@@ -1,4 +1,4 @@
-# ouisync_app
+# ouisync-app
 
 OuiSync Flutter application.
 
