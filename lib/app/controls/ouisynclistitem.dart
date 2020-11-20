@@ -13,28 +13,36 @@ class OuiSyncListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final row = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        itemData.icon,
-        Expanded(
-            flex: 1,
-            child: itemData.type == OSType.folder
-                ? _FolderDescription(folderData: itemData)
-                : _FileDescription(fileData: itemData)
-        ),
-        itemData.type == OSType.folder
-            ? const Icon(Icons.arrow_forward_ios, size: 16.0,)
-            : const Icon(Icons.more_vert, size: 24.0,),
-      ],
+    final paddedRow = Padding(
+        padding: const EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            itemData.icon,
+            getExpandedDescriptionByType(),
+            geActionIconByType(),
+          ],
+        )
     );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: itemData.type == OSType.folder
-          ? Card(margin: EdgeInsets.symmetric(vertical: 5.0), child: row)
-          : row,
-    );
+    return itemData.type == OSType.folder
+          ? Card(child: paddedRow)
+          : paddedRow;
+  }
+
+  Expanded getExpandedDescriptionByType() {
+    return Expanded(
+              flex: 1,
+              child: itemData.type == OSType.folder
+                  ? _FolderDescription(folderData: itemData)
+                  : _FileDescription(fileData: itemData)
+          );
+  }
+
+  Icon geActionIconByType() {
+    return itemData.type == OSType.folder
+        ? const Icon(Icons.arrow_forward_ios, size: 16.0,)
+        : const Icon(Icons.more_vert, size: 24.0,);
   }
 
 }
