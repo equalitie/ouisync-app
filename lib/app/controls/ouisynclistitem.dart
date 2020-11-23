@@ -7,9 +7,11 @@ import 'package:ouisync_app/app/models/ouisyncfolder.dart';
 class OuiSyncListItem extends StatelessWidget {
   const OuiSyncListItem({
     this.itemData,
+    this.action
   });
 
   final BaseItem itemData;
+  final Function action;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class OuiSyncListItem extends StatelessWidget {
           children: <Widget>[
             itemData.icon,
             getExpandedDescriptionByType(),
-            geActionIconByType(),
+            getActionByType(action),
           ],
         )
     );
@@ -39,10 +41,11 @@ class OuiSyncListItem extends StatelessWidget {
           );
   }
 
-  Icon geActionIconByType() {
+  IconButton getActionByType(Function action) {
+
     return itemData.type == OSType.folder
-        ? const Icon(Icons.arrow_forward_ios, size: 16.0,)
-        : const Icon(Icons.more_vert, size: 24.0,);
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
+        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
   }
 
 }
