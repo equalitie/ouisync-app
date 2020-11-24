@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/controls/ouisynclistitem.dart';
 import 'package:ouisync_app/app/models/baseitem.dart';
 import 'package:ouisync_app/app/models/ouisyncfile.dart';
 import 'package:ouisync_app/app/models/ouisyncfolder.dart';
 import 'package:ouisync_app/app/pages/folderdetailpage.dart';
+import 'package:ouisync_app/cpp/native_add.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -43,17 +43,18 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-          child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return OuiSyncListItem (
-                  itemData: item,
-                  action: item.type == OSType.folder
-                      ? createNewFolder//navigateToFolderDetail(context, item)
-                      : createNewFile
-                );
-              })
+        child: Text('1 + 2 == ${nativeAdd(1, 2)}'),
+          // child: ListView.builder(
+          //     itemCount: items.length,
+          //     itemBuilder: (context, index) {
+          //       final item = items[index];
+          //       return OuiSyncListItem (
+          //         itemData: item,
+          //         action: item.type == OSType.folder
+          //             ? createNewFolder//navigateToFolderDetail(context, item)
+          //             : createNewFile
+          //       );
+          //     })
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createNewFolder,
