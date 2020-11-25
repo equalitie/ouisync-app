@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouisync_app/app/controls/ouisynclistitem.dart';
 import 'package:ouisync_app/app/models/baseitem.dart';
 import 'package:ouisync_app/app/models/ouisyncfile.dart';
 import 'package:ouisync_app/app/models/ouisyncfolder.dart';
@@ -43,31 +44,33 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Text('1 + 2 == ${nativeAdd(1, 2)}'),
-          // child: ListView.builder(
-          //     itemCount: items.length,
-          //     itemBuilder: (context, index) {
-          //       final item = items[index];
-          //       return OuiSyncListItem (
-          //         itemData: item,
-          //         action: item.type == OSType.folder
-          //             ? createNewFolder//navigateToFolderDetail(context, item)
-          //             : createNewFile
-          //       );
-          //     })
+        // child: Text('1 + 2 == ${nativeAdd(1, 2)}'),
+          child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return OuiSyncListItem (
+                  itemData: item,
+                  action: () => { _actionByType(item) }
+                );
+              })
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: createNewFolder,
-        tooltip: 'Add new task',
+        onPressed: items.length.isOdd ? createNewFolder : createNewFile,
+        tooltip: 'Add new repository or file',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
+  void _actionByType(BaseItem item) {
+    item.type == OSType.folder
+        ? navigateToFolderDetail(item)
+        : createNewFile();
+  }
 
-
-  Future navigateToFolderDetail(BuildContext context, BaseItem item) {
-    return Navigator.push(
+  void navigateToFolderDetail(BaseItem item) {
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return FolderDetailPage(data: item);
