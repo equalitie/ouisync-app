@@ -5,7 +5,7 @@ import 'package:ouisync_app/app/models/baseitem.dart';
 import 'package:ouisync_app/app/models/ouisyncfile.dart';
 import 'package:ouisync_app/app/models/ouisyncfolder.dart';
 import 'package:ouisync_app/app/pages/folderdetailpage.dart';
-import 'package:ouisync_app/cpp/native_add.dart';
+import 'package:ouisync_app/callbacks/nativecallbacks.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -22,6 +22,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    NativeCallbacks.doSetup();
+
     setState(() {
       items.add(
           OuiSyncFolder(
@@ -44,7 +47,6 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // child: Text('1 + 2 == ${nativeAdd(1, 2)}'),
           child: ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {
