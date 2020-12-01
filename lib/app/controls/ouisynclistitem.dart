@@ -16,7 +16,7 @@ class OuiSyncListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final paddedRow = Padding(
-        padding: const EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 10.0),
+        padding: const EdgeInsets.fromLTRB(5.0, 4.0, 5.0, 4.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -27,9 +27,13 @@ class OuiSyncListItem extends StatelessWidget {
         )
     );
 
-    return itemData.type == OSType.folder
-          ? Card(child: paddedRow)
-          : paddedRow;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget> [
+        paddedRow,
+        Divider(),
+      ]
+    );
   }
 
   Expanded getExpandedDescriptionByType() {
