@@ -23,14 +23,12 @@ add_library( libouisync
              ${NATIVE_DIR}/file.cpp
              ${NATIVE_DIR}/file_locker.cpp
              ${NATIVE_DIR}/file_system_attrib.cpp
-             ${NATIVE_DIR}/fuse_runner.cpp
              ${NATIVE_DIR}/hash.cpp
              ${NATIVE_DIR}/local_branch.cpp
              ${NATIVE_DIR}/message.cpp
              ${NATIVE_DIR}/message_broker.cpp
              ${NATIVE_DIR}/network.cpp
              ${NATIVE_DIR}/options.cpp
-             ${NATIVE_DIR}/ouisync.cpp
              ${NATIVE_DIR}/random.cpp
              ${NATIVE_DIR}/remote_branch.cpp
              ${NATIVE_DIR}/repository.cpp
