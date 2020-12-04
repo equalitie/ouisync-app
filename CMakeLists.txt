@@ -15,8 +15,8 @@ add_library( libouisync
 
              SHARED
 
-             ${CALLBACK_MANAGER_DIR}/CallBackManager.h
-             ${CALLBACK_MANAGER_DIR}/CallBackManager.cpp
+             ${CALLBACK_MANAGER_DIR}/CallbackManager.h
+             ${CALLBACK_MANAGER_DIR}/CallbackManager.cpp
 
              ${NATIVE_DIR}/branch_io.cpp
              ${NATIVE_DIR}/client.cpp
