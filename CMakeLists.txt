@@ -11,6 +11,12 @@ find_package(BuildBoost REQUIRED)
 set(BuildCryptoPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ios/ouisync/cmake")
 find_package(BuildCryptoPP REQUIRED)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts -stdlib=libc++ -std=c++17")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines -std=c++2a -DBOOST_ASIO_HAS_STD_COROUTINE")
+endif()
+
 add_library( libouisync
 
              SHARED
