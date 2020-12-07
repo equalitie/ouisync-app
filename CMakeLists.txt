@@ -41,6 +41,8 @@ add_library( libouisync
              ${NATIVE_DIR}/server.cpp
              ${NATIVE_DIR}/snapshot.cpp
              ${NATIVE_DIR}/user_id.cpp
+             ${NATIVE_DIR}/object_id.cpp
+             ${NATIVE_DIR}/refcount.cpp
              ${NATIVE_DIR}/object/blob.cpp
              ${NATIVE_DIR}/object/io.cpp
              ${NATIVE_DIR}/object/path.cpp
