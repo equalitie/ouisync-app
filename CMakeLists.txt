@@ -17,7 +17,7 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines -std=c++2a -DBOOST_ASIO_HAS_STD_COROUTINE")
 endif()
 
-add_library( libouisync
+add_library( nativeapp
 
              SHARED
 
@@ -50,7 +50,7 @@ add_library( libouisync
              ${NATIVE_DIR}/object/tagged.cpp
              ${NATIVE_DIR}/object/tree.cpp)
 
-target_include_directories(libouisync PUBLIC ${CALLBACK_MANAGER_DIR})
-target_include_directories(libouisync PUBLIC ${NATIVE_DIR})
+target_include_directories(nativeapp PUBLIC ${CALLBACK_MANAGER_DIR})
+target_include_directories(nativeapp PUBLIC ${NATIVE_DIR})
 
-target_link_libraries(libouisync PUBLIC Boost::filesystem Boost::serialization Boost::program_options CryptoPP)
+target_link_libraries(nativeapp PUBLIC Boost::filesystem Boost::serialization Boost::program_options CryptoPP)
