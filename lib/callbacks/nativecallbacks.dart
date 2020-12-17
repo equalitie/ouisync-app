@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:isolate/ports.dart';
 
 final DynamicLibrary ouisyncLib = Platform.isAndroid
-    ? DynamicLibrary.open("libouisync.os")
+    ? DynamicLibrary.open("libnativeapp.so")
     : DynamicLibrary.process();
 
 // final int Function(int x, int y) ouisync =

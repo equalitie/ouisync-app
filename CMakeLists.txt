@@ -6,6 +6,7 @@ set (NATIVE_DIR ${APP_ROOT_DIR}/ios/ouisync/src)
 set (OUISYNC_CMAKE_DIR ${APP_ROOT_DIR}/ios/ouisync/)
 set (CALLBACK_MANAGER_DIR ${APP_ROOT_DIR}/ios/Classes/Shared)
 
+<<<<<<< HEAD
 
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -57,3 +58,17 @@ add_subdirectory(${OUISYNC_CMAKE_DIR} bin-dir)
 
 
 add_link_options("LINKER:-v")
+=======
+add_subdirectory(
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/ouisync
+)
+
+add_library( nativeapp
+     SHARED
+     ${CALLBACK_MANAGER_DIR}/CallbackManager.h
+     ${CALLBACK_MANAGER_DIR}/CallbackManager.cpp
+)
+
+target_include_directories(nativeapp PUBLIC ${CALLBACK_MANAGER_DIR} ${NATIVE_DIR})
+target_link_libraries(nativeapp PUBLIC libouisync)
+>>>>>>> 3e220f9138d3d1e46843a2a63fc090d44048f9ab

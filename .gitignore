@@ -43,3 +43,7 @@ app.*.map.json
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+# Some artefact from native building.
+# XXX: Check where it's from and remove building it.
+android/a.out
