@@ -42,9 +42,6 @@ android {
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        ndk{
-            abiFilters "armeabi-v7a", "x86", "x86_64"
-        }
     }
 
     buildTypes {
@@ -57,6 +54,16 @@ android {
     externalNativeBuild {
         cmake {
             path "../../CMakeLists.txt"
+            // Note: Android SDK comes with its own cmake but its version is too low
+            // to build ouisync. Thus install a recent cmake on your system and use that.
+            // To do so modify cmake.dir in your android/local.properties file as
+            // explained here
+            //
+            // https://stackoverflow.com/questions/40966472/can-android-studio-use-the-system-cmake#comment88865472_46596679
+            //
+            // Also, when doing so, make sure you don't include the `bin` part of the
+            // path. I.e. if the path to cmake is '/X/Y/Z/bin/cmake', the use
+            // cmake.dir="/X/Y/Z"
         }
     }
 }
