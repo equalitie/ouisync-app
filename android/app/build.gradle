@@ -42,6 +42,10 @@ android {
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        ndk{
+            abiFilters "armeabi-v7a", "x86", "x86_64"
+        }
+
     }
 
     buildTypes {
