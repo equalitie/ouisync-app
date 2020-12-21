@@ -4,6 +4,9 @@ set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set (NATIVE_DIR ${APP_ROOT_DIR}/ios/ouisync/src)
 set (CALLBACK_MANAGER_DIR ${APP_ROOT_DIR}/ios/Classes/Shared)
+set (SOURCE_DIR ${APP_ROOT_DIR}/ios/Classes)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts -stdlib=libc++ -std=c++17")
 
 add_subdirectory(
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/ouisync
