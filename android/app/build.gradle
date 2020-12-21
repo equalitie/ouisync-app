@@ -43,7 +43,15 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         ndk{
-            abiFilters "armeabi-v7a", "x86", "x86_64"
+            if (localProperties.containsKey('ndk.abiFilters')) {
+                abiFilters = []
+                abiFilters.addAll(
+                        localProperties
+                                .getProperty('ndk.abiFilters')
+                                .split(',')
+                                .collect{it as String}
+                )
+            }
         }
 
     }
