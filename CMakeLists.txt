@@ -16,7 +16,9 @@ add_library( nativeapp
      SHARED
      ${CALLBACK_MANAGER_DIR}/CallbackManager.h
      ${CALLBACK_MANAGER_DIR}/CallbackManager.cpp
+
+     ${SOURCE_DIR}/localRepository.cpp
 )
 
 target_include_directories(nativeapp PUBLIC ${CALLBACK_MANAGER_DIR} ${NATIVE_DIR})
-target_link_libraries(nativeapp PUBLIC libouisync)
+target_link_libraries(nativeapp PUBLIC libouisync Boost::filesystem)
