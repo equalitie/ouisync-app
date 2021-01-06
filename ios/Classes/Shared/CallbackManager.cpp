@@ -4,6 +4,10 @@
 
 #include "CallbackManager.h"
 #include <stdlib.h>
+#include <string>
+#include <vector>
+
+using namespace std;
 
 Dart_PostCObjectType dartPostCObject = NULL;
 
@@ -23,31 +27,27 @@ void callbackToDartInt32(Dart_Port callbackPort, int32_t value) {
     }
 }
 
-void callbackToDartStrArray(Dart_Port callbackPort, int length, char** values) {
-    Dart_CObject **valueObjects = new Dart_CObject *[length];
-    int i;
-    for (i = 0; i < length; i++) {
+void callbackToDartStrArray(Dart_Port callbackPort, const vector<string>& strings) {
+    Dart_CObject **valueObjects = new Dart_CObject *[strings.size()];
+    for (size_t i = 0; i < strings.size(); i++) {
         Dart_CObject *valueObject = new Dart_CObject;
         valueObject->type = Dart_CObject_kString;
-        valueObject->value.as_string = values[i];
-
+        const string& from = strings[i];
+        char* to = new char[from.size() + 1]; // +1 for \0
+        memcpy(to, from.data(), from.size() + 1);
+        valueObject->value.as_string = to;
         valueObjects[i] = valueObject;
     }
 
     Dart_CObject dart_object;
     dart_object.type = Dart_CObject_kArray;
-    dart_object.value.as_array.length = length;
+    dart_object.value.as_array.length = strings.size();
     dart_object.value.as_array.values = valueObjects;
 
     bool result = dartPostCObject(callbackPort, &dart_object);
     if (!result) {
         printf("call from native to Dart failed, result was: %d\n", result);
     }
-
-    for (i = 0; i < length; i++) {
-        delete valueObjects[i];
-    }
-    delete[] valueObjects;
 }
 
 void callbackToDartInt32Array(Dart_Port callbackPort, int length, int** values) {
