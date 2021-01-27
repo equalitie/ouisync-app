@@ -49,3 +49,4 @@ app.*.map.json
 android/a.out
 android/log
 android/log.bck
+/ios/ouisync/build-dir/
