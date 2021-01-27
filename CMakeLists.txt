@@ -20,5 +20,12 @@ add_library( nativeapp
      ${SOURCE_DIR}/localRepository.cpp
 )
 
+find_library(log-lib log)
+
 target_include_directories(nativeapp PUBLIC ${CALLBACK_MANAGER_DIR} ${NATIVE_DIR})
-target_link_libraries(nativeapp PUBLIC libouisync Boost::filesystem)
+target_link_libraries(
+    nativeapp
+    PUBLIC
+    libouisync
+    ${log-lib}
+)
