@@ -47,3 +47,5 @@ app.*.map.json
 # Some artefact from native building.
 # XXX: Check where it's from and remove building it.
 android/a.out
+android/log
+android/log.bck
