@@ -1,32 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
-import 'repofooter.dart';
+import 'package:ouisync_app/app/controls/controls.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 class RepoCard extends StatelessWidget {
   const RepoCard({
-    this.id,
-    this.name,
-    this.totalFiles,
-    this.totalConflicts,
-    this.totalSpace,
-    this.totalUsers,
-    this.syncStatus,
+    this.folderData,
     this.isEncrypted,
     this.isLocal,
-    this.isOwn
+    this.isOwn,
+    this.action
 });
 
-  final String id;
-  final String name;
-  final int totalFiles;
-  final int totalConflicts;
-  final double totalSpace;
-  final int totalUsers;
-  final SyncStatus syncStatus;
+  final BaseItem folderData;
   final bool isEncrypted;
   final bool isLocal;
   final bool isOwn;
+  final Function action;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +32,7 @@ class RepoCard extends StatelessWidget {
                   child: Container(
                     margin: EdgeInsets.fromLTRB(10.0, 20.0, 20.0, 10.0),
                     child: Text(
-                      name,
+                      folderData.name,
                       textAlign: TextAlign.start,
                       style: TextStyle(
                         fontWeight:  FontWeight.bold,
@@ -52,13 +42,14 @@ class RepoCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Container(
-                //   margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-                //   child: ColumnText(
-                //       labelString: "space:",
-                //       value: "500.87 MB"
-                //   ),
-                // ),
+                Container(
+                  margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                  child: ColumnText(
+                      labelString: "size:",
+                      value: folderData.size.toString()
+                  ),
+                ),
+                getActionByType(action),
               ],
             ),
 
@@ -102,7 +93,7 @@ class RepoCard extends StatelessWidget {
 
   IconData _getIconFromStatus() {
     IconData icon;
-    switch(syncStatus){
+    switch(folderData.syncStatus){
       case SyncStatus.syncing:
         icon = Icons.sync;
         break;
@@ -121,6 +112,13 @@ class RepoCard extends StatelessWidget {
     }
 
     return icon;
+  }
+
+  IconButton getActionByType(Function action) {
+
+    return folderData.itemType == ItemType.folder
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
+        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
   }
 }
 
