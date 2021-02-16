@@ -2,15 +2,11 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:isolate/ports.dart';
+import 'package:ffi/ffi.dart';
 
 final DynamicLibrary ouisyncLib = Platform.isAndroid
     ? DynamicLibrary.open("libnativeapp.so")
-    : DynamicLibrary.process();
-
-// final int Function(int x, int y) ouisync =
-// ouisyncLib
-//     .lookup<NativeFunction<Int32 Function(Int32, Int32)>>("native_add")
-//     .asFunction();
+    : DynamicLibrary.executable();
 
 final nRegisterPostCObject = ouisyncLib.lookupFunction<
     Void Function(
@@ -20,15 +16,17 @@ final nRegisterPostCObject = ouisyncLib.lookupFunction<
         Pointer<NativeFunction<Int8 Function(Int64, Pointer<Dart_CObject>)>>
         functionPointer)>('RegisterDart_PostCObject');
 
-// final nRunTaskAsync = ouisyncLib
-//     .lookupFunction<Int32 Function(Int64, Int8), int Function(int, int)>('native_add');
+final nReadDirAsync = ouisyncLib
+    .lookupFunction<
+    Void Function(Int64, Pointer<Utf8>),
+    void Function(int, Pointer<Utf8>)>('readDir');
 
 class NativeCallbacks {
   static doSetup() {
     nRegisterPostCObject(NativeApi.postCObject);
   }
 
-  // static Future<int> runAsyncTask(int taskId) async {
-  //   return singleResponseFuture((port) => nRunTaskAsync(port.nativePort, taskId));
-  // }
+  static Future<List<String>> readDirAsync(String dir) async {
+    return singleResponseFuture((port) => nReadDirAsync(port.nativePort, Utf8.toUtf8(dir)));
+  }
 }
