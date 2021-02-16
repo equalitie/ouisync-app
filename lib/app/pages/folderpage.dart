@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/controls/items/listitem.dart';
-import 'package:ouisync_app/app/models/item/baseitem.dart';
-import 'package:ouisync_app/app/models/item/itemtype.dart';
-
-import 'filepage.dart';
+import 'package:ouisync_app/app/controls/controls.dart';
+import 'package:ouisync_app/app/models/models.dart';
+import 'package:ouisync_app/app/pages/pages.dart';
 
 class FolderPage extends StatefulWidget {
   FolderPage({Key key, this.title, this.path}) : super(key: key);
@@ -88,16 +86,12 @@ class _FolderPage extends State<FolderPage> {
   }
 
   void _actionByType(BaseItem item) {
-    if (item.itemType == ItemType.folder) {
-      navigateToFolderDetail(item);
-    }
-  }
-
-  void navigateToFolderDetail(BaseItem item) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return FilePage(data: item);
+        return item.itemType == ItemType.folder
+          ? FolderPage(title: item.name, path: item.path)
+        : FilePage(title: item.name, data: item);
       }),
     );
   }
