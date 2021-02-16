@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/pages/homepage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_app/app/data/repositories/directoryrepository.dart';
+import 'package:ouisync_app/app/pages/rootpage.dart';
 
 class OuiSyncApp extends StatelessWidget {
+  OuiSyncApp({
+    Key key,
+    @required this.directoryRepository
+  }) : assert(directoryRepository != null), super(key: key);
+
+  final DirectoryRepository directoryRepository;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -12,7 +22,10 @@ class OuiSyncApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(title: 'OuiSync'),
+      home: BlocProvider(
+        create: (context) => DirectoryBloc(repository: directoryRepository),
+        child: RootPage(title: 'OuiSync repositories'),
+      )
     );
   }
 }
