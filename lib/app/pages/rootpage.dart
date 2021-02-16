@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/controls/items/listitem.dart';
-import 'package:ouisync_app/app/controls/menu/drawermenu.dart';
+import 'package:ouisync_app/app/controls/controls.dart';
 import 'package:ouisync_app/app/models/models.dart';
-import 'package:ouisync_app/app/pages/filepage.dart';
-import 'package:ouisync_app/app/pages/folderpage.dart';
+import 'package:ouisync_app/app/pages/pages.dart';
 import 'package:ouisync_app/callbacks/nativecallbacks.dart';
 
 class RootPage extends StatefulWidget {
@@ -63,7 +61,7 @@ class _RootPageState extends State<RootPage> {
               if (state is DirectoryLoadSuccess) {
                 final contents = state.contents;
 
-                return _contentsList(contents);
+                return _reposList(contents);
               }
 
               if (state is DirectoryLoadFailure) {
@@ -79,43 +77,29 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
-  _contentsList(List<BaseItem> contents) {
-    return ListView.separated(
-        separatorBuilder: (context, index) => Divider(
-            height: 1,
-            color: Colors.transparent
-        ),
-        itemCount: contents.length,
-        itemBuilder: (context, index) {
-          final item = contents[index];
-          return ListItem (
-              itemData: item,
-              action: () => { _actionByType(item) }
-          );
-        }
+  _reposList(List<BaseItem> repos) {
+    return ListView.builder(
+      itemCount: repos.length,
+      itemBuilder: (context, index) {
+        final repo = repos[index];
+        return RepoCard(
+          folderData: repo,
+          isEncrypted: false,
+          isLocal: true,
+          isOwn: true,
+          action: () => { _actionByType(repo) }
+        );
+      },
     );
   }
 
   void _actionByType(BaseItem item) {
-    if (item.itemType == ItemType.folder) {
-      navigateToFolderDetail(item);
-    }
-  }
-
-  void navigateToFolderDetail(BaseItem item) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return FolderPage(title: item.name, path: item.path);
-      }),
-    );
-  }
-
-  void navigateToFileDetail(BaseItem item) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) {
-        return FilePage(data: item);
+        return item.itemType == ItemType.folder
+            ? FolderPage(title: item.name, path: item.path)
+            : FilePage(title: item.name, data: item);
       }),
     );
   }
