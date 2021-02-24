@@ -26,7 +26,7 @@ class NativeCallbacks {
     nRegisterPostCObject(NativeApi.postCObject);
   }
 
-  static Future<List<String>> readDirAsync(String dir) async {
+  static Future<List<dynamic>> readDirAsync(String dir) async {
     return singleResponseFuture((port) => nReadDirAsync(port.nativePort, Utf8.toUtf8(dir)));
   }
 }
