@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void readDir(Dart_Port callbackPort, std::string dir);
+    void readDir(Dart_Port callbackPort, const char* dir);
 #ifdef __cplusplus
 }
 #endif

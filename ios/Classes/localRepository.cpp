@@ -24,15 +24,14 @@
 using namespace std;
 using namespace ouisync;
 
-void readDir(Dart_Port callbackPort, string dir) {
+void readDir(Dart_Port callbackPort, const char* dir) {
+    ALOG(LOG_TAG, "directory: %s at s%:%s:%d", dir, __FILE__,__FUNCTION__, __LINE__);
+
     net::io_context ioc;
-
     Options options;
-
-    ALOG(LOG_TAG, "dir=%s at %s:%s:%d", "directory", __FILE__,__FUNCTION__, __LINE__);
-
-    string basedir = "/";
-    vector<const char*> args = { "ouisync", "--basedir", basedir.c_str() };
+    
+    string basedir = dir;
+    vector<const char*> args = { "./ouisync", "--basedir", basedir.c_str() };
 
     try {
         options.parse(args.size(), (char**) args.data());
@@ -43,31 +42,37 @@ void readDir(Dart_Port callbackPort, string dir) {
         }
     }
     catch (const std::exception& e) {
-        cerr << "Failed to parse options:\n";
-        cerr << e.what() << "\n\n";
-        options.write_help(cerr);
-        exit(1);
+        ALOG(LOG_TAG, "Failed to parse options:\n%s at s%:%s:%d", e.what(), __FILE__,__FUNCTION__, __LINE__);
+        
+        if (options.help) {
+            std::stringstream ss;
+            options.write_help(ss);
+            ALOG(LOG_TAG, ss.str().c_str(), __FILE__,__FUNCTION__, __LINE__);
+            exit(0);
+        }
     }
 
-    Repository repo(ioc.get_executor(), options);
-    Path path = fs::path(dir);
+    fs::create_directories(options.branchdir);
+    fs::create_directories(options.objectdir);
+    fs::create_directories(options.remotes);
+    fs::create_directories(options.snapshotdir);
+
     vector<string> files;
 
-    ALOG(LOG_TAG, "path=%s at %s:%s:%d", "path", __FILE__,__FUNCTION__, __LINE__);
+    try {
+        Repository repo(ioc.get_executor(), options);
+        Path path = fs::path(basedir);
 
-    co_spawn(ioc, [&] () -> net::awaitable<void> {
-        files = co_await repo.readdir(path_range(path));
+        co_spawn(ioc, [&] () -> net::awaitable<void> {
+            files = co_await repo.readdir(path_range(path));
+            callbackToDartStrArray(callbackPort, files);
+        }, net::detached);
 
-    if (!files.empty()){
-        ostringstream vts;
-
-        copy(files.begin(), files.end()-1, ostream_iterator<string>(vts, ", "));
-        vts << files.back();
-
-        string files_string = vts.str();
-        ALOG(LOG_TAG, "files in %s at %s:%s:%d", "file contents", __FILE__,__FUNCTION__, __LINE__);
+        callbackToDartStrArray(callbackPort, files);   
+    } catch (const exception& e) {
+        ALOG(LOG_TAG, e.what(), __FILE__,__FUNCTION__, __LINE__);
+        files.push_back(e.what());
+        
+        callbackToDartStrArray(callbackPort, files); 
     }
-
-    callbackToDartStrArray(callbackPort, files);
-    }, net::detached);
 }
