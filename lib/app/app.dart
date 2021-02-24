@@ -6,13 +6,13 @@ import 'package:ouisync_app/app/data/repositories/directoryrepository.dart';
 import 'package:ouisync_app/app/pages/rootpage.dart';
 
 class OuiSyncApp extends StatelessWidget {
-  OuiSyncApp({
+  const OuiSyncApp({
     Key key,
     @required this.directoryRepository
   }) : assert(directoryRepository != null), super(key: key);
 
   final DirectoryRepository directoryRepository;
-
+  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -21,11 +21,11 @@ class OuiSyncApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: BlocProvider(
-        create: (context) => DirectoryBloc(repository: directoryRepository),
-        child: RootPage(title: 'OuiSync repositories'),
-      )
-    );
+        ),
+        home: BlocProvider(
+          create: (context) => DirectoryBloc(repository: directoryRepository),
+          child: RootPage(title: 'OuiSync repositories'),
+          ),  
+      );
   }
 }
