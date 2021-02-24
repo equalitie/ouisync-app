@@ -6,6 +6,7 @@ import 'package:ouisync_app/app/controls/controls.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/pages.dart';
 import 'package:ouisync_app/callbacks/nativecallbacks.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.title}) : super(key: key);
@@ -17,15 +18,126 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
+
+  List<PermissionStatus> _negativePermissions = [
+    PermissionStatus.restricted,
+    PermissionStatus.limited,
+    PermissionStatus.denied,
+    PermissionStatus.permanentlyDenied,
+  ];
+
   @override
   void initState() {
     super.initState();
 
     NativeCallbacks.doSetup();
+    WidgetsBinding.instance.addPostFrameCallback(onLayoutDone);
+  }
+
+  void onLayoutDone(Duration timeStamp) async {
+    PermissionStatus _permissionStatus = await Permission.storage.status;
+    if (_permissionStatus == PermissionStatus.granted) {
+      Navigator.push(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => _getBlocScaffold(context)
+        )
+      );
+      
+      return;
+    }
+
+    if (_negativePermissions.contains(_permissionStatus)) {
+      await _showStoragePermissionNotGrantedDialog();
+      return;
+    }
+
+    if (_permissionStatus == PermissionStatus.undetermined) {
+      await _showRequestStoragePermissionDialog().whenComplete(() async => {
+        await Permission.storage.request().then((value) async => {
+          if (value != PermissionStatus.granted) {
+            await _showStoragePermissionNotGrantedDialog()
+          } else {
+             Navigator.push(
+               context, 
+               MaterialPageRoute(
+                 builder: (context) => _getBlocScaffold(context)
+                )
+              )
+          }
+        })
+      });
+    }
+  }
+
+  Future<void> _showRequestStoragePermissionDialog() async {
+    Text title = Text('OuiSync - Storage permission needed');
+    Text message = Text('Ouisync need access to the phone storage to operate properly.\n\nPlease accept the permissions request');
+    
+    await _permissionDialog(title, message);
+  }
+
+  Future<void> _showStoragePermissionNotGrantedDialog() async {
+    Text title = Text('OuiSync - Storage permission not granted');
+    Text message = Text('Ouisync need access to the phone storage to operate properly.\n\nWithout this permission the app won\'t work.');
+    
+    await _permissionDialog(title, message);
+  }
+
+   Future<void> _permissionDialog(Widget title, Widget message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: title,
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget> [
+               message, 
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      // body: _getBlocScaffold(context),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              'OuiSync',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 48.0,
+                fontWeight: FontWeight.bold
+              ),),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Scaffold _getBlocScaffold(BuildContext context) {
     BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(path: "/"));
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +146,7 @@ class _RootPageState extends State<RootPage> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
-
+    
             },
           )
         ]
