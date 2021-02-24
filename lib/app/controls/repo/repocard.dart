@@ -56,22 +56,14 @@ class RepoCard extends StatelessWidget {
 
             Row(
               children: [
-                // Container(
-                //   margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-                //   alignment: AlignmentDirectional.bottomStart,
-                //   child: ColumnText(
-                //       labelString: "files:",
-                //       value: "22"
-                //   ),
-                // ),
-                // Container(
-                //   margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-                //   alignment: AlignmentDirectional.bottomStart,
-                //   child: ColumnText(
-                //       labelString: "conflicts:",
-                //       value: "0"
-                //   ),
-                // ),
+                Container(
+                  margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                  alignment: AlignmentDirectional.bottomStart,
+                  child: ColumnText(
+                      labelString: "files:",
+                      value: "22"
+                  ),
+                ),
 
                 Container(
                   margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),

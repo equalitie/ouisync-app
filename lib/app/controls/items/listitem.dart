@@ -18,7 +18,7 @@ class ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final container = Container(
-      padding: _getPadding(),
+      padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 0.0),
       color: _getColor(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,12 +39,6 @@ class ListItem extends StatelessWidget {
     return itemData.itemType == ItemType.folder
         ? Colors.transparent
         : Color.fromARGB(35, 220, 220, 220);
-  }
-
-  EdgeInsets _getPadding() {
-    return itemData.itemType == ItemType.folder
-        ? EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 0.0)
-        : EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 0.0);
   }
 
   Expanded getExpandedDescriptionByType() {
