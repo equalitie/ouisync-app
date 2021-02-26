@@ -67,12 +67,12 @@ void readDir(Dart_Port callbackPort, const char* dir) {
             files = co_await repo.readdir(path_range(path));
             callbackToDartStrArray(callbackPort, files);
         }, net::detached);
-
-        callbackToDartStrArray(callbackPort, files);   
     } catch (const exception& e) {
         ALOG(LOG_TAG, e.what(), __FILE__,__FUNCTION__, __LINE__);
         files.push_back(e.what());
         
         callbackToDartStrArray(callbackPort, files); 
     }
+
+    ioc.run();
 }
