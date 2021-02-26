@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,7 @@ import 'package:ouisync_app/app/controls/controls.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/pages.dart';
 import 'package:ouisync_app/callbacks/nativecallbacks.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class RootPage extends StatefulWidget {
@@ -35,20 +38,25 @@ class _RootPageState extends State<RootPage> {
   }
 
   void onLayoutDone(Duration timeStamp) async {
+    await printAppFolderContents();
+
     PermissionStatus _permissionStatus = await Permission.storage.status;
+
+    if (_negativePermissions.contains(_permissionStatus)) {
+      await _showStoragePermissionNotGrantedDialog();
+      return;
+    }
+
+    Directory directory = await getApplicationSupportDirectory();
+
     if (_permissionStatus == PermissionStatus.granted) {
       Navigator.push(
         context, 
         MaterialPageRoute(
-          builder: (context) => _getBlocScaffold(context)
+          builder: (context) => _getBlocScaffold(context, directory.path)
         )
       );
       
-      return;
-    }
-
-    if (_negativePermissions.contains(_permissionStatus)) {
-      await _showStoragePermissionNotGrantedDialog();
       return;
     }
 
@@ -61,12 +69,23 @@ class _RootPageState extends State<RootPage> {
              Navigator.push(
                context, 
                MaterialPageRoute(
-                 builder: (context) => _getBlocScaffold(context)
+                 builder: (context) => _getBlocScaffold(context, directory.path)
                 )
               )
           }
         })
       });
+    }
+  }
+
+  Future<void> printAppFolderContents() async {
+    final Directory _directory = await getApplicationSupportDirectory();
+   
+    print('${_directory.path} contents:\n\n');
+
+    var contents = _directory.listSync();
+    for (var item in contents) {
+      print(item); 
     }
   }
 
@@ -117,7 +136,6 @@ class _RootPageState extends State<RootPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      // body: _getBlocScaffold(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,8 +155,8 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
-  Scaffold _getBlocScaffold(BuildContext context) {
-    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(path: "/"));
+  Scaffold _getBlocScaffold(BuildContext context, String path) {
+    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(path: path));
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
