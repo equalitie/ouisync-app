@@ -76,11 +76,6 @@ void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
         }
     }
 
-    fs::create_directories(options.branchdir);
-    fs::create_directories(options.objectdir);
-    fs::create_directories(options.remotes);
-    fs::create_directories(options.snapshotdir);
-
     bool inserted = g_repos.insert({repo_dir, make_unique<Repo>(move(options))}).second;
 
     if (!inserted)
