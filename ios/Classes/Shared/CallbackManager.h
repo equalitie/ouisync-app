@@ -98,9 +98,11 @@ typedef bool (*Dart_PostCObjectType)(Dart_Port port_id, Dart_CObject* message);
 extern "C" {
 #endif
     void RegisterDart_PostCObject(Dart_PostCObjectType _dartPostCObject);
+    
     void callbackToDartInt32(Dart_Port callbackPort, int32_t value);
-    void callbackToDartStrArray(Dart_Port callbackPort, const vector<string>& strings);
+    void callbackToDartStr(Dart_Port callbackPort, const string& value);
 
+    void callbackToDartStrArray(Dart_Port callbackPort, const vector<string>& strings);
     void callbackToDartInt32Array(Dart_Port callbackPort, int length, int** values);
 #ifdef __cplusplus
 }

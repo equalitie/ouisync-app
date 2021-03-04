@@ -27,6 +27,21 @@ void callbackToDartInt32(Dart_Port callbackPort, int32_t value) {
     }
 }
 
+void callbackToDartStr(Dart_Port callbackPort, const string& value) {
+    Dart_CObject dart_object;
+
+    dart_object.type = Dart_CObject_kString;
+    const string& from = value;
+    char* to = new char[from.size() + 1];
+    memcpy(to, from.data(), from.size() + 1);
+    dart_object.value.as_string = to;
+
+    bool result = dartPostCObject(callbackPort, &dart_object);
+    if (!result) {
+        printf("call from native to Dart failed, result was: %d\n", result);
+    }
+}
+
 void callbackToDartStrArray(Dart_Port callbackPort, const vector<string>& strings) {
     Dart_CObject **valueObjects = new Dart_CObject *[strings.size()];
     for (size_t i = 0; i < strings.size(); i++) {
