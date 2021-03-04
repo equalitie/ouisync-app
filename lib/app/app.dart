@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
 import 'package:ouisync_app/app/data/repositories/directoryrepository.dart';
 import 'package:ouisync_app/app/pages/rootpage.dart';
+import 'package:ouisync_app/lifecycle.dart';
 
 class OuiSyncApp extends StatelessWidget {
   const OuiSyncApp({
@@ -24,7 +25,7 @@ class OuiSyncApp extends StatelessWidget {
         ),
         home: BlocProvider(
           create: (context) => DirectoryBloc(repository: directoryRepository),
-          child: RootPage(title: 'OuiSync repositories'),
+          child: LifeCycle(child: RootPage(title: 'OuiSync repositories')),
           ),  
       );
   }
