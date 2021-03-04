@@ -28,16 +28,18 @@ using namespace ouisync;
 
 struct Repo {
     net::io_context _ioc;
+    net::executor_work_guard<net::io_context::executor_type> _work_guard;
     Repository _ouisync_repo;
     thread _thread;
 
     Repo(Options options) :
+        _work_guard(_ioc.get_executor()),
         _ouisync_repo(_ioc.get_executor(), options)
     {
-        _thread = thread([=] {
-            _ioc.run();
-        });
+        _thread = thread([=] { _ioc.run(); });
+        _thread.detach();
     }
+
 };
 
 map<string, unique_ptr<Repo>> g_repos;
@@ -111,7 +113,6 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
 
     auto& repo = *repo_i->second;
     fs::path directory_to_read = c_directory_to_read;
-    //Won't go into the post
     net::post(repo._ioc, [
         callbackPort,
         &repo,
