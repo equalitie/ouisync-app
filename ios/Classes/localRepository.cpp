@@ -17,9 +17,11 @@
 
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 #include <iostream>
 #include <iterator>
+#include <cstdarg>
 
 using namespace std;
 using namespace ouisync;
@@ -40,10 +42,9 @@ struct Repo {
 
 map<string, unique_ptr<Repo>> g_repos;
 
-void initializeOuisyncRepository(const char* repo_dir)
+void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
 {
-    // TODO: Don't terminate the program on error, let the caller know
-    // what happened.
+    ALOG(LOG_TAG, "Initializing OuiSync repository...\nRepository path: %s", repo_dir);
 
     vector<const char*> args = { "./ouisync", "--basedir", repo_dir };
 
@@ -54,7 +55,9 @@ void initializeOuisyncRepository(const char* repo_dir)
 
         if (options.help) {
             options.write_help(cout);
-            exit(0);
+            callbackToDartStr(callbackPort, "options.help");
+
+            return;
         }
     }
     catch (const std::exception& e) {
@@ -63,8 +66,11 @@ void initializeOuisyncRepository(const char* repo_dir)
         if (options.help) {
             std::stringstream ss;
             options.write_help(ss);
+            
             ALOG(LOG_TAG, ss.str().c_str(), __FILE__,__FUNCTION__, __LINE__);
-            exit(0);
+            callbackToDartStr(callbackPort, ss.str());
+
+            return;
         }
     }
 
@@ -77,25 +83,35 @@ void initializeOuisyncRepository(const char* repo_dir)
 
     if (!inserted)
     {
-        ALOG(LOG_TAG, "Failed to initialize the repo because repository %s has been already initialized", repo_dir);
-        exit(0);
+        string return_inserted = str(boost::format("Failed to initialize the repo because repository %s has been already initialized\n") % repo_dir);
+
+        ALOG(LOG_TAG, return_inserted.c_str(), "");
+        callbackToDartStr(callbackPort, return_inserted);
+
+        return;
     }
+
+    callbackToDartStr(callbackPort, str(boost::format("__ok__ OuiSync repository initialized at %s") % repo_dir));
 }
 
-void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directory_to_read) {
-    // TODO: Don't terminate the program on error, let the caller know
-    // what happened.
+void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directory_to_read) 
+{
+    ALOG(LOG_TAG, "Reading directory %s in repo %s", c_directory_to_read, repo_dir);
 
     auto repo_i = g_repos.find(repo_dir);
 
     if (repo_i == g_repos.end()) {
-        ALOG(LOG_TAG, "No such repo %s has been initialized", repo_dir);
-        exit(0);
+        string return_no_such_repo = str(boost::format("No such repo %s has been initialized") % repo_dir);
+
+        ALOG(LOG_TAG, return_no_such_repo.c_str(), "");
+        callbackToDartStr(callbackPort, return_no_such_repo);
+
+        return;
     }
 
     auto& repo = *repo_i->second;
     fs::path directory_to_read = c_directory_to_read;
-
+    //Won't go into the post
     net::post(repo._ioc, [
         callbackPort,
         &repo,
@@ -110,10 +126,25 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
             try {
                files = co_await repo._ouisync_repo.readdir(path_range(directory_to_read));
                callbackToDartStrArray(callbackPort, files);
-            } catch (const exception&) {
-               // TODO: Convey to the caller that an error happened
-               callbackToDartStrArray(callbackPort, files);
+            } catch (const exception& e) {
+                string return_exception_reddir = str(
+                    boost::format(
+                        "There was an exception while reading the directory %s contents: %s at %s:%s:%d"
+                    ) % directory_to_read % e.what() % __FILE__ % __FUNCTION__ % __LINE__
+                );
+
+                ALOG(LOG_TAG, return_exception_reddir.c_str(), "");
+
+                files.push_back("__error__");
+                files.push_back(return_exception_reddir);
+                callbackToDartStrArray(callbackPort, files);
             }
         }, net::detached);
     });
+
+    ALOG(LOG_TAG, "The coroutine was not executed (Reached the end of the function) at %s:%s:%d", __FILE__, __FUNCTION__, __LINE__);
+
+    vector<string> result;
+    result.push_back("The coroutine was not executed (Reached the end of the function)");
+    callbackToDartStrArray(callbackPort, result);
 }
