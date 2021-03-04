@@ -7,13 +7,16 @@ abstract class DirectoryEvent extends Equatable {
 
 class ContentRequest extends DirectoryEvent {
   const ContentRequest({
-    @required this.path
-  }) : assert(path != null) , assert(path != "");
+    @required this.repoPath,
+    @required this.folderPath
+  }) : assert(repoPath != null && folderPath != null) , assert(repoPath != "" && folderPath != "");
 
-  final String path;
+  final String repoPath;
+  final String folderPath;
   @override
   List<Object> get props => [
-    path
+    repoPath,
+    folderPath
   ];
 
 }

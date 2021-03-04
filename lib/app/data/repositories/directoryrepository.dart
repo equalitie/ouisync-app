@@ -35,23 +35,39 @@ class DirectoryRepository {
     FileItem("e", "File 15.txt", "txt", "/repo XYZ/folder 2/File 15.txt", 267.09, SyncStatus.idle, const User(id: "A", name: "Me")),
   ];
 
-  Future<List<BaseItem>> getContents(String path) async {
+  Future<List<BaseItem>> getContents(String repoDir, String folderPath) async {
     print("About to call readDirAsync...");
-     List<dynamic> files = await NativeCallbacks.readDirAsync(path);
+    
+    List<dynamic> files;
+    
+    await NativeCallbacks.readDirAsync(repoDir, folderPath)
+    .catchError((onError) {
+      print('Error on readDirAsync call: $onError');
+    })
+    .then((value) => {
+        print('readDirAsync returned ${value.length} items'),
+        files = value
+    })
+    .whenComplete(() => {
+      print('readDirAsync completed')
+    });
+    
     print("Files returned: " + files.toString());
 
-    return Future
-        .delayed(Duration(seconds: 2))
-        .then((value) =>
-    path == "/"
-        ? repos
-        : path == "/repo XYZ"
-        ? repoXYZContents
-        : path == "/repo XYZ/folder 1"
-        ? folder1Contents
-        : path == "/repo XYZ/folder 2"
-        ? folder2Contents
-        : []
-    );
+    // repoDir = "/";
+
+    // return Future
+    //     .delayed(Duration(seconds: 2))
+    //     .then((value) =>
+    // repoDir == "/"
+    //     ? repos
+    //     : repoDir == "/repo XYZ"
+    //     ? repoXYZContents
+    //     : repoDir == "/repo XYZ/folder 1"
+    //     ? folder1Contents
+    //     : repoDir == "/repo XYZ/folder 2"
+    //     ? folder2Contents
+    //     : []
+    // );
   }
 }

@@ -20,9 +20,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     if (event is ContentRequest) {
       yield DirectoryLoadInProgress();
       try {
-        final List<BaseItem> contents = await repository.getContents(event.path);
+        final List<BaseItem> contents = await repository.getContents(event.repoPath, event.folderPath);
         yield DirectoryLoadSuccess(contents: contents);
-      } catch (_) {
+      } catch (e) {
+        print('Exception getting the directory\'s ${event.folderPath} contents in repository ${event.repoPath}:\n${e.toString()}');
         yield DirectoryLoadFailure();
       }
     }
