@@ -19,7 +19,7 @@ class FolderPage extends StatefulWidget {
 class _FolderPage extends State<FolderPage> {
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(path: widget.path));
+    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(repoPath: widget.path, folderPath: ""));
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.title),
