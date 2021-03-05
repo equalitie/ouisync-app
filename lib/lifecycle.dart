@@ -74,27 +74,33 @@ class _LifeCycleState extends State<LifeCycle>
   void setupRepository() async {
     Directory repoDir = await getApplicationSupportDirectory();
 
-    String repoPath = repoDir.path;
-    String folderPath = '$repoPath/branches';
+    String repoPath = '${repoDir.path}/ouisync';
+    String folderPath = '$repoPath/blocks';
 
     print('Repository path:\n$repoPath');
 
-    print('Starting repository initialization');
+    await printAppFolderContents(repoPath);
+    await printAppFolderContents(folderPath);
 
-    NativeCallbacks.initializeOuisyncRepository(repoPath)
-    .catchError((onError) {
-      print("Repository initialization error catched:\n$onError");
-    })
-    .then((result) async => 
-      print('Repository initialization returned:\n$result')
-    )
-    .whenComplete(() async => {
-        print("Repository initialization completed"),
-        print("Calling _readDir"),
-        await _readDir(repoPath, folderPath)
-      }
-    ); 
+    print('Initializing Ouisync repo');
+    NativeCallbacks.initializeOuisyncRepository(repoPath);
+
+    print("Calling _readDir");
+    await _readDir(repoPath, folderPath);
+
   }
+
+  Future<void> printAppFolderContents(String path) async {
+    final Directory _directory = Directory(path);
+   
+    print('${_directory.path} contents:\n\n');
+
+    var contents = _directory.listSync();
+    for (var item in contents) {
+      print(item); 
+    }
+  }
+
 
   Future<void> _readDir(String repoPath, String folderPath) async {
     print('Checking storage permissions and executing readDir event -$repoPath, $folderPath'      );
@@ -118,11 +124,11 @@ class _LifeCycleState extends State<LifeCycle>
       drawer: Drawer(
         child: Center(child: DrawerMenu()),
       ),
-      body: _repos(),
+      body: _repos(repoPath, folderPath),
     );
   }
 
-  Widget _repos() {
+  Widget _repos(String repoPath, String folderPath) {
     return Center(
         child: BlocBuilder<DirectoryBloc, DirectoryState>(
             builder: (context, state) {
@@ -137,7 +143,7 @@ class _LifeCycleState extends State<LifeCycle>
               if (state is DirectoryLoadSuccess) {
                 final contents = state.contents;
 
-                return _reposList(contents);
+                return _reposList(contents, repoPath, folderPath);
               }
 
               if (state is DirectoryLoadFailure) {
@@ -153,7 +159,7 @@ class _LifeCycleState extends State<LifeCycle>
     );
   }
 
-  _reposList(List<BaseItem> repos) {
+  _reposList(List<BaseItem> repos, String repoPath, String folderPath) {
     return ListView.builder(
       itemCount: repos.length,
       itemBuilder: (context, index) {
@@ -163,18 +169,18 @@ class _LifeCycleState extends State<LifeCycle>
           isEncrypted: false,
           isLocal: true,
           isOwn: true,
-          action: () => { _actionByType(repo) }
+          action: () => { _actionByType(repo, repoPath, folderPath) }
         );
       },
     );
   }
 
-  void _actionByType(BaseItem item) {
+  void _actionByType(BaseItem item, String repoPath, String folderPath) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return item.itemType == ItemType.folder
-            ? FolderPage(title: item.name, path: item.path)
+            ? FolderPage(title: item.name, repoPath: repoPath, folderPath: folderPath)
             : FilePage(title: item.name, data: item);
       }),
     );

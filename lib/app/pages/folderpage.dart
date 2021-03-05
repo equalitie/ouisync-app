@@ -7,10 +7,11 @@ import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/pages.dart';
 
 class FolderPage extends StatefulWidget {
-  FolderPage({Key key, this.title, this.path}) : super(key: key);
+  FolderPage({Key key, this.title, this.repoPath, this.folderPath}) : super(key: key);
 
   final String title;
-  final String path;
+  final String repoPath;
+  final String folderPath;
 
   @override
   _FolderPage createState() => _FolderPage();
@@ -19,7 +20,7 @@ class FolderPage extends StatefulWidget {
 class _FolderPage extends State<FolderPage> {
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(repoPath: widget.path, folderPath: ""));
+    BlocProvider.of<DirectoryBloc>(context).add(ContentRequest(repoPath: widget.repoPath, folderPath: widget.folderPath));
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.title),
@@ -90,7 +91,7 @@ class _FolderPage extends State<FolderPage> {
       context,
       MaterialPageRoute(builder: (context) {
         return item.itemType == ItemType.folder
-          ? FolderPage(title: item.name, path: item.path)
+          ? FolderPage(title: item.name, repoPath: widget.repoPath, folderPath: widget.folderPath)
         : FilePage(title: item.name, data: item);
       }),
     );
