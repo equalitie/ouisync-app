@@ -74,13 +74,6 @@ void initializeOuisyncRepository(const char* repo_dir)
         }
     }
 
-    fs::create_directories(options.branchdir);
-    fs::create_directories(options.objectdir);
-    fs::create_directories(options.remotes);
-    fs::create_directories(options.snapshotdir);
-    
-    ALOG(LOG_TAG, "Directories created", "");
-    
     bool inserted = g_repos.insert({repo_dir, make_unique<Repo>(move(options))}).second;
     
     if (!inserted)
