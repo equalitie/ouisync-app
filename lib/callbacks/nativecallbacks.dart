@@ -28,11 +28,9 @@ final nRegisterPostCObject =
 final nInitializeOuisyncRepository = 
   ouisyncLib.lookupFunction<
     Void Function(
-      Int64,
       Pointer<Utf8>
     ),
     void Function(
-      int,
       Pointer<Utf8>
     )
   >('initializeOuisyncRepository');
@@ -57,8 +55,8 @@ class NativeCallbacks {
     print('Native callbacks setup done');
   }
 
-  static Future<dynamic> initializeOuisyncRepository(String repoDir) async {
-    return singleResponseFuture((port) => nInitializeOuisyncRepository(port.nativePort, Utf8.toUtf8(repoDir)));
+  static void initializeOuisyncRepository(String repoDir) async {
+    nInitializeOuisyncRepository.call(Utf8.toUtf8(repoDir));
   } 
 
   static Future<List<dynamic>> readDirAsync(String repoPath, String folderPath) async {
