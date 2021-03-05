@@ -44,7 +44,7 @@ struct Repo {
 
 map<string, unique_ptr<Repo>> g_repos;
 
-void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
+void initializeOuisyncRepository(const char* repo_dir)
 {
     ALOG(LOG_TAG, "Initializing OuiSync repository...\nRepository path: %s", repo_dir);
 
@@ -57,8 +57,8 @@ void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
 
         if (options.help) {
             options.write_help(cout);
-            callbackToDartStr(callbackPort, "options.help");
 
+            ALOG(LOG_TAG, "options help at %s:%s:%d", __FILE__,__FUNCTION__, __LINE__);
             return;
         }
     }
@@ -69,9 +69,7 @@ void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
             std::stringstream ss;
             options.write_help(ss);
             
-            ALOG(LOG_TAG, ss.str().c_str(), __FILE__,__FUNCTION__, __LINE__);
-            callbackToDartStr(callbackPort, ss.str());
-
+            ALOG(LOG_TAG, ss.str().c_str(), "");
             return;
         }
     }
@@ -80,20 +78,18 @@ void initializeOuisyncRepository(Dart_Port callbackPort, const char* repo_dir)
     fs::create_directories(options.objectdir);
     fs::create_directories(options.remotes);
     fs::create_directories(options.snapshotdir);
-
+    
+    ALOG(LOG_TAG, "Directories created", "");
+    
     bool inserted = g_repos.insert({repo_dir, make_unique<Repo>(move(options))}).second;
-
+    
     if (!inserted)
     {
-        string return_inserted = str(boost::format("Failed to initialize the repo because repository %s has been already initialized\n") % repo_dir);
-
-        ALOG(LOG_TAG, return_inserted.c_str(), "");
-        callbackToDartStr(callbackPort, return_inserted);
-
+        ALOG(LOG_TAG, "Failed to initialize the repo because repository %s has been already initialized\n", repo_dir);
         return;
     }
 
-    callbackToDartStr(callbackPort, str(boost::format("__ok__ OuiSync repository initialized at %s") % repo_dir));
+    ALOG(LOG_TAG, "__ok__ OuiSync repository initialized at %s", repo_dir);
 }
 
 void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directory_to_read) 
@@ -113,6 +109,7 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
 
     auto& repo = *repo_i->second;
     fs::path directory_to_read = c_directory_to_read;
+
     net::post(repo._ioc, [
         callbackPort,
         &repo,
@@ -125,8 +122,8 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
         ] () -> net::awaitable<void> {
             vector<string> files;
             try {
-               files = co_await repo._ouisync_repo.readdir(path_range(directory_to_read));
-               callbackToDartStrArray(callbackPort, files);
+                files = co_await repo._ouisync_repo.readdir(path_range(directory_to_read));
+                callbackToDartStrArray(callbackPort, files);
             } catch (const exception& e) {
                 string return_exception_reddir = str(
                     boost::format(
@@ -142,10 +139,4 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
             }
         }, net::detached);
     });
-
-    ALOG(LOG_TAG, "The coroutine was not executed (Reached the end of the function) at %s:%s:%d", __FILE__, __FUNCTION__, __LINE__);
-
-    vector<string> result;
-    result.push_back("The coroutine was not executed (Reached the end of the function)");
-    callbackToDartStrArray(callbackPort, result);
 }
