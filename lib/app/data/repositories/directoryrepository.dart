@@ -38,7 +38,7 @@ class DirectoryRepository {
   Future<List<BaseItem>> getContents(String repoDir, String folderPath) async {
     print("About to call readDirAsync...");
     
-    List<dynamic> files;
+    List<dynamic> folderContents;
     
     await NativeCallbacks.readDirAsync(repoDir, folderPath)
     .catchError((onError) {
@@ -46,13 +46,17 @@ class DirectoryRepository {
     })
     .then((value) => {
         print('readDirAsync returned ${value.length} items'),
-        files = value
+        folderContents = value
     })
     .whenComplete(() => {
       print('readDirAsync completed')
     });
     
-    print("Files returned: " + files.toString());
+    if (folderContents.isNotEmpty) {
+      
+    }
+
+    return [];
 
     // repoDir = "/";
 
