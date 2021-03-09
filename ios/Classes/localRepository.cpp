@@ -156,10 +156,18 @@ void getAttributes(const char* repo_dir, const char* c_path)
         &repo,
         path = fs::path(c_path)
     ] () -> net::awaitable<void> {
-        FileSystemAttrib attributes;
         try {
-            attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
-        } catch (const exception& e) {
+            FileSystemAttrib attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
+
+            apply(attributes,
+                [&] (const FileSystemDirAttrib&) {
+                    ALOG(LOG_TAG, "Path is a directory");
+                },
+                [&] (const FileSystemFileAttrib& a) {
+                    ALOG(LOG_TAG, "Path is a file of size %d", a.size);
+                });
+        }
+        catch (const exception& e) {
             string return_exception_getatt = str(
                 boost::format(
                     "There was an exception getting the attributes from %s: %s\nat %s:%s:%d"
