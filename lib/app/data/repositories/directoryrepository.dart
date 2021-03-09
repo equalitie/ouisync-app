@@ -53,7 +53,7 @@ class DirectoryRepository {
     });
     
     if (folderContents.isNotEmpty) {
-      
+      print('Directory contents returned:\n$folderContents');
     }
 
     return [];
