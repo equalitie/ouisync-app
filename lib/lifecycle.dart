@@ -73,20 +73,16 @@ class _LifeCycleState extends State<LifeCycle>
 
   void setupRepository() async {
     Directory repoDir = await getApplicationSupportDirectory();
-
     String repoPath = '${repoDir.path}/ouisync';
-    String folderPath = '$repoPath/blocks';
 
     print('Repository path:\n$repoPath');
 
-    await printAppFolderContents(repoPath);
-    await printAppFolderContents(folderPath);
-
-    print('Initializing Ouisync repo');
     NativeCallbacks.initializeOuisyncRepository(repoPath);
+    // NativeCallbacks.createDir(repoPath, 'one/three');
+    
+    // NativeCallbacks.getAttributes(repoPath, 'one/dos');
 
-    print("Calling _readDir");
-    await _readDir(repoPath, folderPath);
+    await _readDir(repoPath, 'one');
 
   }
 
