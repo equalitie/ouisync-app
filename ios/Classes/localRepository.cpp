@@ -13,6 +13,7 @@
 #include "path.h"
 
 #include "androidlog.h"
+#include "std_scoped_redirect.h"
 #define  LOG_TAG "LOCAL_REPOSITORY"
 
 #include <boost/asio.hpp>
@@ -31,10 +32,12 @@ struct Repo {
     net::executor_work_guard<net::io_context::executor_type> _work_guard;
     Repository _ouisync_repo;
     thread _thread;
+    shared_ptr<StdScopedRedirect> _std_io_redirect;
 
-    Repo(Options options) :
+    Repo(Options options, shared_ptr<StdScopedRedirect> io_redirect) :
         _work_guard(_ioc.get_executor()),
-        _ouisync_repo(_ioc.get_executor(), options)
+        _ouisync_repo(_ioc.get_executor(), options),
+        _std_io_redirect(io_redirect)
     {
         _thread = thread([=] { _ioc.run(); });
         _thread.detach();
@@ -54,6 +57,14 @@ map<string, unique_ptr<Repo>> g_repos;
 
 void initializeOuisyncRepository(const char* repo_dir)
 {
+    shared_ptr<StdScopedRedirect> io_redirect;
+
+    if (g_repos.empty()) {
+        io_redirect = make_shared<StdScopedRedirect>();
+    } else {
+        io_redirect = g_repos.begin()->second->_std_io_redirect;
+    }
+
     ALOG(LOG_TAG, "Initializing OuiSync repository...\nRepository path: %s", repo_dir);
 
     vector<const char*> args = { "./ouisync", "--basedir", repo_dir };
@@ -90,8 +101,8 @@ void initializeOuisyncRepository(const char* repo_dir)
         return;
     }
 
-    i->second = make_unique<Repo>(move(options));
-    
+    i->second = make_unique<Repo>(move(options), move(io_redirect));
+
     ALOG(LOG_TAG, "__ok__ OuiSync repository initialized at %s", repo_dir);
 }
 
