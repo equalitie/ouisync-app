@@ -40,6 +40,14 @@ struct Repo {
         _thread.detach();
     }
 
+    template<class F>
+    void post(F&& f) {
+        net::post(
+            _ioc, [&, f = move(f)] {
+                co_spawn(_ioc, move(f), net::detached);
+            }
+        );
+    }
 };
 
 map<string, unique_ptr<Repo>> g_repos;
@@ -103,26 +111,19 @@ void createDir(const char* repo_dir, const char* c_new_directory)
     auto& repo = *repo_i->second;
     fs::path new_directory = c_new_directory;
 
-    net::post(
-        repo._ioc, [
-            &repo,
-            new_directory = new_directory
-        ] {
-            co_spawn(repo._ioc, [
-                &repo,
-                new_directory = new_directory
-            ] () -> net::awaitable<void> {
-                try {
-                    mode_t mode = 0777;
-                    co_await repo._ouisync_repo.mkdir(path_range(new_directory), mode);       
+    repo.post([
+        &repo,
+        new_directory = new_directory
+    ] () -> net::awaitable<void> {
+        try {
+            mode_t mode = 0777;
+            co_await repo._ouisync_repo.mkdir(path_range(new_directory), mode);       
 
-                    ALOG(LOG_TAG, "Directory created correctly");
-                } catch (const exception& e) {
-                    ALOG(LOG_TAG, "Exception creating the directory:\n%s", e.what());
-                }
-            }, net::detached);
+            ALOG(LOG_TAG, "Directory created correctly");
+        } catch (const exception& e) {
+            ALOG(LOG_TAG, "Exception creating the directory:\n%s", e.what());
         }
-    );
+    });
 }
 
 void getAttributes(const char* repo_dir, const char* c_path)
@@ -139,29 +140,23 @@ void getAttributes(const char* repo_dir, const char* c_path)
     }
 
     auto& repo = *repo_i->second;
-    fs::path path = c_path;
 
-    net::post(repo._ioc, [
+    repo.post([
         &repo,
-        path = path
-    ] {
-        co_spawn(repo._ioc, [
-            &repo,
-            path = path
-        ] () -> net::awaitable<void> {
-            FileSystemAttrib attributes;
-            try {
-                attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
-            } catch (const exception& e) {
-                string return_exception_getatt = str(
-                    boost::format(
-                        "There was an exception getting the attributes from %s: %s\nat %s:%s:%d"
-                    ) % path % e.what() % __FILE__ % __FUNCTION__ % __LINE__
-                );
+        path = fs::path(c_path)
+    ] () -> net::awaitable<void> {
+        FileSystemAttrib attributes;
+        try {
+            attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
+        } catch (const exception& e) {
+            string return_exception_getatt = str(
+                boost::format(
+                    "There was an exception getting the attributes from %s: %s\nat %s:%s:%d"
+                ) % path % e.what() % __FILE__ % __FUNCTION__ % __LINE__
+            );
 
-                ALOG(LOG_TAG, return_exception_getatt.c_str(), "");
-            }
-        }, net::detached);
+            ALOG(LOG_TAG, return_exception_getatt.c_str(), "");
+        }
     });
 }
 
@@ -181,35 +176,28 @@ void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directo
     }
 
     auto& repo = *repo_i->second;
-    fs::path directory_to_read = c_directory_to_read;
 
-    net::post(repo._ioc, [
+    repo.post([
         callbackPort,
         &repo,
-        directory_to_read = move(directory_to_read)
-    ] {
-        co_spawn(repo._ioc, [
-            callbackPort,
-            &repo,
-            directory_to_read = move(directory_to_read)
-        ] () -> net::awaitable<void> {
-            vector<string> files;
-            try {
-                files = co_await repo._ouisync_repo.readdir(path_range(directory_to_read));
-                callbackToDartStrArray(callbackPort, files);
-            } catch (const exception& e) {
-                string return_exception_reddir = str(
-                    boost::format(
-                        "There was an exception while reading the directory %s contents: %s at %s:%s:%d"
-                    ) % directory_to_read % e.what() % __FILE__ % __FUNCTION__ % __LINE__
-                );
+        directory_to_read = fs::path(c_directory_to_read)
+    ] () -> net::awaitable<void> {
+        vector<string> files;
+        try {
+            files = co_await repo._ouisync_repo.readdir(path_range(directory_to_read));
+            callbackToDartStrArray(callbackPort, files);
+        } catch (const exception& e) {
+            string return_exception_reddir = str(
+                boost::format(
+                    "There was an exception while reading the directory %s contents: %s at %s:%s:%d"
+                ) % directory_to_read % e.what() % __FILE__ % __FUNCTION__ % __LINE__
+            );
 
-                ALOG(LOG_TAG, return_exception_reddir.c_str(), "");
+            ALOG(LOG_TAG, return_exception_reddir.c_str(), "");
 
-                files.push_back("__error__");
-                files.push_back(return_exception_reddir);
-                callbackToDartStrArray(callbackPort, files);
-            }
-        }, net::detached);
+            files.push_back("__error__");
+            files.push_back(return_exception_reddir);
+            callbackToDartStrArray(callbackPort, files);
+        }
     });
 }
