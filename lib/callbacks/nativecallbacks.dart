@@ -35,6 +35,18 @@ final nInitializeOuisyncRepository =
     )
   >('initializeOuisyncRepository');
 
+final nGetAttributes =
+    ouisyncLib.lookupFunction<
+      Void Function(
+        Pointer<Utf8>,
+        Pointer<Utf8>
+      ),
+      void Function(
+        Pointer<Utf8>,
+        Pointer<Utf8>
+      )
+    >('getAttributes');
+
 final nReadDirAsync = 
   ouisyncLib.lookupFunction<
     Void Function(
@@ -49,6 +61,18 @@ final nReadDirAsync =
     )
   >('readDir');
 
+final nCreateDir = 
+  ouisyncLib.lookupFunction<
+    Void Function(
+      Pointer<Utf8>,
+      Pointer<Utf8>
+    ),
+    void Function(
+      Pointer<Utf8>,
+      Pointer<Utf8>
+    )
+  >('createDir');
+
 class NativeCallbacks {
   static doSetup() {
     nRegisterPostCObject(NativeApi.postCObject);
@@ -59,7 +83,15 @@ class NativeCallbacks {
     nInitializeOuisyncRepository.call(Utf8.toUtf8(repoDir));
   } 
 
+  static void createDir(String repoPath, String newFolderPath) {
+    nCreateDir.call(Utf8.toUtf8(repoPath), Utf8.toUtf8(newFolderPath));
+  }
+
   static Future<List<dynamic>> readDirAsync(String repoPath, String folderPath) async {
     return singleResponseFuture((port) => nReadDirAsync(port.nativePort, Utf8.toUtf8(repoPath), Utf8.toUtf8(folderPath)));
+  }
+
+  static void getAttributes(String repoPath, String path) {
+    nGetAttributes.call(Utf8.toUtf8(repoPath), Utf8.toUtf8(path));
   }
 }
