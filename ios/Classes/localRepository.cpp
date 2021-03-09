@@ -81,8 +81,86 @@ void initializeOuisyncRepository(const char* repo_dir)
         ALOG(LOG_TAG, "Failed to initialize the repo because repository %s has been already initialized\n", repo_dir);
         return;
     }
-
+    
     ALOG(LOG_TAG, "__ok__ OuiSync repository initialized at %s", repo_dir);
+}
+
+void createDir(const char* repo_dir, const char* c_new_directory)
+{
+    ALOG(LOG_TAG, "Creating directory %s in repo %s", c_new_directory, repo_dir);
+
+    auto repo_i = g_repos.find(repo_dir);
+    if (repo_i == g_repos.end()) {
+        string return_no_such_repo = str(boost::format("No such repo %s has been initialized") % repo_dir);
+
+        ALOG(LOG_TAG, return_no_such_repo.c_str(), "");
+
+        return;    
+    }
+
+    auto& repo = *repo_i->second;
+    fs::path new_directory = c_new_directory;
+
+    net::post(
+        repo._ioc, [
+            &repo,
+            new_directory = new_directory
+        ] {
+            co_spawn(repo._ioc, [
+                &repo,
+                new_directory = new_directory
+            ] () -> net::awaitable<void> {
+                try {
+                    mode_t mode = 0777;
+                    co_await repo._ouisync_repo.mkdir(path_range(new_directory), mode);       
+
+                    ALOG(LOG_TAG, "Directory created correctly");
+                } catch (const exception& e) {
+                    ALOG(LOG_TAG, "Exception creating the directory:\n%s", e.what());
+                }
+            }, net::detached);
+        }
+    );
+}
+
+void getAttributes(const char* repo_dir, const char* c_path)
+{
+    ALOG(LOG_TAG, "Getting attributes for %s in repo %s", c_path, repo_dir);
+
+    auto repo_i = g_repos.find(repo_dir);
+    if (repo_i == g_repos.end()) {
+        string return_no_such_repo = str(boost::format("No such repo %s has been initialized") % repo_dir);
+
+        ALOG(LOG_TAG, return_no_such_repo.c_str(), "");
+
+        return;    
+    }
+
+    auto& repo = *repo_i->second;
+    fs::path path = c_path;
+
+    net::post(repo._ioc, [
+        &repo,
+        path = path
+    ] {
+        co_spawn(repo._ioc, [
+            &repo,
+            path = path
+        ] () -> net::awaitable<void> {
+            FileSystemAttrib attributes;
+            try {
+                attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
+            } catch (const exception& e) {
+                string return_exception_getatt = str(
+                    boost::format(
+                        "There was an exception getting the attributes from %s: %s\nat %s:%s:%d"
+                    ) % path % e.what() % __FILE__ % __FUNCTION__ % __LINE__
+                );
+
+                ALOG(LOG_TAG, return_exception_getatt.c_str(), "");
+            }
+        }, net::detached);
+    });
 }
 
 void readDir(Dart_Port callbackPort, const char* repo_dir, const char* c_directory_to_read) 
