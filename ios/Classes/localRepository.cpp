@@ -74,13 +74,15 @@ void initializeOuisyncRepository(const char* repo_dir)
         }
     }
 
-    bool inserted = g_repos.insert({repo_dir, make_unique<Repo>(move(options))}).second;
+    auto [i, inserted] = g_repos.insert({repo_dir, nullptr});
     
     if (!inserted)
     {
         ALOG(LOG_TAG, "Failed to initialize the repo because repository %s has been already initialized\n", repo_dir);
         return;
     }
+
+    i->second = make_unique<Repo>(move(options));
     
     ALOG(LOG_TAG, "__ok__ OuiSync repository initialized at %s", repo_dir);
 }
