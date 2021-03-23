@@ -1,5 +1,5 @@
 enum ItemType {
   folder,
   file,
-  safe
+  repo
 }
