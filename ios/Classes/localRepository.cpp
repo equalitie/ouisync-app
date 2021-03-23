@@ -103,10 +103,10 @@ void initializeOuisyncRepository(const char* repo_dir)
 
     i->second = make_unique<Repo>(move(options), move(io_redirect));
 
-    ALOG(LOG_TAG, "__ok__ OuiSync repository initialized at %s", repo_dir);
+    ALOG(LOG_TAG, "OuiSync repository initialized at %s", repo_dir);
 }
 
-void createDir(const char* repo_dir, const char* c_new_directory)
+void createDir(Dart_Port callbackPort, const char* repo_dir, const char* c_new_directory)
 {
     ALOG(LOG_TAG, "Creating directory %s in repo %s", c_new_directory, repo_dir);
 
@@ -116,28 +116,31 @@ void createDir(const char* repo_dir, const char* c_new_directory)
 
         ALOG(LOG_TAG, return_no_such_repo.c_str(), "");
 
-        return;    
+        callbackToDartInt32(callbackPort, 1);
+        return;
     }
 
     auto& repo = *repo_i->second;
-    fs::path new_directory = c_new_directory;
 
     repo.post([
+        callbackPort,
         &repo,
-        new_directory = new_directory
+        new_directory = fs::path(c_new_directory)
     ] () -> net::awaitable<void> {
         try {
-            mode_t mode = 0777;
-            co_await repo._ouisync_repo.mkdir(path_range(new_directory), mode);       
+            mode_t mode = 0700; //rwx------
+            co_await repo._ouisync_repo.mkdir(path_range(new_directory), mode); 
 
             ALOG(LOG_TAG, "Directory created correctly");
+            callbackToDartInt32(callbackPort, 0);      
         } catch (const exception& e) {
             ALOG(LOG_TAG, "Exception creating the directory:\n%s", e.what());
+            callbackToDartInt32(callbackPort, 1);
         }
     });
 }
 
-void getAttributes(const char* repo_dir, const char* c_path)
+void getAttributes(Dart_Port callbackPort, const char* repo_dir, const char* c_path)
 {
     ALOG(LOG_TAG, "Getting attributes for %s in repo %s", c_path, repo_dir);
 
