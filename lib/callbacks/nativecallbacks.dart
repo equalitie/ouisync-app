@@ -35,18 +35,6 @@ final nInitializeOuisyncRepository =
     )
   >('initializeOuisyncRepository');
 
-final nGetAttributes =
-    ouisyncLib.lookupFunction<
-      Void Function(
-        Pointer<Utf8>,
-        Pointer<Utf8>
-      ),
-      void Function(
-        Pointer<Utf8>,
-        Pointer<Utf8>
-      )
-    >('getAttributes');
-
 final nReadDirAsync = 
   ouisyncLib.lookupFunction<
     Void Function(
@@ -61,13 +49,27 @@ final nReadDirAsync =
     )
   >('readDir');
 
-final nCreateDir = 
+final nGetAttributesAsync =
+    ouisyncLib.lookupFunction<
+      Void Function(
+        Pointer<Utf8>,
+        Pointer<Utf8>
+      ),
+      void Function(
+        Pointer<Utf8>,
+        Pointer<Utf8>
+      )
+    >('getAttributes');
+
+final nCreateDirAsync = 
   ouisyncLib.lookupFunction<
-    Void Function(
+    Int32 Function(
+      Int64,
       Pointer<Utf8>,
       Pointer<Utf8>
     ),
-    void Function(
+    int Function(
+      int,
       Pointer<Utf8>,
       Pointer<Utf8>
     )
@@ -80,18 +82,18 @@ class NativeCallbacks {
   }
 
   static void initializeOuisyncRepository(String repoDir) async {
-    nInitializeOuisyncRepository.call(Utf8.toUtf8(repoDir));
+    nInitializeOuisyncRepository.call(repoDir.toNativeUtf8());
   } 
 
-  static void createDir(String repoPath, String newFolderPath) {
-    nCreateDir.call(Utf8.toUtf8(repoPath), Utf8.toUtf8(newFolderPath));
+  static Future<int> createDirAsync(String repoPath, String newFolderPath) {
+    return singleResponseFuture((port) => nCreateDirAsync.call(port.nativePort, repoPath.toNativeUtf8(), newFolderPath.toNativeUtf8()));
+  }
+
+  static Future<dynamic> getAttributesAsync(String repoPath, String path) {
+    return singleResponseFuture((port) => nGetAttributesAsync.call(repoPath.toNativeUtf8(), path.toNativeUtf8()));
   }
 
   static Future<List<dynamic>> readDirAsync(String repoPath, String folderPath) async {
-    return singleResponseFuture((port) => nReadDirAsync(port.nativePort, Utf8.toUtf8(repoPath), Utf8.toUtf8(folderPath)));
-  }
-
-  static void getAttributes(String repoPath, String path) {
-    nGetAttributes.call(Utf8.toUtf8(repoPath), Utf8.toUtf8(path));
+    return singleResponseFuture((port) => nReadDirAsync(port.nativePort, repoPath.toNativeUtf8(), folderPath.toNativeUtf8()));
   }
 }
