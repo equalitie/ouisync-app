@@ -1,32 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/data/repositories/directoryrepository.dart';
-import 'package:ouisync_app/app/pages/rootpage.dart';
-import 'package:ouisync_app/lifecycle.dart';
+import 'package:ouisync_app/app/data/data.dart';
+
+import '../lifecycle.dart';
+import 'pages/pages.dart';
+import 'utils/utils.dart';
 
 class OuiSyncApp extends StatelessWidget {
   const OuiSyncApp({
     Key key,
-    @required this.directoryRepository
-  }) : assert(directoryRepository != null), super(key: key);
+    @required this.reposBaseFolderPath,
+    @required this.foldersRepository
+  }) : 
+  assert(reposBaseFolderPath != null),
+  assert(reposBaseFolderPath != ""),
+  assert(foldersRepository != null),
+  super(key: key);
 
-  final DirectoryRepository directoryRepository;
+  final String reposBaseFolderPath;
+  final DirectoryRepository foldersRepository;
   
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'OuiSync',
+      title: titleApp,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: BlocProvider(
-          create: (context) => DirectoryBloc(repository: directoryRepository),
-          child: LifeCycle(child: RootPage(title: 'OuiSync repositories')),
-          ),  
-      );
+      ),
+      home: LifeCycle(
+        child: RootPage(
+          reposBaseFolderPath: reposBaseFolderPath,
+          foldersRepository: foldersRepository,
+          title: titleRootPage,
+        )
+      ),
+    );
   }
 }
