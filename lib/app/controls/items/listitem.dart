@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/controls/items/filedescription.dart';
-import 'package:ouisync_app/app/controls/items/folderdescription.dart';
-import 'package:ouisync_app/app/models/item/baseitem.dart';
-import 'package:ouisync_app/app/models/item/itemtype.dart';
+
+import '../../models/models.dart';
+import '../controls.dart';
+import 'filedescription.dart';
+import 'folderdescription.dart';
 
 
 class ListItem extends StatelessWidget {
   const ListItem({
     this.itemData,
-    this.action
+    this.action,
+    this.isEncrypted,
+    this.isLocal,
+    this.isOwn,
   });
 
   final BaseItem itemData;
   final Function action;
+  final bool isEncrypted;
+  final bool isLocal;
+  final bool isOwn;
 
   @override
   Widget build(BuildContext context) {
@@ -36,23 +43,26 @@ class ListItem extends StatelessWidget {
   }
 
   Color _getColor() {
-    return itemData.itemType == ItemType.folder
+    return itemData.itemType == ItemType.file
         ? Colors.transparent
         : Color.fromARGB(35, 220, 220, 220);
   }
 
   Expanded getExpandedDescriptionByType() {
     return Expanded(
-              flex: 1,
-              child: itemData.itemType == ItemType.folder
-                  ? FolderDescription(folderData: itemData)
-                  : FileDescription(fileData: itemData)
-          );
+      flex: 1,
+      child: itemData.itemType == ItemType.repo
+        ? RepoDescription(folderData: itemData, isEncrypted: isEncrypted, isLocal: isLocal, isOwn:  isOwn)
+        : itemData.itemType == ItemType.folder
+        ? FolderDescription(folderData: itemData)
+        : FileDescription(fileData: itemData)
+    );
   }
 
   IconButton getActionByType(Function action) {
-
-    return itemData.itemType == ItemType.folder
+    return itemData.itemType == ItemType.repo
+        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: action)
+        : itemData.itemType == ItemType.folder
         ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
         : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
   }
