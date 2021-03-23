@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/controls/controls.dart';
-import 'package:ouisync_app/app/models/models.dart';
 
-class RepoCard extends StatelessWidget {
-  const RepoCard({
+import '../../models/models.dart';
+import '../controls.dart';
+
+class RepoDescription extends StatelessWidget {
+  const RepoDescription({
     this.folderData,
     this.isEncrypted,
     this.isLocal,
@@ -12,7 +13,7 @@ class RepoCard extends StatelessWidget {
     this.action
 });
 
-  final BaseItem folderData;
+  final FolderItem folderData;
   final bool isEncrypted;
   final bool isLocal;
   final bool isOwn;
@@ -42,13 +43,6 @@ class RepoCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-                  child: ColumnText(
-                      labelString: "size:",
-                      value: folderData.size.toString()
-                  ),
-                ),
                 getActionByType(action),
               ],
             ),
@@ -56,15 +50,6 @@ class RepoCard extends StatelessWidget {
 
             Row(
               children: [
-                Container(
-                  margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-                  alignment: AlignmentDirectional.bottomStart,
-                  child: ColumnText(
-                      labelString: "files:",
-                      value: "22"
-                  ),
-                ),
-
                 Container(
                   margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
                   alignment: AlignmentDirectional.bottomEnd,
@@ -113,7 +98,3 @@ class RepoCard extends StatelessWidget {
         : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
   }
 }
-
-
-// Encryption off: name/folder, total files, total conflicts, total space, sync status, users
-// Encryption on: name/folder, has conflicts, sync status
