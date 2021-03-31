@@ -140,9 +140,9 @@ void createDir(Dart_Port callbackPort, const char* repo_dir, const char* c_new_d
     });
 }
 
-void getAttributes(Dart_Port callbackPort, const char* repo_dir, const char* c_path)
+void getAttributes(Dart_Port callbackPort, const char* repo_dir, const char  **c_paths, const int size)
 {
-    ALOG(LOG_TAG, "Getting attributes for %s in repo %s", c_path, repo_dir);
+    // ALOG(LOG_TAG, "Getting attributes for %s in repo %s", c_path, repo_dir);
 
     auto repo_i = g_repos.find(repo_dir);
     if (repo_i == g_repos.end()) {
@@ -154,30 +154,45 @@ void getAttributes(Dart_Port callbackPort, const char* repo_dir, const char* c_p
     }
 
     auto& repo = *repo_i->second;
-
+    const vector<string> paths(c_paths, c_paths + size);
+    
     repo.post([
+        callbackPort,
         &repo,
-        path = fs::path(c_path)
+        paths
     ] () -> net::awaitable<void> {
-        try {
-            FileSystemAttrib attributes = co_await repo._ouisync_repo.get_attr(path_range(path));
+        vector<string> object_attributes;
 
-            apply(attributes,
+        try {
+            for (auto &path : paths) {
+                FileSystemAttrib attributes = co_await repo._ouisync_repo.get_attr(path_range(fs::path(path)));
+
+                string attributes_data;
+                apply(attributes,
                 [&] (const FileSystemDirAttrib&) {
-                    ALOG(LOG_TAG, "Path is a directory");
+                    attributes_data = str(boost::format("name:%s,type:folder") % path);
                 },
                 [&] (const FileSystemFileAttrib& a) {
-                    ALOG(LOG_TAG, "Path is a file of size %d", a.size);
+                    attributes_data = str(boost::format("name:%s,type:file,size:%d") % path % a.size);
                 });
+
+                ALOG(LOG_TAG, "Path attributes: %s\n", attributes_data.c_str());
+                object_attributes.push_back(attributes_data);
+            }    
+
+            callbackToDartStrArray(callbackPort, object_attributes);
         }
         catch (const exception& e) {
             string return_exception_getatt = str(
                 boost::format(
-                    "There was an exception getting the attributes from %s: %s\nat %s:%s:%d"
-                ) % path % e.what() % __FILE__ % __FUNCTION__ % __LINE__
+                    "There was an exception getting the attributes: %s\nat %s:%s:%d"
+                ) % e.what() % __FILE__ % __FUNCTION__ % __LINE__
             );
 
             ALOG(LOG_TAG, return_exception_getatt.c_str(), "");
+            object_attributes.push_back("__error__");
+            object_attributes.push_back(return_exception_getatt);
+            callbackToDartStrArray(callbackPort, object_attributes);
         }
     });
 }
