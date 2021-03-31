@@ -1,3 +1,6 @@
+export 'addfilepage.dart';
+export 'addfolderpage.dart';
+export 'addrepopage.dart';
 export 'filepage.dart';
 export 'folderpage.dart';
 export 'loginpage.dart';
