@@ -32,9 +32,11 @@ class DirectoryRepository {
     .catchError((onError) {
       print('Error on readDirAsync call: $onError');
     })
-    .then((contents) => {
-        print('readDirAsync returned ${contents.length} items'),
-        folderContents = _castToBaseItem(folderPath, contents.cast<String>())
+    .then((contents) async {
+        print('readDirAsync returned ${contents.length} items');
+
+        var contentsWithAttributes = await _getAttributes(repoDir, contents.cast<String>());
+        folderContents = _castToBaseItem(folderPath, contentsWithAttributes);
     })
     .whenComplete(() => {
       print('readDirAsync completed')
@@ -47,20 +49,67 @@ class DirectoryRepository {
     return folderContents;
   }
 
-  List<BaseItem> _castToBaseItem(String folderPath, List<String> repos) {
-    List<BaseItem> newList = repos.map((repo) => 
-      FolderItem(
-        "",
-        repo,
-        folderPath,
-        0.0,
-        SyncStatus.idle,
-        User(id: '', name: ''),
-        itemType: ItemType.repo,
-        icon: Icons.store,
-      )
-    ).toList();
+  Future<List<String>> _getAttributes(String repoDir, List<String> paths) async {
+    List<String> objectWithAttributes;
+
+    await NativeCallbacks.getAttributesAsync(repoDir, paths)
+    .catchError((onError) {
+      print('Error on getAttributesAsync call: $onError');
+    })
+    .then((returned) => {
+      print('getAttributes: $returned'),
+      objectWithAttributes = List<String>.from(returned)
+    })
+    .whenComplete(() => {
+      print('getAttributesAsync completed')
+    });
+
+    if (objectWithAttributes.isEmpty) {
+      return [];
+    }
+
+    return objectWithAttributes;
+  }
+
+  List<BaseItem> _castToBaseItem(String folderPath, List<String> objectWithAttributes) {
+    List<BaseItem> newList = objectWithAttributes.map((object) { 
+      List<String> data = object.split(',');
+      String name = _extractNativeAttribute(data, 'name').split(':')[1];
+      String type = _extractNativeAttribute(data, 'type').split(':')[1];
+      double size = 0.0;
+      if (data.any((element) => element.startsWith('size:'))) {
+       size = double.parse(_extractNativeAttribute(data, 'size').split(':')[1]); 
+      }
+
+      if (type == 'folder') {
+        return FolderItem(
+          "",
+          name,
+          folderPath,
+          size,
+          SyncStatus.idle,
+          User(id: '', name: ''),
+          itemType: ItemType.folder,
+          icon: Icons.store,
+        );
+      }
+
+      if (type == 'file') {
+       return FileItem(
+          '',
+          name,
+          '',
+          folderPath,
+          size,
+          SyncStatus.idle,
+          User(id: '', name: '')
+        ); 
+      }
+    }).toList().cast<BaseItem>();
 
     return newList;
   }
+
+  dynamic _extractNativeAttribute(List<String> attributesList, String attribute) => 
+    attributesList.singleWhere((element) => element.startsWith('$attribute:'));
 }
