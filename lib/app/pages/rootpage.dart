@@ -97,70 +97,17 @@ class _RootPageState extends State<RootPage> {
         child: Center(child: DrawerMenu()),
       ),
       body: _repositoriesBlocBuilder(),
-      floatingActionButton: FloatingActionButton.extended(
-        label: Text('Actions'),
-        backgroundColor: Colors.blue,
-        onPressed: () {
-          return showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ActionsDialog(
-                title: 'Actions',
-                body: _repositoriesActions(),
-              );
-            }
-          );
-        },
+      floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        context,
+        _controller,
+        widget.reposBaseFolderPath,
+        repoActions,
+        flagRepoActionsDialog,
+        backgroundColor,
+        foregroundColor
       ),
     );
   }
-
-  _repositoriesActions() => Column(
-    children: [
-      _createRepository(),
-    ],
-  );
-
-  _createRepository() => Form(
-    key: _createRepoFormKey,
-    autovalidateMode: AutovalidateMode.onUserInteraction,
-    child: Column(
-      children: [
-        TextFormField(
-          decoration: InputDecoration (
-            icon: const Icon(Icons.folder),
-            hintText: 'Repository name',
-            labelText: 'Create a new repository',
-            contentPadding: EdgeInsets.all(10.0),
-          ),
-          validator: (value) {
-            return value.isEmpty
-            ? 'Please enter some text'
-            : null;
-          },
-          onSaved: (newRepoName) {
-            BlocProvider.of<RepositoryBloc>(context)
-            .add(
-              RepositoryCreate(
-                repoDir: widget.reposBaseFolderPath,
-                newRepoRelativePath: newRepoName
-              )
-            );
-
-            Navigator.of(context).pop();
-          },
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_createRepoFormKey.currentState.validate()) {
-              _createRepoFormKey.currentState.save();
-            }
-          },
-          child: const Text('create'),
-        ),
-      ],
-    )
-  );
 
   Widget _repositoriesBlocBuilder() {
     return Center(

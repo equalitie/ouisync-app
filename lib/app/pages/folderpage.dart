@@ -63,75 +63,17 @@ class _FolderPageState extends State<FolderPage> {
           ]
       ),
       body: _folderContentsBlocBuilder(),
-      floatingActionButton: FloatingActionButton.extended(
-        label: Text('Actions'),
-        backgroundColor: Colors.blue,
-        onPressed: () {
-          return showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ActionsDialog(
-                title: 'Actions',
-                body: _folderActions(),
-              );
-            }
-          );
-        },
+      floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        context,
+        _controller,
+        widget.repoPath,
+        folderActions,
+        flagFolderActionsDialog,
+        backgroundColor,
+        foregroundColor
       ),
     );
   }
-
-  _folderActions() => Column(
-    children: [
-      _createFolder(),
-    ],
-  );
-
-  _createFolder() => Form(
-    key: _createFolderFormKey,
-    autovalidateMode: AutovalidateMode.onUserInteraction,
-    child: Column(
-      children: [
-        TextFormField(
-          decoration: InputDecoration (
-            icon: const Icon(Icons.folder),
-            hintText: 'Folder name',
-            labelText: 'Create a new folder',
-            contentPadding: EdgeInsets.all(10.0),
-          ),
-          validator: (value) {
-            return value.isEmpty
-            ? 'Please enter some text'
-            : null;
-          },
-          onSaved: (newFolderName) {
-            String newPath = widget.folderPath.isEmpty
-            ? newFolderName
-            : '${widget.folderPath}/$newFolderName';
-
-            BlocProvider.of<DirectoryBloc>(context)
-            .add(
-              FolderCreate(
-                repoPath: widget.repoPath,
-                parentPath: widget.folderPath,
-                newFolderRelativePath: newPath
-              )
-            );
-
-            Navigator.of(context).pop();
-          },
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_createFolderFormKey.currentState.validate()) {
-              _createFolderFormKey.currentState.save();
-            }
-          },
-          child: const Text('create'),
-        ),
-      ],
-    )
-  );
 
   Widget _folderContentsBlocBuilder() {
     return Center(
