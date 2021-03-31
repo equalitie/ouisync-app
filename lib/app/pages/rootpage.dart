@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -34,14 +33,30 @@ class RootPage extends StatefulWidget {
   _RootPageState createState() => _RootPageState();
 }
 
-class _RootPageState extends State<RootPage> {
-  final _createRepoFormKey = GlobalKey<FormState>();
+class _RootPageState extends State<RootPage>
+  with TickerProviderStateMixin {
+
+  AnimationController _controller;
+  
+  Color backgroundColor;
+  Color foregroundColor;
 
   @override
   void initState() {
     initRepositories();
 
+    _controller = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+    );
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   Future<void> initRepositories() async {
@@ -81,6 +96,9 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    backgroundColor = Theme.of(context).cardColor;
+    foregroundColor = Theme.of(context).accentColor;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

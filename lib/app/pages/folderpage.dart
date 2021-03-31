@@ -33,8 +33,13 @@ class FolderPage extends StatefulWidget {
 
 }
 
-class _FolderPageState extends State<FolderPage> {
-  final _createFolderFormKey = GlobalKey<FormState>();
+class _FolderPageState extends State<FolderPage>
+  with TickerProviderStateMixin {
+
+  AnimationController _controller;
+  
+  Color backgroundColor;
+  Color foregroundColor;
 
   @override
   void initState() {
@@ -45,11 +50,25 @@ class _FolderPageState extends State<FolderPage> {
       )
     );
 
+    _controller = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+    );
+
     super.initState();
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    backgroundColor = Theme.of(context).cardColor;
+    foregroundColor = Theme.of(context).accentColor;
+
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.title),
