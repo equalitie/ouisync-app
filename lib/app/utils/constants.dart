@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 const List<PermissionStatus> negativePermissionStatus = [
@@ -32,3 +33,19 @@ const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a fi
 
 const double actionsDialogPadding = 20.0;
 const double actionsDialogAvatarRadius = 45.0;
+
+const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds
+
+const String flagRepoActionsDialog = 'repo_dialog';
+const String flagFolderActionsDialog = 'folder_dialog';
+
+const String actionNewRepo = 'Add repo';
+
+const String actionNewFolder = 'Add folder';
+const String actionNewFile = 'Add file';
+
+const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
+const Map<String, IconData> folderActions = const { 
+  actionNewFolder: Icons.create_new_folder_rounded, 
+  actionNewFile: Icons.file_upload
+};
