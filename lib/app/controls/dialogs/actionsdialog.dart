@@ -48,23 +48,24 @@ class _ActionsDialogState extends State<ActionsDialog> {
               ),
             ]
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(widget.title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),),
-              SizedBox(height: 15,),
-              widget.body,
-              // Text(widget.descriptions,style: TextStyle(fontSize: 14),textAlign: TextAlign.center,),
-              // SizedBox(height: 22,),
-              // Align(
-              //   alignment: Alignment.bottomRight,
-              //   child: TextButton(
-              //       onPressed: (){
-              //         Navigator.of(context).pop();
-              //       },
-              //       child: Text(widget.text,style: TextStyle(fontSize: 18),)),
-              // ),
-            ],
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints viewportConstraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewportConstraints.minHeight 
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(widget.title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),),
+                      SizedBox(height: 15,),
+                      widget.body,
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
         Positioned(
