@@ -34,7 +34,7 @@ class _AddFilePage extends State<AddFilePage> {
     return Column(
       children: [
         TextFormField(
-          initialValue: 'Select a file using teh button',
+          initialValue: 'Select a file using the button',
           readOnly: true,
           decoration: InputDecoration (
             icon: const Icon(Icons.folder),
