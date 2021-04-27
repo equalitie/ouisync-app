@@ -27,7 +27,6 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     compileSdkVersion 30
-    ndkVersion '22.0.7026061'
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -44,7 +43,7 @@ android {
         versionName flutterVersionName
         ndk{
             //TODO arm64 platform creates issues in MacOS (Catalina - 10.15.7)
-            //To get it to compile, filters for the supported abis (x86,x86_64,armeabi-v7a)
+            //To get it to compile, filters for the supported abis (x86,x86_64,armeabi-v7a,arm64-v8a)
             //are passed to the ndk via a property in the local.properties file, so it is
             //specific to each machine. If such property doesn't exist then this is not performed.
             //To add another architecture, just add the property and all the architectures supported
@@ -65,22 +64,6 @@ android {
         release {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path "../../CMakeLists.txt"
-            // Note: Android SDK comes with its own cmake but its version is too low
-            // to build ouisync. Thus install a recent cmake on your system and use that.
-            // To do so modify cmake.dir in your android/local.properties file as
-            // explained here
-            //
-            // https://stackoverflow.com/questions/40966472/can-android-studio-use-the-system-cmake#comment88865472_46596679
-            //
-            // Also, when doing so, make sure you don't include the `bin` part of the
-            // path. I.e. if the path to cmake is '/X/Y/Z/bin/cmake', the use
-            // cmake.dir="/X/Y/Z"
         }
     }
 }
