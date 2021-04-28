@@ -1,8 +1,6 @@
 
 import 'package:flutter/material.dart';
-
-import 'callbacks/nativecallbacks.dart';
-
+import 'package:ouisync_plugin/ouisync.dart';
 
 class LifeCycle extends StatefulWidget {
   const LifeCycle({
@@ -22,7 +20,7 @@ class _LifeCycleState extends State<LifeCycle>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
 
-    NativeCallbacks.doSetup();
+    OuiSync.setupCallbacks();
 
     super.initState();
   }

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/callbacks/nativecallbacks.dart';
+import 'package:ouisync_plugin/ouisync.dart';
 
 import '../../controls/controls.dart';
 import '../../models/models.dart';
@@ -9,7 +9,7 @@ import '../../models/models.dart';
 class OuisyncRepository {
   void createRepository(String repoDir, String newRepoPath) {
     String path = '$repoDir/$newRepoPath';
-    NativeCallbacks.initializeOuisyncRepository(path);
+    OuiSync.initializeRepository(path);
   }
 
   Future<List<BaseItem>> getRepositories(String repoDir) async {

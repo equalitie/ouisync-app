@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync.dart';
 import 'package:styled_text/styled_text.dart';
 
-import '../../callbacks/nativecallbacks.dart';
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
 import '../data/data.dart';
@@ -90,7 +90,7 @@ class _RootPageState extends State<RootPage>
   Future<void> initializeUserRepositories(List<String> reposList) async {
     reposList.forEach((repo) => {
       print('About to initilialize $repo'),
-      NativeCallbacks.initializeOuisyncRepository(repo)
+      OuiSync.initializeRepository(repo)
     });
   }
 

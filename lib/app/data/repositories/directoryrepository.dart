@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync.dart';
 
-import '../../../callbacks/nativecallbacks.dart';
 import '../../controls/controls.dart';
 import '../../models/models.dart';
 
@@ -8,7 +8,7 @@ class DirectoryRepository {
   Future<bool> createFolder(String repoDir, String newFolderRelativePath)  async {
     bool creationSuccessful;
 
-    await NativeCallbacks.createDirAsync(repoDir, newFolderRelativePath)
+    await OuiSync.newFolder(repoDir, newFolderRelativePath)
     .catchError((onError) {
       print('Error on createDirAsync call: $onError');
     })
@@ -28,7 +28,7 @@ class DirectoryRepository {
     List<dynamic> folderContents;
     String folderPath = folder.isEmpty ? repoDir : '$repoDir/$folder';
     
-    await NativeCallbacks.readDirAsync(repoDir, folder)
+    await OuiSync.readFolder(repoDir, folder)
     .catchError((onError) {
       print('Error on readDirAsync call: $onError');
     })
@@ -52,7 +52,7 @@ class DirectoryRepository {
   Future<List<String>> _getAttributes(String repoDir, List<String> paths) async {
     List<String> objectWithAttributes;
 
-    await NativeCallbacks.getAttributesAsync(repoDir, paths)
+    await OuiSync.getObjectAttributes(repoDir, paths)
     .catchError((onError) {
       print('Error on getAttributesAsync call: $onError');
     })
