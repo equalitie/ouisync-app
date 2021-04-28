@@ -32,8 +32,11 @@ dependencies:
   isolate: ^2.0.3
   path_provider: ^2.0.1
   permission_handler: ^6.1.1
+  receive_sharing_intent: ^1.4.5
   shared_preferences: ^2.0.5
   styled_text: ^1.0.3+4
+  ouisync_plugin:
+    path: ../ouisync_plugin
 
 dev_dependencies:
   flutter_test:
