@@ -51,3 +51,4 @@ const Map<String, IconData> folderActions = const {
 };
 
 const int bufferSize = 64000;
+const String EndOfFile = "EOF";
