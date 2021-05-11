@@ -31,72 +31,80 @@ class _AddFilePage extends State<AddFilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextFormField(
-          initialValue: 'Select a file using the button',
-          readOnly: true,
-          decoration: InputDecoration (
-            icon: const Icon(Icons.folder),
-            hintText: 'File location',
-            labelText: _filePath,//'Add a new file',
-            contentPadding: EdgeInsets.all(10.0),
+    return Form(
+      key: _addFileFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        children: [
+          TextFormField(
+            initialValue: 'Select a file using the button',
+            readOnly: true,
+            decoration: InputDecoration (
+              icon: const Icon(Icons.folder),
+              hintText: 'File location',
+              labelText: _filePath,//'Add a new file',
+              contentPadding: EdgeInsets.all(10.0),
+            ),
+            validator: (value) {
+              return value.isEmpty
+              ? 'Please enter a valid path'
+              : null;
+            },
+            onSaved: (newRepoName) {
+              BlocProvider.of<DirectoryBloc>(context)
+              .add(
+                CreateFile(
+                  repoPath: widget.repoPath,
+                  parentPath: widget.parentPath,
+                  newFileRelativePath: _filePath,
+                  fileStream: _fileStream
+                )
+              );
+
+              Navigator.of(context).pop(true);
+            },
           ),
-          validator: (value) {
-            return value.isEmpty
-            ? 'Please enter a valid path'
-            : null;
-          },
-          onSaved: (newRepoName) {
-            BlocProvider.of<RepositoryBloc>(context)
-            .add(
-              RepositoryCreate(
-                repoDir: widget.repoPath,
-                newRepoRelativePath: newRepoName
-              )
-            );
-
-            Navigator.of(context).pop(true);
-          },
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            String path;
-            FilePickerResult result = await FilePicker.platform.pickFiles();
-
-            if(result != null) {
-              path = result.files.single.path;
-            }
-
-            setState(() {
-              _filePath = path;
-            });
-          },
-          child: Text('SELECT FILE')),
-        SizedBox(height: 50.0,),
-        _configurationList(),
-        SizedBox(height: 40.0,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                if (_addFileFormKey.currentState.validate()) {
-                  _addFileFormKey.currentState.save();
-                }
-              },
-              child: const Text('CREATE'),
-            ),
-            SizedBox(width: 40.0,),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('CANCEL'),
-            ),
-          ],
-        ),
-      ],
+          ElevatedButton(
+            onPressed: () async {
+              FilePickerResult result = await FilePicker.platform.pickFiles(
+                type: FileType.any,
+                withReadStream: true
+              );
+              if(result != null) {
+                setState(() {
+                  _filePath = widget.parentPath.isEmpty
+                  ? result.files.single.name
+                  : '${widget.parentPath}/${result.files.single.name}';
+                  _fileStream = result.files.single.readStream;
+                });
+              }
+            },
+            child: Text('SELECT FILE')),
+          SizedBox(height: 50.0,),
+          _configurationList(),
+          SizedBox(height: 40.0,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  if (_addFileFormKey.currentState.validate()) {
+                    _addFileFormKey.currentState.save();
+                  }
+                },
+                child: const Text('CREATE'),
+              ),
+              SizedBox(width: 40.0,),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('CANCEL'),
+              ),
+            ],
+          ),
+        ],
+      )
     );
   }
 
