@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/models/item/fileitem.dart';
-import 'package:ouisync_app/app/utils/descriptions.dart';
+
+import '../../models/item/fileitem.dart';
 
 class FileDescription extends StatelessWidget {
   const FileDescription({

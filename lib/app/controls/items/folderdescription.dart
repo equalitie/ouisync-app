@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/models/item/folderitem.dart';
-import 'package:ouisync_app/app/utils/descriptions.dart';
+
+import '../../models/item/folderitem.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({

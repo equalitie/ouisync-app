@@ -3,9 +3,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../models/models.dart';
 import '../controls.dart';
-import 'filedescription.dart';
-import 'folderdescription.dart';
-
 
 class ListItem extends StatelessWidget {
   const ListItem({

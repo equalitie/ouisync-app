@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/data/data.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
+import '../data/data.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
+import 'pages.dart';
 
 class FolderPage extends StatefulWidget {
   FolderPage({
