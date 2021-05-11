@@ -11,9 +11,9 @@ class RepositoryCreate extends RepositoryEvent {
     @required this.newRepoRelativePath
   }) :
   assert (repoDir != null),
-  assert (repoDir != null),
+  assert (repoDir != ''),
   assert (newRepoRelativePath != null),
-  assert (newRepoRelativePath != null);
+  assert (newRepoRelativePath != '');
 
   final String repoDir;
   final String newRepoRelativePath;
