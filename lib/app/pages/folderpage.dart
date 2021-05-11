@@ -45,7 +45,7 @@ class _FolderPageState extends State<FolderPage>
   @override
   void initState() {
     BlocProvider.of<DirectoryBloc>(context).add(
-      ContentRequest(
+      RequestContent(
         repoPath: widget.repoPath, 
         folderRelativePath: widget.folderPath,
       )
@@ -177,18 +177,16 @@ class _FolderPageState extends State<FolderPage>
           return ListItem (
               itemData: item,
               action: () {
-                String path = widget.folderPath.isEmpty
-                ? item.name
-                : '${widget.folderPath}/${item.name}';
+                String path = widget.folderPath;
 
-                _actionByType(widget.repoPath, path, widget.foldersRepository, item.name); 
+                _actionByType(widget.repoPath, path, widget.foldersRepository, item); 
               }
           );
         }
     );
   }
 
-  void _actionByType(String repoPath, String folderPath, DirectoryRepository repository, String title) {
+  void _actionByType(String repoPath, String folderPath, DirectoryRepository repository, BaseItem data) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -196,19 +194,31 @@ class _FolderPageState extends State<FolderPage>
           create: (context) => DirectoryBloc(
             repository: widget.foldersRepository
           ),
-          child: FolderPage(
-            repoPath: repoPath,
-            folderPath: folderPath,
-            foldersRepository: repository,
-            title: title,
-          )
+          child: _pageByType(
+            repoPath,
+            folderPath,
+            repository,
+            data
+          ),
         );
       })
     );
   }
 
+  _pageByType(String repoPath, String folderPath, DirectoryRepository repository, BaseItem data) => 
+    data.itemType == ItemType.folder
+    ? FolderPage(
+      title: data.name,
+      repoPath: repoPath,
+      folderPath: folderPath,
+      foldersRepository: repository
+    )
+    : FilePage(
+      title: data.name,
+      repoPath: repoPath,
+      folderPath: folderPath,
+      foldersRepository: repository,
+      data: data
+    );
+
 }
-        // return new ;
-        // return item.itemType == ItemType.folder
-        //    FolderPage(title: item.name, repoPath: widget.repoPath, folder: item.name)
-        // : FilePage(title: item.name, data: item)
