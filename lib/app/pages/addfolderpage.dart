@@ -7,12 +7,15 @@ import '../bloc/blocs.dart';
 class AddFolderPage extends StatefulWidget {
   AddFolderPage({
     @required this.repoPath,
+    @required this.parentPath,
     this.title,
   }) :
   assert(repoPath != null),
-  assert(repoPath != "");
+  assert(repoPath != ""),
+  assert(parentPath != null);
 
   final String repoPath;
+  final String parentPath;
   final String title;
 
   @override
@@ -47,12 +50,13 @@ class _AddFolderPage extends State<AddFolderPage> {
               ? 'Please enter a valid name (unique, no spaces, ...)'
               : null;
             },
-            onSaved: (newRepoName) {
-              BlocProvider.of<RepositoryBloc>(context)
+            onSaved: (newFolderName) {
+              BlocProvider.of<DirectoryBloc>(context)
               .add(
-                RepositoryCreate(
-                  repoDir: widget.repoPath,
-                  newRepoRelativePath: newRepoName
+                CreateFolder(
+                  repoPath: widget.repoPath,
+                  parentPath: widget.parentPath,
+                  newFolderRelativePath: newFolderName
                 )
               );
 

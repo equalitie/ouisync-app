@@ -1,18 +1,24 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
+
+import '../bloc/blocs.dart';
 
 class AddFilePage extends StatefulWidget {
   AddFilePage({
     @required this.repoPath,
+    @required this.parentPath,
     this.title,
   }) :
   assert(repoPath != null),
-  assert(repoPath != "");
+  assert(repoPath != ""),
+  assert(parentPath != null);
 
   final String repoPath;
+  final String parentPath;
   final String title;
 
   @override
@@ -23,6 +29,7 @@ class _AddFilePage extends State<AddFilePage> {
   final _addFileFormKey = GlobalKey<FormState>();
 
   String _filePath;
+  Stream<List<int>> _fileStream;
 
   bool _hidden = false;
   bool _read = false;
