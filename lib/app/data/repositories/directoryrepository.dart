@@ -98,18 +98,17 @@ class DirectoryRepository {
   }
 
   Future<void> readFile(String repoDir, String filePath, double totalBytes) async {
-    List<int> file = new List<int>();
+    List<int> fileStream = new List.filled(0, 0, growable: true);
     await for (var chunk in OuiSync.readFile(repoDir, filePath, bufferSize, totalBytes.toInt())) {
-      if (chunk == 'done') {
+      if (chunk == EndOfFile) {
         break;
       }
 
       print('Chunk received: ${chunk.length} bytes');
-      file.addAll(chunk);
+      fileStream.addAll(chunk);
     }
 
-    File inMemoryFile = File.fromRawPath(Uint8List.fromList(file));
-    print(inMemoryFile.toString());
+    File inMemoryFile = File.fromRawPath(Uint8List.fromList(fileStream));
   }
 
   Future<BasicResult> getContents(String repoDir, String parentPath) async {
