@@ -43,9 +43,30 @@ class _RootPageState extends State<RootPage>
   Color backgroundColor;
   Color foregroundColor;
 
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
+
   @override
   void initState() {
     initRepositories();
+
+    // For sharing images coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+      setState(() {
+        print("Shared:" + (_sharedFiles?.map((f)=> f.path)?.join(",") ?? ""));
+        _sharedFiles = value;
+      });
+    }, onError: (err) {
+      print("getIntentDataStream error: $err");
+    });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      setState(() {
+        _sharedFiles = value;
+      });
+    });
 
     _controller = new AnimationController(
       vsync: this,
@@ -58,6 +79,8 @@ class _RootPageState extends State<RootPage>
   @override
   void dispose() {
     super.dispose();
+
+    _intentDataStreamSubscription.cancel();
     _controller.dispose();
   }
 
