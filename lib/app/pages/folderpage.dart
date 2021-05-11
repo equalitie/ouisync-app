@@ -84,14 +84,16 @@ class _FolderPageState extends State<FolderPage>
       ),
       body: _folderContentsBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        BlocProvider. of<DirectoryBloc>(context),
         context,
         _controller,
         widget.repoPath,
+        widget.folderPath,
         folderActions,
         flagFolderActionsDialog,
         backgroundColor,
         foregroundColor
-      ),
+      )
     );
   }
 

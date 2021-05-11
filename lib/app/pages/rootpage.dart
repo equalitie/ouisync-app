@@ -118,9 +118,11 @@ class _RootPageState extends State<RootPage>
       ),
       body: _repositoriesBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        BlocProvider.of<RepositoryBloc>(context),
         context,
         _controller,
         widget.reposBaseFolderPath,
+        '',//parentPath
         repoActions,
         flagRepoActionsDialog,
         backgroundColor,

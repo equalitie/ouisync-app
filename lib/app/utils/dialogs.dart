@@ -2,16 +2,20 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/blocs.dart';
 import '../controls/controls.dart';
 import '../pages/pages.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
   static Widget floatingActionsButtonMenu(
+    Bloc bloc,
     BuildContext context,
     AnimationController controller,
     String reposBaseFolderPath, 
+    String parentPath,
     Map<String, IconData> actions,
     String actionsDialog,
     Color backgroundColor,
@@ -45,11 +49,11 @@ abstract class Dialogs {
                 Future<dynamic> dialog;
                 switch (actionsDialog) {
                   case flagRepoActionsDialog:
-                    dialog = repoActionsDialog(context, reposBaseFolderPath, actionName);
+                    dialog = repoActionsDialog(context, bloc, reposBaseFolderPath, actionName);
                     break;
 
                   case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, reposBaseFolderPath, actionName);
+                    dialog = folderActionsDialog(context, bloc, reposBaseFolderPath, parentPath, actionName);
                     break;
 
                   default:
@@ -89,7 +93,7 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> repoActionsDialog(BuildContext context, String reposBaseFolderPath, String action) {
+  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, String reposBaseFolderPath, String action) {
     String dialogTitle;
     Widget actionBody;
 
@@ -109,24 +113,33 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, String reposBaseFolderPath, String action) {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String reposBaseFolderPath, String parentPath, String action) {
     String dialogTitle;
     Widget actionBody;
 
     switch (action) {
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
-          repoPath: reposBaseFolderPath
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFolderPage(
+            repoPath: reposBaseFolderPath,
+            parentPath: parentPath,
+          ),
         );
         break;
       
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = AddFilePage(
-          repoPath: reposBaseFolderPath,
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFilePage(
+            repoPath: reposBaseFolderPath,
+            parentPath: parentPath,
+          ),
         );
         break;
+        
     }
 
     return _actionDialog(
