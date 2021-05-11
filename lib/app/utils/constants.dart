@@ -47,5 +47,7 @@ const String actionNewFile = 'Add file';
 const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
 const Map<String, IconData> folderActions = const { 
   actionNewFolder: Icons.create_new_folder_rounded, 
-  actionNewFile: Icons.file_upload
+  actionNewFile: Icons.file_upload,
 };
+
+const int bufferSize = 64000;
