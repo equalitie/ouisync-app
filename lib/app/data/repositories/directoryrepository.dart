@@ -1,8 +1,8 @@
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:chunked_stream/chunked_stream.dart';
+import 'package:file/memory.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 import 'package:ouisync_plugin/ouisync.dart';
 
 import '../../controls/controls.dart';
@@ -108,7 +108,15 @@ class DirectoryRepository {
       fileStream.addAll(chunk);
     }
 
-    File inMemoryFile = File.fromRawPath(Uint8List.fromList(fileStream));
+    final imfs = MemoryFileSystem(); //InMemoryFileSystem
+    final tempDirectory = await imfs.systemTempDirectory.create();
+    final outputFile = tempDirectory.childFile('testFile.pdf');
+    outputFile.writeAsBytes(fileStream);
+
+    // print(outputFile.read());
+
+    final _result = await OpenFile.open(outputFile.path);
+    print(_result.message);
   }
 
   Future<BasicResult> getContents(String repoDir, String parentPath) async {
