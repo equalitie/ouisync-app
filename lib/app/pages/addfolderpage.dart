@@ -51,12 +51,16 @@ class _AddFolderPage extends State<AddFolderPage> {
               : null;
             },
             onSaved: (newFolderName) {
+              final folderPath = widget.parentPath.isEmpty
+              ? newFolderName
+              : '${widget.parentPath}/$newFolderName';  
+
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 CreateFolder(
                   repoPath: widget.repoPath,
                   parentPath: widget.parentPath,
-                  newFolderRelativePath: newFolderName
+                  newFolderRelativePath: folderPath
                 )
               );
 

@@ -177,9 +177,7 @@ class _FolderPageState extends State<FolderPage>
           return ListItem (
               itemData: item,
               action: () {
-                String path = widget.folderPath;
-
-                _actionByType(widget.repoPath, path, widget.foldersRepository, item); 
+                _actionByType(widget.repoPath, widget.folderPath, widget.foldersRepository, item); 
               }
           );
         }
@@ -210,7 +208,9 @@ class _FolderPageState extends State<FolderPage>
     ? FolderPage(
       title: data.name,
       repoPath: repoPath,
-      folderPath: folderPath,
+      folderPath: widget.folderPath.isEmpty
+        ? data.name
+        : '${widget.folderPath}/${data.name}',
       foldersRepository: repository
     )
     : FilePage(
