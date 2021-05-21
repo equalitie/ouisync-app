@@ -109,6 +109,38 @@ If we want to build for **_all_** the supported ABIs, this property is not neede
 **IMPORTANT**: **_do not_** commit `local.properties` into the repository; include it in the `.gitignore` file.
 
 
+## Specify paths to sub-commands: **`rustc`** and **`cargo`**
+
+The **`OuiSync`** plugin, that provides the API for using the **`OuiSync`** library that is written in **`Rust`**, uses **`Cargo`** for building it.
+
+If building the app in your computer you encounter this error:
+
+```
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':ouisync_plugin:cargoBuildArm'.
+> A problem occurred starting process 'command 'rustc''
+
+* Try:
+Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output. Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 2s
+``` 
+
+It means that **`Gradle`** can't find **`rustc`** when trying to run the command to build the plugin. 
+
+To fix this, add the following to the `local.properties` file located in the `android` folder of the app project (`~/android/local.properties`):
+
+```
+rust.rustcCommand=<path-to-user-folder>/.cargo/bin/rustc
+rust.cargoCommand=<path-to-user-folder>/.cargo/bin/cargo
+```
+
+Don't forget to replace `<path-to-user-folder>` with the path to your user folder.
+
 ## Boost for Android required configuration for archiver on MacOS (Darwin toolset)
 
 Because the tools in **MacOS** for C/C++ are Apple versions (`clang`, `clang++`, `ar`, etc.); it is necessary to use the Android NDK toolset versions, according to each ABI supported in the app.
