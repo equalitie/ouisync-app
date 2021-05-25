@@ -5,6 +5,7 @@ export 'filepage.dart';
 export 'folderpage.dart';
 export 'loginpage.dart';
 export 'receive_sharing_intent_page.dart';
+export 'root_folder_page.dart';
 export 'rootpage.dart';
 export 'settingspage.dart';
 export 'syncpage.dart';
