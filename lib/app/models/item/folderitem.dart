@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/controls/repo/repofooter.dart';
-import 'package:ouisync_app/app/models/item/baseitem.dart';
-import 'package:ouisync_app/app/models/item/itemtype.dart';
-import 'package:ouisync_app/app/models/user/user.dart';
+
+import '../../controls/controls.dart';
+import '../models.dart';
+
 
 class FolderItem extends Equatable implements BaseItem {
   List<BaseItem> items;
