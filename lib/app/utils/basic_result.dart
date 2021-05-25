@@ -63,3 +63,25 @@ class GetContentResult extends BasicResult {
   final String functionName;
   final List<BaseItem> result;
 }
+
+class GetContentRecursiveResult extends BasicResult {
+  GetContentRecursiveResult({
+    @required this.functionName,
+    @required this.result,
+  }) :
+  super(functionName: functionName, result: result);
+
+  final String functionName;
+  final List<Node> result;
+}
+
+class GetFullContentResult extends BasicResult {
+  GetFullContentResult({
+    @required this.functionName,
+    @required this.result
+  }) :
+  super(functionName: functionName, result: result);
+
+  final String functionName;
+  final Node result;
+}
