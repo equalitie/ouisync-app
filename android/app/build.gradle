@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId "com.equalitie.ouisync_app"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
