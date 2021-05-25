@@ -2,39 +2,39 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../controls/controls.dart';
 import '../../models/models.dart';
 
 class OuisyncRepository {
-  void createRepository(String repoDir, String newRepoPath) {
-    String path = '$repoDir/$newRepoPath';
-    OuiSync.initializeRepository(path);
+  void createRepository() {
+    // String path = '$repoDir/$newRepoPath';
+    // OuiSync.initializeRepository(path);
   }
 
-  Future<List<BaseItem>> getRepositories(String repoDir) async {
-    print('Reading user repositories at $repoDir');
+  Future<List<BaseItem>> getRepositories() async {
+    // print('Reading user repositories at $repoDir');
     
-    bool exist = await Directory(repoDir).exists();
-    if(!exist) {
-      print('Repository location $repoDir doesn\'t exist');
-      return [];
-    }
+    // bool exist = await Directory(repoDir).exists();
+    // if(!exist) {
+    //   print('Repository location $repoDir doesn\'t exist');
+    //   return [];
+    // }
 
     List<BaseItem> reposList = [];
     
-    await Directory(repoDir).list().toList()
-    .catchError((onError) {
-      print('Error reading $repoDir contents: $onError');
-    })
-    .then((repos) => {
-        print('Repositories found: ${repos.length}'),
-        reposList = _castToBaseItem(repos)
-    })
-    .whenComplete(() => {
-      print('Done reading repositories')
-    });
+    // await Directory(repoDir).list().toList()
+    // .catchError((onError) {
+    //   print('Error reading $repoDir contents: $onError');
+    // })
+    // .then((repos) => {
+    //     print('Repositories found: ${repos.length}'),
+    //     reposList = _castToBaseItem(repos)
+    // })
+    // .whenComplete(() => {
+    //   print('Done reading repositories')
+    // });
     
     return reposList;
   }
@@ -43,7 +43,7 @@ class OuisyncRepository {
     List<BaseItem> newList = repos.map((repo) => 
       FolderItem(
         "",
-        _removeParentPathSection(repo.path),
+        removePathFromFileName(repo.path),
         repo.path,
         0.0,
         SyncStatus.idle,
@@ -56,7 +56,5 @@ class OuisyncRepository {
     return newList;
   }
   
-  String _removeParentPathSection(String path) {
-    return path.split('/').last;
-  }
+  
 }
