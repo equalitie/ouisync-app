@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/data/data.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../lifecycle.dart';
+import 'data/data.dart';
 import 'pages/pages.dart';
 import 'utils/utils.dart';
 
-class OuiSyncApp extends StatelessWidget {
+class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     Key key,
-    @required this.reposBaseFolderPath,
-    @required this.foldersRepository
-  }) : 
-  assert(reposBaseFolderPath != null),
-  assert(reposBaseFolderPath != ""),
-  assert(foldersRepository != null),
+    @required this.session,
+    @required this.foldersRepository,
+  }) :
   super(key: key);
 
-  final String reposBaseFolderPath;
+  final Session session;
   final DirectoryRepository foldersRepository;
-  
+
+  @override
+  _OuiSyncAppState createState() => _OuiSyncAppState();
+}
+
+class _OuiSyncAppState extends State<OuiSyncApp> {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,11 +33,13 @@ class OuiSyncApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: LifeCycle(
-        child: RootPage(
-          reposBaseFolderPath: reposBaseFolderPath,
-          foldersRepository: foldersRepository,
-          title: titleRootPage,
-        )
+        session: widget.session,
+        child: RootFolderPage(
+          session: widget.session,
+          foldersRepository: widget.foldersRepository,
+          path: '/',
+          title: 'OuiSync - /'
+        ),
       ),
     );
   }

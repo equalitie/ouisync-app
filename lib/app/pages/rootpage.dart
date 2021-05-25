@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as ouisync;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -18,16 +17,12 @@ import 'pages.dart';
 class RootPage extends StatefulWidget {
   RootPage({
     Key key,
-    @required this.reposBaseFolderPath,
+    @required this.session,
     @required this.foldersRepository,
-    this.title,
-  }) :
-  assert(reposBaseFolderPath != null),
-  assert(reposBaseFolderPath != ""), 
-  assert(foldersRepository != null),
-  super(key: key);
+    @required this.title,
+  }) : super(key: key);
 
-  final String reposBaseFolderPath;
+  final ouisync.Session session;
   final DirectoryRepository foldersRepository;
   final String title;
 
@@ -44,79 +39,64 @@ class _RootPageState extends State<RootPage>
   Color foregroundColor;
 
   StreamSubscription _intentDataStreamSubscription;
-  List<SharedMediaFile> _sharedFiles;
 
   @override
   void initState() {
-    initRepositories();
+    initAnimationController();
+    handleIncomingShareIntent();
+    
+    super.initState();
+  }
 
-    // For sharing images coming from outside the app while the app is in the memory
+  void handleIncomingShareIntent() {
+    // For sharing files coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
-      setState(() {
-        print("Shared:" + (_sharedFiles?.map((f)=> f.path)?.join(",") ?? ""));
-        _sharedFiles = value;
-      });
+        print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+        _processIntent(value);
     }, onError: (err) {
       print("getIntentDataStream error: $err");
     });
 
-    // For sharing images coming from outside the app while the app is closed
+    // For sharing files coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-      });
+      print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+      _processIntent(value);
     });
-
-    _controller = new AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-    );
-
-    super.initState();
   }
+
+  Future<void> _processIntent(List<SharedMediaFile> sharedMedia) async {
+    if (sharedMedia.isEmpty) {
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return BlocProvider(
+          create: (context) => DirectoryBloc(
+            repository: widget.foldersRepository
+          ),
+          child: ReceiveSharingIntentPage(
+            sharedFileInfo: sharedMedia,
+          )
+        );
+      })
+    );
+  }
+
+  initAnimationController()  => 
+  _controller = new AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+  );
 
   @override
   void dispose() {
     super.dispose();
-
+    
     _intentDataStreamSubscription.cancel();
     _controller.dispose();
-  }
-
-  Future<void> initRepositories() async {
-    bool exist = await Directory(widget.reposBaseFolderPath).exists();
-    if (!exist) {
-      print('No repositories were found');
-      BlocProvider.of<RepositoryBloc>(context)
-      .add(
-        RepositoriesRequest(
-          repositoriesPath: widget.reposBaseFolderPath
-        )
-      );
-
-      return;
-    }
-
-    List<FileSystemEntity> repoList = await Directory(widget.reposBaseFolderPath).list().toList();
-    print('Repositories found ${repoList.length}:\n$repoList');
-
-    initializeUserRepositories(repoList.map((e) => e.path).toList())
-    .then((value) async => 
-      BlocProvider.of<RepositoryBloc>(context)
-      .add(
-        RepositoriesRequest(
-          repositoriesPath: widget.reposBaseFolderPath
-        )
-      )
-    );
-  }
-
-  Future<void> initializeUserRepositories(List<String> reposList) async {
-    reposList.forEach((repo) => {
-      print('About to initilialize $repo'),
-      OuiSync.initializeRepository(repo)
-    });
   }
 
   @override
@@ -142,9 +122,9 @@ class _RootPageState extends State<RootPage>
       body: _repositoriesBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
         BlocProvider.of<RepositoryBloc>(context),
+        null, //TODO add the repository
         context,
         _controller,
-        widget.reposBaseFolderPath,
         '',//parentPath
         repoActions,
         flagRepoActionsDialog,
@@ -245,8 +225,7 @@ class _RootPageState extends State<RootPage>
             repository: widget.foldersRepository
           ),
           child: FolderPage(
-            repoPath: repoPath,
-            folderPath: '',
+            path: '',
             foldersRepository: widget.foldersRepository,
             title: title
           )

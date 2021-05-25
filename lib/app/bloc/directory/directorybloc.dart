@@ -2,18 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../data/repositories/directoryrepository.dart';
-import 'directoryevent.dart';
-import 'directorystate.dart';
-
+import '../../data/data.dart';
+import '../blocs.dart';
 
 class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   DirectoryBloc({
     @required this.repository
-  }) : 
-  assert(repository != null),
-  super(DirectoryInitial());
+  }) : super(DirectoryInitial());
 
   final DirectoryRepository repository;
 
@@ -23,10 +20,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield DirectoryLoadInProgress();
       
       try {
-        yield await _getFolderContents(event.repoPath, event.folderRelativePath);
+        yield await _getFolderContents(event.repository, event.path, event.recursive);
 
       } catch (e) {
-        print('Exception getting the directory\'s ${event.folderRelativePath} contents in repository ${event.repoPath}:\n${e.toString()}');
+        print('Exception getting the directory\'s ${event.path} contents in repository ${event.repository}:\n${e.toString()}');
         yield DirectoryLoadFailure();
       }
     }
@@ -35,19 +32,19 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield DirectoryLoadInProgress();
 
       try{
-        final createFileResult = await repository.createFolder(event.repoPath, event.newFolderRelativePath);
+        final createFileResult = await this.repository.createFolder(event.repository, event.newFolderPath);
         if (!createFileResult.result) 
         {
-          print('The new directory (${event.newFolderRelativePath}) could not be created in repository ${event.repoPath}');
+          print('The new directory (${event.newFolderPath}) could not be created in repository ${event.repository}');
           yield DirectoryLoadFailure();
 
           return;
         }
 
-        yield await _getFolderContents(event.repoPath, event.parentPath);
+        yield await _getFolderContents(event.repository, event.parentPath, false);
 
       } catch (e) {
-        print('Exception creating a new directory (${event.newFolderRelativePath}) in repository ${event.repoPath}:\n${e.toString()}');
+        print('Exception creating a new directory (${event.newFolderPath}) in repository ${event.repository}:\n${e.toString()}');
         yield DirectoryLoadFailure();
       }
     }
@@ -56,41 +53,41 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield DirectoryLoadInProgress();
 
       try {
-        final createFileResult = await repository.createFile(event.repoPath, event.newFileRelativePath);
+        final createFileResult = await this.repository.createFile(event.repository, event.newFilePath);
         if (createFileResult.errorMessage.isNotEmpty) {
           if (createFileResult.errorMessage != 'File exists') {
-            print('File ${event.newFileRelativePath} creation in repository ${event.repoPath} failed:\n${createFileResult.errorMessage}');
+            print('File ${event.newFilePath} creation in repository ${event.repository} failed:\n${createFileResult.errorMessage}');
             yield DirectoryLoadFailure();
 
             return;  
           }
           
-          print('The file ${event.newFileRelativePath} already exist.');    
+          print('The file ${event.newFilePath} already exist.');    
         }
 
-        final writeFileResult = await repository.writeFile(event.repoPath, event.newFileRelativePath, event.fileStream);
+        final writeFileResult = await this.repository.writeFile(event.repository, event.newFilePath, event.fileByteStream);
         if (writeFileResult.errorMessage.isNotEmpty) {
-          print('Writing to the file ${event.newFileRelativePath} failed:\n${writeFileResult.errorMessage}');
+          print('Writing to the file ${event.newFilePath} failed:\n${writeFileResult.errorMessage}');
           yield DirectoryLoadFailure();
 
           return;
         }
 
-        yield await _getFolderContents(event.repoPath, event.parentPath);
+        yield await _getFolderContents(event.repository, event.parentPath, false);
         
       } catch (e) {
-        print('Exception creating file ${event.newFileRelativePath} in repository ${event.newFileRelativePath}:\n${e.toString()}');
+        print('Exception creating file ${event.newFilePath} in repository ${event.newFilePath}:\n${e.toString()}');
         yield DirectoryLoadFailure();
       }
     }
 
     if (event is ReadFile) {
-      await repository.readFile(event.repoPath, event.fileRelativePath, event.totalBytes);
+      await repository.readFile(event.repository, event.filePath);
     }
   }
 
-  Future<DirectoryState> _getFolderContents(String repositoryPath, String folderPath) async {
-    final getContentsResult = await repository.getContents(repositoryPath, folderPath);
+  Future<DirectoryState> _getFolderContents(Repository repository, String folderPath, bool recursive) async {
+    final getContentsResult = await this.repository.getContents(repository, folderPath, recursive);
     if (getContentsResult.errorMessage.isNotEmpty) {
       print('Get contents in folder $folderPath failed:\n${getContentsResult.errorMessage}');
       return DirectoryLoadFailure();

@@ -1,4 +1,7 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:meta/meta.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
 
@@ -36,7 +39,7 @@ class CreateFileResult extends BasicResult {
   super(functionName: functionName, result: result);
 
   final String functionName;
-  final String result;
+  final File result;
 }
 
 class WriteFileResult extends BasicResult {
@@ -47,7 +50,7 @@ class WriteFileResult extends BasicResult {
   super(functionName: functionName, result: result);
 
   final String functionName;
-  final int result;
+  final File result;
 }
 
 class GetContentResult extends BasicResult {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
@@ -13,20 +14,15 @@ import 'pages.dart';
 class FolderPage extends StatefulWidget {
   FolderPage({
     Key key, 
-    @required this.repoPath,
-    @required this.folderPath,
+    @required this.repository,
     @required this.foldersRepository,
-    this.title
-  }) : 
-  assert(repoPath != null),
-  assert(repoPath != ''),
-  assert(folderPath != null),
-  assert(foldersRepository != null),
-  super(key: key);
+    @required this.path,
+    @required this.title
+  }) : super(key: key);
 
-  final String repoPath;
-  final String folderPath;
+  final Repository repository;
   final DirectoryRepository foldersRepository;
+  final String path;
   final String title;
 
   @override
@@ -44,26 +40,31 @@ class _FolderPageState extends State<FolderPage>
 
   @override
   void initState() {
-    BlocProvider.of<DirectoryBloc>(context).add(
-      RequestContent(
-        repoPath: widget.repoPath, 
-        folderRelativePath: widget.folderPath,
-      )
-    );
-
-    _controller = new AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-    );
-
     super.initState();
+
+    initAnimationController();
+
+    getFolderContents();    
   }
 
   @override
   void dispose() {
     super.dispose();
+
     _controller.dispose();
   }
+
+  initAnimationController() => _controller = new AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+  );
+
+  getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
+  .add(RequestContent(
+    repository: widget.repository,
+    path: widget.path,
+    recursive: false
+  ));
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +86,10 @@ class _FolderPageState extends State<FolderPage>
       body: _folderContentsBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
         BlocProvider. of<DirectoryBloc>(context),
+        widget.repository,
         context,
         _controller,
-        widget.repoPath,
-        widget.folderPath,
+        widget.path,
         folderActions,
         flagFolderActionsDialog,
         backgroundColor,
@@ -102,7 +103,7 @@ class _FolderPageState extends State<FolderPage>
         child: BlocBuilder<DirectoryBloc, DirectoryState>(
             builder: (context, state) {
               if (state is DirectoryInitial) {
-                return Center(child: Text('Loading ${widget.folderPath} contents...'));
+                return Center(child: Text('Loading ${widget.path} contents...'));
               }
 
               if (state is DirectoryLoadInProgress){
@@ -137,7 +138,7 @@ class _FolderPageState extends State<FolderPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          widget.folderPath.isEmpty
+          widget.path.isEmpty
           ? messageEmptyRepo
           : messageEmptyFolder,
           textAlign: TextAlign.center,
@@ -177,14 +178,14 @@ class _FolderPageState extends State<FolderPage>
           return ListItem (
               itemData: item,
               action: () {
-                _actionByType(widget.repoPath, widget.folderPath, widget.foldersRepository, item); 
+                _actionByType(widget.foldersRepository, widget.path, item); 
               }
           );
         }
     );
   }
 
-  void _actionByType(String repoPath, String folderPath, DirectoryRepository repository, BaseItem data) {
+  void _actionByType(DirectoryRepository folderRespository, String folderPath, BaseItem data) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -193,9 +194,8 @@ class _FolderPageState extends State<FolderPage>
             repository: widget.foldersRepository
           ),
           child: _pageByType(
-            repoPath,
+            folderRespository,
             folderPath,
-            repository,
             data
           ),
         );
@@ -203,22 +203,24 @@ class _FolderPageState extends State<FolderPage>
     );
   }
 
-  _pageByType(String repoPath, String folderPath, DirectoryRepository repository, BaseItem data) => 
-    data.itemType == ItemType.folder
+  _pageByType(DirectoryRepository folderRepository, String folderPath, BaseItem data) { 
+    String destinationPath = folderPath == '/'
+      ? '/${data.name}'
+      : '$folderPath/${data.name}';
+
+    return data.itemType == ItemType.folder
     ? FolderPage(
-      title: data.name,
-      repoPath: repoPath,
-      folderPath: widget.folderPath.isEmpty
-        ? data.name
-        : '${widget.folderPath}/${data.name}',
-      foldersRepository: repository
+      repository: widget.repository,
+      foldersRepository: folderRepository,
+      path: destinationPath,
+      title: destinationPath,
     )
     : FilePage(
-      title: data.name,
-      repoPath: repoPath,
+      repository: widget.repository,
+      foldersRepository: folderRepository,
       folderPath: folderPath,
-      foldersRepository: repository,
-      data: data
+      data: data,
+      title: '$folderPath/${data.name}'
     );
-
+  }
 }

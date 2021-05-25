@@ -4,20 +4,18 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 
 class AddFilePage extends StatefulWidget {
   AddFilePage({
-    @required this.repoPath,
+    @required this.repository,
     @required this.parentPath,
-    this.title,
-  }) :
-  assert(repoPath != null),
-  assert(repoPath != ""),
-  assert(parentPath != null);
+    @required this.title,
+  });
 
-  final String repoPath;
+  final Repository repository;
   final String parentPath;
   final String title;
 
@@ -28,8 +26,8 @@ class AddFilePage extends StatefulWidget {
 class _AddFilePage extends State<AddFilePage> {
   final _addFileFormKey = GlobalKey<FormState>();
 
-  String _filePath;
-  Stream<List<int>> _fileStream;
+  String _newFilePath;
+  Stream<List<int>> _fileByteStream;
 
   bool _hidden = false;
   bool _read = false;
@@ -49,7 +47,7 @@ class _AddFilePage extends State<AddFilePage> {
             decoration: InputDecoration (
               icon: const Icon(Icons.folder),
               hintText: 'File location',
-              labelText: _filePath,//'Add a new file',
+              labelText: _newFilePath,//'Add a new file',
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
@@ -61,10 +59,10 @@ class _AddFilePage extends State<AddFilePage> {
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 CreateFile(
-                  repoPath: widget.repoPath,
+                  repository: widget.repository,
                   parentPath: widget.parentPath,
-                  newFileRelativePath: _filePath,
-                  fileStream: _fileStream
+                  newFilePath: _newFilePath,
+                  fileByteStream: _fileByteStream
                 )
               );
 
@@ -79,10 +77,11 @@ class _AddFilePage extends State<AddFilePage> {
               );
               if(result != null) {
                 setState(() {
-                  _filePath = widget.parentPath.isEmpty
-                  ? result.files.single.name
+                  _newFilePath = widget.parentPath == '/'
+                  ? '/${result.files.single.name}'
                   : '${widget.parentPath}/${result.files.single.name}';
-                  _fileStream = result.files.single.readStream;
+                  
+                  _fileByteStream = result.files.single.readStream;
                 });
               }
             },

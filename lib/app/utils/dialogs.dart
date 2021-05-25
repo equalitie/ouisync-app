@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
@@ -12,9 +13,9 @@ import 'utils.dart';
 abstract class Dialogs {
   static Widget floatingActionsButtonMenu(
     Bloc bloc,
+    Repository repository,
     BuildContext context,
     AnimationController controller,
-    String reposBaseFolderPath, 
     String parentPath,
     Map<String, IconData> actions,
     String actionsDialog,
@@ -49,11 +50,12 @@ abstract class Dialogs {
                 Future<dynamic> dialog;
                 switch (actionsDialog) {
                   case flagRepoActionsDialog:
-                    dialog = repoActionsDialog(context, bloc, reposBaseFolderPath, actionName);
+                  /// Only one repository allowed for the MVP
+                    // dialog = repoActionsDialog(context, bloc, session, actionName);
                     break;
 
                   case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, bloc, reposBaseFolderPath, parentPath, actionName);
+                    dialog = folderActionsDialog(context, bloc, repository, parentPath, actionName);
                     break;
 
                   default:
@@ -93,7 +95,7 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, String reposBaseFolderPath, String action) {
+  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
     String dialogTitle;
     Widget actionBody;
 
@@ -101,7 +103,7 @@ abstract class Dialogs {
       case actionNewRepo:
         dialogTitle = 'New Repository';
         actionBody = AddRepoPage(
-          reposBaseFolderPath: reposBaseFolderPath
+          session: session
         );
         break;
     }
@@ -113,7 +115,7 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String reposBaseFolderPath, String parentPath, String action) {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Repository repository, String parentPath, String action) {
     String dialogTitle;
     Widget actionBody;
 
@@ -123,8 +125,9 @@ abstract class Dialogs {
         actionBody = BlocProvider(
           create: (context) => directoryBloc,
           child: AddFolderPage(
-            repoPath: reposBaseFolderPath,
-            parentPath: parentPath,
+            repository: repository,
+            path: parentPath,
+            title: 'New Folder',
           ),
         );
         break;
@@ -134,8 +137,9 @@ abstract class Dialogs {
         actionBody = BlocProvider(
           create: (context) => directoryBloc,
           child: AddFilePage(
-            repoPath: reposBaseFolderPath,
+            repository: repository,
             parentPath: parentPath,
+            title: 'Add File',
           ),
         );
         break;

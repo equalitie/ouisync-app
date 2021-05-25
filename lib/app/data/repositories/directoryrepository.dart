@@ -1,95 +1,92 @@
-
 import 'package:chunked_stream/chunked_stream.dart';
-import 'package:file/memory.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
-import 'package:ouisync_plugin/ouisync.dart';
+import 'package:flutter_treeview/flutter_treeview.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../controls/controls.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class DirectoryRepository {
-  Future<BasicResult> createFolder(String repoDir, String newFolderRelativePath)  async {
-    print('Creating folder $newFolderRelativePath in repository $repoDir');
+  Future<BasicResult> createFolder(Repository repository, String path)  async {
+    print('Creating folder $path in repository $repository');
     
     BasicResult createFolderResult;
+    String error = '';
 
-    await OuiSync.newFolder(repoDir, newFolderRelativePath)
+    bool created = false;
+
+    await Directory.create(repository, path)
     .catchError((onError) {
-      print('Error on createDirAsync call: $onError');
+      print('Error creating folder $path: $onError');
+      error = onError;
     })
-    .then((returned) => {
-      createFolderResult = CreateFolderResult(
-        functionName: 'createFolder',
-        result: returned == 0
-      )
-    })
-    .whenComplete(() => {
-      print('createFolderAsync completed')
-    });
+    .then((value) => created = true);
+
+    createFolderResult = CreateFolderResult(functionName: 'getContents', result: created);
+    if (error.isNotEmpty) {
+      createFolderResult.errorMessage = error;
+    }
 
     return createFolderResult;
   }
 
-  Future<BasicResult> createFile(String repoDir, String newFilePath) async {
+  Future<BasicResult> createFile(Repository repository, String newFilePath) async {
     print('Creating file $newFilePath');
     
     BasicResult createFileResult;
+    String error = '';
 
-    await OuiSync.newFile(repoDir, newFilePath)
+    File newFile;
+
+    await File.create(repository, newFilePath)
     .catchError((onError) {
-      print('Error on createFileAsync call: $onError');
+      print('Error creating file $newFilePath: $onError');
+      error = onError;
     })
-    .then((result) {
-      createFileResult = CreateFileResult(functionName: 'createFile', result: result);
-      if (result != 'OK') {
-        createFileResult.errorMessage = result;
-      } 
-    })
-    .whenComplete(() => {
-      print('createFileAsync completed')
-    });
+    .then((file) => newFile = file);
+
+    createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
+    if (error.isNotEmpty) {
+      createFileResult.errorMessage = error;
+    }
 
     return createFileResult;
   }
 
-  Future<BasicResult> writeFile(String repoDir, String filePath, Stream<List<int>> fileStream) async {
+  Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
     print('Writing file $filePath');
     
     BasicResult writeFileResult;
     String error = '';
 
-    int totalBytes = 0;
     int offset = 0;
+    // int totalBytes = 0;
+
+    final file = await File.open(repository, filePath);
 
     try {
       final streamReader = ChunkedStreamIterator(fileStream);
-
       while (true) {
-        var buffer = await streamReader.read(bufferSize);
+        var buffer = await streamReader.read(File.defaultChunkSize);
         print('Buffer size: ${buffer.length} - offset: $offset');
 
         print('Buffer:\n$buffer');
 
         if (buffer.isEmpty) {
-          print('The buffer is empty; reading from the stream is done!\nTotal bytes read: $totalBytes');
+          print('The buffer is empty; reading from the stream is done!');
           break;
         }
 
-        var bytesRead = await OuiSync.writeFile(repoDir, filePath, buffer, offset);
-        totalBytes += bytesRead;
-
-        print('Bytes read: $bytesRead');
-
-        offset += bytesRead;
+        await file.write(offset, buffer);
+        offset += buffer.length;
       }
     } catch (e) {
       print('Exception writing the fie $filePath:\n${e.toString()}');
       error = 'Writing to the file $filePath failed';
     }
 
-    writeFileResult = WriteFileResult(functionName: 'writeFile', result: totalBytes);
+    writeFileResult = WriteFileResult(functionName: 'writeFile', result: file);
     if (error.isNotEmpty) {
       writeFileResult.errorMessage = error;
     }
@@ -97,74 +94,82 @@ class DirectoryRepository {
     return writeFileResult; 
   }
 
-  Future<void> readFile(String repoDir, String filePath, double totalBytes) async {
-    List<int> fileStream = new List.filled(0, 0, growable: true);
-    await for (var chunk in OuiSync.readFile(repoDir, filePath, bufferSize, totalBytes.toInt())) {
-      if (chunk == EndOfFile) {
-        break;
-      }
+  Future<void> readFile(Repository repository, String filePath) async {
+    // List<int> fileStream = new List.filled(0, 0, growable: true);
+    // await for (var chunk in OuiSync.readFile(repoDir, filePath, bufferSize, totalBytes.toInt())) {
+    //   if (chunk == EndOfFile) {
+    //     break;
+    //   }
 
-      print('Chunk received: ${chunk.length} bytes');
-      fileStream.addAll(chunk);
-    }
+    //   print('Chunk received: ${chunk.length} bytes');
+    //   fileStream.addAll(chunk);
+    // }
 
-    final imfs = MemoryFileSystem(); //InMemoryFileSystem
-    final tempDirectory = await imfs.systemTempDirectory.create();
-    final outputFile = tempDirectory.childFile('testFile.pdf');
-    outputFile.writeAsBytes(fileStream);
+    // final imfs = MemoryFileSystem(); //InMemoryFileSystem
+    // final tempDirectory = await imfs.systemTempDirectory.create();
+    // final outputFile = tempDirectory.childFile('testFile.pdf');
+    // outputFile.writeAsBytes(fileStream);
 
-    // print(outputFile.read());
+    // // print(outputFile.read());
 
-    final _result = await OpenFile.open(outputFile.path);
-    print(_result.message);
+    // final _result = await OpenFile.open(outputFile.path);
+    // print(_result.message);
   }
 
-  Future<BasicResult> getContents(String repoDir, String parentPath) async {
-    print("Getting folder $parentPath contents in repository $repoDir");
-    
+  Future<BasicResult> getContents(Repository repository, String path, bool recursive) async {
+    print("Getting folder $path contents in repository $repository");
+  
+    if (recursive) {
+      print('(recursive...)');
+
+      List<Node> returnedContent = await getContentsRecursive(repository, path);
+
+      // await _getContentsRecursive(repository, path)
+      // .catchError((onError) {
+      //   print('Error on getContentsRecursive call: $onError');
+      // })
+      // .then((value) => {
+      //   returnedContent.addAll(value)
+      // })
+      // .whenComplete(() => {
+      //   print('getContentsRecursive completed')
+      // });
+
+      return GetContentRecursiveResult(functionName: 'getContents', result: returnedContent);
+    }
+
+    return await _getFolderContents(repository, path);
+  }
+
+  Future<BasicResult> _getFolderContents(Repository repository, String path) async {
     BasicResult getContentsResult;
-
-    List<BaseItem> returnedContents = [];
     String error = '';
-    
-    /* If there is not parent folder, it means we are in the repository root,
-      so the path for the folder is the repository path.
-      Otherwise, we need to pass the full path for the new folder 
-    */
-    String folderPath = parentPath.isEmpty
-    ? repoDir
-    : '$repoDir/$parentPath';
-    
-    await OuiSync.readFolder(repoDir, parentPath)
-    .catchError((onError) {
-      print('Error on readDirAsync call: $onError');
-    })
-    .then((contents) async {
-      print('readDirAsync returned ${contents.length} items');
 
-      if (contents.isEmpty) {
-        return;
-      }
-      
-      if (contents.first == 'ERROR') {
-        error = contents.last;
-        return;
-      }
+    List<BaseItem> returnedContent = [];
 
-      final paths = contents.cast<String>().map(
-        (object) => parentPath.isEmpty 
-        ? object
-        : '$parentPath/$object'
-      ).toList();
-
-      var contentsWithAttributes = await _getAttributes(repoDir, paths);
-      returnedContents = _castToBaseItem(folderPath, contentsWithAttributes);
-    })
-    .whenComplete(() => {
-      print('readDirAsync completed')
-    });
+    final directory = await Directory.open(repository, path);
+    try {
+      final iterator = directory.iterator;
+      while (iterator.moveNext()) {
+        final item = iterator.current;
+        returnedContent.add(
+          _castToBaseItem(
+            path,
+            item.name,
+            item.type,
+            0.0
+          )
+        );
+      }  
+    } catch (e) {
+      print('Error traversing directory $path: $e');
+      error = e.toString();
+    } finally {
+      print('Directory $path closed');
+      directory.close();
+    }
     
-    getContentsResult = GetContentResult(functionName: 'getContents', result: returnedContents);
+    getContentsResult = GetContentResult(functionName: 'getContents', result: returnedContent);
     if (error.isNotEmpty) {
       getContentsResult.errorMessage = error;
     }
@@ -172,75 +177,94 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<String>> _getAttributes(String repoDir, List<String> paths) async {
-    List<String> objectWithAttributes;
+  Future<List<Node>> getContentsRecursive(Repository repository, String path) async {
+    List<Node> nodes = new List.filled(0, null, growable: true);
 
-    await OuiSync.getObjectAttributes(repoDir, paths)
-    .catchError((onError) {
-      print('Error on getAttributesAsync call: $onError');
-    })
-    .then((returned) => {
-      print('getAttributes: $returned'),
-      objectWithAttributes = List<String>.from(returned)
-    })
-    .whenComplete(() => {
-      print('getAttributesAsync completed')
-    });
-
-    if (objectWithAttributes.isEmpty) {
+    final directory = await Directory.open(repository, path);
+    if (directory.isEmpty) {
+      print('Folder $path is empty.');
       return [];
     }
 
-    return objectWithAttributes;
+    try {
+      final iterator = directory.iterator;
+      while (iterator.moveNext()) {
+        final item = iterator.current;
+        nodes.add(await _castToTreeView(repository, path, item));
+      }  
+    } catch (e) {
+      print('Error traversing directory $path: $e');
+    } finally {
+      print('Directory $path closed');
+      directory.close();
+    }
+
+    return nodes;
   }
 
-  List<BaseItem> _castToBaseItem(String folderPath, List<String> objectWithAttributes) {
-    List<BaseItem> newList = objectWithAttributes.map((object) { 
-      List<String> data = object.split(',');
+  Future<Node> _castToTreeView(Repository repository, String parentPath, DirEntry entry) async {
+    Node node;
+    var item = _castToBaseItem(parentPath, entry.name, entry.type, 0.0);
 
-      String name = _extractNativeAttribute(data, 'name').toString().split('/').last;
-      String type = _extractNativeAttribute(data, 'type');
-      
-      double size = 0.0;
-      if (data.any((element) => element.startsWith('size:'))) {
-       size = double.parse(_extractNativeAttribute(data, 'size')); 
-      }
+    if (item == null) {
+      return null;
+    }
 
-      if (type == 'folder') {
-        return FolderItem(
-          "",
-          name,
-          folderPath,
-          size,
-          SyncStatus.idle,
-          User(id: '', name: ''),
-          itemType: ItemType.folder,
-          icon: Icons.store,
-        );
-      }
+    if (item is FileItem) {
+      node = Node(
+        label: item.name,
+        key: 'file',
+        icon: Icons.insert_drive_file,
+        data: FileDescription(fileData: item)
+      );
+    }
 
-      if (type == 'file') {
-        String fileType = _extractFileTypeFromName(name);
+    if (item is FolderItem) {
+      var path = item.path == '/'
+      ? '/${item.name}'
+      : '${item.path}/${item.name}';
 
-        return FileItem(
-          '',
-          name,
-          fileType,
-          folderPath,
-          size,
-          SyncStatus.idle,
-          User(id: '', name: '')
-        ); 
-      }
-    }).toList().cast<BaseItem>();
+      node = Node(
+        parent: true,
+        label: item.name,
+        key: item.name,
+        icon: Icons.folder,
+        data: FolderDescription(folderData: item),
+        children: await getContentsRecursive(repository, path),
+      );
+    }
 
-    return newList;
+    return node;
   }
 
-  dynamic _extractNativeAttribute(List<String> attributesList, String attribute) => 
-    attributesList.singleWhere((element) => element.startsWith('$attribute:')).split(':')[1];
+  BaseItem _castToBaseItem(String path, String name, EntryType type, double size) {
+    if (type == EntryType.directory) {
+      return FolderItem(
+        "",
+        name,
+        path,
+        size,
+        SyncStatus.idle,
+        User(id: '', name: ''),
+        itemType: ItemType.folder,
+        icon: Icons.store,
+      );
+    }
 
-  String _extractFileTypeFromName(String fileName) {
-    //TODO
+    if (type == EntryType.file) {
+      String fileType = extractFileTypeFromName(name);
+
+      return FileItem(
+        '',
+        name,
+        fileType,
+        path,
+        0.0,
+        SyncStatus.idle,
+        User(id: '', name: '')
+      ); 
+    }
+    
+    return null;
   }
 }

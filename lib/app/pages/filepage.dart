@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
-import '../data/repositories/directoryrepository.dart';
+import '../data/data.dart';
 import '../models/models.dart';
 
 class FilePage extends StatefulWidget {
   FilePage({
     Key key,
-    @required this.repoPath,
-    @required this.folderPath,
+    @required this.repository,
     @required this.foldersRepository,
+    @required this.folderPath,
     @required this.data,
-    this.title,
-  }) :
-  assert(repoPath != null),
-  assert(repoPath != ''),
-  assert(folderPath != null),
-  assert(foldersRepository != null),
-  super(key: key);
+    @required this.title,
+  }) : super(key: key);
 
-  final String repoPath;
-  final String folderPath;
+  final Repository repository;
   final DirectoryRepository foldersRepository;
+  final String folderPath;
   final BaseItem data;
   final String title;
 
@@ -52,10 +48,10 @@ class _FilePage extends State<FilePage> {
                     BlocProvider.of<DirectoryBloc>(context)
                     .add(
                       ReadFile(
-                        repoPath: widget.repoPath,
+                        repository: widget.repository,
                         parentPath: widget.folderPath,
-                        fileRelativePath: filePath,
-                        totalBytes: widget.data.size)
+                        filePath: filePath
+                      ),
                     );
                   },
                   child: Text("Preview")

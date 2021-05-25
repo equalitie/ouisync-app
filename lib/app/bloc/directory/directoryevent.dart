@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -7,102 +8,85 @@ abstract class DirectoryEvent extends Equatable {
 
 class CreateFolder extends DirectoryEvent {
   const CreateFolder({
-    @required this.repoPath,
+    @required this.repository,
     @required this.parentPath,
-    @required this.newFolderRelativePath
+    @required this.newFolderPath
   }) : 
-  assert(repoPath != null),
-  assert(repoPath != ''),
-  assert(parentPath != null),
-  assert(newFolderRelativePath != null),
-  assert(newFolderRelativePath != '');
+  assert(newFolderPath != '');
 
-  final String repoPath;
+  final Repository repository;
   final String parentPath;
-  final String newFolderRelativePath;
+  final String newFolderPath;
 
   @override
   List<Object> get props => [
-    repoPath,
+    repository,
     parentPath,
-    newFolderRelativePath,
+    newFolderPath,
   ];
 }
 
 class RequestContent extends DirectoryEvent {
   const RequestContent({
-    @required this.repoPath,
-    @required this.folderRelativePath,
-  }) : 
-  assert(repoPath != null),
-  assert(folderRelativePath != null);
+    @required this.repository,
+    @required this.path,
+    @required this.recursive
+  });
 
-  final String repoPath;
-  final String folderRelativePath;
+  final Repository repository;
+  final String path;
+  final bool recursive;
 
   @override
   List<Object> get props => [
-    repoPath,
-    folderRelativePath,
+    repository,
+    path,
+    recursive
   ];
 
 }
 
 class CreateFile extends DirectoryEvent {
   const CreateFile({
-    @required this.repoPath,
+    @required this.repository,
     @required this.parentPath,
-    @required this.newFileRelativePath,
-    @required this.fileStream
+    @required this.newFilePath,
+    @required this.fileByteStream
   }) :
-  assert (repoPath != null),
-  assert (repoPath != ''),
-  assert (parentPath != null),
-  assert (newFileRelativePath != null),
-  assert (newFileRelativePath != ''),
-  assert (fileStream != null);
+  assert (newFilePath != '');
 
-  final String repoPath;
-  final String newFileRelativePath;
+  final Repository repository;
   final String parentPath;
-  final Stream<List<int>> fileStream;
+  final String newFilePath;
+  final Stream<List<int>> fileByteStream;
 
   @override
   List<Object> get props => [
-    repoPath,
+    repository,
     parentPath,
-    newFileRelativePath,
-    fileStream
+    newFilePath,
+    fileByteStream
   ];
   
 }
 
 class ReadFile extends DirectoryEvent {
   const ReadFile({
-    @required this.repoPath,
+    @required this.repository,
     @required this.parentPath,
-    @required this.fileRelativePath,
-    @required this.totalBytes
+    @required this.filePath
   }) :
-  assert (repoPath != null),
-  assert (repoPath != ''),
-  assert (parentPath != null),
-  assert (fileRelativePath != null),
-  assert (fileRelativePath != ''),
-  assert (totalBytes != null),
-  assert (totalBytes > 0);
+  assert (filePath != '');
 
-  final String repoPath;
+  final Repository repository;
   final String parentPath;
-  final String fileRelativePath;
-  final double totalBytes;
+  final String filePath;
 
   @override
   List<Object> get props => [
-    repoPath,
+    repository,
     parentPath,
-    fileRelativePath,
-    totalBytes
+    filePath
   ];
 
 }

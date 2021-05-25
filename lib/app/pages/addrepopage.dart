@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 
 class AddRepoPage extends StatefulWidget {
   AddRepoPage({
-    @required this.reposBaseFolderPath,
+    @required this.session,
     this.title,
-  }) :
-  assert(reposBaseFolderPath != null),
-  assert(reposBaseFolderPath != "");
+  });
 
-  final String reposBaseFolderPath;
+  final Session session;
   final String title;
 
   @override
@@ -49,9 +48,8 @@ class _AddRepoPage extends State<AddRepoPage> {
             onSaved: (newRepoName) {
               BlocProvider.of<RepositoryBloc>(context)
               .add(
-                RepositoryCreate(
-                  repoDir: widget.reposBaseFolderPath,
-                  newRepoRelativePath: newRepoName
+                CreateRepository(
+                  session: widget.session
                 )
               );
 

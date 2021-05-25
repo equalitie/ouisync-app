@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 
 class AddFolderPage extends StatefulWidget {
   AddFolderPage({
-    @required this.repoPath,
-    @required this.parentPath,
-    this.title,
-  }) :
-  assert(repoPath != null),
-  assert(repoPath != ""),
-  assert(parentPath != null);
+    @required this.repository,
+    @required this.path,
+    @required this.title,
+  });
 
-  final String repoPath;
-  final String parentPath;
+  final Repository repository;
+  final String path;
   final String title;
 
   @override
@@ -51,16 +49,16 @@ class _AddFolderPage extends State<AddFolderPage> {
               : null;
             },
             onSaved: (newFolderName) {
-              final folderPath = widget.parentPath.isEmpty
+              final folderPath = widget.path == '/'
               ? newFolderName
-              : '${widget.parentPath}/$newFolderName';  
+              : '${widget.path}/$newFolderName';  
 
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 CreateFolder(
-                  repoPath: widget.repoPath,
-                  parentPath: widget.parentPath,
-                  newFolderRelativePath: folderPath
+                  repository: widget.repository,
+                  parentPath: widget.path,
+                  newFolderPath: folderPath
                 )
               );
 
