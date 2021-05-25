@@ -18,7 +18,7 @@ class DirectoryLoadSuccess extends DirectoryState {
     @required this.contents
   }) : assert(contents != null);
 
-  final List<BaseItem> contents;
+  final List<dynamic> contents;
 
   @override
   List<Object> get props => [
