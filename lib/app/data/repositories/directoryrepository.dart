@@ -197,41 +197,51 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<Node>> getContentsRecursive(Repository repository, String path) async {
-    List<Node> nodes = new List.filled(0, null, growable: true);
+  Future<List<Node>> getContentsRecursive(Session session, String path) async {
+    final contentNodes = <Node>[];
 
-    final directory = await Directory.open(repository, path);
+    final repository = await _openRepository(session);
+    final directory = await _openDirectory(repository, path);
+
     if (directory.isEmpty) {
       print('Folder $path is empty.');
-      return [];
+
+      directory.close();
+      repository.close();
+
+      return <Node>[];
     }
 
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        final item = iterator.current;
-        nodes.add(await _castToTreeView(repository, path, item));
+        final newNode = await _castToTreeView(
+          session,
+          path,
+          iterator.current
+        );
+
+        contentNodes.add(newNode!);
       }  
     } catch (e) {
       print('Error traversing directory $path: $e');
     } finally {
-      print('Directory $path closed');
       directory.close();
+      repository.close();
     }
 
-    return nodes;
+    return contentNodes;
   }
 
-  Future<Node> _castToTreeView(Repository repository, String parentPath, DirEntry entry) async {
-    Node node;
-    var item = _castToBaseItem(parentPath, entry.name, entry.type, 0.0);
+  Future<Node?> _castToTreeView(Session session, String parentPath, DirEntry entry) async {
+    final item = _castToBaseItem(parentPath, entry.name, entry.type, 0.0);
 
     if (item == null) {
       return null;
     }
 
     if (item is FileItem) {
-      node = Node(
+      return Node(
         label: item.name,
         key: 'file',
         icon: Icons.insert_drive_file,
@@ -240,34 +250,35 @@ class DirectoryRepository {
     }
 
     if (item is FolderItem) {
-      var path = item.path == '/'
-      ? '/${item.name}'
-      : '${item.path}/${item.name}';
-
-      node = Node(
+      return Node(
         parent: true,
         label: item.name,
         key: item.name,
         icon: Icons.folder,
         data: FolderDescription(folderData: item),
-        children: await getContentsRecursive(repository, path),
+        children: await getContentsRecursive(session, item.path),
       );
     }
-
-    return node;
   }
 
-  BaseItem _castToBaseItem(String path, String name, EntryType type, double size) {
+  BaseItem? _castToBaseItem(String path, String name, EntryType type, double size) {
+    final itemPath = path == '/'
+    ? '/$name'
+    : '$path/$name';
+
     if (type == EntryType.directory) {
       return FolderItem(
-        "",
-        name,
-        path,
-        size,
-        SyncStatus.idle,
-        User(id: '', name: ''),
+        id: '',
+        name: name,
+        path: itemPath,
+        size: size,
+        syncStatus: SyncStatus.idle,
+        user: User(id: '', name: ''),
         itemType: ItemType.folder,
         icon: Icons.store,
+        creationDate: DateTime.now(),
+        lastModificationDate: DateTime.now(),
+        items: <BaseItem>[]
       );
     }
 
@@ -275,13 +286,15 @@ class DirectoryRepository {
       String fileType = extractFileTypeFromName(name);
 
       return FileItem(
-        '',
-        name,
-        fileType,
-        path,
-        0.0,
-        SyncStatus.idle,
-        User(id: '', name: '')
+        id: '',
+        name: name,
+        extension: fileType,
+        path: itemPath,
+        size: 0.0,
+        syncStatus: SyncStatus.idle,
+        user: User(id: '', name: ''),
+        creationDate: DateTime.now(),
+        lastModificationDate: DateTime.now()
       ); 
     }
     
