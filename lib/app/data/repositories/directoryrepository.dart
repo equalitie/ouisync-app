@@ -46,20 +46,24 @@ class DirectoryRepository {
     return createFolderResult;
   }
 
-  Future<BasicResult> createFile(Repository repository, String newFilePath) async {
-    print('Creating file $newFilePath');
-    
+  Future<BasicResult> createFile(Session session, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
 
-    File newFile;
+    File? newFile;
+    final repository = await _openRepository(session);
 
-    await File.create(repository, newFilePath)
-    .catchError((onError) {
-      print('Error creating file $newFilePath: $onError');
-      error = onError;
-    })
-    .then((file) => newFile = file);
+    try {
+      print('Creating file $newFilePath');
+
+      newFile = await File.create(repository, newFilePath);
+    } catch (e) {
+      print('Error creating file $newFilePath: $e');
+      error = e.toString();
+    } finally {
+      newFile!.close(); // TODO: Necessary? 
+      repository.close();
+    }
 
     createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
     if (error.isNotEmpty) {
