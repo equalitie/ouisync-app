@@ -1,7 +1,12 @@
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/utils/actions.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share/share.dart';
 
 import '../bloc/blocs.dart';
 import '../data/data.dart';
@@ -33,7 +38,42 @@ class _FilePage extends State<FilePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
+      body: BlocListener<DirectoryBloc, DirectoryState> (
+        listener: (context, state) async {
+          if (state is DirectoryInitial) {
+              // return Center(child: Text('Loading ${widget.data.path}...'));
+            }
+
+            if (state is DirectoryLoadInProgress){
+              // return Center(child: CircularProgressIndicator());
+            }
+
+            if (state is DirectoryLoadSuccess) {
+              if (state.contents.isEmpty) {
+                print('The file ${widget.data.name} is empty');
+                return;
+              }  
+
+              final tempPath = (await getTemporaryDirectory()).path;
+              final tempFileExtension = extractFileTypeFromName(widget.data.name);
+              final tempFileName = '${DateTime.now().toIso8601String()}.$tempFileExtension';
+              final tempFile = new io.File('$tempPath/$tempFileName');
+
+              await tempFile.writeAsBytes(state.contents as List<int>);
+              Share.shareFiles([tempFile.path])
+              .then((value) async => 
+                await tempFile.delete()
+              );
+            }
+
+            if (state is DirectoryLoadFailure) {
+              // return Text(
+              //   'Something went wrong!',
+              //   style: TextStyle(color: Colors.red),
+              // );
+            }
+        },
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -64,6 +104,7 @@ class _FilePage extends State<FilePage> {
               ),
             ],
           )
+        ),
       ),
     );
   }
