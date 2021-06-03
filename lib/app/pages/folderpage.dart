@@ -32,18 +32,18 @@ class FolderPage extends StatefulWidget {
 class _FolderPageState extends State<FolderPage>
   with TickerProviderStateMixin {
 
-  AnimationController _controller;
+  late AnimationController _controller;
   
-  Color backgroundColor;
-  Color foregroundColor;
+  late Color backgroundColor;
+  late Color foregroundColor;
 
   @override
   void initState() {
     super.initState();
 
-    initAnimationController();
+    getFolderContents();
 
-    getFolderContents();    
+    initAnimationController();
   }
 
   @override
@@ -110,7 +110,7 @@ class _FolderPageState extends State<FolderPage>
               }
 
               if (state is DirectoryLoadSuccess) {
-                final contents = state.contents;
+                final contents = state.contents as List<BaseItem>;
 
                 return contents.isEmpty 
                 ? _noContents()
@@ -176,9 +176,11 @@ class _FolderPageState extends State<FolderPage>
           final item = contents[index];
           return ListItem (
               itemData: item,
-              action: () {
-                _actionByType(widget.foldersRepository, widget.path, item); 
-              }
+              action: () => _actionByType(
+                widget.foldersRepository,
+                widget.path,
+                item
+              ),
           );
         }
     );
@@ -190,7 +192,7 @@ class _FolderPageState extends State<FolderPage>
       MaterialPageRoute(builder: (context) {
         return BlocProvider(
           create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
+            blocRepository: widget.foldersRepository
           ),
           child: _pageByType(
             folderRespository,
@@ -203,23 +205,19 @@ class _FolderPageState extends State<FolderPage>
   }
 
   _pageByType(DirectoryRepository folderRepository, String folderPath, BaseItem data) { 
-    String destinationPath = folderPath == '/'
-      ? '/${data.name}'
-      : '$folderPath/${data.name}';
-
     return data.itemType == ItemType.folder
     ? FolderPage(
-      repository: widget.repository,
+      session: widget.session,
       foldersRepository: folderRepository,
-      path: destinationPath,
-      title: destinationPath,
+      path: data.path,
+      title: data.path
     )
     : FilePage(
-      repository: widget.repository,
+      session: widget.session,
       foldersRepository: folderRepository,
       folderPath: folderPath,
       data: data,
-      title: '$folderPath/${data.name}'
+      title: data.path
     );
   }
 }
