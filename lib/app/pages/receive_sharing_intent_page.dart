@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
@@ -29,58 +31,26 @@ class ReceiveSharingIntentPage extends StatefulWidget {
 
 class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage> {
   
-  TreeView _foldersTree = TreeView(controller: TreeViewController()); 
-
+  Widget? _bodyWidget;
+  
   @override
   void initState() {
     super.initState();
 
-    loadContents();
+    initFoldersList();
   }
 
-  Future<void> loadContents() async {
-    List<Node> folderNodes = [];
-
-    final folderStructure = await DirectoryRepository().getContentsRecursive(widget.repository, '/');
-    folderNodes.add(
-      Node(
-        parent: true,
-        label: 'OuiSync',
-        key: 'ouisync_repo',
-        expanded: true,
-        children: folderStructure
-      )
-    );
-
-    var _treeViewController = TreeViewController(children: folderNodes);
+  Future<void> initFoldersList() async {
     setState(() {
-      _foldersTree = TreeView(
-        allowParentSelect: true,
-        controller: _treeViewController,
-        onNodeTap: (key) {
-          if (key == 'file') {
-            return;
-          }
-
-          var selectedNode = _treeViewController.getNode(key);
-          var data = selectedNode.data;
-        },
-      );
+      _bodyWidget = _emptyTree();
     });
-  }
 
-  Future<void> _saveFileToOuiSync(Repository repository, String parentPath, String destinationPath) async {
-    // var fileStream = File(widget.sharedFileInfo.first.path).openRead();
-    
-    // BlocProvider.of<DirectoryBloc>(context)
-    //   .add(
-    //     CreateFile(
-    //       repository: repository,
-    //       parentPath: parentPath,
-    //       newFileRelativePath: destinationPath,
-    //       fileStream: fileStream
-    //     )
-    //   );
+    final foldersList = await DirectoryRepository().getContentsRecursive(widget.session, '/');
+    if (foldersList.isEmpty) {
+      return;
+    }
+
+    _buildFoldersTree(foldersList);
   }
 
   @override
@@ -89,8 +59,104 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage> {
       appBar: AppBar(
         title: Text('Share file to OuiSync'),
       ),
-      body: _foldersTree,
+      body: _bodyWidget,
     );
+  }
+
+  _emptyTree() => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Align(
+        alignment: Alignment.center,
+        child: Text(
+          messageEmptyFolderStructure,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      SizedBox(height: 20.0),
+      Align(
+        alignment: Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+          child: StyledText(
+            text: messageCreateNewFolderToStartStyled,
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.normal
+            ),
+            styles: {
+              'bold': TextStyle(fontWeight: FontWeight.bold),
+              'arrow_down': IconStyle(Icons.south),
+            },
+          ),
+        ),
+      ),
+    ],
+  );
+
+  _buildFoldersTree(List<Node> nodes) {
+    final folderNodes = <Node>[];
+    folderNodes.add(
+      Node(
+        parent: true,
+        label: 'OuiSync',
+        key: 'ouisync_repo',
+        expanded: true,
+        children: nodes
+      )
+    );
+
+    var _treeViewController = TreeViewController(children: folderNodes);
+    final foldersTree = TreeView(
+      allowParentSelect: true,
+      controller: _treeViewController,
+      onNodeTap: (key) {
+        if (key == 'file') {
+          return;
+        }
+
+        final selectedNode = _treeViewController.getNode(key);
+        final folderData = selectedNode!.data != null
+        ? selectedNode.data as FolderDescription
+        : Widget;
+        
+        final parentPath = key == 'ouisync_repo'
+        ? '/'
+        : (folderData as FolderDescription).folderData.path;
+        final fileName = removePathFromFileName(
+          '/${widget.sharedFileInfo.first.path}'
+        );
+        final destinationPath = parentPath == '/'
+        ? '/$fileName'
+        : '$parentPath/$fileName';
+
+        _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
+      },
+    );
+
+    setState(() {
+      _bodyWidget = foldersTree;
+    });
+  }
+
+  Future<void> _saveFileToOuiSync(Session session, String directoryBlocPath, String destinationPath) async {
+    var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
+    widget.directoryBloc
+    .add(
+      CreateFile(
+        session: session,
+        parentPath: directoryBlocPath,
+        newFilePath: destinationPath,
+        fileByteStream: fileStream
+      )
+    );
+
+    Navigator.pop(context);
   }
 
   Widget _getHeader() { 
