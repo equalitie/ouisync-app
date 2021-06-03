@@ -1,14 +1,12 @@
 import 'package:flutter/widgets.dart';
-
-import '../../models/item/folderitem.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({
-    Key key,
-    this.folderData,
-  }) : super(key: key);
+    required this.folderData,
+  });
 
-  final FolderItem folderData;
+  final BaseItem folderData;
 
   @override
   Widget build(BuildContext context) {

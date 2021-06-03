@@ -6,14 +6,14 @@ import '../controls.dart';
 
 class RepoDescription extends StatelessWidget {
   const RepoDescription({
-    this.folderData,
-    this.isEncrypted,
-    this.isLocal,
-    this.isOwn,
-    this.action
+    required this.folderData,
+    required this.isEncrypted,
+    required this.isLocal,
+    required this.isOwn,
+    required this.action
 });
 
-  final FolderItem folderData;
+  final BaseItem folderData;
   final bool isEncrypted;
   final bool isLocal;
   final bool isOwn;
@@ -94,7 +94,7 @@ class RepoDescription extends StatelessWidget {
   IconButton getActionByType(Function action) {
 
     return folderData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
-        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: () => action)
+        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed:  () => action);
   }
 }

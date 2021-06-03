@@ -2,16 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
-import '../../models/item/fileitem.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 class FileDescription extends StatelessWidget {
   const FileDescription({
-    Key key,
-    this.fileData,
-  }) : super(key: key);
+    required this.fileData,
+  });
 
-  final FileItem fileData;
+  final BaseItem fileData;
 
   @override
   Widget build(BuildContext context) {
