@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../data/data.dart';
 import '../../models/models.dart';
@@ -10,12 +9,12 @@ import '../blocs.dart';
 
 class RepositoryBloc extends Bloc<RepositoryEvent, RepositoryState> {
   RepositoryBloc({
-    @required this.repository
+    required this.blocRepository
   }) : 
-  assert(repository != null),
+  assert(blocRepository != null),
   super(RepositoryInitial());
 
-  final OuisyncRepository repository;
+  final OuisyncRepository blocRepository;
 
   @override
   Stream<RepositoryState> mapEventToState(RepositoryEvent event) async* {
@@ -23,8 +22,8 @@ class RepositoryBloc extends Bloc<RepositoryEvent, RepositoryState> {
       yield RepositoryLoadInProgress();
 
       try {
-        repository.createRepository();
-        final List<BaseItem> repos = await repository.getRepositories();
+        blocRepository.createRepository();
+        final List<BaseItem> repos = await blocRepository.getRepositories();
         
         yield RepositoryLoadSuccess(repositories: repos);
       } catch (e) {
@@ -37,7 +36,7 @@ class RepositoryBloc extends Bloc<RepositoryEvent, RepositoryState> {
       yield RepositoryLoadInProgress();
       
       try {
-        final List<BaseItem> repos = await repository.getRepositories();
+        final List<BaseItem> repos = await blocRepository.getRepositories();
         yield RepositoryLoadSuccess(repositories: repos);
       } catch (e) {
         print('Exception getting the repositories from ${event.repository}:\n${e.toString()}');

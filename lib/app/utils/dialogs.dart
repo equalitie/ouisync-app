@@ -13,7 +13,7 @@ import 'utils.dart';
 abstract class Dialogs {
   static Widget floatingActionsButtonMenu(
     Bloc bloc,
-    Repository repository,
+    Session session,
     BuildContext context,
     AnimationController controller,
     String parentPath,
@@ -47,15 +47,15 @@ abstract class Dialogs {
               label: Text(actionName),
               icon: Icon(actions[actionName]),
               onPressed: () async { 
-                Future<dynamic> dialog;
+                late Future<dynamic> dialog;
                 switch (actionsDialog) {
                   case flagRepoActionsDialog:
                   /// Only one repository allowed for the MVP
-                    // dialog = repoActionsDialog(context, bloc, session, actionName);
+                    // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
                     break;
 
                   case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, bloc, repository, parentPath, actionName);
+                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
                     break;
 
                   default:
@@ -77,7 +77,7 @@ abstract class Dialogs {
           label: Text('Actions'),
           icon: new AnimatedBuilder(
             animation: controller,
-            builder: (BuildContext context, Widget child) {
+            builder: (BuildContext context, Widget? child) {
               return new Transform(
                 transform: new Matrix4.rotationZ(controller.value * 0.5 * math.pi),
                 alignment: FractionalOffset.center,
@@ -96,14 +96,15 @@ abstract class Dialogs {
   }
 
   static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
-    String dialogTitle;
-    Widget actionBody;
+    String dialogTitle = '';
+    Widget? actionBody;
 
     switch (action) {
       case actionNewRepo:
         dialogTitle = 'New Repository';
         actionBody = AddRepoPage(
-          session: session
+          session: session,
+          title: 'New Repository',
         );
         break;
     }
@@ -115,9 +116,9 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Repository repository, String parentPath, String action) {
-    String dialogTitle;
-    Widget actionBody;
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+    String dialogTitle = '';
+    Widget? actionBody;
 
     switch (action) {
       case actionNewFolder:
@@ -125,7 +126,7 @@ abstract class Dialogs {
         actionBody = BlocProvider(
           create: (context) => directoryBloc,
           child: AddFolderPage(
-            repository: repository,
+            session: session,
             path: parentPath,
             title: 'New Folder',
           ),
@@ -137,7 +138,7 @@ abstract class Dialogs {
         actionBody = BlocProvider(
           create: (context) => directoryBloc,
           child: AddFilePage(
-            repository: repository,
+            session: session,
             parentPath: parentPath,
             title: 'Add File',
           ),
@@ -153,7 +154,7 @@ abstract class Dialogs {
     );
   }
 
-  static _actionDialog(BuildContext context, String dialogTitle, Widget actionBody) => showDialog(
+  static _actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
     builder: (BuildContext context) {
       return ActionsDialog(

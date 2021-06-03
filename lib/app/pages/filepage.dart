@@ -9,15 +9,14 @@ import '../models/models.dart';
 
 class FilePage extends StatefulWidget {
   FilePage({
-    Key key,
-    @required this.repository,
-    @required this.foldersRepository,
-    @required this.folderPath,
-    @required this.data,
-    @required this.title,
-  }) : super(key: key);
+    required this.session,
+    required this.foldersRepository,
+    required this.folderPath,
+    required this.data,
+    required this.title,
+  });
 
-  final Repository repository;
+  final Session session;
   final DirectoryRepository foldersRepository;
   final String folderPath;
   final BaseItem data;
@@ -48,7 +47,7 @@ class _FilePage extends State<FilePage> {
                     BlocProvider.of<DirectoryBloc>(context)
                     .add(
                       ReadFile(
-                        repository: widget.repository,
+                        session: widget.session,
                         parentPath: widget.folderPath,
                         filePath: filePath
                       ),

@@ -13,14 +13,13 @@ import 'pages.dart';
 
 class FolderPage extends StatefulWidget {
   FolderPage({
-    Key key, 
-    @required this.repository,
-    @required this.foldersRepository,
-    @required this.path,
-    @required this.title
-  }) : super(key: key);
+    required this.session,
+    required this.foldersRepository,
+    required this.path,
+    required this.title
+  });
 
-  final Repository repository;
+  final Session session;
   final DirectoryRepository foldersRepository;
   final String path;
   final String title;
@@ -61,7 +60,7 @@ class _FolderPageState extends State<FolderPage>
 
   getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
   .add(RequestContent(
-    repository: widget.repository,
+    session: widget.session,
     path: widget.path,
     recursive: false
   ));
@@ -86,7 +85,7 @@ class _FolderPageState extends State<FolderPage>
       body: _folderContentsBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
         BlocProvider. of<DirectoryBloc>(context),
-        widget.repository,
+        widget.session,
         context,
         _controller,
         widget.path,

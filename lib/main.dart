@@ -20,7 +20,7 @@ Future<void> main() async {
 
   runApp(BlocProvider(
     create: (context) => 
-      DirectoryBloc(repository: foldersRepository),
+      DirectoryBloc(blocRepository: foldersRepository),
     child: OuiSyncApp(
       session: session,
       foldersRepository: foldersRepository,

@@ -7,12 +7,12 @@ import '../bloc/blocs.dart';
 
 class AddFolderPage extends StatefulWidget {
   AddFolderPage({
-    @required this.repository,
-    @required this.path,
-    @required this.title,
+    required this.session,
+    required this.path,
+    required this.title,
   });
 
-  final Repository repository;
+  final Session session;
   final String path;
   final String title;
 
@@ -44,19 +44,19 @@ class _AddFolderPage extends State<AddFolderPage> {
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
-              return value.isEmpty
+              return value!.isEmpty
               ? 'Please enter a valid name (unique, no spaces, ...)'
               : null;
             },
             onSaved: (newFolderName) {
               final folderPath = widget.path == '/'
-              ? newFolderName
+              ? '/$newFolderName'
               : '${widget.path}/$newFolderName';  
 
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 CreateFolder(
-                  repository: widget.repository,
+                  session: widget.session,
                   parentPath: widget.path,
                   newFolderPath: folderPath
                 )
@@ -73,8 +73,8 @@ class _AddFolderPage extends State<AddFolderPage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (_createFolderFormKey.currentState.validate()) {
-                    _createFolderFormKey.currentState.save();
+                  if (_createFolderFormKey.currentState!.validate()) {
+                    _createFolderFormKey.currentState!.save();
                   }
                 },
                 child: const Text('CREATE'),

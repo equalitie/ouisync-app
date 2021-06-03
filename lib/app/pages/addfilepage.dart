@@ -10,12 +10,12 @@ import '../bloc/blocs.dart';
 
 class AddFilePage extends StatefulWidget {
   AddFilePage({
-    @required this.repository,
-    @required this.parentPath,
-    @required this.title,
+    required this.session,
+    required this.parentPath,
+    required this.title,
   });
 
-  final Repository repository;
+  final Session session;
   final String parentPath;
   final String title;
 
@@ -26,8 +26,8 @@ class AddFilePage extends StatefulWidget {
 class _AddFilePage extends State<AddFilePage> {
   final _addFileFormKey = GlobalKey<FormState>();
 
-  String _newFilePath;
-  Stream<List<int>> _fileByteStream;
+  String _newFilePath = '';
+  late Stream<List<int>>? _fileByteStream;
 
   bool _hidden = false;
   bool _read = false;
@@ -51,7 +51,7 @@ class _AddFilePage extends State<AddFilePage> {
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
-              return value.isEmpty
+              return value!.isEmpty
               ? 'Please enter a valid path'
               : null;
             },
@@ -59,10 +59,10 @@ class _AddFilePage extends State<AddFilePage> {
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 CreateFile(
-                  repository: widget.repository,
+                  session: widget.session,
                   parentPath: widget.parentPath,
                   newFilePath: _newFilePath,
-                  fileByteStream: _fileByteStream
+                  fileByteStream: _fileByteStream!
                 )
               );
 
@@ -71,17 +71,20 @@ class _AddFilePage extends State<AddFilePage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              FilePickerResult result = await FilePicker.platform.pickFiles(
+              final result = await FilePicker
+              .platform
+              .pickFiles(
                 type: FileType.any,
                 withReadStream: true
               );
+
               if(result != null) {
                 setState(() {
                   _newFilePath = widget.parentPath == '/'
                   ? '/${result.files.single.name}'
                   : '${widget.parentPath}/${result.files.single.name}';
                   
-                  _fileByteStream = result.files.single.readStream;
+                  _fileByteStream = result.files.single.readStream!;
                 });
               }
             },
@@ -94,8 +97,8 @@ class _AddFilePage extends State<AddFilePage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (_addFileFormKey.currentState.validate()) {
-                    _addFileFormKey.currentState.save();
+                  if (_addFileFormKey.currentState!.validate()) {
+                    _addFileFormKey.currentState!.save();
                   }
                 },
                 child: const Text('CREATE'),
