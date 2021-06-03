@@ -8,22 +8,37 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class DirectoryRepository {
-  Future<BasicResult> createFolder(Repository repository, String path)  async {
-    print('Creating folder $path in repository $repository');
-    
+  _openRepository(session) async => 
+    await Repository.open(session);
+
+  _openDirectory(repository, path) async => 
+    await Directory.open(repository, path);
+
+  _openFile(repository, path) async => 
+    await File.open(repository, path);
+
+  Future<BasicResult> createFolder(Session session, String path)  async {
     BasicResult createFolderResult;
     String error = '';
 
     bool created = false;
+    final repository = await _openRepository(session);
 
-    await Directory.create(repository, path)
-    .catchError((onError) {
-      print('Error creating folder $path: $onError');
-      error = onError;
-    })
-    .then((value) => created = true);
+    try {
+      print('Creating folder $path');
 
-    createFolderResult = CreateFolderResult(functionName: 'getContents', result: created);
+      await Directory.create(repository, path);
+      created = true;
+    } catch (e) {
+      print('Error creating folder $path: $e');
+
+      created = false;
+      error = e.toString();
+    } finally {
+      repository.close();
+    }
+
+    createFolderResult = CreateFolderResult(functionName: 'createFolder', result: created);
     if (error.isNotEmpty) {
       createFolderResult.errorMessage = error;
     }
