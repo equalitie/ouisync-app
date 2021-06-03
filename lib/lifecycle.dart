@@ -32,23 +32,13 @@ class _LifeCycleState extends State<LifeCycle>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('App Lyfecycle State: $state');
-    if (state == AppLifecycleState.paused) {
-      closeSession();
-    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
 
-    closeSession();
-
+    widget.session.close();
     super.dispose();
-  }
-
-  void closeSession() {
-    setState(() {
-      widget.session.close();
-    });
   }
 }
