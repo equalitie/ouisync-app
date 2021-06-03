@@ -6,17 +6,22 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
+import '../controls/controls.dart';
 import '../data/data.dart';
 import '../utils/utils.dart';
 
 class ReceiveSharingIntentPage extends StatefulWidget {
   ReceiveSharingIntentPage({
-    @required this.repository,
-    @required this.sharedFileInfo
-  }) : assert (sharedFileInfo != null);
+    required this.session,
+    required this.sharedFileInfo,
+    required this.directoryBloc,
+    required this.directoryBlocPath
+  });
 
-  final Repository repository;
+  final Session session;
   final List<SharedMediaFile> sharedFileInfo;
+  final Bloc directoryBloc;
+  final String directoryBlocPath;
 
   @override
   _ReceiveSharingIntentPageState createState() => _ReceiveSharingIntentPageState();
