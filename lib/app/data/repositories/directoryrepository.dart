@@ -114,82 +114,82 @@ class DirectoryRepository {
     return writeFileResult; 
   }
 
-  Future<void> readFile(Repository repository, String filePath) async {
-    // List<int> fileStream = new List.filled(0, 0, growable: true);
-    // await for (var chunk in OuiSync.readFile(repoDir, filePath, bufferSize, totalBytes.toInt())) {
-    //   if (chunk == EndOfFile) {
-    //     break;
-    //   }
+  Future<BasicResult> readFile(Session session, String filePath) async {
+    BasicResult readFileResult;
+    String error = '';
 
-    //   print('Chunk received: ${chunk.length} bytes');
-    //   fileStream.addAll(chunk);
-    // }
+    final repository = await _openRepository(session);
+    final file = await _openFile(repository, filePath);
+    
+    final content = <int>[];
 
-    // final imfs = MemoryFileSystem(); //InMemoryFileSystem
-    // final tempDirectory = await imfs.systemTempDirectory.create();
-    // final outputFile = tempDirectory.childFile('testFile.pdf');
-    // outputFile.writeAsBytes(fileStream);
+    try {
+      final length = await file.length;
+      content.addAll(await file.read(0, length));  
+    } catch (e) {
+      print('Exception reading file $filePath:\n${e.toString()}');
+      error = 'Read file $filePath failed';
+    } finally {
+      file.close();
+      repository.close();
+    }
 
-    // // print(outputFile.read());
+    readFileResult = ReadFileResult(functionName: 'readFile', result: content);
+    if (error.isNotEmpty) {
+      readFileResult.errorMessage = error;
+    }
 
-    // final _result = await OpenFile.open(outputFile.path);
-    // print(_result.message);
+    return readFileResult;
   }
 
-  Future<BasicResult> getContents(Repository repository, String path, bool recursive) async {
-    print("Getting folder $path contents in repository $repository");
+  Future<BasicResult> getContents(Session session, String path, bool recursive) async {
+    print("Getting folder $path contents");
   
     if (recursive) {
       print('(recursive...)');
 
-      List<Node> returnedContent = await getContentsRecursive(repository, path);
+      List<Node> returnedContent = await getContentsRecursive(session, path);
+      BasicResult getContentsRecursiveResult = GetContentRecursiveResult(
+        functionName: '_getContentsRecursive',
+        result: returnedContent
+      );
 
-      // await _getContentsRecursive(repository, path)
-      // .catchError((onError) {
-      //   print('Error on getContentsRecursive call: $onError');
-      // })
-      // .then((value) => {
-      //   returnedContent.addAll(value)
-      // })
-      // .whenComplete(() => {
-      //   print('getContentsRecursive completed')
-      // });
-
-      return GetContentRecursiveResult(functionName: 'getContents', result: returnedContent);
+      return getContentsRecursiveResult;
     }
 
-    return await _getFolderContents(repository, path);
+    return await _getFolderContents(session, path);
   }
 
-  Future<BasicResult> _getFolderContents(Repository repository, String path) async {
+  Future<BasicResult> _getFolderContents(Session session, String path) async {
     BasicResult getContentsResult;
     String error = '';
 
-    List<BaseItem> returnedContent = [];
+    final returnedContent = <BaseItem>[];
 
-    final directory = await Directory.open(repository, path);
+    final repository = await _openRepository(session);
+    final directory = await _openDirectory(repository, path);
+    
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        final item = iterator.current;
         returnedContent.add(
           _castToBaseItem(
             path,
-            item.name,
-            item.type,
+            iterator.current.name,
+            iterator.current.type,
             0.0
-          )
+          )!
         );
-      }  
+      } 
     } catch (e) {
       print('Error traversing directory $path: $e');
       error = e.toString();
     } finally {
-      print('Directory $path closed');
       directory.close();
+      repository.close();
     }
     
-    getContentsResult = GetContentResult(functionName: 'getContents', result: returnedContent);
+    getContentsResult = GetContentResult(functionName: '_getFolderContents', result: returnedContent);
     if (error.isNotEmpty) {
       getContentsResult.errorMessage = error;
     }
