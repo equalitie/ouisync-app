@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as ouisync;
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -16,13 +16,12 @@ import 'pages.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({
-    Key key,
-    @required this.session,
-    @required this.foldersRepository,
-    @required this.title,
-  }) : super(key: key);
+    required this.session,
+    required this.foldersRepository,
+    required this.title,
+  });
 
-  final ouisync.Session session;
+  final Session session;
   final DirectoryRepository foldersRepository;
   final String title;
 
@@ -33,12 +32,12 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage>
   with TickerProviderStateMixin {
 
-  AnimationController _controller;
+  late AnimationController _controller;
   
-  Color backgroundColor;
-  Color foregroundColor;
+  late Color backgroundColor;
+  late Color foregroundColor;
 
-  StreamSubscription _intentDataStreamSubscription;
+  late StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
@@ -48,11 +47,19 @@ class _RootPageState extends State<RootPage>
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    _controller.dispose();
+    _intentDataStreamSubscription.cancel();
+  }
+
   void handleIncomingShareIntent() {
     // For sharing files coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
-        print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+        print("Shared:" + (value.map((f)=> f.path).join(",")));  
         _processIntent(value);
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -60,7 +67,7 @@ class _RootPageState extends State<RootPage>
 
     // For sharing files coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+      print("Shared:" + (value.map((f)=> f.path).join(",")));  
       _processIntent(value);
     });
   }
@@ -75,10 +82,13 @@ class _RootPageState extends State<RootPage>
       MaterialPageRoute(builder: (context) {
         return BlocProvider(
           create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
+            blocRepository: widget.foldersRepository
           ),
           child: ReceiveSharingIntentPage(
+            session:  widget.session,
             sharedFileInfo: sharedMedia,
+            directoryBloc: BlocProvider.of<RepositoryBloc>(context),
+            directoryBlocPath: '/',
           )
         );
       })
@@ -90,14 +100,6 @@ class _RootPageState extends State<RootPage>
     vsync: this,
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
-
-  @override
-  void dispose() {
-    super.dispose();
-    
-    _intentDataStreamSubscription.cancel();
-    _controller.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +124,7 @@ class _RootPageState extends State<RootPage>
       body: _repositoriesBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
         BlocProvider.of<RepositoryBloc>(context),
-        null, //TODO add the repository
+        widget.session,
         context,
         _controller,
         '',//parentPath
@@ -216,17 +218,22 @@ class _RootPageState extends State<RootPage>
     },
   );
 
-  void _navigateToRepositoryContents({BuildContext context, String repoPath, String title}) {
+  void _navigateToRepositoryContents({
+    required BuildContext context,
+    required String repoPath,
+    required String title
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return BlocProvider(
           create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
+            blocRepository: widget.foldersRepository
           ),
           child: FolderPage(
-            path: '',
+            session: widget.session,
             foldersRepository: widget.foldersRepository,
+            path: '',
             title: title
           )
         );
