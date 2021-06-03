@@ -16,12 +16,11 @@ import 'pages.dart';
 
 class RootFolderPage extends StatefulWidget {
   RootFolderPage({
-    Key key,
-    @required this.session,
-    @required this.foldersRepository,
-    @required this.path,
-    @required this.title,
-  }) : super(key: key);
+    required this.session,
+    required this.foldersRepository,
+    required this.path,
+    required this.title,
+  });
 
   final Session session;
   final DirectoryRepository foldersRepository;
@@ -34,59 +33,37 @@ class RootFolderPage extends StatefulWidget {
 
 class _RootFolderPageState extends State<RootFolderPage>
   with TickerProviderStateMixin {
-    
-  Repository _repository;
   
-  AnimationController _controller;
+  late AnimationController _controller;
   
-  Color backgroundColor;
-  Color foregroundColor;
+  late Color backgroundColor;
+  late Color foregroundColor;
 
-  StreamSubscription _intentDataStreamSubscription;
+  late StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    initRepository().then((value) => _getFolderContents());
-    initAnimationController();
+    getFolderContents();
 
     handleIncomingShareIntent();
+    initAnimationController();
   }
 
   @override
   void dispose() {
     super.dispose();
     
-    _repository.close();
     _controller.dispose();
     _intentDataStreamSubscription.cancel();
   }
-
-  Future<void> initRepository() async {
-    final repository = await Repository.open(widget.session);
-    setState(() {
-      this._repository = repository;
-    });
-  }
-
-  _getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
-  .add(RequestContent(
-    repository: _repository,
-    path: widget.path,
-    recursive: false
-  ));
-
-  initAnimationController()  => _controller = new AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-  );
 
   void handleIncomingShareIntent() {
     // For sharing files coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
-        print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+        print("Shared:" + (value.map((f)=> f.path).join(",")));  
         _processIntent(value);
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -94,7 +71,7 @@ class _RootFolderPageState extends State<RootFolderPage>
 
     // For sharing files coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      print("Shared:" + (value?.map((f)=> f.path)?.join(",") ?? ""));  
+      print("Shared:" + (value.map((f)=> f.path).join(",")));  
       _processIntent(value);
     });
   }
@@ -107,19 +84,28 @@ class _RootFolderPageState extends State<RootFolderPage>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return BlocProvider(
-          create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
-          ),
-          child: ReceiveSharingIntentPage(
-            repository: _repository,
-            sharedFileInfo: sharedMedia,
-          )
+        return ReceiveSharingIntentPage(
+          session: widget.session,
+          sharedFileInfo: sharedMedia,
+          directoryBloc: BlocProvider.of<DirectoryBloc>(context),
+          directoryBlocPath: widget.path,
         );
       })
     );
   }
 
+  initAnimationController()  => _controller = new AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+  );
+
+  getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
+  .add(RequestContent(
+    session: widget.session,
+    path: widget.path,
+    recursive: false
+  ));
+  
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).cardColor;
@@ -142,8 +128,8 @@ class _RootFolderPageState extends State<RootFolderPage>
       ),
       body: _repositoriesBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
-        BlocProvider. of<DirectoryBloc>(context),
-        _repository,
+        BlocProvider.of<DirectoryBloc>(context),
+        widget.session,
         context,
         _controller,
         widget.path,
@@ -168,7 +154,7 @@ class _RootFolderPageState extends State<RootFolderPage>
           }
 
           if (state is DirectoryLoadSuccess) {
-            final contents = state.contents;
+            final contents = state.contents as List<BaseItem>;
 
             return contents.isEmpty 
             ? _noContents()
@@ -234,9 +220,11 @@ class _RootFolderPageState extends State<RootFolderPage>
           final item = contents[index];
           return ListItem (
               itemData: item,
-              action: () {
-                _actionByType(widget.foldersRepository, widget.path, item); 
-              }
+              action: () => _actionByType(
+                widget.foldersRepository,
+                widget.path,
+                item
+              ),
           );
         }
     );
@@ -248,7 +236,7 @@ class _RootFolderPageState extends State<RootFolderPage>
       MaterialPageRoute(builder: (context) {
         return BlocProvider(
           create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
+            blocRepository: widget.foldersRepository
           ),
           child: _pageByType(
             folderRespository,
@@ -261,23 +249,19 @@ class _RootFolderPageState extends State<RootFolderPage>
   }
 
   _pageByType(DirectoryRepository folderRepository, String folderPath, BaseItem data) { 
-    String destinationPath = folderPath == '/'
-      ? '/${data.name}'
-      : '$folderPath/${data.name}';
-
     return data.itemType == ItemType.folder
     ? FolderPage(
-      repository: _repository,
+      session: widget.session,
       foldersRepository: folderRepository,
-      path: destinationPath,
-      title: destinationPath,
+      path: data.path,
+      title: data.path,
     )
     : FilePage(
-      repository: _repository,
+      session: widget.session,
       foldersRepository: folderRepository,
       folderPath: folderPath,
       data: data,
-      title: '$folderPath/${data.name}',
+      title: data.path,
     );
   }
 }
