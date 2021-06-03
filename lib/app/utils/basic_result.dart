@@ -1,31 +1,29 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
-import 'package:meta/meta.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
 
 abstract class BasicResult<T> {
   BasicResult({
-    @required this.functionName,
-    @required this.result,
+    required this.functionName,
+    required this.result,
   }) :
-  assert (functionName != null),
-  assert (functionName != ''),
-  assert (result != null);
+  assert (functionName != '');
 
   final String functionName;
-  final T result;
+  final T? result;
 
   String errorMessage = '';
 }
 
 class CreateFolderResult extends BasicResult {
   CreateFolderResult({
-    @required this.functionName,
-    @required this.result,
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
   final bool result;
@@ -33,32 +31,38 @@ class CreateFolderResult extends BasicResult {
 
 class CreateFileResult extends BasicResult {
   CreateFileResult({
-    @required this.functionName,
-    @required this.result,
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
-  final File result;
+  final File? result;
 }
 
 class WriteFileResult extends BasicResult {
   WriteFileResult({
-    @required this.functionName,
-    @required this.result,
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
-  final File result;
+  final File? result;
 }
 
-class GetContentResult extends BasicResult {
+class   GetContentResult extends BasicResult {
   GetContentResult({
-    @required this.functionName,
-    @required this.result,
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
   final List<BaseItem> result;
@@ -66,10 +70,12 @@ class GetContentResult extends BasicResult {
 
 class GetContentRecursiveResult extends BasicResult {
   GetContentRecursiveResult({
-    @required this.functionName,
-    @required this.result,
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
   final List<Node> result;
@@ -77,11 +83,26 @@ class GetContentRecursiveResult extends BasicResult {
 
 class GetFullContentResult extends BasicResult {
   GetFullContentResult({
-    @required this.functionName,
-    @required this.result
-  }) :
-  super(functionName: functionName, result: result);
+    required this.functionName,
+    required this.result
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
 
   final String functionName;
   final Node result;
+}
+
+class ReadFileResult extends BasicResult {
+  ReadFileResult({
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
+
+  final String functionName;
+  final List<int> result;
 }
