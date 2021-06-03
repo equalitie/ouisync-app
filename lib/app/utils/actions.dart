@@ -2,20 +2,21 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void push(BuildContext context, {Widget widget, bool replace = false}) {
+import 'utils.dart';
+
+void push(BuildContext context, {Widget? widget, bool replace = false}) {
   if (replace) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => widget )
+      MaterialPageRoute(builder: (context) => widget! )
     ); 
   }
   else {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => widget )
+      MaterialPageRoute(builder: (context) => widget! )
     );
   }
 }
@@ -46,3 +47,23 @@ Future<void> printAppFolderContents(String path) async {
     print(item); 
   }
 }
+
+String removePathFromFileName(String path) => path.split('/').last;
+
+String removeFileNameFromPath(String path) => path.substring(0, path.lastIndexOf('/')); 
+
+dynamic extractNativeAttribute(List<String> attributesList, String attribute) => 
+  attributesList.singleWhere((element) => element.startsWith('$attribute:')).split(':')[1];
+
+String extractFileTypeFromName(String fileName) {
+  if (!fileName.contains('.')) {
+    return '';
+  }
+
+  if (fileName.lastIndexOf('.') > fileName.length - 2) {
+    return '';
+  }
+
+  return fileName.substring(fileName.lastIndexOf('.') + 1);
+}
+

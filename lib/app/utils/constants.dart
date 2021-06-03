@@ -27,6 +27,8 @@ const String messageNoStoragePermissionsGranted = 'OuiSync need access to the ph
 const String messageNoRepos = 'No repositories found';
 const String messageEmptyRepo = 'This repository is empty';
 const String messageEmptyFolder = 'This folder is empty';
+const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
+const String messageCreateNewFolderToStartStyled = '(Maybe start by creating a new folder? or just go ahead and use <bold>/</bold>, we are not your mother)';
 
 const String messageCreateNewRepoStyled = 'Create a new repo using <bold>Actions</bold> <arrow_down/>';
 const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';
@@ -47,5 +49,8 @@ const String actionNewFile = 'Add file';
 const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
 const Map<String, IconData> folderActions = const { 
   actionNewFolder: Icons.create_new_folder_rounded, 
-  actionNewFile: Icons.file_upload
+  actionNewFile: Icons.file_upload,
 };
+
+const int bufferSize = 64000;
+const String EndOfFile = "EOF";

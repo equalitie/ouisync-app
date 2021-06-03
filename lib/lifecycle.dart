@@ -1,14 +1,13 @@
-
 import 'package:flutter/material.dart';
-
-import 'callbacks/nativecallbacks.dart';
-
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 class LifeCycle extends StatefulWidget {
   const LifeCycle({
-    @required this.child,
-  }): assert(child != null);
+    required this.session,
+    required this.child,
+  });
 
+  final Session session;
   final Widget child;
 
   @override
@@ -20,9 +19,7 @@ class _LifeCycleState extends State<LifeCycle>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
-
-    NativeCallbacks.doSetup();
+    WidgetsBinding.instance!.addObserver(this);
 
     super.initState();
   }
@@ -39,8 +36,9 @@ class _LifeCycleState extends State<LifeCycle>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
 
+    widget.session.close();
     super.dispose();
   }
 }

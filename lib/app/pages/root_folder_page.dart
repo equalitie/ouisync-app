@@ -14,24 +14,26 @@ import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-class RootPage extends StatefulWidget {
-  RootPage({
+class RootFolderPage extends StatefulWidget {
+  RootFolderPage({
     required this.session,
     required this.foldersRepository,
+    required this.path,
     required this.title,
   });
 
   final Session session;
   final DirectoryRepository foldersRepository;
+  final String path;
   final String title;
 
   @override
-  _RootPageState createState() => _RootPageState();
+  _RootFolderPageState createState() => _RootFolderPageState();
 }
 
-class _RootPageState extends State<RootPage>
+class _RootFolderPageState extends State<RootFolderPage>
   with TickerProviderStateMixin {
-
+  
   late AnimationController _controller;
   
   late Color backgroundColor;
@@ -41,16 +43,18 @@ class _RootPageState extends State<RootPage>
 
   @override
   void initState() {
-    initAnimationController();
-    handleIncomingShareIntent();
-    
     super.initState();
+
+    getFolderContents();
+
+    handleIncomingShareIntent();
+    initAnimationController();
   }
 
   @override
   void dispose() {
     super.dispose();
-
+    
     _controller.dispose();
     _intentDataStreamSubscription.cancel();
   }
@@ -80,27 +84,28 @@ class _RootPageState extends State<RootPage>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return BlocProvider(
-          create: (context) => DirectoryBloc(
-            blocRepository: widget.foldersRepository
-          ),
-          child: ReceiveSharingIntentPage(
-            session:  widget.session,
-            sharedFileInfo: sharedMedia,
-            directoryBloc: BlocProvider.of<RepositoryBloc>(context),
-            directoryBlocPath: '/',
-          )
+        return ReceiveSharingIntentPage(
+          session: widget.session,
+          sharedFileInfo: sharedMedia,
+          directoryBloc: BlocProvider.of<DirectoryBloc>(context),
+          directoryBlocPath: widget.path,
         );
       })
     );
   }
 
-  initAnimationController()  => 
-  _controller = new AnimationController(
+  initAnimationController()  => _controller = new AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
 
+  getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
+  .add(RequestContent(
+    session: widget.session,
+    path: widget.path,
+    recursive: false
+  ));
+  
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).cardColor;
@@ -123,13 +128,13 @@ class _RootPageState extends State<RootPage>
       ),
       body: _repositoriesBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
-        BlocProvider.of<RepositoryBloc>(context),
+        BlocProvider.of<DirectoryBloc>(context),
         widget.session,
         context,
         _controller,
-        '',//parentPath
-        repoActions,
-        flagRepoActionsDialog,
+        widget.path,
+        folderActions,
+        flagFolderActionsDialog,
         backgroundColor,
         foregroundColor
       ),
@@ -138,43 +143,47 @@ class _RootPageState extends State<RootPage>
 
   Widget _repositoriesBlocBuilder() {
     return Center(
-        child: BlocBuilder<RepositoryBloc, RepositoryState>(
-            builder: (context, state) {
-              if (state is RepositoryInitial) {
-                return Center(child: Text('Loading repositories...'));
-              }
+      child: BlocBuilder<DirectoryBloc, DirectoryState>(
+        builder: (context, state) {
+          if (state is DirectoryInitial) {
+            return Center(child: Text('Loading ${widget.path} contents...'));
+          }
 
-              if (state is RepositoryLoadInProgress){
-                return Center(child: CircularProgressIndicator());
-              }
+          if (state is DirectoryLoadInProgress){
+            return Center(child: CircularProgressIndicator());
+          }
 
-              if (state is RepositoryLoadSuccess) {
-                return state.repositories.isEmpty
-                ? _noRepos()
-                : _reposListView(context, state.repositories);
-              }
+          if (state is DirectoryLoadSuccess) {
+            final contents = state.contents as List<BaseItem>;
 
-              if (state is RepositoryLoadFailure) {
-                return Text(
-                  'Something went wrong!',
-                  style: TextStyle(color: Colors.red),
-                );
-              }
+            return contents.isEmpty 
+            ? _noContents()
+            : _contentsList(contents);
+          }
 
-              return Center(child: Text('repos_'));
-            }
-        )
+          if (state is DirectoryLoadFailure) {
+            return Text(
+              'Something went wrong!',
+              style: TextStyle(color: Colors.red),
+            );
+          }
+
+          return Center(child: Text('root'));
+        }
+      )
     );
   }
 
-  _noRepos() => Column(
+  _noContents() => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Align(
         alignment: Alignment.center,
         child: Text(
-          messageNoRepos,
+          widget.path.isEmpty
+          ? messageEmptyRepo
+          : messageEmptyFolder,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24.0,
@@ -186,7 +195,7 @@ class _RootPageState extends State<RootPage>
       Align(
         alignment: Alignment.center,
         child: StyledText(
-          text: messageCreateNewRepoStyled,
+          text: messageCreateAddNewObjectStyled,
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.normal
@@ -200,29 +209,28 @@ class _RootPageState extends State<RootPage>
     ],
   );
 
-  _reposListView(BuildContext context, List<BaseItem> repositories) => ListView.builder(
-    itemCount: repositories.length,
-    itemBuilder: (context, index) {
-      final repo = repositories[index];
-      return RepoDescription(
-        folderData: repo,
-        isEncrypted: false,
-        isLocal: true,
-        isOwn: true,
-        action: () => _navigateToRepositoryContents(
-          context: context,
-          repoPath: repo.path,
-          title: repo.name
-        )
-      );
-    },
-  );
+  _contentsList(List<BaseItem> contents) {
+    return ListView.separated(
+        separatorBuilder: (context, index) => Divider(
+            height: 1,
+            color: Colors.transparent
+        ),
+        itemCount: contents.length,
+        itemBuilder: (context, index) {
+          final item = contents[index];
+          return ListItem (
+              itemData: item,
+              action: () => _actionByType(
+                widget.foldersRepository,
+                widget.path,
+                item
+              ),
+          );
+        }
+    );
+  }
 
-  void _navigateToRepositoryContents({
-    required BuildContext context,
-    required String repoPath,
-    required String title
-  }) {
+  void _actionByType(DirectoryRepository folderRespository, String folderPath, BaseItem data) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -230,14 +238,30 @@ class _RootPageState extends State<RootPage>
           create: (context) => DirectoryBloc(
             blocRepository: widget.foldersRepository
           ),
-          child: FolderPage(
-            session: widget.session,
-            foldersRepository: widget.foldersRepository,
-            path: '',
-            title: title
-          )
+          child: _pageByType(
+            folderRespository,
+            folderPath,
+            data
+          ),
         );
       })
+    );
+  }
+
+  _pageByType(DirectoryRepository folderRepository, String folderPath, BaseItem data) { 
+    return data.itemType == ItemType.folder
+    ? FolderPage(
+      session: widget.session,
+      foldersRepository: folderRepository,
+      path: data.path,
+      title: data.path,
+    )
+    : FilePage(
+      session: widget.session,
+      foldersRepository: folderRepository,
+      folderPath: folderPath,
+      data: data,
+      title: data.path,
     );
   }
 }

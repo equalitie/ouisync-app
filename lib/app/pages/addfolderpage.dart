@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 
 class AddFolderPage extends StatefulWidget {
   AddFolderPage({
-    @required this.repoPath,
-    this.title,
-  }) :
-  assert(repoPath != null),
-  assert(repoPath != "");
+    required this.session,
+    required this.path,
+    required this.title,
+  });
 
-  final String repoPath;
+  final Session session;
+  final String path;
   final String title;
 
   @override
@@ -43,16 +44,21 @@ class _AddFolderPage extends State<AddFolderPage> {
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
-              return value.isEmpty
+              return value!.isEmpty
               ? 'Please enter a valid name (unique, no spaces, ...)'
               : null;
             },
-            onSaved: (newRepoName) {
-              BlocProvider.of<RepositoryBloc>(context)
+            onSaved: (newFolderName) {
+              final folderPath = widget.path == '/'
+              ? '/$newFolderName'
+              : '${widget.path}/$newFolderName';  
+
+              BlocProvider.of<DirectoryBloc>(context)
               .add(
-                RepositoryCreate(
-                  repoDir: widget.repoPath,
-                  newRepoRelativePath: newRepoName
+                CreateFolder(
+                  session: widget.session,
+                  parentPath: widget.path,
+                  newFolderPath: folderPath
                 )
               );
 
@@ -67,8 +73,8 @@ class _AddFolderPage extends State<AddFolderPage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (_createFolderFormKey.currentState.validate()) {
-                    _createFolderFormKey.currentState.save();
+                  if (_createFolderFormKey.currentState!.validate()) {
+                    _createFolderFormKey.currentState!.save();
                   }
                 },
                 child: const Text('CREATE'),

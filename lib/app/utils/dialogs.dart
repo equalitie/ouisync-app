@@ -2,16 +2,21 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../bloc/blocs.dart';
 import '../controls/controls.dart';
 import '../pages/pages.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
   static Widget floatingActionsButtonMenu(
+    Bloc bloc,
+    Session session,
     BuildContext context,
     AnimationController controller,
-    String reposBaseFolderPath, 
+    String parentPath,
     Map<String, IconData> actions,
     String actionsDialog,
     Color backgroundColor,
@@ -42,14 +47,15 @@ abstract class Dialogs {
               label: Text(actionName),
               icon: Icon(actions[actionName]),
               onPressed: () async { 
-                Future<dynamic> dialog;
+                late Future<dynamic> dialog;
                 switch (actionsDialog) {
                   case flagRepoActionsDialog:
-                    dialog = repoActionsDialog(context, reposBaseFolderPath, actionName);
+                  /// Only one repository allowed for the MVP
+                    // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
                     break;
 
                   case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, reposBaseFolderPath, actionName);
+                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
                     break;
 
                   default:
@@ -71,7 +77,7 @@ abstract class Dialogs {
           label: Text('Actions'),
           icon: new AnimatedBuilder(
             animation: controller,
-            builder: (BuildContext context, Widget child) {
+            builder: (BuildContext context, Widget? child) {
               return new Transform(
                 transform: new Matrix4.rotationZ(controller.value * 0.5 * math.pi),
                 alignment: FractionalOffset.center,
@@ -89,15 +95,16 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> repoActionsDialog(BuildContext context, String reposBaseFolderPath, String action) {
-    String dialogTitle;
-    Widget actionBody;
+  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
+    String dialogTitle = '';
+    Widget? actionBody;
 
     switch (action) {
       case actionNewRepo:
         dialogTitle = 'New Repository';
         actionBody = AddRepoPage(
-          reposBaseFolderPath: reposBaseFolderPath
+          session: session,
+          title: 'New Repository',
         );
         break;
     }
@@ -109,24 +116,35 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, String reposBaseFolderPath, String action) {
-    String dialogTitle;
-    Widget actionBody;
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+    String dialogTitle = '';
+    Widget? actionBody;
 
     switch (action) {
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
-          repoPath: reposBaseFolderPath
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFolderPage(
+            session: session,
+            path: parentPath,
+            title: 'New Folder',
+          ),
         );
         break;
       
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = AddFilePage(
-          repoPath: reposBaseFolderPath,
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFilePage(
+            session: session,
+            parentPath: parentPath,
+            title: 'Add File',
+          ),
         );
         break;
+        
     }
 
     return _actionDialog(
@@ -136,7 +154,7 @@ abstract class Dialogs {
     );
   }
 
-  static _actionDialog(BuildContext context, String dialogTitle, Widget actionBody) => showDialog(
+  static _actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
     builder: (BuildContext context) {
       return ActionsDialog(

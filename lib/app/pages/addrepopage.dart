@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 
 class AddRepoPage extends StatefulWidget {
   AddRepoPage({
-    @required this.reposBaseFolderPath,
-    this.title,
-  }) :
-  assert(reposBaseFolderPath != null),
-  assert(reposBaseFolderPath != "");
+    required this.session,
+    required this.title,
+  });
 
-  final String reposBaseFolderPath;
+  final Session session;
   final String title;
 
   @override
@@ -42,16 +41,15 @@ class _AddRepoPage extends State<AddRepoPage> {
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
-              return value.isEmpty
+              return value!.isEmpty
               ? 'Please enter a valid name (unique, no spaces, ...)'
               : null;
             },
             onSaved: (newRepoName) {
               BlocProvider.of<RepositoryBloc>(context)
               .add(
-                RepositoryCreate(
-                  repoDir: widget.reposBaseFolderPath,
-                  newRepoRelativePath: newRepoName
+                CreateRepository(
+                  session: widget.session
                 )
               );
 
@@ -66,8 +64,8 @@ class _AddRepoPage extends State<AddRepoPage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (_createRepoFormKey.currentState.validate()) {
-                    _createRepoFormKey.currentState.save();
+                  if (_createRepoFormKey.currentState!.validate()) {
+                    _createRepoFormKey.currentState!.save();
                   }
                 },
                 child: const Text('CREATE'),

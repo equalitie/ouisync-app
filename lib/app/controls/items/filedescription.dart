@@ -1,15 +1,15 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/models/item/fileitem.dart';
-import 'package:ouisync_app/app/utils/descriptions.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 class FileDescription extends StatelessWidget {
   const FileDescription({
-    Key key,
-    this.fileData,
-  }) : super(key: key);
+    required this.fileData,
+  });
 
-  final FileItem fileData;
+  final BaseItem fileData;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class FileDescription extends StatelessWidget {
     );
   }
 
-  List<Widget> _getUI(){
+  List<Widget> _getUI() {
     return [
       Text(
         this.fileData.name,
@@ -32,7 +32,7 @@ class FileDescription extends StatelessWidget {
       ),
       const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
       Text(
-        "sync: ${Descriptions.getSyncStatusDescription(this.fileData.syncStatus)}",
+        "size: ${_formattSize(this.fileData.size)}",
         style: const TextStyle(fontSize: 12.0),
       ),
       const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
@@ -43,5 +43,22 @@ class FileDescription extends StatelessWidget {
           style: const TextStyle(fontSize: 12.0)
       ),
     ];
+  }
+
+  String _formattSize(double size, { int decimals = 2 }) {
+    print('size: $size\n');
+    final units = ['b', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    var i = 0.0;
+    var h = 0.0;
+
+    final kb = 1 / 1024; // change it to 1024 and see the diff
+
+    for (; h < kb && i < units.length; i++) {
+      if ((h = pow(1024, i) / size) >= kb) {
+        break;
+      }
+    }
+
+    return (1 / h).toStringAsFixed(decimals) + " " + units[i.toInt()];
   }
 }

@@ -1,43 +1,35 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class RepositoryEvent extends Equatable {
   const RepositoryEvent();
 }
 
-class RepositoryCreate extends RepositoryEvent {
-  const RepositoryCreate({
-    @required this.repoDir,
-    @required this.newRepoRelativePath
-  }) :
-  assert (repoDir != null),
-  assert (repoDir != null),
-  assert (newRepoRelativePath != null),
-  assert (newRepoRelativePath != null);
+class CreateRepository extends RepositoryEvent {
+  const CreateRepository({
+    required this.session
+  });
 
-  final String repoDir;
-  final String newRepoRelativePath;
+  final Session session;
 
   @override
   List<Object> get props => [
-    repoDir,
-    newRepoRelativePath
+    session
   ];
 
 }
 
-class RepositoriesRequest extends RepositoryEvent {
-  const RepositoriesRequest({
-    @required this.repositoriesPath
+class RequestContents extends RepositoryEvent {
+  const RequestContents({
+    required this.repository
   }) :
-  assert(repositoriesPath != null) ,
-  assert(repositoriesPath != "");
+  assert(repository != null);
 
-  final String repositoriesPath;
+  final Repository repository;
 
   @override
   List<Object> get props => [
-    repositoriesPath
+    repository
   ];
 
 }

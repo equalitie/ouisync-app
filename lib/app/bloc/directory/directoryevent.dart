@@ -1,49 +1,91 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
 }
 
-class FolderCreate extends DirectoryEvent {
-  const FolderCreate({
-    @required this.repoPath,
-    @required this.parentPath,
-    @required this.newFolderRelativePath
+class CreateFolder extends DirectoryEvent {
+  const CreateFolder({
+    required this.session,
+    required this.parentPath,
+    required this.newFolderPath
   }) : 
-  assert(repoPath != null),
-  assert(repoPath != ''),
-  assert(parentPath != null),
-  assert(newFolderRelativePath != null),
-  assert(newFolderRelativePath != '');
+  assert(newFolderPath != '');
 
-  final String repoPath;
+  final Session session;
   final String parentPath;
-  final String newFolderRelativePath;
+  final String newFolderPath;
 
   @override
   List<Object> get props => [
-    repoPath,
+    session,
     parentPath,
-    newFolderRelativePath,
+    newFolderPath,
   ];
 }
 
-class ContentRequest extends DirectoryEvent {
-  const ContentRequest({
-    @required this.repoPath,
-    @required this.folderRelativePath,
-  }) : 
-  assert(repoPath != null),
-  assert(folderRelativePath != null);
+class RequestContent extends DirectoryEvent {
+  const RequestContent({
+    required this.session,
+    required this.path,
+    required this.recursive
+  });
 
-  final String repoPath;
-  final String folderRelativePath;
+  final Session session;
+  final String path;
+  final bool recursive;
 
   @override
   List<Object> get props => [
-    repoPath,
-    folderRelativePath,
+    session,
+    path,
+    recursive
+  ];
+
+}
+
+class CreateFile extends DirectoryEvent {
+  const CreateFile({
+    required this.session,
+    required this.parentPath,
+    required this.newFilePath,
+    required this.fileByteStream
+  }) :
+  assert (newFilePath != '');
+
+  final Session session;
+  final String parentPath;
+  final String newFilePath;
+  final Stream<List<int>> fileByteStream;
+
+  @override
+  List<Object> get props => [
+    session,
+    parentPath,
+    newFilePath,
+    fileByteStream
+  ];
+  
+}
+
+class ReadFile extends DirectoryEvent {
+  const ReadFile({
+    required this.session,
+    required this.parentPath,
+    required this.filePath
+  }) :
+  assert (filePath != '');
+
+  final Session session;
+  final String parentPath;
+  final String filePath;
+
+  @override
+  List<Object> get props => [
+    session,
+    parentPath,
+    filePath
   ];
 
 }

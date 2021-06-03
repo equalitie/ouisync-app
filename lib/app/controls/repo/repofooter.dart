@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 class RepoFooter extends StatelessWidget {
   const RepoFooter({
-    this.syncStatus
+    required this.syncStatus
   });
 
   final SyncStatus syncStatus;
@@ -63,11 +63,11 @@ enum SyncStatus {
 
 class ColumnIcon extends StatelessWidget {
   ColumnIcon({
-    this.labelString,
-    this.icon,
-    this.color,
-    this.size,
-    this.semanticLabel
+    required this.labelString,
+    required this.icon,
+    required this.color,
+    required this.size,
+    required this.semanticLabel
   });
 
   final String labelString;

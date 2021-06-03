@@ -3,15 +3,14 @@ import 'package:ouisync_app/app/utils/utils.dart';
 
 class ActionsDialog extends StatefulWidget {
   const ActionsDialog({
-    Key key,
-    this.title,
+    required this.title,
     this.body,
-    this.image
+    // this.image
   });
 
   final String title;
-  final Widget body;
-  final Image image;
+  final Widget? body;
+  // final Image image;
 
   @override
   _ActionsDialogState createState() => _ActionsDialogState();
@@ -60,7 +59,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
                     children: <Widget>[
                       Text(widget.title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),),
                       SizedBox(height: 15,),
-                      widget.body,
+                      widget.body!,
                     ],
                   ),
                 ),

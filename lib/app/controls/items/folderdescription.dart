@@ -1,14 +1,12 @@
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/models/item/folderitem.dart';
-import 'package:ouisync_app/app/utils/descriptions.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({
-    Key key,
-    this.folderData,
-  }) : super(key: key);
+    required this.folderData,
+  });
 
-  final FolderItem folderData;
+  final BaseItem folderData;
 
   @override
   Widget build(BuildContext context) {
@@ -30,16 +28,7 @@ class FolderDescription extends StatelessWidget {
           fontSize: 16.0,
         ),
       ),
-      const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-      Text(
-        "sync: ${Descriptions.getSyncStatusDescription(this.folderData.syncStatus)}",
-        style: const TextStyle(fontSize: 12.0),
-      ),
       const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
-      Text(
-        '${folderData.items.length} objects',
-        style: const TextStyle(fontSize: 12.0),
-      ),
       Text(
           folderData.path.length == 0
               ? "-"

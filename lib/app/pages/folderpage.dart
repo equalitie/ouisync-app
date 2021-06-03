@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/data/data.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
+import '../data/data.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
+import 'pages.dart';
 
 class FolderPage extends StatefulWidget {
   FolderPage({
-    Key key, 
-    @required this.repoPath,
-    @required this.folderPath,
-    @required this.foldersRepository,
-    this.title
-  }) : 
-  assert(repoPath != null),
-  assert(repoPath != ''),
-  assert(folderPath != null),
-  assert(foldersRepository != null),
-  super(key: key);
+    required this.session,
+    required this.foldersRepository,
+    required this.path,
+    required this.title
+  });
 
-  final String repoPath;
-  final String folderPath;
+  final Session session;
   final DirectoryRepository foldersRepository;
+  final String path;
   final String title;
 
   @override
@@ -36,33 +32,38 @@ class FolderPage extends StatefulWidget {
 class _FolderPageState extends State<FolderPage>
   with TickerProviderStateMixin {
 
-  AnimationController _controller;
+  late AnimationController _controller;
   
-  Color backgroundColor;
-  Color foregroundColor;
+  late Color backgroundColor;
+  late Color foregroundColor;
 
   @override
   void initState() {
-    BlocProvider.of<DirectoryBloc>(context).add(
-      ContentRequest(
-        repoPath: widget.repoPath, 
-        folderRelativePath: widget.folderPath,
-      )
-    );
-
-    _controller = new AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-    );
-
     super.initState();
+
+    getFolderContents();
+
+    initAnimationController();
   }
 
   @override
   void dispose() {
     super.dispose();
+
     _controller.dispose();
   }
+
+  initAnimationController() => _controller = new AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+  );
+
+  getFolderContents() => BlocProvider.of<DirectoryBloc>(context)
+  .add(RequestContent(
+    session: widget.session,
+    path: widget.path,
+    recursive: false
+  ));
 
   @override
   Widget build(BuildContext context) {
@@ -83,14 +84,16 @@ class _FolderPageState extends State<FolderPage>
       ),
       body: _folderContentsBlocBuilder(),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        BlocProvider. of<DirectoryBloc>(context),
+        widget.session,
         context,
         _controller,
-        widget.repoPath,
+        widget.path,
         folderActions,
         flagFolderActionsDialog,
         backgroundColor,
         foregroundColor
-      ),
+      )
     );
   }
 
@@ -99,7 +102,7 @@ class _FolderPageState extends State<FolderPage>
         child: BlocBuilder<DirectoryBloc, DirectoryState>(
             builder: (context, state) {
               if (state is DirectoryInitial) {
-                return Center(child: Text('Loading ${widget.folderPath} contents...'));
+                return Center(child: Text('Loading ${widget.path} contents...'));
               }
 
               if (state is DirectoryLoadInProgress){
@@ -107,7 +110,7 @@ class _FolderPageState extends State<FolderPage>
               }
 
               if (state is DirectoryLoadSuccess) {
-                final contents = state.contents;
+                final contents = state.contents as List<BaseItem>;
 
                 return contents.isEmpty 
                 ? _noContents()
@@ -134,7 +137,7 @@ class _FolderPageState extends State<FolderPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          widget.folderPath.isEmpty
+          widget.path.isEmpty
           ? messageEmptyRepo
           : messageEmptyFolder,
           textAlign: TextAlign.center,
@@ -173,39 +176,48 @@ class _FolderPageState extends State<FolderPage>
           final item = contents[index];
           return ListItem (
               itemData: item,
-              action: () {
-                String path = widget.folderPath.isEmpty
-                ? item.name
-                : '${widget.folderPath}/${item.name}';
-
-                _actionByType(widget.repoPath, path, widget.foldersRepository, item.name); 
-              }
+              action: () => _actionByType(
+                widget.foldersRepository,
+                widget.path,
+                item
+              ),
           );
         }
     );
   }
 
-  void _actionByType(String repoPath, String folderPath, DirectoryRepository repository, String title) {
+  void _actionByType(DirectoryRepository folderRespository, String folderPath, BaseItem data) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return BlocProvider(
           create: (context) => DirectoryBloc(
-            repository: widget.foldersRepository
+            blocRepository: widget.foldersRepository
           ),
-          child: FolderPage(
-            repoPath: repoPath,
-            folderPath: folderPath,
-            foldersRepository: repository,
-            title: title,
-          )
+          child: _pageByType(
+            folderRespository,
+            folderPath,
+            data
+          ),
         );
       })
     );
   }
 
+  _pageByType(DirectoryRepository folderRepository, String folderPath, BaseItem data) { 
+    return data.itemType == ItemType.folder
+    ? FolderPage(
+      session: widget.session,
+      foldersRepository: folderRepository,
+      path: data.path,
+      title: data.path
+    )
+    : FilePage(
+      session: widget.session,
+      foldersRepository: folderRepository,
+      folderPath: folderPath,
+      data: data,
+      title: data.path
+    );
+  }
 }
-        // return new ;
-        // return item.itemType == ItemType.folder
-        //    FolderPage(title: item.name, repoPath: widget.repoPath, folder: item.name)
-        // : FilePage(title: item.name, data: item)

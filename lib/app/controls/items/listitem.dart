@@ -3,17 +3,14 @@ import 'package:flutter/widgets.dart';
 
 import '../../models/models.dart';
 import '../controls.dart';
-import 'filedescription.dart';
-import 'folderdescription.dart';
-
 
 class ListItem extends StatelessWidget {
   const ListItem({
-    this.itemData,
-    this.action,
-    this.isEncrypted,
-    this.isLocal,
-    this.isOwn,
+    required this.itemData,
+    required this.action,
+    this.isEncrypted = false,
+    this.isLocal = true,
+    this.isOwn = true,
   });
 
   final BaseItem itemData;
@@ -25,14 +22,14 @@ class ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final container = Container(
-      padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 0.0),
+      padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 15.0),
       color: _getColor(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(itemData.icon),
-          getExpandedDescriptionByType(),
-          getActionByType(action),
+          _getIconByType(),
+          _getExpandedDescriptionByType(),
+          _getActionByType(action),
         ],
       ),
     );
@@ -44,27 +41,39 @@ class ListItem extends StatelessWidget {
 
   Color _getColor() {
     return itemData.itemType == ItemType.file
-        ? Colors.transparent
-        : Color.fromARGB(35, 220, 220, 220);
+      ? Colors.transparent
+      : Color.fromARGB(35, 220, 220, 220);
   }
 
-  Expanded getExpandedDescriptionByType() {
+  Widget _getIconByType() {
+    return itemData.itemType == ItemType.folder
+      ? Container()
+      : Icon(itemData.icon);
+  }
+
+  Expanded _getExpandedDescriptionByType() {
     return Expanded(
       flex: 1,
       child: itemData.itemType == ItemType.repo
-        ? RepoDescription(folderData: itemData, isEncrypted: isEncrypted, isLocal: isLocal, isOwn:  isOwn)
+        ? RepoDescription(
+          folderData: itemData,
+          isEncrypted: isEncrypted,
+          isLocal: isLocal,
+          isOwn: isOwn,
+          action: action
+        )
         : itemData.itemType == ItemType.folder
         ? FolderDescription(folderData: itemData)
         : FileDescription(fileData: itemData)
     );
   }
 
-  IconButton getActionByType(Function action) {
+  IconButton _getActionByType(Function action) {
     return itemData.itemType == ItemType.repo
-        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: action)
+        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: () => action.call())
         : itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
-        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: () => action.call())
+        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: () => action.call());
   }
 
 }
