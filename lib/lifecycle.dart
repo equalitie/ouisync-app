@@ -3,8 +3,8 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 class LifeCycle extends StatefulWidget {
   const LifeCycle({
-    @required this.session,
-    @required this.child,
+    required this.session,
+    required this.child,
   });
 
   final Session session;
@@ -19,7 +19,7 @@ class _LifeCycleState extends State<LifeCycle>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
 
     super.initState();
   }

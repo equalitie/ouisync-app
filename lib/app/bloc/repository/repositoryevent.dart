@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class RepositoryEvent extends Equatable {
@@ -8,7 +7,7 @@ abstract class RepositoryEvent extends Equatable {
 
 class CreateRepository extends RepositoryEvent {
   const CreateRepository({
-    @required this.session
+    required this.session
   });
 
   final Session session;
@@ -22,7 +21,7 @@ class CreateRepository extends RepositoryEvent {
 
 class RequestContents extends RepositoryEvent {
   const RequestContents({
-    @required this.repository
+    required this.repository
   }) :
   assert(repository != null);
 

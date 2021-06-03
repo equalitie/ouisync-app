@@ -7,8 +7,8 @@ import '../bloc/blocs.dart';
 
 class AddRepoPage extends StatefulWidget {
   AddRepoPage({
-    @required this.session,
-    this.title,
+    required this.session,
+    required this.title,
   });
 
   final Session session;
@@ -41,7 +41,7 @@ class _AddRepoPage extends State<AddRepoPage> {
               contentPadding: EdgeInsets.all(10.0),
             ),
             validator: (value) {
-              return value.isEmpty
+              return value!.isEmpty
               ? 'Please enter a valid name (unique, no spaces, ...)'
               : null;
             },
@@ -64,8 +64,8 @@ class _AddRepoPage extends State<AddRepoPage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (_createRepoFormKey.currentState.validate()) {
-                    _createRepoFormKey.currentState.save();
+                  if (_createRepoFormKey.currentState!.validate()) {
+                    _createRepoFormKey.currentState!.save();
                   }
                 },
                 child: const Text('CREATE'),

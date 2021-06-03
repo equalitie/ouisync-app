@@ -7,25 +7,26 @@ import '../models.dart';
 
 
 class FolderItem extends Equatable implements BaseItem {
-  List<BaseItem> items;
+  late List<BaseItem> items;
 
-  FolderItem(
-      this.id,
-      this.name,
-      this.path,
-      this.size,
-      this.syncStatus,
-      this.user,
-      {
-        this.description = "folder",
-        this.itemType = ItemType.folder,
-        this.icon = Icons.folder,
-      }
-  ) {
+  FolderItem({
+    this.id = '',
+    this.name = '',
+    this.path = '',
+    this.size = 0.0,
+    this.syncStatus = SyncStatus.idle,
+    this.user = const User(id: '', name: ''),
+    this.description = "folder",
+    this.itemType = ItemType.folder,
+    this.icon = Icons.folder,
+    required this.creationDate,
+    required this.lastModificationDate,
+    required this.items,
+  }) {
     this.creationDate = DateTime.now();
     this.lastModificationDate = DateTime.now();
 
-    this.items = List<BaseItem>();
+    this.items = <BaseItem>[];
   }
 
   @override

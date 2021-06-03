@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 class RepoHeader extends StatelessWidget {
   const RepoHeader({
-    this.totalRepos,
-    this.totalFiles,
-    this.totalConflicts,
-    this.totalUsers
+    required this.totalRepos,
+    required this.totalFiles,
+    required this.totalConflicts,
+    required this.totalUsers
 });
 
   final int totalRepos;
@@ -50,8 +50,8 @@ class RepoHeader extends StatelessWidget {
 
 class ColumnText extends StatelessWidget {
   ColumnText({
-    this.labelString,
-    this.value
+    required this.labelString,
+    required this.value
 });
 
   final String labelString;

@@ -9,11 +9,9 @@ import 'utils/utils.dart';
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
-    Key key,
-    @required this.session,
-    @required this.foldersRepository,
-  }) :
-  super(key: key);
+    required this.session,
+    required this.foldersRepository,
+  });
 
   final Session session;
   final DirectoryRepository foldersRepository;

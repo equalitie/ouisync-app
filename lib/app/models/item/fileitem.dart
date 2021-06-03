@@ -2,36 +2,26 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../controls/repo/repofooter.dart';
-import '../user/user.dart';
-import 'baseitem.dart';
-import 'itemtype.dart';
+import '../../controls/controls.dart';
+import '../models.dart';
 
 class FileItem extends Equatable implements BaseItem {
-  FileItem(
-      id,
-      name,
-      extension,
-      path,
-      size,
-      syncStatus,
-      user,
-      {
-        description = "file",
-        icon = Icons.insert_drive_file
-      }) {
-    this.id = id;
+  FileItem({
+    this.id = '',
+    this.name = '',
+    this.extension = '',
+    this.path = '',
+    this.size = 0.0,
+    this.syncStatus = SyncStatus.idle,
+    this.itemType = ItemType.file,
+    this.user = const User(id: '', name: ''),
+    this.description = "file",
+    this.icon = Icons.insert_drive_file,
+    required this.creationDate,
+    required this.lastModificationDate
+  }) {
     this.creationDate = DateTime.now();
     this.lastModificationDate = DateTime.now();
-    this.name = name;
-    this.extension = extension;
-    this.description = description;
-    this.path = path;
-    this.size = size;
-    this.syncStatus = syncStatus;
-    this.itemType = ItemType.file;
-    this.icon = icon;
-    this.user = user;
   }
 
   @override

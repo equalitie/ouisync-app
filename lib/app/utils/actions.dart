@@ -6,17 +6,17 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'utils.dart';
 
-void push(BuildContext context, {Widget widget, bool replace = false}) {
+void push(BuildContext context, {Widget? widget, bool replace = false}) {
   if (replace) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => widget )
+      MaterialPageRoute(builder: (context) => widget! )
     ); 
   }
   else {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => widget )
+      MaterialPageRoute(builder: (context) => widget! )
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../models/models.dart';
 
@@ -16,7 +15,7 @@ class RepositoryLoadInProgress extends RepositoryState {}
 
 class RepositoryLoadSuccess extends RepositoryState {
   const RepositoryLoadSuccess({
-    @required this.repositories
+    required this.repositories
   }) : assert(repositories != null);
 
   final List<BaseItem> repositories;

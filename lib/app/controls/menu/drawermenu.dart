@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class DrawerMenu extends StatelessWidget {
-  const DrawerMenu({
-    Key key,
-  }) : super(key: key);
+  const DrawerMenu();
 
   @override
   Widget build(BuildContext context) {

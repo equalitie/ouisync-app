@@ -6,11 +6,11 @@ import '../controls.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
-    this.itemData,
-    this.action,
-    this.isEncrypted,
-    this.isLocal,
-    this.isOwn,
+    required this.itemData,
+    required this.action,
+    this.isEncrypted = false,
+    this.isLocal = true,
+    this.isOwn = true,
   });
 
   final BaseItem itemData;
@@ -55,7 +55,13 @@ class ListItem extends StatelessWidget {
     return Expanded(
       flex: 1,
       child: itemData.itemType == ItemType.repo
-        ? RepoDescription(folderData: itemData, isEncrypted: isEncrypted, isLocal: isLocal, isOwn:  isOwn)
+        ? RepoDescription(
+          folderData: itemData,
+          isEncrypted: isEncrypted,
+          isLocal: isLocal,
+          isOwn: isOwn,
+          action: action
+        )
         : itemData.itemType == ItemType.folder
         ? FolderDescription(folderData: itemData)
         : FileDescription(fileData: itemData)
@@ -64,10 +70,10 @@ class ListItem extends StatelessWidget {
 
   IconButton _getActionByType(Function action) {
     return itemData.itemType == ItemType.repo
-        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: action)
+        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: () => action.call())
         : itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: action)
-        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: action);
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: () => action.call())
+        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: () => action.call());
   }
 
 }
