@@ -73,24 +73,22 @@ class DirectoryRepository {
     return createFileResult;
   }
 
-  Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
+  Future<BasicResult> writeFile(Session session, String filePath, Stream<List<int>> fileStream) async {
     print('Writing file $filePath');
     
     BasicResult writeFileResult;
     String error = '';
 
     int offset = 0;
-    // int totalBytes = 0;
 
-    final file = await File.open(repository, filePath);
+    final repository = await _openRepository(session);
+    final file = await _openFile(repository, filePath);
 
     try {
       final streamReader = ChunkedStreamIterator(fileStream);
       while (true) {
-        var buffer = await streamReader.read(File.defaultChunkSize);
+        final buffer = await streamReader.read(bufferSize);
         print('Buffer size: ${buffer.length} - offset: $offset');
-
-        print('Buffer:\n$buffer');
 
         if (buffer.isEmpty) {
           print('The buffer is empty; reading from the stream is done!');
@@ -103,6 +101,9 @@ class DirectoryRepository {
     } catch (e) {
       print('Exception writing the fie $filePath:\n${e.toString()}');
       error = 'Writing to the file $filePath failed';
+    } finally {
+      file.close();
+      repository.close();
     }
 
     writeFileResult = WriteFileResult(functionName: 'writeFile', result: file);
