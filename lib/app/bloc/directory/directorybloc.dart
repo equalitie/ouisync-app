@@ -81,12 +81,22 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     }
 
     if (event is ReadFile) {
-      await repository.readFile(event.repository, event.filePath);
+      yield DirectoryLoadInProgress();
+      
+      final readFileResult = await blocRepository.readFile(event.session, event.filePath);
+      if (readFileResult.errorMessage.isNotEmpty) {
+        print('Reading file ${event.filePath} failed:\n${readFileResult.errorMessage}');
+        yield DirectoryLoadFailure();
+
+        return;
+      }
+
+      yield DirectoryLoadSuccess(contents: readFileResult.result);
     }
   }
 
-  Future<DirectoryState> _getFolderContents(Repository repository, String folderPath, bool recursive) async {
-    final getContentsResult = await this.repository.getContents(repository, folderPath, recursive);
+  Future<DirectoryState> _getFolderContents(Session session, String folderPath, bool recursive) async {
+    final getContentsResult = await this.blocRepository.getContents(session, folderPath, recursive);
     if (getContentsResult.errorMessage.isNotEmpty) {
       print('Get contents in folder $folderPath failed:\n${getContentsResult.errorMessage}');
       return DirectoryLoadFailure();
