@@ -29,37 +29,153 @@ class ReceiveSharingIntentPage extends StatefulWidget {
   _ReceiveSharingIntentPageState createState() => _ReceiveSharingIntentPageState();
 }
 
-class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage> {
-  
+class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
+  with TickerProviderStateMixin {
+
   Widget? _bodyWidget;
+
+  late TreeViewController _treeViewController;
+
+  late AnimationController _controller;
+
+  late Color backgroundColor;
+  late Color foregroundColor;
   
   @override
   void initState() {
     super.initState();
 
+    initAnimationController();
     initFoldersList();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    _controller.dispose();
+  }
+
+  initAnimationController()  => 
+  _controller = new AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+  );
+
   Future<void> initFoldersList() async {
     setState(() {
-      _bodyWidget = _emptyTree();
+      _bodyWidget = Center(child: CircularProgressIndicator());
     });
 
-    final foldersList = await DirectoryRepository().getContentsRecursive(widget.session, '/');
-    if (foldersList.isEmpty) {
+    final nodeList = await DirectoryRepository().getContentsRecursive(widget.session, '/');
+    if (nodeList.isEmpty) {
+      setState(() {
+        _bodyWidget = _emptyTree();
+      });
       return;
     }
 
-    _buildFoldersTree(foldersList);
+    _folders(nodeList);
   }
 
   @override
   Widget build(BuildContext context) {
+    backgroundColor = Theme.of(context).cardColor;
+    foregroundColor = Theme.of(context).accentColor;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Share file to OuiSync'),
       ),
       body: _bodyWidget,
+      floatingActionButton: Dialogs.floatingActionsButtonMenu(
+        widget.directoryBloc,
+        widget.session,
+        context,
+        _controller,
+        widget.directoryBlocPath,//parentPath
+        receiveShareActions,
+        flagReceiveShareActionsDialog,
+        backgroundColor,
+        foregroundColor
+      ),
+    );
+  }
+
+  Widget _buildFileInfoHeader() { 
+    var fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
+    var pathWithoutName = removeFileNameFromPath(widget.sharedFileInfo.first.path);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.0),
+            constraints: BoxConstraints.tightForFinite(),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              color: Colors.blueGrey.shade50,
+              shape: BoxShape.rectangle,
+              boxShadow: [ 
+                BoxShadow(
+                  color: Colors.black12,
+                  offset: Offset(3.0, 3.0),
+                  blurRadius: 1.0,
+                  spreadRadius: 0.2,
+                ) 
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.file_present),
+                    SizedBox(width: 10.0),
+                    Text(
+                      fileName,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.0),
+                Text(
+                  pathWithoutName,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            )
+          ),
+          const Divider(
+            height: 30.0,
+            thickness: 1.0,
+            color: Colors.black12,
+            indent: 30.0,
+            endIndent: 30.0,
+          ),
+          Row(
+            children: [
+              Text(
+                'Where do you want to put it?',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            ]
+          ),
+        ],
+      ),
     );
   }
 
@@ -67,81 +183,169 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage> {
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      Align(
-        alignment: Alignment.center,
-        child: Text(
-          messageEmptyFolderStructure,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold
-          ),
-        ),
-      ),
-      SizedBox(height: 20.0),
-      Align(
-        alignment: Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-          child: StyledText(
-            text: messageCreateNewFolderToStartStyled,
-            style: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.normal
+      _buildFileInfoHeader(),
+      Expanded(
+        child: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                messageEmptyFolderStructure,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
             ),
-            styles: {
-              'bold': TextStyle(fontWeight: FontWeight.bold),
-              'arrow_down': IconStyle(Icons.south),
-            },
-          ),
+            SizedBox(height: 20.0),
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                child: StyledText(
+                  text: messageCreateNewFolderToStartStyled,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.normal
+                  ),
+                  styles: {
+                    'bold': TextStyle(fontWeight: FontWeight.bold),
+                    'arrow_down': IconStyle(Icons.south),
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
+      )
     ],
   );
 
-  _buildFoldersTree(List<Node> nodes) {
-    final folderNodes = <Node>[];
-    folderNodes.add(
+  _folders(List<Node> nodeList) {
+      var foldersColumn = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildFileInfoHeader(),
+            const Divider(
+              height: 20.0,
+              thickness: 0.0,
+              color: Colors.transparent,
+            ),
+            Expanded(
+              child: _buildFoldersTree(nodeList),
+            ),
+          ],
+        ),
+      );
+
+      setState(() {
+        _bodyWidget = foldersColumn;
+      });
+  }
+
+  _buildFoldersTree(List<Node> nodeList) {
+    var folderNodes = <Node>[];
+    folderNodes.add( // root node
       Node(
         parent: true,
         label: 'OuiSync',
         key: 'ouisync_repo',
         expanded: true,
-        children: nodes
+        children: nodeList
       )
     );
+    
+    return _getFolderTree(folderNodes);
+  }
 
-    var _treeViewController = TreeViewController(children: folderNodes);
-    final foldersTree = TreeView(
+  TreeView _getFolderTree(List<Node> folderNodes) {
+    _treeViewController = TreeViewController(
+      children: folderNodes
+    );
+    
+    var foldersTree = TreeView(
       allowParentSelect: true,
       controller: _treeViewController,
+      theme: _buildTreeViewTheme(),
+      onExpansionChanged: _expandNode,
       onNodeTap: (key) {
         if (key == 'file') {
           return;
         }
-
+    
         final selectedNode = _treeViewController.getNode(key);
-        final folderData = selectedNode!.data != null
-        ? selectedNode.data as FolderDescription
-        : Widget;
-        
-        final parentPath = key == 'ouisync_repo'
-        ? '/'
-        : (folderData as FolderDescription).folderData.path;
-        final fileName = removePathFromFileName(
-          '/${widget.sharedFileInfo.first.path}'
-        );
-        final destinationPath = parentPath == '/'
-        ? '/$fileName'
-        : '$parentPath/$fileName';
-
-        _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
+        _saveFileToSelectedFolder(selectedNode, key);
       },
     );
 
-    setState(() {
-      _bodyWidget = foldersTree;
-    });
+    return foldersTree;
+  }
+
+  _expandNode(String key, bool expanded) {
+    Node? node = _treeViewController.getNode(key);
+    if (node != null) {
+      List<Node> updated = _treeViewController.updateNode(
+        key,
+        node.copyWith(
+          expanded: expanded,
+          icon: expanded
+          ? Icons.folder_open
+          : Icons.folder
+        ),
+      );
+
+      setState(() {
+        _treeViewController = _treeViewController.copyWith(children: updated);
+      });
+    }
+  }
+
+  TreeViewTheme _buildTreeViewTheme() {
+    return TreeViewTheme(
+      parentLabelStyle: TextStyle(
+        fontSize: 20.0,
+        fontWeight: FontWeight.bold,
+        debugLabel: 'Parent node label'
+      ),
+      parentLabelOverflow: TextOverflow.fade,
+      iconTheme: IconThemeData(
+        size: 30.0
+      ),
+      expanderTheme: ExpanderThemeData(
+        type: ExpanderType.chevron,
+        size: 40.0
+      ),
+      labelStyle: TextStyle(
+        fontSize: 16.0,
+        fontWeight: FontWeight.normal,
+        debugLabel: 'Child node label'
+      ),
+      labelOverflow: TextOverflow.ellipsis
+    );
+  }
+
+  void _saveFileToSelectedFolder(Node<dynamic>? selectedNode, String key) {
+    final folderData = selectedNode!.data != null
+    ? selectedNode.data as FolderDescription
+    : Widget;
+    
+    final parentPath = key == 'ouisync_repo'
+    ? '/'
+    : (folderData as FolderDescription).folderData.path;
+    final fileName = removePathFromFileName(
+      '/${widget.sharedFileInfo.first.path}'
+    );
+    final destinationPath = parentPath == '/'
+    ? '/$fileName'
+    : '$parentPath/$fileName';
+        
+    _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
   }
 
   Future<void> _saveFileToOuiSync(Session session, String directoryBlocPath, String destinationPath) async {
@@ -157,64 +361,5 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage> {
     );
 
     Navigator.pop(context);
-  }
-
-  Widget _getHeader() { 
-    var fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
-    var pathWithoutName = removeFileNameFromPath(widget.sharedFileInfo.first.path);
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(
-              'Pick the location for the file:',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16.0,
-              ),
-            ),
-          ]
-        ),
-        SizedBox(height: 20.0),
-        Container(
-          constraints: BoxConstraints.tightForFinite(),
-          color: Colors.grey,
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.source),
-                  SizedBox(width: 10.0),
-                  Text(
-                    pathWithoutName,
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.file_present),
-                  SizedBox(width: 10.0),
-                  Text(
-                    fileName,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 18.0,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          )
-        ),
-      ],
-    );
   }
 }
