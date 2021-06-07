@@ -38,73 +38,173 @@ class _FilePage extends State<FilePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: BlocListener<DirectoryBloc, DirectoryState> (
-        listener: (context, state) async {
-          if (state is DirectoryInitial) {
-              // return Center(child: Text('Loading ${widget.data.path}...'));
-            }
+      body: _blocBody(),
+    );
+  }
 
-            if (state is DirectoryLoadInProgress){
-              // return Center(child: CircularProgressIndicator());
-            }
+  _blocBody() {
+    return BlocListener<DirectoryBloc, DirectoryState> (
+      listener: (context, state) async {
+        if (state is DirectoryInitial) {
+            // return Center(child: Text('Loading ${widget.data.path}...'));
+          }
 
-            if (state is DirectoryLoadSuccess) {
-              if (state.contents.isEmpty) {
-                print('The file ${widget.data.name} is empty');
-                return;
-              }  
+          if (state is DirectoryLoadInProgress){
+            // return Center(child: CircularProgressIndicator());
+          }
 
-              final tempPath = (await getTemporaryDirectory()).path;
-              final tempFileExtension = extractFileTypeFromName(widget.data.name);
-              final tempFileName = '${DateTime.now().toIso8601String()}.$tempFileExtension';
-              final tempFile = new io.File('$tempPath/$tempFileName');
-
-              await tempFile.writeAsBytes(state.contents as List<int>);
-              Share.shareFiles([tempFile.path])
-              .then((value) async => 
-                await tempFile.delete()
+          if (state is DirectoryLoadSuccess) {
+            if (state.contents.isEmpty) {
+              print('The file ${widget.data.name} is empty');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('The file ${widget.data.name} is empty'),
+                  action: SnackBarAction(
+                    label: 'HIDE',
+                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()
+                  ),
+                ),  
               );
-            }
+              
+              return;
+            }  
 
-            if (state is DirectoryLoadFailure) {
-              // return Text(
-              //   'Something went wrong!',
-              //   style: TextStyle(color: Colors.red),
-              // );
-            }
-        },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            final tempPath = (await getTemporaryDirectory()).path;
+            final tempFileExtension = extractFileTypeFromName(widget.data.name);
+            final tempFileName = '${DateTime.now().toIso8601String()}.$tempFileExtension';
+            final tempFile = new io.File('$tempPath/$tempFileName');
+
+            await tempFile.writeAsBytes(state.contents as List<int>);
+            Share.shareFiles([tempFile.path])
+            .then((value) async => 
+              await tempFile.delete()
+            );
+          }
+
+          if (state is DirectoryLoadFailure) {
+            // return Text(
+            //   'Something went wrong!',
+            //   style: TextStyle(color: Colors.red),
+            // );
+          }
+      },
+      child: _fileInfo()
+    );
+  }
+
+  _fileInfo() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.0, 30.0, 20.0, 30.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text("Folder details for ${widget.data.name}"),
-              SizedBox(height: 50.0,),
-              TextButton(
-                  onPressed: () {
-                    String filePath = widget.folderPath.isEmpty
-                    ? widget.data.name
-                    : '${widget.folderPath}/${widget.data.name}';
-                    BlocProvider.of<DirectoryBloc>(context)
-                    .add(
-                      ReadFile(
-                        session: widget.session,
-                        parentPath: widget.folderPath,
-                        filePath: filePath
-                      ),
-                    );
-                  },
-                  child: Text("Preview")
+              Text(
+                'name: ',
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold
+                ),
               ),
-              SizedBox(height: 50.0,),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text("Pop!")
+              Text(
+                widget.data.name,
+                textAlign: TextAlign.left,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 20.0,
+                ),
               ),
             ],
-          )
-        ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'location: ',
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+              Text(
+                widget.data.path
+                .replaceAll(widget.data.name, '')
+                .trimRight(),
+                textAlign: TextAlign.left,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 20.0,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'size: ',
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+              Text(
+                widget.data.size.toString(),
+                textAlign: TextAlign.left,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 20.0,
+                ),
+              ),
+            ],
+          ),
+
+          const Divider(
+            height: 30.0,
+            thickness: 1.0,
+            color: Colors.black12,
+            indent: 30.0,
+            endIndent: 30.0,
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              OutlinedButton(
+                onPressed: () {
+                  
+                },
+                child: Text('Preview'),
+              ),
+              SizedBox(width: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  String filePath = widget.folderPath.isEmpty
+                  ? widget.data.name
+                  : '${widget.folderPath}/${widget.data.name}';
+                  BlocProvider.of<DirectoryBloc>(context)
+                  .add(
+                    ReadFile(
+                      session: widget.session,
+                      parentPath: widget.folderPath,
+                      filePath: filePath
+                    ),
+                  );
+                },
+                child: Text('Share'),
+                autofocus: true,
+              ),
+            ]
+          ),
+        ],
       ),
     );
   }
