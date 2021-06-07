@@ -58,6 +58,10 @@ abstract class Dialogs {
                     dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
                     break;
 
+                  case flagReceiveShareActionsDialog:
+                    dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
+                    break;
+
                   default:
                     return;
                 }
@@ -145,6 +149,42 @@ abstract class Dialogs {
         );
         break;
         
+    }
+
+    return _actionDialog(
+      context,
+      dialogTitle,
+      actionBody
+    );
+  }
+
+  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+    String dialogTitle = '';
+    Widget? actionBody;
+
+    switch (action) {
+      case actionNewFile:
+        dialogTitle = 'Add File';
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFilePage(
+            session: session,
+            parentPath: parentPath,
+            title: 'Add File',
+          ),
+        );
+        break;
+      case actionNewFolder:
+        dialogTitle = 'New Folder';
+        actionBody = BlocProvider(
+          create: (context) => directoryBloc,
+          child: AddFolderPage(
+            session: session,
+            path: parentPath,
+            title: 'New Folder',
+          ),
+        );
+        break;
     }
 
     return _actionDialog(
