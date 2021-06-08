@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/utils/actions.dart';
+import 'package:open_file/open_file.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share/share.dart';
@@ -11,6 +12,8 @@ import 'package:share/share.dart';
 import '../bloc/blocs.dart';
 import '../data/data.dart';
 import '../models/models.dart';
+import '../utils/actions.dart';
+import '../utils/utils.dart';
 
 class FilePage extends StatefulWidget {
   FilePage({
@@ -32,6 +35,24 @@ class FilePage extends StatefulWidget {
 }
 
 class _FilePage extends State<FilePage> {
+
+  late final tempPath;
+  late final tempFileName;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initTempFileParams();
+  }
+
+  Future<void> initTempFileParams() async {
+    tempPath = (await getTemporaryDirectory()).path;
+
+    final tempFileExtension = extractFileTypeFromName(widget.data.name);
+    tempFileName = '${DateTime.now().toIso8601String()}.$tempFileExtension';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,48 +66,54 @@ class _FilePage extends State<FilePage> {
   _blocBody() {
     return BlocListener<DirectoryBloc, DirectoryState> (
       listener: (context, state) async {
-        if (state is DirectoryInitial) {
-            // return Center(child: Text('Loading ${widget.data.path}...'));
+        if (state is DirectoryLoadSuccess) {
+          if (state.contents.isEmpty) {
+            print('The file ${widget.data.name} is empty');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('The file ${widget.data.name} is empty'),
+                action: SnackBarAction(
+                  label: 'HIDE',
+                  onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()
+                ),
+              ),  
+            );
+            
+            return;
           }
 
-          if (state is DirectoryLoadInProgress){
-            // return Center(child: CircularProgressIndicator());
-          }
+          final tempFile = new io.File('$tempPath/$tempFileName');
+          await tempFile.writeAsBytes(state.contents as List<int>);
 
-          if (state is DirectoryLoadSuccess) {
-            if (state.contents.isEmpty) {
-              print('The file ${widget.data.name} is empty');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('The file ${widget.data.name} is empty'),
-                  action: SnackBarAction(
-                    label: 'HIDE',
-                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()
-                  ),
-                ),  
+          if (state.action == actionPreview) {
+            await OpenFile.open(tempFile.path)
+            .then((result) async {
+              print("type=${result.type}  message=${result.message}");
+            })
+            .whenComplete(() {
+              Timer.periodic(
+                Duration(seconds: 5),
+                (timer) async {
+                  await tempFile.delete(); 
+                  print('File ${tempFile.path} deleted from cache');
+                  timer.cancel();
+                  print('Timer cancelled');
+                }
               );
-              
-              return;
-            }  
+              print('File ${tempFile.path} opened');
+            });
+          }  
 
-            final tempPath = (await getTemporaryDirectory()).path;
-            final tempFileExtension = extractFileTypeFromName(widget.data.name);
-            final tempFileName = '${DateTime.now().toIso8601String()}.$tempFileExtension';
-            final tempFile = new io.File('$tempPath/$tempFileName');
-
-            await tempFile.writeAsBytes(state.contents as List<int>);
-            Share.shareFiles([tempFile.path])
+          if (state.action == actionShare) {
+            await Share.shareFiles([tempFile.path])
             .then((value) async => 
               await tempFile.delete()
-            );
+            )
+            .whenComplete(() => 
+              print('File ${tempFile.path} shared')
+            ); 
           }
-
-          if (state is DirectoryLoadFailure) {
-            // return Text(
-            //   'Something went wrong!',
-            //   style: TextStyle(color: Colors.red),
-            // );
-          }
+        }
       },
       child: _fileInfo()
     );
@@ -180,7 +207,18 @@ class _FilePage extends State<FilePage> {
             children: [
               OutlinedButton(
                 onPressed: () {
-                  
+                  String filePath = widget.folderPath.isEmpty
+                  ? widget.data.name
+                  : '${widget.folderPath}/${widget.data.name}';
+                  BlocProvider.of<DirectoryBloc>(context)
+                  .add(
+                    ReadFile(
+                      session: widget.session,
+                      parentPath: widget.folderPath,
+                      filePath: filePath,
+                      action: actionPreview
+                    ),
+                  );
                 },
                 child: Text('Preview'),
               ),
@@ -195,7 +233,8 @@ class _FilePage extends State<FilePage> {
                     ReadFile(
                       session: widget.session,
                       parentPath: widget.folderPath,
-                      filePath: filePath
+                      filePath: filePath,
+                      action: actionShare
                     ),
                   );
                 },
