@@ -89,3 +89,28 @@ class ReadFile extends DirectoryEvent {
   ];
 
 }
+
+class ShareFile extends DirectoryEvent {
+  const ShareFile({
+    required this.session,
+    required this.parentPath,
+    required this.filePath,
+    required this.action,
+  }) :
+  assert (filePath != ''),
+  assert (action != '');
+
+  final Session session;
+  final String parentPath;
+  final String filePath;
+  final String action;
+
+  @override
+  List<Object> get props => [
+    session,
+    parentPath,
+    filePath,
+    action
+  ];
+
+}
