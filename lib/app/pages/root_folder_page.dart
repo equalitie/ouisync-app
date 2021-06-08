@@ -155,7 +155,8 @@ class _RootFolderPageState extends State<RootFolderPage>
 
           if (state is DirectoryLoadSuccess) {
             final contents = state.contents as List<BaseItem>;
-
+            contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+            
             return contents.isEmpty 
             ? _noContents()
             : _contentsList(contents);

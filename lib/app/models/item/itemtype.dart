@@ -1,5 +1,5 @@
 enum ItemType {
+  repo,
   folder,
-  file,
-  repo
+  file
 }
