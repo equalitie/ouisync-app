@@ -50,6 +50,9 @@ const String actionNewFile = 'Add file';
 
 const String actionUseRoot = 'Use /';
 
+const String actionPreview = 'preview';
+const String actionShare = 'share';
+
 const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
 const Map<String, IconData> folderActions = const { 
   actionNewFolder: Icons.create_new_folder_rounded, 

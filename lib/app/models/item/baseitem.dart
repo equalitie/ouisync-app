@@ -29,7 +29,7 @@ abstract class BaseItem {
     this.syncStatus = syncStatus;
     this.itemType = itemType; //folder, file, safe (?)
     this.icon = icon;
-    this.user =user;
+    this.user = user;
   }
 
   String id = '';
