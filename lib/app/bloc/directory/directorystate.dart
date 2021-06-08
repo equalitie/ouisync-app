@@ -13,14 +13,17 @@ class DirectoryLoadInProgress extends DirectoryState {}
 
 class DirectoryLoadSuccess extends DirectoryState {
   const DirectoryLoadSuccess({
-    required this.contents
+    required this.contents,
+    this.action = ''
   });
 
   final List<dynamic> contents;
+  final String action;
 
   @override
   List<Object> get props => [
-    contents
+    contents,
+    action
   ];
 }
 
