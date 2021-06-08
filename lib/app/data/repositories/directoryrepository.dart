@@ -114,7 +114,7 @@ class DirectoryRepository {
     return writeFileResult; 
   }
 
-  Future<BasicResult> readFile(Session session, String filePath) async {
+  Future<BasicResult> readFile(Session session, String filePath, { String action = '' }) async {
     BasicResult readFileResult;
     String error = '';
 
@@ -134,7 +134,9 @@ class DirectoryRepository {
       repository.close();
     }
 
-    readFileResult = ReadFileResult(functionName: 'readFile', result: content);
+    readFileResult = action.isEmpty
+    ? ReadFileResult(functionName: 'readFile', result: content)
+    : ShareFileResult(functionName: 'readFile', result: content, action: action);
     if (error.isNotEmpty) {
       readFileResult.errorMessage = error;
     }
