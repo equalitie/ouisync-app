@@ -132,12 +132,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                   children: [
                     const Icon(Icons.file_present),
                     SizedBox(width: 10.0),
-                    Text(
-                      fileName,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        fileName,
+                        textAlign: TextAlign.left,
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold
+                        ),
                       ),
                     ),
                   ],
@@ -145,9 +150,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 SizedBox(height: 10.0),
                 Text(
                   pathWithoutName,
+                  textAlign: TextAlign.start,
                   softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.clip,
                   style: TextStyle(
                     fontSize: 16.0,
                   ),
