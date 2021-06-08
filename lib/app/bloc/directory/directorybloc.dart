@@ -83,7 +83,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     if (event is ReadFile) {
       yield DirectoryLoadInProgress();
       
-      final readFileResult = await blocRepository.readFile(event.session, event.filePath);
+      final readFileResult = await blocRepository.readFile(event.session, event.filePath, action: event.action);
       if (readFileResult.errorMessage.isNotEmpty) {
         print('Reading file ${event.filePath} failed:\n${readFileResult.errorMessage}');
         yield DirectoryLoadFailure();
@@ -91,7 +91,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         return;
       }
 
-      yield DirectoryLoadSuccess(contents: readFileResult.result);
+      yield DirectoryLoadSuccess(contents: readFileResult.result, action: event.action);
     }
   }
 
