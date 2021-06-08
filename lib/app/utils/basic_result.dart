@@ -106,3 +106,18 @@ class ReadFileResult extends BasicResult {
   final String functionName;
   final List<int> result;
 }
+
+class ShareFileResult extends BasicResult {
+  ShareFileResult({
+    required this.functionName,
+    required this.result,
+    required this.action
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
+
+  final String functionName;
+  final List<int> result;
+  final String action;
+}
