@@ -177,11 +177,12 @@ class _FolderPageState extends State<FolderPage>
           final item = contents[index];
           return ListItem (
               itemData: item,
-              action: () => _actionByType(
+              mainAction: () => _actionByType(
                 widget.foldersRepository,
                 widget.path,
                 item
               ),
+              popupAction: () => {},
           );
         }
     );

@@ -7,31 +7,39 @@ import '../controls.dart';
 class ListItem extends StatelessWidget {
   const ListItem({
     required this.itemData,
-    required this.action,
+    required this.mainAction,
+    required this.popupAction,
     this.isEncrypted = false,
     this.isLocal = true,
     this.isOwn = true,
   });
 
   final BaseItem itemData;
-  final Function action;
+  final Function mainAction;
+  final Function popupAction;
   final bool isEncrypted;
   final bool isLocal;
   final bool isOwn;
 
   @override
   Widget build(BuildContext context) {
-    final container = Container(
-      padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 15.0),
-      color: _getColor(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _getIconByType(),
-          _getExpandedDescriptionByType(),
-          _getActionByType(action),
-        ],
+    final container = Material(
+      child: InkWell(
+        onTap:() => mainAction.call(),
+        splashColor: Colors.blue,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 15.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _getIconByType(),
+              _getExpandedDescriptionByType(),
+              _getActionByType(popupAction),
+            ],
+          ),
+        )
       ),
+      color: _getColor(),
     );
 
     return itemData.itemType == ItemType.folder
@@ -60,7 +68,7 @@ class ListItem extends StatelessWidget {
           isEncrypted: isEncrypted,
           isLocal: isLocal,
           isOwn: isOwn,
-          action: action
+          action: mainAction
         )
         : itemData.itemType == ItemType.folder
         ? FolderDescription(folderData: itemData)
