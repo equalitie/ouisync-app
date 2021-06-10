@@ -216,7 +216,12 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           TextButton(
-            child: Text('Back to ${getParentFolderFromCurrent()}'),
+            child: Text(
+              'Back to ${getParentFolderFromCurrent()}',
+              style: TextStyle(
+                fontSize: 18.0
+              ),
+            ),
             onPressed: atRoot()
             ? null
             : () { 
