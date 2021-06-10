@@ -127,25 +127,21 @@ abstract class Dialogs {
     switch (action) {
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFolderPage(
-            session: session,
-            path: parentPath,
-            title: 'New Folder',
-          ),
+        actionBody = AddFolderPage(
+          session: session,
+          path: parentPath,
+          bloc: directoryBloc,
+          title: 'New Folder',
         );
         break;
       
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFilePage(
-            session: session,
-            parentPath: parentPath,
-            title: 'Add File',
-          ),
+        actionBody = AddFilePage(
+          session: session,
+          parentPath: parentPath,
+          bloc: directoryBloc,
+          title: 'Add File',
         );
         break;
         
@@ -165,24 +161,20 @@ abstract class Dialogs {
     switch (action) {
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFilePage(
-            session: session,
-            parentPath: parentPath,
-            title: 'Add File',
-          ),
+        actionBody = AddFilePage(
+          session: session,
+          parentPath: parentPath,
+          bloc: directoryBloc,
+          title: 'Add File',
         );
         break;
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFolderPage(
-            session: session,
-            path: parentPath,
-            title: 'New Folder',
-          ),
+        actionBody = AddFolderPage(
+          session: session,
+          path: parentPath,
+          bloc: directoryBloc,
+          title: 'New Folder',
         );
         break;
     }
