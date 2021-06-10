@@ -50,7 +50,12 @@ Future<void> printAppFolderContents(String path) async {
 
 String removePathFromFileName(String path) => path.split('/').last;
 
-String removeFileNameFromPath(String path) => path.substring(0, path.lastIndexOf('/')); 
+String extractParentFromPath(String path) {
+  final section = path.substring(0, path.lastIndexOf('/')); 
+  return section.isEmpty
+  ? '/'
+  : section;
+}
 
 dynamic extractNativeAttribute(List<String> attributesList, String attribute) => 
   attributesList.singleWhere((element) => element.startsWith('$attribute:')).split(':')[1];
