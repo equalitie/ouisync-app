@@ -105,7 +105,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           children: [
             _buildFileInfoHeader(),
             _contentNavigationButtons(),
-            _directoriesBlocBuilder()
+            Expanded(
+              flex: 1,
+              child: _directoriesBlocBuilder()
+            ),
           ]
         ),
       ),
