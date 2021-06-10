@@ -77,11 +77,9 @@ class ListItem extends StatelessWidget {
   }
 
   IconButton _getActionByType(Function action) {
-    return itemData.itemType == ItemType.repo
-        ? IconButton(icon: const Icon(Icons.storage, size: 16.0,), onPressed: () => action.call())
-        : itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_forward_ios, size: 16.0,), onPressed: () => action.call())
-        : IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: () => action.call());
+    return itemData.itemType == ItemType.file
+        ? IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: () => action.call())
+        : IconButton(onPressed: null, icon: Container());
   }
 
 }
