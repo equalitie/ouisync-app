@@ -105,6 +105,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           children: [
             _buildFileInfoHeader(),
             _contentNavigationButtons(),
+            Divider(
+              height: 10.0,
+            ),
             Expanded(
               flex: 1,
               child: _directoriesBlocBuilder()
@@ -281,7 +284,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      _buildFileInfoHeader(),
       Expanded(
         child: 
         Column(
@@ -305,7 +307,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: messageCreateNewFolderToStartStyled,
+                  text: _currentFolder == '/'
+                  ? messageCreateNewFolderRootToStartStyled
+                  : messageCreateNewFolderStyled,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.normal
@@ -325,27 +330,26 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _contentsList(List<BaseItem> contents) {
     return ListView.separated(
-      shrinkWrap: true,
-        separatorBuilder: (context, index) => Divider(
-            height: 1,
-            color: Colors.transparent,
-        ),
-        itemCount: contents.length,
-        itemBuilder: (context, index) {
-          final item = contents[index];
-          return ListItem (
-              itemData: item,
-              mainAction: () {
-                if (item.itemType == ItemType.file) {
-                  return;
-                }  
+      separatorBuilder: (context, index) => Divider(
+          height: 1,
+          color: Colors.transparent,
+      ),
+      itemCount: contents.length,
+      itemBuilder: (context, index) {
+        final item = contents[index];
+        return ListItem (
+            itemData: item,
+            mainAction: () {
+              if (item.itemType == ItemType.file) {
+                return;
+              }  
 
-                final path = updateCurrentFolder(item.path);
-                getFolderContents(path);
-              },
-              popupAction: () => {},
-          );
-        }
+              final path = updateCurrentFolder(item.path);
+              getFolderContents(path);
+            },
+            popupAction: () => {},
+        );
+      }
     );
   }
 
