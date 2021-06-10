@@ -9,7 +9,7 @@ import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
-import '../data/data.dart';
+import '../models/models.dart';
 import '../utils/utils.dart';
 
 class ReceiveSharingIntentPage extends StatefulWidget {
@@ -32,9 +32,10 @@ class ReceiveSharingIntentPage extends StatefulWidget {
 class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   with TickerProviderStateMixin {
 
-  Widget? _bodyWidget;
+  late final fileName;
+  late final pathWithoutName;
 
-  late TreeViewController _treeViewController;
+  String? _currentFolder;
 
   late AnimationController _controller;
 
@@ -45,8 +46,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   void initState() {
     super.initState();
 
+    _currentFolder = '/';
+
+    initHeaderParams();
     initAnimationController();
-    initFoldersList();
   }
 
   @override
@@ -56,27 +59,36 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     _controller.dispose();
   }
 
+  initHeaderParams() {
+    fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
+    pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
+  }
+
   initAnimationController()  => 
   _controller = new AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
 
-  Future<void> initFoldersList() async {
+  getFolderContents(path) => BlocProvider.of<DirectoryBloc>(context)
+  .add(RequestContent(
+    session: widget.session,
+    path: path,
+    recursive: false
+  ));
+
+  getParentFolderFromCurrent() =>
+    extractParentFromPath(_currentFolder!);
+
+  updateCurrentFolder(path) {
     setState(() {
-      _bodyWidget = Center(child: CircularProgressIndicator());
+      _currentFolder = path;
     });
-
-    final nodeList = await DirectoryRepository().getContentsRecursive(widget.session, '/');
-    if (nodeList.isEmpty) {
-      setState(() {
-        _bodyWidget = _emptyTree();
-      });
-      return;
-    }
-
-    _folders(nodeList);
+    return path;
   }
+
+  atRoot() =>
+    _currentFolder == '/';
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +99,16 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       appBar: AppBar(
         title: Text('Share file to OuiSync'),
       ),
-      body: _bodyWidget,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildFileInfoHeader(),
+            _contentNavigationButtons(),
+            _directoriesBlocBuilder()
+          ]
+        ),
+      ),
       floatingActionButton: Dialogs.floatingActionsButtonMenu(
         widget.directoryBloc,
         widget.session,
@@ -102,10 +123,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  Widget _buildFileInfoHeader() { 
-    var fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
-    var pathWithoutName = removeFileNameFromPath(widget.sharedFileInfo.first.path);
-
+  _buildFileInfoHeader() { 
     return Padding(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
       child: Column(
@@ -161,7 +179,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             )
           ),
           const Divider(
-            height: 30.0,
+            height: 40.0,
             thickness: 1.0,
             color: Colors.black12,
             indent: 30.0,
@@ -173,8 +191,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 'Where do you want to put it?',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold
                 ),
               ),
             ]
@@ -184,7 +202,79 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  _emptyTree() => Column(
+  _contentNavigationButtons() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          TextButton(
+            child: Text('Back to ${getParentFolderFromCurrent()}'),
+            onPressed: atRoot()
+            ? null
+            : () { 
+              final target = getParentFolderFromCurrent();
+              getFolderContents(updateCurrentFolder(target)); 
+            }
+          ),
+          Row(
+            children: [              
+              Expanded(
+                flex: 1,
+                child: Text(
+                  ' @ $_currentFolder ',
+                  style: TextStyle (
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white,
+                    backgroundColor: Colors.black
+                  ),
+                ),
+              ),
+            ]
+          ),
+        ],
+      ),
+    );
+  }
+
+  _directoriesBlocBuilder() {
+    return Center(
+      child: BlocBuilder<DirectoryBloc, DirectoryState>(
+        builder: (context, state) {
+          if (state is DirectoryInitial) {
+            return Center(child: Text('Loading contents...'));
+          }
+
+          if (state is DirectoryLoadInProgress){
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (state is DirectoryLoadSuccess) {
+            final contents = state.contents as List<BaseItem>;
+            contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+
+            return contents.isEmpty 
+            ? _noContents()
+            : _contentsList(contents);
+          }
+
+          if (state is DirectoryLoadFailure) {
+            return Text(
+              'Something went wrong!',
+              style: TextStyle(color: Colors.red),
+            );
+          }
+
+          return Center(child: Text('root'));
+        }
+      )
+    );
+  }
+
+  _noContents() => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -230,108 +320,29 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ],
   );
 
-  _folders(List<Node> nodeList) {
-      var foldersColumn = Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildFileInfoHeader(),
-            const Divider(
-              height: 20.0,
-              thickness: 0.0,
-              color: Colors.transparent,
-            ),
-            Expanded(
-              child: _buildFoldersTree(nodeList),
-            ),
-          ],
+  _contentsList(List<BaseItem> contents) {
+    return ListView.separated(
+      shrinkWrap: true,
+        separatorBuilder: (context, index) => Divider(
+            height: 1,
+            color: Colors.transparent,
         ),
-      );
+        itemCount: contents.length,
+        itemBuilder: (context, index) {
+          final item = contents[index];
+          return ListItem (
+              itemData: item,
+              mainAction: () {
+                if (item.itemType == ItemType.file) {
+                  return;
+                }  
 
-      setState(() {
-        _bodyWidget = foldersColumn;
-      });
-  }
-
-  _buildFoldersTree(List<Node> nodeList) {
-    var folderNodes = <Node>[];
-    folderNodes.add( // root node
-      Node(
-        parent: true,
-        label: 'OuiSync',
-        key: 'ouisync_repo',
-        expanded: true,
-        children: nodeList
-      )
-    );
-    
-    return _getFolderTree(folderNodes);
-  }
-
-  TreeView _getFolderTree(List<Node> folderNodes) {
-    _treeViewController = TreeViewController(
-      children: folderNodes
-    );
-    
-    var foldersTree = TreeView(
-      allowParentSelect: true,
-      controller: _treeViewController,
-      theme: _buildTreeViewTheme(),
-      onExpansionChanged: _expandNode,
-      onNodeTap: (key) {
-        if (key == 'file') {
-          return;
+                final path = updateCurrentFolder(item.path);
+                getFolderContents(path);
+              },
+              popupAction: () => {},
+          );
         }
-    
-        final selectedNode = _treeViewController.getNode(key);
-        _saveFileToSelectedFolder(selectedNode, key);
-      },
-    );
-
-    return foldersTree;
-  }
-
-  _expandNode(String key, bool expanded) {
-    Node? node = _treeViewController.getNode(key);
-    if (node != null) {
-      List<Node> updated = _treeViewController.updateNode(
-        key,
-        node.copyWith(
-          expanded: expanded,
-          icon: expanded
-          ? Icons.folder_open
-          : Icons.folder
-        ),
-      );
-
-      setState(() {
-        _treeViewController = _treeViewController.copyWith(children: updated);
-      });
-    }
-  }
-
-  TreeViewTheme _buildTreeViewTheme() {
-    return TreeViewTheme(
-      parentLabelStyle: TextStyle(
-        fontSize: 20.0,
-        fontWeight: FontWeight.bold,
-        debugLabel: 'Parent node label'
-      ),
-      parentLabelOverflow: TextOverflow.fade,
-      iconTheme: IconThemeData(
-        size: 30.0
-      ),
-      expanderTheme: ExpanderThemeData(
-        type: ExpanderType.chevron,
-        size: 40.0
-      ),
-      labelStyle: TextStyle(
-        fontSize: 16.0,
-        fontWeight: FontWeight.normal,
-        debugLabel: 'Child node label'
-      ),
-      labelOverflow: TextOverflow.ellipsis
     );
   }
 
