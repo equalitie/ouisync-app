@@ -144,6 +144,29 @@ class DirectoryRepository {
     return readFileResult;
   }
 
+  Future<BasicResult> deleteFile(Session session, String filePath) async {
+    BasicResult deleteFileResult;
+    String error = '';
+
+    final repository = await _openRepository(session);
+
+    try {
+      await File.remove(repository, filePath);
+    } catch (e) {
+      print('Exception deleting file $filePath:\n${e.toString()}');
+      error = 'Delete file $filePath failed';
+    } finally {
+      repository.close();
+    }
+
+    deleteFileResult = DeleteFileResult(functionName: 'deleteFile', result: 'OK');
+    if (error.isNotEmpty) {
+      deleteFileResult.errorMessage = error;
+    }
+
+    return deleteFileResult;
+  }
+
   Future<BasicResult> getContents(Session session, String path, bool recursive) async {
     print("Getting folder $path contents");
   
