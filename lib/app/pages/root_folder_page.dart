@@ -226,7 +226,13 @@ class _RootFolderPageState extends State<RootFolderPage>
                 widget.path,
                 item
               ),
-              popupAction: () => {},
+              secondaryAction: () => {},
+              popupMenu: Dialogs
+                .filePopupMenu(
+                  widget.session,
+                  BlocProvider. of<DirectoryBloc>(context),
+                  { 'Device': item }
+                ),
           );
         }
     );
