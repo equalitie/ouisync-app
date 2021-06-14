@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
@@ -195,6 +196,29 @@ abstract class Dialogs {
       );
     }
   );
+
+  static filePopupMenu(Session session, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
+    return PopupMenuButton(
+      itemBuilder: (context) {
+        return fileMenuOptions.entries.map((e) => 
+          PopupMenuItem(
+              child: Text(e.key),
+              value: e,
+          ) 
+        ).toList();
+      },
+      onSelected: (value) {
+        final data = (value as MapEntry<String, BaseItem>).value;
+        bloc.add(
+          DeleteFile(
+            session: session,
+            parentPath: extractParentFromPath(data.path),
+            filePath: data.path
+          )
+        );
+      }
+    );
+  }
 
   static Future<void> showRequestStoragePermissionDialog(BuildContext context) async {
     Text title = Text('OuiSync - Storage permission needed');
