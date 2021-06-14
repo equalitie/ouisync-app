@@ -2,7 +2,6 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
@@ -240,7 +239,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                     fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.italic,
                     color: Colors.white,
-                    backgroundColor: Colors.black
+                    backgroundColor: Colors.black,
                   ),
                 ),
               ),
@@ -344,34 +343,36 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         final item = contents[index];
         return ListItem (
             itemData: item,
-            mainAction: () {
-              if (item.itemType == ItemType.file) {
-                return;
-              }  
-
+            mainAction: item.itemType == ItemType.file
+            ? () { }
+            : () { 
+              _saveFileToSelectedFolder(
+                item.path,
+                removePathFromFileName(widget.sharedFileInfo.single.path)
+              );
+            },
+            secondaryAction: item.itemType == ItemType.file
+            ? () { }
+            : () {
               final path = updateCurrentFolder(item.path);
               getFolderContents(path);
             },
-            popupAction: () => {},
+            popupMenu: Dialogs
+                .filePopupMenu(
+                  widget.session,
+                  BlocProvider. of<DirectoryBloc>(context),
+                  { 'Device': item }
+                ),
+            isDestination: true,
         );
       }
     );
   }
 
-  void _saveFileToSelectedFolder(Node<dynamic>? selectedNode, String key) {
-    final folderData = selectedNode!.data != null
-    ? selectedNode.data as FolderDescription
-    : Widget;
-    
-    final parentPath = key == 'ouisync_repo'
-    ? '/'
-    : (folderData as FolderDescription).folderData.path;
-    final fileName = removePathFromFileName(
-      '/${widget.sharedFileInfo.first.path}'
-    );
-    final destinationPath = parentPath == '/'
+  void _saveFileToSelectedFolder(String path, String fileName) {
+    final destinationPath = path == '/'
     ? '/$fileName'
-    : '$parentPath/$fileName';
+    : '$path/$fileName';
         
     _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
   }
