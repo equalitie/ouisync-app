@@ -8,7 +8,9 @@ class ListItem extends StatelessWidget {
   const ListItem({
     required this.itemData,
     required this.mainAction,
-    required this.popupAction,
+    required this.secondaryAction,
+    required this.popupMenu,
+    this.isDestination = false,
     this.isEncrypted = false,
     this.isLocal = true,
     this.isOwn = true,
@@ -16,7 +18,9 @@ class ListItem extends StatelessWidget {
 
   final BaseItem itemData;
   final Function mainAction;
-  final Function popupAction;
+  final Function secondaryAction;
+  final PopupMenuButton? popupMenu;
+  final bool isDestination;
   final bool isEncrypted;
   final bool isLocal;
   final bool isOwn;
@@ -34,7 +38,7 @@ class ListItem extends StatelessWidget {
             children: <Widget>[
               _getIconByType(),
               _getExpandedDescriptionByType(),
-              _getActionByType(popupAction),
+              _getActionByType(secondaryAction, popupMenu, isDestination),
             ],
           ),
         )
@@ -76,9 +80,15 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  IconButton _getActionByType(Function action) {
+  Widget _getActionByType(Function secondaryAction, PopupMenuButton? popupMenu, bool isDestination) {
+    if (isDestination) {
+      return itemData.itemType == ItemType.folder
+        ? IconButton(icon: const Icon(Icons.arrow_forward_ios_outlined, size: 24.0,), onPressed: () => secondaryAction.call())
+        : IconButton(onPressed: null, icon: Container());
+    }
+
     return itemData.itemType == ItemType.file
-        ? IconButton(icon: const Icon(Icons.more_vert, size: 24.0,), onPressed: () => action.call())
+        ? popupMenu!
         : IconButton(onPressed: null, icon: Container());
   }
 
