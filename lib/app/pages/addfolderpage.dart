@@ -9,11 +9,13 @@ class AddFolderPage extends StatefulWidget {
   AddFolderPage({
     required this.session,
     required this.path,
+    required this.bloc,
     required this.title,
   });
 
   final Session session;
   final String path;
+  final Bloc bloc;
   final String title;
 
   @override
@@ -53,7 +55,7 @@ class _AddFolderPage extends State<AddFolderPage> {
               ? '/$newFolderName'
               : '${widget.path}/$newFolderName';  
 
-              BlocProvider.of<DirectoryBloc>(context)
+              widget.bloc
               .add(
                 CreateFolder(
                   session: widget.session,

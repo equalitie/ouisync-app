@@ -93,3 +93,24 @@ class ReadFile extends DirectoryEvent {
   ];
 
 }
+
+class DeleteFile extends DirectoryEvent {
+  const DeleteFile({
+    required this.session,
+    required this.parentPath,
+    required this.filePath,
+  }) :
+  assert (filePath != '');
+
+  final Session session;
+  final String parentPath;
+  final String filePath;
+
+  @override
+  List<Object> get props => [
+    session,
+    parentPath,
+    filePath,
+  ];
+
+}

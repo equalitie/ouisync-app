@@ -28,8 +28,10 @@ const String messageNoRepos = 'No repositories found';
 const String messageEmptyRepo = 'This repository is empty';
 const String messageEmptyFolder = 'This folder is empty';
 const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
-const String messageCreateNewFolderToStartStyled = 'Maybe start by creating a new folder using <bold>Actions</bold> <arrow_down/>'
+const String messageCreateNewFolderRootToStartStyled = 'Maybe start by creating a new folder using <bold>Actions</bold> <arrow_down/>'
 '\n... or just go ahead and use <bold>/</bold>, we are not your mother';
+const String messageCreateNewFolderStyled = 'You can create a new folder using <bold>Actions</bold> <arrow_down/>'
+'\n... or just drop it here, champ';
 
 const String messageCreateNewRepoStyled = 'Create a new repo using <bold>Actions</bold> <arrow_down/>';
 const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';

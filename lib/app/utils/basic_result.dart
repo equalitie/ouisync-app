@@ -121,3 +121,16 @@ class ShareFileResult extends BasicResult {
   final List<int> result;
   final String action;
 }
+
+class DeleteFileResult extends BasicResult {
+  DeleteFileResult({
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
+
+  final String functionName;
+  final String result;
+}

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
@@ -127,25 +128,21 @@ abstract class Dialogs {
     switch (action) {
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFolderPage(
-            session: session,
-            path: parentPath,
-            title: 'New Folder',
-          ),
+        actionBody = AddFolderPage(
+          session: session,
+          path: parentPath,
+          bloc: directoryBloc,
+          title: 'New Folder',
         );
         break;
       
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFilePage(
-            session: session,
-            parentPath: parentPath,
-            title: 'Add File',
-          ),
+        actionBody = AddFilePage(
+          session: session,
+          parentPath: parentPath,
+          bloc: directoryBloc,
+          title: 'Add File',
         );
         break;
         
@@ -165,24 +162,20 @@ abstract class Dialogs {
     switch (action) {
       case actionNewFile:
         dialogTitle = 'Add File';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFilePage(
-            session: session,
-            parentPath: parentPath,
-            title: 'Add File',
-          ),
+        actionBody = AddFilePage(
+          session: session,
+          parentPath: parentPath,
+          bloc: directoryBloc,
+          title: 'Add File',
         );
         break;
       case actionNewFolder:
         dialogTitle = 'New Folder';
-        actionBody = BlocProvider(
-          create: (context) => directoryBloc,
-          child: AddFolderPage(
-            session: session,
-            path: parentPath,
-            title: 'New Folder',
-          ),
+        actionBody = AddFolderPage(
+          session: session,
+          path: parentPath,
+          bloc: directoryBloc,
+          title: 'New Folder',
         );
         break;
     }
@@ -203,6 +196,29 @@ abstract class Dialogs {
       );
     }
   );
+
+  static filePopupMenu(Session session, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
+    return PopupMenuButton(
+      itemBuilder: (context) {
+        return fileMenuOptions.entries.map((e) => 
+          PopupMenuItem(
+              child: Text(e.key),
+              value: e,
+          ) 
+        ).toList();
+      },
+      onSelected: (value) {
+        final data = (value as MapEntry<String, BaseItem>).value;
+        bloc.add(
+          DeleteFile(
+            session: session,
+            parentPath: extractParentFromPath(data.path),
+            filePath: data.path
+          )
+        );
+      }
+    );
+  }
 
   static Future<void> showRequestStoragePermissionDialog(BuildContext context) async {
     Text title = Text('OuiSync - Storage permission needed');

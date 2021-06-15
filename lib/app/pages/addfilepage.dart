@@ -12,11 +12,13 @@ class AddFilePage extends StatefulWidget {
   AddFilePage({
     required this.session,
     required this.parentPath,
+    required this.bloc,
     required this.title,
   });
 
   final Session session;
   final String parentPath;
+  final Bloc bloc;
   final String title;
 
   @override
@@ -56,7 +58,7 @@ class _AddFilePage extends State<AddFilePage> {
               : null;
             },
             onSaved: (newRepoName) {
-              BlocProvider.of<DirectoryBloc>(context)
+              widget.bloc
               .add(
                 CreateFile(
                   session: widget.session,

@@ -221,11 +221,18 @@ class _RootFolderPageState extends State<RootFolderPage>
           final item = contents[index];
           return ListItem (
               itemData: item,
-              action: () => _actionByType(
+              mainAction: () => _actionByType(
                 widget.foldersRepository,
                 widget.path,
                 item
               ),
+              secondaryAction: () => {},
+              popupMenu: Dialogs
+                .filePopupMenu(
+                  widget.session,
+                  BlocProvider. of<DirectoryBloc>(context),
+                  { 'Device': item }
+                ),
           );
         }
     );
