@@ -28,7 +28,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
           return;
         }
 
-        yield await _getFolderContents(event.session, event.parentPath, false);
+        yield await _getFolderContents(event.session, event.parentPath);
 
       } catch (e) {
         print('Exception creating a new directory (${event.newFolderPath}) in repository ${event.session}:\n${e.toString()}');
@@ -40,7 +40,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield DirectoryLoadInProgress();
       
       try {
-        yield await _getFolderContents(event.session, event.path, event.recursive);
+        yield await _getFolderContents(event.session, event.path);
 
       } catch (e) {
         print('Exception getting the directory\'s ${event.path} contents in repository ${event.session}:\n${e.toString()}');
@@ -72,7 +72,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
           return;
         }
 
-        yield await _getFolderContents(event.session, event.parentPath, false);
+        yield await _getFolderContents(event.session, event.parentPath);
         
       } catch (e) {
         print('Exception creating file ${event.newFilePath} in repository ${event.newFilePath}:\n${e.toString()}');
@@ -107,7 +107,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
           return;
         }
 
-        yield await _getFolderContents(event.session, event.parentPath, false);
+        yield await _getFolderContents(event.session, event.parentPath);
 
       } catch (e) {
         print('Exception deleting the file (${event.filePath}) in repository ${event.session}:\n${e.toString()}');
@@ -116,8 +116,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     }
   }
 
-  Future<DirectoryState> _getFolderContents(Session session, String folderPath, bool recursive) async {
-    final getContentsResult = await this.blocRepository.getContents(session, folderPath, recursive);
+  Future<DirectoryState> _getFolderContents(Session session, String folderPath) async {
+    final getContentsResult = await this.blocRepository.getFolderContents(session, folderPath);
     if (getContentsResult.errorMessage.isNotEmpty) {
       print('Get contents in folder $folderPath failed:\n${getContentsResult.errorMessage}');
       return DirectoryLoadFailure();

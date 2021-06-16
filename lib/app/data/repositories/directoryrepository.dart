@@ -17,35 +17,6 @@ class DirectoryRepository {
   _openFile(repository, path) async => 
     await File.open(repository, path);
 
-  Future<BasicResult> createFolder(Session session, String path)  async {
-    BasicResult createFolderResult;
-    String error = '';
-
-    bool created = false;
-    final repository = await _openRepository(session);
-
-    try {
-      print('Creating folder $path');
-
-      await Directory.create(repository, path);
-      created = true;
-    } catch (e) {
-      print('Error creating folder $path: $e');
-
-      created = false;
-      error = e.toString();
-    } finally {
-      repository.close();
-    }
-
-    createFolderResult = CreateFolderResult(functionName: 'createFolder', result: created);
-    if (error.isNotEmpty) {
-      createFolderResult.errorMessage = error;
-    }
-
-    return createFolderResult;
-  }
-
   Future<BasicResult> createFile(Session session, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
@@ -167,25 +138,38 @@ class DirectoryRepository {
     return deleteFileResult;
   }
 
-  Future<BasicResult> getContents(Session session, String path, bool recursive) async {
-    print("Getting folder $path contents");
-  
-    if (recursive) {
-      print('(recursive...)');
+  Future<BasicResult> createFolder(Session session, String path)  async {
+    BasicResult createFolderResult;
+    String error = '';
 
-      List<Node> returnedContent = await getContentsRecursive(session, path);
-      BasicResult getContentsRecursiveResult = GetContentRecursiveResult(
-        functionName: '_getContentsRecursive',
-        result: returnedContent
-      );
+    bool created = false;
+    final repository = await _openRepository(session);
 
-      return getContentsRecursiveResult;
+    try {
+      print('Creating folder $path');
+
+      await Directory.create(repository, path);
+      created = true;
+    } catch (e) {
+      print('Error creating folder $path: $e');
+
+      created = false;
+      error = e.toString();
+    } finally {
+      repository.close();
     }
 
-    return await _getFolderContents(session, path);
+    createFolderResult = CreateFolderResult(functionName: 'createFolder', result: created);
+    if (error.isNotEmpty) {
+      createFolderResult.errorMessage = error;
+    }
+
+    return createFolderResult;
   }
 
-  Future<BasicResult> _getFolderContents(Session session, String path) async {
+  Future<BasicResult> getFolderContents(Session session, String path) async {
+    print("Getting folder $path contents");
+  
     BasicResult getContentsResult;
     String error = '';
 
@@ -197,14 +181,16 @@ class DirectoryRepository {
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        returnedContent.add(
-          _castToBaseItem(
-            path,
-            iterator.current.name,
-            iterator.current.type,
-            0.0
-          )!
+        final returned =  await _castToBaseItem(
+          session,
+          path,
+          iterator.current.name,
+          iterator.current.type,
+          0.0
         );
+
+        returnedContent.add(returned);
+        
       } 
     } catch (e) {
       print('Error traversing directory $path: $e');
@@ -214,7 +200,7 @@ class DirectoryRepository {
       repository.close();
     }
     
-    getContentsResult = GetContentResult(functionName: '_getFolderContents', result: returnedContent);
+    getContentsResult = GetContentResult(functionName: 'getFolderContents', result: returnedContent);
     if (error.isNotEmpty) {
       getContentsResult.errorMessage = error;
     }
@@ -222,8 +208,8 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<Node>> getContentsRecursive(Session session, String path) async {
-    final contentNodes = <Node>[];
+  Future<List<BaseItem>> getContentsRecursive(Session session, String path) async {
+    final contentNodes = <BaseItem>[];
 
     final repository = await _openRepository(session);
     final directory = await _openDirectory(repository, path);
@@ -234,19 +220,29 @@ class DirectoryRepository {
       directory.close();
       repository.close();
 
-      return <Node>[];
+      return <BaseItem>[];
     }
 
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        final newNode = await _castToTreeView(
+        final newNode = await _castToBaseItem(
           session,
           path,
-          iterator.current
+          iterator.current.name,
+          iterator.current.type,
+          0.0
         );
 
-        contentNodes.add(newNode!);
+        if (newNode.itemType == ItemType.folder) {
+          final itemPath = path == '/'
+          ? '/${iterator.current.name}'
+          : '$path/${iterator.current.name}';
+
+          (newNode as FolderItem).items = await getContentsRecursive(session, itemPath);  
+        }
+        
+        contentNodes.add(newNode);
       }  
     } catch (e) {
       print('Error traversing directory $path: $e');
@@ -258,35 +254,7 @@ class DirectoryRepository {
     return contentNodes;
   }
 
-  Future<Node?> _castToTreeView(Session session, String parentPath, DirEntry entry) async {
-    final item = _castToBaseItem(parentPath, entry.name, entry.type, 0.0);
-
-    if (item == null) {
-      return null;
-    }
-
-    if (item is FileItem) {
-      return Node(
-        label: item.name,
-        key: 'file',
-        icon: Icons.insert_drive_file,
-        data: FileDescription(fileData: item)
-      );
-    }
-
-    if (item is FolderItem) {
-      return Node(
-        parent: true,
-        label: item.name,
-        key: item.name,
-        icon: Icons.folder,
-        data: FolderDescription(folderData: item),
-        children: await getContentsRecursive(session, item.path),
-      );
-    }
-  }
-
-  BaseItem? _castToBaseItem(String path, String name, EntryType type, double size) {
+  Future<BaseItem> _castToBaseItem(Session session, String path, String name, EntryType type, double size) async {
     final itemPath = path == '/'
     ? '/$name'
     : '$path/$name';
@@ -322,7 +290,7 @@ class DirectoryRepository {
         lastModificationDate: DateTime.now()
       ); 
     }
-    
-    return null;
+
+    return <BaseItem>[].single;
   }
 }
