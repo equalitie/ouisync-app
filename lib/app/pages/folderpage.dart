@@ -185,9 +185,10 @@ class _FolderPageState extends State<FolderPage>
               secondaryAction: () => {},
               popupMenu: Dialogs
                 .filePopupMenu(
+                  context,
                   widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
-                  { 'Device': item }
+                  { filePopupMenuDelete: item }
                 ),
           );
         }

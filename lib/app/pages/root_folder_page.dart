@@ -229,9 +229,10 @@ class _RootFolderPageState extends State<RootFolderPage>
               secondaryAction: () => {},
               popupMenu: Dialogs
                 .filePopupMenu(
+                  context,
                   widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
-                  { 'Device': item }
+                  { filePopupMenuDelete: item }
                 ),
           );
         }

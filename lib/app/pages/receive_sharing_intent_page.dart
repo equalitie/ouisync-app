@@ -359,9 +359,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             },
             popupMenu: Dialogs
                 .filePopupMenu(
+                  context,
                   widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
-                  { 'Device': item }
+                  { filePopupMenuDelete: item }
                 ),
             isDestination: true,
         );
