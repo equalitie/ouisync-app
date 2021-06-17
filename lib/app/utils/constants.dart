@@ -67,3 +67,5 @@ const Map<String, IconData> receiveShareActions = const {
 
 const int bufferSize = 64000;
 const String EndOfFile = "EOF";
+
+const String filePopupMenuDelete = 'Delete';
