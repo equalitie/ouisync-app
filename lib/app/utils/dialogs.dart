@@ -197,7 +197,7 @@ abstract class Dialogs {
     }
   );
 
-  static filePopupMenu(Session session, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
+  static filePopupMenu(BuildContext context, Session session, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
     return PopupMenuButton(
       itemBuilder: (context) {
         return fileMenuOptions.entries.map((e) => 
@@ -209,16 +209,86 @@ abstract class Dialogs {
       },
       onSelected: (value) {
         final data = (value as MapEntry<String, BaseItem>).value;
-        bloc.add(
-          DeleteFile(
-            session: session,
-            parentPath: extractParentFromPath(data.path),
-            filePath: data.path
-          )
-        );
+        switch (value.key) {
+          case filePopupMenuDelete:
+            _deleteFile(context, bloc, session, data.path);
+            break;
+        }
       }
     );
   }
+
+  static _deleteFile(BuildContext context, bloc, session, path) =>
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        final fileName = removePathFromFileName(path);
+        final parent = extractParentFromPath(path);
+
+        return AlertDialog(
+          title: const Text('Delete file'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  fileName,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '@ ',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    Text(
+                      parent,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 30.0,
+                ),
+                const Text('Are you sure you want to delete this file?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('DELETE'),
+              onPressed: () {
+                bloc
+                .add(
+                  DeleteFile(
+                    session: session,
+                    parentPath: parent,
+                    filePath: path
+                  )
+                );
+
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
 
   static Future<void> showRequestStoragePermissionDialog(BuildContext context) async {
     Text title = Text('OuiSync - Storage permission needed');
