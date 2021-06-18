@@ -37,7 +37,7 @@ const String messageCreateNewRepoStyled = 'Create a new repo using <bold>Actions
 const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';
 
 const double actionsDialogPadding = 20.0;
-const double actionsDialogAvatarRadius = 45.0;
+const double actionsDialogAvatarRadius = 10.0;
 
 const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds
 
@@ -50,6 +50,9 @@ const String actionNewRepo = 'Add repo';
 const String actionNewFolder = 'Add folder';
 const String actionNewFile = 'Add file';
 
+const String actionDeleteFolder = 'Delete folder';
+const String actionDeleteFile = 'Delete file';
+
 const String actionUseRoot = 'Use /';
 
 const String actionPreview = 'preview';
@@ -59,6 +62,7 @@ const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_ne
 const Map<String, IconData> folderActions = const { 
   actionNewFolder: Icons.create_new_folder_rounded, 
   actionNewFile: Icons.file_upload,
+  actionDeleteFolder: Icons.delete_sharp
 };
 const Map<String, IconData> receiveShareActions = const {
   actionUseRoot: Icons.save_alt_rounded,
@@ -67,5 +71,3 @@ const Map<String, IconData> receiveShareActions = const {
 
 const int bufferSize = 64000;
 const String EndOfFile = "EOF";
-
-const String filePopupMenuDelete = 'Delete';
