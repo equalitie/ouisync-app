@@ -293,4 +293,27 @@ class DirectoryRepository {
 
     return <BaseItem>[].single;
   }
+
+  Future<BasicResult> deleteFolder(Session session, String path) async {
+    BasicResult deleteFolderResult;
+    String error = '';
+
+    final repository = await _openRepository(session);
+
+    try {
+      await Directory.remove(repository, path);
+    } catch (e) {
+      print('Exception deleting folder $path:\n${e.toString()}');
+      error = 'Delete folder $path failed';
+    } finally {
+      repository.close();
+    }
+
+    deleteFolderResult = DeleteFolderResult(functionName: 'deleteFolder', result: 'OK');
+    if (error.isNotEmpty) {
+      deleteFolderResult.errorMessage = error;
+    }
+
+    return deleteFolderResult;
+  }
 }

@@ -48,6 +48,27 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       }
     }
 
+    if (event is DeleteFolder) {
+      yield DirectoryLoadInProgress();
+
+      try{
+        final deleteFolderResult = await this.blocRepository.deleteFolder(event.session, event.path);
+        if (deleteFolderResult.errorMessage.isNotEmpty) 
+        {
+          print('The folder (${event.path}) could not be deleted in repository ${event.session}');
+          yield DirectoryLoadFailure();
+
+          return;
+        }
+
+        yield await _getFolderContents(event.session, event.parentPath);
+
+      } catch (e) {
+        print('Exception deleting the folder (${event.path}) in repository ${event.session}:\n${e.toString()}');
+        yield DirectoryLoadFailure();
+      }
+    }
+
     if (event is CreateFile) {
       yield DirectoryLoadInProgress();
 
