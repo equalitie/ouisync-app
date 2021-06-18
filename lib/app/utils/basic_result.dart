@@ -134,3 +134,16 @@ class DeleteFileResult extends BasicResult {
   final String functionName;
   final String result;
 }
+
+class DeleteFolderResult extends BasicResult {
+  DeleteFolderResult({
+    required this.functionName,
+    required this.result,
+  }) : super(
+    functionName: functionName,
+    result: result
+  );
+
+  final String functionName;
+  final String result;
+}
