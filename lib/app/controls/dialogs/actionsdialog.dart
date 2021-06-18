@@ -67,18 +67,6 @@ class _ActionsDialogState extends State<ActionsDialog> {
             },
           ),
         ),
-        Positioned(
-          left: actionsDialogPadding,
-            right: actionsDialogPadding,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: actionsDialogAvatarRadius,
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(actionsDialogAvatarRadius)),
-                  child: Image.network('https://equalit.ie/wp-content/uploads/2015/04/eq-logo-site.jpg')
-              ),
-            ),
-        ),
       ],
     );
   }
