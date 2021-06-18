@@ -17,7 +17,7 @@ abstract class Dialogs {
     Session session,
     BuildContext context,
     AnimationController controller,
-    String parentPath,
+    String path,
     Map<String, IconData> actions,
     String actionsDialog,
     Color backgroundColor,
@@ -56,11 +56,11 @@ abstract class Dialogs {
                     break;
 
                   case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
+                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
                     break;
 
                   case flagReceiveShareActionsDialog:
-                    dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, parentPath, actionName);
+                    dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
                     break;
 
                   default:
@@ -121,7 +121,7 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) {
     String dialogTitle = '';
     Widget? actionBody;
 
@@ -130,7 +130,7 @@ abstract class Dialogs {
         dialogTitle = 'New Folder';
         actionBody = AddFolderPage(
           session: session,
-          path: parentPath,
+          path: path,
           bloc: directoryBloc,
           title: 'New Folder',
         );
@@ -140,18 +140,81 @@ abstract class Dialogs {
         dialogTitle = 'Add File';
         actionBody = AddFilePage(
           session: session,
-          parentPath: parentPath,
+          parentPath: path,
           bloc: directoryBloc,
           title: 'Add File',
         );
         break;
-        
+
+      case actionDeleteFolder:
+        final parentPath = extractParentFromPath(path);
+
+        return showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+
+            return buildDeleteFolderAlertDialog(
+              directoryBloc,
+              session,
+              parentPath,
+              path,
+              context,
+            );
+          },
+        );
     }
 
     return _actionDialog(
       context,
       dialogTitle,
       actionBody
+    );
+  }
+
+  static AlertDialog buildDeleteFolderAlertDialog(bloc, session, parentPath, path, BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete folder'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+              path,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold
+              ),
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            const Text('Are you sure you want to delete this folder?'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('DELETE'),
+          onPressed: () {
+            bloc
+            .add(
+              DeleteFolder(
+                session: session,
+                parentPath: parentPath,
+                path: path
+              )
+            );
+    
+            Navigator.of(context).pop(true);
+          },
+        ),
+        TextButton(
+          child: const Text('CANCEL'),
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        ),
+      ],
     );
   }
 
@@ -210,7 +273,7 @@ abstract class Dialogs {
       onSelected: (value) {
         final data = (value as MapEntry<String, BaseItem>).value;
         switch (value.key) {
-          case filePopupMenuDelete:
+          case actionDeleteFile:
             _deleteFileWithConfirmation(context, bloc, session, data.path);
             break;
         }
@@ -226,11 +289,11 @@ abstract class Dialogs {
         final fileName = removePathFromFileName(path);
         final parent = extractParentFromPath(path);
 
-        return buildDeleteAlertDialog(bloc, session, path, context, fileName, parent);
+        return buildDeleteFileAlertDialog(bloc, session, path, context, fileName, parent);
       },
     );
 
-  static AlertDialog buildDeleteAlertDialog(bloc, session, path, BuildContext context, String fileName, String parent) {
+  static AlertDialog buildDeleteFileAlertDialog(bloc, session, path, BuildContext context, String fileName, String parent) {
     return AlertDialog(
       title: const Text('Delete file'),
       content: SingleChildScrollView(
