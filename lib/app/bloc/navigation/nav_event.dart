@@ -6,14 +6,18 @@ abstract class NavigationEvent extends Equatable {
 
 class NavigateTo extends NavigationEvent {
   const NavigateTo(
+    this.origin,
     this.destination
   ) : 
+  assert (origin != ''),
   assert (destination != '');
 
+  final String origin;
   final String destination;
 
   @override
   List<Object?> get props => [
+    origin,
     destination
   ];
 }
