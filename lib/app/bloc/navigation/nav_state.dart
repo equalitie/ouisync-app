@@ -1,16 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-abstract class NavigationState extends Equatable {
-  const NavigationState();
-
-  @override
-  List<Object> get props => [];
-}
-
-class NavigateToInProgress extends NavigationState { }
-
-class NavigateToSucess extends NavigationState {
-  const NavigateToSucess(
+class NavigationState extends Equatable {
+  const NavigationState(
     this.parentPath,
     this.destinationPath
   ) :
@@ -26,5 +17,3 @@ class NavigateToSucess extends NavigationState {
     destinationPath
   ];
 }
-
-class NavigateToFailure extends NavigationState { }
