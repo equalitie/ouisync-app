@@ -5,9 +5,9 @@ abstract class NavigationEvent extends Equatable {
 }
 
 class NavigateTo extends NavigationEvent {
-  const NavigateTo({
-    required this.destination
-  }) : 
+  const NavigateTo(
+    this.destination
+  ) : 
   assert (destination != '');
 
   final String destination;
