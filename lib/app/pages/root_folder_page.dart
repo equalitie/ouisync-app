@@ -232,7 +232,7 @@ class _RootFolderPageState extends State<RootFolderPage>
                   context,
                   widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
-                  { filePopupMenuDelete: item }
+                  { actionDeleteFile: item }
                 ),
           );
         }

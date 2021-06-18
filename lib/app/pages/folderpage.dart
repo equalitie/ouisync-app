@@ -188,7 +188,7 @@ class _FolderPageState extends State<FolderPage>
                   context,
                   widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
-                  { filePopupMenuDelete: item }
+                  { actionDeleteFile: item }
                 ),
           );
         }
