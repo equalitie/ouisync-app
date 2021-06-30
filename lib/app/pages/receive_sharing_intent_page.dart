@@ -297,14 +297,21 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             : () { 
               _saveFileToSelectedFolder(
                 item.path,
-                removePathFromFileName(widget.sharedFileInfo.single.path)
+                getPathFromFileName(widget.sharedFileInfo.single.path)
               );
             },
             secondaryAction: item.itemType == ItemType.file
             ? () { }
             : () {
-              final path = updateCurrentFolder(item.path);
-              getFolderContents(path);
+               _navigateTo(
+                Navigation.folder,
+                extractParentFromPath(item.path),
+                item.path
+              );
+
+               setState(() {
+                _currentFolder = item.path;
+              });
             },
             popupMenu: Dialogs
                 .filePopupMenu(
@@ -324,21 +331,38 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ? '/$fileName'
     : '$path/$fileName';
         
-    _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
+    _saveFileToOuiSync(widget.session, path, destinationPath);
   }
 
-  Future<void> _saveFileToOuiSync(Session session, String directoryBlocPath, String destinationPath) async {
+  Future<void> _saveFileToOuiSync(Session session, String parentPath, String destinationPath) async {
     var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
     widget.directoryBloc
     .add(
       CreateFile(
         session: session,
-        parentPath: directoryBlocPath,
+        parentPath: parentPath,
         newFilePath: destinationPath,
         fileByteStream: fileStream
       )
     );
 
+    _navigateTo(
+      Navigation.folder,
+      extractParentFromPath(parentPath),
+      parentPath
+    );
+
     Navigator.pop(context);
+  }
+
+  _navigateTo(type, parent, destination) {
+    BlocProvider.of<NavigationBloc>(context)
+    .add(
+      NavigateTo(
+        type,
+        parent,
+        destination
+      )
+    );
   }
 }
