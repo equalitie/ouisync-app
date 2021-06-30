@@ -69,26 +69,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
 
-  getFolderContents(path) => BlocProvider.of<DirectoryBloc>(context)
-  .add(RequestContent(
-    session: widget.session,
-    path: path,
-    recursive: false
-  ));
-
-  getParentFolderFromCurrent() =>
-    extractParentFromPath(_currentFolder!);
-
-  updateCurrentFolder(path) {
-    setState(() {
-      _currentFolder = path;
-    });
-    return path;
-  }
-
-  atRoot() =>
-    _currentFolder == '/';
-
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).cardColor;
