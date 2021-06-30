@@ -13,6 +13,8 @@ const String repositoriesFolder = 'repos';
 const String titleApp = 'OuiSync';
 const String titleRootPage = 'Repositories';
 
+const String slash = '/';
+
 const String messageNoStoragePermissionsGranted = 'OuiSync need access to the phone storage to operate.'
 '\n\nWithout this permission the app can\'t function properly.'
 '\n\nTo grant the permissions needed, please follow the instructions below:\n'
