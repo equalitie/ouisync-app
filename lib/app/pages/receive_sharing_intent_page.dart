@@ -83,7 +83,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildFileInfoHeader(),
-            _contentNavigationButtons(),
+            _navigationRoute(),
             Divider(
               height: 10.0,
             ),
@@ -187,48 +187,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  _contentNavigationButtons() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TextButton(
-            child: Text(
-              'Back to ${getParentFolderFromCurrent()}',
-              style: TextStyle(
-                fontSize: 18.0
-              ),
-            ),
-            onPressed: atRoot()
-            ? null
-            : () { 
-              final target = getParentFolderFromCurrent();
-              getFolderContents(updateCurrentFolder(target)); 
-            }
-          ),
-          Row(
-            children: [              
-              Expanded(
-                flex: 1,
-                child: Text(
-                  ' @ $_currentFolder ',
-                  style: TextStyle (
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.white,
-                    backgroundColor: Colors.black,
-                  ),
-                ),
-              ),
-            ]
-          ),
-        ],
-      ),
-    );
-  }
+  _navigationRoute() => BlocBuilder<RouteBloc, RouteState>(
+    builder: (context, state) {
+      if (state is RouteLoadSuccess) {
+        return state.route;
+      }
+
+      return Container(
+        child: Text('[!]]')
+      );
+    }
+  );
 
   _directoriesBlocBuilder() {
     return Center(
