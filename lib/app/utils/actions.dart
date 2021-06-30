@@ -37,3 +37,86 @@ String extractFileTypeFromName(String fileName) {
   return fileName.substring(fileName.lastIndexOf('.') + 1);
 }
 
+
+sectionWidget(text) => Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(1.0),
+      color: text == slash
+      ? Colors.black
+      : Colors.amber[500],
+      shape: BoxShape.rectangle,
+    ),
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(10.0, 1.0, 15.0, 2.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+        ),
+      )
+    )
+  );
+
+  slashWidget() => Text(
+    slash,
+    style: TextStyle(
+      color: Colors.black,
+      fontSize: 20.0,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  buildRouteSection(Bloc bloc, String parentPath, String destinationPath) {
+    final text = destinationPath == slash
+    ? destinationPath
+    : removeParentFromPath(destinationPath).replaceAll(slash, '').trim();
+
+    return GestureDetector(
+      onTap: () => navigateToSection(bloc, parentPath, destinationPath),
+      child: sectionWidget(text),
+    );
+  }
+
+  buildRoute(route) => Padding(
+    padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 2.0),
+    child: Row(
+      children: route,
+    ),
+  );
+
+  getPathMap(String path) {
+    final pathMap = new Map();
+
+    var slashCount = path.split(slash).length - 1;
+    var offset = 1;
+
+    while (slashCount > 0) {
+      var firstIndex = path.indexOf(slash, offset);
+      var section = firstIndex > 0 
+      ? path.substring(0, firstIndex) 
+      : path;
+      
+      if (section.endsWith(slash)) {
+        section = section.substring(0, section.length -1);
+      }
+
+      final parent = extractParentFromPath(section);
+      pathMap[parent] = section;
+
+      offset = firstIndex + 1;
+      slashCount--;
+    }
+
+    return pathMap;
+  }
+
+  navigateToSection(bloc, parent, destination) => bloc
+    .add(
+      NavigateTo(
+        Navigation.folder,
+        parent,
+        destination
+      )
+    );
