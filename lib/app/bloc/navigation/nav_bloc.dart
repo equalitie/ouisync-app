@@ -1,15 +1,22 @@
 import 'package:bloc/bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
+
+import '../blocs.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-  NavigationBloc(NavigationState initialState) : super(initialState);
+  NavigationBloc({
+    required this.rootPath
+  }) : super(NavigationInitial());
+
+  final String rootPath;
 
   @override
   Stream<NavigationState> mapEventToState(NavigationEvent event) async* {
     if (event is NavigateTo) {
-      if (event.destination != state.destinationPath) {
-        yield NavigationState(event.origin, event.destination);
-      }
+      yield NavigationLoadSuccess(
+        navigation: event.navigation,
+        parentPath: event.origin,
+        destinationPath: event.destination
+      );
     }
   }
   
