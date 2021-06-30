@@ -45,7 +45,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   void initState() {
     super.initState();
 
-    _currentFolder = '/';
+    _currentFolder = slash;
 
     initHeaderParams();
     initAnimationController();
@@ -311,7 +311,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: _currentFolder == '/'
+                  text: _currentFolder == slash
                   ? messageCreateNewFolderRootToStartStyled
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
