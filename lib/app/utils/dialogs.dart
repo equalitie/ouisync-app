@@ -286,7 +286,7 @@ abstract class Dialogs {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        final fileName = removePathFromFileName(path);
+        final fileName = getPathFromFileName(path);
         final parent = extractParentFromPath(path);
 
         return buildDeleteFileAlertDialog(bloc, session, path, context, fileName, parent);

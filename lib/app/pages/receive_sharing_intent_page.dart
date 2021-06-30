@@ -59,7 +59,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   }
 
   initHeaderParams() {
-    fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
+    fileName = getPathFromFileName(widget.sharedFileInfo.first.path);
     pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
   }
 

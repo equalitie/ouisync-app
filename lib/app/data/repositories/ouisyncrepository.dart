@@ -43,7 +43,7 @@ class OuisyncRepository {
     List<BaseItem> newList = repos.map((repo) => 
       FolderItem(
         id: '',
-        name: removePathFromFileName(repo.path),
+        name: getPathFromFileName(repo.path),
         path: repo.path,
         size: 0.0,
         syncStatus: SyncStatus.idle,
