@@ -45,7 +45,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   void initState() {
     super.initState();
 
-    _currentFolder = '/';
+    _currentFolder = slash;
 
     initHeaderParams();
     initAnimationController();
@@ -59,7 +59,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   }
 
   initHeaderParams() {
-    fileName = removePathFromFileName(widget.sharedFileInfo.first.path);
+    fileName = getPathFromFileName(widget.sharedFileInfo.first.path);
     pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
   }
 
@@ -68,26 +68,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     vsync: this,
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
-
-  getFolderContents(path) => BlocProvider.of<DirectoryBloc>(context)
-  .add(RequestContent(
-    session: widget.session,
-    path: path,
-    recursive: false
-  ));
-
-  getParentFolderFromCurrent() =>
-    extractParentFromPath(_currentFolder!);
-
-  updateCurrentFolder(path) {
-    setState(() {
-      _currentFolder = path;
-    });
-    return path;
-  }
-
-  atRoot() =>
-    _currentFolder == '/';
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +83,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildFileInfoHeader(),
-            _contentNavigationButtons(),
+            _navigationRoute(),
             Divider(
               height: 10.0,
             ),
@@ -207,48 +187,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  _contentNavigationButtons() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TextButton(
-            child: Text(
-              'Back to ${getParentFolderFromCurrent()}',
-              style: TextStyle(
-                fontSize: 18.0
-              ),
-            ),
-            onPressed: atRoot()
-            ? null
-            : () { 
-              final target = getParentFolderFromCurrent();
-              getFolderContents(updateCurrentFolder(target)); 
-            }
-          ),
-          Row(
-            children: [              
-              Expanded(
-                flex: 1,
-                child: Text(
-                  ' @ $_currentFolder ',
-                  style: TextStyle (
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.white,
-                    backgroundColor: Colors.black,
-                  ),
-                ),
-              ),
-            ]
-          ),
-        ],
-      ),
-    );
-  }
+  _navigationRoute() => BlocBuilder<RouteBloc, RouteState>(
+    builder: (context, state) {
+      if (state is RouteLoadSuccess) {
+        return state.route;
+      }
+
+      return Container(
+        child: Text('[!]]')
+      );
+    }
+  );
 
   _directoriesBlocBuilder() {
     return Center(
@@ -311,7 +260,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: _currentFolder == '/'
+                  text: _currentFolder == slash
                   ? messageCreateNewFolderRootToStartStyled
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
@@ -348,14 +297,21 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             : () { 
               _saveFileToSelectedFolder(
                 item.path,
-                removePathFromFileName(widget.sharedFileInfo.single.path)
+                getPathFromFileName(widget.sharedFileInfo.single.path)
               );
             },
             secondaryAction: item.itemType == ItemType.file
             ? () { }
             : () {
-              final path = updateCurrentFolder(item.path);
-              getFolderContents(path);
+               _navigateTo(
+                Navigation.folder,
+                extractParentFromPath(item.path),
+                item.path
+              );
+
+               setState(() {
+                _currentFolder = item.path;
+              });
             },
             popupMenu: Dialogs
                 .filePopupMenu(
@@ -375,21 +331,38 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ? '/$fileName'
     : '$path/$fileName';
         
-    _saveFileToOuiSync(widget.session, widget.directoryBlocPath, destinationPath);
+    _saveFileToOuiSync(widget.session, path, destinationPath);
   }
 
-  Future<void> _saveFileToOuiSync(Session session, String directoryBlocPath, String destinationPath) async {
+  Future<void> _saveFileToOuiSync(Session session, String parentPath, String destinationPath) async {
     var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
     widget.directoryBloc
     .add(
       CreateFile(
         session: session,
-        parentPath: directoryBlocPath,
+        parentPath: parentPath,
         newFilePath: destinationPath,
         fileByteStream: fileStream
       )
     );
 
+    _navigateTo(
+      Navigation.folder,
+      extractParentFromPath(parentPath),
+      parentPath
+    );
+
     Navigator.pop(context);
+  }
+
+  _navigateTo(type, parent, destination) {
+    BlocProvider.of<NavigationBloc>(context)
+    .add(
+      NavigateTo(
+        type,
+        parent,
+        destination
+      )
+    );
   }
 }

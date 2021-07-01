@@ -1,64 +1,29 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/blocs.dart';
 import 'utils.dart';
 
-void push(BuildContext context, {Widget? widget, bool replace = false}) {
-  if (replace) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => widget! )
-    ); 
-  }
-  else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => widget! )
-    );
-  }
-}
-
-Future<PermissionStatus> checkRequiredPermissions (BuildContext context) async {
-  PermissionStatus _permissionStatus = await Permission.storage.status;
-  
-  if (negativePermissionStatus.contains(_permissionStatus)) {
-    _permissionStatus = await requestPermissions(context);
-  }
-
-  return _permissionStatus;
-}
-
-Future<PermissionStatus> requestPermissions(BuildContext context) async {
-  await Dialogs.showRequestStoragePermissionDialog(context);
-
-  return Permission.storage.request();
-}
-
-Future<void> printAppFolderContents(String path) async {
-  final Directory _directory = Directory(path);
-  
-  print('${_directory.path} contents:\n\n');
-  
-  var contents = _directory.listSync();
-  for (var item in contents) {
-    print(item); 
-  }
-}
-
-String removePathFromFileName(String path) => path.split('/').last;
+String getPathFromFileName(String path) => path.split('/').last;
 
 String extractParentFromPath(String path) {
   final section = path.substring(0, path.lastIndexOf('/')); 
   return section.isEmpty
-  ? '/'
+  ? slash
   : section;
 }
 
-dynamic extractNativeAttribute(List<String> attributesList, String attribute) => 
-  attributesList.singleWhere((element) => element.startsWith('$attribute:')).split(':')[1];
+String removeParentFromPath(String path) {
+  if (path == slash) {
+    return path;
+  }
+
+  final index = path.lastIndexOf(slash);
+  final section = path.substring(index + 1);
+  
+  return section;
+}
 
 String extractFileTypeFromName(String fileName) {
   if (!fileName.contains('.')) {
@@ -72,3 +37,86 @@ String extractFileTypeFromName(String fileName) {
   return fileName.substring(fileName.lastIndexOf('.') + 1);
 }
 
+
+sectionWidget(text) => Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(1.0),
+      color: text == slash
+      ? Colors.black
+      : Colors.amber[500],
+      shape: BoxShape.rectangle,
+    ),
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(10.0, 1.0, 15.0, 2.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+        ),
+      )
+    )
+  );
+
+  slashWidget() => Text(
+    slash,
+    style: TextStyle(
+      color: Colors.black,
+      fontSize: 20.0,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  buildRouteSection(Bloc bloc, String parentPath, String destinationPath) {
+    final text = destinationPath == slash
+    ? destinationPath
+    : removeParentFromPath(destinationPath).replaceAll(slash, '').trim();
+
+    return GestureDetector(
+      onTap: () => navigateToSection(bloc, parentPath, destinationPath),
+      child: sectionWidget(text),
+    );
+  }
+
+  buildRoute(route) => Padding(
+    padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 2.0),
+    child: Row(
+      children: route,
+    ),
+  );
+
+  getPathMap(String path) {
+    final pathMap = new Map();
+
+    var slashCount = path.split(slash).length - 1;
+    var offset = 1;
+
+    while (slashCount > 0) {
+      var firstIndex = path.indexOf(slash, offset);
+      var section = firstIndex > 0 
+      ? path.substring(0, firstIndex) 
+      : path;
+      
+      if (section.endsWith(slash)) {
+        section = section.substring(0, section.length -1);
+      }
+
+      final parent = extractParentFromPath(section);
+      pathMap[parent] = section;
+
+      offset = firstIndex + 1;
+      slashCount--;
+    }
+
+    return pathMap;
+  }
+
+  navigateToSection(bloc, parent, destination) => bloc
+    .add(
+      NavigateTo(
+        Navigation.folder,
+        parent,
+        destination
+      )
+    );
