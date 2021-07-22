@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 import '../../utils/actions.dart';
 import '../../utils/utils.dart';
@@ -24,12 +25,12 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     RouteEvent event,
   ) async* {
     if (event is UpdateRoute) {
-      final routeList = <Widget>[ buildRouteSection(bloc, slash, slash) ];
+      final routeList = <Widget>[ buildRouteSection(bloc, slash, slash, event.data) ];
 
       if (event.path != slash) {
         final pathMap = getPathMap(event.path);
         pathMap.forEach((parentPath, destinationPath) {
-          final sectionWidget = buildRouteSection(bloc, parentPath, destinationPath);
+          final sectionWidget = buildRouteSection(bloc, parentPath, destinationPath, event.data);
           routeList.add(sectionWidget);
 
           if (destinationPath != slash) {

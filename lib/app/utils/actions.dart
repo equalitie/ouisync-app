@@ -68,13 +68,13 @@ sectionWidget(text) => Container(
     ),
   );
 
-  buildRouteSection(Bloc bloc, String parentPath, String destinationPath) {
+  buildRouteSection(Bloc bloc, String parentPath, String destinationPath, data) {
     final text = destinationPath == slash
     ? destinationPath
     : removeParentFromPath(destinationPath).replaceAll(slash, '').trim();
 
     return GestureDetector(
-      onTap: () => navigateToSection(bloc, parentPath, destinationPath),
+      onTap: () => navigateToSection(bloc, parentPath, destinationPath, data),
       child: sectionWidget(text),
     );
   }
@@ -112,11 +112,12 @@ sectionWidget(text) => Container(
     return pathMap;
   }
 
-  navigateToSection(bloc, parent, destination) => bloc
+  navigateToSection(bloc, parent, destination, data) => bloc
     .add(
       NavigateTo(
         Navigation.folder,
         parent,
-        destination
+        destination,
+        data
       )
     );

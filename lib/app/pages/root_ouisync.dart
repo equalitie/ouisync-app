@@ -103,7 +103,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
   .add(NavigateTo(
       Navigation.folder,
       widget.path,
-      slash
+      slash,
+      FolderItem(creationDate: DateTime.now(), lastModificationDate: DateTime.now(), items: <BaseItem>[])
   ));
 
   @override
@@ -162,8 +163,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     bloc: BlocProvider.of<NavigationBloc>(context),
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
-        switch (state.navigation) {
-        case Navigation.folder:
+        if (state.navigation == Navigation.folder) {
           BlocProvider.of<DirectoryBloc>(context)
           .add(
             RequestContent(
@@ -177,11 +177,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
           .add(
             UpdateRoute(
               path: state.destinationPath,
+              data: state.data
             )
           );
-          break;
-        default:
-        } 
+        }
       }
     },
     builder: (context, state) => _blocUI(context, state)
@@ -200,6 +199,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
           }
 
           if (state is NavigationLoadSuccess) {
+            if (state.navigation == Navigation.file) {
+              return _contents();
+            }
+
             if (state.navigation == Navigation.folder) {
               BlocProvider.of<DirectoryBloc>(context)
               .add(
@@ -303,18 +306,40 @@ class _RootOuiSyncState extends State<RootOuiSync>
         itemCount: contents.length,
         itemBuilder: (context, index) {
           final item = contents[index];
+          final navigationType = item.itemType == ItemType.file
+          ? Navigation.file
+          : Navigation.folder;
+
+          final actionByType = item.itemType == ItemType.file
+          ? () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return FilePage(
+                  session: widget.session,
+                  foldersRepository: widget.foldersRepository,
+                  folderPath: extractParentFromPath(item.path),
+                  data: item,
+                  title: item.path,
+                ); 
+              })
+            );
+          }
+          : () {
+            BlocProvider.of<NavigationBloc>(context)
+            .add(
+              NavigateTo(
+                navigationType,
+                extractParentFromPath(item.path),
+                item.path,
+                item //data
+              )
+            );
+          };
+
           return ListItem (
               itemData: item,
-              mainAction: () {
-                BlocProvider.of<NavigationBloc>(context)
-                .add(
-                  NavigateTo(
-                    Navigation.folder,
-                    extractParentFromPath(item.path),
-                    item.path
-                  )
-                );
-              },
+              mainAction: actionByType,
               secondaryAction: () => {},
               popupMenu: Dialogs
                 .filePopupMenu(
