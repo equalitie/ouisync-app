@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 import '../blocs.dart';
 
@@ -10,7 +11,8 @@ class NavigateTo extends NavigationEvent {
   const NavigateTo(
     this.navigation,
     this.origin,
-    this.destination
+    this.destination,
+    this.data
   ) : 
   assert (origin != ''),
   assert (destination != '');
@@ -18,11 +20,13 @@ class NavigateTo extends NavigationEvent {
   final Navigation navigation;
   final String origin;
   final String destination;
+  final BaseItem data;
 
   @override
   List<Object?> get props => [
     navigation,
     origin,
-    destination
+    destination,
+    data
   ];
 }

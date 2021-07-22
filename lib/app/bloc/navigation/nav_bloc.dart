@@ -15,7 +15,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       yield NavigationLoadSuccess(
         navigation: event.navigation,
         parentPath: event.origin,
-        destinationPath: event.destination
+        destinationPath: event.destination,
+        data: event.data
       );
     }
   }

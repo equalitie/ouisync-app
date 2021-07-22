@@ -297,7 +297,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             : () { 
               _saveFileToSelectedFolder(
                 item.path,
-                getPathFromFileName(widget.sharedFileInfo.single.path)
+                getPathFromFileName(widget.sharedFileInfo.single.path),
+                item
               );
             },
             secondaryAction: item.itemType == ItemType.file
@@ -306,7 +307,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                _navigateTo(
                 Navigation.folder,
                 extractParentFromPath(item.path),
-                item.path
+                item.path,
+                item //data
               );
 
                setState(() {
@@ -326,15 +328,15 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  void _saveFileToSelectedFolder(String path, String fileName) {
+  void _saveFileToSelectedFolder(String path, String fileName, BaseItem data) {
     final destinationPath = path == '/'
     ? '/$fileName'
     : '$path/$fileName';
         
-    _saveFileToOuiSync(widget.session, path, destinationPath);
+    _saveFileToOuiSync(widget.session, path, destinationPath, data);
   }
 
-  Future<void> _saveFileToOuiSync(Session session, String parentPath, String destinationPath) async {
+  Future<void> _saveFileToOuiSync(Session session, String parentPath, String destinationPath, BaseItem data) async {
     var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
     widget.directoryBloc
     .add(
@@ -349,19 +351,21 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     _navigateTo(
       Navigation.folder,
       extractParentFromPath(parentPath),
-      parentPath
+      parentPath,
+      data
     );
 
     Navigator.pop(context);
   }
 
-  _navigateTo(type, parent, destination) {
+  _navigateTo(type, parent, destination, data) {
     BlocProvider.of<NavigationBloc>(context)
     .add(
       NavigateTo(
         type,
         parent,
-        destination
+        destination,
+        data
       )
     );
   }

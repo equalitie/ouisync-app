@@ -103,7 +103,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
   .add(NavigateTo(
       Navigation.folder,
       widget.path,
-      slash
+      slash,
+      FolderItem(creationDate: DateTime.now(), lastModificationDate: DateTime.now(), items: <BaseItem>[])
   ));
 
   @override
@@ -177,11 +178,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
           .add(
             UpdateRoute(
               path: state.destinationPath,
+              data: state.data
             )
           );
-          break;
-        default:
-        } 
+        }
       }
     },
     builder: (context, state) => _blocUI(context, state)
