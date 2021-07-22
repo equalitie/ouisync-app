@@ -29,6 +29,7 @@ dependencies:
   bloc_test: ^8.0.2
   build_runner: ^2.0.5
   chunked_stream: ^1.4.1
+  clock: ^1.1.0
   cupertino_icons: ^1.0.3
   equatable: ^2.0.2
   ffi: ^1.0.0
