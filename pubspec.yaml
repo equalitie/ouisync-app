@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   ouisync_plugin:
-    path: ../ouisync_plugin
+    path: ./ouisync-plugin
   bloc: ^7.0.0
   bloc_test: ^8.0.2
   build_runner: ^2.0.5
