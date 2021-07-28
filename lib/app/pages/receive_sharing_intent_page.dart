@@ -94,17 +94,25 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           ]
         ),
       ),
-      floatingActionButton: Dialogs.floatingActionsButtonMenu(
-        widget.directoryBloc,
-        widget.session,
-        context,
-        _controller,
-        widget.directoryBlocPath,//parentPath
-        receiveShareActions,
-        flagReceiveShareActionsDialog,
-        backgroundColor,
-        foregroundColor
-      ),
+      floatingActionButton: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,  
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: const Icon(Icons.save_alt_rounded),
+              label: Text('Use $_currentFolder')
+            ),
+            SizedBox(width: 30.0),
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: const Icon(Icons.create_new_folder_rounded),
+              label: const Text(actionNewFolder)
+            ),
+          ],
+        )
+      )
     );
   }
 

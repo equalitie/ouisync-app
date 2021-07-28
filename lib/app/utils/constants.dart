@@ -55,8 +55,6 @@ const String actionNewFile = 'Add file';
 const String actionDeleteFolder = 'Delete folder';
 const String actionDeleteFile = 'Delete file';
 
-const String actionUseRoot = 'Use /';
-
 const String actionPreview = 'preview';
 const String actionShare = 'share';
 
@@ -65,10 +63,6 @@ const Map<String, IconData> folderActions = const {
   actionNewFolder: Icons.create_new_folder_rounded, 
   actionNewFile: Icons.file_upload,
   actionDeleteFolder: Icons.delete_sharp
-};
-const Map<String, IconData> receiveShareActions = const {
-  actionUseRoot: Icons.save_alt_rounded,
-  actionNewFolder: Icons.create_new_folder_rounded
 };
 
 const int bufferSize = 64000;
