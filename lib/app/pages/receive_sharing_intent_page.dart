@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -37,6 +38,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   String? _currentFolder;
 
   late AnimationController _controller;
+  late ScrollController _scrollController;
+  
+  bool _showFloatingButtons = true;
 
   late Color backgroundColor;
   late Color foregroundColor;
@@ -48,14 +52,23 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     _currentFolder = slash;
 
     initHeaderParams();
+
     initAnimationController();
+    initScrollController();
+
+    handleScroll();
   }
 
   @override
   void dispose() {
     super.dispose();
 
+    disposeControllers();
+  }
+
+  disposeControllers() {
     _controller.dispose();
+    _scrollController.dispose();
   }
 
   initHeaderParams() {
@@ -68,6 +81,31 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     vsync: this,
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
+
+  initScrollController() =>
+  _scrollController = new ScrollController();
+
+  handleScroll() async {
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+          showFloatingButtons();
+      }
+
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+          hideFloatingButtons();
+      }
+    });
+  }
+
+  showFloatingButtons() => setState(() {
+    _showFloatingButtons = true;
+  });
+
+  hideFloatingButtons() => setState(() {
+    _showFloatingButtons = false;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -94,24 +132,27 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           ]
         ),
       ),
-      floatingActionButton: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,  
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: const Icon(Icons.save_alt_rounded),
-              label: Text('Use $_currentFolder')
-            ),
-            SizedBox(width: 30.0),
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: const Icon(Icons.create_new_folder_rounded),
-              label: const Text(actionNewFolder)
-            ),
-          ],
-        )
+      floatingActionButton: Visibility(
+        visible: _showFloatingButtons,
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,  
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton.extended(
+                onPressed: () {},
+                icon: const Icon(Icons.create_new_folder_rounded),
+                label: const Text(actionNewFolder)
+              ),
+              SizedBox(width: 30.0),
+              FloatingActionButton.extended(
+                onPressed: () {},
+                icon: const Icon(Icons.arrow_circle_down),
+                label: Text('$_currentFolder')
+              ),
+            ],
+          )
+        ),
       )
     );
   }
@@ -302,6 +343,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _contentsList(List<BaseItem> contents) {
     return ListView.separated(
+      controller: _scrollController,
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent,
