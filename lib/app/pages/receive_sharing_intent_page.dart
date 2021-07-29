@@ -118,66 +118,53 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _buildFileInfoHeader() { 
     return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
+      padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
       child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(10.0),
-            constraints: BoxConstraints.tightForFinite(),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              color: Colors.blueGrey.shade50,
-              shape: BoxShape.rectangle,
-              boxShadow: [ 
-                BoxShadow(
-                  color: Colors.black12,
-                  offset: Offset(3.0, 3.0),
-                  blurRadius: 1.0,
-                  spreadRadius: 0.2,
-                ) 
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.file_present),
-                    SizedBox(width: 10.0),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        fileName,
-                        textAlign: TextAlign.left,
-                        softWrap: true,
-                        overflow: TextOverflow.clip,
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold
+          Card(
+            color: Colors.yellow.shade700,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.file_present_rounded,
+                        size: 35.0,
+                      ),
+                      SizedBox(width: 2.0),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          fileName,
+                          textAlign: TextAlign.left,
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.0),
-                Text(
-                  pathWithoutName,
-                  textAlign: TextAlign.start,
-                  softWrap: true,
-                  overflow: TextOverflow.clip,
-                  style: TextStyle(
-                    fontSize: 16.0,
+                    ],
                   ),
-                ),
-              ],
-            )
+                  SizedBox(height: 5.0),
+                  Text(
+                    pathWithoutName,
+                    textAlign: TextAlign.start,
+                    softWrap: true,
+                    overflow: TextOverflow.clip,
+                    style: TextStyle(
+                        fontSize: 16.0,
+                    ),
+                  ),
+                ],
+              )
+            ),
           ),
-          const Divider(
-            height: 40.0,
-            thickness: 1.0,
-            color: Colors.black12,
-            indent: 30.0,
-            endIndent: 30.0,
-          ),
+          const SizedBox(height: 20.0),
           Padding(
             padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 20.0),
             child: Row(
