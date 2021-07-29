@@ -3,16 +3,18 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
+import '../hooks/hooks.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
-class ReceiveSharingIntentPage extends StatefulWidget {
+class ReceiveSharingIntentPage extends StatefulHookWidget {
   ReceiveSharingIntentPage({
     required this.session,
     required this.sharedFileInfo,
@@ -37,11 +39,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   String? _currentFolder;
 
-  late AnimationController _controller;
-  late ScrollController _scrollController;
-  
-  bool _showFloatingButtons = true;
-
   late Color backgroundColor;
   late Color foregroundColor;
   
@@ -52,23 +49,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     _currentFolder = slash;
 
     initHeaderParams();
-
-    initAnimationController();
-    initScrollController();
-
-    handleScroll();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    disposeControllers();
-  }
-
-  disposeControllers() {
-    _controller.dispose();
-    _scrollController.dispose();
   }
 
   initHeaderParams() {
@@ -76,41 +56,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
   }
 
-  initAnimationController()  => 
-  _controller = new AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-  );
-
-  initScrollController() =>
-  _scrollController = new ScrollController();
-
-  handleScroll() async {
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-          showFloatingButtons();
-      }
-
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-          hideFloatingButtons();
-      }
-    });
-  }
-
-  showFloatingButtons() => setState(() {
-    _showFloatingButtons = true;
-  });
-
-  hideFloatingButtons() => setState(() {
-    _showFloatingButtons = false;
-  });
-
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).cardColor;
     foregroundColor = Theme.of(context).accentColor;
+
+    final hideFabsAnimationController = useAnimationController(
+      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+      initialValue: 1,
+    );
+
+    final scrollController = useScrollControllerForAnimation(hideFabsAnimationController);
 
     return Scaffold(
       appBar: AppBar(
@@ -127,31 +83,34 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             ),
             Expanded(
               flex: 1,
-              child: _directoriesBlocBuilder()
+              child: _directoriesBlocBuilder(scrollController)
             ),
           ]
         ),
       ),
-      floatingActionButton: Visibility(
-        visible: _showFloatingButtons,
-        child: Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,  
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FloatingActionButton.extended(
-                onPressed: () {},
-                icon: const Icon(Icons.create_new_folder_rounded),
-                label: const Text(actionNewFolder)
-              ),
-              SizedBox(width: 30.0),
-              FloatingActionButton.extended(
-                onPressed: () {},
-                icon: const Icon(Icons.arrow_circle_down),
-                label: Text('$_currentFolder')
-              ),
-            ],
-          )
+      floatingActionButton: FadeTransition(
+        opacity: hideFabsAnimationController,
+        child: ScaleTransition(
+          scale: hideFabsAnimationController,
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,  
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  onPressed: () {},
+                  icon: const Icon(Icons.create_new_folder_rounded),
+                  label: const Text(actionNewFolder)
+                ),
+                SizedBox(width: 30.0),
+                FloatingActionButton.extended(
+                  onPressed: () {},
+                  icon: const Icon(Icons.arrow_circle_down),
+                  label: Text('$_currentFolder')
+                ),
+              ],
+            )
+          ),
         ),
       )
     );
@@ -259,7 +218,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     }
   );
 
-  _directoriesBlocBuilder() {
+  _directoriesBlocBuilder(ScrollController scrollController) {
     return Center(
       child: BlocBuilder<DirectoryBloc, DirectoryState>(
         builder: (context, state) {
@@ -277,7 +236,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
             return contents.isEmpty 
             ? _noContents()
-            : _contentsList(contents);
+            : _contentsList(contents, scrollController);
           }
 
           if (state is DirectoryLoadFailure) {
@@ -341,9 +300,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ],
   );
 
-  _contentsList(List<BaseItem> contents) {
+  _contentsList(List<BaseItem> contents, ScrollController scrollController) {
     return ListView.separated(
-      controller: _scrollController,
+      controller: scrollController,
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent,
