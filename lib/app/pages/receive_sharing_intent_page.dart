@@ -178,24 +178,28 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             indent: 30.0,
             endIndent: 30.0,
           ),
-          Row(
-            children: [
-              Text(
-                'Where do you want to put it?',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold
+          Padding(
+            padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 20.0),
+            child: Row(
+              children: [
+                Text(
+                  'Where do you want to put it?',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold
+                  ),
                 ),
-              ),
-            ]
+              ]
+            ),
           ),
         ],
       ),
     );
   }
-
-  _navigationRoute() => BlocBuilder<RouteBloc, RouteState>(
+  
+  _navigationRoute() => BlocConsumer(
+    bloc: BlocProvider.of<RouteBloc>(context), 
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
         return state.route;
@@ -204,6 +208,13 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       return Container(
         child: Text('[!]]')
       );
+    },
+    listener: (context, state) {
+      if (state is RouteLoadSuccess) {
+        setState(() {
+          _currentFolder = state.path;
+        });
+      }
     }
   );
 
