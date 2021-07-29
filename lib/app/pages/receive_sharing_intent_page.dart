@@ -76,7 +76,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Share file to OuiSync'),
+        title: Text('Add file to OuiSync'),
       ),
       body: Center(
         child: Column(
