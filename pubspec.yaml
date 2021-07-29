@@ -36,6 +36,7 @@ dependencies:
   file: ^6.1.1
   file_picker: ^3.0.2+2
   flutter_bloc: ^7.0.0
+  flutter_hooks: ^0.18.0
   flutter_treeview: ^1.0.3+2
   mockito: ^5.0.10
   mocktail: ^0.1.4
