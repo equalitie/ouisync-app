@@ -37,7 +37,13 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   late final fileName;
   late final pathWithoutName;
 
-  String? _currentFolder;
+  late BaseItem _currentFolderData;
+  final rootItem = FolderItem(
+    path: slash,
+    creationDate: DateTime.now(),
+    lastModificationDate: DateTime.now(),
+    items: <BaseItem>[]
+  ); 
 
   late Color backgroundColor;
   late Color foregroundColor;
@@ -46,7 +52,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   void initState() {
     super.initState();
 
-    _currentFolder = slash;
+    _currentFolderData = rootItem;
 
     initHeaderParams();
   }
@@ -55,6 +61,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     fileName = getPathFromFileName(widget.sharedFileInfo.first.path);
     pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
   }
+
+  updateCurrentFolder(data) => setState(() {
+    _currentFolderData = data;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +114,13 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 ),
                 SizedBox(width: 30.0),
                 FloatingActionButton.extended(
-                  onPressed: () {},
+                  onPressed: () => _saveFileToSelectedFolder(
+                    _currentFolderData.path,
+                    getPathFromFileName(widget.sharedFileInfo.single.path),
+                    _currentFolderData
+                  ),
                   icon: const Icon(Icons.arrow_circle_down),
-                  label: Text('$_currentFolder')
+                  label: Text('${_currentFolderData.path}')
                 ),
               ],
             )
@@ -198,9 +212,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     },
     listener: (context, state) {
       if (state is RouteLoadSuccess) {
-        setState(() {
-          _currentFolder = state.path;
-        });
+        if (state.path == slash) {
+          updateCurrentFolder(rootItem);
+        }
       }
     }
   );
@@ -266,7 +280,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: _currentFolder == slash
+                  text: _currentFolderData.path == slash
                   ? messageCreateNewFolderRootToStartStyled
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
@@ -302,6 +316,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             mainAction: item.itemType == ItemType.file
             ? () { }
             : () { 
+              updateCurrentFolder(item);
+
               _navigateTo(
                 Navigation.folder,
                 extractParentFromPath(item.path),
@@ -312,6 +328,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             secondaryAction: item.itemType == ItemType.file
             ? () { }
             : () {
+              updateCurrentFolder(item);
+
               _saveFileToSelectedFolder(
                 item.path,
                 getPathFromFileName(widget.sharedFileInfo.single.path),
@@ -362,7 +380,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   }
 
   _navigateTo(type, parent, destination, data) {
-    BlocProvider.of<NavigationBloc>(context)
+    _currentFolderData.path == slash
+    ? loadRoot(BlocProvider.of<NavigationBloc>(context))
+    : BlocProvider.of<NavigationBloc>(context)
     .add(
       NavigateTo(
         type,
