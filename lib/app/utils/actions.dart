@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 import '../bloc/blocs.dart';
 import 'utils.dart';
@@ -37,6 +38,15 @@ String extractFileTypeFromName(String fileName) {
   return fileName.substring(fileName.lastIndexOf('.') + 1);
 }
 
+loadRoot(bloc) => 
+bloc.add(
+  NavigateTo(
+    Navigation.folder,
+    slash,
+    slash,
+    FolderItem(creationDate: DateTime.now(), lastModificationDate: DateTime.now(), items: <BaseItem>[])
+  )
+);
 
 sectionWidget(text) => Container(
     decoration: BoxDecoration(
