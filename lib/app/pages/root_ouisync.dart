@@ -116,7 +116,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     title: _getTitle(),
     centerTitle: true,
     bottom: PreferredSize(
-      preferredSize: Size.fromHeight(27.0),
+      preferredSize: Size.fromHeight(30.0),
       child: Container(
         child: _getRoute(),
       ),
