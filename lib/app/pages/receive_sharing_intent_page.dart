@@ -303,25 +303,21 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             mainAction: item.itemType == ItemType.file
             ? () { }
             : () { 
-              _saveFileToSelectedFolder(
-                item.path,
-                getPathFromFileName(widget.sharedFileInfo.single.path),
-                item
-              );
-            },
-            secondaryAction: item.itemType == ItemType.file
-            ? () { }
-            : () {
-               _navigateTo(
+              _navigateTo(
                 Navigation.folder,
                 extractParentFromPath(item.path),
                 item.path,
                 item //data
               );
-
-               setState(() {
-                _currentFolder = item.path;
-              });
+            },
+            secondaryAction: item.itemType == ItemType.file
+            ? () { }
+            : () {
+              _saveFileToSelectedFolder(
+                item.path,
+                getPathFromFileName(widget.sharedFileInfo.single.path),
+                item
+              );
             },
             popupMenu: Dialogs
                 .filePopupMenu(
