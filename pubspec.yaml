@@ -21,10 +21,6 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  ouisync_plugin:
-    path: ../ouisync_plugin
   bloc: ^7.0.0
   bloc_test: ^8.0.2
   build_runner: ^2.0.5
@@ -35,12 +31,16 @@ dependencies:
   ffi: ^1.0.0
   file: ^6.1.1
   file_picker: ^3.0.2+2
+  flutter:
+    sdk: flutter
   flutter_bloc: ^7.1.0
   flutter_hooks: ^0.18.0
   flutter_treeview: ^1.0.3+2
   mockito: ^5.0.10
   mocktail: ^0.1.4
   open_file: ^3.2.1
+  ouisync_plugin:
+    path: ../ouisync_plugin
   path: ^1.8.0
   path_provider: ^2.0.1
   permission_handler: ^8.0.0+2
