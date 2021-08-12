@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../lifecycle.dart';
 import 'bloc/blocs.dart';
 import 'data/data.dart';
 import 'pages/pages.dart';
@@ -29,6 +28,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   @override
   void initState() {
     super.initState();
+
+    NativeChannels.init(widget.session);
 
     navigationBloc = NavigationBloc(rootPath: slash);
   }
