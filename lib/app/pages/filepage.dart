@@ -287,30 +287,14 @@ class _FilePage extends State<FilePage> {
             children: [
               OutlinedButton(
                 onPressed: () {
-                  BlocProvider.of<DirectoryBloc>(context)
-                  .add(
-                    ReadFile(
-                      session: widget.session,
-                      parentPath: widget.folderPath,
-                      filePath: filePath,
-                      action: actionPreview
-                    ),
-                  );
+                  NativeChannels.previewOuiSyncFile(filePath, 1);
                 },
                 child: Text('Preview'),
               ),
               SizedBox(width: 20.0),
               ElevatedButton(
                 onPressed: () {
-                  BlocProvider.of<DirectoryBloc>(context)
-                  .add(
-                    ReadFile(
-                      session: widget.session,
-                      parentPath: widget.folderPath,
-                      filePath: filePath,
-                      action: actionShare
-                    ),
-                  );
+                  NativeChannels.shareOuiSyncFile(filePath, 1);
                 },
                 child: Text('Share'),
                 autofocus: true,
