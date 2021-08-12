@@ -83,7 +83,7 @@ class ListItem extends StatelessWidget {
   Widget _getActionByType(Function secondaryAction, PopupMenuButton? popupMenu, bool isDestination) {
     if (isDestination) {
       return itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_forward_ios_outlined, size: 24.0,), onPressed: () => secondaryAction.call())
+        ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: 30.0,), onPressed: () => secondaryAction.call())
         : IconButton(onPressed: null, icon: Container());
     }
 

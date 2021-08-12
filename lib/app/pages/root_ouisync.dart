@@ -48,7 +48,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     handleIncomingShareIntent();
     initAnimationController();
 
-    loadRoot();
+    loadRoot(BlocProvider.of<NavigationBloc>(context));
   }
 
   @override
@@ -99,14 +99,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
   );
 
-  loadRoot() => BlocProvider.of<NavigationBloc>(context)
-  .add(NavigateTo(
-      Navigation.folder,
-      widget.path,
-      slash,
-      FolderItem(creationDate: DateTime.now(), lastModificationDate: DateTime.now(), items: <BaseItem>[])
-  ));
-
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).cardColor;
@@ -124,7 +116,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     title: _getTitle(),
     centerTitle: true,
     bottom: PreferredSize(
-      preferredSize: Size.fromHeight(27.0),
+      preferredSize: Size.fromHeight(30.0),
       child: Container(
         child: _getRoute(),
       ),
