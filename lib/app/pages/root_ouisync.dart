@@ -303,19 +303,28 @@ class _RootOuiSyncState extends State<RootOuiSync>
           : Navigation.folder;
 
           final actionByType = item.itemType == ItemType.file
-          ? () {
-            Navigator.push(
+          ? () async {
+            final file = await Dialogs.executeWithLoadingDialog(
               context,
-              MaterialPageRoute(builder: (context) {
-                return FilePage(
-                  session: widget.session,
-                  foldersRepository: widget.foldersRepository,
-                  folderPath: extractParentFromPath(item.path),
-                  data: item,
-                  title: item.path,
-                ); 
-              })
+              getFile(widget.session, item.path, item.name)
             );
+            if (file != null) {
+              final size = await file.length;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return FilePage(
+                    session: widget.session,
+                    foldersRepository: widget.foldersRepository,
+                    path: item.path,
+                    name: item.name,
+                    size: size,
+                    title: item.name,
+                  ); 
+                })
+              ); 
+            }
           }
           : () {
             BlocProvider.of<NavigationBloc>(context)
@@ -343,6 +352,25 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
         }
     );
+  }
+
+  Future<File?> getFile(Session session, String path, String name) async {
+    try {
+      final repo = await Repository.open(session);
+      return await File.open(repo, path);
+    } on Exception catch (e) {
+      print('Init file: $e');
+
+      ScaffoldMessenger
+      .of(context)
+      .showSnackBar(
+        SnackBar(
+          content: Text('There was a problem opening the file $name.')
+        )
+      );
+    }
+
+    return null;
   }
 
   _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
