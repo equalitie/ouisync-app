@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 import '../data/data.dart';
-import '../models/models.dart';
 
 class FilePage extends StatefulWidget {
   FilePage({
     required this.session,
     required this.foldersRepository,
-    required this.folderPath,
-    required this.data,
+    required this.path,
+    required this.name,
+    required this.size,
     required this.title,
   });
 
   final Session session;
   final DirectoryRepository foldersRepository;
-  final String folderPath;
-  final BaseItem data;
+  final String path;
+  final String name;
+  final int size;
   final String title;
 
   @override
@@ -34,7 +36,7 @@ class _FilePage extends State<FilePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _blocBody(),
+      body: _fileInfo()//_blocBody(),
     );
   }
 
@@ -43,10 +45,10 @@ class _FilePage extends State<FilePage> {
       listener: (context, state) async {
         if (state is DirectoryLoadSuccess) {
           if (state.contents.isEmpty) {
-            print('The file ${widget.data.name} is empty');
+            print('The file ${widget.title} is empty');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('The file ${widget.data.name} is empty'),
+                content: Text('The file ${widget.title} is empty'),
                 action: SnackBarAction(
                   label: 'HIDE',
                   onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()
@@ -83,7 +85,7 @@ class _FilePage extends State<FilePage> {
                 ),
               ),
               Text(
-                widget.data.name,
+                widget.name,
                 textAlign: TextAlign.left,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
@@ -104,8 +106,8 @@ class _FilePage extends State<FilePage> {
                 ),
               ),
               Text(
-                widget.data.path
-                .replaceAll(widget.data.name, '')
+                widget.path
+                .replaceAll(widget.title, '')
                 .trimRight(),
                 textAlign: TextAlign.left,
                 softWrap: true,
@@ -127,7 +129,7 @@ class _FilePage extends State<FilePage> {
                 ),
               ),
               Text(
-                widget.data.size.toString(),
+                formattSize(widget.size, units: true),
                 textAlign: TextAlign.left,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
@@ -152,13 +154,13 @@ class _FilePage extends State<FilePage> {
             children: [
               OutlinedButton(
                 onPressed: () async =>
-                  await NativeChannels.previewOuiSyncFile(widget.data.path, 1),
+                  await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
                 child: Text('Preview'),
               ),
               SizedBox(width: 20.0),
               ElevatedButton(
-                onPressed: () async => 
-                  await NativeChannels.shareOuiSyncFile(widget.data.path, 1),
+                onPressed: () async =>
+                  await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
                 child: Text('Share'),
                 autofocus: true,
               ),
