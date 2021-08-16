@@ -12,6 +12,36 @@ import '../pages/pages.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
+  static Future<dynamic> executeWithLoadingDialog(BuildContext context, Future<dynamic> f) async {
+    _showLoadingDialog(context);
+
+    var result = await f;
+    _hideLoadingDialog(context);
+
+    return result;
+  }
+
+  static _showLoadingDialog(BuildContext context) {
+    final alert = AlertDialog(
+      content: new Row(
+        children: [
+          CircularProgressIndicator(),
+          Container(margin: EdgeInsets.only(left: 7),child:Text("Loading..." )),
+        ],
+      ),
+    );
+
+    return showDialog(barrierDismissible: false,
+      context:context,
+      builder:(BuildContext context){
+        return alert; 
+      },
+    );
+  }
+
+  static _hideLoadingDialog(context) => 
+    Navigator.pop(context);
+
   static Widget floatingActionsButtonMenu(
     Bloc bloc,
     Session session,
