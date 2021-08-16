@@ -27,6 +27,17 @@ flutter upgrade
 **NOTE**: Make sure that you are in the `stable` channel.
 
 
+## Update the **OuiSync** plugin and **OuiSync** (**Rust**) library submodules 
+
+The **`OuiSync`** app includes in its dependencies the **`OuiSync`** plugin repository as a submodule; at the same time, the **`OuiSync`** plugin depends on the **`OuiSync`** library, also contained as a submodule in the plugin repository.
+
+In order for the **`OuiSync`** app to properly run, you need to make sure that both submodules are updated. This can be achieved by executing the following command while located in the app folder:
+
+```
+git submodule update --init --recursive
+```
+
+
 ## Get the libraries included in pubspec.yaml
 
 OuiSync uses some Flutter packages for various functionalities, so please execute this command to install them:
@@ -141,19 +152,12 @@ rust.cargoCommand=<path-to-user-folder>/.cargo/bin/cargo
 
 Don't forget to replace `<path-to-user-folder>` with the path to your user folder.
 
-## Boost for Android required configuration for archiver on MacOS (Darwin toolset)
+## Specify the path to the **NDK**
 
-Because the tools in **MacOS** for C/C++ are Apple versions (`clang`, `clang++`, `ar`, etc.); it is necessary to use the Android NDK toolset versions, according to each ABI supported in the app.
+**Rust** needs the Android toolsets in orden to compile properly. 
 
-We need to modify the jam file containing the configuration for Android: `user-config-android.jam` (located at `./ios/ouisync/cmake/build-boost/inline-boost/user-config-android.jam`). 
-These values then will be used by **b2** (Boost.Build) to compile the Boost library.
-
-We achieve this by adding the `<ranlib>` tag, right after the `<archiver>` tag in the jam file:
+For this add the path to the `NDK` installation to the `local.properties` file:
 
 ```
-...
-using clang : $(Architecture) : $(CompilerFullPath) :
-<archiver>$(BinutilsPrefix)ar
-<ranlib>$(BinutilsPrefix)ranlib
-...
+ndk.dir=<path-to-ndk-installation>
 ```
