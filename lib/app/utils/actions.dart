@@ -6,9 +6,29 @@ import 'package:ouisync_app/app/models/models.dart';
 import '../bloc/blocs.dart';
 import 'utils.dart';
 
+showSnackBar(BuildContext context, { required Widget content, SnackBarAction? action }) =>
+  ScaffoldMessenger
+  .of(context)
+  .showSnackBar(
+    SnackBar(
+      content: content,
+      action: action,
+    ),  
+  );
+
+hideSnackBar(context) => 
+  SnackBarAction(
+    label: 'HIDE',
+    onPressed: () => 
+      ScaffoldMessenger.of(context).hideCurrentSnackBar()
+  );
+
 String getPathFromFileName(String path) => path.split('/').last;
 
 String extractParentFromPath(String path) {
+  if (path.isEmpty) return slash;
+  if (path == slash) return slash;
+
   final section = path.substring(0, path.lastIndexOf('/')); 
   return section.isEmpty
   ? slash
