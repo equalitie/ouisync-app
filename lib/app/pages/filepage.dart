@@ -46,14 +46,10 @@ class _FilePage extends State<FilePage> {
         if (state is DirectoryLoadSuccess) {
           if (state.contents.isEmpty) {
             print('The file ${widget.title} is empty');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('The file ${widget.title} is empty'),
-                action: SnackBarAction(
-                  label: 'HIDE',
-                  onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar()
-                ),
-              ),  
+            showSnackBar(
+              context,
+              content: Text('The file ${widget.title} is empty'),
+              action: hideSnackBar(context)
             );
             
             return;
