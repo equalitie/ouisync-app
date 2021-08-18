@@ -12,13 +12,20 @@ import '../pages/pages.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
-  static Future<dynamic> executeWithLoadingDialog(BuildContext context, Future<dynamic> f) async {
+  static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context, Future<dynamic> f) async {
     _showLoadingDialog(context);
 
     var result = await f;
     _hideLoadingDialog(context);
 
     return result;
+  }
+
+  static void executeFunctionWithLoadingDialog(BuildContext context, Function f) {
+    _showLoadingDialog(context);
+
+    f.call();
+    _hideLoadingDialog(context);
   }
 
   static _showLoadingDialog(BuildContext context) {
