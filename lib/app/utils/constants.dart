@@ -41,6 +41,8 @@ const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a fi
 const double actionsDialogPadding = 20.0;
 const double actionsDialogAvatarRadius = 10.0;
 
+const int autoRefreshPeriodInSeconds = 300;
+
 const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds
 
 const String flagRepoActionsDialog = 'repo_dialog';
