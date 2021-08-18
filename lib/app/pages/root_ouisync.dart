@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -34,6 +35,11 @@ class RootOuiSync extends StatefulWidget {
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
 
+  final List<BaseItem> _folderContents = <BaseItem>[];
+
+  late final Timer autoRefreshTimer;
+  String _currentFolder = slash;
+
   late AnimationController _controller;
   
   late Color backgroundColor;
@@ -46,6 +52,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
     super.initState();
 
     handleIncomingShareIntent();
+
+    initAutoRefresh();
     initAnimationController();
 
     loadRoot(BlocProvider.of<NavigationBloc>(context));
@@ -54,7 +62,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
   @override
   void dispose() {
     super.dispose();
-    
+
+    autoRefreshTimer.cancel();
+
     _controller.dispose();
     _intentDataStreamSubscription.cancel();
   }
@@ -91,6 +101,23 @@ class _RootOuiSyncState extends State<RootOuiSync>
           directoryBlocPath: widget.path,
         );
       })
+    );
+  }
+
+  void initAutoRefresh() {
+    autoRefreshTimer = Timer.periodic(
+      Duration(seconds: autoRefreshPeriodInSeconds),
+      (timer) { 
+        print('[${DateTime.now()}] Pooling data for folder $_currentFolder');
+
+        showSnackBar(
+          context,
+          content: Text('Updating contents after syncing'),
+          action: hideSnackBar(context)
+        );
+
+        _reloadCurrentFolder();
+      }
     );
   }
 
@@ -156,6 +183,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
         if (state.navigation == Navigation.folder) {
+          setState(() { 
+            _currentFolder = state.destinationPath;
+            print('Current path updated: $_currentFolder');
+          });
+          
           BlocProvider.of<DirectoryBloc>(context)
           .add(
             RequestContent(
@@ -235,12 +267,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
 
       if (state is DirectoryLoadSuccess) {
-        final contents = state.contents as List<BaseItem>;
-        contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
-        
-        return contents.isEmpty 
+        return state.contents.isEmpty 
         ? _noContents()
-        : _contentsList(contents);
+        : _contentsList(state.contents);
       }
 
       if (state is DirectoryLoadFailure) {
@@ -254,57 +283,64 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  _noContents() => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Align(
-        alignment: Alignment.center,
-        child: Text(
-          widget.path.isEmpty
-          ? messageEmptyRepo
-          : messageEmptyFolder,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold
+  _noContents() => RefreshIndicator(
+      onRefresh: _reloadCurrentFolder,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              widget.path.isEmpty
+              ? messageEmptyRepo
+              : messageEmptyFolder,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold
+              ),
+            ),
           ),
-        ),
-      ),
-      SizedBox(height: 20.0),
-      Align(
-        alignment: Alignment.center,
-        child: StyledText(
-          text: messageCreateAddNewObjectStyled,
-          style: TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.normal
+          SizedBox(height: 20.0),
+          Align(
+            alignment: Alignment.center,
+            child: StyledText(
+              text: messageCreateAddNewObjectStyled,
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal
+              ),
+              styles: {
+                'bold': TextStyle(fontWeight: FontWeight.bold),
+                'arrow_down': IconStyle(Icons.south),
+              },
+            ),
           ),
-          styles: {
-            'bold': TextStyle(fontWeight: FontWeight.bold),
-            'arrow_down': IconStyle(Icons.south),
-          },
-        ),
-      ),
-    ],
-  );
+        ],
+      )
+    );
 
-  _contentsList(List<BaseItem> contents) {
-    return ListView.separated(
+  _contentsList(List contents) {
+    updateFolderContents(contents);
+
+    return RefreshIndicator(
+      onRefresh: _reloadCurrentFolder,
+      child: ListView.separated(
         separatorBuilder: (context, index) => Divider(
             height: 1,
             color: Colors.transparent
         ),
-        itemCount: contents.length,
+        itemCount: _folderContents.length,
         itemBuilder: (context, index) {
-          final item = contents[index];
+          final item = _folderContents[index];
           final navigationType = item.itemType == ItemType.file
           ? Navigation.file
           : Navigation.folder;
 
           final actionByType = item.itemType == ItemType.file
           ? () async {
-            final file = await Dialogs.executeWithLoadingDialog(
+            final file = await Dialogs.executeFutureWithLoadingDialog(
               context,
               getFile(widget.session, item.path, item.name)
             );
@@ -351,7 +387,40 @@ class _RootOuiSyncState extends State<RootOuiSync>
                 ),
           );
         }
+      )
     );
+  }
+
+  Future<void> _reloadCurrentFolder() async {
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      RequestContent(
+        session: widget.session,
+        path: _currentFolder,
+        recursive: false
+      )
+    );
+  }
+
+  Future<void> updateFolderContents(items) async {
+    if (items.isEmpty) {
+      if (_folderContents.isNotEmpty) {
+        setState(() {
+          _folderContents.clear();
+        }); 
+      }
+      return;
+    }
+
+    final contents = items as List<BaseItem>;
+    contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+    
+    if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
+      setState(() {
+        _folderContents.clear();
+        _folderContents.addAll(contents);
+      });  
+    }
   }
 
   Future<File?> getFile(Session session, String path, String name) async {
@@ -378,7 +447,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     widget.session,
     context,
     _controller,
-    widget.path,
+    _currentFolder,// widget.path,
     folderActions,
     flagFolderActionsDialog,
     backgroundColor,
