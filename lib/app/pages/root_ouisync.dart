@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -405,9 +406,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
   Future<void> updateFolderContents(items) async {
     if (items.isEmpty) {
       if (_folderContents.isNotEmpty) {
-        setState(() {
-          _folderContents.clear();
-        }); 
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          setState(() {
+            _folderContents.clear();
+          }); 
+        });
       }
       return;
     }
@@ -416,9 +419,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
     
     if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-      setState(() {
-        _folderContents.clear();
-        _folderContents.addAll(contents);
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        setState(() {
+          _folderContents = contents;
+        });
       });  
     }
   }
