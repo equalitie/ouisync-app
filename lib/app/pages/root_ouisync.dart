@@ -35,7 +35,7 @@ class RootOuiSync extends StatefulWidget {
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
 
-  final List<BaseItem> _folderContents = <BaseItem>[];
+  List<BaseItem> _folderContents = <BaseItem>[];
 
   late final Timer autoRefreshTimer;
   String _currentFolder = slash;
