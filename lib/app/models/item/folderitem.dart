@@ -10,38 +10,25 @@ class FolderItem extends Equatable implements BaseItem {
   late List<BaseItem> items;
 
   FolderItem({
-    this.id = '',
     this.name = '',
     this.path = '',
     this.size = 0.0,
     this.syncStatus = SyncStatus.idle,
-    this.user = const User(id: '', name: ''),
-    this.description = "folder",
     this.itemType = ItemType.folder,
     this.icon = Icons.folder,
-    required this.creationDate,
-    required this.lastModificationDate,
     required this.items,
   }) {
-    this.creationDate = DateTime.now();
-    this.lastModificationDate = DateTime.now();
-
     this.items = <BaseItem>[];
   }
 
   @override
   List<Object> get props => [
-    id,
-    creationDate,
-    lastModificationDate,
     name,
-    description,
     path,
     size,
     syncStatus,
     itemType,
     icon,
-    user,
     items
   ];
 
@@ -49,8 +36,8 @@ class FolderItem extends Equatable implements BaseItem {
     items.add(item);
   }
 
-  BaseItem getItem(String id) {
-    return items.firstWhere((element) => element.id == id);
+  BaseItem getItem(String name) {
+    return items.firstWhere((element) => element.name == name);
   }
   
   void removeItem(BaseItem item) {
@@ -58,22 +45,10 @@ class FolderItem extends Equatable implements BaseItem {
   }
 
   @override
-  DateTime creationDate;
-
-  @override
-  String description;
-
-  @override
   IconData icon;
 
   @override
-  String id;
-
-  @override
   ItemType itemType;
-
-  @override
-  DateTime lastModificationDate;
 
   @override
   String name;
@@ -86,9 +61,6 @@ class FolderItem extends Equatable implements BaseItem {
 
   @override
   SyncStatus syncStatus;
-
-  @override
-  User user;
 
   @override
   void move(String newPath) {
@@ -108,16 +80,6 @@ class FolderItem extends Equatable implements BaseItem {
   @override
   void setSyncStatus(SyncStatus status) {
     this.syncStatus = status;
-  }
-
-  @override
-  void updateDescription(String newDescription) {
-    this.description = description;
-  }
-
-  @override
-  void updateModificationDate(DateTime modificationDate) {
-    this.lastModificationDate = modificationDate;
   }
 
 }

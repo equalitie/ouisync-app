@@ -42,16 +42,12 @@ class OuisyncRepository {
   List<BaseItem> _castToBaseItem(List<FileSystemEntity> repos) {
     List<BaseItem> newList = repos.map((repo) => 
       FolderItem(
-        id: '',
         name: getPathFromFileName(repo.path),
         path: repo.path,
         size: 0.0,
         syncStatus: SyncStatus.idle,
-        user: User(id: '', name: ''),
         itemType: ItemType.repo,
         icon: Icons.store, 
-        creationDate: DateTime.now(),
-        lastModificationDate: DateTime.now(),
         items: [],
         
       )

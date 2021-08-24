@@ -64,7 +64,7 @@ bloc.add(
     Navigation.folder,
     slash,
     slash,
-    FolderItem(creationDate: DateTime.now(), lastModificationDate: DateTime.now(), items: <BaseItem>[])
+    FolderItem(items: <BaseItem>[])
   )
 );
 

@@ -40,8 +40,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   late BaseItem _currentFolderData;
   final rootItem = FolderItem(
     path: slash,
-    creationDate: DateTime.now(),
-    lastModificationDate: DateTime.now(),
     items: <BaseItem>[]
   ); 
 

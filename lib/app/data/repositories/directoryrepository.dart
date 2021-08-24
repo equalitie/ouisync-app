@@ -261,16 +261,11 @@ class DirectoryRepository {
 
     if (type == EntryType.directory) {
       return FolderItem(
-        id: '',
         name: name,
         path: itemPath,
         size: size,
         syncStatus: SyncStatus.idle,
-        user: User(id: '', name: ''),
         itemType: ItemType.folder,
-        icon: Icons.store,
-        creationDate: DateTime.now(),
-        lastModificationDate: DateTime.now(),
         items: <BaseItem>[]
       );
     }
@@ -279,15 +274,11 @@ class DirectoryRepository {
       String fileType = extractFileTypeFromName(name);
 
       return FileItem(
-        id: '',
         name: name,
         extension: fileType,
         path: itemPath,
         size: 0.0,
-        syncStatus: SyncStatus.idle,
-        user: User(id: '', name: ''),
-        creationDate: DateTime.now(),
-        lastModificationDate: DateTime.now()
+        syncStatus: SyncStatus.idle
       ); 
     }
 
