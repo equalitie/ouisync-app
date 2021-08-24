@@ -194,7 +194,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
             RequestContent(
               session: widget.session,
               path: state.destinationPath,
-              recursive: false
+              recursive: false,
+              withProgressIndicator: true
             )
           );
 
@@ -234,7 +235,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
                 RequestContent(
                   session: widget.session,
                   path: state.destinationPath,
-                  recursive: false
+                  recursive: false,
+                  withProgressIndicator: true
                 )
               );
 
@@ -398,7 +400,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
       RequestContent(
         session: widget.session,
         path: _currentFolder,
-        recursive: false
+        recursive: false,
+        withProgressIndicator: false
       )
     );
   }

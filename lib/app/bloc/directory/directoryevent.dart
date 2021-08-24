@@ -29,18 +29,21 @@ class RequestContent extends DirectoryEvent {
   const RequestContent({
     required this.session,
     required this.path,
-    required this.recursive
+    required this.recursive,
+    required this.withProgressIndicator
   });
 
   final Session session;
   final String path;
   final bool recursive;
+  final bool withProgressIndicator;
 
   @override
   List<Object> get props => [
     session,
     path,
-    recursive
+    recursive,
+    withProgressIndicator
   ];
 
 }

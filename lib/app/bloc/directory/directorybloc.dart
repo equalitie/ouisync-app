@@ -38,7 +38,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     }
 
     if (event is RequestContent) {
-      yield DirectoryLoadInProgress();
+      if (event.withProgressIndicator) {
+        yield DirectoryLoadInProgress(); 
+      }
       
       try {
         yield await getFolderContents(event.session, event.path);
