@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+
+import '../../utils/utils.dart';
 
 class FileDetail extends StatelessWidget {
   const FileDetail({
