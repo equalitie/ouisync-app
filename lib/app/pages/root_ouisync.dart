@@ -405,9 +405,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
   Future<void> updateFolderContents(items) async {
     if (items.isEmpty) {
       if (_folderContents.isNotEmpty) {
-        setState(() {
-          _folderContents.clear();
-        }); 
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          setState(() {
+            _folderContents.clear();
+          }); 
+        });
       }
       return;
     }
@@ -416,9 +418,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
     
     if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-      setState(() {
-        _folderContents.clear();
-        _folderContents.addAll(contents);
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        setState(() {
+          _folderContents = contents;
+        });
       });  
     }
   }
