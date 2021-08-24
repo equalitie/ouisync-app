@@ -108,14 +108,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     autoRefreshTimer = Timer.periodic(
       Duration(seconds: autoRefreshPeriodInSeconds),
       (timer) { 
-        print('[${DateTime.now()}] Pooling data for folder $_currentFolder');
-
-        showSnackBar(
-          context,
-          content: Text('Updating contents after syncing'),
-          action: hideSnackBar(context)
-        );
-
         _reloadCurrentFolder();
       }
     );
