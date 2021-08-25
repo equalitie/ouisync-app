@@ -176,14 +176,17 @@ abstract class Dialogs {
     Widget? actionBody;
 
     switch (action) {
-      case actionNewFolder:
-        dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
-          session: session,
-          path: path,
-          bloc: directoryBloc,
-          title: 'New Folder',
-        );
+      case actionNewFolder: {
+          final formKey = GlobalKey<FormState>();
+
+          dialogTitle = 'Create Folder';
+          actionBody = FolderCreation(
+            session: session,
+            bloc: directoryBloc,
+            path: path,
+            formKey: formKey,
+          );
+        }
         break;
       
       case actionNewFile:
@@ -282,14 +285,17 @@ abstract class Dialogs {
           title: 'Add File',
         );
         break;
-      case actionNewFolder:
-        dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
-          session: session,
-          path: parentPath,
-          bloc: directoryBloc,
-          title: 'New Folder',
-        );
+      case actionNewFolder: {
+          final formKey = GlobalKey<FormState>();
+
+          dialogTitle = 'Create Folder';
+          actionBody = FolderCreation(
+            session: session,
+            bloc: directoryBloc,
+            path: parentPath,
+            formKey: formKey,
+          );
+        }
         break;
     }
 
