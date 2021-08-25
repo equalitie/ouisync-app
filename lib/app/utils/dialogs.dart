@@ -62,13 +62,14 @@ abstract class Dialogs {
   ) { 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: new List.generate(actions.length, (int index) {
         String actionName = actions.keys.elementAt(index);
 
         Widget child = new Container(
-          height: 70.0,
-          width: 156.0,
-          alignment: FractionalOffset.topCenter,
+          height: 80.0,
+          width: 180.0,
+          alignment: Alignment.topRight,
           child: new ScaleTransition(
             scale: new CurvedAnimation(
               parent: controller,
