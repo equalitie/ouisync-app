@@ -121,7 +121,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   @override
   Widget build(BuildContext context) {
-    backgroundColor = Theme.of(context).cardColor;
+    backgroundColor = Theme.of(context).hintColor;
     foregroundColor = Theme.of(context).accentColor;
 
     return Scaffold(
