@@ -30,29 +30,9 @@ class FileDetail extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHandle(context),
+          buildHandle(context),
           _fileDetails(context),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHandle(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return FractionallySizedBox(
-      widthFactor: 0.25,
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-          vertical: 12.0,
-        ),
-        child: Container(
-          height: 5.0,
-          decoration: BoxDecoration(
-            color: theme.dividerColor,
-            borderRadius: const BorderRadius.all(Radius.circular(2.5)),
-          ),
-        ),
       ),
     );
   }
@@ -65,141 +45,39 @@ class FileDetail extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildTitle('File Details'),
-          _buildInfoLabel(
+          buildTitle('File Details'),
+          buildInfoLabel(
             'Name: ',
             name
           ),
-          _buildInfoLabel(
+          buildInfoLabel(
             'Location: ', 
             path
             .replaceAll(name, '')
             .trimRight()
           ),
-          _buildInfoLabel(
+          buildInfoLabel(
             'Size: ',
             formattSize(size, units: true)
           ),
-          Divider(
-            height: 20,
-            color: Colors.transparent
-          ),
-          _buildActionsSection(context),
+          buildActionsSection(context, _actions(context)),
         ],
       ),
     );
   }
 
-  Widget _buildTitle(title) => Column(
-    children: [
-      Text(
-        title,
-        textAlign: TextAlign.center,
-        softWrap: true,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 24.0,
-          fontWeight: FontWeight.bold
-        ),
-      ),
-      Divider(
-        height: 30,
-        color: Colors.transparent
-      ),
-    ]
-  );
-
-  Widget _buildInfoLabel(label, info) => Padding(
-    padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 10.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        _buildIdLabel(label),
-        SizedBox(width: 10.0,),
-        _buildConstrainedText(info)
-      ],
+  List<Widget> _actions(context) => [
+    buildRoundedButton(
+      context,
+      const Icon(Icons.preview),
+      'Preview',
+      () async => await NativeChannels.previewOuiSyncFile(path, size)
+    ),
+    buildRoundedButton(
+      context,
+      const Icon(Icons.share),
+      'Share',
+      () async => await NativeChannels.shareOuiSyncFile(path, size)
     )
-  );
-
-  Widget _buildIdLabel(text) => Text(
-    text,
-    textAlign: TextAlign.center,
-    softWrap: true,
-    overflow: TextOverflow.ellipsis,
-    style: TextStyle(
-      fontSize: 14.0,
-      fontWeight: FontWeight.bold
-    ),
-  ); 
-
-  Widget _buildConstrainedText(text)  => Expanded(
-    flex: 1,
-    child: Text(
-      text,
-      textAlign: TextAlign.start,
-      softWrap: true,
-      overflow: TextOverflow.clip,
-      style: TextStyle(
-        fontSize: 18.0,
-        fontWeight: FontWeight.w600
-      ),
-    ),
-  );
-
-  Widget _buildActionsSection(context) => Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      _buildRoundedButton(
-        context,
-        const Icon(Icons.preview),
-        'Preview',
-        () async => await NativeChannels.previewOuiSyncFile(path, size)
-      ),
-      _buildRoundedButton(
-        context,
-        const Icon(Icons.share),
-        'Share',
-        () async => await NativeChannels.shareOuiSyncFile(path, size)
-      )
-    ],
-  );
-
-  Widget _buildRoundedButton(BuildContext context, Icon icon, String text, Function action) {
-    return  Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        OutlinedButton(
-          onPressed: () => action.call(),
-          child: Container(
-            width: 60,
-            height: 60,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle
-            ),
-            child: icon,
-          ),
-          style: OutlinedButton.styleFrom(
-            shape: CircleBorder(),
-            primary: Theme.of(context).primaryColor
-          ),
-        ),
-        Divider(
-          height: 5.0,
-          color: Colors.transparent,
-        ),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 13.0,
-            fontWeight: FontWeight.w700,
-          ),
-        )
-      ]
-    );
-  }
+  ];
 }
