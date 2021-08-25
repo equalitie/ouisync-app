@@ -85,31 +85,8 @@ abstract class Dialogs {
               foregroundColor: foregroundColor,
               label: Text(actionName),
               icon: Icon(actions[actionName]),
-              onPressed: () async { 
-                late Future<dynamic> dialog;
-                switch (actionsDialog) {
-                  case flagRepoActionsDialog:
-                  /// Only one repository allowed for the MVP
-                    // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
-                    break;
-
-                  case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
-                    break;
-
-                  case flagReceiveShareActionsDialog:
-                    dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
-                    break;
-
-                  default:
-                    return;
-                }
-
-                bool resultOk = await dialog;
-                if (resultOk) {
-                  controller.reset(); 
-                }
-              },
+              onPressed: () async => 
+                await executeActionByName(actionsDialog, controller, context, bloc, session, path, actionName),
             ),
           ),
         );
@@ -136,6 +113,41 @@ abstract class Dialogs {
         ),
       ),
     );
+  }
+
+  static Future<void> executeActionByName(
+    String actionsDialog,
+    AnimationController controller,
+    BuildContext context,
+    Bloc<dynamic, dynamic> bloc,
+    Session session,
+    String path,
+    String actionName
+  ) async {
+    late Future<dynamic> dialog;
+    switch (actionsDialog) {
+      case flagRepoActionsDialog:
+      /// Only one repository allowed for the MVP
+        // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
+        break;
+    
+      case flagFolderActionsDialog:
+        dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        break;
+    
+      case flagReceiveShareActionsDialog:
+        dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        break;
+    
+      default:
+        dialog = Future.value(false);
+        break;
+    }
+    
+    bool resultOk = await dialog;
+    if (resultOk) {
+      controller.reset(); 
+    }
   }
 
   static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
