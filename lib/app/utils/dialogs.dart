@@ -308,6 +308,7 @@ abstract class Dialogs {
 
   static _actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return ActionsDialog(
         title: dialogTitle,
