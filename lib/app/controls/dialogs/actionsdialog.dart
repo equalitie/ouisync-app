@@ -5,12 +5,10 @@ class ActionsDialog extends StatefulWidget {
   const ActionsDialog({
     required this.title,
     this.body,
-    // this.image
   });
 
   final String title;
   final Widget? body;
-  // final Image image;
 
   @override
   _ActionsDialogState createState() => _ActionsDialogState();

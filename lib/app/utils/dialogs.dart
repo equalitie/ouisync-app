@@ -1,13 +1,14 @@
 import 'dart:math' as math;
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
+import '../models/models.dart';
 import '../pages/pages.dart';
 import 'utils.dart';
 
@@ -62,13 +63,14 @@ abstract class Dialogs {
   ) { 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: new List.generate(actions.length, (int index) {
         String actionName = actions.keys.elementAt(index);
 
         Widget child = new Container(
-          height: 70.0,
-          width: 156.0,
-          alignment: FractionalOffset.topCenter,
+          height: 80.0,
+          width: 180.0,
+          alignment: Alignment.topRight,
           child: new ScaleTransition(
             scale: new CurvedAnimation(
               parent: controller,
@@ -84,31 +86,8 @@ abstract class Dialogs {
               foregroundColor: foregroundColor,
               label: Text(actionName),
               icon: Icon(actions[actionName]),
-              onPressed: () async { 
-                late Future<dynamic> dialog;
-                switch (actionsDialog) {
-                  case flagRepoActionsDialog:
-                  /// Only one repository allowed for the MVP
-                    // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
-                    break;
-
-                  case flagFolderActionsDialog:
-                    dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
-                    break;
-
-                  case flagReceiveShareActionsDialog:
-                    dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
-                    break;
-
-                  default:
-                    return;
-                }
-
-                bool resultOk = await dialog;
-                if (resultOk) {
-                  controller.reset(); 
-                }
-              },
+              onPressed: () async => 
+                await executeActionByName(actionsDialog, controller, context, bloc, session, path, actionName),
             ),
           ),
         );
@@ -137,6 +116,41 @@ abstract class Dialogs {
     );
   }
 
+  static Future<void> executeActionByName(
+    String actionsDialog,
+    AnimationController controller,
+    BuildContext context,
+    Bloc<dynamic, dynamic> bloc,
+    Session session,
+    String path,
+    String actionName
+  ) async {
+    late Future<dynamic> dialog;
+    switch (actionsDialog) {
+      case flagRepoActionsDialog:
+      /// Only one repository allowed for the MVP
+        // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
+        break;
+    
+      case flagFolderActionsDialog:
+        dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        break;
+    
+      case flagReceiveShareActionsDialog:
+        dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        break;
+    
+      default:
+        dialog = Future.value(false);
+        break;
+    }
+    
+    bool resultOk = await dialog;
+    if (resultOk) {
+      controller.reset(); 
+    }
+  }
+
   static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
     String dialogTitle = '';
     Widget? actionBody;
@@ -158,30 +172,26 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
-      case actionNewFolder:
-        dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
+      case actionNewFolder: {
+        final formKey = GlobalKey<FormState>();
+
+        dialogTitle = 'Create Folder';
+        actionBody = FolderCreation(
           session: session,
+          bloc: directoryBloc,
           path: path,
-          bloc: directoryBloc,
-          title: 'New Folder',
+          formKey: formKey,
         );
-        break;
+      }
+      break;
       
-      case actionNewFile:
-        dialogTitle = 'Add File';
-        actionBody = AddFilePage(
-          session: session,
-          parentPath: path,
-          bloc: directoryBloc,
-          title: 'Add File',
-        );
-        break;
+      case actionNewFile: 
+        return await _addFileAction(path, directoryBloc, session);
 
       case actionDeleteFolder:
         final parentPath = extractParentFromPath(path);
@@ -207,6 +217,37 @@ abstract class Dialogs {
       dialogTitle,
       actionBody
     );
+  }
+
+  static _addFileAction(String path, DirectoryBloc directoryBloc, Session session) async {
+    final result = await FilePicker
+    .platform
+    .pickFiles(
+      type: FileType.any,
+      withReadStream: true
+    );
+
+    if(result != null) {
+      final newFilePath = path == '/'
+      ? '/${result.files.single.name}'
+      : '$path/${result.files.single.name}';
+      
+      final fileByteStream = result.files.single.readStream!;
+      
+      directoryBloc
+      .add(
+        CreateFile(
+          session: session,
+          parentPath: path,
+          newFilePath: newFilePath,
+          fileByteStream: fileByteStream
+        )
+      );
+      
+      return Future.value(true);
+    }
+
+    return Future.value(false);
   }
 
   static AlertDialog buildDeleteFolderAlertDialog(bloc, session, parentPath, path, BuildContext context) {
@@ -255,28 +296,25 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
       case actionNewFile:
-        dialogTitle = 'Add File';
-        actionBody = AddFilePage(
-          session: session,
-          parentPath: parentPath,
-          bloc: directoryBloc,
-          title: 'Add File',
-        );
-        break;
-      case actionNewFolder:
-        dialogTitle = 'New Folder';
-        actionBody = AddFolderPage(
-          session: session,
-          path: parentPath,
-          bloc: directoryBloc,
-          title: 'New Folder',
-        );
+        return await _addFileAction(parentPath, directoryBloc, session);
+        
+      case actionNewFolder: {
+          final formKey = GlobalKey<FormState>();
+
+          dialogTitle = 'Create Folder';
+          actionBody = FolderCreation(
+            session: session,
+            bloc: directoryBloc,
+            path: parentPath,
+            formKey: formKey,
+          );
+        }
         break;
     }
 
@@ -289,6 +327,7 @@ abstract class Dialogs {
 
   static _actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return ActionsDialog(
         title: dialogTitle,

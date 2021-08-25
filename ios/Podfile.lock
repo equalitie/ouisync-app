@@ -35,6 +35,10 @@ PODS:
     - Flutter
   - FLAnimatedImage (1.0.12)
   - Flutter (1.0.0)
+  - open_file (0.0.1):
+    - Flutter
+  - ouisync_plugin (0.0.1):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - "permission_handler (5.1.0+2)":
@@ -47,16 +51,24 @@ PODS:
   - SDWebImageFLPlugin (0.4.0):
     - FLAnimatedImage (>= 1.0.11)
     - SDWebImage/Core (~> 5.6)
+  - share (0.0.1):
+    - Flutter
   - shared_preferences (0.0.1):
+    - Flutter
+  - url_launcher (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
+  - open_file (from `.symlinks/plugins/open_file/ios`)
+  - ouisync_plugin (from `.symlinks/plugins/ouisync_plugin/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
+  - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
 SPEC REPOS:
   trunk:
@@ -71,14 +83,22 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
+  open_file:
+    :path: ".symlinks/plugins/open_file/ios"
+  ouisync_plugin:
+    :path: ".symlinks/plugins/ouisync_plugin/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
+  share:
+    :path: ".symlinks/plugins/share/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
 
 SPEC CHECKSUMS:
   DKImagePickerController: 4a3e7948a848c4348e600b3fe5ce41478835fa10
@@ -86,13 +106,17 @@ SPEC CHECKSUMS:
   file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
+  ouisync_plugin: 57306a216bc00a84dd80f2ac68184e70f04b8e08
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   SDWebImage: 0b2ba0d56479bf6a45ecddbfd5558bea93150d25
   SDWebImageFLPlugin: 6c2295fb1242d44467c6c87dc5db6b0a13228fd8
+  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.10.2

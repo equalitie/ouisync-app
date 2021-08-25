@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/controls/dialogs/modal_file_detail_bottom_sheet.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/icon_style.dart';
@@ -122,7 +121,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   @override
   Widget build(BuildContext context) {
-    backgroundColor = Theme.of(context).cardColor;
+    backgroundColor = Theme.of(context).hintColor;
     foregroundColor = Theme.of(context).accentColor;
 
     return Scaffold(
@@ -453,7 +452,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     widget.session,
     context,
     _controller,
-    _currentFolder,// widget.path,
+    _currentFolder,
     folderActions,
     flagFolderActionsDialog,
     backgroundColor,
