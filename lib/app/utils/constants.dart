@@ -49,9 +49,9 @@ const String flagRepoActionsDialog = 'repo_dialog';
 const String flagFolderActionsDialog = 'folder_dialog';
 const String flagReceiveShareActionsDialog = 'receive_share_dialog';
 
-const String actionNewRepo = 'Add repo';
+const String actionNewRepo = 'Create repo';
 
-const String actionNewFolder = 'Add folder';
+const String actionNewFolder = 'Create folder';
 const String actionNewFile = 'Add file';
 
 const String actionDeleteFolder = 'Delete folder';
@@ -62,9 +62,9 @@ const String actionShare = 'share';
 
 const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
 const Map<String, IconData> folderActions = const { 
-  actionNewFolder: Icons.create_new_folder_rounded, 
-  actionNewFile: Icons.file_upload,
-  actionDeleteFolder: Icons.delete_sharp
+  actionDeleteFolder: Icons.delete_sharp,
+  actionNewFolder: Icons.create_new_folder_rounded,
+  actionNewFile: Icons.file_upload
 };
 
 const int bufferSize = 64000;
