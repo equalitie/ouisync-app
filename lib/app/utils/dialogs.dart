@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -171,33 +172,26 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
       case actionNewFolder: {
-          final formKey = GlobalKey<FormState>();
+        final formKey = GlobalKey<FormState>();
 
-          dialogTitle = 'Create Folder';
-          actionBody = FolderCreation(
-            session: session,
-            bloc: directoryBloc,
-            path: path,
-            formKey: formKey,
-          );
-        }
-        break;
-      
-      case actionNewFile:
-        dialogTitle = 'Add File';
-        actionBody = AddFilePage(
+        dialogTitle = 'Create Folder';
+        actionBody = FolderCreation(
           session: session,
-          parentPath: path,
           bloc: directoryBloc,
-          title: 'Add File',
+          path: path,
+          formKey: formKey,
         );
-        break;
+      }
+      break;
+      
+      case actionNewFile: 
+        return await _addFileAction(path, directoryBloc, session);
 
       case actionDeleteFolder:
         final parentPath = extractParentFromPath(path);
@@ -223,6 +217,37 @@ abstract class Dialogs {
       dialogTitle,
       actionBody
     );
+  }
+
+  static _addFileAction(String path, DirectoryBloc directoryBloc, Session session) async {
+    final result = await FilePicker
+    .platform
+    .pickFiles(
+      type: FileType.any,
+      withReadStream: true
+    );
+
+    if(result != null) {
+      final newFilePath = path == '/'
+      ? '/${result.files.single.name}'
+      : '$path/${result.files.single.name}';
+      
+      final fileByteStream = result.files.single.readStream!;
+      
+      directoryBloc
+      .add(
+        CreateFile(
+          session: session,
+          parentPath: path,
+          newFilePath: newFilePath,
+          fileByteStream: fileByteStream
+        )
+      );
+      
+      return Future.value(true);
+    }
+
+    return Future.value(false);
   }
 
   static AlertDialog buildDeleteFolderAlertDialog(bloc, session, parentPath, path, BuildContext context) {
@@ -271,20 +296,14 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) {
+  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
       case actionNewFile:
-        dialogTitle = 'Add File';
-        actionBody = AddFilePage(
-          session: session,
-          parentPath: parentPath,
-          bloc: directoryBloc,
-          title: 'Add File',
-        );
-        break;
+        return await _addFileAction(parentPath, directoryBloc, session);
+        
       case actionNewFolder: {
           final formKey = GlobalKey<FormState>();
 
