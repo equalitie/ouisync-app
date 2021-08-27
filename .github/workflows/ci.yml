@@ -14,19 +14,16 @@ jobs:
   build_and_test:
     name: OuiSync Flutter App
     runs-on: macos-11
-    env:
-      JAVA_VERSION: "11.0"
-      FLUTTER_VERSION: "2.2.3"
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
       - uses: actions/setup-java@v1
         with:
-          java_version: $
+          java_version: '12.x'
       - uses: subosito/flutter-action@v1
         with:
-          flutter_version: $
+          channel: 'stable'
+          flutter_version: '2.2.3'
       - run: flutter pub get
       - run: flutter analyze
-      
