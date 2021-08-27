@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
-  FolderCreation({
+  const FolderCreation({
     Key? key,
-    required this.session,
     required this.bloc,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
-  final Session session;
   final Bloc bloc;
   final String path;
   final GlobalKey<FormState> formKey;
@@ -68,7 +65,6 @@ class FolderCreation extends StatelessWidget {
     this.bloc
     .add(
       CreateFolder(
-        session: this.session,
         parentPath: this.path,
         newFolderPath: newFolderPath
       )

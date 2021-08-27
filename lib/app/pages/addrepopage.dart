@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-
-import '../bloc/blocs.dart';
 
 class AddRepoPage extends StatefulWidget {
   AddRepoPage({
-    required this.session,
     required this.title,
   });
 
-  final Session session;
   final String title;
 
   @override
@@ -46,12 +40,11 @@ class _AddRepoPage extends State<AddRepoPage> {
               : null;
             },
             onSaved: (newRepoName) {
-              BlocProvider.of<RepositoryBloc>(context)
-              .add(
-                CreateRepository(
-                  session: widget.session
-                )
-              );
+              // BlocProvider.of<RepositoryBloc>(context)
+              // .add(
+              //   // CreateRepository(
+              //   // )
+              // );
 
               Navigator.of(context).pop(true);
             },

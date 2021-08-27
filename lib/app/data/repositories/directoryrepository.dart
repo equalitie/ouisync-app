@@ -1,6 +1,4 @@
 import 'package:chunked_stream/chunked_stream.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../controls/controls.dart';
@@ -8,8 +6,11 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class DirectoryRepository {
-  _openRepository(session) async => 
-    await Repository.open(session);
+  const DirectoryRepository({
+    required this.repository
+  });
+
+  final Repository repository;
 
   _openDirectory(repository, path) async => 
     await Directory.open(repository, path);
@@ -17,12 +18,11 @@ class DirectoryRepository {
   _openFile(repository, path) async => 
     await File.open(repository, path);
 
-  Future<BasicResult> createFile(Session session, String newFilePath) async {
+  Future<BasicResult> createFile(String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
 
     File? newFile;
-    final repository = await _openRepository(session);
 
     try {
       print('Creating file $newFilePath');
@@ -32,8 +32,7 @@ class DirectoryRepository {
       print('Error creating file $newFilePath: $e');
       error = e.toString();
     } finally {
-      newFile!.close(); // TODO: Necessary? 
-      repository.close();
+      newFile!.close(); // TODO: Necessary?
     }
 
     createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
@@ -44,15 +43,13 @@ class DirectoryRepository {
     return createFileResult;
   }
 
-  Future<BasicResult> writeFile(Session session, String filePath, Stream<List<int>> fileStream) async {
+  Future<BasicResult> writeFile(String filePath, Stream<List<int>> fileStream) async {
     print('Writing file $filePath');
     
     BasicResult writeFileResult;
     String error = '';
 
     int offset = 0;
-
-    final repository = await _openRepository(session);
     final file = await _openFile(repository, filePath);
 
     try {
@@ -74,7 +71,6 @@ class DirectoryRepository {
       error = 'Writing to the file $filePath failed';
     } finally {
       file.close();
-      repository.close();
     }
 
     writeFileResult = WriteFileResult(functionName: 'writeFile', result: file);
@@ -85,14 +81,12 @@ class DirectoryRepository {
     return writeFileResult; 
   }
 
-  Future<BasicResult> readFile(Session session, String filePath, { String action = '' }) async {
+  Future<BasicResult> readFile(String filePath, { String action = '' }) async {
     BasicResult readFileResult;
     String error = '';
 
-    final repository = await _openRepository(session);
-    final file = await _openFile(repository, filePath);
-    
     final content = <int>[];
+    final file = await _openFile(repository, filePath);    
 
     try {
       final length = await file.length;
@@ -102,7 +96,6 @@ class DirectoryRepository {
       error = 'Read file $filePath failed';
     } finally {
       file.close();
-      repository.close();
     }
 
     readFileResult = action.isEmpty
@@ -115,19 +108,15 @@ class DirectoryRepository {
     return readFileResult;
   }
 
-  Future<BasicResult> deleteFile(Session session, String filePath) async {
+  Future<BasicResult> deleteFile(String filePath) async {
     BasicResult deleteFileResult;
     String error = '';
-
-    final repository = await _openRepository(session);
 
     try {
       await File.remove(repository, filePath);
     } catch (e) {
       print('Exception deleting file $filePath:\n${e.toString()}');
       error = 'Delete file $filePath failed';
-    } finally {
-      repository.close();
     }
 
     deleteFileResult = DeleteFileResult(functionName: 'deleteFile', result: 'OK');
@@ -138,12 +127,11 @@ class DirectoryRepository {
     return deleteFileResult;
   }
 
-  Future<BasicResult> createFolder(Session session, String path)  async {
+  Future<BasicResult> createFolder(String path)  async {
     BasicResult createFolderResult;
     String error = '';
 
     bool created = false;
-    final repository = await _openRepository(session);
 
     try {
       print('Creating folder $path');
@@ -155,8 +143,6 @@ class DirectoryRepository {
 
       created = false;
       error = e.toString();
-    } finally {
-      repository.close();
     }
 
     createFolderResult = CreateFolderResult(functionName: 'createFolder', result: created);
@@ -167,22 +153,19 @@ class DirectoryRepository {
     return createFolderResult;
   }
 
-  Future<BasicResult> getFolderContents(Session session, String path) async {
+  Future<BasicResult> getFolderContents(String path) async {
     print("Getting folder $path contents");
   
     BasicResult getContentsResult;
     String error = '';
 
     final returnedContent = <BaseItem>[];
-
-    final repository = await _openRepository(session);
     final directory = await _openDirectory(repository, path);
     
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
         final returned =  await _castToBaseItem(
-          session,
           path,
           iterator.current.name,
           iterator.current.type,
@@ -197,7 +180,6 @@ class DirectoryRepository {
       error = e.toString();
     } finally {
       directory.close();
-      repository.close();
     }
     
     getContentsResult = GetContentResult(functionName: 'getFolderContents', result: returnedContent);
@@ -208,18 +190,14 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<BaseItem>> getContentsRecursive(Session session, String path) async {
+  Future<List<BaseItem>> getContentsRecursive(String path) async {
     final contentNodes = <BaseItem>[];
 
-    final repository = await _openRepository(session);
     final directory = await _openDirectory(repository, path);
-
     if (directory.isEmpty) {
       print('Folder $path is empty.');
 
       directory.close();
-      repository.close();
-
       return <BaseItem>[];
     }
 
@@ -227,7 +205,6 @@ class DirectoryRepository {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
         final newNode = await _castToBaseItem(
-          session,
           path,
           iterator.current.name,
           iterator.current.type,
@@ -239,7 +216,7 @@ class DirectoryRepository {
           ? '/${iterator.current.name}'
           : '$path/${iterator.current.name}';
 
-          (newNode as FolderItem).items = await getContentsRecursive(session, itemPath);  
+          (newNode as FolderItem).items = await getContentsRecursive(itemPath);  
         }
         
         contentNodes.add(newNode);
@@ -248,13 +225,12 @@ class DirectoryRepository {
       print('Error traversing directory $path: $e');
     } finally {
       directory.close();
-      repository.close();
     }
 
     return contentNodes;
   }
 
-  Future<BaseItem> _castToBaseItem(Session session, String path, String name, EntryType type, double size) async {
+  Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, double size) async {
     final itemPath = path == '/'
     ? '/$name'
     : '$path/$name';
@@ -285,19 +261,15 @@ class DirectoryRepository {
     return <BaseItem>[].single;
   }
 
-  Future<BasicResult> deleteFolder(Session session, String path) async {
+  Future<BasicResult> deleteFolder(String path) async {
     BasicResult deleteFolderResult;
     String error = '';
-
-    final repository = await _openRepository(session);
 
     try {
       await Directory.remove(repository, path);
     } catch (e) {
       print('Exception deleting folder $path:\n${e.toString()}');
       error = 'Delete folder $path failed';
-    } finally {
-      repository.close();
     }
 
     deleteFolderResult = DeleteFolderResult(functionName: 'deleteFolder', result: 'OK');
