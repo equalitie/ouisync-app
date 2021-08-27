@@ -20,10 +20,10 @@ jobs:
           submodules: recursive
       - uses: actions/setup-java@v1
         with:
-          java_version: '12.x'
+          java-version: '12.x'
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-          flutter_version: '2.2.3'
+          flutter-version: '2.2.3'
       - run: flutter pub get
       - run: flutter analyze
