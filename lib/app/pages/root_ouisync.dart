@@ -214,14 +214,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     return Center(
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-          if (state is NavigationInitial) {
-            return Center(child: Text('Loading ${widget.path}...'));
-          }
-
-          if (state is NavigationLoadInProgress){
-            return Center(child: CircularProgressIndicator());
-          }
-
           if (state is NavigationLoadSuccess) {
             if (state.navigation == Navigation.file) {
               return _contents();
