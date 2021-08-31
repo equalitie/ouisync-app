@@ -133,7 +133,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      drawer: _getDrawer(),
+      // drawer: _getDrawer(),
       body: _getScreen(),
       floatingActionButton: _getFloatingButton(),
     );
