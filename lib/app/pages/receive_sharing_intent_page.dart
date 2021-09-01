@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -16,13 +15,11 @@ import '../utils/utils.dart';
 
 class ReceiveSharingIntentPage extends StatefulHookWidget {
   ReceiveSharingIntentPage({
-    required this.session,
     required this.sharedFileInfo,
     required this.directoryBloc,
     required this.directoryBlocPath
   });
 
-  final Session session;
   final List<SharedMediaFile> sharedFileInfo;
   final Bloc directoryBloc;
   final String directoryBlocPath;
@@ -337,7 +334,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             popupMenu: Dialogs
                 .filePopupMenu(
                   context,
-                  widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
                   { actionDeleteFile: item }
                 ),
@@ -352,15 +348,14 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ? '/$fileName'
     : '$path/$fileName';
         
-    _saveFileToOuiSync(widget.session, path, destinationPath, data);
+    _saveFileToOuiSync(path, destinationPath, data);
   }
 
-  Future<void> _saveFileToOuiSync(Session session, String parentPath, String destinationPath, BaseItem data) async {
+  Future<void> _saveFileToOuiSync(String parentPath, String destinationPath, BaseItem data) async {
     var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
     widget.directoryBloc
     .add(
       CreateFile(
-        session: session,
         parentPath: parentPath,
         newFilePath: destinationPath,
         fileByteStream: fileStream

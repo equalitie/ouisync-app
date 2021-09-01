@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/models.dart';
 
 import '../bloc/blocs.dart';
+import '../models/models.dart';
 import 'utils.dart';
 
 showSnackBar(BuildContext context, { required Widget content, SnackBarAction? action }) =>

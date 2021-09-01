@@ -1,0 +1,28 @@
+name: CI
+
+on: 
+  push:
+    #branches: [master]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: OuiSync Flutter App
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+          flutter-version: '2.2.3'
+      - run: flutter pub get

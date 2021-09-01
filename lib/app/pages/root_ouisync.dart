@@ -18,13 +18,13 @@ import 'pages.dart';
 
 class RootOuiSync extends StatefulWidget {
   const RootOuiSync({
-    required this.session,
+    required this.repository,
     required this.foldersRepository,
     required this.path,
     required this.title,
   });
 
-  final Session session;
+  final Repository repository;
   final DirectoryRepository foldersRepository;
   final String path;
   final String title;
@@ -35,6 +35,9 @@ class RootOuiSync extends StatefulWidget {
 
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
+
+  late final Repository repository;
+  late final Subscription subscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
 
@@ -53,18 +56,19 @@ class _RootOuiSyncState extends State<RootOuiSync>
     super.initState();
 
     handleIncomingShareIntent();
-
-    initAutoRefresh();
-    initAnimationController();
+    // initAutoRefresh();
+    subscribeToRepositoryNotifications(widget.repository);
 
     loadRoot(BlocProvider.of<NavigationBloc>(context));
+    initAnimationController();
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    autoRefreshTimer.cancel();
+    // autoRefreshTimer.cancel();
+    subscription.cancel();
 
     _controller.dispose();
     _intentDataStreamSubscription.cancel();
@@ -96,13 +100,16 @@ class _RootOuiSyncState extends State<RootOuiSync>
       context,
       MaterialPageRoute(builder: (context) {
         return ReceiveSharingIntentPage(
-          session: widget.session,
           sharedFileInfo: sharedMedia,
           directoryBloc: BlocProvider.of<DirectoryBloc>(context),
           directoryBlocPath: widget.path,
         );
       })
     );
+  }
+
+  void subscribeToRepositoryNotifications(Repository repository) async {
+    subscription = repository.subscribe(_reloadCurrentFolder);
   }
 
   void initAutoRefresh() {
@@ -126,7 +133,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      drawer: _getDrawer(),
+      // drawer: _getDrawer(),
       body: _getScreen(),
       floatingActionButton: _getFloatingButton(),
     );
@@ -184,7 +191,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
           BlocProvider.of<DirectoryBloc>(context)
           .add(
             RequestContent(
-              session: widget.session,
               path: state.destinationPath,
               recursive: false,
               withProgressIndicator: true
@@ -208,14 +214,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     return Center(
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-          if (state is NavigationInitial) {
-            return Center(child: Text('Loading ${widget.path}...'));
-          }
-
-          if (state is NavigationLoadInProgress){
-            return Center(child: CircularProgressIndicator());
-          }
-
           if (state is NavigationLoadSuccess) {
             if (state.navigation == Navigation.file) {
               return _contents();
@@ -225,7 +223,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
               BlocProvider.of<DirectoryBloc>(context)
               .add(
                 RequestContent(
-                  session: widget.session,
                   path: state.destinationPath,
                   recursive: false,
                   withProgressIndicator: true
@@ -337,7 +334,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
           ? () async {
             final file = await Dialogs.executeFutureWithLoadingDialog(
               context,
-              getFile(widget.session, item.path, item.name)
+              getFile(item.path, item.name)
             );
             if (file != null) {
               final size = await file.length;
@@ -363,7 +360,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
               popupMenu: Dialogs
                 .filePopupMenu(
                   context,
-                  widget.session,
                   BlocProvider. of<DirectoryBloc>(context),
                   { actionDeleteFile: item }
                 ),
@@ -401,7 +397,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       RequestContent(
-        session: widget.session,
         path: _currentFolder,
         recursive: false,
         withProgressIndicator: false
@@ -409,10 +404,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
     );
   }
 
-  Future<File?> getFile(Session session, String path, String name) async {
+  Future<File?> getFile(String path, String name) async {
     try {
-      final repo = await Repository.open(session);
-      return await File.open(repo, path);
+      return await File.open(widget.repository, path);
     } on Exception catch (e) {
       print('Init file: $e');
 
@@ -449,7 +443,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
     BlocProvider.of<DirectoryBloc>(context),
-    widget.session,
     context,
     _controller,
     _currentFolder,

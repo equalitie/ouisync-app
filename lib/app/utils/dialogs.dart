@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
@@ -39,8 +38,9 @@ abstract class Dialogs {
       ),
     );
 
-    return showDialog(barrierDismissible: false,
+    return showDialog(
       context:context,
+      barrierDismissible: false,
       builder:(BuildContext context){
         return alert; 
       },
@@ -52,7 +52,6 @@ abstract class Dialogs {
 
   static Widget floatingActionsButtonMenu(
     Bloc bloc,
-    Session session,
     BuildContext context,
     AnimationController controller,
     String path,
@@ -87,7 +86,7 @@ abstract class Dialogs {
               label: Text(actionName),
               icon: Icon(actions[actionName]),
               onPressed: () async => 
-                await executeActionByName(actionsDialog, controller, context, bloc, session, path, actionName),
+                await executeActionByName(actionsDialog, controller, context, bloc, path, actionName),
             ),
           ),
         );
@@ -121,7 +120,6 @@ abstract class Dialogs {
     AnimationController controller,
     BuildContext context,
     Bloc<dynamic, dynamic> bloc,
-    Session session,
     String path,
     String actionName
   ) async {
@@ -133,11 +131,11 @@ abstract class Dialogs {
         break;
     
       case flagFolderActionsDialog:
-        dialog = folderActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        dialog = folderActionsDialog(context, bloc as DirectoryBloc, path, actionName);
         break;
     
       case flagReceiveShareActionsDialog:
-        dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, session, path, actionName);
+        dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, path, actionName);
         break;
     
       default:
@@ -151,7 +149,7 @@ abstract class Dialogs {
     }
   }
 
-  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, Session session, String action) {
+  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, String action) {
     String dialogTitle = '';
     Widget? actionBody;
 
@@ -159,7 +157,6 @@ abstract class Dialogs {
       case actionNewRepo:
         dialogTitle = 'New Repository';
         actionBody = AddRepoPage(
-          session: session,
           title: 'New Repository',
         );
         break;
@@ -172,7 +169,7 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String path, String action) async {
+  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String path, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
@@ -182,7 +179,6 @@ abstract class Dialogs {
 
         dialogTitle = 'Create Folder';
         actionBody = FolderCreation(
-          session: session,
           bloc: directoryBloc,
           path: path,
           formKey: formKey,
@@ -191,7 +187,7 @@ abstract class Dialogs {
       break;
       
       case actionNewFile: 
-        return await _addFileAction(path, directoryBloc, session);
+        return await _addFileAction(path, directoryBloc);
 
       case actionDeleteFolder:
         final parentPath = extractParentFromPath(path);
@@ -203,7 +199,6 @@ abstract class Dialogs {
 
             return buildDeleteFolderAlertDialog(
               directoryBloc,
-              session,
               parentPath,
               path,
               context,
@@ -219,7 +214,7 @@ abstract class Dialogs {
     );
   }
 
-  static _addFileAction(String path, DirectoryBloc directoryBloc, Session session) async {
+  static _addFileAction(String path, DirectoryBloc directoryBloc) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -237,7 +232,6 @@ abstract class Dialogs {
       directoryBloc
       .add(
         CreateFile(
-          session: session,
           parentPath: path,
           newFilePath: newFilePath,
           fileByteStream: fileByteStream
@@ -250,7 +244,7 @@ abstract class Dialogs {
     return Future.value(false);
   }
 
-  static AlertDialog buildDeleteFolderAlertDialog(bloc, session, parentPath, path, BuildContext context) {
+  static AlertDialog buildDeleteFolderAlertDialog(bloc, parentPath, path, BuildContext context) {
     return AlertDialog(
       title: const Text('Delete folder'),
       content: SingleChildScrollView(
@@ -277,7 +271,6 @@ abstract class Dialogs {
             bloc
             .add(
               DeleteFolder(
-                session: session,
                 parentPath: parentPath,
                 path: path
               )
@@ -296,20 +289,19 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, Session session, String parentPath, String action) async {
+  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String parentPath, String action) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
       case actionNewFile:
-        return await _addFileAction(parentPath, directoryBloc, session);
+        return await _addFileAction(parentPath, directoryBloc);
         
       case actionNewFolder: {
           final formKey = GlobalKey<FormState>();
 
           dialogTitle = 'Create Folder';
           actionBody = FolderCreation(
-            session: session,
             bloc: directoryBloc,
             path: parentPath,
             formKey: formKey,
@@ -336,7 +328,7 @@ abstract class Dialogs {
     }
   );
 
-  static filePopupMenu(BuildContext context, Session session, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
+  static filePopupMenu(BuildContext context, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
     return PopupMenuButton(
       itemBuilder: (context) {
         return fileMenuOptions.entries.map((e) => 
@@ -350,14 +342,14 @@ abstract class Dialogs {
         final data = (value as MapEntry<String, BaseItem>).value;
         switch (value.key) {
           case actionDeleteFile:
-            _deleteFileWithConfirmation(context, bloc, session, data.path);
+            _deleteFileWithConfirmation(context, bloc, data.path);
             break;
         }
       }
     );
   }
 
-  static _deleteFileWithConfirmation(BuildContext context, bloc, session, path) =>
+  static _deleteFileWithConfirmation(BuildContext context, bloc, path) =>
     showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -365,11 +357,11 @@ abstract class Dialogs {
         final fileName = getPathFromFileName(path);
         final parent = extractParentFromPath(path);
 
-        return buildDeleteFileAlertDialog(bloc, session, path, context, fileName, parent);
+        return buildDeleteFileAlertDialog(bloc, path, context, fileName, parent);
       },
     );
 
-  static AlertDialog buildDeleteFileAlertDialog(bloc, session, path, BuildContext context, String fileName, String parent) {
+  static AlertDialog buildDeleteFileAlertDialog(bloc, path, BuildContext context, String fileName, String parent) {
     return AlertDialog(
       title: const Text('Delete file'),
       content: SingleChildScrollView(
@@ -414,7 +406,6 @@ abstract class Dialogs {
             bloc
             .add(
               DeleteFile(
-                session: session,
                 parentPath: parent,
                 filePath: path
               )

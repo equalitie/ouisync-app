@@ -11,10 +11,12 @@ import 'utils/utils.dart';
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     required this.session,
+    required this.repository,
     required this.foldersRepository,
   });
 
   final Session session;
+  final Repository repository;
   final DirectoryRepository foldersRepository;
 
   @override
@@ -58,7 +60,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: RootOuiSync(
-          session:  widget.session,
+          repository: widget.repository,
           foldersRepository: widget.foldersRepository,
           path: slash,
           title: titleApp,

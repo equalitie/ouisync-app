@@ -14,7 +14,10 @@ Future<void> main() async {
   final session = await Session.open(
         join((await getApplicationSupportDirectory()).path, 'db'));
 
-  final DirectoryRepository foldersRepository = DirectoryRepository();
+  final repository = await Repository.open(session);
+
+  final DirectoryRepository foldersRepository = 
+    DirectoryRepository(repository: repository);
 
   Bloc.observer = SimpleBlocObserver();
 
@@ -23,6 +26,7 @@ Future<void> main() async {
       DirectoryBloc(blocRepository: foldersRepository),
     child: OuiSyncApp(
       session: session,
+      repository: repository,
       foldersRepository: foldersRepository,
     ),
   ));
