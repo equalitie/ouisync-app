@@ -264,56 +264,53 @@ class _RootOuiSyncState extends State<RootOuiSync>
       )
     );
 
-  _contentsList(List contents) {
-    updateFolderContents(contents);
-
-    return RefreshIndicator(
-      onRefresh: _reloadCurrentFolder,
-      child: ListView.separated(
-        separatorBuilder: (context, index) => Divider(
-            height: 1,
-            color: Colors.transparent
-        ),
-        itemCount: _folderContents.length,
-        itemBuilder: (context, index) {
-          final item = _folderContents[index];
-          final actionByType = item.itemType == ItemType.file
-          ? () async {
-            final file = await Dialogs.executeFutureWithLoadingDialog(
-              context,
-              getFile(item.path, item.name)
-            );
-            if (file != null) {
-              final size = await file.length;
-              _showFileDetails(item.name, item.path, size);
-            }
-          }
-          : () {
-            BlocProvider.of<NavigationBloc>(context)
-            .add(
-              NavigateTo(
-                type: Navigation.content,
-                origin: _currentFolder,
-                destination: item.path
-              )
-            );
-          };
-
-          return ListItem (
-              itemData: item,
-              mainAction: actionByType,
-              secondaryAction: () => {},
-              popupMenu: Dialogs
-                .filePopupMenu(
-                  context,
-                  BlocProvider. of<DirectoryBloc>(context),
-                  { actionDeleteFile: item }
-                ),
+  _contentsList(List<BaseItem> contents) => 
+  RefreshIndicator(
+    onRefresh: _reloadCurrentFolder,
+    child: ListView.separated(
+      separatorBuilder: (context, index) => Divider(
+          height: 1,
+          color: Colors.transparent
+      ),
+      itemCount: contents.length,
+      itemBuilder: (context, index) {
+        final item = contents[index];
+        final actionByType = item.itemType == ItemType.file
+        ? () async {
+          final file = await Dialogs.executeFutureWithLoadingDialog(
+            context,
+            getFile(item.path, item.name)
           );
+          if (file != null) {
+            final size = await file.length;
+            _showFileDetails(item.name, item.path, size);
+          }
         }
-      )
-    );
-  }
+        : () {
+          BlocProvider.of<NavigationBloc>(context)
+          .add(
+            NavigateTo(
+              type: Navigation.content,
+              origin: _currentFolder,
+              destination: item.path
+            )
+          );
+        };
+
+        return ListItem (
+            itemData: item,
+            mainAction: actionByType,
+            secondaryAction: () => {},
+            popupMenu: Dialogs
+              .filePopupMenu(
+                context,
+                BlocProvider. of<DirectoryBloc>(context),
+                { actionDeleteFile: item }
+              ),
+        );
+      }
+    )
+  );
 
   Future<void> updateFolderContents(items) async {
     if (items.isEmpty) {
