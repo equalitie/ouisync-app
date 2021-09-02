@@ -11,15 +11,15 @@ abstract class RouteEvent extends Equatable {
 class UpdateRoute extends RouteEvent {
   const UpdateRoute({
     required this.path,
-    required this.data
+    required this.action
   });
 
   final String path;
-  final BaseItem data;
+  final Function action;
 
   @override
   List<Object> get props => [
     path,
-    data
+    action
   ];
 }
