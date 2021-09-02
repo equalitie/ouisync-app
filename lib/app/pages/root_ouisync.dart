@@ -145,7 +145,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     bottom: PreferredSize(
       preferredSize: Size.fromHeight(30.0),
       child: Container(
-        child: _getRoute(),
+        child: _getRouteBar(),
       ),
     ),
     actions: <Widget> [
@@ -162,14 +162,14 @@ class _RootOuiSyncState extends State<RootOuiSync>
     widget.title
   );
 
-  _getRoute() => BlocBuilder<RouteBloc, RouteState>(
+  _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
         return state.route;
       }
 
       return Container(
-        child: Text('[!]]')
+        child: Text('[ ! ]')
       );
     }
   );
@@ -200,8 +200,20 @@ class _RootOuiSyncState extends State<RootOuiSync>
           BlocProvider.of<RouteBloc>(context)
           .add(
             UpdateRoute(
-              path: state.destinationPath,
-              data: state.data
+              path: state.destination,
+              action: () { //Back button action, hence we invert the origin and destination values
+                final from = state.destination;
+                final backTo = extractParentFromPath(from);
+
+                BlocProvider.of<NavigationBloc>(context)
+                .add(
+                  NavigateTo(
+                    type: Navigation.content,
+                    origin: from,
+                    destination: backTo
+                  )
+                );
+              }
             )
           );
         }

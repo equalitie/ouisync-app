@@ -25,22 +25,63 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     RouteEvent event,
   ) async* {
     if (event is UpdateRoute) {
-      final routeList = <Widget>[ buildRouteSection(bloc, slash, slash, event.data) ];
-
-      if (event.path != slash) {
-        final pathMap = getPathMap(event.path);
-        pathMap.forEach((parentPath, destinationPath) {
-          final sectionWidget = buildRouteSection(bloc, parentPath, destinationPath, event.data);
-          routeList.add(sectionWidget);
-
-          if (destinationPath != slash) {
-            routeList.add(slashWidget()); 
-          }
-        }); 
-      }
-
-      final routeWidget = buildRoute(routeList);
-      yield RouteLoadSuccess(path: event.path, route: routeWidget);
+      yield RouteLoadSuccess(
+        path: event.path,
+        route: _currentLocationBar(event.path, event.action)
+        );
     }
+  }
+
+  Widget _currentLocationBar(String path, Function action) {
+    final current = removeParentFromPath(path);
+    return Padding(
+      padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
+      child: Row(
+        children: [
+          _navigation(path, action),
+          SizedBox(
+            width: path == slash
+            ? 5.0
+            : 0.0
+          ),
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: EdgeInsets.all(5.0),
+              child: Text(
+                '$current',
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  GestureDetector _navigation(String path, Function action) {
+    final target = extractParentFromPath(path);
+
+    return GestureDetector(
+      onTap: () {
+        if (target != path) {
+          action.call();
+        }
+      },
+      child: path == slash
+      ? const Icon(
+          Icons.folder_rounded,
+          size: 30.0,
+        )
+      : const Icon(
+          Icons.arrow_back,
+          size: 30.0,
+        ),
+    );
   }
 }
