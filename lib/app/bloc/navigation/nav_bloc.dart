@@ -4,10 +4,10 @@ import '../blocs.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   NavigationBloc({
-    required this.rootPath
+    required this.directoryRepository
   }) : super(NavigationInitial());
 
-  final String rootPath;
+  final DirectoryRepository directoryRepository;
 
   @override
   Stream<NavigationState> mapEventToState(NavigationEvent event) async* {
