@@ -13,7 +13,7 @@ import 'utils.dart';
 
 abstract class Dialogs {
   static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context, Future<dynamic> f) async {
-    _showLoadingDialog(context);
+    showLoadingDialog(context);
 
     var result = await f;
     _hideLoadingDialog(context);
@@ -22,18 +22,21 @@ abstract class Dialogs {
   }
 
   static void executeFunctionWithLoadingDialog(BuildContext context, Function f) {
-    _showLoadingDialog(context);
+    showLoadingDialog(context);
 
     f.call();
     _hideLoadingDialog(context);
   }
 
-  static _showLoadingDialog(BuildContext context) {
+  static showLoadingDialog(BuildContext context, { Widget widget = const Text("Loading..." ) }) {
     final alert = AlertDialog(
       content: new Row(
         children: [
           CircularProgressIndicator(),
-          Container(margin: EdgeInsets.only(left: 7),child:Text("Loading..." )),
+          Container(
+            margin: EdgeInsets.only(left: 7),
+            child:widget
+            ),
         ],
       ),
     );
