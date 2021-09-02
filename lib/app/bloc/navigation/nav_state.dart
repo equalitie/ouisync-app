@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../models/models.dart';
-
 abstract class NavigationState extends Equatable {
   const NavigationState();
 

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_app/app/models/models.dart';
 
 import '../blocs.dart';
 
