@@ -133,7 +133,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      // drawer: _getDrawer(),
       body: _getScreen(),
       floatingActionButton: _getFloatingButton(),
     );
@@ -145,53 +144,41 @@ class _RootOuiSyncState extends State<RootOuiSync>
     bottom: PreferredSize(
       preferredSize: Size.fromHeight(30.0),
       child: Container(
-        child: _getRoute(),
+        child: _getRouteBar(),
       ),
     ),
-    actions: <Widget> [
-      IconButton(
-        icon: Icon(Icons.search),
-        onPressed: () async {
-
-        },
-      )
-    ]
   );
 
   _getTitle() => Text(
     widget.title
   );
 
-  _getRoute() => BlocBuilder<RouteBloc, RouteState>(
+  _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
         return state.route;
       }
 
       return Container(
-        child: Text('[!]]')
+        child: Text('[ ! ]')
       );
     }
-  );
-
-  _getDrawer() => Drawer(
-    child: Center(child: DrawerMenu()),
   );
 
   _getScreen() => BlocConsumer(
     bloc: BlocProvider.of<NavigationBloc>(context),
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
-        if (state.navigation == Navigation.folder) {
+        if (state.type == Navigation.content) {
           setState(() { 
-            _currentFolder = state.destinationPath;
+            _currentFolder = state.destination;
             print('Current path updated: $_currentFolder');
           });
           
           BlocProvider.of<DirectoryBloc>(context)
           .add(
             RequestContent(
-              path: state.destinationPath,
+              path: state.destination,
               recursive: false,
               withProgressIndicator: true
             )
@@ -200,8 +187,20 @@ class _RootOuiSyncState extends State<RootOuiSync>
           BlocProvider.of<RouteBloc>(context)
           .add(
             UpdateRoute(
-              path: state.destinationPath,
-              data: state.data
+              path: state.destination,
+              action: () { //Back button action, hence we invert the origin and destination values
+                final from = state.destination;
+                final backTo = extractParentFromPath(from);
+
+                BlocProvider.of<NavigationBloc>(context)
+                .add(
+                  NavigateTo(
+                    type: Navigation.content,
+                    origin: from,
+                    destination: backTo
+                  )
+                );
+              }
             )
           );
         }
@@ -215,34 +214,17 @@ class _RootOuiSyncState extends State<RootOuiSync>
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
           if (state is NavigationLoadSuccess) {
-            if (state.navigation == Navigation.file) {
-              return _contents();
-            }
-
-            if (state.navigation == Navigation.folder) {
-              BlocProvider.of<DirectoryBloc>(context)
-              .add(
-                RequestContent(
-                  path: state.destinationPath,
-                  recursive: false,
-                  withProgressIndicator: true
-                )
-              );
-
-              return _contents();
-            }  
-
-            return _noContents();
+            return _contents();
           }
 
-          if (state is DirectoryLoadFailure) {
+          if (state is NavigationLoadFailure) {
             return Text(
               'Something went wrong!',
               style: TextStyle(color: Colors.red),
             );
           }
 
-          return Center(child: Text('[!]'));
+          return Center(child: Text('[ ! ]'));
         }
       )
     );
@@ -326,10 +308,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
         itemCount: _folderContents.length,
         itemBuilder: (context, index) {
           final item = _folderContents[index];
-          final navigationType = item.itemType == ItemType.file
-          ? Navigation.file
-          : Navigation.folder;
-
           final actionByType = item.itemType == ItemType.file
           ? () async {
             final file = await Dialogs.executeFutureWithLoadingDialog(
@@ -345,10 +323,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
             BlocProvider.of<NavigationBloc>(context)
             .add(
               NavigateTo(
-                navigationType,
-                extractParentFromPath(item.path),
-                item.path,
-                item //data
+                type: Navigation.content,
+                origin: _currentFolder,
+                destination: item.path
               )
             );
           };
