@@ -109,13 +109,12 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 ),
                 SizedBox(width: 30.0),
                 FloatingActionButton.extended(
-                  onPressed: () => _saveFileToSelectedFolder(
-                    _currentFolderData.path,
-                    getPathFromFileName(widget.sharedFileInfo.single.path),
-                    _currentFolderData
+                  onPressed: () async => await _saveFileToSelectedFolder(
+                    destination: _currentFolderData.path,
+                    fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
                   ),
                   icon: const Icon(Icons.arrow_circle_down),
-                  label: Text('${_currentFolderData.path}')
+                  label: Text('${removeParentFromPath(_currentFolderData.path)}')
                 ),
               ],
             )
@@ -321,13 +320,12 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             },
             secondaryAction: item.itemType == ItemType.file
             ? () { }
-            : () {
+            : () async {
               updateCurrentFolder(item);
 
-              _saveFileToSelectedFolder(
-                item.path,
-                getPathFromFileName(widget.sharedFileInfo.single.path),
-                item
+              await _saveFileToSelectedFolder(
+                destination: item.path,
+                fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
               );
             },
             popupMenu: Dialogs
@@ -342,21 +340,21 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  void _saveFileToSelectedFolder(String path, String fileName, BaseItem data) {
-    final destinationPath = path == '/'
+  Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {
+    final filePath = destination == slash
     ? '/$fileName'
-    : '$path/$fileName';
+    : '$destination/$fileName';
         
-    _saveFileToOuiSync(path, destinationPath, data);
+    _saveFileToOuiSync(destination, filePath);
   }
 
-  Future<void> _saveFileToOuiSync(String parentPath, String destinationPath, BaseItem data) async {
+  Future<void> _saveFileToOuiSync(String destination, String filePath) async {
     var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
     widget.directoryBloc
     .add(
       CreateFile(
-        parentPath: parentPath,
-        newFilePath: destinationPath,
+        parentPath: destination,
+        newFilePath: filePath,
         fileByteStream: fileStream
       )
     );
