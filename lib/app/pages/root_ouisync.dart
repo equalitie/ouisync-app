@@ -133,7 +133,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      // drawer: _getDrawer(),
       body: _getScreen(),
       floatingActionButton: _getFloatingButton(),
     );
@@ -148,14 +147,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
         child: _getRouteBar(),
       ),
     ),
-    actions: <Widget> [
-      IconButton(
-        icon: Icon(Icons.search),
-        onPressed: () async {
-
-        },
-      )
-    ]
   );
 
   _getTitle() => Text(
@@ -172,10 +163,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
         child: Text('[ ! ]')
       );
     }
-  );
-
-  _getDrawer() => Drawer(
-    child: Center(child: DrawerMenu()),
   );
 
   _getScreen() => BlocConsumer(
@@ -227,34 +214,17 @@ class _RootOuiSyncState extends State<RootOuiSync>
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
           if (state is NavigationLoadSuccess) {
-            if (state.navigation == Navigation.file) {
-              return _contents();
-            }
-
-            if (state.navigation == Navigation.folder) {
-              BlocProvider.of<DirectoryBloc>(context)
-              .add(
-                RequestContent(
-                  path: state.destinationPath,
-                  recursive: false,
-                  withProgressIndicator: true
-                )
-              );
-
-              return _contents();
-            }  
-
-            return _noContents();
+            return _contents();
           }
 
-          if (state is DirectoryLoadFailure) {
+          if (state is NavigationLoadFailure) {
             return Text(
               'Something went wrong!',
               style: TextStyle(color: Colors.red),
             );
           }
 
-          return Center(child: Text('[!]'));
+          return Center(child: Text('[ ! ]'));
         }
       )
     );
@@ -338,10 +308,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
         itemCount: _folderContents.length,
         itemBuilder: (context, index) {
           final item = _folderContents[index];
-          final navigationType = item.itemType == ItemType.file
-          ? Navigation.file
-          : Navigation.folder;
-
           final actionByType = item.itemType == ItemType.file
           ? () async {
             final file = await Dialogs.executeFutureWithLoadingDialog(
