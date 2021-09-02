@@ -16,7 +16,7 @@ Future<void> main() async {
 
   final repository = await Repository.open(session);
 
-  final DirectoryRepository foldersRepository = 
+  final DirectoryRepository directoryRepository = 
     DirectoryRepository(repository: repository);
 
   Bloc.observer = SimpleBlocObserver();
@@ -24,6 +24,6 @@ Future<void> main() async {
   runApp(OuiSyncApp(
       session: session,
       repository: repository,
-      foldersRepository: foldersRepository,
+      directoryRepository: directoryRepository,
     ));
 }

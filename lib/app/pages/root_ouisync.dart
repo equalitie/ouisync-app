@@ -19,13 +19,13 @@ import 'pages.dart';
 class RootOuiSync extends StatefulWidget {
   const RootOuiSync({
     required this.repository,
-    required this.foldersRepository,
+    required this.directoryRepository,
     required this.path,
     required this.title,
   });
 
   final Repository repository;
-  final DirectoryRepository foldersRepository;
+  final DirectoryRepository directoryRepository;
   final String path;
   final String title;
   

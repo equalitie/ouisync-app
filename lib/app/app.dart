@@ -12,12 +12,12 @@ class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     required this.session,
     required this.repository,
-    required this.foldersRepository,
+    required this.directoryRepository,
   });
 
   final Session session;
   final Repository repository;
-  final DirectoryRepository foldersRepository;
+  final DirectoryRepository directoryRepository;
 
   @override
   _OuiSyncAppState createState() => _OuiSyncAppState();
@@ -33,7 +33,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
 
     NativeChannels.init(widget.session);
 
-    navigationBloc = NavigationBloc(rootPath: slash);
+    navigationBloc = NavigationBloc(
+      directoryRepository: widget.directoryRepository
+    );
   }
 
   @override
@@ -45,7 +47,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         ),
         BlocProvider<DirectoryBloc>(
           create: (BuildContext context) => DirectoryBloc(
-            blocRepository: widget.foldersRepository
+            blocRepository: widget.directoryRepository
           ),
         ),
         BlocProvider(
@@ -61,7 +63,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         ),
         home: RootOuiSync(
           repository: widget.repository,
-          foldersRepository: widget.foldersRepository,
+          directoryRepository: widget.directoryRepository,
           path: slash,
           title: titleApp,
         )
