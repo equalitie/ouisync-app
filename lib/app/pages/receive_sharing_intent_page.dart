@@ -310,6 +310,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             mainAction: item.itemType == ItemType.file
             ? () { }
             : () { 
+              final current = _currentFolderData.path;
               updateCurrentFolder(item);
 
               _navigateTo(
