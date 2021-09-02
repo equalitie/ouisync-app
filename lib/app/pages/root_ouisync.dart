@@ -33,7 +33,6 @@ class RootOuiSync extends StatefulWidget {
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
 
-  late final Repository repository;
   late final Subscription subscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
