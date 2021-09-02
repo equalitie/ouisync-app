@@ -21,13 +21,9 @@ Future<void> main() async {
 
   Bloc.observer = SimpleBlocObserver();
 
-  runApp(BlocProvider(
-    create: (context) => 
-      DirectoryBloc(blocRepository: foldersRepository),
-    child: OuiSyncApp(
+  runApp(OuiSyncApp(
       session: session,
       repository: repository,
       foldersRepository: foldersRepository,
-    ),
-  ));
+    ));
 }
