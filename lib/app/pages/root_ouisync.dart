@@ -169,16 +169,16 @@ class _RootOuiSyncState extends State<RootOuiSync>
     bloc: BlocProvider.of<NavigationBloc>(context),
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
-        if (state.navigation == Navigation.folder) {
+        if (state.type == Navigation.content) {
           setState(() { 
-            _currentFolder = state.destinationPath;
+            _currentFolder = state.destination;
             print('Current path updated: $_currentFolder');
           });
           
           BlocProvider.of<DirectoryBloc>(context)
           .add(
             RequestContent(
-              path: state.destinationPath,
+              path: state.destination,
               recursive: false,
               withProgressIndicator: true
             )
