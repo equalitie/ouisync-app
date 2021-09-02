@@ -5,8 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/models.dart';
 
+import '../../models/models.dart';
 import '../../utils/actions.dart';
 import '../../utils/utils.dart';
 
