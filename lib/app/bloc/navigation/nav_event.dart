@@ -8,25 +8,22 @@ abstract class NavigationEvent extends Equatable {
 }
 
 class NavigateTo extends NavigationEvent {
-  const NavigateTo(
-    this.navigation,
-    this.origin,
-    this.destination,
-    this.data
-  ) : 
+  const NavigateTo({
+    required this.type,
+    required this.origin,
+    required this.destination
+  }) : 
   assert (origin != ''),
   assert (destination != '');
 
-  final Navigation navigation;
+  final Navigation type;
   final String origin;
   final String destination;
-  final BaseItem data;
 
   @override
   List<Object?> get props => [
-    navigation,
+    type,
     origin,
-    destination,
-    data
+    destination
   ];
 }

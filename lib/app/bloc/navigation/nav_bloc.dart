@@ -13,10 +13,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   Stream<NavigationState> mapEventToState(NavigationEvent event) async* {
     if (event is NavigateTo) {
       yield NavigationLoadSuccess(
-        navigation: event.navigation,
-        parentPath: event.origin,
-        destinationPath: event.destination,
-        data: event.data
+        type: event.type,
+        origin: event.origin,
+        destination: event.destination
       );
     }
   }

@@ -15,30 +15,28 @@ class NavigationLoadInProgress extends NavigationState {}
 
 class NavigationLoadSuccess extends NavigationState {
   const NavigationLoadSuccess({
-    required this.navigation,
-    required this.parentPath,
-    required this.destinationPath,
-    required this.data
+    required this.type,
+    required this.origin,
+    required this.destination
   }) :
-  assert (parentPath != ''),
-  assert (destinationPath != '');
+  assert (origin != ''),
+  assert (destination != '');
 
-  final Navigation navigation;
-  final String parentPath;
-  final String destinationPath;
-  final BaseItem data;
+  final Navigation type;
+  final String origin;
+  final String destination;
 
   @override
   List<Object> get props => [
-    navigation,
-    parentPath,
-    destinationPath,
-    data
+    type,
+    origin,
+    destination
   ];
 }
 
+class NavigationLoadFailure extends NavigationState {}
+
 enum Navigation {
-  folder,
-  file,
+  content,
   receive_intent,
 }

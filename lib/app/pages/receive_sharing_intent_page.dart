@@ -314,10 +314,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               updateCurrentFolder(item);
 
               _navigateTo(
-                Navigation.folder,
-                extractParentFromPath(item.path),
-                item.path,
-                item //data
+                type: Navigation.content,
+                origin: current,
+                destination: item.path
               );
             },
             secondaryAction: item.itemType == ItemType.file
@@ -363,25 +362,23 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
 
     _navigateTo(
-      Navigation.folder,
-      extractParentFromPath(parentPath),
-      parentPath,
-      data
+      type: Navigation.content,
+      origin: extractParentFromPath(destination),
+      destination: destination,
     );
 
     Navigator.pop(context);
   }
 
-  _navigateTo(type, parent, destination, data) {
+  _navigateTo({type, origin, destination}) {
     _currentFolderData.path == slash
     ? loadRoot(BlocProvider.of<NavigationBloc>(context))
     : BlocProvider.of<NavigationBloc>(context)
     .add(
       NavigateTo(
-        type,
-        parent,
-        destination,
-        data
+        type: type,
+        origin: origin,
+        destination: destination
       )
     );
   }
