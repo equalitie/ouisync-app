@@ -11,20 +11,18 @@ import 'utils/utils.dart';
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     required this.session,
-    required this.repository,
-    required this.directoryRepository,
+    required this.repository
   });
 
   final Session session;
   final Repository repository;
-  final DirectoryRepository directoryRepository;
 
   @override
   _OuiSyncAppState createState() => _OuiSyncAppState();
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> {
-
+  late final DirectoryRepository directoryRepository;
   late final NavigationBloc navigationBloc;
 
   @override
@@ -32,9 +30,14 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
     super.initState();
 
     NativeChannels.init(widget.session);
+    initLateObjects();
+  }
 
+  void initLateObjects() {
+    directoryRepository = DirectoryRepository(repository: widget.repository);
+    
     navigationBloc = NavigationBloc(
-      directoryRepository: widget.directoryRepository
+      directoryRepository: directoryRepository
     );
   }
 
@@ -47,7 +50,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         ),
         BlocProvider<DirectoryBloc>(
           create: (BuildContext context) => DirectoryBloc(
-            blocRepository: widget.directoryRepository
+            blocRepository: directoryRepository
           ),
         ),
         BlocProvider(
