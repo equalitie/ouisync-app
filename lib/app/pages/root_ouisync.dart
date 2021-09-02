@@ -11,7 +11,6 @@ import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
-import '../data/data.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -19,13 +18,11 @@ import 'pages.dart';
 class RootOuiSync extends StatefulWidget {
   const RootOuiSync({
     required this.repository,
-    required this.directoryRepository,
     required this.path,
     required this.title,
   });
 
   final Repository repository;
-  final DirectoryRepository directoryRepository;
   final String path;
   final String title;
   

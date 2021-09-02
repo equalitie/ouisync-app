@@ -63,7 +63,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         ),
         home: RootOuiSync(
           repository: widget.repository,
-          directoryRepository: widget.directoryRepository,
           path: slash,
           title: titleApp,
         )
