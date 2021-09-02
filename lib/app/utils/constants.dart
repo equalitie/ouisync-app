@@ -32,7 +32,7 @@ const String messageEmptyFolder = 'This folder is empty';
 const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
 const String messageCreateNewFolderRootToStartStyled = 'Maybe start by creating a new folder using <bold>Actions</bold> <arrow_down/>'
 '\n... or just go ahead and use <bold>/</bold>, we are not your mother';
-const String messageCreateNewFolderStyled = 'You can create a new folder using <bold>Actions</bold> <arrow_down/>'
+const String messageCreateNewFolderStyled = 'You can create a new folder using (look down <arrow_down/>)'
 '\n... or just drop it here, champ';
 
 const String messageCreateNewRepoStyled = 'Create a new repo using <bold>Actions</bold> <arrow_down/>';
