@@ -129,7 +129,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      body: _getScreen(),
+      body: _getBody(),
       floatingActionButton: _getFloatingButton(),
     );
   }
@@ -161,7 +161,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  _getScreen() => BlocConsumer(
+  _getBody() => BlocConsumer(
     bloc: BlocProvider.of<NavigationBloc>(context),
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
@@ -170,15 +170,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
             _currentFolder = state.destination;
             print('Current path updated: $_currentFolder');
           });
-          
-          BlocProvider.of<DirectoryBloc>(context)
-          .add(
-            RequestContent(
-              path: state.destination,
-              recursive: false,
-              withProgressIndicator: true
-            )
-          );
 
           BlocProvider.of<RouteBloc>(context)
           .add(
@@ -202,56 +193,38 @@ class _RootOuiSyncState extends State<RootOuiSync>
         }
       }
     },
-    builder: (context, state) => _blocUI(context, state)
+    builder: (context, state) => _body(context, state)
   );
 
-  _blocUI(context, state) {
-    return Center(
-      child: BlocBuilder<NavigationBloc, NavigationState>(
-        builder: (context, state) {
-          if (state is NavigationLoadSuccess) {
-            return _contents();
-          }
-
-          if (state is NavigationLoadFailure) {
-            return Text(
-              'Something went wrong!',
-              style: TextStyle(color: Colors.red),
-            );
-          }
-
-          return Center(child: Text('[ ! ]'));
-        }
-      )
-    );
-  }
-
-  _contents() => BlocBuilder<DirectoryBloc, DirectoryState>(
-    builder: (context, state) {
-      if (state is DirectoryInitial) {
-        return Center(child: Text('Loading contents...'));
-      }
-
-      if (state is DirectoryLoadInProgress){
-        return Center(child: CircularProgressIndicator());
-      }
-
-      if (state is DirectoryLoadSuccess) {
-        return state.contents.isEmpty 
-        ? _noContents()
-        : _contentsList(state.contents);
-      }
-
-      if (state is DirectoryLoadFailure) {
-        return Text(
-          'Something went wrong!',
-          style: TextStyle(color: Colors.red),
-        );
-      }
-
-      return Center(child: Text('root'));
+  Widget _body(context, state) {
+    if (state is NavigationInitial) {
+      return Center(child: Text('Loading contents...'));
     }
-  );
+
+    if (state is NavigationLoadInProgress) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (state is NavigationLoadSuccess) {
+      if (state.contents.isEmpty) {
+        return _noContents();
+      }
+
+      final contents = state.contents;
+      contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+
+      return _contentsList(contents);
+    }
+
+    if (state is NavigationLoadFailure) {
+      return Text(
+        'Something went wrong!',
+        style: TextStyle(color: Colors.red),
+      );
+    }
+
+    return Center(child: Text('Ooops!'));
+  }
 
   _noContents() => RefreshIndicator(
       onRefresh: _reloadCurrentFolder,
