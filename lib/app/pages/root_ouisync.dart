@@ -323,10 +323,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
             BlocProvider.of<NavigationBloc>(context)
             .add(
               NavigateTo(
-                navigationType,
-                extractParentFromPath(item.path),
-                item.path,
-                item //data
+                type: Navigation.content,
+                origin: _currentFolder,
+                destination: item.path
               )
             );
           };
