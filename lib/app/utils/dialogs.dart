@@ -54,8 +54,9 @@ abstract class Dialogs {
     Navigator.pop(context);
 
   static Widget floatingActionsButtonMenu(
-    Bloc bloc,
     BuildContext context,
+    Bloc actionBloc,
+    Function updateUI,
     AnimationController controller,
     String path,
     Map<String, IconData> actions,
@@ -89,7 +90,7 @@ abstract class Dialogs {
               label: Text(actionName),
               icon: Icon(actions[actionName]),
               onPressed: () async => 
-                await executeActionByName(actionsDialog, controller, context, bloc, path, actionName),
+                await executeActionByName(actionsDialog, controller, context, actionBloc, updateUI, path, actionName),
             ),
           ),
         );
@@ -122,23 +123,31 @@ abstract class Dialogs {
     String actionsDialog,
     AnimationController controller,
     BuildContext context,
-    Bloc<dynamic, dynamic> bloc,
+    Bloc<dynamic, dynamic> actionBloc,
+    Function updateUI,
     String path,
     String actionName
   ) async {
     late Future<dynamic> dialog;
     switch (actionsDialog) {
-      case flagRepoActionsDialog:
-      /// Only one repository allowed for the MVP
-        // dialog = repoActionsDialog(context, bloc as RepositoryBloc, session, actionName);
-        break;
-    
       case flagFolderActionsDialog:
-        dialog = folderActionsDialog(context, bloc as DirectoryBloc, path, actionName);
+        dialog = folderActionsDialog(
+          context,
+          actionBloc as DirectoryBloc,
+          updateUI,
+          path,
+          actionName
+        );
         break;
     
       case flagReceiveShareActionsDialog:
-        dialog = receiveShareActionsDialog(context, bloc as DirectoryBloc, path, actionName);
+        dialog = receiveShareActionsDialog(
+          context,
+          actionBloc as DirectoryBloc,
+          updateUI,
+          path,
+          actionName
+        );
         break;
     
       default:
@@ -152,27 +161,13 @@ abstract class Dialogs {
     }
   }
 
-  static Future<dynamic> repoActionsDialog(BuildContext context, RepositoryBloc repositoryBloc, String action) {
-    String dialogTitle = '';
-    Widget? actionBody;
-
-    switch (action) {
-      case actionNewRepo:
-        dialogTitle = 'New Repository';
-        actionBody = AddRepoPage(
-          title: 'New Repository',
-        );
-        break;
-    }
-
-    return _actionDialog(
-      context,
-      dialogTitle,
-      actionBody
-    );
-  }
-
-  static Future<dynamic> folderActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String path, String action) async {
+  static Future<dynamic> folderActionsDialog(
+    BuildContext context,
+    DirectoryBloc directoryBloc,
+    Function updateUI,
+    String path,
+    String action
+  ) async {
     String dialogTitle = '';
     Widget? actionBody;
 
@@ -183,6 +178,7 @@ abstract class Dialogs {
         dialogTitle = 'Create Folder';
         actionBody = FolderCreation(
           bloc: directoryBloc,
+          updateUI: updateUI,
           path: path,
           formKey: formKey,
         );
@@ -190,7 +186,7 @@ abstract class Dialogs {
       break;
       
       case actionNewFile: 
-        return await _addFileAction(path, directoryBloc);
+        return await _addFileAction(path, directoryBloc, updateUI);
 
       case actionDeleteFolder:
         final parentPath = extractParentFromPath(path);
@@ -201,10 +197,11 @@ abstract class Dialogs {
           builder: (BuildContext context) {
 
             return buildDeleteFolderAlertDialog(
+              context,
               directoryBloc,
+              updateUI,
               parentPath,
               path,
-              context,
             );
           },
         );
@@ -217,7 +214,7 @@ abstract class Dialogs {
     );
   }
 
-  static _addFileAction(String path, DirectoryBloc directoryBloc) async {
+  static _addFileAction(String path, DirectoryBloc directoryBloc, Function updateUI) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -240,6 +237,8 @@ abstract class Dialogs {
           fileByteStream: fileByteStream
         )
       );
+
+      updateUI.call();
       
       return Future.value(true);
     }
@@ -247,7 +246,7 @@ abstract class Dialogs {
     return Future.value(false);
   }
 
-  static AlertDialog buildDeleteFolderAlertDialog(bloc, parentPath, path, BuildContext context) {
+  static AlertDialog buildDeleteFolderAlertDialog(BuildContext context, bloc, updateUI, parentPath, path) {
     return AlertDialog(
       title: const Text('Delete folder'),
       content: SingleChildScrollView(
@@ -278,6 +277,8 @@ abstract class Dialogs {
                 path: path
               )
             );
+
+            updateUI.call();
     
             Navigator.of(context).pop(true);
           },
@@ -292,13 +293,19 @@ abstract class Dialogs {
     );
   }
 
-  static Future<dynamic> receiveShareActionsDialog(BuildContext context, DirectoryBloc directoryBloc, String parentPath, String action) async {
+  static Future<dynamic> receiveShareActionsDialog(
+    BuildContext context,
+    DirectoryBloc directoryBloc,
+    Function updateUI,
+    String parentPath,
+    String action
+  ) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
       case actionNewFile:
-        return await _addFileAction(parentPath, directoryBloc);
+        return await _addFileAction(parentPath, directoryBloc, updateUI);
         
       case actionNewFolder: {
           final formKey = GlobalKey<FormState>();
@@ -306,6 +313,7 @@ abstract class Dialogs {
           dialogTitle = 'Create Folder';
           actionBody = FolderCreation(
             bloc: directoryBloc,
+            updateUI: updateUI,
             path: parentPath,
             formKey: formKey,
           );

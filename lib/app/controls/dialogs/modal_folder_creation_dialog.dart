@@ -9,11 +9,13 @@ class FolderCreation extends StatelessWidget {
   const FolderCreation({
     Key? key,
     required this.bloc,
+    required this.updateUI,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
   final Bloc bloc;
+  final Function updateUI;
   final String path;
   final GlobalKey<FormState> formKey;
 
@@ -49,7 +51,7 @@ class FolderCreation extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildEntry(context, 'Create a new folder: ', (value) => _onSaved(context, value)),
+          buildEntry(context, 'Create a new folder: ', (value) => _onSaved(context, value, updateUI)),
           buildInfoLabel('Location: ', this.path),
           buildActionsSection(context, _actions(context)),
         ]
@@ -57,7 +59,7 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(context, newFolderName) {
+  void _onSaved(context, newFolderName, updateUI) {
     final newFolderPath = this.path == slash
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
@@ -69,6 +71,8 @@ class FolderCreation extends StatelessWidget {
         newFolderPath: newFolderPath
       )
     );
+
+    updateUI.call();
 
     Navigator.of(context).pop(true);
   }

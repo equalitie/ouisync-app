@@ -385,8 +385,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
   );
 
   Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
-    BlocProvider.of<DirectoryBloc>(context),
     context,
+    BlocProvider.of<DirectoryBloc>(context),
+    updateUI,
     _controller,
     _currentFolder,
     folderActions,
@@ -394,5 +395,20 @@ class _RootOuiSyncState extends State<RootOuiSync>
     backgroundColor,
     foregroundColor
   );
+
+  void updateUI({bool withProgress = true}) {
+    final origin = extractParentFromPath(_currentFolder);
+    final destination = _currentFolder;
+
+    BlocProvider.of<NavigationBloc>(context)
+    .add(
+      NavigateTo(
+        type: Navigation.content,
+        origin: origin,
+        destination: destination,
+        withProgress: withProgress
+      )
+    );
+  }
 
 }
