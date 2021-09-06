@@ -168,6 +168,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
         if (state.type == Navigation.content) {
           setState(() { 
             _currentFolder = state.destination;
+            updateFolderContents(state.contents);
             print('Current path updated: $_currentFolder');
           });
 
@@ -214,7 +215,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       final contents = state.contents;
       contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-      return _contentsList(contents);
+      return _contentsList();
     }
 
     if (state is NavigationLoadFailure) {
@@ -228,7 +229,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   _noContents() => RefreshIndicator(
-      onRefresh: _reloadCurrentFolder,
+      onRefresh: () async => updateUI.call(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -265,17 +266,17 @@ class _RootOuiSyncState extends State<RootOuiSync>
       )
     );
 
-  _contentsList(List<BaseItem> contents) => 
+  _contentsList() =>
   RefreshIndicator(
-    onRefresh: _reloadCurrentFolder,
+    onRefresh: () async => updateUI.call(),
     child: ListView.separated(
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent
       ),
-      itemCount: contents.length,
+      itemCount: _folderContents.length,
       itemBuilder: (context, index) {
-        final item = contents[index];
+        final item = _folderContents[index];
         final actionByType = item.itemType == ItemType.file
         ? () async {
           final file = await Dialogs.executeFutureWithLoadingDialog(
