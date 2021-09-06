@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'app/bloc/blocs.dart';
-import 'app/data/data.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,14 +15,10 @@ Future<void> main() async {
 
   final repository = await Repository.open(session);
 
-  final DirectoryRepository foldersRepository = 
-    DirectoryRepository(repository: repository);
-
   Bloc.observer = SimpleBlocObserver();
 
   runApp(OuiSyncApp(
       session: session,
-      repository: repository,
-      foldersRepository: foldersRepository,
+      repository: repository
     ));
 }

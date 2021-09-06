@@ -10,7 +10,8 @@ class NavigateTo extends NavigationEvent {
   const NavigateTo({
     required this.type,
     required this.origin,
-    required this.destination
+    required this.destination,
+    required this.withProgress
   }) : 
   assert (origin != ''),
   assert (destination != '');
@@ -18,11 +19,13 @@ class NavigateTo extends NavigationEvent {
   final Navigation type;
   final String origin;
   final String destination;
+  final bool withProgress;
 
   @override
   List<Object?> get props => [
     type,
     origin,
-    destination
+    destination,
+    withProgress
   ];
 }

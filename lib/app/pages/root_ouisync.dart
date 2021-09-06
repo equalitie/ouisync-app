@@ -11,7 +11,6 @@ import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
-import '../data/data.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -19,13 +18,11 @@ import 'pages.dart';
 class RootOuiSync extends StatefulWidget {
   const RootOuiSync({
     required this.repository,
-    required this.foldersRepository,
     required this.path,
     required this.title,
   });
 
   final Repository repository;
-  final DirectoryRepository foldersRepository;
   final String path;
   final String title;
   
@@ -36,7 +33,6 @@ class RootOuiSync extends StatefulWidget {
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
 
-  late final Repository repository;
   late final Subscription subscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
@@ -116,7 +112,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     autoRefreshTimer = Timer.periodic(
       Duration(seconds: autoRefreshPeriodInSeconds),
       (timer) { 
-        _reloadCurrentFolder();
+        updateUI(withProgress: false);
       }
     );
   }
@@ -133,7 +129,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
     return Scaffold(
       appBar: _getAppBar(widget.title),
-      body: _getScreen(),
+      body: _getBody(),
       floatingActionButton: _getFloatingButton(),
     );
   }
@@ -165,24 +161,16 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  _getScreen() => BlocConsumer(
+  _getBody() => BlocConsumer(
     bloc: BlocProvider.of<NavigationBloc>(context),
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
         if (state.type == Navigation.content) {
           setState(() { 
             _currentFolder = state.destination;
+            updateFolderContents(state.contents);
             print('Current path updated: $_currentFolder');
           });
-          
-          BlocProvider.of<DirectoryBloc>(context)
-          .add(
-            RequestContent(
-              path: state.destination,
-              recursive: false,
-              withProgressIndicator: true
-            )
-          );
 
           BlocProvider.of<RouteBloc>(context)
           .add(
@@ -197,7 +185,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
                   NavigateTo(
                     type: Navigation.content,
                     origin: from,
-                    destination: backTo
+                    destination: backTo,
+                    withProgress: true
                   )
                 );
               }
@@ -206,59 +195,41 @@ class _RootOuiSyncState extends State<RootOuiSync>
         }
       }
     },
-    builder: (context, state) => _blocUI(context, state)
+    builder: (context, state) => _body(context, state)
   );
 
-  _blocUI(context, state) {
-    return Center(
-      child: BlocBuilder<NavigationBloc, NavigationState>(
-        builder: (context, state) {
-          if (state is NavigationLoadSuccess) {
-            return _contents();
-          }
+  Widget _body(context, state) {
+    if (state is NavigationInitial) {
+      return Center(child: Text('Loading contents...'));
+    }
 
-          if (state is NavigationLoadFailure) {
-            return Text(
-              'Something went wrong!',
-              style: TextStyle(color: Colors.red),
-            );
-          }
+    if (state is NavigationLoadInProgress) {
+      return Center(child: CircularProgressIndicator());
+    }
 
-          return Center(child: Text('[ ! ]'));
-        }
-      )
-    );
+    if (state is NavigationLoadSuccess) {
+      if (state.contents.isEmpty) {
+        return _noContents();
+      }
+
+      final contents = state.contents;
+      contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+
+      return _contentsList();
+    }
+
+    if (state is NavigationLoadFailure) {
+      return Text(
+        'Something went wrong!',
+        style: TextStyle(color: Colors.red),
+      );
+    }
+
+    return Center(child: Text('Ooops!'));
   }
 
-  _contents() => BlocBuilder<DirectoryBloc, DirectoryState>(
-    builder: (context, state) {
-      if (state is DirectoryInitial) {
-        return Center(child: Text('Loading contents...'));
-      }
-
-      if (state is DirectoryLoadInProgress){
-        return Center(child: CircularProgressIndicator());
-      }
-
-      if (state is DirectoryLoadSuccess) {
-        return state.contents.isEmpty 
-        ? _noContents()
-        : _contentsList(state.contents);
-      }
-
-      if (state is DirectoryLoadFailure) {
-        return Text(
-          'Something went wrong!',
-          style: TextStyle(color: Colors.red),
-        );
-      }
-
-      return Center(child: Text('root'));
-    }
-  );
-
   _noContents() => RefreshIndicator(
-      onRefresh: _reloadCurrentFolder,
+      onRefresh: () async => updateUI.call(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -295,65 +266,61 @@ class _RootOuiSyncState extends State<RootOuiSync>
       )
     );
 
-  _contentsList(List contents) {
-    updateFolderContents(contents);
-
-    return RefreshIndicator(
-      onRefresh: _reloadCurrentFolder,
-      child: ListView.separated(
-        separatorBuilder: (context, index) => Divider(
-            height: 1,
-            color: Colors.transparent
-        ),
-        itemCount: _folderContents.length,
-        itemBuilder: (context, index) {
-          final item = _folderContents[index];
-          final actionByType = item.itemType == ItemType.file
-          ? () async {
-            final file = await Dialogs.executeFutureWithLoadingDialog(
-              context,
-              getFile(item.path, item.name)
-            );
-            if (file != null) {
-              final size = await file.length;
-              _showFileDetails(item.name, item.path, size);
-            }
-          }
-          : () {
-            BlocProvider.of<NavigationBloc>(context)
-            .add(
-              NavigateTo(
-                type: Navigation.content,
-                origin: _currentFolder,
-                destination: item.path
-              )
-            );
-          };
-
-          return ListItem (
-              itemData: item,
-              mainAction: actionByType,
-              secondaryAction: () => {},
-              popupMenu: Dialogs
-                .filePopupMenu(
-                  context,
-                  BlocProvider. of<DirectoryBloc>(context),
-                  { actionDeleteFile: item }
-                ),
+  _contentsList() =>
+  RefreshIndicator(
+    onRefresh: () async => updateUI.call(),
+    child: ListView.separated(
+      separatorBuilder: (context, index) => Divider(
+          height: 1,
+          color: Colors.transparent
+      ),
+      itemCount: _folderContents.length,
+      itemBuilder: (context, index) {
+        final item = _folderContents[index];
+        final actionByType = item.itemType == ItemType.file
+        ? () async {
+          final file = await Dialogs.executeFutureWithLoadingDialog(
+            context,
+            getFile(item.path, item.name)
           );
+          if (file != null) {
+            final size = await file.length;
+            _showFileDetails(item.name, item.path, size);
+          }
         }
-      )
-    );
-  }
+        : () {
+          BlocProvider.of<NavigationBloc>(context)
+          .add(
+            NavigateTo(
+              type: Navigation.content,
+              origin: _currentFolder,
+              destination: item.path,
+              withProgress: true
+            )
+          );
+        };
+
+        return ListItem (
+            itemData: item,
+            mainAction: actionByType,
+            secondaryAction: () => {},
+            popupMenu: Dialogs
+              .filePopupMenu(
+                context,
+                BlocProvider. of<DirectoryBloc>(context),
+                { actionDeleteFile: item }
+              ),
+        );
+      }
+    )
+  );
 
   Future<void> updateFolderContents(items) async {
     if (items.isEmpty) {
       if (_folderContents.isNotEmpty) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
           setState(() {
             _folderContents.clear();
           }); 
-        });
       }
       return;
     }
@@ -362,23 +329,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
     
     if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
         setState(() {
           _folderContents = contents;
         });
-      });  
     }
-  }
-
-  Future<void> _reloadCurrentFolder() async {
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
-      RequestContent(
-        path: _currentFolder,
-        recursive: false,
-        withProgressIndicator: false
-      )
-    );
   }
 
   Future<File?> getFile(String path, String name) async {
@@ -419,8 +373,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
   );
 
   Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
-    BlocProvider.of<DirectoryBloc>(context),
     context,
+    BlocProvider.of<DirectoryBloc>(context),
+    updateUI,
     _controller,
     _currentFolder,
     folderActions,
@@ -428,5 +383,20 @@ class _RootOuiSyncState extends State<RootOuiSync>
     backgroundColor,
     foregroundColor
   );
+
+  void updateUI({bool withProgress = true}) {
+    final origin = extractParentFromPath(_currentFolder);
+    final destination = _currentFolder;
+
+    BlocProvider.of<NavigationBloc>(context)
+    .add(
+      NavigateTo(
+        type: Navigation.content,
+        origin: origin,
+        destination: destination,
+        withProgress: withProgress
+      )
+    );
+  }
 
 }

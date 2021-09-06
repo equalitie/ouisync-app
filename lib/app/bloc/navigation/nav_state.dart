@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_app/app/models/models.dart';
 
 abstract class NavigationState extends Equatable {
   const NavigationState();
@@ -15,7 +16,8 @@ class NavigationLoadSuccess extends NavigationState {
   const NavigationLoadSuccess({
     required this.type,
     required this.origin,
-    required this.destination
+    required this.destination,
+    required this.contents
   }) :
   assert (origin != ''),
   assert (destination != '');
@@ -23,12 +25,14 @@ class NavigationLoadSuccess extends NavigationState {
   final Navigation type;
   final String origin;
   final String destination;
+  final List<BaseItem> contents;
 
   @override
   List<Object> get props => [
     type,
     origin,
-    destination
+    destination,
+    contents
   ];
 }
 

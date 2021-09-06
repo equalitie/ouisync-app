@@ -215,33 +215,35 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _directoriesBlocBuilder(ScrollController scrollController) {
     return Center(
-      child: BlocBuilder<DirectoryBloc, DirectoryState>(
+      child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-          if (state is DirectoryInitial) {
+          if (state is NavigationInitial) {
             return Center(child: Text('Loading contents...'));
           }
 
-          if (state is DirectoryLoadInProgress){
+          if (state is NavigationLoadInProgress) {
             return Center(child: CircularProgressIndicator());
           }
 
-          if (state is DirectoryLoadSuccess) {
-            final contents = state.contents as List<BaseItem>;
+          if (state is NavigationLoadSuccess) {
+            if (state.contents.isEmpty) {
+              return _noContents();
+            }
+
+            final contents = state.contents;
             contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-            return contents.isEmpty 
-            ? _noContents()
-            : _contentsList(contents, scrollController);
+            return _contentsList(contents, scrollController);
           }
 
-          if (state is DirectoryLoadFailure) {
+          if (state is NavigationLoadFailure) {
             return Text(
               'Something went wrong!',
               style: TextStyle(color: Colors.red),
             );
           }
 
-          return Center(child: Text('root'));
+          return Center(child: Text('Ooops!'));
         }
       )
     );
@@ -263,7 +265,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 messageEmptyFolderStructure,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 24.0,
+                  fontSize: 23.0,
                   fontWeight: FontWeight.bold
                 ),
               ),
@@ -279,7 +281,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18.0,
+                    fontSize: 17.0,
                     fontWeight: FontWeight.normal
                   ),
                   styles: {
@@ -377,7 +379,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       NavigateTo(
         type: type,
         origin: origin,
-        destination: destination
+        destination: destination,
+        withProgress: true
       )
     );
   }
