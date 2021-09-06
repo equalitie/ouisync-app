@@ -74,7 +74,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
       },
       child: path == slash
       ? const Icon(
-          Icons.folder_rounded,
+          Icons.lock_rounded,
           size: 30.0,
         )
       : const Icon(
