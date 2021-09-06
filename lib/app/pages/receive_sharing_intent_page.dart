@@ -265,7 +265,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 messageEmptyFolderStructure,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 24.0,
+                  fontSize: 23.0,
                   fontWeight: FontWeight.bold
                 ),
               ),
@@ -281,7 +281,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18.0,
+                    fontSize: 17.0,
                     fontWeight: FontWeight.normal
                   ),
                   styles: {
