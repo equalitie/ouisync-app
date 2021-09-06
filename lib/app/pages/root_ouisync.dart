@@ -318,11 +318,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
   Future<void> updateFolderContents(items) async {
     if (items.isEmpty) {
       if (_folderContents.isNotEmpty) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
           setState(() {
             _folderContents.clear();
           }); 
-        });
       }
       return;
     }
@@ -331,23 +329,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
     
     if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
         setState(() {
           _folderContents = contents;
         });
-      });  
     }
-  }
-
-  Future<void> _reloadCurrentFolder() async {
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
-      RequestContent(
-        path: _currentFolder,
-        recursive: false,
-        withProgressIndicator: false
-      )
-    );
   }
 
   Future<File?> getFile(String path, String name) async {
