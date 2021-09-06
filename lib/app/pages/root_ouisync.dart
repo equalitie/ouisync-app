@@ -112,7 +112,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     autoRefreshTimer = Timer.periodic(
       Duration(seconds: autoRefreshPeriodInSeconds),
       (timer) { 
-        _reloadCurrentFolder();
+        updateUI(withProgress: false);
       }
     );
   }
@@ -184,7 +184,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
                   NavigateTo(
                     type: Navigation.content,
                     origin: from,
-                    destination: backTo
+                    destination: backTo,
+                    withProgress: true
                   )
                 );
               }
@@ -292,7 +293,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
             NavigateTo(
               type: Navigation.content,
               origin: _currentFolder,
-              destination: item.path
+              destination: item.path,
+              withProgress: true
             )
           );
         };

@@ -377,7 +377,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       NavigateTo(
         type: type,
         origin: origin,
-        destination: destination
+        destination: destination,
+        withProgress: true
       )
     );
   }

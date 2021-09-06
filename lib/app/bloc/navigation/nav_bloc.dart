@@ -13,7 +13,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   @override
   Stream<NavigationState> mapEventToState(NavigationEvent event) async* {
     if (event is NavigateTo) {
-      yield NavigationLoadInProgress();
+      if (event.withProgress) {
+        yield NavigationLoadInProgress(); 
+      }
 
       try {
         final folderContentsResult = 

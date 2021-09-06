@@ -61,7 +61,8 @@ bloc.add(
   NavigateTo(
     type: Navigation.content,
     origin: slash,
-    destination: slash
+    destination: slash,
+    withProgress: true
   )
 );
 
