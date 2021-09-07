@@ -86,28 +86,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           ]
         ),
       ),
-      floatingActionButton: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,  
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: const Icon(Icons.create_new_folder_rounded),
-              label: const Text(actionNewFolder)
-            ),
-            SizedBox(width: 30.0),
-            FloatingActionButton.extended(
-              onPressed: () async => await _saveFileToSelectedFolder(
-                destination: _currentFolderData.path,
-                fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
-              ),
-              icon: const Icon(Icons.arrow_circle_down),
-              label: Text('${removeParentFromPath(_currentFolderData.path)}')
-            ),
-          ],
-        )
-      ),
+      floatingActionButton: _actionButtons(),
     );
   }
 
@@ -234,6 +213,59 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         }
       )
     );
+  }
+
+  Widget _actionButtons() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,  
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () async => await _createNewFolder(_currentFolderData.path),
+            icon: const Icon(Icons.create_new_folder_rounded),
+            label: const Text(actionNewFolder)
+          ),
+          SizedBox(width: 30.0),
+          FloatingActionButton.extended(
+            onPressed: () async => await _saveFileToSelectedFolder(
+              destination: _currentFolderData.path,
+              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+            ),
+            icon: const Icon(Icons.arrow_circle_down),
+            label: Text('${removeParentFromPath(_currentFolderData.path)}')
+          ),
+        ],
+      )
+    );
+  }
+
+  _createNewFolder(String current) {
+    final formKey = GlobalKey<FormState>();
+
+    final dialogTitle = 'Create Folder';
+    final actionBody = FolderCreation(
+      bloc: BlocProvider.of<DirectoryBloc>(context),
+      updateUI: () => updateUI(current),
+      path: current,
+      formKey: formKey,
+    );
+
+    Dialogs.actionDialog(
+      context,
+      dialogTitle,
+      actionBody
+      );
+  }
+
+  void updateUI(String path) {
+    final origin = extractParentFromPath(path);
+
+    _navigateTo(
+      type: Navigation.content,
+      origin: origin,
+      destination: path
+      );
   }
 
   _noContents() => Column(
