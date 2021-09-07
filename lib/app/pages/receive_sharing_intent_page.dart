@@ -66,13 +66,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     backgroundColor = Theme.of(context).cardColor;
     foregroundColor = Theme.of(context).accentColor;
 
-    final hideFabsAnimationController = useAnimationController(
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-      initialValue: 1,
-    );
-
-    final scrollController = useScrollControllerForAnimation(hideFabsAnimationController);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Add file to OuiSync'),
@@ -88,39 +81,33 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             ),
             Expanded(
               flex: 1,
-              child: _directoriesBlocBuilder(scrollController)
+              child: _directoriesBlocBuilder()
             ),
           ]
         ),
       ),
-      floatingActionButton: FadeTransition(
-        opacity: hideFabsAnimationController,
-        child: ScaleTransition(
-          scale: hideFabsAnimationController,
-          child: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,  
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.extended(
-                  onPressed: () {},
-                  icon: const Icon(Icons.create_new_folder_rounded),
-                  label: const Text(actionNewFolder)
-                ),
-                SizedBox(width: 30.0),
-                FloatingActionButton.extended(
-                  onPressed: () async => await _saveFileToSelectedFolder(
-                    destination: _currentFolderData.path,
-                    fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
-                  ),
-                  icon: const Icon(Icons.arrow_circle_down),
-                  label: Text('${removeParentFromPath(_currentFolderData.path)}')
-                ),
-              ],
-            )
-          ),
-        ),
-      )
+      floatingActionButton: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,  
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: const Icon(Icons.create_new_folder_rounded),
+              label: const Text(actionNewFolder)
+            ),
+            SizedBox(width: 30.0),
+            FloatingActionButton.extended(
+              onPressed: () async => await _saveFileToSelectedFolder(
+                destination: _currentFolderData.path,
+                fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+              ),
+              icon: const Icon(Icons.arrow_circle_down),
+              label: Text('${removeParentFromPath(_currentFolderData.path)}')
+            ),
+          ],
+        )
+      ),
     );
   }
 
@@ -213,7 +200,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     }
   );
 
-  _directoriesBlocBuilder(ScrollController scrollController) {
+  _directoriesBlocBuilder() {
     return Center(
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
@@ -233,7 +220,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             final contents = state.contents;
             contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-            return _contentsList(contents, scrollController);
+            return _contentsList(contents);
           }
 
           if (state is NavigationLoadFailure) {
@@ -297,9 +284,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ],
   );
 
-  _contentsList(List<BaseItem> contents, ScrollController scrollController) {
+  _contentsList(List<BaseItem> contents) {
     return ListView.separated(
-      controller: scrollController,
       padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
           height: 1,
