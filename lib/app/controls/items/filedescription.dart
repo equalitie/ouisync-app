@@ -32,15 +32,8 @@ class FileDescription extends StatelessWidget {
       ),
       const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
       Text(
-        "size: ${formattSize(this.fileData.size.toInt(), units: true)}",
-        style: const TextStyle(fontSize: 12.0),
-      ),
-      const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
-      Text(
-          this.fileData.path.length == 0
-              ? "-"
-              : this.fileData.path,
-          style: const TextStyle(fontSize: 12.0)
+        "${formattSize(this.fileData.size.toInt(), units: true)}",
+        style: const TextStyle(fontSize: 14.0),
       ),
     ];
   }
