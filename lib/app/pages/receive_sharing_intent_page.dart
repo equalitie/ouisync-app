@@ -300,6 +300,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   _contentsList(List<BaseItem> contents, ScrollController scrollController) {
     return ListView.separated(
       controller: scrollController,
+      padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent,

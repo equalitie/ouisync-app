@@ -269,6 +269,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   RefreshIndicator(
     onRefresh: () async => updateUI.call(),
     child: ListView.separated(
+      padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent
