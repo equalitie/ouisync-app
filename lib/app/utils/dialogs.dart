@@ -207,7 +207,7 @@ abstract class Dialogs {
         );
     }
 
-    return _actionDialog(
+    return actionDialog(
       context,
       dialogTitle,
       actionBody
@@ -321,14 +321,14 @@ abstract class Dialogs {
         break;
     }
 
-    return _actionDialog(
+    return actionDialog(
       context,
       dialogTitle,
       actionBody
     );
   }
 
-  static _actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
+  static actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
