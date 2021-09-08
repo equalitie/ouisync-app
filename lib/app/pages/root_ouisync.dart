@@ -104,7 +104,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   void subscribeToRepositoryNotifications(Repository repository) async {
-    subscription = repository.subscribe(updateUI);
+    subscription = repository.subscribe(() => updateUI(withProgress: false));
   }
 
   void initAutoRefresh() {
