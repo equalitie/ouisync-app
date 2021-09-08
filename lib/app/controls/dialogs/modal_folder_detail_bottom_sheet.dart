@@ -7,10 +7,14 @@ class FolderDetail extends StatelessWidget {
     Key? key,
     required this.name,
     required this.path,
+    required this.renameAction,
+    required this.deleteAction,
   }) : super(key: key);
 
   final String name;
   final String path;
+  final Function renameAction;
+  final Function deleteAction;
 
   @override
   Widget build(BuildContext context) {

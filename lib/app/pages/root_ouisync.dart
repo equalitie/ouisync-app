@@ -394,6 +394,30 @@ class _RootOuiSyncState extends State<RootOuiSync>
       return FolderDetail(
         name: name,
         path: path,
+        renameAction: () {
+          widget.repository.move('/one', '/uno');
+          updateUI(withProgress: true);
+        },
+        deleteAction: () async {
+          final result = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+
+              return Dialogs.buildDeleteFolderAlertDialog(
+                context,
+                BlocProvider.of<DirectoryBloc>(context),
+                updateUI,
+                extractParentFromPath(path),
+                path,
+              );
+            },
+          );
+
+          if (result ?? false) {
+            Navigator.of(context).pop(false);
+          }
+        },
       );
     }
   );
