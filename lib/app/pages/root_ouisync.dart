@@ -304,15 +304,23 @@ class _RootOuiSyncState extends State<RootOuiSync>
             itemData: item,
             mainAction: actionByType,
             secondaryAction: () => {},
-            popupMenu: Dialogs
-              .filePopupMenu(
-                context,
-                BlocProvider. of<DirectoryBloc>(context),
-                { actionDeleteFile: item }
-              ),
+            filePopupMenu: _popupMenu(item),
+            folderDotsAction: () async =>
+              await _showFolderDetails(
+                removeParentFromPath(item.path),
+                item.path
+              )
         );
       }
     )
+  );
+
+  _popupMenu(item) => 
+  Dialogs
+  .filePopupMenu(
+    context,
+    BlocProvider. of<DirectoryBloc>(context),
+    { actionDeleteFile: item }
   );
 
   Future<void> updateFolderContents(items) async {
