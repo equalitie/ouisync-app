@@ -91,7 +91,9 @@ class ListItem extends StatelessWidget {
 
     return itemData.itemType == ItemType.folder
         ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: 30.0,), onPressed: () async => await folderDotsAction!.call())
-        : filePopupMenu!;
+        : Padding(
+          padding: EdgeInsets.only(right: 5.0),
+          child: filePopupMenu!,);
   }
 
 }
