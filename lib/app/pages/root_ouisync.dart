@@ -372,6 +372,24 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
+  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return FolderDetail(
+        name: name,
+        path: path,
+      );
+    }
+  );
+
   Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
     context,
     BlocProvider.of<DirectoryBloc>(context),

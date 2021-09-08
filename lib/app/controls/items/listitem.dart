@@ -9,7 +9,8 @@ class ListItem extends StatelessWidget {
     required this.itemData,
     required this.mainAction,
     required this.secondaryAction,
-    required this.popupMenu,
+    required this.filePopupMenu,
+    required this.folderDotsAction,
     this.isDestination = false,
     this.isEncrypted = false,
     this.isLocal = true,
@@ -19,7 +20,8 @@ class ListItem extends StatelessWidget {
   final BaseItem itemData;
   final Function mainAction;
   final Function secondaryAction;
-  final PopupMenuButton? popupMenu;
+  final PopupMenuButton<dynamic>? filePopupMenu;
+  final Function? folderDotsAction;
   final bool isDestination;
   final bool isEncrypted;
   final bool isLocal;
@@ -38,7 +40,7 @@ class ListItem extends StatelessWidget {
             children: <Widget>[
               _getIconByType(),
               _getExpandedDescriptionByType(),
-              _getActionByType(secondaryAction, popupMenu, isDestination),
+              _getActionByType(secondaryAction, filePopupMenu, folderDotsAction, isDestination),
             ],
           ),
         )
@@ -80,16 +82,16 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  Widget _getActionByType(Function secondaryAction, PopupMenuButton? popupMenu, bool isDestination) {
+  Widget _getActionByType(Function secondaryAction, PopupMenuButton<dynamic>? filePopupMenu, Function? folderDotsAction, bool isDestination) {
     if (isDestination) {
       return itemData.itemType == ItemType.folder
         ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: 30.0,), onPressed: () => secondaryAction.call())
         : IconButton(onPressed: null, icon: Container());
     }
 
-    return itemData.itemType == ItemType.file
-        ? popupMenu!
-        : IconButton(onPressed: null, icon: Container());
+    return itemData.itemType == ItemType.folder
+        ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: 30.0,), onPressed: () async => await folderDotsAction!.call())
+        : filePopupMenu!;
   }
 
 }

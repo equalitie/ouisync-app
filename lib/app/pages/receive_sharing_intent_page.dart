@@ -350,12 +350,13 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
                 fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
               );
             },
-            popupMenu: Dialogs
+            filePopupMenu: Dialogs
                 .filePopupMenu(
                   context,
                   BlocProvider. of<DirectoryBloc>(context),
                   { actionDeleteFile: item }
                 ),
+            folderDotsAction: () {},
             isDestination: true,
         );
       }
