@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -36,8 +36,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
   late final Subscription subscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
-
-  late final Timer autoRefreshTimer;
   String _currentFolder = slash;
 
   late AnimationController _controller;
@@ -52,10 +50,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     super.initState();
 
     handleIncomingShareIntent();
-    // initAutoRefresh();
     subscribeToRepositoryNotifications(widget.repository);
 
     loadRoot(BlocProvider.of<NavigationBloc>(context));
+    
     initAnimationController();
   }
 
@@ -63,7 +61,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
   void dispose() {
     super.dispose();
 
-    // autoRefreshTimer.cancel();
     subscription.cancel();
 
     _controller.dispose();
@@ -96,6 +93,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       context,
       MaterialPageRoute(builder: (context) {
         return ReceiveSharingIntentPage(
+          repository:  widget.repository,
           sharedFileInfo: sharedMedia,
           directoryBloc: BlocProvider.of<DirectoryBloc>(context),
           directoryBlocPath: widget.path,
@@ -105,16 +103,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   void subscribeToRepositoryNotifications(Repository repository) async {
-    subscription = repository.subscribe(updateUI);
-  }
-
-  void initAutoRefresh() {
-    autoRefreshTimer = Timer.periodic(
-      Duration(seconds: autoRefreshPeriodInSeconds),
-      (timer) { 
-        updateUI(withProgress: false);
-      }
-    );
+    subscription = repository.subscribe(() => updateUI(withProgress: false));
   }
 
   initAnimationController()  => _controller = new AnimationController(
@@ -156,7 +145,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
 
       return Container(
-        child: Text('[ ! ]')
+        child: Text('...')
       );
     }
   );
@@ -168,9 +157,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
         if (state.type == Navigation.content) {
           setState(() { 
             _currentFolder = state.destination;
-            updateFolderContents(state.contents);
             print('Current path updated: $_currentFolder');
           });
+
+          updateFolderContents(state.contents);
 
           BlocProvider.of<RouteBloc>(context)
           .add(
@@ -219,10 +209,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
 
     if (state is NavigationLoadFailure) {
-      return Text(
-        'Something went wrong!',
-        style: TextStyle(color: Colors.red),
-      );
+      return _contentsList();
+      // return Text(
+      //   'Something went wrong!',
+      //   style: TextStyle(color: Colors.red),
+      // );
     }
 
     return Center(child: Text('Ooops!'));
@@ -270,6 +261,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   RefreshIndicator(
     onRefresh: () async => updateUI.call(),
     child: ListView.separated(
+      padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent
@@ -279,14 +271,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
         final item = _folderContents[index];
         final actionByType = item.itemType == ItemType.file
         ? () async {
-          final file = await Dialogs.executeFutureWithLoadingDialog(
-            context,
-            getFile(item.path, item.name)
-          );
-          if (file != null) {
-            final size = await file.length;
-            _showFileDetails(item.name, item.path, size);
-          }
+          final fileSize = await _fileSize(item.path);
+          _showFileDetails(item.name, item.path, fileSize);
         }
         : () {
           BlocProvider.of<NavigationBloc>(context)
@@ -300,19 +286,46 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
         };
 
-        return ListItem (
-            itemData: item,
-            mainAction: actionByType,
-            secondaryAction: () => {},
-            popupMenu: Dialogs
-              .filePopupMenu(
-                context,
-                BlocProvider. of<DirectoryBloc>(context),
-                { actionDeleteFile: item }
-              ),
+        final listItem = ListItem (
+          repository: widget.repository,
+          itemData: item,
+          mainAction: actionByType,
+          secondaryAction: () => {},
+          filePopupMenu: _popupMenu(item),
+          folderDotsAction: () async =>
+            await _showFolderDetails(
+              removeParentFromPath(item.path),
+              item.path
+            )
         );
+
+        return listItem;
       }
     )
+  );
+
+  Future<int> _fileSize(String filePath) async {
+    int fileSize = 0;
+    File? file;
+
+    try {
+      file = await File.open(widget.repository, filePath);
+      fileSize = await file.length;
+    } catch (e) {
+      print('Exception getting file $filePath size:\n${e.toString()}');
+    } finally {
+      file?.close();
+    }
+
+    return fileSize;
+  }
+
+  _popupMenu(item) => 
+  Dialogs
+  .filePopupMenu(
+    context,
+    BlocProvider. of<DirectoryBloc>(context),
+    { actionDeleteFile: item }
   );
 
   Future<void> updateFolderContents(items) async {
@@ -335,25 +348,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   }
 
-  Future<File?> getFile(String path, String name) async {
-    try {
-      return await File.open(widget.repository, path);
-    } on Exception catch (e) {
-      print('Init file: $e');
-
-      ScaffoldMessenger
-      .of(context)
-      .showSnackBar(
-        SnackBar(
-          content: Text('There was a problem opening the file $name.')
-        )
-      );
-    }
-
-    return null;
-  }
-
   Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
+    isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -368,6 +364,48 @@ class _RootOuiSyncState extends State<RootOuiSync>
         name: name,
         path: path,
         size: size
+      );
+    }
+  );
+
+  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return FolderDetail(
+        name: name,
+        path: path,
+        renameAction: () {
+          widget.repository.move('/one', '/uno');
+          updateUI(withProgress: true);
+        },
+        deleteAction: () async {
+          final result = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+
+              return Dialogs.buildDeleteFolderAlertDialog(
+                context,
+                BlocProvider.of<DirectoryBloc>(context),
+                updateUI,
+                extractParentFromPath(path),
+                path,
+              );
+            },
+          );
+
+          if (result ?? false) {
+            Navigator.of(context).pop(false);
+          }
+        },
       );
     }
   );

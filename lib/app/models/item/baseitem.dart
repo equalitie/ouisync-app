@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../controls/repo/repofooter.dart';
 import 'itemtype.dart';
 
 abstract class BaseItem extends Equatable {
@@ -43,4 +42,12 @@ abstract class BaseItem extends Equatable {
   void move(String newPath);
   void setIcon(IconData icon);
   void setSyncStatus(SyncStatus status);
+}
+
+enum SyncStatus {
+  syncing,
+  idle,
+  paused,
+  stopped,
+  problem
 }

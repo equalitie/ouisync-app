@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
-import '../hooks/hooks.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
 class ReceiveSharingIntentPage extends StatefulHookWidget {
   ReceiveSharingIntentPage({
+    required this.repository,
     required this.sharedFileInfo,
     required this.directoryBloc,
     required this.directoryBlocPath
   });
 
+  final Repository repository;
   final List<SharedMediaFile> sharedFileInfo;
   final Bloc directoryBloc;
   final String directoryBlocPath;
@@ -66,13 +68,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     backgroundColor = Theme.of(context).cardColor;
     foregroundColor = Theme.of(context).accentColor;
 
-    final hideFabsAnimationController = useAnimationController(
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-      initialValue: 1,
-    );
-
-    final scrollController = useScrollControllerForAnimation(hideFabsAnimationController);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Add file to OuiSync'),
@@ -88,39 +83,12 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             ),
             Expanded(
               flex: 1,
-              child: _directoriesBlocBuilder(scrollController)
+              child: _directoriesBlocBuilder()
             ),
           ]
         ),
       ),
-      floatingActionButton: FadeTransition(
-        opacity: hideFabsAnimationController,
-        child: ScaleTransition(
-          scale: hideFabsAnimationController,
-          child: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,  
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.extended(
-                  onPressed: () {},
-                  icon: const Icon(Icons.create_new_folder_rounded),
-                  label: const Text(actionNewFolder)
-                ),
-                SizedBox(width: 30.0),
-                FloatingActionButton.extended(
-                  onPressed: () async => await _saveFileToSelectedFolder(
-                    destination: _currentFolderData.path,
-                    fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
-                  ),
-                  icon: const Icon(Icons.arrow_circle_down),
-                  label: Text('${removeParentFromPath(_currentFolderData.path)}')
-                ),
-              ],
-            )
-          ),
-        ),
-      )
+      floatingActionButton: _actionButtons(),
     );
   }
 
@@ -213,7 +181,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     }
   );
 
-  _directoriesBlocBuilder(ScrollController scrollController) {
+  _directoriesBlocBuilder() {
     return Center(
       child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
@@ -233,7 +201,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
             final contents = state.contents;
             contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-            return _contentsList(contents, scrollController);
+            return _contentsList(contents);
           }
 
           if (state is NavigationLoadFailure) {
@@ -247,6 +215,59 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         }
       )
     );
+  }
+
+  Widget _actionButtons() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,  
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () async => await _createNewFolder(_currentFolderData.path),
+            icon: const Icon(Icons.create_new_folder_rounded),
+            label: const Text(actionNewFolder)
+          ),
+          SizedBox(width: 30.0),
+          FloatingActionButton.extended(
+            onPressed: () async => await _saveFileToSelectedFolder(
+              destination: _currentFolderData.path,
+              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+            ),
+            icon: const Icon(Icons.arrow_circle_down),
+            label: Text('${removeParentFromPath(_currentFolderData.path)}')
+          ),
+        ],
+      )
+    );
+  }
+
+  _createNewFolder(String current) {
+    final formKey = GlobalKey<FormState>();
+
+    final dialogTitle = 'Create Folder';
+    final actionBody = FolderCreation(
+      bloc: BlocProvider.of<DirectoryBloc>(context),
+      updateUI: () => updateUI(current),
+      path: current,
+      formKey: formKey,
+    );
+
+    Dialogs.actionDialog(
+      context,
+      dialogTitle,
+      actionBody
+      );
+  }
+
+  void updateUI(String path) {
+    final origin = extractParentFromPath(path);
+
+    _navigateTo(
+      type: Navigation.content,
+      origin: origin,
+      destination: path
+      );
   }
 
   _noContents() => Column(
@@ -297,9 +318,9 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ],
   );
 
-  _contentsList(List<BaseItem> contents, ScrollController scrollController) {
+  _contentsList(List<BaseItem> contents) {
     return ListView.separated(
-      controller: scrollController,
+      padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
           height: 1,
           color: Colors.transparent,
@@ -308,39 +329,56 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       itemBuilder: (context, index) {
         final item = contents[index];
         return ListItem (
-            itemData: item,
-            mainAction: item.itemType == ItemType.file
-            ? () { }
-            : () { 
-              final current = _currentFolderData.path;
-              updateCurrentFolder(item);
+          repository: widget.repository,
+          itemData: item,
+          mainAction: item.itemType == ItemType.file
+          ? () { }
+          : () { 
+            final current = _currentFolderData.path;
+            updateCurrentFolder(item);
 
-              _navigateTo(
-                type: Navigation.content,
-                origin: current,
-                destination: item.path
-              );
-            },
-            secondaryAction: item.itemType == ItemType.file
-            ? () { }
-            : () async {
-              updateCurrentFolder(item);
+            _navigateTo(
+              type: Navigation.content,
+              origin: current,
+              destination: item.path
+            );
+          },
+          secondaryAction: item.itemType == ItemType.file
+          ? () { }
+          : () async {
+            updateCurrentFolder(item);
 
-              await _saveFileToSelectedFolder(
-                destination: item.path,
-                fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
-              );
-            },
-            popupMenu: Dialogs
-                .filePopupMenu(
-                  context,
-                  BlocProvider. of<DirectoryBloc>(context),
-                  { actionDeleteFile: item }
-                ),
-            isDestination: true,
+            await _saveFileToSelectedFolder(
+              destination: item.path,
+              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+            );
+          },
+          filePopupMenu: Dialogs
+              .filePopupMenu(
+                context,
+                BlocProvider. of<DirectoryBloc>(context),
+                { actionDeleteFile: item }
+              ),
+          folderDotsAction: () {},
+          isDestination: true,
         );
       }
     );
+  }
+
+  Future<String> getSize(path) async {
+    try {
+      final file = await File.open(widget.repository, path);
+      final length = await file.length;
+
+      await Future.delayed(Duration(seconds: 4));
+
+      return formattSize(length, units: true);
+    } catch (e) {
+      print('Exception getting the file size ($path):\n${e.toString()}');
+    }
+
+    return '0 B';
   }
 
   Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {

@@ -1,7 +1,6 @@
 import 'package:chunked_stream/chunked_stream.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../controls/controls.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
@@ -253,7 +252,7 @@ class DirectoryRepository {
         name: name,
         extension: fileType,
         path: itemPath,
-        size: 0.0,
+        size: size,
         syncStatus: SyncStatus.idle
       ); 
     }

@@ -46,6 +46,39 @@ class FileDetail extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildTitle('File Details'),
+          GestureDetector(
+            onTap: () async => await NativeChannels.previewOuiSyncFile(path, size),
+            child: buildIconLabel(
+              Icons.preview_rounded,
+              'Preview',
+              iconSize: 40.0,
+              infoSize: 18.0,
+              labelPadding: EdgeInsets.only(bottom: 30.0)
+            ),
+          ),
+          GestureDetector(
+            onTap: () async => await NativeChannels.shareOuiSyncFile(path, size),
+            child: buildIconLabel(
+              Icons.share_rounded,
+              'Share',
+              iconSize: 40.0,
+              infoSize: 18.0,
+              labelPadding: EdgeInsets.only(bottom: 10.0)
+            ),
+          ),
+          Divider(
+            height: 50.0,
+            thickness: 2.0,
+            indent: 20.0,
+            endIndent: 20.0,
+          ),
+          buildIconLabel(
+            Icons.info_rounded,
+            'Information',
+            iconSize: 40.0,
+            infoSize: 24.0,
+            labelPadding: EdgeInsets.only(bottom: 30.0)
+          ),
           buildInfoLabel(
             'Name: ',
             name
@@ -54,13 +87,13 @@ class FileDetail extends StatelessWidget {
             'Location: ', 
             path
             .replaceAll(name, '')
-            .trimRight()
+            .trimRight(),
           ),
           buildInfoLabel(
             'Size: ',
             formattSize(size, units: true)
           ),
-          buildActionsSection(context, _actions(context)),
+          // buildActionsSection(context, _actions(context)),
         ],
       ),
     );

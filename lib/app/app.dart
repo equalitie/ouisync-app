@@ -55,7 +55,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         ),
         BlocProvider(
           create: (BuildContext context) => RouteBloc(bloc: navigationBloc)
-        )
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

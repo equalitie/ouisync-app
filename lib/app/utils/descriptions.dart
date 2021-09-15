@@ -1,4 +1,4 @@
-import 'package:ouisync_app/app/controls/repo/repofooter.dart';
+import '../models/models.dart';
 
 class Descriptions {
 
