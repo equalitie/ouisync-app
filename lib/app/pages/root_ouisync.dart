@@ -269,14 +269,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
         final item = _folderContents[index];
         final actionByType = item.itemType == ItemType.file
         ? () async {
-          final file = await Dialogs.executeFutureWithLoadingDialog(
-            context,
-            getFile(item.path, item.name)
-          );
-          if (file != null) {
-            final size = await file.length;
-            _showFileDetails(item.name, item.path, size);
-          }
+          final fileSize = await _fileSize(item.path);
+          _showFileDetails(item.name, item.path, fileSize);
         }
         : () {
           BlocProvider.of<NavigationBloc>(context)
@@ -304,6 +298,22 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
     )
   );
+
+  Future<int> _fileSize(String filePath) async {
+    int fileSize = 0;
+    File? file;
+
+    try {
+      file = await File.open(widget.repository, filePath);
+      fileSize = await file.length;
+    } catch (e) {
+      print('Exception getting file $filePath size:\n${e.toString()}');
+    } finally {
+      file?.close();
+    }
+
+    return fileSize;
+  }
 
   _popupMenu(item) => 
   Dialogs
