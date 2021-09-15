@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -156,9 +157,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
         if (state.type == Navigation.content) {
           setState(() { 
             _currentFolder = state.destination;
-            updateFolderContents(state.contents);
             print('Current path updated: $_currentFolder');
           });
+
+          updateFolderContents(state.contents);
 
           BlocProvider.of<RouteBloc>(context)
           .add(
