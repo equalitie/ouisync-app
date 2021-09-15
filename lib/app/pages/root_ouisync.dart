@@ -35,8 +35,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
   late final Subscription subscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
-
-  late final Timer autoRefreshTimer;
   String _currentFolder = slash;
 
   late AnimationController _controller;
@@ -51,10 +49,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     super.initState();
 
     handleIncomingShareIntent();
-    // initAutoRefresh();
     subscribeToRepositoryNotifications(widget.repository);
 
     loadRoot(BlocProvider.of<NavigationBloc>(context));
+    
     initAnimationController();
   }
 
@@ -62,7 +60,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
   void dispose() {
     super.dispose();
 
-    // autoRefreshTimer.cancel();
     subscription.cancel();
 
     _controller.dispose();
@@ -106,15 +103,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   void subscribeToRepositoryNotifications(Repository repository) async {
     subscription = repository.subscribe(() => updateUI(withProgress: false));
-  }
-
-  void initAutoRefresh() {
-    autoRefreshTimer = Timer.periodic(
-      Duration(seconds: autoRefreshPeriodInSeconds),
-      (timer) { 
-        updateUI(withProgress: false);
-      }
-    );
   }
 
   initAnimationController()  => _controller = new AnimationController(
@@ -342,24 +330,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
           _folderContents = contents;
         });
     }
-  }
-
-  Future<File?> getFile(String path, String name) async {
-    try {
-      return await File.open(widget.repository, path);
-    } on Exception catch (e) {
-      print('Init file: $e');
-
-      ScaffoldMessenger
-      .of(context)
-      .showSnackBar(
-        SnackBar(
-          content: Text('There was a problem opening the file $name.')
-        )
-      );
-    }
-
-    return null;
   }
 
   Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
