@@ -207,10 +207,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
 
     if (state is NavigationLoadFailure) {
-      return Text(
-        'Something went wrong!',
-        style: TextStyle(color: Colors.red),
-      );
+      return _contentsList();
+      // return Text(
+      //   'Something went wrong!',
+      //   style: TextStyle(color: Colors.red),
+      // );
     }
 
     return Center(child: Text('Ooops!'));
