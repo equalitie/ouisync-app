@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
 import '../controls.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
+    required this.repository,
     required this.itemData,
     required this.mainAction,
     required this.secondaryAction,
@@ -17,6 +19,7 @@ class ListItem extends StatelessWidget {
     this.isOwn = true,
   });
 
+  final Repository repository;
   final BaseItem itemData;
   final Function mainAction;
   final Function secondaryAction;
@@ -68,17 +71,9 @@ class ListItem extends StatelessWidget {
   Expanded _getExpandedDescriptionByType() {
     return Expanded(
       flex: 1,
-      child: itemData.itemType == ItemType.repo
-        ? RepoDescription(
-          folderData: itemData,
-          isEncrypted: isEncrypted,
-          isLocal: isLocal,
-          isOwn: isOwn,
-          action: mainAction
-        )
-        : itemData.itemType == ItemType.folder
+      child: itemData.itemType == ItemType.folder
         ? FolderDescription(folderData: itemData)
-        : FileDescription(fileData: itemData)
+        : FileDescription(repository: repository, fileData: itemData)
     );
   }
 

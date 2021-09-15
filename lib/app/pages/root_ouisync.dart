@@ -95,6 +95,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       context,
       MaterialPageRoute(builder: (context) {
         return ReceiveSharingIntentPage(
+          repository:  widget.repository,
           sharedFileInfo: sharedMedia,
           directoryBloc: BlocProvider.of<DirectoryBloc>(context),
           directoryBlocPath: widget.path,

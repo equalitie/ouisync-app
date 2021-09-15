@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -14,11 +15,13 @@ import '../utils/utils.dart';
 
 class ReceiveSharingIntentPage extends StatefulHookWidget {
   ReceiveSharingIntentPage({
+    required this.repository,
     required this.sharedFileInfo,
     required this.directoryBloc,
     required this.directoryBlocPath
   });
 
+  final Repository repository;
   final List<SharedMediaFile> sharedFileInfo;
   final Bloc directoryBloc;
   final String directoryBlocPath;
@@ -326,40 +329,56 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       itemBuilder: (context, index) {
         final item = contents[index];
         return ListItem (
-            itemData: item,
-            mainAction: item.itemType == ItemType.file
-            ? () { }
-            : () { 
-              final current = _currentFolderData.path;
-              updateCurrentFolder(item);
+          repository: widget.repository,
+          itemData: item,
+          mainAction: item.itemType == ItemType.file
+          ? () { }
+          : () { 
+            final current = _currentFolderData.path;
+            updateCurrentFolder(item);
 
-              _navigateTo(
-                type: Navigation.content,
-                origin: current,
-                destination: item.path
-              );
-            },
-            secondaryAction: item.itemType == ItemType.file
-            ? () { }
-            : () async {
-              updateCurrentFolder(item);
+            _navigateTo(
+              type: Navigation.content,
+              origin: current,
+              destination: item.path
+            );
+          },
+          secondaryAction: item.itemType == ItemType.file
+          ? () { }
+          : () async {
+            updateCurrentFolder(item);
 
-              await _saveFileToSelectedFolder(
-                destination: item.path,
-                fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
-              );
-            },
-            filePopupMenu: Dialogs
-                .filePopupMenu(
-                  context,
-                  BlocProvider. of<DirectoryBloc>(context),
-                  { actionDeleteFile: item }
-                ),
-            folderDotsAction: () {},
-            isDestination: true,
+            await _saveFileToSelectedFolder(
+              destination: item.path,
+              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+            );
+          },
+          filePopupMenu: Dialogs
+              .filePopupMenu(
+                context,
+                BlocProvider. of<DirectoryBloc>(context),
+                { actionDeleteFile: item }
+              ),
+          folderDotsAction: () {},
+          isDestination: true,
         );
       }
     );
+  }
+
+  Future<String> getSize(path) async {
+    try {
+      final file = await File.open(widget.repository, path);
+      final length = await file.length;
+
+      await Future.delayed(Duration(seconds: 4));
+
+      return formattSize(length, units: true);
+    } catch (e) {
+      print('Exception getting the file size ($path):\n${e.toString()}');
+    }
+
+    return '0 B';
   }
 
   Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {
