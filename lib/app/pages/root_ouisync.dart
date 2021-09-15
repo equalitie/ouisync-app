@@ -349,6 +349,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
+    isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
