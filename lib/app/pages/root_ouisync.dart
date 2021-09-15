@@ -284,17 +284,20 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
         };
 
-        return ListItem (
-            itemData: item,
-            mainAction: actionByType,
-            secondaryAction: () => {},
-            filePopupMenu: _popupMenu(item),
-            folderDotsAction: () async =>
-              await _showFolderDetails(
-                removeParentFromPath(item.path),
-                item.path
-              )
+        final listItem = ListItem (
+          repository: widget.repository,
+          itemData: item,
+          mainAction: actionByType,
+          secondaryAction: () => {},
+          filePopupMenu: _popupMenu(item),
+          folderDotsAction: () async =>
+            await _showFolderDetails(
+              removeParentFromPath(item.path),
+              item.path
+            )
         );
+
+        return listItem;
       }
     )
   );
