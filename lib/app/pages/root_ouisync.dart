@@ -144,7 +144,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
 
       return Container(
-        child: Text('[ ! ]')
+        child: Text('...')
       );
     }
   );
