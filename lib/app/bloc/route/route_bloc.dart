@@ -33,33 +33,30 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
 
   Widget _currentLocationBar(String path, Function action) {
     final current = removeParentFromPath(path);
-    return Padding(
-      padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
-      child: Row(
-        children: [
-          _navigation(path, action),
-          SizedBox(
-            width: path == slash
-            ? 5.0
-            : 0.0
-          ),
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: EdgeInsets.all(5.0),
-              child: Text(
-                '$current',
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600,
-                ),
+    return Row(
+      children: [
+        _navigation(path, action),
+        SizedBox(
+          width: path == slash
+          ? 5.0
+          : 0.0
+        ),
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: EdgeInsets.all(5.0),
+            child: Text(
+              '$current',
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
