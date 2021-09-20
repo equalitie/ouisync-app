@@ -145,7 +145,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   _getAppBar(destinationPath) => AppBar(
-    title: _getTitle(),
+    title: Text(widget.title),
     centerTitle: true,
     bottom: PreferredSize(
       preferredSize: Size.fromHeight(30.0),
@@ -153,10 +153,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
         child: _getRouteBar(),
       ),
     ),
-  );
-
-  _getTitle() => Text(
-    widget.title
   );
 
   _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
