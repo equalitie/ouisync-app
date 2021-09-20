@@ -115,6 +115,23 @@ class _RootOuiSyncState extends State<RootOuiSync>
     );
   }
 
+  void subscribeToRepositoryNotifications(Repository repository) async {
+    final _debouncer = Debouncer(milliseconds: debouncerMiliseconds);
+    _repositorySubscription = repository.subscribe(() => _runSync(_debouncer));
+  }
+
+  void _runSync(Debouncer _debouncer) {
+    print('Starting synchronization [${DateTime.now()}]');
+    _syncController.repeat();
+    
+    _debouncer.run(() {          
+      print('Syncing [${DateTime.now()}]');
+    
+      updateUI(withProgress: false);
+      _syncController.stop();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     backgroundColor = Theme.of(context).hintColor;
