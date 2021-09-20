@@ -32,39 +32,40 @@ class RootOuiSync extends StatefulWidget {
 
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
-
-  late final Subscription subscription;
+    
+  late StreamSubscription _intentDataStreamSubscription;
+  late final Subscription _repositorySubscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
-  String _currentFolder = slash;
+  String _currentFolder = slash; // Initial value: /
 
-  late AnimationController _controller;
+  late AnimationController _actionsController;
+  late AnimationController _syncController;
   
   late Color backgroundColor;
   late Color foregroundColor;
-
-  late StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
     super.initState();
 
     handleIncomingShareIntent();
+    initAnimationControllers();
+
     subscribeToRepositoryNotifications(widget.repository);
 
-    loadRoot(BlocProvider.of<NavigationBloc>(context));
-    
-    initAnimationController();
+    loadRoot(BlocProvider.of<NavigationBloc>(context));    
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    subscription.cancel();
-
-    _controller.dispose();
+    _repositorySubscription.cancel();
     _intentDataStreamSubscription.cancel();
+    
+    _actionsController.dispose();
+    _syncController.dispose();
   }
 
   void handleIncomingShareIntent() {
@@ -102,14 +103,17 @@ class _RootOuiSyncState extends State<RootOuiSync>
     );
   }
 
-  void subscribeToRepositoryNotifications(Repository repository) async {
-    subscription = repository.subscribe(() => updateUI(withProgress: false));
-  }
+  initAnimationControllers() {
+    _actionsController = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+    );
 
-  initAnimationController()  => _controller = new AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-  );
+    _syncController = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: syncAnimationDuration)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +418,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     context,
     BlocProvider.of<DirectoryBloc>(context),
     updateUI,
-    _controller,
+    _actionsController,
     _currentFolder,
     folderActions,
     flagFolderActionsDialog,
