@@ -158,7 +158,36 @@ class _RootOuiSyncState extends State<RootOuiSync>
   _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
-        return state.route;
+        return Padding(
+          padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: state.route,
+                    ),
+                    Expanded(
+                      flex: 0,
+                      child: SpinningIcon(
+                        controller: _syncController,
+                        icon: const Icon(
+                          Icons.sync_rounded,
+                          size: 30.0,
+                        ),
+                        onPressed: () => {},
+                      )
+                    ),
+                  ],
+                )
+              )
+            ],
+          )
+        );
       }
 
       return Container(
