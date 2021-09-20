@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -32,39 +31,40 @@ class RootOuiSync extends StatefulWidget {
 
 class _RootOuiSyncState extends State<RootOuiSync>
   with TickerProviderStateMixin {
-
-  late final Subscription subscription;
+    
+  late StreamSubscription _intentDataStreamSubscription;
+  late final Subscription _repositorySubscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
-  String _currentFolder = slash;
+  String _currentFolder = slash; // Initial value: /
 
-  late AnimationController _controller;
+  late AnimationController _actionsController;
+  late AnimationController _syncController;
   
   late Color backgroundColor;
   late Color foregroundColor;
-
-  late StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
     super.initState();
 
     handleIncomingShareIntent();
+    initAnimationControllers();
+
     subscribeToRepositoryNotifications(widget.repository);
 
-    loadRoot(BlocProvider.of<NavigationBloc>(context));
-    
-    initAnimationController();
+    loadRoot(BlocProvider.of<NavigationBloc>(context));    
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    subscription.cancel();
-
-    _controller.dispose();
+    _repositorySubscription.cancel();
     _intentDataStreamSubscription.cancel();
+    
+    _actionsController.dispose();
+    _syncController.dispose();
   }
 
   void handleIncomingShareIntent() {
@@ -102,14 +102,34 @@ class _RootOuiSyncState extends State<RootOuiSync>
     );
   }
 
-  void subscribeToRepositoryNotifications(Repository repository) async {
-    subscription = repository.subscribe(() => updateUI(withProgress: false));
+  initAnimationControllers() {
+    _actionsController = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
+    );
+
+    _syncController = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: syncAnimationDuration)
+    );
   }
 
-  initAnimationController()  => _controller = new AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-  );
+  void subscribeToRepositoryNotifications(Repository repository) async {
+    final _debouncer = Debouncer(milliseconds: debouncerMiliseconds);
+    _repositorySubscription = repository.subscribe(() => _runSync(_debouncer));
+  }
+
+  void _runSync(Debouncer _debouncer) {
+    print('Starting synchronization [${DateTime.now()}]');
+    _syncController.repeat();
+    
+    _debouncer.run(() {          
+      print('Syncing [${DateTime.now()}]');
+    
+      updateUI(withProgress: false);
+      _syncController.stop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +144,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   _getAppBar(destinationPath) => AppBar(
-    title: _getTitle(),
+    title: Text(widget.title),
     centerTitle: true,
     bottom: PreferredSize(
       preferredSize: Size.fromHeight(30.0),
@@ -134,14 +154,39 @@ class _RootOuiSyncState extends State<RootOuiSync>
     ),
   );
 
-  _getTitle() => Text(
-    widget.title
-  );
-
   _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
-        return state.route;
+        return Padding(
+          padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: state.route,
+                    ),
+                    Expanded(
+                      flex: 0,
+                      child: SpinningIcon(
+                        controller: _syncController,
+                        icon: const Icon(
+                          Icons.sync_rounded,
+                          size: 30.0,
+                        ),
+                        onPressed: () => {},
+                      )
+                    ),
+                  ],
+                )
+              )
+            ],
+          )
+        );
       }
 
       return Container(
@@ -209,11 +254,10 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
 
     if (state is NavigationLoadFailure) {
-      return _contentsList();
-      // return Text(
-      //   'Something went wrong!',
-      //   style: TextStyle(color: Colors.red),
-      // );
+      return Text(
+        'Something went wrong!',
+        style: TextStyle(color: Colors.red),
+      );
     }
 
     return Center(child: Text('Ooops!'));
@@ -414,7 +458,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     context,
     BlocProvider.of<DirectoryBloc>(context),
     updateUI,
-    _controller,
+    _actionsController,
     _currentFolder,
     folderActions,
     flagFolderActionsDialog,
