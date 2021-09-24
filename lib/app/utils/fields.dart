@@ -63,6 +63,16 @@ Padding(
   )
 );
 
+Widget buildActionIcon({icon, onTap, size = 40.0}) {
+  return GestureDetector(
+    child: Icon(
+      icon,
+      size: size,
+    ),
+    onTap: onTap
+  );
+}
+
 Widget buildIconLabel(iconInfo, info, { 
   iconSize = 30.0,
   infoSize = 18.0,
