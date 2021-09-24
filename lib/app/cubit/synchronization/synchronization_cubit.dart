@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../data.dart';
+import '../../data/data.dart';
 
 part 'synchronization_state.dart';
 
