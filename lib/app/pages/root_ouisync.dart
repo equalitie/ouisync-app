@@ -10,6 +10,10 @@ import 'package:styled_text/icon_style.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
+import '../controls/bars/app_branding.dart';
+import '../controls/bars/ouisync_bar.dart';
+import '../controls/bars/repository_picker.dart';
+import '../controls/bars/route_bar.dart';
 import '../controls/controls.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
@@ -160,63 +164,58 @@ class _RootOuiSyncState extends State<RootOuiSync>
     foregroundColor = Theme.of(context).accentColor;
 
     return Scaffold(
-      appBar: _getAppBar(widget.title),
+      appBar: _getOuiSyncBar(),
       body: _getBody(),
-      floatingActionButton: _getFloatingButton(),
+      floatingActionButton: new FloatingActionButton(
+        child: const Icon(Icons.add_rounded),
+        onPressed: () => _showDirectoryActions(_currentFolder),
+      ),
     );
   }
 
-  _getAppBar(destinationPath) => AppBar(
-    title: Text(widget.title),
-    centerTitle: true,
-    bottom: PreferredSize(
-      preferredSize: Size.fromHeight(30.0),
-      child: Container(
-        child: _getRouteBar(),
+  _getOuiSyncBar() => OuiSyncBar(
+    appBranding: AppBranding(appName: widget.title),
+    defaultRepository: 'Default',
+    centralWidget: RepositoryPicker(context: context, defaultRepository: 'Default'),
+    actions: [
+      Padding(
+        padding: EdgeInsets.only(right: 10.0),
+        child: buildActionIcon(icon: Icons.settings_outlined, onTap: settingsAction, size: 35.0),
+      )
+    ],
+    bottom: RouteBar(animationController: _syncController),
+    mode: BarMode.full,
+    toolbarHeight: 150.0,
+    preferredSize: Size.fromHeight(150.0)
+  );
+
+  Padding appBranding() { //AppBranding
+    return Padding(
+      padding: EdgeInsets.only(left: 10.0),
+      child: Center(
+        child: Text(
+          widget.title,
+          style: TextStyle(
+            fontSize: 28.0,
+            fontWeight: FontWeight.w800
+          ),),
       ),
-    ),
-  );
+    );
+  }
 
-  _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
-    builder: (context, state) {
-      if (state is RouteLoadSuccess) {
-        return Padding(
-          padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: state.route,
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: SpinningIcon(
-                        controller: _syncController,
-                        icon: const Icon(
-                          Icons.sync_rounded,
-                          size: 30.0,
-                        ),
-                        onPressed: () => {},
-                      )
-                    ),
-                  ],
-                )
-              )
-            ],
-          )
-        );
-      }
-
-      return Container(
-        child: Text('...')
-      );
-    }
-  );
+  Row repositorySelector() { //RepositoryPicker
+    return Row(
+      children: [
+        const Icon(
+          Icons.layers_rounded,
+          size: 30.0,
+        ),
+        SizedBox(width: 4.0),
+        buildConstrainedText('Default', size: 20.0, softWrap: false, overflow: TextOverflow.fade),
+        buildActionIcon(icon: Icons.keyboard_arrow_down_outlined, onTap: () async { await _showRepositorySelector('Default'); }),
+      ],
+    );
+  }
 
   _getBody() => BlocConsumer<DirectoryBloc, DirectoryState>(
     builder: (context, state) {
@@ -620,4 +619,15 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   }
 
+  void settingsAction() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return Settings(
+          selectedRepository: 'Default',
+          repository: widget.repository,
+        );
+      })
+    );
+  }
 }
