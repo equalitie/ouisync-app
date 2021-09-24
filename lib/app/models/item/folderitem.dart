@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../controls/controls.dart';
 import '../models.dart';
 
 
@@ -15,7 +14,7 @@ class FolderItem extends Equatable implements BaseItem {
     this.size = 0.0,
     this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.folder,
-    this.icon = Icons.folder,
+    this.icon = Icons.folder_outlined,
     required this.items,
   }) {
     this.items = <BaseItem>[];

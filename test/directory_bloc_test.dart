@@ -1,9 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:ouisync_app/app/bloc/directory/directorybloc.dart';
-import 'package:ouisync_app/app/bloc/directory/directoryevent.dart';
-import 'package:ouisync_app/app/bloc/directory/directorystate.dart';
+import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart';
+import 'package:ouisync_app/app/bloc/directory/directory_event.dart';
+import 'package:ouisync_app/app/bloc/directory/directory_state.dart';
 import 'package:ouisync_app/app/data/data.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -29,7 +29,7 @@ void main() {
       session = MockSession();
 
       directoryRepository = MockDirectoryRepository();
-      directoryBloc = DirectoryBloc(blocRepository: directoryRepository);
+      directoryBloc = DirectoryBloc(repository: directoryRepository);
 
       dummyFolderItem = FolderItem(
         name: 'test',
@@ -133,7 +133,7 @@ void main() {
 
         return directoryBloc;
       },
-      act: (DirectoryBloc bloc) => bloc.add(RequestContent(session: session, path: '/', recursive: false)),
+      act: (DirectoryBloc bloc) => bloc.add(GetContent(session: session, path: '/', recursive: false)),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadSuccess(contents: <BaseItem>[])
@@ -155,7 +155,7 @@ void main() {
 
         return directoryBloc;
       },
-      act: (DirectoryBloc bloc) => bloc.add(RequestContent(session: session, path: '', recursive: false)),
+      act: (DirectoryBloc bloc) => bloc.add(GetContent(session: session, path: '', recursive: false)),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadFailure()

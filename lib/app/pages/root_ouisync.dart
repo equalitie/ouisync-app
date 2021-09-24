@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -9,6 +10,10 @@ import 'package:styled_text/icon_style.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
+import '../controls/bars/app_branding.dart';
+import '../controls/bars/ouisync_bar.dart';
+import '../controls/bars/repository_picker.dart';
+import '../controls/bars/route_bar.dart';
 import '../controls/controls.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
@@ -51,9 +56,14 @@ class _RootOuiSyncState extends State<RootOuiSync>
     handleIncomingShareIntent();
     initAnimationControllers();
 
-    subscribeToRepositoryNotifications(widget.repository);
+    navigateToPath(
+      type: Navigation.content,
+      origin: slash,
+      destination: slash,
+      withProgress: true
+    ); 
 
-    loadRoot(BlocProvider.of<NavigationBloc>(context));    
+    getContents(path: slash, withProgress: true);
   }
 
   @override
@@ -115,21 +125,38 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   void subscribeToRepositoryNotifications(Repository repository) async {
-    final _debouncer = Debouncer(milliseconds: debouncerMiliseconds);
-    _repositorySubscription = repository.subscribe(() => _runSync(_debouncer));
-  }
+    _repositorySubscription = repository.subscribe(() { 
+      _syncController.repeat();
 
-  void _runSync(Debouncer _debouncer) {
-    print('Starting synchronization [${DateTime.now()}]');
-    _syncController.repeat();
-    
-    _debouncer.run(() {          
-      print('Syncing [${DateTime.now()}]');
-    
-      updateUI(withProgress: false);
-      _syncController.stop();
+      getContents(
+        path: _currentFolder,
+        isSyncing: true
+      );
     });
   }
+
+  getContents({path, recursive = false, withProgress = false, isSyncing = false}) { 
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      GetContent(
+        path: path,
+        recursive: recursive,
+        withProgress: withProgress,
+        isSyncing: isSyncing
+      )
+    );
+  }
+
+  navigateToPath({type, origin, destination, withProgress = false}) =>
+  BlocProvider.of<DirectoryBloc>(context)
+  .add(
+    NavigateTo(
+      type: type,
+      origin: origin,
+      destination: destination,
+      withProgress: withProgress
+    )
+  ); 
 
   @override
   Widget build(BuildContext context) {
@@ -137,66 +164,97 @@ class _RootOuiSyncState extends State<RootOuiSync>
     foregroundColor = Theme.of(context).accentColor;
 
     return Scaffold(
-      appBar: _getAppBar(widget.title),
+      appBar: _getOuiSyncBar(),
       body: _getBody(),
-      floatingActionButton: _getFloatingButton(),
+      floatingActionButton: new FloatingActionButton(
+        child: const Icon(Icons.add_rounded),
+        onPressed: () => _showDirectoryActions(_currentFolder),
+      ),
     );
   }
 
-  _getAppBar(destinationPath) => AppBar(
-    title: Text(widget.title),
-    centerTitle: true,
-    bottom: PreferredSize(
-      preferredSize: Size.fromHeight(30.0),
-      child: Container(
-        child: _getRouteBar(),
-      ),
-    ),
+  _getOuiSyncBar() => OuiSyncBar(
+    appBranding: AppBranding(appName: widget.title),
+    defaultRepository: 'Default',
+    centralWidget: RepositoryPicker(context: context, defaultRepository: 'Default'),
+    actions: [
+      Padding(
+        padding: EdgeInsets.only(right: 10.0),
+        child: buildActionIcon(icon: Icons.settings_outlined, onTap: settingsAction, size: 35.0),
+      )
+    ],
+    bottom: RouteBar(animationController: _syncController),
+    mode: BarMode.full,
+    toolbarHeight: 150.0,
+    preferredSize: Size.fromHeight(150.0)
   );
 
-  _getRouteBar() => BlocBuilder<RouteBloc, RouteState>(
+  Padding appBranding() { //AppBranding
+    return Padding(
+      padding: EdgeInsets.only(left: 10.0),
+      child: Center(
+        child: Text(
+          widget.title,
+          style: TextStyle(
+            fontSize: 28.0,
+            fontWeight: FontWeight.w800
+          ),),
+      ),
+    );
+  }
+
+  Row repositorySelector() { //RepositoryPicker
+    return Row(
+      children: [
+        const Icon(
+          Icons.layers_rounded,
+          size: 30.0,
+        ),
+        SizedBox(width: 4.0),
+        buildConstrainedText('Default', size: 20.0, softWrap: false, overflow: TextOverflow.fade),
+        buildActionIcon(icon: Icons.keyboard_arrow_down_outlined, onTap: () async { await _showRepositorySelector('Default'); }),
+      ],
+    );
+  }
+
+  _getBody() => BlocConsumer<DirectoryBloc, DirectoryState>(
     builder: (context, state) {
-      if (state is RouteLoadSuccess) {
-        return Padding(
-          padding: EdgeInsets.only(left: 10.0, bottom: 5.0, right: 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: state.route,
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: SpinningIcon(
-                        controller: _syncController,
-                        icon: const Icon(
-                          Icons.sync_rounded,
-                          size: 30.0,
-                        ),
-                        onPressed: () => {},
-                      )
-                    ),
-                  ],
-                )
-              )
-            ],
-          )
+      if (state is DirectoryInitial) {
+        return Center(child: Text('Loading contents...'));
+      }
+
+      if (state is SyncingInProgress) {
+        return loadContents(_folderContents);
+      }
+
+      if (state is DirectoryLoadInProgress) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (state is DirectoryLoadSuccess) {
+        return loadContents(state.contents);
+      }
+      
+      if (state is NavigationLoadSuccess) {
+        return loadContents(state.contents);
+      }
+
+      if (state is DirectoryLoadFailure) {
+        return Text(
+          'Something went wrong!',
+          style: TextStyle(color: Colors.red),
         );
       }
 
-      return Container(
-        child: Text('...')
-      );
-    }
-  );
+      if (state is NavigationLoadFailure) {
+        return Text(
+          'Something went wrong in navigation',
+          style: TextStyle(color: Colors.red),
+        );
+      }
 
-  _getBody() => BlocConsumer(
-    bloc: BlocProvider.of<NavigationBloc>(context),
+      return Center(child: Text('Ooops!'));
+    },
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
         if (state.type == Navigation.content) {
@@ -215,7 +273,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
                 final from = state.destination;
                 final backTo = extractParentFromPath(from);
 
-                BlocProvider.of<NavigationBloc>(context)
+                BlocProvider.of<DirectoryBloc>(context)
                 .add(
                   NavigateTo(
                     type: Navigation.content,
@@ -229,42 +287,57 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
         }
       }
-    },
-    builder: (context, state) => _body(context, state)
-  );
 
-  Widget _body(context, state) {
-    if (state is NavigationInitial) {
-      return Center(child: Text('Loading contents...'));
-    }
-
-    if (state is NavigationLoadInProgress) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (state is NavigationLoadSuccess) {
-      if (state.contents.isEmpty) {
-        return _noContents();
+      if (state is SyncingInProgress) {
+        _syncController.repeat();
       }
 
-      final contents = state.contents;
-      contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+      if (state is DirectoryLoadSuccess) {
+        updateFolderContents(state.contents);
 
-      return _contentsList();
+        if (state.isSyncing) {  
+          _syncController.stop();  
+        }
+      }
+
+      if (state is DirectoryLoadFailure) {
+        if (state.isSyncing) {
+          _syncController.stop();  
+        }
+      }
+    }
+  );
+
+  loadContents(contents) {
+    if (contents.isEmpty) {
+      return _noContents();
     }
 
-    if (state is NavigationLoadFailure) {
-      return Text(
-        'Something went wrong!',
-        style: TextStyle(color: Colors.red),
-      );
+    return _contentsList();
+  }
+
+  Future<void> updateFolderContents(newContent) async {
+    if (newContent.isEmpty) {
+      if (_folderContents.isNotEmpty) {
+          setState(() {
+            _folderContents.clear();
+          }); 
+      }
+      return;
     }
 
-    return Center(child: Text('Ooops!'));
+    final orderedContent = newContent as List<BaseItem>;
+    orderedContent.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+    
+    if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
+        setState(() {
+          _folderContents = orderedContent;
+        });
+    }
   }
 
   _noContents() => RefreshIndicator(
-      onRefresh: () async => updateUI.call(),
+      onRefresh: refreshCurrent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -303,7 +376,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   _contentsList() =>
   RefreshIndicator(
-    onRefresh: () async => updateUI.call(),
+    onRefresh: refreshCurrent,
     child: ListView.separated(
       padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
@@ -318,17 +391,12 @@ class _RootOuiSyncState extends State<RootOuiSync>
           final fileSize = await _fileSize(item.path);
           _showFileDetails(item.name, item.path, fileSize);
         }
-        : () {
-          BlocProvider.of<NavigationBloc>(context)
-          .add(
-            NavigateTo(
-              type: Navigation.content,
-              origin: _currentFolder,
-              destination: item.path,
-              withProgress: true
-            )
+        : () => navigateToPath(
+            type: Navigation.content,
+            origin: _currentFolder,
+            destination: item.path,
+            withProgress: true
           );
-        };
 
         final listItem = ListItem (
           repository: widget.repository,
@@ -347,6 +415,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
     )
   );
+
+  Future<void> refreshCurrent() async =>
+    getContents(path: _currentFolder, withProgress: true);
 
   Future<int> _fileSize(String filePath) async {
     int fileSize = 0;
@@ -369,28 +440,12 @@ class _RootOuiSyncState extends State<RootOuiSync>
   .filePopupMenu(
     context,
     BlocProvider. of<DirectoryBloc>(context),
-    { actionDeleteFile: item }
+    { 
+      actionPreviewFile: item,
+      actionShareFile: item,
+      actionDeleteFile: item 
+    }
   );
-
-  Future<void> updateFolderContents(items) async {
-    if (items.isEmpty) {
-      if (_folderContents.isNotEmpty) {
-          setState(() {
-            _folderContents.clear();
-          }); 
-      }
-      return;
-    }
-
-    final contents = items as List<BaseItem>;
-    contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
-    
-    if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-        setState(() {
-          _folderContents = contents;
-        });
-    }
-  }
 
   Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
     isScrollControlled: true,
@@ -412,7 +467,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
+  Future<dynamic> _showFolderDetails(name, path) =>
+  showModalBottomSheet(
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -427,19 +483,19 @@ class _RootOuiSyncState extends State<RootOuiSync>
         name: name,
         path: path,
         renameAction: () {
-          widget.repository.move('/one', '/uno');
-          updateUI(withProgress: true);
+          // TODO: Check if available in the library and implement
         },
         deleteAction: () async {
           final result = await showDialog<bool>(
             context: context,
             barrierDismissible: false, // user must tap button!
             builder: (BuildContext context) {
+              final parent = extractParentFromPath(_currentFolder);
 
               return Dialogs.buildDeleteFolderAlertDialog(
                 context,
                 BlocProvider.of<DirectoryBloc>(context),
-                updateUI,
+                getContents(path: parent, withProgress: true),
                 extractParentFromPath(path),
                 path,
               );
@@ -454,31 +510,101 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
-    context,
-    BlocProvider.of<DirectoryBloc>(context),
-    updateUI,
-    _actionsController,
-    _currentFolder,
-    folderActions,
-    flagFolderActionsDialog,
-    backgroundColor,
-    foregroundColor
+
+  Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return RepositoryList(current: 'Default');
+    }
   );
 
-  void updateUI({bool withProgress = true}) {
-    final origin = extractParentFromPath(_currentFolder);
-    final destination = _currentFolder;
+  Future<dynamic> _showDirectoryActions(parent) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return DirectoryActions(
+        parent: parent,
+        folderAction: createFolderDialog,
+        fileAction: () async { await addFile(); },
+      );
+    }
+  );
 
-    BlocProvider.of<NavigationBloc>(context)
-    .add(
-      NavigateTo(
-        type: Navigation.content,
-        origin: origin,
-        destination: destination,
-        withProgress: withProgress
-      )
+  void createFolderDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Create Folder',
+          body: FolderCreation(
+            context: context,
+            bloc: BlocProvider.of<DirectoryBloc>(context),
+            updateUI: () {},
+            path: _currentFolder,
+            formKey: formKey,
+          ),
+        );
+      }
     );
   }
 
+  Future<void> addFile() async {
+    final result = await FilePicker
+    .platform
+    .pickFiles(
+      type: FileType.any,
+      withReadStream: true
+    );
+
+    if(result != null) {
+      final newFilePath = _currentFolder == '/'
+      ? '/${result.files.single.name}'
+      : '$_currentFolder/${result.files.single.name}';
+      
+      final fileByteStream = result.files.single.readStream!;
+      BlocProvider.of<DirectoryBloc>(context)
+      .add(
+        CreateFile(
+          parentPath: _currentFolder,
+          newFilePath: newFilePath,
+          fileByteStream: fileByteStream
+        )
+      );
+
+      Navigator.of(context).pop();
+      getContents(path: _currentFolder, withProgress: true);
+    }
+  }
+
+  void settingsAction() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return Settings(
+          selectedRepository: 'Default',
+          repository: widget.repository,
+        );
+      })
+    );
+  }
 }

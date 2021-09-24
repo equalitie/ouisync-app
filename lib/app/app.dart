@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'bloc/blocs.dart';
+import 'cubit/cubits.dart';
 import 'data/data.dart';
 import 'pages/pages.dart';
 import 'utils/utils.dart';
@@ -23,39 +24,32 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> {
   late final DirectoryRepository directoryRepository;
-  late final NavigationBloc navigationBloc;
 
   @override
   void initState() {
     super.initState();
 
     NativeChannels.init(widget.session);
-    initLateObjects();
-  }
-
-  void initLateObjects() {
     directoryRepository = DirectoryRepository(repository: widget.repository);
-    
-    navigationBloc = NavigationBloc(
-      directoryRepository: directoryRepository
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<NavigationBloc>(
-          create: (BuildContext context) => navigationBloc,
-        ),
         BlocProvider<DirectoryBloc>(
           create: (BuildContext context) => DirectoryBloc(
-            blocRepository: directoryRepository
+            repository: directoryRepository
           ),
         ),
-        BlocProvider(
-          create: (BuildContext context) => RouteBloc(bloc: navigationBloc)
+        BlocProvider<RouteBloc>(
+          create: (BuildContext context) => RouteBloc()
         ),
+        BlocProvider<SynchronizationCubit>(
+          create: (BuildContext context) => SynchronizationCubit(
+            repository: directoryRepository
+          )
+        )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

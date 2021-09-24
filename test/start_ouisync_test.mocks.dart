@@ -7,14 +7,14 @@ import 'dart:async' as _i5;
 import 'package:bloc/src/bloc.dart' as _i8;
 import 'package:bloc/src/transition.dart' as _i14;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:ouisync_app/app/bloc/directory/directorybloc.dart' as _i15;
-import 'package:ouisync_app/app/bloc/directory/directoryevent.dart' as _i16;
-import 'package:ouisync_app/app/bloc/directory/directorystate.dart' as _i7;
+import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart' as _i15;
+import 'package:ouisync_app/app/bloc/directory/directory_event.dart' as _i16;
+import 'package:ouisync_app/app/bloc/directory/directory_state.dart' as _i7;
 import 'package:ouisync_app/app/bloc/navigation/nav_bloc.dart' as _i12;
 import 'package:ouisync_app/app/bloc/navigation/nav_event.dart' as _i13;
 import 'package:ouisync_app/app/bloc/navigation/nav_state.dart' as _i4;
 import 'package:ouisync_app/app/bloc/route/route_bloc.dart' as _i9;
-import 'package:ouisync_app/app/data/repositories/directoryrepository.dart'
+import 'package:ouisync_app/app/data/repositories/directory_repository.dart'
     as _i6;
 import 'package:ouisync_app/app/models/item/baseitem.dart' as _i11;
 import 'package:ouisync_app/app/utils/basic_result.dart' as _i3;
@@ -244,7 +244,7 @@ class MockDirectoryBloc extends _i1.Mock implements _i15.DirectoryBloc {
   }
 
   @override
-  _i6.DirectoryRepository get blocRepository =>
+  _i6.DirectoryRepository get repository =>
       (super.noSuchMethod(Invocation.getter(#blocRepository),
           returnValue: _FakeDirectoryRepository()) as _i6.DirectoryRepository);
   @override

@@ -183,25 +183,22 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _directoriesBlocBuilder() {
     return Center(
-      child: BlocBuilder<NavigationBloc, NavigationState>(
+      child: BlocBuilder<DirectoryBloc, DirectoryState>(
         builder: (context, state) {
-          if (state is NavigationInitial) {
+          if (state is DirectoryInitial) {
             return Center(child: Text('Loading contents...'));
           }
 
-          if (state is NavigationLoadInProgress) {
+          if (state is DirectoryLoadInProgress) {
             return Center(child: CircularProgressIndicator());
           }
 
+          if (state is DirectoryLoadSuccess) {
+            return loadContents(state.contents as List<BaseItem>);
+          }
+
           if (state is NavigationLoadSuccess) {
-            if (state.contents.isEmpty) {
-              return _noContents();
-            }
-
-            final contents = state.contents;
-            contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
-
-            return _contentsList(contents);
+            return loadContents(state.contents);
           }
 
           if (state is NavigationLoadFailure) {
@@ -215,6 +212,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         }
       )
     );
+  }
+
+  Widget loadContents(List<BaseItem> contents) {
+    if (contents.isEmpty) {
+      return _noContents();
+    }
+
+    final items = contents;
+    items.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+
+    return _contentsList(items);
   }
 
   Widget _actionButtons() {
@@ -247,6 +255,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
     final dialogTitle = 'Create Folder';
     final actionBody = FolderCreation(
+      context: context,
       bloc: BlocProvider.of<DirectoryBloc>(context),
       updateUI: () => updateUI(current),
       path: current,
@@ -411,8 +420,15 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _navigateTo({type, origin, destination}) {
     _currentFolderData.path == slash
-    ? loadRoot(BlocProvider.of<NavigationBloc>(context))
-    : BlocProvider.of<NavigationBloc>(context)
+    ? BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      GetContent(
+        path: origin,
+        recursive: false,
+        withProgress: true
+      )
+    )
+    : BlocProvider.of<DirectoryBloc>(context)
     .add(
       NavigateTo(
         type: type,

@@ -13,11 +13,7 @@ part 'route_event.dart';
 part 'route_state.dart';
 
 class RouteBloc extends Bloc<RouteEvent, RouteState> {
-  RouteBloc({
-    required this.bloc
-  }) : super(RouteInitial());
-
-  final Bloc bloc;
+  RouteBloc() : super(RouteInitial());
 
   @override
   Stream<RouteState> mapEventToState(

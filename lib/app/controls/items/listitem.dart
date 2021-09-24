@@ -32,7 +32,7 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final container = Material(
+    return Material(
       child: InkWell(
         onTap:() => mainAction.call(),
         splashColor: Colors.blue,
@@ -48,32 +48,34 @@ class ListItem extends StatelessWidget {
           ),
         )
       ),
-      color: _getColor(),
+      color: Colors.white,
     );
-
-    return itemData.itemType == ItemType.folder
-        ? Card(child: container)
-        : container;
-  }
-
-  Color _getColor() {
-    return itemData.itemType == ItemType.file
-      ? Colors.transparent
-      : Color.fromARGB(35, 220, 220, 220);
   }
 
   Widget _getIconByType() {
     return itemData.itemType == ItemType.folder
-      ? Container()
-      : Icon(itemData.icon);
+      ? Icon(
+        itemData.icon,
+        size: 40.0
+      )
+      : Icon(
+        itemData.icon,
+        size: 38.0,
+      );
   }
 
   Expanded _getExpandedDescriptionByType() {
     return Expanded(
       flex: 1,
       child: itemData.itemType == ItemType.folder
-        ? FolderDescription(folderData: itemData)
-        : FileDescription(repository: repository, fileData: itemData)
+        ? Padding(
+          padding: EdgeInsets.only(left: 4.0),
+          child: FolderDescription(folderData: itemData)
+        )
+        : Padding(
+          padding: EdgeInsets.only(left: 10.0),
+          child: FileDescription(repository: repository, fileData: itemData)
+        )
     );
   }
 
@@ -86,9 +88,7 @@ class ListItem extends StatelessWidget {
 
     return itemData.itemType == ItemType.folder
         ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: 30.0,), onPressed: () async => await folderDotsAction!.call())
-        : Padding(
-          padding: EdgeInsets.only(right: 5.0),
-          child: filePopupMenu!,);
+        : filePopupMenu!;
   }
 
 }

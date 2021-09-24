@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../bloc/blocs.dart';
 import 'utils.dart';
 
 showSnackBar(BuildContext context, { required Widget content, SnackBarAction? action }) =>
@@ -55,16 +54,6 @@ String extractFileTypeFromName(String fileName) {
 
   return fileName.substring(fileName.lastIndexOf('.') + 1);
 }
-
-loadRoot(bloc) => 
-bloc.add(
-  NavigateTo(
-    type: Navigation.content,
-    origin: slash,
-    destination: slash,
-    withProgress: true
-  )
-);
 
 getPathMap(String path) {
   final pathMap = new Map();

@@ -172,7 +172,6 @@ class DirectoryRepository {
         );
 
         returnedContent.add(returned);
-        
       } 
     } catch (e) {
       print('Error traversing directory $path: $e');
@@ -205,15 +204,15 @@ class DirectoryRepository {
       while (iterator.moveNext()) {
         final newNode = await _castToBaseItem(
           path,
-          iterator.current.name,
+          iterator.current.current,
           iterator.current.type,
           0.0
         );
 
         if (newNode.itemType == ItemType.folder) {
           final itemPath = path == '/'
-          ? '/${iterator.current.name}'
-          : '$path/${iterator.current.name}';
+          ? '/${iterator.current.current}'
+          : '$path/${iterator.current.current}';
 
           (newNode as FolderItem).items = await getContentsRecursive(itemPath);  
         }

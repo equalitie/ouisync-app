@@ -1,1 +1,1 @@
-export 'repositories/directoryrepository.dart';
+export 'repositories/directory_repository.dart';
