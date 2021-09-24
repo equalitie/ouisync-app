@@ -255,6 +255,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
     final dialogTitle = 'Create Folder';
     final actionBody = FolderCreation(
+      context: context,
       bloc: BlocProvider.of<DirectoryBloc>(context),
       updateUI: () => updateUI(current),
       path: current,

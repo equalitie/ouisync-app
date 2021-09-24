@@ -177,6 +177,7 @@ abstract class Dialogs {
 
         dialogTitle = 'Create Folder';
         actionBody = FolderCreation(
+          context: context,
           bloc: directoryBloc,
           updateUI: updateUI,
           path: path,
@@ -312,6 +313,7 @@ abstract class Dialogs {
 
           dialogTitle = 'Create Folder';
           actionBody = FolderCreation(
+            context: context,
             bloc: directoryBloc,
             updateUI: updateUI,
             path: parentPath,

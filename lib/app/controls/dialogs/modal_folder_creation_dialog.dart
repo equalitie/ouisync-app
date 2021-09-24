@@ -8,12 +8,14 @@ import '../../utils/utils.dart';
 class FolderCreation extends StatelessWidget {
   const FolderCreation({
     Key? key,
+    required this.context,
     required this.bloc,
     required this.updateUI,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
+  final BuildContext context;
   final Bloc bloc;
   final Function updateUI;
   final String path;
@@ -77,9 +79,17 @@ class FolderCreation extends StatelessWidget {
       )
     );
 
-    updateUI.call();
+    Navigator.of(this.context).pop();
 
-    Navigator.of(context).pop(true);
+    this.bloc
+    .add(
+      NavigateTo(
+        type: Navigation.content,
+        origin: this.path,
+        destination: newFolderPath,
+        withProgress: true
+      )
+    );
   }
 
   List<Widget> _actions(context) => [
