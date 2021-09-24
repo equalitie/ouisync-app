@@ -51,9 +51,14 @@ class _RootOuiSyncState extends State<RootOuiSync>
     handleIncomingShareIntent();
     initAnimationControllers();
 
-    subscribeToRepositoryNotifications(widget.repository);
+    navigateToPath(
+      type: Navigation.content,
+      origin: slash,
+      destination: slash,
+      withProgress: true
+    ); 
 
-    loadRoot(BlocProvider.of<NavigationBloc>(context));    
+    getContents(path: slash, withProgress: true);
   }
 
   @override
@@ -115,21 +120,38 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   void subscribeToRepositoryNotifications(Repository repository) async {
-    final _debouncer = Debouncer(milliseconds: debouncerMiliseconds);
-    _repositorySubscription = repository.subscribe(() => _runSync(_debouncer));
-  }
+    _repositorySubscription = repository.subscribe(() { 
+      _syncController.repeat();
 
-  void _runSync(Debouncer _debouncer) {
-    print('Starting synchronization [${DateTime.now()}]');
-    _syncController.repeat();
-    
-    _debouncer.run(() {          
-      print('Syncing [${DateTime.now()}]');
-    
-      updateUI(withProgress: false);
-      _syncController.stop();
+      getContents(
+        path: _currentFolder,
+        isSyncing: true
+      );
     });
   }
+
+  getContents({path, recursive = false, withProgress = false, isSyncing = false}) { 
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      GetContent(
+        path: path,
+        recursive: recursive,
+        withProgress: withProgress,
+        isSyncing: isSyncing
+      )
+    );
+  }
+
+  navigateToPath({type, origin, destination, withProgress = false}) =>
+  BlocProvider.of<DirectoryBloc>(context)
+  .add(
+    NavigateTo(
+      type: type,
+      origin: origin,
+      destination: destination,
+      withProgress: withProgress
+    )
+  ); 
 
   @override
   Widget build(BuildContext context) {
