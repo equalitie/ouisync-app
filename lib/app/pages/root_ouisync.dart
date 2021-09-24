@@ -291,34 +291,55 @@ class _RootOuiSyncState extends State<RootOuiSync>
     builder: (context, state) => _body(context, state)
   );
 
-  Widget _body(context, state) {
-    if (state is NavigationInitial) {
-      return Center(child: Text('Loading contents...'));
-    }
-
-    if (state is NavigationLoadInProgress) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (state is NavigationLoadSuccess) {
-      if (state.contents.isEmpty) {
-        return _noContents();
+      if (state is SyncingInProgress) {
+        _syncController.repeat();
       }
+
+      if (state is DirectoryLoadSuccess) {
+        updateFolderContents(state.contents);
+
+        if (state.isSyncing) {  
+          _syncController.stop();  
+        }
+      }
+
+      if (state is DirectoryLoadFailure) {
+        if (state.isSyncing) {
+          _syncController.stop();  
+        }
+      }
+    }
+  );
+
+  loadContents(contents) {
+    if (contents.isEmpty) {
+      return _noContents();
+    }
 
       final contents = state.contents;
       contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-      return _contentsList();
+    return _contentsList();
+  }
+
+  Future<void> updateFolderContents(newContent) async {
+    if (newContent.isEmpty) {
+      if (_folderContents.isNotEmpty) {
+          setState(() {
+            _folderContents.clear();
+          }); 
+      }
+      return;
     }
 
-    if (state is NavigationLoadFailure) {
-      return Text(
-        'Something went wrong!',
-        style: TextStyle(color: Colors.red),
-      );
+    final orderedContent = newContent as List<BaseItem>;
+    orderedContent.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+    
+    if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
+        setState(() {
+          _folderContents = orderedContent;
+        });
     }
-
-    return Center(child: Text('Ooops!'));
   }
 
   _noContents() => RefreshIndicator(
