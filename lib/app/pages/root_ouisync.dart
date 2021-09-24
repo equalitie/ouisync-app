@@ -422,7 +422,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
   .filePopupMenu(
     context,
     BlocProvider. of<DirectoryBloc>(context),
-    { actionDeleteFile: item }
+    { 
+      actionPreviewFile: item,
+      actionShareFile: item,
+      actionDeleteFile: item 
+    }
   );
 
   Future<void> updateFolderContents(items) async {

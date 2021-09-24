@@ -56,6 +56,9 @@ const String actionNewFolder = 'Create folder';
 const String actionNewFile = 'Add file';
 
 const String actionDeleteFolder = 'Delete folder';
+
+const String actionPreviewFile = 'Preview file';
+const String actionShareFile = 'Share file';
 const String actionDeleteFile = 'Delete file';
 
 const String actionPreview = 'preview';
