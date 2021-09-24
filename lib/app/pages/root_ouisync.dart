@@ -534,6 +534,23 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
+
+  Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return RepositoryList(current: 'Default');
+    }
+  );
+
   Future<dynamic> _showDirectoryActions(parent) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
