@@ -1,3 +1,8 @@
+export 'bars/app_branding.dart';
+export 'bars/ouisync_bar.dart';
+export 'bars/repository_picker.dart';
+export 'bars/route_bar.dart';
+
 export 'dialogs/actionsdialog.dart';
 
 export 'dialogs/modal_actions_bottom_sheet.dart';
