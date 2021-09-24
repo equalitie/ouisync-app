@@ -337,7 +337,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   }
 
   _noContents() => RefreshIndicator(
-      onRefresh: () async => updateUI.call(),
+      onRefresh: refreshCurrent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -376,7 +376,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
 
   _contentsList() =>
   RefreshIndicator(
-    onRefresh: () async => updateUI.call(),
+    onRefresh: refreshCurrent,
     child: ListView.separated(
       padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
@@ -415,6 +415,9 @@ class _RootOuiSyncState extends State<RootOuiSync>
       }
     )
   );
+
+  Future<void> refreshCurrent() async =>
+    getContents(path: _currentFolder, withProgress: true);
 
   Future<int> _fileSize(String filePath) async {
     int fileSize = 0;
