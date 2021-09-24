@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../controls/controls.dart';
 import '../models.dart';
 
 class FileItem extends Equatable implements BaseItem {
@@ -13,7 +12,7 @@ class FileItem extends Equatable implements BaseItem {
     this.size = 0.0,
     this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.file,
-    this.icon = Icons.insert_drive_file
+    this.icon = Icons.insert_drive_file_outlined
   });
 
   @override
