@@ -287,9 +287,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
         }
       }
-    },
-    builder: (context, state) => _body(context, state)
-  );
 
       if (state is SyncingInProgress) {
         _syncController.repeat();
@@ -315,9 +312,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
     if (contents.isEmpty) {
       return _noContents();
     }
-
-      final contents = state.contents;
-      contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
     return _contentsList();
   }
@@ -449,26 +443,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
       actionDeleteFile: item 
     }
   );
-
-  Future<void> updateFolderContents(items) async {
-    if (items.isEmpty) {
-      if (_folderContents.isNotEmpty) {
-          setState(() {
-            _folderContents.clear();
-          }); 
-      }
-      return;
-    }
-
-    final contents = items as List<BaseItem>;
-    contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
-    
-    if (!DeepCollectionEquality.unordered().equals(contents, _folderContents)) {
-        setState(() {
-          _folderContents = contents;
-        });
-    }
-  }
 
   Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
     isScrollControlled: true,
