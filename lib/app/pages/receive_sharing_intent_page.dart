@@ -214,6 +214,17 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
+  Widget loadContents(List<BaseItem> contents) {
+    if (contents.isEmpty) {
+      return _noContents();
+    }
+
+    final items = contents;
+    items.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+
+    return _contentsList(items);
+  }
+
   Widget _actionButtons() {
     return Container(
       child: Row(
