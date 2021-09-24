@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+
+import '../../utils/utils.dart';
 
 class FolderDetail extends StatelessWidget {
   const FolderDetail({

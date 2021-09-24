@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+
+import '../../bloc/blocs.dart';
+import '../../utils/utils.dart';
 
 class RouteBar extends StatelessWidget {
   const RouteBar({

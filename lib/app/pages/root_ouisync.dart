@@ -10,10 +10,6 @@ import 'package:styled_text/icon_style.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
-import '../controls/bars/app_branding.dart';
-import '../controls/bars/ouisync_bar.dart';
-import '../controls/bars/repository_picker.dart';
-import '../controls/bars/route_bar.dart';
 import '../controls/controls.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';

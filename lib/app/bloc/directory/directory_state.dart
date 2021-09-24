@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_app/app/models/models.dart';
+
+import '../../models/models.dart';
 
 abstract class DirectoryState extends Equatable {
   const DirectoryState();
