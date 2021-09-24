@@ -101,17 +101,21 @@ Widget buildIdLabel(text, {
 ); 
 
 Widget buildConstrainedText(text, {
-  size = 18.0
+  size = 18.0,
+  textAlign = TextAlign.start,
+  softWrap = true,
+  overflow = TextOverflow.clip,
+  fontWeight = FontWeight.w600
 })  => Expanded(
   flex: 1,
   child: Text(
     text,
-    textAlign: TextAlign.start,
-    softWrap: true,
-    overflow: TextOverflow.clip,
+    textAlign: textAlign,
+    softWrap: softWrap,
+    overflow: overflow,
     style: TextStyle(
       fontSize: size,
-      fontWeight: FontWeight.w600
+      fontWeight: fontWeight
     ),
   ),
 );
