@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -490,7 +491,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
+  Future<dynamic> _showFolderDetails(name, path) =>
+  showModalBottomSheet(
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -505,19 +507,19 @@ class _RootOuiSyncState extends State<RootOuiSync>
         name: name,
         path: path,
         renameAction: () {
-          widget.repository.move('/one', '/uno');
-          updateUI(withProgress: true);
+          // TODO: Check if available in the library and implement
         },
         deleteAction: () async {
           final result = await showDialog<bool>(
             context: context,
             barrierDismissible: false, // user must tap button!
             builder: (BuildContext context) {
+              final parent = extractParentFromPath(_currentFolder);
 
               return Dialogs.buildDeleteFolderAlertDialog(
                 context,
                 BlocProvider.of<DirectoryBloc>(context),
-                updateUI,
+                getContents(path: parent, withProgress: true),
                 extractParentFromPath(path),
                 path,
               );
@@ -532,31 +534,73 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  Widget _getFloatingButton() => Dialogs.floatingActionsButtonMenu(
-    context,
-    BlocProvider.of<DirectoryBloc>(context),
-    updateUI,
-    _actionsController,
-    _currentFolder,
-    folderActions,
-    flagFolderActionsDialog,
-    backgroundColor,
-    foregroundColor
+  Future<dynamic> _showDirectoryActions(parent) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return DirectoryActions(
+        parent: parent,
+        folderAction: createFolderDialog,
+        fileAction: () async { await addFile(); },
+      );
+    }
   );
 
-  void updateUI({bool withProgress = true}) {
-    final origin = extractParentFromPath(_currentFolder);
-    final destination = _currentFolder;
+  void createFolderDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
 
-    BlocProvider.of<NavigationBloc>(context)
-    .add(
-      NavigateTo(
-        type: Navigation.content,
-        origin: origin,
-        destination: destination,
-        withProgress: withProgress
-      )
+        return ActionsDialog(
+          title: 'Create Folder',
+          body: FolderCreation(
+            context: context,
+            bloc: BlocProvider.of<DirectoryBloc>(context),
+            updateUI: () {},
+            path: _currentFolder,
+            formKey: formKey,
+          ),
+        );
+      }
     );
+  }
+
+  Future<void> addFile() async {
+    final result = await FilePicker
+    .platform
+    .pickFiles(
+      type: FileType.any,
+      withReadStream: true
+    );
+
+    if(result != null) {
+      final newFilePath = _currentFolder == '/'
+      ? '/${result.files.single.name}'
+      : '$_currentFolder/${result.files.single.name}';
+      
+      final fileByteStream = result.files.single.readStream!;
+      BlocProvider.of<DirectoryBloc>(context)
+      .add(
+        CreateFile(
+          parentPath: _currentFolder,
+          newFilePath: newFilePath,
+          fileByteStream: fileByteStream
+        )
+      );
+
+      Navigator.of(context).pop();
+      getContents(path: _currentFolder, withProgress: true);
+    }
   }
 
 }
