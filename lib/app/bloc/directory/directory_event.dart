@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'directory_state.dart';
+
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
 }
@@ -21,25 +23,70 @@ class CreateFolder extends DirectoryEvent {
   ];
 }
 
-class RequestContent extends DirectoryEvent {
-  const RequestContent({
+class GetContent extends DirectoryEvent {
+  const GetContent({
     required this.path,
     required this.recursive,
-    required this.withProgressIndicator
+    required this.withProgress,
+    this.isSyncing = false
   });
 
   final String path;
   final bool recursive;
-  final bool withProgressIndicator;
+  final bool withProgress;
+  final bool isSyncing;
 
   @override
   List<Object> get props => [
     path,
     recursive,
-    withProgressIndicator
+    withProgress,
+    isSyncing
   ];
 
 }
+
+class DeleteFolder extends DirectoryEvent {
+  const DeleteFolder({
+    required this.parentPath,
+    required this.path,
+  }) :
+  assert (path != '');
+
+  final String parentPath;
+  final String path;
+
+  @override
+  List<Object> get props => [
+    parentPath,
+    path,
+  ];
+
+}
+
+class NavigateTo extends DirectoryEvent {
+  const NavigateTo({
+    required this.type,
+    required this.origin,
+    required this.destination,
+    required this.withProgress
+  }) :
+  assert (origin != ''),
+  assert (destination != '');
+
+  final Navigation type;
+  final String origin;
+  final String destination;
+  final bool withProgress;
+
+  @override
+  List<Object?> get props => [
+    type,
+    origin,
+    destination,
+    withProgress
+  ];
+} 
 
 class CreateFile extends DirectoryEvent {
   const CreateFile({
@@ -98,24 +145,6 @@ class DeleteFile extends DirectoryEvent {
   List<Object> get props => [
     parentPath,
     filePath,
-  ];
-
-}
-
-class DeleteFolder extends DirectoryEvent {
-  const DeleteFolder({
-    required this.parentPath,
-    required this.path,
-  }) :
-  assert (path != '');
-
-  final String parentPath;
-  final String path;
-
-  @override
-  List<Object> get props => [
-    parentPath,
-    path,
   ];
 
 }

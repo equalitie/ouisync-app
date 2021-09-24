@@ -183,25 +183,22 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _directoriesBlocBuilder() {
     return Center(
-      child: BlocBuilder<NavigationBloc, NavigationState>(
+      child: BlocBuilder<DirectoryBloc, DirectoryState>(
         builder: (context, state) {
-          if (state is NavigationInitial) {
+          if (state is DirectoryInitial) {
             return Center(child: Text('Loading contents...'));
           }
 
-          if (state is NavigationLoadInProgress) {
+          if (state is DirectoryLoadInProgress) {
             return Center(child: CircularProgressIndicator());
           }
 
+          if (state is DirectoryLoadSuccess) {
+            return loadContents(state.contents as List<BaseItem>);
+          }
+
           if (state is NavigationLoadSuccess) {
-            if (state.contents.isEmpty) {
-              return _noContents();
-            }
-
-            final contents = state.contents;
-            contents.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
-
-            return _contentsList(contents);
+            return loadContents(state.contents);
           }
 
           if (state is NavigationLoadFailure) {
@@ -411,8 +408,15 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
 
   _navigateTo({type, origin, destination}) {
     _currentFolderData.path == slash
-    ? loadRoot(BlocProvider.of<NavigationBloc>(context))
-    : BlocProvider.of<NavigationBloc>(context)
+    ? BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      GetContent(
+        path: origin,
+        recursive: false,
+        withProgress: true
+      )
+    )
+    : BlocProvider.of<DirectoryBloc>(context)
     .add(
       NavigateTo(
         type: type,

@@ -195,8 +195,44 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-  _getBody() => BlocConsumer(
-    bloc: BlocProvider.of<NavigationBloc>(context),
+  _getBody() => BlocConsumer<DirectoryBloc, DirectoryState>(
+    builder: (context, state) {
+      if (state is DirectoryInitial) {
+        return Center(child: Text('Loading contents...'));
+      }
+
+      if (state is SyncingInProgress) {
+        return loadContents(_folderContents);
+      }
+
+      if (state is DirectoryLoadInProgress) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (state is DirectoryLoadSuccess) {
+        return loadContents(state.contents);
+      }
+      
+      if (state is NavigationLoadSuccess) {
+        return loadContents(state.contents);
+      }
+
+      if (state is DirectoryLoadFailure) {
+        return Text(
+          'Something went wrong!',
+          style: TextStyle(color: Colors.red),
+        );
+      }
+
+      if (state is NavigationLoadFailure) {
+        return Text(
+          'Something went wrong in navigation',
+          style: TextStyle(color: Colors.red),
+        );
+      }
+
+      return Center(child: Text('Ooops!'));
+    },
     listener: (context, state) {
       if (state is NavigationLoadSuccess) {
         if (state.type == Navigation.content) {
@@ -215,7 +251,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
                 final from = state.destination;
                 final backTo = extractParentFromPath(from);
 
-                BlocProvider.of<NavigationBloc>(context)
+                BlocProvider.of<DirectoryBloc>(context)
                 .add(
                   NavigateTo(
                     type: Navigation.content,
@@ -318,17 +354,12 @@ class _RootOuiSyncState extends State<RootOuiSync>
           final fileSize = await _fileSize(item.path);
           _showFileDetails(item.name, item.path, fileSize);
         }
-        : () {
-          BlocProvider.of<NavigationBloc>(context)
-          .add(
-            NavigateTo(
-              type: Navigation.content,
-              origin: _currentFolder,
-              destination: item.path,
-              withProgress: true
-            )
+        : () => navigateToPath(
+            type: Navigation.content,
+            origin: _currentFolder,
+            destination: item.path,
+            withProgress: true
           );
-        };
 
         final listItem = ListItem (
           repository: widget.repository,
