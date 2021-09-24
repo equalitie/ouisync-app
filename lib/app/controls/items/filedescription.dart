@@ -33,7 +33,7 @@ class _FileDescription extends State<FileDescription> {
             ),
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          // size(widget.fileData.path)
+          size(widget.fileData.path)
         ],
       ),
     );
