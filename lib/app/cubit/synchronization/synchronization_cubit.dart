@@ -1,9 +1,7 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 
 import '../../data/data.dart';
-
-part 'synchronization_state.dart';
+import '../synchronization_state.dart';
 
 class SynchronizationCubit extends Cubit<SynchronizationState> {
   SynchronizationCubit({

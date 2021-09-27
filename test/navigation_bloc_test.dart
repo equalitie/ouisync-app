@@ -2,8 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/models/item/baseitem.dart';
-import 'package:ouisync_app/app/models/item/folderitem.dart';
+import 'package:ouisync_app/app/models/item/base_item.dart';
+import 'package:ouisync_app/app/models/item/folder_item.dart';
 
 
 class MockNavigationBloc 

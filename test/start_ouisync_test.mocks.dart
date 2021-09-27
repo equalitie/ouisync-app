@@ -16,7 +16,7 @@ import 'package:ouisync_app/app/bloc/navigation/nav_state.dart' as _i4;
 import 'package:ouisync_app/app/bloc/route/route_bloc.dart' as _i9;
 import 'package:ouisync_app/app/data/repositories/directory_repository.dart'
     as _i6;
-import 'package:ouisync_app/app/models/item/baseitem.dart' as _i11;
+import 'package:ouisync_app/app/models/item/base_item.dart' as _i11;
 import 'package:ouisync_app/app/utils/basic_result.dart' as _i3;
 import 'package:ouisync_plugin/bindings.dart' as _i2;
 import 'package:ouisync_plugin/ouisync_plugin.dart' as _i10;

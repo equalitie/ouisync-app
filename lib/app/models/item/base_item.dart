@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'itemtype.dart';
+import 'item_type.dart';
 
 abstract class BaseItem extends Equatable {
   BaseItem(
