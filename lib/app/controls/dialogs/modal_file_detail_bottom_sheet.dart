@@ -98,19 +98,4 @@ class FileDetail extends StatelessWidget {
       ),
     );
   }
-
-  List<Widget> _actions(context) => [
-    buildRoundedButton(
-      context,
-      const Icon(Icons.preview),
-      'Preview',
-      () async => await NativeChannels.previewOuiSyncFile(path, size)
-    ),
-    buildRoundedButton(
-      context,
-      const Icon(Icons.share),
-      'Share',
-      () async => await NativeChannels.shareOuiSyncFile(path, size)
-    )
-  ];
 }
