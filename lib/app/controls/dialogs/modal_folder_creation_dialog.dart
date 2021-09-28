@@ -9,15 +9,11 @@ class FolderCreation extends StatelessWidget {
   const FolderCreation({
     Key? key,
     required this.context,
-    required this.bloc,
-    required this.updateUI,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
   final BuildContext context;
-  final Bloc bloc;
-  final Function updateUI;
   final String path;
   final GlobalKey<FormState> formKey;
 
@@ -57,7 +53,7 @@ class FolderCreation extends StatelessWidget {
             context,
             'Create a new folder: ',
             'Folder name',
-            (value) => _onSaved(context, value, updateUI),
+            (value) => _onSaved(context, value),
             'Please enter a valid name (unique, no spaces, ...)'),
           buildInfoLabel('Location: ', this.path),
           buildActionsSection(context, _actions(context)),
@@ -66,12 +62,12 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(context, newFolderName, updateUI) {
+  void _onSaved(context, newFolderName) {
     final newFolderPath = this.path == slash
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 
-    this.bloc
+    BlocProvider.of<DirectoryBloc>(context)
     .add(
       CreateFolder(
         parentPath: this.path,

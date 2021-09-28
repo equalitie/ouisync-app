@@ -554,8 +554,6 @@ class _RootOuiSyncState extends State<RootOuiSync>
           title: 'Create Folder',
           body: FolderCreation(
             context: context,
-            bloc: BlocProvider.of<DirectoryBloc>(context),
-            updateUI: () {},
             path: _currentFolder,
             formKey: formKey,
           ),
