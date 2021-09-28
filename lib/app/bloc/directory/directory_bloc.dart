@@ -17,22 +17,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     if (event is CreateFolder) {
       yield DirectoryLoadInProgress();
 
-      try{
-        final createFileResult = await this.repository.createFolder(event.newFolderPath);
-        if (!createFileResult.result) 
-        {
-          print('The new directory (${event.newFolderPath}) could not be created.');
-          yield DirectoryLoadFailure();
-
-          return;
-        }
-
-        yield await getFolderContents(event.parentPath);
-
-      } catch (e) {
-        print('Exception creating a new directory (${event.newFolderPath}):\n${e.toString()}');
-        yield DirectoryLoadFailure();
-      }
+      yield await createFolder(event.parentPath, event.newFolderPath);
     }
 
     if (event is GetContent) {
@@ -44,34 +29,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         yield SyncingInProgress();
       }
       
-      try {
-        yield await getFolderContents(event.path, isSyncing: event.isSyncing);
-
-      } catch (e) {
-        print('Exception getting the directory\'s ${event.path} contents:\n${e.toString()}');
-        yield DirectoryLoadFailure(isSyncing: event.isSyncing);
-      }
+      yield await getFolderContents(event.path, isSyncing: event.isSyncing);
     }
 
     if (event is DeleteFolder) {
       yield DirectoryLoadInProgress();
 
-      try{
-        final deleteFolderResult = await this.repository.deleteFolder(event.path);
-        if (deleteFolderResult.errorMessage.isNotEmpty) 
-        {
-          print('The folder (${event.path}) could not be deleted.');
-          yield DirectoryLoadFailure();
-
-          return;
-        }
-
-        yield await getFolderContents(event.parentPath);
-
-      } catch (e) {
-        print('Exception deleting the folder ${event.path}:\n${e.toString()}');
-        yield DirectoryLoadFailure();
-      }
+      yield await deleteFolder(event.path, event.parentPath);
     }
 
     if (event is NavigateTo) {
@@ -79,102 +43,162 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         yield DirectoryLoadInProgress(); 
       }
 
-      try {
-        final folderContentsResult = 
-          await this.repository.getFolderContents(event.destination);
-
-        if (folderContentsResult.errorMessage.isNotEmpty) {
-          print('Navigation to ${event.destination} failed:\n${folderContentsResult.errorMessage}');
-          yield NavigationLoadFailure();
-        }
-
-        yield NavigationLoadSuccess(
-          type: event.type,
-          origin: event.origin,
-          destination: event.destination,
-          contents: folderContentsResult.result
-        );
-      } catch (e) {
-        print('Exception navigating to ${event.destination}:\n${e.toString()}');
-        yield NavigationLoadFailure();
-      }
+      yield await navigateTo(event.type, event.origin, event.destination);
     }
 
     if (event is CreateFile) {
       yield DirectoryLoadInProgress();
 
-      try {
-        final createFileResult = await this.repository.createFile(event.newFilePath);
-        if (createFileResult.errorMessage.isNotEmpty) {
-          if (createFileResult.errorMessage != 'File exists') {
-            print('File ${event.newFilePath} creation failed:\n${createFileResult.errorMessage}');
-            yield DirectoryLoadFailure();
-
-            return;  
-          }
-          // TODO: Make a validation using the library function instead of guessing
-          print('The file ${event.newFilePath} already exist.');    
-        }
-
-        final writeFileResult = await this.repository.writeFile(event.newFilePath, event.fileByteStream);
-        if (writeFileResult.errorMessage.isNotEmpty) {
-          print('Writing to the file ${event.newFilePath} failed:\n${writeFileResult.errorMessage}');
-          yield DirectoryLoadFailure();
-
-          return;
-        }
-
-        yield await getFolderContents(event.parentPath);
-        
-      } catch (e) {
-        print('Exception creating file ${event.newFilePath}:\n${e.toString()}');
-        yield DirectoryLoadFailure();
-      }
+      yield await createFile(event.newFilePath, event.fileByteStream, event.parentPath);
     }
 
     if (event is ReadFile) {
       yield DirectoryLoadInProgress();
       
-      final readFileResult = await repository.readFile(event.filePath, action: event.action);
-      if (readFileResult.errorMessage.isNotEmpty) {
-        print('Reading file ${event.filePath} failed:\n${readFileResult.errorMessage}');
-        yield DirectoryLoadFailure();
-
-        return;
-      }
-
-      yield DirectoryLoadSuccess(contents: readFileResult.result, action: event.action);
+      yield await readFile(event.filePath, event.action);
     }
 
     if (event is DeleteFile) {
       yield DirectoryLoadInProgress();
 
-      try{
-        final deleteFileResult = await this.repository.deleteFile(event.filePath);
-        if (deleteFileResult.errorMessage.isNotEmpty) 
-        {
-          print('The file (${event.filePath}) could not be deleted.');
-          yield DirectoryLoadFailure();
-
-          return;
-        }
-
-        yield await getFolderContents(event.parentPath);
-
-      } catch (e) {
-        print('Exception deleting the file ${event.filePath}:\n${e.toString()}');
-        yield DirectoryLoadFailure();
-      }
+      yield await deleteFile(event.filePath, event.parentPath);
     }
   }
 
+  Future<DirectoryState> createFolder(String origin, String newFolderPath) async {
+    try{
+      final createFileResult = await this.repository.createFolder(newFolderPath);
+      if (!createFileResult.result) 
+      {
+        print('The new directory ($newFolderPath) could not be created.');
+        return DirectoryLoadFailure();
+      }
+    } catch (e) {
+      print('Exception creating a new directory ($newFolderPath):\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+    
+    return await navigateTo(Navigation.content, origin, newFolderPath);
+  }
+
   Future<DirectoryState> getFolderContents(String path, {bool isSyncing = false}) async {
-    final getContentsResult = await this.repository.getFolderContents(path);
-    if (getContentsResult.errorMessage.isNotEmpty) {
-      print('Get contents in folder $path failed:\n${getContentsResult.errorMessage}');
-      return DirectoryLoadFailure(isSyncing: isSyncing);
+    late final getContentsResult;
+
+    try {
+      getContentsResult = await this.repository.getFolderContents(path);
+      if (getContentsResult.errorMessage.isNotEmpty) {
+        print('Get contents in folder $path failed:\n${getContentsResult.errorMessage}');
+        return DirectoryLoadFailure(isSyncing: isSyncing);
+      }
+    } catch (e) {
+      print('Exception getting contents for $path:\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+    
+    return DirectoryLoadSuccess(contents: getContentsResult.result, isSyncing: isSyncing);
+  }
+
+  Future<DirectoryState> deleteFolder(String path, String parentPath) async {
+    late final deleteFolderResult;
+
+    try {
+      deleteFolderResult = await this.repository.deleteFolder(path);
+      if (deleteFolderResult.errorMessage.isNotEmpty) 
+      {
+        print('The folder ($path) could not be deleted.');
+        return DirectoryLoadFailure();
+      }
+    } catch (e) {
+      print('Exception deleting the folder $path:\n${e.toString()}');
+      return DirectoryLoadFailure();
     }
 
-    return DirectoryLoadSuccess(contents: getContentsResult.result, isSyncing: isSyncing);
+    return await getFolderContents(parentPath);
+  }
+
+  Future<DirectoryState> navigateTo(Navigation type, String origin, String destination) async {
+    late final folderContentsResult;
+
+    try {
+      folderContentsResult = await this.repository.getFolderContents(destination);
+
+      if (folderContentsResult.errorMessage.isNotEmpty) {
+        print('Navigation to $destination failed:\n${folderContentsResult.errorMessage}');
+        return  NavigationLoadFailure();
+      }
+    } catch (e) {
+      print('Exception navigating to $destination:\n${e.toString()}');
+      return NavigationLoadFailure();
+    }
+
+    return NavigationLoadSuccess(
+        type: type,
+        origin: origin,
+        destination: destination,
+        contents: folderContentsResult.result
+      );
+  }
+
+  Future<DirectoryState> createFile(String newFilePath, Stream<List<int>> fileByteStream, String parentPath) async {
+    try {
+      final createFileResult = await this.repository.createFile(newFilePath);
+      if (createFileResult.errorMessage.isNotEmpty) {
+        if (createFileResult.errorMessage != 'File exists') {
+          print('File $newFilePath creation failed:\n${createFileResult.errorMessage}');
+          // TODO: Make a validation using the library function instead of guessing
+          print('The file $newFilePath already exist.');    
+          return DirectoryLoadFailure();
+        }
+      }
+    } catch (e) {
+      print('Exception creating file $newFilePath:\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+
+    try {
+      final writeFileResult = await this.repository.writeFile(newFilePath, fileByteStream);
+      if (writeFileResult.errorMessage.isNotEmpty) {
+        print('Writing to the file $newFilePath failed:\n${writeFileResult.errorMessage}');
+        return DirectoryLoadFailure();
+      }
+    } catch (e) {
+      print('Exception writing to file $newFilePath:\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+
+    return await getFolderContents(parentPath);
+  }
+
+  Future<DirectoryState> readFile(String filePath, String action) async {
+    late final readFileResult;
+
+    try {
+      readFileResult = await repository.readFile(filePath, action: action);
+      if (readFileResult.errorMessage.isNotEmpty) {
+        print('Reading file $filePath failed:\n${readFileResult.errorMessage}');
+        return DirectoryLoadFailure();
+      }  
+    } catch (e) {
+      print('Exception reading file $filePath:\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+
+    return DirectoryLoadSuccess(contents: readFileResult.result, action: action);
+  }
+
+  Future<DirectoryState> deleteFile(String filePath, String parentPath) async {
+    try{
+      final deleteFileResult = await this.repository.deleteFile(filePath);
+      if (deleteFileResult.errorMessage.isNotEmpty) 
+      {
+        print('The file ($filePath) could not be deleted.');
+        return DirectoryLoadFailure();
+      }
+    } catch (e) {
+      print('Exception deleting the file $filePath:\n${e.toString()}');
+      return DirectoryLoadFailure();
+    }
+
+    return await getFolderContents(parentPath);
   }
 }
