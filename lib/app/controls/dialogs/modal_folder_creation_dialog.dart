@@ -75,17 +75,7 @@ class FolderCreation extends StatelessWidget {
       )
     );
 
-    Navigator.of(this.context).pop();
-
-    this.bloc
-    .add(
-      NavigateTo(
-        type: Navigation.content,
-        origin: this.path,
-        destination: newFolderPath,
-        withProgress: true
-      )
-    );
+    Navigator.of(this.context).pop(newFolderPath);
   }
 
   List<Widget> _actions(context) => [
