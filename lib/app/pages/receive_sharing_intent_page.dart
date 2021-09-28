@@ -367,21 +367,6 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     );
   }
 
-  Future<String> getSize(path) async {
-    try {
-      final file = await File.open(widget.repository, path);
-      final length = await file.length;
-
-      await Future.delayed(Duration(seconds: 4));
-
-      return formattSize(length, units: true);
-    } catch (e) {
-      print('Exception getting the file size ($path):\n${e.toString()}');
-    }
-
-    return '0 B';
-  }
-
   Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {
     final filePath = destination == slash
     ? '/$fileName'
