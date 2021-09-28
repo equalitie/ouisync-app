@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -52,159 +50,31 @@ abstract class Dialogs {
   static _hideLoadingDialog(context) => 
     Navigator.pop(context);
 
-  static Widget floatingActionsButtonMenu(
-    BuildContext context,
-    Bloc actionBloc,
-    Function updateUI,
-    AnimationController controller,
-    String path,
-    Map<String, IconData> actions,
-    String actionsDialog,
-    Color backgroundColor,
-    Color foregroundColor,
-  ) { 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: new List.generate(actions.length, (int index) {
-        String actionName = actions.keys.elementAt(index);
-
-        Widget child = new Container(
-          height: 80.0,
-          width: 180.0,
-          alignment: Alignment.topRight,
-          child: new ScaleTransition(
-            scale: new CurvedAnimation(
-              parent: controller,
-              curve: new Interval(
-                0.0,
-                1.0 - index / actions.length / 2.0,
-                curve: Curves.easeOut
-              ),
-            ),
-            child: new FloatingActionButton.extended(
-              heroTag: null,
-              backgroundColor: backgroundColor,
-              foregroundColor: foregroundColor,
-              label: Text(actionName),
-              icon: Icon(actions[actionName]),
-              onPressed: () async => 
-                await executeActionByName(actionsDialog, controller, context, actionBloc, updateUI, path, actionName),
-            ),
-          ),
-        );
-        return child;
-      }).toList()..add(
-        new FloatingActionButton.extended(
-          heroTag: null,
-          label: Text('Actions'),
-          icon: new AnimatedBuilder(
-            animation: controller,
-            builder: (BuildContext context, Widget? child) {
-              return new Transform(
-                transform: new Matrix4.rotationZ(controller.value * 0.5 * math.pi),
-                alignment: FractionalOffset.center,
-                child: new Icon(controller.isDismissed ? Icons.pending : Icons.close),
-              );
-            },
-          ),
-          onPressed: () {
-            controller.isDismissed
-            ? controller.forward()
-            : controller.reverse();
-          },
-        ),
-      ),
-    );
-  }
-
-  static Future<void> executeActionByName(
-    String actionsDialog,
-    AnimationController controller,
-    BuildContext context,
-    Bloc<dynamic, dynamic> actionBloc,
-    Function updateUI,
-    String path,
-    String actionName
-  ) async {
-    late Future<dynamic> dialog;
-    switch (actionsDialog) {
-      case flagFolderActionsDialog:
-        dialog = folderActionsDialog(
-          context,
-          actionBloc as DirectoryBloc,
-          updateUI,
-          path,
-          actionName
-        );
-        break;
-    
-      case flagReceiveShareActionsDialog:
-        dialog = receiveShareActionsDialog(
-          context,
-          actionBloc as DirectoryBloc,
-          updateUI,
-          path,
-          actionName
-        );
-        break;
-    
-      default:
-        dialog = Future.value(false);
-        break;
-    }
-    
-    bool resultOk = await dialog;
-    if (resultOk) {
-      controller.reset(); 
-    }
-  }
-
-  static Future<dynamic> folderActionsDialog(
+  static Future<dynamic> receiveShareActionsDialog(
     BuildContext context,
     DirectoryBloc directoryBloc,
     Function updateUI,
-    String path,
+    String parentPath,
     String action
   ) async {
     String dialogTitle = '';
     Widget? actionBody;
 
     switch (action) {
+      case actionNewFile:
+        return await _addFileAction(parentPath, directoryBloc, updateUI);
+        
       case actionNewFolder: {
-        final formKey = GlobalKey<FormState>();
+          final formKey = GlobalKey<FormState>();
 
-        dialogTitle = 'Create Folder';
-        actionBody = FolderCreation(
-          context: context,
-          bloc: directoryBloc,
-          updateUI: updateUI,
-          path: path,
-          formKey: formKey,
-        );
-      }
-      break;
-      
-      case actionNewFile: 
-        return await _addFileAction(path, directoryBloc, updateUI);
-
-      case actionDeleteFolder:
-        final parentPath = extractParentFromPath(path);
-
-        return showDialog<void>(
-          context: context,
-          barrierDismissible: false, // user must tap button!
-          builder: (BuildContext context) {
-
-            return buildDeleteFolderAlertDialog(
-              context,
-              directoryBloc,
-              updateUI,
-              parentPath,
-              path,
-            );
-          },
-        );
+          dialogTitle = 'Create Folder';
+          actionBody = FolderCreation(
+            context: context,
+            path: parentPath,
+            formKey: formKey,
+          );
+        }
+        break;
     }
 
     return actionDialog(
@@ -290,42 +160,6 @@ abstract class Dialogs {
           },
         ),
       ],
-    );
-  }
-
-  static Future<dynamic> receiveShareActionsDialog(
-    BuildContext context,
-    DirectoryBloc directoryBloc,
-    Function updateUI,
-    String parentPath,
-    String action
-  ) async {
-    String dialogTitle = '';
-    Widget? actionBody;
-
-    switch (action) {
-      case actionNewFile:
-        return await _addFileAction(parentPath, directoryBloc, updateUI);
-        
-      case actionNewFolder: {
-          final formKey = GlobalKey<FormState>();
-
-          dialogTitle = 'Create Folder';
-          actionBody = FolderCreation(
-            context: context,
-            bloc: directoryBloc,
-            updateUI: updateUI,
-            path: parentPath,
-            formKey: formKey,
-          );
-        }
-        break;
-    }
-
-    return actionDialog(
-      context,
-      dialogTitle,
-      actionBody
     );
   }
 
@@ -433,47 +267,6 @@ abstract class Dialogs {
           },
         ),
       ],
-    );
-  }
-
-  static Future<void> showRequestStoragePermissionDialog(BuildContext context) async {
-    Text title = Text('OuiSync - Storage permission needed');
-    Text message = Text('Ouisync need access to the phone storage to operate properly.\n\nPlease accept the permissions request');
-    
-    await _permissionDialog(context, title, message);
-  }
-
-  static Future<void> showStoragePermissionNotGrantedDialog(BuildContext context) async {
-    Text title = Text('OuiSync - Storage permission not granted');
-    Text message = Text('Ouisync need access to the phone storage to operate properly.\n\nWithout this permission the app won\'t work.');
-    
-    await _permissionDialog(context, title, message);
-  }
-
-  static Future<void> _permissionDialog(BuildContext context, Widget title, Widget message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: title,
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget> [
-               message, 
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      }
     );
   }
 }
