@@ -36,7 +36,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   late final fileName;
   late final pathWithoutName;
 
-  late BaseItem _currentFolderData;
+  late String _currentFolder;
   final rootItem = FolderItem(
     path: slash,
     items: <BaseItem>[]
@@ -49,7 +49,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   void initState() {
     super.initState();
 
-    _currentFolderData = rootItem;
+    _currentFolder = rootItem.path;
 
     initHeaderParams();
   }
@@ -59,8 +59,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
   }
 
-  updateCurrentFolder(data) => setState(() {
-    _currentFolderData = data;
+  updateCurrentFolder(path) => setState(() {
+    _currentFolder = path;
   });
 
   @override
@@ -232,18 +232,18 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton.extended(
-            onPressed: () async => await _createNewFolder(_currentFolderData.path),
+            onPressed: () async => await _createNewFolder(_currentFolder),
             icon: const Icon(Icons.create_new_folder_rounded),
             label: const Text(actionNewFolder)
           ),
           SizedBox(width: 30.0),
           FloatingActionButton.extended(
             onPressed: () async => await _saveFileToSelectedFolder(
-              destination: _currentFolderData.path,
+              destination: _currentFolder,
               fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
             ),
             icon: const Icon(Icons.arrow_circle_down),
-            label: Text('${removeParentFromPath(_currentFolderData.path)}')
+            label: Text('${removeParentFromPath(_currentFolder)}')
           ),
         ],
       )
@@ -264,17 +264,11 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
       context,
       dialogTitle,
       actionBody
-      );
-  }
-
-  void updateUI(String path) {
-    final origin = extractParentFromPath(path);
-
-    _navigateTo(
-      type: Navigation.content,
-      origin: origin,
-      destination: path
-      );
+    ).then((newFolder) {
+      setState(() {
+        _currentFolder = newFolder;
+      });
+    });
   }
 
   _noContents() => Column(
@@ -304,7 +298,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: _currentFolderData.path == slash
+                  text: _currentFolder == slash
                   ? messageCreateNewFolderRootToStartStyled
                   : messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
@@ -341,8 +335,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           mainAction: item.itemType == ItemType.file
           ? () { }
           : () { 
-            final current = _currentFolderData.path;
-            updateCurrentFolder(item);
+            final current = _currentFolder;
+            updateCurrentFolder(item.path);
 
             _navigateTo(
               type: Navigation.content,
@@ -353,10 +347,10 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
           secondaryAction: item.itemType == ItemType.file
           ? () { }
           : () async {
-            updateCurrentFolder(item);
+            updateCurrentFolder(item.path);
 
             await _saveFileToSelectedFolder(
-              destination: item.path,
+              destination: _currentFolder,
               fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
             );
           },
@@ -417,7 +411,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
   }
 
   _navigateTo({type, origin, destination}) {
-    _currentFolderData.path == slash
+    _currentFolder == slash
     ? BlocProvider.of<DirectoryBloc>(context)
     .add(
       GetContent(
