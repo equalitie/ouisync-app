@@ -89,7 +89,7 @@ class FolderCreation extends StatelessWidget {
     ),
     SizedBox(width: 20.0,),
     OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(false),
+      onPressed: () => Navigator.of(context).pop(''),
       child: Text('Cancel')
     ),
   ];

@@ -559,7 +559,11 @@ class _RepositoryRootPageState extends State<RepositoryRootPage>
           ),
         );
       }
-    );
+    ).then((newFolder) => {
+      if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
+       Navigator.of(this.context).pop() 
+      }
+    });
   }
 
   Future<void> addFile() async {
