@@ -58,7 +58,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
           primarySwatch: Colors.amber,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: RootOuiSync(
+        home: RepositoryRootPage(
           repository: widget.repository,
           path: slash,
           title: titleApp,

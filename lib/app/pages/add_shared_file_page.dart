@@ -13,8 +13,8 @@ import '../controls/controls.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
-class ReceiveSharingIntentPage extends StatefulHookWidget {
-  ReceiveSharingIntentPage({
+class AddSharedFilePage extends StatefulHookWidget {
+  AddSharedFilePage({
     required this.repository,
     required this.sharedFileInfo,
     required this.directoryBloc,
@@ -30,7 +30,7 @@ class ReceiveSharingIntentPage extends StatefulHookWidget {
   _ReceiveSharingIntentPageState createState() => _ReceiveSharingIntentPageState();
 }
 
-class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
+class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
   with TickerProviderStateMixin {
 
   late final fileName;

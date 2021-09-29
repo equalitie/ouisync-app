@@ -15,8 +15,8 @@ import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-class RootOuiSync extends StatefulWidget {
-  const RootOuiSync({
+class RepositoryRootPage extends StatefulWidget {
+  const RepositoryRootPage({
     required this.repository,
     required this.path,
     required this.title,
@@ -27,10 +27,10 @@ class RootOuiSync extends StatefulWidget {
   final String title;
   
   @override
-  State<StatefulWidget> createState() => _RootOuiSyncState(); 
+  State<StatefulWidget> createState() => _RepositoryRootPageState(); 
 }
 
-class _RootOuiSyncState extends State<RootOuiSync>
+class _RepositoryRootPageState extends State<RepositoryRootPage>
   with TickerProviderStateMixin {
     
   late StreamSubscription _intentDataStreamSubscription;
@@ -98,7 +98,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return ReceiveSharingIntentPage(
+        return AddSharedFilePage(
           repository:  widget.repository,
           sharedFileInfo: sharedMedia,
           directoryBloc: BlocProvider.of<DirectoryBloc>(context),
@@ -594,7 +594,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return Settings(
+        return SettingsPage(
           selectedRepository: 'Default',
           repository: widget.repository,
         );
