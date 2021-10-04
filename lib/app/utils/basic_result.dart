@@ -122,6 +122,19 @@ class ShareFileResult extends BasicResult {
   final String action;
 }
 
+class MoveFileResult extends BasicResult {
+  MoveFileResult({
+    required this.functionName,
+    required this.result
+  }): super(
+    functionName: functionName,
+    result: result
+  );
+
+  final String functionName;
+  final String result;
+}
+
 class DeleteFileResult extends BasicResult {
   DeleteFileResult({
     required this.functionName,

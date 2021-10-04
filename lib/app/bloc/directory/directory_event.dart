@@ -131,6 +131,36 @@ class ReadFile extends DirectoryEvent {
 
 }
 
+class MoveFile extends DirectoryEvent {
+  const MoveFile({
+    required this.origin,
+    required this.destination,
+    required this.filePath,
+    required this.newFilePath,
+    this.navigate = false
+  }) :
+  assert (origin != ''),
+  assert (destination != ''),
+  assert (filePath != ''),
+  assert (newFilePath != '');
+
+  final String origin;
+  final String destination;
+  final String filePath;
+  final String newFilePath;
+  final bool navigate;
+
+  @override
+  List<Object> get props => [
+    origin,
+    destination,
+    filePath,
+    newFilePath,
+    navigate
+  ];
+
+}
+
 class DeleteFile extends DirectoryEvent {
   const DeleteFile({
     required this.parentPath,

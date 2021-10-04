@@ -107,6 +107,27 @@ class DirectoryRepository {
     return readFileResult;
   }
 
+  Future<BasicResult> moveFile(String originPath, String destinationPath) async {
+    BasicResult moveFileResult;
+    String error = '';
+
+    try {
+      print('Moving file from $originPath to $destinationPath');
+
+      await repository.move(originPath, destinationPath);
+    } catch (e) {
+      print('Error moving file from $originPath to $destinationPath: $e');
+      error = e.toString();
+    }
+
+    moveFileResult = MoveFileResult(functionName: 'createFile', result: destinationPath);
+    if (error.isNotEmpty) {
+      moveFileResult.errorMessage = error;
+    }
+
+    return moveFileResult;
+  }
+
   Future<BasicResult> deleteFile(String filePath) async {
     BasicResult deleteFileResult;
     String error = '';
