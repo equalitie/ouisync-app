@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/data/data.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/icon_style.dart';
@@ -456,9 +457,11 @@ class _RepositoryRootPageState extends State<RepositoryRootPage>
     ),
     builder: (context) {
       return FileDetail(
+        directoryRepository: DirectoryRepository(repository: widget.repository),
         name: name,
         path: path,
-        size: size
+        parent: extractParentFromPath(path),
+        size: size,
       );
     }
   );
