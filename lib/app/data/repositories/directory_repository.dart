@@ -225,15 +225,15 @@ class DirectoryRepository {
       while (iterator.moveNext()) {
         final newNode = await _castToBaseItem(
           path,
-          iterator.current.current,
+          iterator.current.name,
           iterator.current.type,
           0.0
         );
 
         if (newNode.itemType == ItemType.folder) {
           final itemPath = path == '/'
-          ? '/${iterator.current.current}'
-          : '$path/${iterator.current.current}';
+          ? '/${iterator.current.name}'
+          : '$path/${iterator.current.name}';
 
           (newNode as FolderItem).items = await getContentsRecursive(itemPath);  
         }
