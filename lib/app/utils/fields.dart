@@ -75,6 +75,7 @@ Widget buildActionIcon({icon, onTap, size = 40.0}) {
 
 Widget buildIconLabel(iconInfo, info, { 
   iconSize = 30.0,
+  iconColor = Colors.black,
   infoSize = 18.0,
   labelPadding = const EdgeInsets.only(bottom: 10.0)
 }) => Padding(
@@ -91,10 +92,12 @@ Widget buildIconLabel(iconInfo, info, {
 );
 
 Icon _buildIcon(icon, {
-  size = 30.0 
+  size = 30.0,
+  color = Colors.black,
 }) => Icon(
   icon,
   size: size,
+  color: color
 );
 
 Widget buildIdLabel(text, {
