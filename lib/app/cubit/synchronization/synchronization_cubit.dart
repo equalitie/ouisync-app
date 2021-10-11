@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
-import 'package:ouisync_app/app/data/data.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../data/data.dart';
 import '../synchronization_state.dart';
 
 class SynchronizationCubit extends Cubit<SynchronizationState> {

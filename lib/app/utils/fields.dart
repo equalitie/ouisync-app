@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-
 Widget buildHandle(BuildContext context) {
   final theme = Theme.of(context);
 

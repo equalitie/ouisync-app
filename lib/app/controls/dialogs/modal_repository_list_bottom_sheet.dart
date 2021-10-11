@@ -3,10 +3,10 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/controls/controls.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
+import '../controls.dart';
 
 class RepositoryList extends StatelessWidget {
   const RepositoryList({
