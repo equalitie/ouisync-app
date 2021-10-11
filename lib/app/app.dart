@@ -11,12 +11,18 @@ import 'utils/utils.dart';
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
+    required this.appDir,
+    required this.repositoriesDir,
     required this.session,
-    required this.repository
+    required this.defaultRepository,
+    required this.defaultRepositoryName,
   });
 
+  final String appDir;
+  final String repositoriesDir;
   final Session session;
-  final Repository repository;
+  final Repository? defaultRepository;
+  final String defaultRepositoryName;
 
   @override
   _OuiSyncAppState createState() => _OuiSyncAppState();
@@ -30,40 +36,41 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
     super.initState();
 
     NativeChannels.init(widget.session);
-    directoryRepository = DirectoryRepository(repository: widget.repository);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<DirectoryBloc>(
-          create: (BuildContext context) => DirectoryBloc(
-            repository: directoryRepository
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: titleApp,
+      theme: ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<DirectoryBloc>(
+            create: (BuildContext context) => DirectoryBloc(directoryRepository: DirectoryRepository()),
           ),
-        ),
-        BlocProvider<RouteBloc>(
-          create: (BuildContext context) => RouteBloc()
-        ),
-        BlocProvider<SynchronizationCubit>(
-          create: (BuildContext context) => SynchronizationCubit(
-            repository: directoryRepository
+          BlocProvider<RouteBloc>(
+            create: (BuildContext context) => RouteBloc()
+          ),
+          BlocProvider<SynchronizationCubit>(
+            create: (BuildContext context) => SynchronizationCubit()
+          ),
+          BlocProvider<RepositoriesCubit>(
+            create: (BuildContext context) => RepositoriesCubit(  
+              session: widget.session,
+              appDir: widget.appDir,
+              repositoriesDir: widget.repositoriesDir
+            )
           )
-        )
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: titleApp,
-        theme: ThemeData(
-          primarySwatch: Colors.amber,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: RepositoryRootPage(
-          repository: widget.repository,
-          path: slash,
+        ],
+        child: MainPage(
+          defaultRepository: widget.defaultRepository,
+          defaultRepositoryName: widget.defaultRepositoryName,
           title: titleApp,
         )
-      ),
+      )
     );
   }
 }
