@@ -6,4 +6,5 @@ export 'descriptions.dart';
 export 'dialogs.dart';
 export 'fields.dart';
 export 'format.dart';
+export 'settings.dart';
 export 'spinning_icon.dart';
