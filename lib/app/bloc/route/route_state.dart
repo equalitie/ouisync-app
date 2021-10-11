@@ -7,9 +7,7 @@ abstract class RouteState extends Equatable {
   List<Object> get props => [];
 }
 
-class RouteInitial extends RouteState {
-
-}
+class RouteInitial extends RouteState {}
 
 class RouteLoadSuccess extends RouteState {
   const RouteLoadSuccess({
