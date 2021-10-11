@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
@@ -9,11 +10,15 @@ class FolderCreation extends StatelessWidget {
   const FolderCreation({
     Key? key,
     required this.context,
+    required this.bloc,
+    required this.repository,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
   final BuildContext context;
+  final DirectoryBloc bloc;
+  final Repository repository;
   final String path;
   final GlobalKey<FormState> formKey;
 
@@ -34,7 +39,7 @@ class FolderCreation extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildCreateFolderWidget(context),
+            _buildCreateFolderWidget(this.context),
           ],
         ),
       )
@@ -53,7 +58,7 @@ class FolderCreation extends StatelessWidget {
             context,
             'Create a new folder: ',
             'Folder name',
-            (value) => _onSaved(context, value),
+            (value) => _onSaved(bloc, value),
             'Please enter a valid name (unique, no spaces, ...)'),
           buildInfoLabel('Location: ', this.path),
           buildActionsSection(context, _actions(context)),
@@ -62,14 +67,14 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(context, newFolderName) {
+  void _onSaved(bloc, newFolderName) {
     final newFolderPath = this.path == slash
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    bloc.add(
       CreateFolder(
+        repository: this.repository,
         parentPath: this.path,
         newFolderPath: newFolderPath
       )
