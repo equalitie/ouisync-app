@@ -256,6 +256,8 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     final dialogTitle = 'Create Folder';
     final actionBody = FolderCreation(
       context: context,
+      bloc: BlocProvider.of<DirectoryBloc>(context),
+      repository: widget.repository,
       path: current,
       formKey: formKey,
     );
@@ -380,6 +382,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     widget.directoryBloc
     .add(
       CreateFile(
+        repository: widget.repository,
         parentPath: destination,
         newFilePath: filePath,
         fileByteStream: fileStream
@@ -400,6 +403,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     ? BlocProvider.of<DirectoryBloc>(context)
     .add(
       GetContent(
+        repository: widget.repository,
         path: origin,
         recursive: false,
         withProgress: true
@@ -408,6 +412,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     : BlocProvider.of<DirectoryBloc>(context)
     .add(
       NavigateTo(
+        repository: widget.repository,
         type: type,
         origin: origin,
         destination: destination,
