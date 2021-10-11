@@ -11,30 +11,38 @@ import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../controls/controls.dart';
+import '../cubit/cubits.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-class RootOuiSync extends StatefulWidget {
-  const RootOuiSync({
-    required this.repository,
-    required this.path,
+typedef RepositoryCallback = void Function(Repository repository, String name);
+
+class MainPage extends StatefulWidget {
+  const MainPage({
+    required this.defaultRepository,
+    required this.defaultRepositoryName,
     required this.title,
   });
 
-  final Repository repository;
-  final String path;
+  final Repository? defaultRepository;
+  final String defaultRepositoryName;
   final String title;
   
   @override
-  State<StatefulWidget> createState() => _RootOuiSyncState(); 
+  State<StatefulWidget> createState() => _MainPageState(); 
 }
 
-class _RootOuiSyncState extends State<RootOuiSync>
+class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin {
+
+  Repository? _repository;
+  String _repositoryName = '';
+  Subscription? _repositorySubscription;
+
+  Widget? _mainState;
     
   late StreamSubscription _intentDataStreamSubscription;
-  late final Subscription _repositorySubscription;
 
   List<BaseItem> _folderContents = <BaseItem>[];
   String _currentFolder = slash; // Initial value: /
@@ -42,8 +50,8 @@ class _RootOuiSyncState extends State<RootOuiSync>
   late AnimationController _actionsController;
   late AnimationController _syncController;
   
-  late Color backgroundColor;
-  late Color foregroundColor;
+  // late Color backgroundColor;
+  // late Color foregroundColor;
 
   @override
   void initState() {
@@ -52,21 +60,14 @@ class _RootOuiSyncState extends State<RootOuiSync>
     handleIncomingShareIntent();
     initAnimationControllers();
 
-    navigateToPath(
-      type: Navigation.content,
-      origin: slash,
-      destination: slash,
-      withProgress: true
-    ); 
-
-    getContents(path: slash, withProgress: true);
+    initRepository();
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    _repositorySubscription.cancel();
+    _repositorySubscription!.cancel();
     _intentDataStreamSubscription.cancel();
     
     _actionsController.dispose();
@@ -98,11 +99,11 @@ class _RootOuiSyncState extends State<RootOuiSync>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return ReceiveSharingIntentPage(
-          repository:  widget.repository,
+        return AddSharedFilePage(
+          repository:  _repository!,
           sharedFileInfo: sharedMedia,
           directoryBloc: BlocProvider.of<DirectoryBloc>(context),
-          directoryBlocPath: widget.path,
+          directoryBlocPath: _currentFolder,
         );
       })
     );
@@ -120,21 +121,26 @@ class _RootOuiSyncState extends State<RootOuiSync>
     );
   }
 
-  void subscribeToRepositoryNotifications(Repository repository) async {
-    _repositorySubscription = repository.subscribe(() { 
-      _syncController.repeat();
+  void initRepository() {
 
-      getContents(
-        path: _currentFolder,
-        isSyncing: true
-      );
-    });
+    switchMainState(widget.defaultRepository == null
+    ? _noRepositories()
+    : _repositoryContentBuilder());
+
+    BlocProvider.of<RepositoriesCubit>(context)
+    .selectRepository(
+      widget.defaultRepository,
+      widget.defaultRepositoryName
+    );
   }
+
+  switchMainState(state) => setState(() { _mainState = state; });
 
   getContents({path, recursive = false, withProgress = false, isSyncing = false}) { 
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       GetContent(
+        repository: _repository!,
         path: path,
         recursive: recursive,
         withProgress: withProgress,
@@ -147,6 +153,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
   BlocProvider.of<DirectoryBloc>(context)
   .add(
     NavigateTo(
+      repository: _repository!,
       type: type,
       origin: origin,
       destination: destination,
@@ -154,25 +161,48 @@ class _RootOuiSyncState extends State<RootOuiSync>
     )
   ); 
 
+  void subscribeToRepositoryNotifications(repository) async {
+    _repositorySubscription = repository.subscribe(() { 
+      getContents(path: slash, isSyncing: true);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    backgroundColor = Theme.of(context).hintColor;
-    foregroundColor = Theme.of(context).accentColor;
-
     return Scaffold(
       appBar: _getOuiSyncBar(),
-      body: _getBody(),
+      body: _mainState,
       floatingActionButton: new FloatingActionButton(
         child: const Icon(Icons.add_rounded),
-        onPressed: () => _showDirectoryActions(_currentFolder),
+        onPressed: () => _showDirectoryActions(BlocProvider.of<DirectoryBloc>(context), _currentFolder),
       ),
     );
   }
 
   _getOuiSyncBar() => OuiSyncBar(
     appBranding: AppBranding(appName: widget.title),
-    defaultRepository: 'Default',
-    centralWidget: RepositoryPicker(context: context, defaultRepository: 'Default'),
+    centralWidget: RepositoryPicker(
+      cubit: BlocProvider.of<RepositoriesCubit>(context),
+      onRepositorySelect: (repository, name) {
+        if (_repositorySubscription != null) {
+          _repositorySubscription!.cancel();
+        }
+
+        _repository = repository;
+        _repositoryName = name;
+
+        switchMainState(_repositoryContentBuilder());
+
+        navigateToPath(
+          type: Navigation.content,
+          origin: slash,
+          destination: slash,
+          withProgress: true
+        );
+
+        subscribeToRepositoryNotifications(_repository);
+      },
+    ),
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
@@ -185,35 +215,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     preferredSize: Size.fromHeight(150.0)
   );
 
-  Padding appBranding() { //AppBranding
-    return Padding(
-      padding: EdgeInsets.only(left: 10.0),
-      child: Center(
-        child: Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 28.0,
-            fontWeight: FontWeight.w800
-          ),),
-      ),
-    );
-  }
-
-  Row repositorySelector() { //RepositoryPicker
-    return Row(
-      children: [
-        const Icon(
-          Icons.layers_rounded,
-          size: 30.0,
-        ),
-        SizedBox(width: 4.0),
-        buildConstrainedText('Default', size: 20.0, softWrap: false, overflow: TextOverflow.fade),
-        buildActionIcon(icon: Icons.keyboard_arrow_down_outlined, onTap: () async { await _showRepositorySelector('Default'); }),
-      ],
-    );
-  }
-
-  _getBody() => BlocConsumer<DirectoryBloc, DirectoryState>(
+  _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
     builder: (context, state) {
       if (state is DirectoryInitial) {
         return Center(child: Text('Loading contents...'));
@@ -260,27 +262,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
           });
 
           updateFolderContents(state.contents);
-
-          BlocProvider.of<RouteBloc>(context)
-          .add(
-            UpdateRoute(
-              path: state.destination,
-              action: () { //Back button action, hence we invert the origin and destination values
-                final from = state.destination;
-                final backTo = extractParentFromPath(from);
-
-                BlocProvider.of<DirectoryBloc>(context)
-                .add(
-                  NavigateTo(
-                    type: Navigation.content,
-                    origin: from,
-                    destination: backTo,
-                    withProgress: true
-                  )
-                );
-              }
-            )
-          );
+          updateRoute(state.destination);
         }
       }
 
@@ -332,6 +314,74 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   }
 
+  void updateRoute(destination) {
+    BlocProvider.of<RouteBloc>(context)
+    .add(
+      UpdateRoute(
+        path: destination,
+        action: () { //Back button action, hence we invert the origin and destination values
+          final from = destination;
+          final backTo = extractParentFromPath(from);
+
+          BlocProvider.of<DirectoryBloc>(context)
+          .add(
+            NavigateTo(
+              repository: _repository!,
+              type: Navigation.content,
+              origin: from,
+              destination: backTo,
+              withProgress: true
+            )
+          );
+        }
+      )
+    );
+  }
+
+  _noRepositories() => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Align(
+        alignment: Alignment.center,
+        child: Text(
+          messageNoRepos,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      SizedBox(height: 20.0),
+      Align(
+        alignment: Alignment.center,
+        child: StyledText(
+          text: messageCreateNewRepoStyled,
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.normal
+          ),
+          styles: {
+            'bold': TextStyle(fontWeight: FontWeight.bold),
+            'arrow_down': IconStyle(Icons.south),
+          },
+        ),
+      ),
+      SizedBox(height: 20.0),
+      ElevatedButton(
+        onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
+        child: Text('Create a Lockbox')
+      ),
+      ElevatedButton(
+        onPressed: () {
+          
+        },
+        child: Text('Link a Lockbox')
+      ),
+    ],
+  );
+
   _noContents() => RefreshIndicator(
       onRefresh: refreshCurrent,
       child: Column(
@@ -341,7 +391,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
           Align(
             alignment: Alignment.center,
             child: Text(
-              widget.path.isEmpty
+              _currentFolder.isEmpty
               ? messageEmptyRepo
               : messageEmptyFolder,
               textAlign: TextAlign.center,
@@ -355,7 +405,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
           Align(
             alignment: Alignment.center,
             child: StyledText(
-              text: messageCreateAddNewObjectStyled,
+              text: messageCreateAddNewItemStyled,
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.normal
@@ -370,8 +420,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       )
     );
 
-  _contentsList() =>
-  RefreshIndicator(
+  _contentsList() => RefreshIndicator(
     onRefresh: refreshCurrent,
     child: ListView.separated(
       padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
@@ -395,7 +444,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
           );
 
         final listItem = ListItem (
-          repository: widget.repository,
+          repository: _repository!,
           itemData: item,
           mainAction: actionByType,
           secondaryAction: () => {},
@@ -420,7 +469,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     File? file;
 
     try {
-      file = await File.open(widget.repository, filePath);
+      file = await File.open(_repository!, filePath);
       fileSize = await file.length;
     } catch (e) {
       print('Exception getting file $filePath size:\n${e.toString()}');
@@ -431,8 +480,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     return fileSize;
   }
 
-  _popupMenu(item) => 
-  Dialogs
+  _popupMenu(item) => Dialogs
   .filePopupMenu(
     context,
     BlocProvider. of<DirectoryBloc>(context),
@@ -456,15 +504,16 @@ class _RootOuiSyncState extends State<RootOuiSync>
     ),
     builder: (context) {
       return FileDetail(
+        repository: _repository!,
         name: name,
         path: path,
-        size: size
+        parent: extractParentFromPath(path),
+        size: size,
       );
     }
   );
 
-  Future<dynamic> _showFolderDetails(name, path) =>
-  showModalBottomSheet(
+  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -479,6 +528,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
         name: name,
         path: path,
         renameAction: () {
+          // ignore: todo
           // TODO: Check if available in the library and implement
         },
         deleteAction: () async {
@@ -506,24 +556,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   );
 
-
-  Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
-    isScrollControlled: true,
-    context: context, 
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20.0),
-        topRight: Radius.circular(20.0),
-        bottomLeft: Radius.zero,
-        bottomRight: Radius.zero
-      ),
-    ),
-    builder: (context) {
-      return RepositoryList(current: 'Default');
-    }
-  );
-
-  Future<dynamic> _showDirectoryActions(parent) => showModalBottomSheet(
+  Future<dynamic> _showDirectoryActions(bloc, parent) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
@@ -537,13 +570,13 @@ class _RootOuiSyncState extends State<RootOuiSync>
     builder: (context) {
       return DirectoryActions(
         parent: parent,
-        folderAction: createFolderDialog,
+        folderAction: () => createFolderDialog(bloc),
         fileAction: () async { await addFile(); },
       );
     }
   );
 
-  void createFolderDialog() async {
+  void createFolderDialog(bloc) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -554,12 +587,18 @@ class _RootOuiSyncState extends State<RootOuiSync>
           title: 'Create Folder',
           body: FolderCreation(
             context: context,
+            bloc: bloc,
+            repository: _repository!,
             path: _currentFolder,
             formKey: formKey,
           ),
         );
       }
-    );
+    ).then((newFolder) => {
+      if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
+        Navigator.of(this.context).pop() 
+      }
+    });
   }
 
   Future<void> addFile() async {
@@ -579,6 +618,7 @@ class _RootOuiSyncState extends State<RootOuiSync>
       BlocProvider.of<DirectoryBloc>(context)
       .add(
         CreateFile(
+          repository: _repository!,
           parentPath: _currentFolder,
           newFilePath: newFilePath,
           fileByteStream: fileByteStream
@@ -590,13 +630,36 @@ class _RootOuiSyncState extends State<RootOuiSync>
     }
   }
 
+  void createRepoDialog(cubit) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Create Lockbox',
+          body: RepositoryCreation(
+            context: context,
+            cubit: cubit,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((newRepository) {
+      if (newRepository.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
+        switchMainState(_repositoryContentBuilder());
+      }
+    });
+  }
+
   void settingsAction() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return Settings(
+        return SettingsPage(
           selectedRepository: 'Default',
-          repository: widget.repository,
+          repository: _repository!,
         );
       })
     );

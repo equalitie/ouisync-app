@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
-import '../../bloc/blocs.dart';
-import '../../utils/utils.dart';
+import '../../cubit/cubits.dart';
 
-class FolderCreation extends StatelessWidget {
-  const FolderCreation({
+class RepositoryCreation extends StatelessWidget {
+  const RepositoryCreation({
     Key? key,
     required this.context,
-    required this.bloc,
-    required this.repository,
-    required this.path,
+    required this.cubit,
     required this.formKey
   }) : super(key: key);
 
   final BuildContext context;
-  final DirectoryBloc bloc;
-  final Repository repository;
-  final String path;
+  final RepositoriesCubit cubit;
   final GlobalKey<FormState> formKey;
 
   @override
@@ -56,31 +50,20 @@ class FolderCreation extends StatelessWidget {
         children: [
           buildEntry(
             context,
-            'Create a new folder: ',
-            'Folder name',
-            (value) => _onSaved(bloc, value),
+            'Create a new lockbox: ',
+            'Lockbox name',
+            (value) => _onSaved(cubit, value),
             'Please enter a valid name (unique, no spaces, ...)'),
-          buildInfoLabel('Location: ', this.path),
           buildActionsSection(context, _actions(context)),
         ]
       )
     );
   }
 
-  void _onSaved(bloc, newFolderName) {
-    final newFolderPath = this.path == slash
-    ? '/$newFolderName'
-    : '${this.path}/$newFolderName';  
+  void _onSaved(RepositoriesCubit cubit, newRepositoryName) {
+    cubit.openRepository(newRepositoryName);
 
-    bloc.add(
-      CreateFolder(
-        repository: this.repository,
-        parentPath: this.path,
-        newFolderPath: newFolderPath
-      )
-    );
-
-    Navigator.of(this.context).pop(newFolderPath);
+    Navigator.of(this.context).pop(newRepositoryName);
   }
 
   List<Widget> _actions(context) => [

@@ -26,7 +26,7 @@ const String messageNoStoragePermissionsGranted = 'OuiSync need access to the ph
 '\n   > Look for OuiSync and select it'
 '\n   > Select Allow'
 '\n\nThen you can open OuiSync again and use it as expected';
-const String messageNoRepos = 'No repositories found';
+const String messageNoRepos = 'No lockboxes found';
 const String messageEmptyRepo = 'This repository is empty';
 const String messageEmptyFolder = 'This folder is empty';
 const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
@@ -35,8 +35,8 @@ const String messageCreateNewFolderRootToStartStyled = 'Maybe start by creating 
 const String messageCreateNewFolderStyled = 'You can create a new folder using (look down <arrow_down/>)'
 '\n... or just drop it here, champ';
 
-const String messageCreateNewRepoStyled = 'Create a new repo using <bold>Actions</bold> <arrow_down/>';
-const String messageCreateAddNewObjectStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';
+const String messageCreateNewRepoStyled = 'Create a new lockbox, or link to one from a friend <arrow_down/>';
+const String messageCreateAddNewItemStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';
 
 const double actionsDialogPadding = 20.0;
 const double actionsDialogAvatarRadius = 10.0;
@@ -73,3 +73,9 @@ const Map<String, IconData> folderActions = const {
 
 const int bufferSize = 64000;
 const String EndOfFile = "EOF";
+
+const String appDirKey = 'APP_DIR';
+const String repositoriesDirKey = 'REPOS_DIR';
+const String localRepositoriesKey = 'LOCAL_REPOS';
+const String currentRepositoryKey = 'CURRENT_REPO';
+const String sessionStoreKey = 'SESSION_STORE';

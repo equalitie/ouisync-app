@@ -1,18 +1,16 @@
 import 'package:bloc/bloc.dart';
+import 'package:ouisync_app/app/data/data.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../data/data.dart';
 import '../synchronization_state.dart';
 
 class SynchronizationCubit extends Cubit<SynchronizationState> {
-  SynchronizationCubit({
-    required this.repository
-  }) : super(SynchronizationInitial());
+  SynchronizationCubit() : super(SynchronizationInitial());
 
-  final DirectoryRepository repository;
-
-  void sync(String path) async {
+  void sync(Repository repository, String path) async {
     try {
-      final getContentsResult = await this.repository.getFolderContents(path);
+      final directoryRepository = DirectoryRepository();
+      final getContentsResult = await directoryRepository.getFolderContents(repository, path);
       if (getContentsResult.errorMessage.isNotEmpty) {
         print('Get contents in folder $path failed:\n${getContentsResult.errorMessage}');
         emit(SynchronizationFailure());

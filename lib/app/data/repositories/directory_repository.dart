@@ -5,11 +5,6 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class DirectoryRepository {
-  const DirectoryRepository({
-    required this.repository
-  });
-
-  final Repository repository;
 
   _openDirectory(repository, path) async => 
     await Directory.open(repository, path);
@@ -17,7 +12,7 @@ class DirectoryRepository {
   _openFile(repository, path) async => 
     await File.open(repository, path);
 
-  Future<BasicResult> createFile(String newFilePath) async {
+  Future<BasicResult> createFile(Repository repository, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
 
@@ -31,6 +26,7 @@ class DirectoryRepository {
       print('Error creating file $newFilePath: $e');
       error = e.toString();
     } finally {
+      // ignore: todo
       newFile!.close(); // TODO: Necessary?
     }
 
@@ -42,7 +38,7 @@ class DirectoryRepository {
     return createFileResult;
   }
 
-  Future<BasicResult> writeFile(String filePath, Stream<List<int>> fileStream) async {
+  Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
     print('Writing file $filePath');
     
     BasicResult writeFileResult;
@@ -80,7 +76,7 @@ class DirectoryRepository {
     return writeFileResult; 
   }
 
-  Future<BasicResult> readFile(String filePath, { String action = '' }) async {
+  Future<BasicResult> readFile(Repository repository, String filePath, { String action = '' }) async {
     BasicResult readFileResult;
     String error = '';
 
@@ -107,7 +103,28 @@ class DirectoryRepository {
     return readFileResult;
   }
 
-  Future<BasicResult> deleteFile(String filePath) async {
+  Future<BasicResult> moveFile(Repository repository, String originPath, String destinationPath) async {
+    BasicResult moveFileResult;
+    String error = '';
+
+    try {
+      print('Moving file from $originPath to $destinationPath');
+
+      await repository.move(originPath, destinationPath);
+    } catch (e) {
+      print('Error moving file from $originPath to $destinationPath: $e');
+      error = e.toString();
+    }
+
+    moveFileResult = MoveFileResult(functionName: 'createFile', result: destinationPath);
+    if (error.isNotEmpty) {
+      moveFileResult.errorMessage = error;
+    }
+
+    return moveFileResult;
+  }
+
+  Future<BasicResult> deleteFile(Repository repository, String filePath) async {
     BasicResult deleteFileResult;
     String error = '';
 
@@ -126,7 +143,7 @@ class DirectoryRepository {
     return deleteFileResult;
   }
 
-  Future<BasicResult> createFolder(String path)  async {
+  Future<BasicResult> createFolder(Repository repository, String path)  async {
     BasicResult createFolderResult;
     String error = '';
 
@@ -152,7 +169,7 @@ class DirectoryRepository {
     return createFolderResult;
   }
 
-  Future<BasicResult> getFolderContents(String path) async {
+  Future<BasicResult> getFolderContents(Repository repository, String path) async {
     print("Getting folder $path contents");
   
     BasicResult getContentsResult;
@@ -188,7 +205,7 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<BaseItem>> getContentsRecursive(String path) async {
+  Future<List<BaseItem>> getContentsRecursive(Repository repository, String path) async {
     final contentNodes = <BaseItem>[];
 
     final directory = await _openDirectory(repository, path);
@@ -204,17 +221,17 @@ class DirectoryRepository {
       while (iterator.moveNext()) {
         final newNode = await _castToBaseItem(
           path,
-          iterator.current.current,
+          iterator.current.name,
           iterator.current.type,
           0.0
         );
 
         if (newNode.itemType == ItemType.folder) {
           final itemPath = path == '/'
-          ? '/${iterator.current.current}'
-          : '$path/${iterator.current.current}';
+          ? '/${iterator.current.name}'
+          : '$path/${iterator.current.name}';
 
-          (newNode as FolderItem).items = await getContentsRecursive(itemPath);  
+          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath);  
         }
         
         contentNodes.add(newNode);
@@ -259,7 +276,7 @@ class DirectoryRepository {
     return <BaseItem>[].single;
   }
 
-  Future<BasicResult> deleteFolder(String path) async {
+  Future<BasicResult> deleteFolder(Repository repository, String path) async {
     BasicResult deleteFolderResult;
     String error = '';
 

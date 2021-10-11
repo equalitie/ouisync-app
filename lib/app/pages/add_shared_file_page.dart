@@ -13,8 +13,8 @@ import '../controls/controls.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
-class ReceiveSharingIntentPage extends StatefulHookWidget {
-  ReceiveSharingIntentPage({
+class AddSharedFilePage extends StatefulHookWidget {
+  AddSharedFilePage({
     required this.repository,
     required this.sharedFileInfo,
     required this.directoryBloc,
@@ -30,7 +30,7 @@ class ReceiveSharingIntentPage extends StatefulHookWidget {
   _ReceiveSharingIntentPageState createState() => _ReceiveSharingIntentPageState();
 }
 
-class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
+class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
   with TickerProviderStateMixin {
 
   late final fileName;
@@ -256,6 +256,8 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     final dialogTitle = 'Create Folder';
     final actionBody = FolderCreation(
       context: context,
+      bloc: BlocProvider.of<DirectoryBloc>(context),
+      repository: widget.repository,
       path: current,
       formKey: formKey,
     );
@@ -380,6 +382,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     widget.directoryBloc
     .add(
       CreateFile(
+        repository: widget.repository,
         parentPath: destination,
         newFilePath: filePath,
         fileByteStream: fileStream
@@ -400,6 +403,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     ? BlocProvider.of<DirectoryBloc>(context)
     .add(
       GetContent(
+        repository: widget.repository,
         path: origin,
         recursive: false,
         withProgress: true
@@ -408,6 +412,7 @@ class _ReceiveSharingIntentPageState extends State<ReceiveSharingIntentPage>
     : BlocProvider.of<DirectoryBloc>(context)
     .add(
       NavigateTo(
+        repository: widget.repository,
         type: type,
         origin: origin,
         destination: destination,

@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({
     required this.appBranding,
-    required this.defaultRepository,
     required this.centralWidget,
     required this.actions,
     required this.bottom,
@@ -14,7 +13,6 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   });
 
   final Widget appBranding;
-  final String defaultRepository;
   final Widget centralWidget;
   final List<Widget> actions;
   final Widget bottom;
