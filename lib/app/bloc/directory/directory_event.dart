@@ -150,25 +150,25 @@ class ReadFile extends DirectoryEvent {
 
 }
 
-class MoveFile extends DirectoryEvent {
-  const MoveFile({
+class MoveEntry extends DirectoryEvent {
+  const MoveEntry({
     required this.repository,
     required this.origin,
     required this.destination,
-    required this.filePath,
-    required this.newFilePath,
+    required this.entryPath,
+    required this.newDestinationPath,
     this.navigate = false
   }) :
   assert (origin != ''),
   assert (destination != ''),
-  assert (filePath != ''),
-  assert (newFilePath != '');
+  assert (entryPath != ''),
+  assert (newDestinationPath != '');
 
   final Repository repository;
   final String origin;
   final String destination;
-  final String filePath;
-  final String newFilePath;
+  final String entryPath;
+  final String newDestinationPath;
   final bool navigate;
 
   @override
@@ -176,8 +176,8 @@ class MoveFile extends DirectoryEvent {
     repository,
     origin,
     destination,
-    filePath,
-    newFilePath,
+    entryPath,
+    newDestinationPath,
     navigate
   ];
 

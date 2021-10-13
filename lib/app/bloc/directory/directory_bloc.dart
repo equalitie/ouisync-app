@@ -59,10 +59,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield await readFile(event.repository, event.filePath, event.action);
     }
 
-    if (event is MoveFile) {
+    if (event is MoveEntry) {
       yield DirectoryLoadInProgress();
 
-      yield await moveFile(event.repository, event.origin, event.destination, event.filePath, event.newFilePath, event.navigate);
+      yield await moveEntry(event.repository, event.origin, event.destination, event.entryPath, event.newDestinationPath, event.navigate);
     }
 
     if (event is DeleteFile) {
@@ -194,15 +194,15 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     return DirectoryLoadSuccess(contents: readFileResult.result, action: action);
   }
 
-  Future<DirectoryState> moveFile(Repository repository, String origin, String destination, String filePath, String newFilePath, navigate) async {
+  Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newSDestinationPath, navigate) async {
     try {
-      final moveFileResult = await directoryRepository.moveFile(repository, filePath, newFilePath);
-      if (moveFileResult.errorMessage.isNotEmpty) {
-        print('Moving file from $filePath to $newFilePath failed:\n${moveFileResult.errorMessage}');
+      final moveEntryResult = await directoryRepository.moveEntry(repository, entryPath, newSDestinationPath);
+      if (moveEntryResult.errorMessage.isNotEmpty) {
+        print('Moving entry from $entryPath to $newSDestinationPath failed:\n${moveEntryResult.errorMessage}');
         return DirectoryLoadFailure();
       }  
     } catch (e) {
-      print('Exception moving file from $filePath to $newFilePath :\n${e.toString()}');
+      print('Exception moving entry from $entryPath to $newSDestinationPath :\n${e.toString()}');
       return DirectoryLoadFailure();
     }
 

@@ -122,8 +122,8 @@ class ShareFileResult extends BasicResult {
   final String action;
 }
 
-class MoveFileResult extends BasicResult {
-  MoveFileResult({
+class MoveEntryResult extends BasicResult {
+  MoveEntryResult({
     required this.functionName,
     required this.result
   }): super(
