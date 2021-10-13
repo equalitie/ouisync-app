@@ -205,17 +205,8 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<BaseItem>> getContentsRecursive(Repository repository, String path) async {
-    final contentNodes = <BaseItem>[];
-
+  Future<List<BaseItem>> getContentsRecursive(Repository repository, String path, List<BaseItem> contentNodes) async {
     final directory = await _openDirectory(repository, path);
-    if (directory.isEmpty) {
-      print('Folder $path is empty.');
-
-      directory.close();
-      return <BaseItem>[];
-    }
-
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
@@ -231,7 +222,7 @@ class DirectoryRepository {
           ? '/${iterator.current.name}'
           : '$path/${iterator.current.name}';
 
-          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath);  
+          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath, contentNodes);  
         }
         
         contentNodes.add(newNode);
