@@ -451,6 +451,7 @@ class _MainPageState extends State<MainPage>
           filePopupMenu: _popupMenu(item),
           folderDotsAction: () async =>
             await _showFolderDetails(
+              BlocProvider.of<DirectoryBloc>(context),
               removeParentFromPath(item.path),
               item.path
             )
@@ -515,7 +516,8 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  Future<dynamic> _showFolderDetails(name, path) => showModalBottomSheet(
+  Future<dynamic> _showFolderDetails(bloc, name, path) => showModalBottomSheet(
+    isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -527,8 +529,12 @@ class _MainPageState extends State<MainPage>
     ),
     builder: (context) {
       return FolderDetail(
+        context: context,
+        bloc: bloc,
+        repository: _repository!,
         name: name,
         path: path,
+        parent: extractParentFromPath(path),
         renameAction: () {
           // ignore: todo
           // TODO: Check if available in the library and implement
