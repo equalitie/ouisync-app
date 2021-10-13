@@ -434,7 +434,7 @@ class _MainPageState extends State<MainPage>
         final actionByType = item.itemType == ItemType.file
         ? () async {
           final fileSize = await _fileSize(item.path);
-          _showFileDetails(item.name, item.path, fileSize);
+          _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
         : () => navigateToPath(
             type: Navigation.content,
@@ -491,7 +491,7 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  Future<dynamic> _showFileDetails(name, path, size) => showModalBottomSheet(
+  Future<dynamic> _showFileDetails(bloc, name, path, size) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
@@ -504,6 +504,8 @@ class _MainPageState extends State<MainPage>
     ),
     builder: (context) {
       return FileDetail(
+        context: context,
+        bloc: bloc,
         repository: _repository!,
         name: name,
         path: path,
