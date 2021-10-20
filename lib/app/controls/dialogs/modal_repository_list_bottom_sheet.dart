@@ -10,11 +10,10 @@ import '../controls.dart';
 
 class RepositoryList extends StatelessWidget {
   const RepositoryList({
-    Key? key,
     required this.context,
     required this.cubit,
     required this.current,
-  }) : super(key: key);
+  });
 
   final BuildContext context;
   final RepositoriesCubit cubit;
@@ -55,18 +54,15 @@ class RepositoryList extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Your Repositories'),
-          Container(
-            height: 150.0,
-            child: _buildRepositoryItem(localRepositories, current)
-          ),
+          buildTitle('Your Lockboxes'),
+          _buildRepositoryItem(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
             child: buildIconLabel(
               Icons.add_circle_outline_rounded,
               'Add new lockbox',
-              iconSize: 30.0,
+              iconSize: 40.0,
               iconColor: Colors.black,
               infoSize: 25.0,
               labelPadding: EdgeInsets.only(bottom: 10.0)
@@ -78,8 +74,30 @@ class RepositoryList extends StatelessWidget {
   }
 
   Widget _buildRepositoryItem(List<String> repositories, String current) => ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
     itemCount: repositories.length,
     itemBuilder: (context, index) {
+      final icon = repositories[index] == current
+      ? const Icon(
+        Icons.lock_open_rounded,
+        size: 40.0,
+        color:  Colors.black
+      )
+      : const Icon(
+        Icons.lock,
+        size: 40.0,
+        color:  Colors.black54
+      );
+
+      final textColor = repositories[index] == current
+      ? Colors.black
+      : Colors.black54;
+
+      final fontWeight = repositories[index] == current
+      ? FontWeight.bold
+      : FontWeight.normal;
+
       return GestureDetector(
         onTap: () {
           this.cubit.openRepository(repositories[index]);
@@ -91,19 +109,16 @@ class RepositoryList extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
           child: Row(
             children: [
-              const Icon(
-                Icons.check,
-                size: 40.0,
-                color:  Colors.black
-              ),
-              SizedBox(width: 20.0,),
+              icon,
+              SizedBox(width: 10.0,),
               Expanded(
                 flex: 1,
                 child: Text(
                   repositories[index],
                   style:  TextStyle(
-                    fontSize: 30.0,
-
+                    fontSize: 25.0,
+                    color: textColor,
+                    fontWeight: fontWeight
                   )
                 ),
               )
