@@ -359,6 +359,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
           filePopupMenu: Dialogs
               .filePopupMenu(
                 context,
+                widget.repository,
                 BlocProvider. of<DirectoryBloc>(context),
                 { actionDeleteFile: item }
               ),
