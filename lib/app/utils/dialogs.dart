@@ -48,53 +48,6 @@ abstract class Dialogs {
   static _hideLoadingDialog(context) => 
     Navigator.pop(context);
 
-  static AlertDialog buildDeleteFolderAlertDialog(BuildContext context, bloc, updateUI, parentPath, path) {
-    return AlertDialog(
-      title: const Text('Delete folder'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            Text(
-              path,
-              style: TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold
-              ),
-            ),
-            const SizedBox(
-              height: 30.0,
-            ),
-            const Text('Are you sure you want to delete this folder?'),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: const Text('DELETE'),
-          onPressed: () {
-            bloc
-            .add(
-              DeleteFolder(
-                parentPath: parentPath,
-                path: path
-              )
-            );
-
-            updateUI.call();
-    
-            Navigator.of(context).pop(true);
-          },
-        ),
-        TextButton(
-          child: const Text('CANCEL'),
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-        ),
-      ],
-    );
-  }
-
   static actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
     barrierDismissible: false,
