@@ -26,6 +26,8 @@ const String messageNoStoragePermissionsGranted = 'OuiSync need access to the ph
 '\n   > Look for OuiSync and select it'
 '\n   > Select Allow'
 '\n\nThen you can open OuiSync again and use it as expected';
+const String messageOhOh = 'Oh oh...';
+const String messageErrorState = 'Something went wrong <bold>:\\</bold>';
 const String messageNoRepos = 'No lockboxes found';
 const String messageEmptyRepo = 'This repository is empty';
 const String messageEmptyFolder = 'This folder is empty';
