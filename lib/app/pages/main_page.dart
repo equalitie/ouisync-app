@@ -17,6 +17,7 @@ import '../utils/utils.dart';
 import 'pages.dart';
 
 typedef RepositoryCallback = void Function(Repository repository, String name);
+typedef ShareRepositoryCallback = void Function();
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -149,21 +150,23 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  navigateToPath({type, origin, destination, withProgress = false}) =>
-  BlocProvider.of<DirectoryBloc>(context)
-  .add(
-    NavigateTo(
-      repository: _repository!,
-      type: type,
-      origin: origin,
-      destination: destination,
-      withProgress: withProgress
-    )
-  ); 
+  navigateToPath({type, origin, destination, withProgress = false}) {
+    print('navigateToPath destination: $destination');
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      NavigateTo(
+        repository: _repository!,
+        type: type,
+        origin: origin,
+        destination: destination,
+        withProgress: withProgress
+      )
+    ); 
+  }
 
   void subscribeToRepositoryNotifications(repository) async {
     _repositorySubscription = repository.subscribe(() { 
-      getContents(path: slash, isSyncing: true);
+      getContents(path: _currentFolder, isSyncing: true);
     });
   }
 
@@ -174,46 +177,71 @@ class _MainPageState extends State<MainPage>
       body: _mainState,
       floatingActionButton: new FloatingActionButton(
         child: const Icon(Icons.add_rounded),
-        onPressed: () => _showDirectoryActions(BlocProvider.of<DirectoryBloc>(context), _currentFolder),
+        onPressed: () => _showDirectoryActions(
+          context, 
+          BlocProvider.of<DirectoryBloc>(context), 
+          _repository!, 
+          _currentFolder
+        ),
       ),
     );
   }
 
   _getOuiSyncBar() => OuiSyncBar(
     appBranding: AppBranding(appName: widget.title),
-    centralWidget: RepositoryPicker(
-      cubit: BlocProvider.of<RepositoriesCubit>(context),
-      onRepositorySelect: (repository, name) {
-        if (_repositorySubscription != null) {
-          _repositorySubscription!.cancel();
-        }
-
-        _repository = repository;
-        _repositoryName = name;
-
-        switchMainState(_repositoryContentBuilder());
-
-        navigateToPath(
-          type: Navigation.content,
-          origin: slash,
-          destination: slash,
-          withProgress: true
-        );
-
-        subscribeToRepositoryNotifications(_repository);
-      },
-    ),
+    centralWidget: SearchBar(),
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
         child: buildActionIcon(icon: Icons.settings_outlined, onTap: settingsAction, size: 35.0),
       )
     ],
-    bottom: RouteBar(animationController: _syncController),
+    bottom: NavigationBar(
+      cubitRepositories: BlocProvider.of<RepositoriesCubit>(context),
+      onRepositorySelect: switchRepository,
+      shareRepositoryOnTap: shareRepository,
+    ),
     mode: BarMode.full,
-    toolbarHeight: 150.0,
-    preferredSize: Size.fromHeight(150.0)
+    toolbarHeight: 200.0,
+    preferredSize: Size.fromHeight(200.0)
   );
+
+  void switchRepository(repository, name) {
+    if (_repositorySubscription != null) {
+      _repositorySubscription!.cancel();
+      print('Repository subscription ${_repositorySubscription!.handle} closed');
+    }
+
+    if (_repository != null) {
+      _repository!.close();
+      print('Repository ${_repository!.handle} closed');
+    }
+
+    NativeChannels.setRepository(repository);
+
+    _repository = repository;
+    _repositoryName = name;
+
+    switchMainState(_repositoryContentBuilder());
+
+    navigateToPath(
+      type: Navigation.content,
+      origin: slash,
+      destination: slash,
+      withProgress: true
+    );
+
+    subscribeToRepositoryNotifications(_repository);
+  }
+
+  void shareRepository() {
+    if (_repository == null) {
+      print('No repository selected');
+      return;  
+    }
+
+    print('Share repository $_repository tapped');
+  }
 
   _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
     builder: (context, state) {
@@ -238,17 +266,11 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadFailure) {
-        return Text(
-          'Something went wrong!',
-          style: TextStyle(color: Colors.red),
-        );
+        return _errorState();
       }
 
       if (state is NavigationLoadFailure) {
-        return Text(
-          'Something went wrong in navigation',
-          style: TextStyle(color: Colors.red),
-        );
+        return _errorState();
       }
 
       return Center(child: Text('Ooops!'));
@@ -263,11 +285,14 @@ class _MainPageState extends State<MainPage>
 
           updateFolderContents(state.contents);
           updateRoute(state.destination);
+
+          return;
         }
       }
 
       if (state is SyncingInProgress) {
         _syncController.repeat();
+        return;
       }
 
       if (state is DirectoryLoadSuccess) {
@@ -276,12 +301,16 @@ class _MainPageState extends State<MainPage>
         if (state.isSyncing) {  
           _syncController.stop();  
         }
+
+        return;
       }
 
       if (state is DirectoryLoadFailure) {
         if (state.isSyncing) {
           _syncController.stop();  
         }
+
+        return;
       }
     }
   );
@@ -337,6 +366,46 @@ class _MainPageState extends State<MainPage>
       )
     );
   }
+
+  _errorState() => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Align(
+        alignment: Alignment.center,
+        child: Text(
+          messageOhOh,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.red
+          ),
+        ),
+      ),
+      SizedBox(height: 20.0),
+      Align(
+        alignment: Alignment.center,
+        child: StyledText(
+          text: messageErrorState,
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.red
+          ),
+          styles: {
+            'bold': TextStyle(fontWeight: FontWeight.bold),
+            'arrow_down': IconStyle(Icons.south),
+          },
+        ),
+      ),
+      SizedBox(height: 20.0),
+      ElevatedButton(
+        onPressed: refreshCurrent,
+        child: Text('Reload')
+      ),
+    ],
+  );
 
   _noRepositories() => Column(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -535,36 +604,11 @@ class _MainPageState extends State<MainPage>
         name: name,
         path: path,
         parent: extractParentFromPath(path),
-        renameAction: () {
-          // ignore: todo
-          // TODO: Check if available in the library and implement
-        },
-        deleteAction: () async {
-          final result = await showDialog<bool>(
-            context: context,
-            barrierDismissible: false, // user must tap button!
-            builder: (BuildContext context) {
-              final parent = extractParentFromPath(_currentFolder);
-
-              return Dialogs.buildDeleteFolderAlertDialog(
-                context,
-                BlocProvider.of<DirectoryBloc>(context),
-                getContents(path: parent, withProgress: true),
-                extractParentFromPath(path),
-                path,
-              );
-            },
-          );
-
-          if (result ?? false) {
-            Navigator.of(context).pop(false);
-          }
-        },
       );
     }
   );
 
-  Future<dynamic> _showDirectoryActions(bloc, parent) => showModalBottomSheet(
+  Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
@@ -577,66 +621,13 @@ class _MainPageState extends State<MainPage>
     ),
     builder: (context) {
       return DirectoryActions(
+        context: context,
+        bloc: bloc,
+        repository: repository,
         parent: parent,
-        folderAction: () => createFolderDialog(bloc),
-        fileAction: () async { await addFile(); },
       );
     }
   );
-
-  void createFolderDialog(bloc) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
-
-        return ActionsDialog(
-          title: 'Create Folder',
-          body: FolderCreation(
-            context: context,
-            bloc: bloc,
-            repository: _repository!,
-            path: _currentFolder,
-            formKey: formKey,
-          ),
-        );
-      }
-    ).then((newFolder) => {
-      if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
-        Navigator.of(this.context).pop() 
-      }
-    });
-  }
-
-  Future<void> addFile() async {
-    final result = await FilePicker
-    .platform
-    .pickFiles(
-      type: FileType.any,
-      withReadStream: true
-    );
-
-    if(result != null) {
-      final newFilePath = _currentFolder == '/'
-      ? '/${result.files.single.name}'
-      : '$_currentFolder/${result.files.single.name}';
-      
-      final fileByteStream = result.files.single.readStream!;
-      BlocProvider.of<DirectoryBloc>(context)
-      .add(
-        CreateFile(
-          repository: _repository!,
-          parentPath: _currentFolder,
-          newFilePath: newFilePath,
-          fileByteStream: fileByteStream
-        )
-      );
-
-      Navigator.of(context).pop();
-      getContents(path: _currentFolder, withProgress: true);
-    }
-  }
 
   void createRepoDialog(cubit) async {
     await showDialog(
