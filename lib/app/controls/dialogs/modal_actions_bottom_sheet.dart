@@ -1,10 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../bloc/blocs.dart';
+import '../../bloc/directory/directory_bloc.dart';
 import '../../utils/utils.dart';
 import '../controls.dart';
 

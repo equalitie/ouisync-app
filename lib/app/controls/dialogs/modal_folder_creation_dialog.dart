@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:path/path.dart';
 
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
