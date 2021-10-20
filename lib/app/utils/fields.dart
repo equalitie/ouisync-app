@@ -117,7 +117,8 @@ Widget buildConstrainedText(text, {
   textAlign = TextAlign.start,
   softWrap = true,
   overflow = TextOverflow.clip,
-  fontWeight = FontWeight.w600
+  fontWeight = FontWeight.w600,
+  color = Colors.black
 })  => Expanded(
   flex: 1,
   child: Text(
@@ -127,7 +128,8 @@ Widget buildConstrainedText(text, {
     overflow: overflow,
     style: TextStyle(
       fontSize: size,
-      fontWeight: fontWeight
+      fontWeight: fontWeight,
+      color: color
     ),
   ),
 );
