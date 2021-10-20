@@ -40,63 +40,72 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
   _buildBar(route) {
     return Column(
       children: [
-        Container(
-          decoration: const BoxDecoration(
-            color: Colors.transparent,
-            border: Border(
-              top: BorderSide(width: 1.0, color: Colors.transparent, style: BorderStyle.solid),
-            ),
-          ),
-          padding: EdgeInsets.only(right: 10.0, left: 10.0, bottom: 10.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: RepositoryPicker(
-                  cubit: widget.cubitRepositories,
-                  onRepositorySelect: widget.onRepositorySelect
-                ),
-              ),
-              SizedBox(width: 10.0,),
-              Expanded(
-                flex: 0,
-                child: GestureDetector(
-                  onTap: widget.shareRepositoryOnTap,
-                  child: const Icon(
-                    Icons.share_outlined,
-                    size: 40.0,
-                    color: Colors.white,
-                  ),
-                )
-              )
-            ],
-          )
-        ),
-        Container(
-          padding: EdgeInsets.all(10.0),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(width: 0.0, color: Colors.transparent, style: BorderStyle.solid),
-            ),
-            color: Colors.white,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: route,
-                    ),
-                  ],
-                )
-              ),
-            ],
-          ),
-        ),
+        _repositoriesBar(),
+        _routeBar(route),
       ],
+    );
+  }
+
+  Container _repositoriesBar() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+        border: Border(
+          top: BorderSide(width: 1.0, color: Colors.transparent, style: BorderStyle.solid),
+        ),
+      ),
+      padding: EdgeInsets.only(right: 10.0, left: 10.0, bottom: 10.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: RepositoryPicker(
+              cubit: widget.cubitRepositories,
+              onRepositorySelect: widget.onRepositorySelect
+            ),
+          ),
+          SizedBox(width: 10.0,),
+          Expanded(
+            flex: 0,
+            child: GestureDetector(
+              onTap: widget.shareRepositoryOnTap,
+              child: const Icon(
+                Icons.share_outlined,
+                size: 40.0,
+                color: Colors.white,
+              ),
+            )
+          )
+        ],
+      )
+    );
+  }
+
+  Container _routeBar(route) {
+    return Container(
+      padding: EdgeInsets.all(10.0),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 0.0,
+            color: Colors.transparent,
+            style: BorderStyle.solid
+          ),
+        ),
+        color: Colors.white,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: [
+                Expanded(child: route),
+              ],
+            )
+          ),
+        ],
+      ),
     );
   }
 }
