@@ -35,7 +35,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   void initState() {
     super.initState();
 
-    NativeChannels.init(widget.session);
+    NativeChannels.init(repository: widget.defaultRepository);
   }
 
   @override
