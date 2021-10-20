@@ -24,7 +24,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: toolbarHeight,
-      shadowColor: Colors.transparent,
+      shadowColor: Colors.black26,
       leading: appBranding,
       leadingWidth: 140.0,
       title: centralWidget,
@@ -34,7 +34,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
       PreferredSize(
         preferredSize: preferredSize,
         child: Container(
-          color: Colors.white,
+          color: Theme.of(context).primaryColor,
           child: bottom
         ),
       ),
