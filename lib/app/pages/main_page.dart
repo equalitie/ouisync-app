@@ -552,6 +552,7 @@ class _MainPageState extends State<MainPage>
   _popupMenu(item) => Dialogs
   .filePopupMenu(
     context,
+    _repository!,
     BlocProvider. of<DirectoryBloc>(context),
     { 
       actionPreviewFile: item,

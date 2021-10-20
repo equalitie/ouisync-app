@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../controls/controls.dart';
 import '../models/models.dart';
@@ -59,7 +61,7 @@ abstract class Dialogs {
     }
   );
 
-  static filePopupMenu(BuildContext context, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
+  static filePopupMenu(BuildContext context, Repository repository, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
     return PopupMenuButton(
       itemBuilder: (context) {
         return fileMenuOptions.entries.map((e) => 
@@ -73,14 +75,14 @@ abstract class Dialogs {
         final data = (value as MapEntry<String, BaseItem>).value;
         switch (value.key) {
           case actionDeleteFile:
-            _deleteFileWithConfirmation(context, bloc, data.path);
+            _deleteFileWithConfirmation(context, repository, bloc, data.path);
             break;
         }
       }
     );
   }
 
-  static _deleteFileWithConfirmation(BuildContext context, bloc, path) =>
+  static _deleteFileWithConfirmation(BuildContext context, repository, bloc, path) =>
     showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -88,11 +90,11 @@ abstract class Dialogs {
         final fileName = getPathFromFileName(path);
         final parent = extractParentFromPath(path);
 
-        return buildDeleteFileAlertDialog(bloc, path, context, fileName, parent);
+        return buildDeleteFileAlertDialog(repository, bloc, path, context, fileName, parent);
       },
     );
 
-  static AlertDialog buildDeleteFileAlertDialog(bloc, path, BuildContext context, String fileName, String parent) {
+  static AlertDialog buildDeleteFileAlertDialog(repository, bloc, path, BuildContext context, String fileName, String parent) {
     return AlertDialog(
       title: const Text('Delete file'),
       content: SingleChildScrollView(
@@ -137,6 +139,7 @@ abstract class Dialogs {
             bloc
             .add(
               DeleteFile(
+                repository: repository,
                 parentPath: parent,
                 filePath: path
               )
