@@ -124,11 +124,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   }
 
   Future<DirectoryState> navigateTo(Repository repository, Navigation type, String origin, String destination) async {
-    late final folderContentsResult;
+    var folderContentsResult;
 
     try {
       folderContentsResult = await directoryRepository.getFolderContents(repository, destination);
-
       if (folderContentsResult.errorMessage.isNotEmpty) {
         print('Navigation to $destination failed:\n${folderContentsResult.errorMessage}');
         return  NavigationLoadFailure();
