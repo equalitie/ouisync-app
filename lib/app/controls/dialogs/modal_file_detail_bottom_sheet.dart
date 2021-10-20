@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -10,14 +9,18 @@ import '../../utils/utils.dart';
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
-    required this.directoryRepository,
+    required this.context,
+    required this.bloc,
+    required this.repository,
     required this.name,
     required this.path,
     required this.parent,
     required this.size,
   });
 
-  final DirectoryRepository directoryRepository;
+  final BuildContext context;
+  final DirectoryBloc bloc;
+  final Repository repository;
   final String name;
   final String path;
   final String parent;
@@ -28,8 +31,8 @@ class FileDetail extends StatefulWidget {
 }
 
 class _FileDetailState extends State<FileDetail> {
-  DropdownMenuItem? _selectedDestination ;
-  List<DropdownMenuItem> _destinations = <DropdownMenuItem>[];
+  String _selectedDestination = slash;
+  List<DropdownMenuItem<String>> _destinations = <DropdownMenuItem<String>>[];
 
   bool _movingFile = false;
   bool _navigateToDestination = false;
@@ -38,36 +41,43 @@ class _FileDetailState extends State<FileDetail> {
   void initState() {
     super.initState();
     
-    _loadFolders(widget.directoryRepository);
+    _loadFolders(widget.repository);
   }
 
-  Future<void> _loadFolders(DirectoryRepository repository) async {
-    final directoriesItem = <DropdownMenuItem>[];
-    final repoContents = await repository.getContentsRecursive(slash);
+  Future<void> _loadFolders(Repository repository) async {
+    final directoriesItem = <DropdownMenuItem<String>>[];
+    final directoryRepository = DirectoryRepository();
+    
+    if (widget.parent != slash) {
+      directoriesItem.add(DropdownMenuItem(
+        child: Text(slash),
+        value: slash,
+      ));
+    }
+
+    final repoContents = await directoryRepository.getContentsRecursive(repository, slash, <BaseItem>[]);
+    repoContents.sort((a, b) => a.path.compareTo(b.path));
+    
     repoContents.forEach((element) { 
       if (element.itemType == ItemType.folder 
       && element.path != widget.parent) {
         directoriesItem.add(DropdownMenuItem(
-          child: Text(element.name),
+          child: Text(element.path),
           value: element.path,
         ));
       }  
     });
 
-    setState(() {
-      _destinations.addAll(directoriesItem);
-    });
+    _selectedDestination = directoriesItem.first.value!;
+    _destinations.addAll(directoriesItem);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       margin: const EdgeInsets.all(16.0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: theme.cardColor,
         borderRadius: const BorderRadius.all(Radius.circular(16.0))
       ),
       child: Column(
@@ -89,27 +99,10 @@ class _FileDetailState extends State<FileDetail> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildTitle('File Details'),
-          GestureDetector(
-            onTap: () async => await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
-            child: buildIconLabel(
-              Icons.preview_rounded,
-              'Preview',
-              iconSize: 40.0,
-              infoSize: 18.0,
-              labelPadding: EdgeInsets.only(bottom: 30.0)
-            ),
-          ),
-          GestureDetector(
-            onTap: () async => await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
-            child: buildIconLabel(
-              Icons.share_rounded,
-              'Share',
-              iconSize: 40.0,
-              infoSize: 18.0,
-              labelPadding: EdgeInsets.only(bottom: 30.0)
-            ),
-          ),
-          _buildMoveFileSection(),
+          _buildPreviewButton(),
+          _buildShareButton(),
+          _buildMoveFileSection(widget.context, widget.bloc, widget.repository, widget.parent, widget.path),
+          _buildDeleteButton(),
           Divider(
             height: 50.0,
             thickness: 2.0,
@@ -142,12 +135,38 @@ class _FileDetailState extends State<FileDetail> {
     );
   }
 
-  Widget _buildMoveFileSection() {
+  GestureDetector _buildPreviewButton() {
+    return GestureDetector(
+          onTap: () async => await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
+          child: buildIconLabel(
+            Icons.preview_rounded,
+            'Preview',
+            iconSize: 40.0,
+            infoSize: 18.0,
+            labelPadding: EdgeInsets.only(bottom: 30.0)
+          ),
+        );
+  }
+
+  GestureDetector _buildShareButton() {
+    return GestureDetector(
+          onTap: () async => await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
+          child: buildIconLabel(
+            Icons.share_rounded,
+            'Share',
+            iconSize: 40.0,
+            infoSize: 18.0,
+            labelPadding: EdgeInsets.only(bottom: 30.0)
+          ),
+        );
+  }
+
+  Widget _buildMoveFileSection(context, bloc, repository, parent, path) {
     return Container(
       child: Column(
         children: [
           _buildMoveFileButton(),
-          _buildMoveFileDetail(),
+          _buildMoveFileDetail(context, bloc, repository, parent, path),
         ],
       ),
     );
@@ -161,26 +180,26 @@ class _FileDetailState extends State<FileDetail> {
             'Move',
             iconSize: 40.0,
             infoSize: 18.0,
-            labelPadding: EdgeInsets.only(bottom: 10.0)
+            labelPadding: EdgeInsets.only(bottom: 30.0)
           ),
         );
   }
 
-  Visibility _buildMoveFileDetail() {
+  Visibility _buildMoveFileDetail(context, bloc, repository, parent, path) {
     return Visibility(
       visible: _movingFile,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
+        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
         child: Container(
           child: Column(
             children: [
-              buildInfoLabel('From:', extractParentFromPath(widget.path)),
+              buildInfoLabel('From:', extractParentFromPath(widget.path), padding: EdgeInsets.all(0.0)),
               _destinationDropDown(),
               _buildNavigateToCheckBox(),
               buildActionsSection(
                 context,
-                _actions(context, 'origin', 'filePath'),
-                padding: EdgeInsets.only(top: 30.0)
+                _actions(context, bloc, repository, parent, path),
+                padding: EdgeInsets.only(top: 20.0)
               ),
             ]
           ),
@@ -191,9 +210,14 @@ class _FileDetailState extends State<FileDetail> {
 
   DropdownButtonFormField _destinationDropDown() {
     return DropdownButtonFormField(
-      value: _selectedDestination,
+      icon: const Icon(Icons.create_new_folder_outlined),
+      iconSize: 30.0,
       hint: Text('Destination'),
+      value: _selectedDestination,
       items: _destinations,
+      onChanged: (value) {
+        _selectedDestination = value;
+      },
     );
   }
 
@@ -217,9 +241,9 @@ class _FileDetailState extends State<FileDetail> {
     );
   }
 
-  List<Widget> _actions(context, origin, filePath) => [
+  List<Widget> _actions(context, bloc, repository, parent, filePath) => [
     ElevatedButton(
-      onPressed: () => _moveFile(context, origin, filePath),
+      onPressed: () => _moveFile(context, bloc, repository, parent, filePath),
       child: Text('Move')
     ),
     SizedBox(width: 20.0,),
@@ -229,33 +253,33 @@ class _FileDetailState extends State<FileDetail> {
     ),
   ];
 
-  void _moveFile(context, origin, filePath) {
-    final newFilePath = _selectedDestination!.value == slash
+  void _moveFile(context, bloc, repository, parent, filePath) {
+    final newFilePath = _selectedDestination == slash
     ? '/${widget.name}'
-    : '${_selectedDestination!.value}/${widget.name}';
+    : '$_selectedDestination/${widget.name}';
     
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
-      MoveFile(
-        origin: origin,
-        destination: _selectedDestination!.value,
-        filePath: filePath,
-        newFilePath: newFilePath
+    bloc.add(
+      MoveEntry(
+        repository: repository,
+        origin: parent,
+        destination: _selectedDestination,
+        entryPath: filePath,
+        newDestinationPath: newFilePath
       )
     );
 
     if (_navigateToDestination) {
-      BlocProvider.of<DirectoryBloc>(context)
-      .add(
+      bloc.add(
         NavigateTo(
+          repository: repository,
           type: Navigation.content,
-          origin: origin,
-          destination: _selectedDestination!.value,
+          origin: parent,
+          destination: _selectedDestination,
           withProgress: true
         )
       );
 
-      return;
+      // return;
     }
 
     Navigator.of(context).pop(newFilePath);
@@ -263,4 +287,17 @@ class _FileDetailState extends State<FileDetail> {
 
   _showHideMoveFileSection() => setState(() { _movingFile = !_movingFile; });
   _changeNavigateToCheckBoxState(state) => setState(() => _navigateToDestination = state); 
+
+  GestureDetector _buildDeleteButton() {
+    return GestureDetector(
+      onTap: () async => {},
+      child: buildIconLabel(
+        Icons.delete_outlined,
+        'Delete',
+        iconSize: 40.0,
+        infoSize: 18.0,
+        labelPadding: EdgeInsets.only(bottom: 30.0)
+      ),
+    );
+  }
 }
