@@ -1,42 +1,45 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../utils/utils.dart';
+import '../controls.dart';
 
 class DirectoryActions extends StatelessWidget {
   const DirectoryActions({
-    Key? key,
+    required this.context,
+    required this.bloc,
+    required this.repository,
     required this.parent,
-    required this.folderAction,
-    required this.fileAction
-  }) : super(key: key);
+  });
 
+  final BuildContext context;
+  final DirectoryBloc bloc;
+  final Repository repository;
   final String parent;
-  final Function folderAction;
-  final Function fileAction;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       margin: const EdgeInsets.all(16.0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: theme.cardColor,
         borderRadius: const BorderRadius.all(Radius.circular(16.0))
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           buildHandle(context),
-          _folderDetails(context),
+          _folderDetails(this.context, this.bloc, this.repository, this.parent),
         ],
       ),
     );
   }
 
-  Widget _folderDetails(BuildContext context) {
+  Widget _folderDetails(context, bloc, repository, parent) {
     return Padding(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
       child: Column(
@@ -51,12 +54,12 @@ class DirectoryActions extends StatelessWidget {
               _buildAction(
                 name: 'Create a folder',
                 icon: Icons.folder_outlined,
-                action: folderAction
+                action: () => createFolderDialog(context, bloc, repository, parent)
               ),
               _buildAction(
                 name: 'Add a file',
                 icon: Icons.insert_drive_file_outlined,
-                action: fileAction
+                action: () async => await addFile(context, bloc, repository, parent)
               )
             ]
           ),
@@ -86,4 +89,56 @@ class DirectoryActions extends StatelessWidget {
       )
     ),
   ); 
+
+  void createFolderDialog(context, bloc, repository, parent) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Create Folder',
+          body: FolderCreation(
+            context: context,
+            bloc: bloc,
+            repository: repository,
+            path: parent,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((newFolder) => {
+      if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
+        Navigator.of(this.context).pop() 
+      }
+    });
+  }
+
+  Future<void> addFile(context, bloc, repository, parent) async {
+    final result = await FilePicker
+    .platform
+    .pickFiles(
+      type: FileType.any,
+      withReadStream: true
+    );
+
+    if(result != null) {
+      final newFilePath = parent == '/'
+      ? '/${result.files.single.name}'
+      : '$parent/${result.files.single.name}';
+      
+      final fileByteStream = result.files.single.readStream!;
+      bloc.add(
+        CreateFile(
+          repository: repository,
+          parentPath: parent,
+          newFilePath: newFilePath,
+          fileByteStream: fileByteStream
+        )
+      );
+
+      Navigator.of(context).pop();
+    }
+  }
 }
