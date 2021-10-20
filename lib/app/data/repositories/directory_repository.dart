@@ -267,12 +267,12 @@ class DirectoryRepository {
     return <BaseItem>[].single;
   }
 
-  Future<BasicResult> deleteFolder(Repository repository, String path) async {
+  Future<BasicResult> deleteFolder(Repository repository, String path, bool recursive) async {
     BasicResult deleteFolderResult;
     String error = '';
 
     try {
-      await Directory.remove(repository, path);
+      await Directory.remove(repository, path, recursive: recursive);
     } catch (e) {
       print('Exception deleting folder $path:\n${e.toString()}');
       error = 'Delete folder $path failed';

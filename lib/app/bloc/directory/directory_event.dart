@@ -58,18 +58,21 @@ class DeleteFolder extends DirectoryEvent {
     required this.repository,
     required this.parentPath,
     required this.path,
+    this.recursive = false
   }) :
   assert (path != '');
 
   final Repository repository;
   final String parentPath;
   final String path;
+  final bool recursive;
 
   @override
   List<Object> get props => [
     repository,
     parentPath,
     path,
+    recursive
   ];
 
 }

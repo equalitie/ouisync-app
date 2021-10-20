@@ -36,7 +36,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     if (event is DeleteFolder) {
       yield DirectoryLoadInProgress();
 
-      yield await deleteFolder(event.repository, event.path, event.parentPath);
+      yield await deleteFolder(event.repository, event.path, event.parentPath, event.recursive);
     }
 
     if (event is NavigateTo) {
@@ -105,11 +105,11 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     return DirectoryLoadSuccess(contents: getContentsResult.result, isSyncing: isSyncing);
   }
 
-  Future<DirectoryState> deleteFolder(Repository repository, String path, String parentPath) async {
+  Future<DirectoryState> deleteFolder(Repository repository, String path, String parentPath, bool recursive) async {
     late final deleteFolderResult;
 
     try {
-      deleteFolderResult = await directoryRepository.deleteFolder(repository, path);
+      deleteFolderResult = await directoryRepository.deleteFolder(repository, path, recursive);
       if (deleteFolderResult.errorMessage.isNotEmpty) 
       {
         print('The folder ($path) could not be deleted.');
