@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+part of 'synchronization_cubit.dart';
 
 abstract class SynchronizationState extends Equatable {
   const SynchronizationState();
@@ -9,17 +9,8 @@ abstract class SynchronizationState extends Equatable {
 
 class SynchronizationInitial extends SynchronizationState {}
 
-class SynchronizationNotification extends SynchronizationState {
-  const SynchronizationNotification({
-    required this.contents,
-  });
+class SynchronizationOngoing extends SynchronizationState {}
 
-  final List<dynamic> contents;
-
-  @override
-  List<Object> get props => [
-    contents,
-  ];
-}
+class SynchronizationDone extends SynchronizationState {}
 
 class SynchronizationFailure extends SynchronizationState {}
