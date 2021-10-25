@@ -14,10 +14,10 @@ class Descriptions {
       case SyncStatus.paused:
         description = "paused";
         break;
-      case SyncStatus.stopped:
+      case SyncStatus.done:
         description = "stopped";
         break;
-      case SyncStatus.problem:
+      case SyncStatus.failed:
         description = "problem";
         break;
     }
