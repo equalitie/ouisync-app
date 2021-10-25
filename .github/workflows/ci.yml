@@ -26,3 +26,8 @@ jobs:
           channel: 'stable'
           flutter-version: '2.5.2'
       - run: flutter pub get
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v1
+        with:
+         name: debug-apk
+         path: build/app/outputs/apk/release/app-debug.apk
