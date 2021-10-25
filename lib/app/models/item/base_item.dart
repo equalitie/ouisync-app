@@ -45,9 +45,9 @@ abstract class BaseItem extends Equatable {
 }
 
 enum SyncStatus {
-  syncing,
   idle,
+  syncing,
   paused,
-  stopped,
-  problem
+  done,
+  failed
 }

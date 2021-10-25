@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/blocs.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
-import '../controls.dart';
+import '../custom_widgets.dart';
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({

@@ -9,8 +9,8 @@ import 'package:styled_text/icon_style.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
-import '../controls/controls.dart';
 import '../cubit/cubits.dart';
+import '../custom_widgets/custom_widgets.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -37,29 +37,25 @@ class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin {
 
   Repository? _repository;
-  String _repositoryName = '';
   Subscription? _repositorySubscription;
 
   Widget? _mainState;
     
   late StreamSubscription _intentDataStreamSubscription;
+  late final SynchronizationCubit _syncingCubit;
 
-  List<BaseItem> _folderContents = <BaseItem>[];
+  String _repositoryName = '';
+
   String _currentFolder = slash; // Initial value: /
-
-  late AnimationController _actionsController;
-  late AnimationController _syncController;
-  
-  // late Color backgroundColor;
-  // late Color foregroundColor;
+  List<BaseItem> _folderContents = <BaseItem>[];
 
   @override
   void initState() {
     super.initState();
 
-    handleIncomingShareIntent();
-    initAnimationControllers();
+    _syncingCubit = BlocProvider.of<SynchronizationCubit>(context);
 
+    handleIncomingShareIntent();
     initRepository();
   }
 
@@ -69,9 +65,6 @@ class _MainPageState extends State<MainPage>
 
     _repositorySubscription!.cancel();
     _intentDataStreamSubscription.cancel();
-    
-    _actionsController.dispose();
-    _syncController.dispose();
   }
 
   void handleIncomingShareIntent() {
@@ -106,18 +99,6 @@ class _MainPageState extends State<MainPage>
           directoryBlocPath: _currentFolder,
         );
       })
-    );
-  }
-
-  initAnimationControllers() {
-    _actionsController = new AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: actionsFloatingActionButtonAnimationDuration),
-    );
-
-    _syncController = new AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: syncAnimationDuration)
     );
   }
 
@@ -165,6 +146,7 @@ class _MainPageState extends State<MainPage>
 
   void subscribeToRepositoryNotifications(repository) async {
     _repositorySubscription = repository.subscribe(() { 
+      _syncingCubit.syncing();
       getContents(path: _currentFolder, isSyncing: true);
     });
   }
@@ -174,7 +156,8 @@ class _MainPageState extends State<MainPage>
     return Scaffold(
       appBar: _getOuiSyncBar(),
       body: _mainState,
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: _repository != null
+      ? new FloatingActionButton(
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
           context, 
@@ -182,7 +165,8 @@ class _MainPageState extends State<MainPage>
           _repository!, 
           _currentFolder
         ),
-      ),
+      )
+      : Container(),
     );
   }
 
@@ -290,7 +274,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is SyncingInProgress) {
-        _syncController.repeat();
+        _syncingCubit.syncing();
         return;
       }
 
@@ -298,7 +282,7 @@ class _MainPageState extends State<MainPage>
         updateFolderContents(state.contents);
 
         if (state.isSyncing) {  
-          _syncController.stop();  
+          _syncingCubit.done();
         }
 
         return;
@@ -306,7 +290,7 @@ class _MainPageState extends State<MainPage>
 
       if (state is DirectoryLoadFailure) {
         if (state.isSyncing) {
-          _syncController.stop();  
+          _syncingCubit.failed();
         }
 
         return;

@@ -9,7 +9,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
-import '../controls/controls.dart';
+import '../custom_widgets/custom_widgets.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
 
