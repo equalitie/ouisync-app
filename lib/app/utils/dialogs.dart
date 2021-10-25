@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_app/app/custom_widgets/custom_widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../controls/controls.dart';
+import '../bloc/blocs.dart';
 import '../models/models.dart';
 import 'utils.dart';
 

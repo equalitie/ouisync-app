@@ -6,7 +6,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../bloc/blocs.dart';
 import '../../bloc/directory/directory_bloc.dart';
 import '../../utils/utils.dart';
-import '../controls.dart';
+import '../custom_widgets.dart';
 
 class DirectoryActions extends StatelessWidget {
   const DirectoryActions({

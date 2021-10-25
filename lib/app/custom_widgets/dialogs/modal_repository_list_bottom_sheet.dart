@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
-import '../controls.dart';
+import '../custom_widgets.dart';
 
 class RepositoryList extends StatelessWidget {
   const RepositoryList({

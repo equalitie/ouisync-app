@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
-import '../controls.dart';
+import '../custom_widgets.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
