@@ -103,7 +103,6 @@ class _MainPageState extends State<MainPage>
   }
 
   void initRepository() {
-
     switchMainState(widget.defaultRepository == null
     ? _noRepositories()
     : _repositoryContentBuilder());
@@ -143,6 +142,33 @@ class _MainPageState extends State<MainPage>
       )
     ); 
   }
+
+  updateRoute(destination) {
+    BlocProvider.of<RouteBloc>(context)
+    .add(
+      UpdateRoute(
+        path: destination,
+        action: () { //Back button action, hence we invert the origin and destination values
+          final from = destination;
+          final backTo = extractParentFromPath(from);
+
+          BlocProvider.of<DirectoryBloc>(context)
+          .add(
+            NavigateTo(
+              repository: _repository!,
+              type: Navigation.content,
+              origin: from,
+              destination: backTo,
+              withProgress: true
+            )
+          );
+        }
+      )
+    );
+  }
+
+  Future<void> refreshCurrent() async =>
+    getContents(path: _currentFolder, withProgress: true);
 
   void subscribeToRepositoryNotifications(repository) async {
     _repositorySubscription = repository.subscribe(() { 
@@ -330,30 +356,6 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  void updateRoute(destination) {
-    BlocProvider.of<RouteBloc>(context)
-    .add(
-      UpdateRoute(
-        path: destination,
-        action: () { //Back button action, hence we invert the origin and destination values
-          final from = destination;
-          final backTo = extractParentFromPath(from);
-
-          BlocProvider.of<DirectoryBloc>(context)
-          .add(
-            NavigateTo(
-              repository: _repository!,
-              type: Navigation.content,
-              origin: from,
-              destination: backTo,
-              withProgress: true
-            )
-          );
-        }
-      )
-    );
-  }
-
   _errorState() => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -512,9 +514,6 @@ class _MainPageState extends State<MainPage>
     )
   );
 
-  Future<void> refreshCurrent() async =>
-    getContents(path: _currentFolder, withProgress: true);
-
   Future<int> _fileSize(String filePath) async {
     int fileSize = 0;
     File? file;
@@ -639,7 +638,7 @@ class _MainPageState extends State<MainPage>
       context,
       MaterialPageRoute(builder: (context) {
         return SettingsPage(
-          selectedRepository: 'Default',
+          selectedRepository: _repositoryName,
           repository: _repository!,
         );
       })
