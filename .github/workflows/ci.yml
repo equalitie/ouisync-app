@@ -25,30 +25,26 @@ jobs:
       - run: rustup target add aarch64-linux-android
       - run: rustup target add i686-linux-android
       - run: rustup target add x86_64-linux-android
-      - uses: actions/setup-java@v1
+      - uses: nttld/setup-ndk@v1
         with:
-          java-version: '1.8'
-      # Download & install the Android SDK.
-      - uses: malinskiy/action-android/install-sdk@release/0.1.2
-
-      # Set up platform tools like adb.
-      - run: sdkmanager platform-tools
-
-      # Start ADB (and verify that pathing is working correctly).
-      - run: adb devices
-
-      # Verify $ANDROID_HOME is properly set for later Gradle commands.
-      - run: echo $ANDROID_HOME
-      - run: echo "y" | ls -R /Users/runner/android-sdk/
-      - name: Install NDK
-        run: echo "y" | sudo /Users/runner/android-sdk//cmdline-tools/bootstrap-version/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
+            ndk-version: r21e
+        # Note: we should be able to get the NDK directory value from
+        #
+        # ${{ steps.setup-ndk.outputs.ndk-path }}
+        #
+        # as described here
+        #
+        # https://github.com/marketplace/actions/setup-android-ndk
+        #
+        # but that doesn't seem to work.
+      - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
           flutter-version: '2.5.2'
       - run: flutter pub get
-      - run: flutter build apk --debug
+      - run: flutter build apk
       - uses: actions/upload-artifact@v1
         with:
-         name: debug-apk
-         path: build/app/outputs/apk/release/app-debug.apk
+         name: release-apk
+         path: build/app/outputs/apk/release/app-release.apk
