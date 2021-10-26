@@ -41,23 +41,6 @@ android {
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        ndk{
-            //TODO arm64 platform creates issues in MacOS (Catalina - 10.15.7)
-            //To get it to compile, filters for the supported abis (x86,x86_64,armeabi-v7a,arm64-v8a)
-            //are passed to the ndk via a property in the local.properties file, so it is
-            //specific to each machine. If such property doesn't exist then this is not performed.
-            //To add another architecture, just add the property and all the architectures supported
-            if (localProperties.containsKey('ndk.abiFilters')) {
-                abiFilters = []
-                abiFilters.addAll(
-                        localProperties
-                                .getProperty('ndk.abiFilters')
-                                .split(',')
-                                .collect{it as String}
-                )
-            }
-        }
-
     }
 
     buildTypes {
