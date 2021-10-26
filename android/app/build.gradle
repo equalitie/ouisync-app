@@ -52,8 +52,6 @@ android {
             android.packagingOptions.doNotStrip '**.so'
         }
     }
-    
-    ndkVersion "20.0.5594570"
 }
 
 flutter {
