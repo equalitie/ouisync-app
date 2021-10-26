@@ -57,26 +57,31 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
       padding: EdgeInsets.only(right: 10.0, left: 10.0, bottom: 10.0),
       child: Row(
         children: [
-          Expanded(
-            child: RepositoryPicker(
-              cubit: widget.cubitRepositories,
-              onRepositorySelect: widget.onRepositorySelect
-            ),
-          ),
-          SizedBox(width: 10.0,),
-          Expanded(
-            flex: 0,
-            child: GestureDetector(
-              onTap: widget.shareRepositoryOnTap,
-              child: const Icon(
-                Icons.share_outlined,
-                size: 40.0,
-                color: Colors.white,
-              ),
-            )
-          )
+          _repositoryPicker(),
+          // SizedBox(width: 10.0,),
+          // _shareAction() |removed until implemented.
         ],
       )
+    );
+  }
+
+  Expanded _repositoryPicker() {
+    return Expanded(
+          child: RepositoryPicker(
+            cubit: widget.cubitRepositories,
+            onRepositorySelect: widget.onRepositorySelect
+          ),
+        );
+  }
+
+  GestureDetector _shareAction() {
+    return GestureDetector(
+      onTap: widget.shareRepositoryOnTap,
+      child: const Icon(
+        Icons.share_outlined,
+        size: 40.0,
+        color: Colors.white,
+      ),
     );
   }
 
