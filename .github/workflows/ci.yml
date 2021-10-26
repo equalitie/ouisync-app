@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: '12.x'
+      - name: Install NDK
+        run: echo "y" | sudo /usr/local/lib/android/sdk/tools/bin/sdkmanager --install "ndk;23.1.7779620" --sdk_root=${ANDROID_SDK_ROOT}
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
