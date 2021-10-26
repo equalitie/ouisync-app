@@ -20,7 +20,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-java@v1
         with:
-          java-version: '12.x'
+          java-version: '1.8'
       # Download & install the Android SDK.
       - uses: malinskiy/action-android/install-sdk@release/0.1.2
 
@@ -33,7 +33,7 @@ jobs:
       # Verify $ANDROID_HOME is properly set for later Gradle commands.
       - run: echo $ANDROID_HOME
       - name: Install NDK
-        run: echo "y" | sudo /usr/local/lib/android/sdk/tools/bin/sdkmanager --install "ndk;23.1.7779620" --sdk_root=${ANDROID_HOME}
+        run: echo "y" | sudo /usr/local/lib/android/sdk/tools/bin/sdkmanager --install "ndk;23.1.7779620" --sdk_root=${ANDROID_SDK_ROOT}
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
