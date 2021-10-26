@@ -172,7 +172,7 @@ class _MainPageState extends State<MainPage>
 
   _getOuiSyncBar() => OuiSyncBar(
     appBranding: AppBranding(appName: widget.title),
-    centralWidget: SearchBar(),
+    centralWidget: Container(), //SearchBar(), |removed until implemented
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
@@ -424,12 +424,6 @@ class _MainPageState extends State<MainPage>
       ElevatedButton(
         onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
         child: Text('Create a Lockbox')
-      ),
-      ElevatedButton(
-        onPressed: () {
-          
-        },
-        child: Text('Link a Lockbox')
       ),
     ],
   );
