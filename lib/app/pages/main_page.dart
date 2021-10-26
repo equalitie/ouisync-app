@@ -263,7 +263,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is SyncingInProgress) {
-        return loadContents(_folderContents);
+        return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
 
       if (state is DirectoryLoadInProgress) {
@@ -271,11 +271,11 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadSuccess) {
-        return loadContents(state.contents);
+        return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);
       }
       
       if (state is NavigationLoadSuccess) {
-        return loadContents(state.contents);
+        return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);
       }
 
       if (state is DirectoryLoadFailure) {
@@ -328,8 +328,8 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  loadContents(contents) {
-    if (contents.isEmpty) {
+  _selectLayoutWidget({isContentsEmpty}) {
+    if (isContentsEmpty) {
       return _noContents();
     }
 
