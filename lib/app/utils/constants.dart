@@ -1,12 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-
-const List<PermissionStatus> negativePermissionStatus = [
-    PermissionStatus.restricted,
-    PermissionStatus.limited,
-    PermissionStatus.denied,
-    PermissionStatus.permanentlyDenied,
-  ];
 
 const String repositoriesFolder = 'repos';
 
