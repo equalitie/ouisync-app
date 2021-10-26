@@ -156,17 +156,7 @@ class _MainPageState extends State<MainPage>
     return Scaffold(
       appBar: _getOuiSyncBar(),
       body: _mainState,
-      floatingActionButton: _repository != null
-      ? new FloatingActionButton(
-        child: const Icon(Icons.add_rounded),
-        onPressed: () => _showDirectoryActions(
-          context, 
-          BlocProvider.of<DirectoryBloc>(context), 
-          _repository!, 
-          _currentFolder
-        ),
-      )
-      : Container(),
+      floatingActionButton: _getFAB(context),
     );
   }
 
@@ -188,6 +178,20 @@ class _MainPageState extends State<MainPage>
     toolbarHeight: 200.0,
     preferredSize: Size.fromHeight(200.0)
   );
+
+  StatelessWidget _getFAB(BuildContext context) {
+    return _repository != null
+    ? new FloatingActionButton(
+      child: const Icon(Icons.add_rounded),
+      onPressed: () => _showDirectoryActions(
+        context, 
+        BlocProvider.of<DirectoryBloc>(context), 
+        _repository!, 
+        _currentFolder
+      ),
+    )
+    : Container();
+  }
 
   void switchRepository(repository, name) {
     if (_repositorySubscription != null) {
