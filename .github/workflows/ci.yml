@@ -32,7 +32,7 @@ jobs:
 
       # Verify $ANDROID_HOME is properly set for later Gradle commands.
       - run: echo $ANDROID_HOME
-      - run: echo "y" | ls /Users/runner/android-sdk/ -R
+      - run: echo "y" | ls -R /Users/runner/android-sdk/
       - name: Install NDK
         run: echo "y" | sudo /Users/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
       - uses: subosito/flutter-action@v1
