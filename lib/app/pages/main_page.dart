@@ -257,13 +257,12 @@ class _MainPageState extends State<MainPage>
   }
 
   _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
+    buildWhen: (context, state) {
+      return !(state is SyncingInProgress);
+    },
     builder: (context, state) {
       if (state is DirectoryInitial) {
         return Center(child: Text('Loading contents...'));
-      }
-
-      if (state is SyncingInProgress) {
-        return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
 
       if (state is DirectoryLoadInProgress) {
@@ -271,7 +270,12 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadSuccess) {
-        return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);
+        if (state.path == _currentFolder) {
+          print('DirectoryLoadSuccess::state.contents');
+          return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);  
+        }
+        print('DirectoryLoadSuccess::_currenFolder');
+        return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
       
       if (state is NavigationLoadSuccess) {
@@ -309,12 +313,17 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadSuccess) {
-        updateFolderContents(state.contents);
-
         if (state.isSyncing) {  
           _syncingCubit.done();
+
+          if (state.path == _currentFolder) {
+            updateFolderContents(state.contents);    
+          }
+
+          return;
         }
 
+        updateFolderContents(state.contents);
         return;
       }
 

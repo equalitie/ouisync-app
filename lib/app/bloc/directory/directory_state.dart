@@ -52,17 +52,20 @@ class SyncingDone extends DirectoryState {
 
 class DirectoryLoadSuccess extends DirectoryState {
   const DirectoryLoadSuccess({
+    required this.path,
     required this.contents,
     this.action = '',
     this.isSyncing = false
   });
 
+  final String path;
   final List<dynamic> contents;
   final String action;
   final bool isSyncing;
 
   @override
   List<Object> get props => [
+    path,
     contents,
     action,
     isSyncing
