@@ -103,7 +103,6 @@ class _MainPageState extends State<MainPage>
   }
 
   void initRepository() {
-
     switchMainState(widget.defaultRepository == null
     ? _noRepositories()
     : _repositoryContentBuilder());
@@ -144,6 +143,33 @@ class _MainPageState extends State<MainPage>
     ); 
   }
 
+  updateRoute(destination) {
+    BlocProvider.of<RouteBloc>(context)
+    .add(
+      UpdateRoute(
+        path: destination,
+        action: () { //Back button action, hence we invert the origin and destination values
+          final from = destination;
+          final backTo = extractParentFromPath(from);
+
+          BlocProvider.of<DirectoryBloc>(context)
+          .add(
+            NavigateTo(
+              repository: _repository!,
+              type: Navigation.content,
+              origin: from,
+              destination: backTo,
+              withProgress: true
+            )
+          );
+        }
+      )
+    );
+  }
+
+  Future<void> refreshCurrent() async =>
+    getContents(path: _currentFolder, withProgress: true);
+
   void subscribeToRepositoryNotifications(repository) async {
     _repositorySubscription = repository.subscribe(() { 
       _syncingCubit.syncing();
@@ -156,23 +182,13 @@ class _MainPageState extends State<MainPage>
     return Scaffold(
       appBar: _getOuiSyncBar(),
       body: _mainState,
-      floatingActionButton: _repository != null
-      ? new FloatingActionButton(
-        child: const Icon(Icons.add_rounded),
-        onPressed: () => _showDirectoryActions(
-          context, 
-          BlocProvider.of<DirectoryBloc>(context), 
-          _repository!, 
-          _currentFolder
-        ),
-      )
-      : Container(),
+      floatingActionButton: _getFAB(context),
     );
   }
 
   _getOuiSyncBar() => OuiSyncBar(
     appBranding: AppBranding(appName: widget.title),
-    centralWidget: SearchBar(),
+    centralWidget: Container(), //SearchBar(), |removed until implemented
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
@@ -188,6 +204,20 @@ class _MainPageState extends State<MainPage>
     toolbarHeight: 200.0,
     preferredSize: Size.fromHeight(200.0)
   );
+
+  StatelessWidget _getFAB(BuildContext context) {
+    return _repository != null
+    ? new FloatingActionButton(
+      child: const Icon(Icons.add_rounded),
+      onPressed: () => _showDirectoryActions(
+        context, 
+        BlocProvider.of<DirectoryBloc>(context), 
+        _repository!, 
+        _currentFolder
+      ),
+    )
+    : Container();
+  }
 
   void switchRepository(repository, name) {
     if (_repositorySubscription != null) {
@@ -227,13 +257,12 @@ class _MainPageState extends State<MainPage>
   }
 
   _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
+    buildWhen: (context, state) {
+      return !(state is SyncingInProgress);
+    },
     builder: (context, state) {
       if (state is DirectoryInitial) {
         return Center(child: Text('Loading contents...'));
-      }
-
-      if (state is SyncingInProgress) {
-        return loadContents(_folderContents);
       }
 
       if (state is DirectoryLoadInProgress) {
@@ -241,11 +270,16 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadSuccess) {
-        return loadContents(state.contents);
+        if (state.path == _currentFolder) {
+          print('DirectoryLoadSuccess::state.contents');
+          return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);  
+        }
+        print('DirectoryLoadSuccess::_currenFolder');
+        return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
       
       if (state is NavigationLoadSuccess) {
-        return loadContents(state.contents);
+        return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);
       }
 
       if (state is DirectoryLoadFailure) {
@@ -279,12 +313,17 @@ class _MainPageState extends State<MainPage>
       }
 
       if (state is DirectoryLoadSuccess) {
-        updateFolderContents(state.contents);
-
         if (state.isSyncing) {  
           _syncingCubit.done();
+
+          if (state.path == _currentFolder) {
+            updateFolderContents(state.contents);    
+          }
+
+          return;
         }
 
+        updateFolderContents(state.contents);
         return;
       }
 
@@ -298,8 +337,8 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  loadContents(contents) {
-    if (contents.isEmpty) {
+  _selectLayoutWidget({isContentsEmpty}) {
+    if (isContentsEmpty) {
       return _noContents();
     }
 
@@ -324,30 +363,6 @@ class _MainPageState extends State<MainPage>
           _folderContents = orderedContent;
         });
     }
-  }
-
-  void updateRoute(destination) {
-    BlocProvider.of<RouteBloc>(context)
-    .add(
-      UpdateRoute(
-        path: destination,
-        action: () { //Back button action, hence we invert the origin and destination values
-          final from = destination;
-          final backTo = extractParentFromPath(from);
-
-          BlocProvider.of<DirectoryBloc>(context)
-          .add(
-            NavigateTo(
-              repository: _repository!,
-              type: Navigation.content,
-              origin: from,
-              destination: backTo,
-              withProgress: true
-            )
-          );
-        }
-      )
-    );
   }
 
   _errorState() => Column(
@@ -424,12 +439,6 @@ class _MainPageState extends State<MainPage>
       ElevatedButton(
         onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
         child: Text('Create a Lockbox')
-      ),
-      ElevatedButton(
-        onPressed: () {
-          
-        },
-        child: Text('Link a Lockbox')
       ),
     ],
   );
@@ -513,9 +522,6 @@ class _MainPageState extends State<MainPage>
       }
     )
   );
-
-  Future<void> refreshCurrent() async =>
-    getContents(path: _currentFolder, withProgress: true);
 
   Future<int> _fileSize(String filePath) async {
     int fileSize = 0;
@@ -641,7 +647,7 @@ class _MainPageState extends State<MainPage>
       context,
       MaterialPageRoute(builder: (context) {
         return SettingsPage(
-          selectedRepository: 'Default',
+          selectedRepository: _repositoryName,
           repository: _repository!,
         );
       })

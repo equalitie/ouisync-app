@@ -102,7 +102,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return DirectoryLoadFailure();
     }
     
-    return DirectoryLoadSuccess(contents: getContentsResult.result, isSyncing: isSyncing);
+    return DirectoryLoadSuccess(path:  path, contents: getContentsResult.result, isSyncing: isSyncing);
   }
 
   Future<DirectoryState> deleteFolder(Repository repository, String path, String parentPath, bool recursive) async {
@@ -190,7 +190,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return DirectoryLoadFailure();
     }
 
-    return DirectoryLoadSuccess(contents: readFileResult.result, action: action);
+    return DirectoryLoadSuccess(path: filePath, contents: readFileResult.result, action: action);
   }
 
   Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newSDestinationPath, navigate) async {

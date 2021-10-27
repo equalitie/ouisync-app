@@ -75,29 +75,21 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     );
   }
 
-  _buildState(color) => Row(
-    children: [
-      Expanded( 
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            color: Colors.white,
-          ),
-          child: Expanded(
-            child: Row(
-              children: [
-                _repositoryIcon(color),
-                SizedBox(width: 10.0),
-                buildConstrainedText(_repositoryName, size: 20.0, softWrap: false, overflow: TextOverflow.fade, color: color),
-                _syncSection(),
-                _actionsSection(),
-              ],
-            )
-          )
-        ),
-      ),
-    ],
+  _buildState(color) => Container(
+    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+    decoration: const BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      color: Colors.white,
+    ),
+    child: Row(
+      children: [
+        _repositoryIcon(color),
+        SizedBox(width: 10.0),
+        buildConstrainedText(_repositoryName, size: 20.0, softWrap: false, overflow: TextOverflow.fade, color: color),
+        _syncSection(),
+        _actionsSection(),
+      ],
+    )
   );
 
   Icon _repositoryIcon(color) {
