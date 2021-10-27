@@ -271,10 +271,8 @@ class _MainPageState extends State<MainPage>
 
       if (state is DirectoryLoadSuccess) {
         if (state.path == _currentFolder) {
-          print('DirectoryLoadSuccess::state.contents');
           return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);  
         }
-        print('DirectoryLoadSuccess::_currenFolder');
         return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
       
