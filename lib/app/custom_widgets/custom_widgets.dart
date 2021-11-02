@@ -12,6 +12,7 @@ export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_folder_detail_bottom_sheet.dart';
 export 'dialogs/modal_repo_creation_dialog.dart';
 export 'dialogs/modal_repository_list_bottom_sheet.dart';
+export 'dialogs/move_entry_bottom_sheet.dart';
 
 export 'items/file_description.dart';
 export 'items/folder_description.dart';
