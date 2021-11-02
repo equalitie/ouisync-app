@@ -41,7 +41,7 @@ class _MainPageState extends State<MainPage>
   Repository? _repository;
   Subscription? _repositorySubscription;
 
-  Widget? _mainState;
+  late Widget _mainState = Container();
     
   late StreamSubscription _intentDataStreamSubscription;
   late final SynchronizationCubit _syncingCubit;
@@ -498,6 +498,15 @@ class _MainPageState extends State<MainPage>
         final item = _folderContents[index];
         final actionByType = item.itemType == ItemType.file
         ? () async {
+          if (_persistentBottomSheetController != null) {
+            await Dialogs.simpleAlertDialog(
+              context: context,
+              title: 'Moving entry',
+              message: 'This function is not availabe when moving an entry'
+            );
+            return;
+          }
+
           final fileSize = await _fileSize(item.path);
           _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
@@ -514,12 +523,22 @@ class _MainPageState extends State<MainPage>
           mainAction: actionByType,
           secondaryAction: () => {},
           filePopupMenu: _popupMenu(item),
-          folderDotsAction: () async =>
+          folderDotsAction: () async {
+            if (_persistentBottomSheetController != null) {
+              await Dialogs.simpleAlertDialog(
+                context: context,
+                title: 'Moving entry',
+                message: 'This function is not availabe when moving an entry'
+              );
+              return;
+            }
+            
             await _showFolderDetails(
               BlocProvider.of<DirectoryBloc>(context),
               removeParentFromPath(item.path),
               item.path
-            )
+            );
+          }
         );
 
         return listItem;
@@ -756,4 +775,5 @@ class _MainPageState extends State<MainPage>
       })
     );
   }
+
 }
