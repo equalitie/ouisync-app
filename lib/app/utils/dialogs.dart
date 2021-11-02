@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/custom_widgets/custom_widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
+import '../custom_widgets/custom_widgets.dart';
 import '../models/models.dart';
 import 'utils.dart';
 
@@ -50,6 +50,46 @@ abstract class Dialogs {
   static _hideLoadingDialog(context) => 
     Navigator.pop(context);
 
+  static Future<bool?> alertDialogWithActions({
+    required BuildContext context,
+    required String title,
+    required List<Widget> body,
+    required List<Widget> actions
+    }) {
+      return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return _alertDialog(
+            title,
+            body,
+            actions
+          );
+        }
+      );
+  }
+
+  static Future<bool?> simpleAlertDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return _alertDialog(
+          title,
+          [Text(message)],
+          [TextButton(
+            child: const Text('CLOSE'),
+            onPressed: () => Navigator.of(context).pop(false),
+          )]
+        );
+      }
+    );
+  }
+
   static actionDialog(BuildContext context, String dialogTitle, Widget? actionBody) => showDialog(
     context: context,
     barrierDismissible: false,
@@ -60,6 +100,19 @@ abstract class Dialogs {
       );
     }
   );
+
+  static AlertDialog _alertDialog(
+    String title,
+    List<Widget> body,
+    List<Widget> actions) {
+    return AlertDialog(
+      title: Text(title),
+      content: SingleChildScrollView(
+        child: ListBody(children: body),
+      ),
+      actions: actions,
+    );
+  }
 
   static filePopupMenu(BuildContext context, Repository repository, Bloc bloc, Map<String, BaseItem> fileMenuOptions) {
     return PopupMenuButton(
