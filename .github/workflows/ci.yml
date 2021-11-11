@@ -32,9 +32,7 @@ jobs:
       - name: Creating directories for the library binary for tests
         run: mkdir -p /home/runner/work/ouisync-app/ouisync-app/build/test
       - name: Creating symlink to the library binary for the Flutter tests
-        run: ln -s /home/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.so /home/runner/work/ouisync-app/ouisync-app/
-build/test
-
+        run: ln -s /home/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.so /home/runner/work/ouisync-app/ouisync-app/build/test
       - uses: nttld/setup-ndk@v1
         with:
             ndk-version: r21e
