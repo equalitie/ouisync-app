@@ -25,6 +25,16 @@ jobs:
       - run: rustup target add aarch64-linux-android
       - run: rustup target add i686-linux-android
       - run: rustup target add x86_64-linux-android
+      - name: Building ouisync library  
+        run: cd ouisync-plugin/ouisync && cargo build --release --lib --verbose
+      - name: Release directory contents 
+        run: ls /home/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/
+      - name: Creating directories for the library binary for tests
+        run: mkdir -p /home/runner/work/ouisync-app/ouisync-app/build/test
+      - name: Creating symlink to the library binary for the Flutter tests
+        run: ln -s /home/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.so /home/runner/work/ouisync-app/ouisync-app/
+build/test
+
       - uses: nttld/setup-ndk@v1
         with:
             ndk-version: r21e
@@ -43,6 +53,7 @@ jobs:
           channel: 'stable'
           flutter-version: '2.5.2'
       - run: flutter pub get
+      - run: flutter test
       - run: flutter build apk
       - uses: actions/upload-artifact@v1
         with:
