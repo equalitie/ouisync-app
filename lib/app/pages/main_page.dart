@@ -209,7 +209,8 @@ class _MainPageState extends State<MainPage>
       )
     ],
     bottom: NavigationBar(
-      cubitRepositories: BlocProvider.of<RepositoriesCubit>(context),
+      repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+      synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
       onRepositorySelect: switchRepository,
       shareRepositoryOnTap: shareRepository,
     ),
