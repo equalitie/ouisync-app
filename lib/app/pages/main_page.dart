@@ -198,7 +198,14 @@ class _MainPageState extends State<MainPage>
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
-        child: buildActionIcon(icon: Icons.settings_outlined, onTap: settingsAction, size: 35.0),
+        child: buildActionIcon(
+          icon: Icons.settings_outlined,
+          onTap: () => settingsAction(
+            BlocProvider.of<RepositoriesCubit>(context),
+            BlocProvider.of<SynchronizationCubit>(context)
+          ),
+          size: 35.0
+        ),
       )
     ],
     bottom: NavigationBar(
@@ -764,13 +771,17 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction() {
+  void settingsAction(reposCubit, syncCubit) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return SettingsPage(
-          selectedRepository: _repositoryName,
-          repository: _repository!,
+          repositoriesCubit: reposCubit,
+          synchronizationCubit: syncCubit,
+          onRepositorySelect: switchRepository,
+          title: 'Settings',
+          currentRepository: _repository,
+          currentRepositoryName: _repositoryName,
         );
       })
     );
