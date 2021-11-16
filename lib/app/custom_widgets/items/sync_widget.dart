@@ -6,6 +6,12 @@ import '../../cubit/cubits.dart';
 import '../../models/models.dart';
 
 class SyncWidget extends StatefulWidget {
+  SyncWidget({
+    required this.cubit
+  });
+
+  final SynchronizationCubit cubit;
+
   @override
   _SyncWidgetState createState() => _SyncWidgetState();
 }
@@ -13,7 +19,8 @@ class SyncWidget extends StatefulWidget {
 class _SyncWidgetState extends State<SyncWidget> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SynchronizationCubit, SynchronizationState>(
+    return BlocBuilder(
+      bloc: widget.cubit,
       builder: (context, state) {
         if (state is SynchronizationInitial) {
           return _buildState(SyncStatus.idle);
