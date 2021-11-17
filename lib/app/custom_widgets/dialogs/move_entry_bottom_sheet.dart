@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../pages/pages.dart';
@@ -17,14 +20,14 @@ class MoveEntryDialog extends StatelessWidget {
   final String origin;
   final String path;
   final EntryType type;
-  final RetrieveBottomSheetControllerCallback onBottomSheetOpen;
+  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.0, 40.0, 20.0, 20.0),
-      height: 200.0,
+      padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+      height: 160.0,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
@@ -42,27 +45,68 @@ class MoveEntryDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildConstrainedText('Moving $path', size: 24.0, fontWeight: FontWeight.w800),
+          _movingActionTitle(),
           SizedBox(width: 10.0,),
-          buildConstrainedText('Navigate to the destination folder and tap Move', fontWeight: FontWeight.w400),
-          buildActionsSection(context, _actions(context), padding: EdgeInsets.only(top: 0.0))
+          buildConstrainedText(
+            'from: ${extractParentFromPath(path)}',
+            size: 16.0,
+            fontWeight: FontWeight.w800
+          ),
+          _selectActions(context)
         ],
       ),
     );
   }
 
-  List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () => onMoveEntry.call(origin, path, type),
-      child: Text('MOVE')
-    ),
-    SizedBox(width: 20.0,),
-    OutlinedButton(
+  Row _movingActionTitle() {
+    return Row(
+          children: [
+            const Icon(
+              Icons.drive_file_move_outlined,
+              size: 40.0,
+            ),
+            SizedBox(width: 10.0,),
+            buildConstrainedText('${removeParentFromPath(path)}', size: 24.0, fontWeight: FontWeight.w800),
+          ],
+        );
+  }
+
+  _selectActions(context) {
+    return BlocBuilder(
+      bloc: BlocProvider.of<DirectoryBloc>(context),
+      builder: (context, state) {
+        bool allowAction = false;
+        if (state is NavigationLoadSuccess) {
+          if (state.destination != origin &&
+          state.destination != path) {
+            allowAction = true;
+          }
+        }
+
+        return buildActionsSection(context, _actions(context, allowAction), padding: EdgeInsets.only(top: 0.0));
+      }
+    );
+  }
+
+  List<Widget> _actions(context, allowAction) {
+    List<Widget> actions = <Widget>[];
+
+    if (allowAction) {
+      actions.addAll([ElevatedButton(
+        onPressed: () => onMoveEntry.call(origin, path, type),
+        child: Text('MOVE')
+      ),
+      SizedBox(width: 20.0,),]);
+    }
+
+    actions.add(OutlinedButton(
       onPressed: () {
-        onBottomSheetOpen.call(null);
+        onBottomSheetOpen.call(null, '');
         Navigator.of(context).pop('');
       },
       child: Text('CANCEL')
-    ),
-  ];
+    ));
+
+    return actions;
+  }
 }

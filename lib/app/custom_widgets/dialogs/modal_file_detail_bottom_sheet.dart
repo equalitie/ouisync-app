@@ -29,7 +29,7 @@ class FileDetail extends StatefulWidget {
   final String parent;
   final int size;
   final GlobalKey<ScaffoldState> scaffoldKey;
-  final RetrieveBottomSheetControllerCallback onBottomSheetOpen;
+  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
@@ -137,7 +137,7 @@ class _FileDetailState extends State<FileDetail> {
     required String path,
     required EntryType type,
     required MoveEntryCallback moveEntryCallback,
-    required RetrieveBottomSheetControllerCallback bottomSheetControllerCallback
+    required MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
   }) {
     return GestureDetector(
       onTap: () => _showMoveEntryBottomSheet(
@@ -162,7 +162,7 @@ class _FileDetailState extends State<FileDetail> {
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
-    RetrieveBottomSheetControllerCallback bottomSheetControllerCallback
+    MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
     
@@ -184,7 +184,7 @@ class _FileDetailState extends State<FileDetail> {
       ),
     );
 
-    widget.onBottomSheetOpen.call(controller!);
+    widget.onBottomSheetOpen.call(controller!, path);
   }
 
   GestureDetector _buildDeleteButton() {

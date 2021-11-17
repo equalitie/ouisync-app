@@ -18,7 +18,7 @@ import 'pages.dart';
 typedef RepositoryCallback = void Function(Repository repository, String name);
 typedef ShareRepositoryCallback = void Function();
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef RetrieveBottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller);
+typedef MoveEntryBottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -52,7 +52,9 @@ class _MainPageState extends State<MainPage>
   List<BaseItem> _folderContents = <BaseItem>[];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   PersistentBottomSheetController? _persistentBottomSheetController;
+  String _pathEntryToMove = '';
 
   @override
   void initState() {
@@ -518,12 +520,19 @@ class _MainPageState extends State<MainPage>
           final fileSize = await _fileSize(item.path);
           _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
-        : () => navigateToPath(
+        : () {
+          if (_persistentBottomSheetController != null &&
+          _pathEntryToMove == item.path) {
+            return;
+          }
+
+          navigateToPath(
             type: Navigation.content,
             origin: _currentFolder,
             destination: item.path,
             withProgress: true
           );
+        };
 
         final listItem = ListItem (
           repository: _repository!,
@@ -635,98 +644,32 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  void retrieveBottomSheetController(PersistentBottomSheetController? controller) {
+  void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
     _persistentBottomSheetController = controller;
+    _pathEntryToMove = entryPath;
   }
 
   void moveEntry(origin, path, type) async {
-    final alertTitle = 'Moving ${type == EntryType.directory ? 'folder' : 'file'}';
-
-    if (origin == _currentFolder) {
-      await Dialogs.simpleAlertDialog(
-        context: context,
-        title: alertTitle,
-        message: 'The destination can\'t be the same as the origin'
-      );
-      return;
-    }
-
     final entryName = removeParentFromPath(path);
     final newDestinationPath = _currentFolder == slash
     ? '/$entryName'
     : '$_currentFolder/$entryName';
 
-    final List<Widget> alertBody = _getMoveEntryBody(
-      name: entryName,
-      origin: origin,
-      destination: _currentFolder,
-      type: type);
+    _persistentBottomSheetController!.close();
+    _persistentBottomSheetController = null;
 
-    final List<Widget> alertActions = _getMoveEntryActions(context);
-
-    final result = await Dialogs.alertDialogWithActions(
-      context: context,
-      title: alertTitle,
-      body: alertBody,
-      actions: alertActions
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      MoveEntry(
+        repository: _repository!,
+        origin: origin,
+        destination: _currentFolder,
+        entryPath: path,
+        newDestinationPath: newDestinationPath,
+        navigate: false
+      )
     );
-    if (result ?? false) {
-      _persistentBottomSheetController!.close();
-      _persistentBottomSheetController = null;
-
-      BlocProvider.of<DirectoryBloc>(context)
-      .add(
-        MoveEntry(
-          repository: _repository!,
-          origin: origin,
-          destination: _currentFolder,
-          entryPath: path,
-          newDestinationPath: newDestinationPath,
-          navigate: false
-        )
-      );
-    }
   }
-
-  List<Widget> _getMoveEntryBody({name, origin, destination, type}) => [
-    Text(
-      name,
-      style: TextStyle(
-        fontSize: 18.0,
-        fontWeight: FontWeight.bold
-      ),
-    ),
-    const SizedBox(height: 10.0,),
-    Text(
-      'From: $origin',
-      style: TextStyle(
-        fontSize: 18.0,
-        fontWeight: FontWeight.bold
-      ),
-    ),
-    const SizedBox(height: 5.0,),
-    Text(
-      'To: $destination',
-      style: TextStyle(
-        fontSize: 18.0,
-        fontWeight: FontWeight.bold
-      ),
-    ),
-    const SizedBox(height: 30.0,),
-    Text('Are you sure you want to move this ${type == EntryType.directory ? 'folder' : 'file'} here?')
-  ];
-
-  List<Widget> _getMoveEntryActions(context) => [
-    TextButton(
-      child: const Text('ACCEPT'),
-      onPressed: () => Navigator.of(context).pop(true),
-    ),
-    TextButton(
-      child: const Text('CANCEL'),
-      onPressed: () => Navigator.of(context).pop(false),
-    ),
-  ];
-
 
   Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
     isScrollControlled: true,
