@@ -193,15 +193,15 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     return DirectoryLoadSuccess(path: filePath, contents: readFileResult.result, action: action);
   }
 
-  Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newSDestinationPath, navigate) async {
+  Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newDestinationPath, navigate) async {
     try {
-      final moveEntryResult = await directoryRepository.moveEntry(repository, entryPath, newSDestinationPath);
+      final moveEntryResult = await directoryRepository.moveEntry(repository, entryPath, newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {
-        print('Moving entry from $entryPath to $newSDestinationPath failed:\n${moveEntryResult.errorMessage}');
+        print('Moving entry from $entryPath to $newDestinationPath failed:\n${moveEntryResult.errorMessage}');
         return DirectoryLoadFailure();
       }  
     } catch (e) {
-      print('Exception moving entry from $entryPath to $newSDestinationPath :\n${e.toString()}');
+      print('Exception moving entry from $entryPath to $newDestinationPath :\n${e.toString()}');
       return DirectoryLoadFailure();
     }
 

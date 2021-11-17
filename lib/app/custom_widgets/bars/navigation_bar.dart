@@ -9,12 +9,14 @@ import '../custom_widgets.dart';
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({
-    required this.cubitRepositories,
+    required this.repositoriesCubit,
+    required this.synchronizationCubit,
     required this.onRepositorySelect,
     required this.shareRepositoryOnTap
   });
 
-  final RepositoriesCubit cubitRepositories;
+  final RepositoriesCubit repositoriesCubit;
+  final SynchronizationCubit synchronizationCubit;
   final RepositoryCallback onRepositorySelect;
   final ShareRepositoryCallback shareRepositoryOnTap;
 
@@ -68,8 +70,10 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
   Expanded _repositoryPicker() {
     return Expanded(
           child: RepositoryPicker(
-            cubit: widget.cubitRepositories,
-            onRepositorySelect: widget.onRepositorySelect
+            repositoriesCubit: widget.repositoriesCubit,
+            synchronizationCubit: widget.synchronizationCubit,
+            onRepositorySelect: widget.onRepositorySelect,
+            borderColor: Colors.white,
           ),
         );
   }

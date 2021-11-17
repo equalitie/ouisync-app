@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
-import '../../data/data.dart';
-import '../../models/models.dart';
+import '../../pages/pages.dart';
 import '../../utils/utils.dart';
+import '../custom_widgets.dart';
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
@@ -16,6 +16,9 @@ class FileDetail extends StatefulWidget {
     required this.path,
     required this.parent,
     required this.size,
+    required this.scaffoldKey,
+    required this.onBottomSheetOpen,
+    required this.onMoveEntry
   });
 
   final BuildContext context;
@@ -25,53 +28,15 @@ class FileDetail extends StatefulWidget {
   final String path;
   final String parent;
   final int size;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
+  final MoveEntryCallback onMoveEntry;
 
   @override
   _FileDetailState createState() => _FileDetailState();
 }
 
 class _FileDetailState extends State<FileDetail> {
-  String _selectedDestination = slash;
-  List<DropdownMenuItem<String>> _destinations = <DropdownMenuItem<String>>[];
-
-  bool _movingFile = false;
-  bool _navigateToDestination = false;
-
-  @override
-  void initState() {
-    super.initState();
-    
-    _loadFolders(widget.repository);
-  }
-
-  Future<void> _loadFolders(Repository repository) async {
-    final directoriesItem = <DropdownMenuItem<String>>[];
-    final directoryRepository = DirectoryRepository();
-    
-    if (widget.parent != slash) {
-      directoriesItem.add(DropdownMenuItem(
-        child: Text(slash),
-        value: slash,
-      ));
-    }
-
-    final repoContents = await directoryRepository.getContentsRecursive(repository, slash, <BaseItem>[]);
-    repoContents.sort((a, b) => a.path.compareTo(b.path));
-    
-    repoContents.forEach((element) { 
-      if (element.itemType == ItemType.folder 
-      && element.path != widget.parent) {
-        directoriesItem.add(DropdownMenuItem(
-          child: Text(element.path),
-          value: element.path,
-        ));
-      }  
-    });
-
-    _selectedDestination = directoriesItem.first.value!;
-    _destinations.addAll(directoriesItem);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -101,7 +66,13 @@ class _FileDetailState extends State<FileDetail> {
           buildTitle('File Details'),
           _buildPreviewButton(),
           _buildShareButton(),
-          _buildMoveFileSection(widget.context, widget.bloc, widget.repository, widget.parent, widget.path),
+          _buildMoveFolderButton(
+            origin: widget.parent,
+            path: widget.path,
+            type: EntryType.file,
+            moveEntryCallback: widget.onMoveEntry,
+            bottomSheetControllerCallback: widget.onBottomSheetOpen
+          ),
           _buildDeleteButton(),
           Divider(
             height: 50.0,
@@ -161,132 +132,60 @@ class _FileDetailState extends State<FileDetail> {
         );
   }
 
-  Widget _buildMoveFileSection(context, bloc, repository, parent, path) {
-    return Container(
-      child: Column(
-        children: [
-          _buildMoveFileButton(),
-          _buildMoveFileDetail(context, bloc, repository, parent, path),
-        ],
+  GestureDetector _buildMoveFolderButton({
+    required String origin,
+    required String path,
+    required EntryType type,
+    required MoveEntryCallback moveEntryCallback,
+    required MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+  }) {
+    return GestureDetector(
+      onTap: () => _showMoveEntryBottomSheet(
+        origin,
+        path,
+        type,
+        moveEntryCallback,
+        bottomSheetControllerCallback
+      ),
+      child: buildIconLabel(
+        Icons.drive_file_move_outlined,
+        'Move',
+        iconSize: 40.0,
+        infoSize: 18.0,
+        labelPadding: EdgeInsets.only(bottom: 30.0)
       ),
     );
   }
 
-  GestureDetector _buildMoveFileButton() {
-    return GestureDetector(
-          onTap: _showHideMoveFileSection,
-          child: buildIconLabel(
-            Icons.drive_file_move_outlined,
-            'Move',
-            iconSize: 40.0,
-            infoSize: 18.0,
-            labelPadding: EdgeInsets.only(bottom: 30.0)
-          ),
-        );
-  }
-
-  Visibility _buildMoveFileDetail(context, bloc, repository, parent, path) {
-    return Visibility(
-      visible: _movingFile,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
-        child: Container(
-          child: Column(
-            children: [
-              buildInfoLabel('From:', extractParentFromPath(widget.path), padding: EdgeInsets.all(0.0)),
-              _destinationDropDown(),
-              _buildNavigateToCheckBox(),
-              buildActionsSection(
-                context,
-                _actions(context, bloc, repository, parent, path),
-                padding: EdgeInsets.only(top: 20.0)
-              ),
-            ]
-          ),
-        )
-      )
-    );
-  }
-
-  DropdownButtonFormField _destinationDropDown() {
-    return DropdownButtonFormField(
-      icon: const Icon(Icons.create_new_folder_outlined),
-      iconSize: 30.0,
-      hint: Text('Destination'),
-      value: _selectedDestination,
-      items: _destinations,
-      onChanged: (value) {
-        _selectedDestination = value;
-      },
-    );
-  }
-
-  Padding _buildNavigateToCheckBox() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          GestureDetector(
-            child: buildIdLabel('Navigate to destination'),
-            onTap: () => _changeNavigateToCheckBoxState(!_navigateToDestination),
-          ),
-          Checkbox(
-            value: _navigateToDestination,
-            onChanged: (value) => _changeNavigateToCheckBoxState(value)
-          )
-        ],
-      )
-    );
-  }
-
-  List<Widget> _actions(context, bloc, repository, parent, filePath) => [
-    ElevatedButton(
-      onPressed: () => _moveFile(context, bloc, repository, parent, filePath),
-      child: Text('Move')
-    ),
-    SizedBox(width: 20.0,),
-    OutlinedButton(
-      onPressed: _showHideMoveFileSection,
-      child: Text('Cancel')
-    ),
-  ];
-
-  void _moveFile(context, bloc, repository, parent, filePath) {
-    final newFilePath = _selectedDestination == slash
-    ? '/${widget.name}'
-    : '$_selectedDestination/${widget.name}';
+  _showMoveEntryBottomSheet(
+    String origin,
+    String path,
+    EntryType type,
+    MoveEntryCallback moveEntryCallback,
+    MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+  ) {
+    Navigator.of(context).pop();
     
-    bloc.add(
-      MoveEntry(
-        repository: repository,
-        origin: parent,
-        destination: _selectedDestination,
-        entryPath: filePath,
-        newDestinationPath: newFilePath
-      )
+    final controller = widget.scaffoldKey.currentState?.showBottomSheet(
+      (context) => MoveEntryDialog(
+        origin: origin,
+        path: path,
+        type: type,
+        onBottomSheetOpen: bottomSheetControllerCallback,
+        onMoveEntry: moveEntryCallback
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+          bottomLeft: Radius.zero,
+          bottomRight: Radius.zero
+        ),
+      ),
     );
 
-    if (_navigateToDestination) {
-      bloc.add(
-        NavigateTo(
-          repository: repository,
-          type: Navigation.content,
-          origin: parent,
-          destination: _selectedDestination,
-          withProgress: true
-        )
-      );
-
-      // return;
-    }
-
-    Navigator.of(context).pop(newFilePath);
+    widget.onBottomSheetOpen.call(controller!, path);
   }
-
-  _showHideMoveFileSection() => setState(() { _movingFile = !_movingFile; });
-  _changeNavigateToCheckBoxState(state) => setState(() => _navigateToDestination = state); 
 
   GestureDetector _buildDeleteButton() {
     return GestureDetector(

@@ -17,6 +17,8 @@ import 'pages.dart';
 
 typedef RepositoryCallback = void Function(Repository repository, String name);
 typedef ShareRepositoryCallback = void Function();
+typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
+typedef MoveEntryBottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -39,7 +41,7 @@ class _MainPageState extends State<MainPage>
   Repository? _repository;
   Subscription? _repositorySubscription;
 
-  Widget? _mainState;
+  late Widget _mainState = Container();
     
   late StreamSubscription _intentDataStreamSubscription;
   late final SynchronizationCubit _syncingCubit;
@@ -48,6 +50,11 @@ class _MainPageState extends State<MainPage>
 
   String _currentFolder = slash; // Initial value: /
   List<BaseItem> _folderContents = <BaseItem>[];
+
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  PersistentBottomSheetController? _persistentBottomSheetController;
+  String _pathEntryToMove = '';
 
   @override
   void initState() {
@@ -180,6 +187,7 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: _getOuiSyncBar(),
       body: _mainState,
       floatingActionButton: _getFAB(context),
@@ -192,11 +200,19 @@ class _MainPageState extends State<MainPage>
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
-        child: buildActionIcon(icon: Icons.settings_outlined, onTap: settingsAction, size: 35.0),
+        child: buildActionIcon(
+          icon: Icons.settings_outlined,
+          onTap: () => settingsAction(
+            BlocProvider.of<RepositoriesCubit>(context),
+            BlocProvider.of<SynchronizationCubit>(context)
+          ),
+          size: 35.0
+        ),
       )
     ],
     bottom: NavigationBar(
-      cubitRepositories: BlocProvider.of<RepositoriesCubit>(context),
+      repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+      synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
       onRepositorySelect: switchRepository,
       shareRepositoryOnTap: shareRepository,
     ),
@@ -271,10 +287,8 @@ class _MainPageState extends State<MainPage>
 
       if (state is DirectoryLoadSuccess) {
         if (state.path == _currentFolder) {
-          print('DirectoryLoadSuccess::state.contents');
           return _selectLayoutWidget(isContentsEmpty: state.contents.isEmpty);  
         }
-        print('DirectoryLoadSuccess::_currenFolder');
         return _selectLayoutWidget(isContentsEmpty: _folderContents.isEmpty);
       }
       
@@ -494,15 +508,31 @@ class _MainPageState extends State<MainPage>
         final item = _folderContents[index];
         final actionByType = item.itemType == ItemType.file
         ? () async {
+          if (_persistentBottomSheetController != null) {
+            await Dialogs.simpleAlertDialog(
+              context: context,
+              title: 'Moving entry',
+              message: 'This function is not availabe when moving an entry'
+            );
+            return;
+          }
+
           final fileSize = await _fileSize(item.path);
           _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
-        : () => navigateToPath(
+        : () {
+          if (_persistentBottomSheetController != null &&
+          _pathEntryToMove == item.path) {
+            return;
+          }
+
+          navigateToPath(
             type: Navigation.content,
             origin: _currentFolder,
             destination: item.path,
             withProgress: true
           );
+        };
 
         final listItem = ListItem (
           repository: _repository!,
@@ -510,12 +540,22 @@ class _MainPageState extends State<MainPage>
           mainAction: actionByType,
           secondaryAction: () => {},
           filePopupMenu: _popupMenu(item),
-          folderDotsAction: () async =>
+          folderDotsAction: () async {
+            if (_persistentBottomSheetController != null) {
+              await Dialogs.simpleAlertDialog(
+                context: context,
+                title: 'Moving entry',
+                message: 'This function is not availabe when moving an entry'
+              );
+              return;
+            }
+            
             await _showFolderDetails(
               BlocProvider.of<DirectoryBloc>(context),
               removeParentFromPath(item.path),
               item.path
-            )
+            );
+          }
         );
 
         return listItem;
@@ -571,6 +611,9 @@ class _MainPageState extends State<MainPage>
         path: path,
         parent: extractParentFromPath(path),
         size: size,
+        scaffoldKey: _scaffoldKey,
+        onBottomSheetOpen: retrieveBottomSheetController,
+        onMoveEntry: moveEntry
       );
     }
   );
@@ -594,9 +637,39 @@ class _MainPageState extends State<MainPage>
         name: name,
         path: path,
         parent: extractParentFromPath(path),
+        scaffoldKey: _scaffoldKey,
+        onBottomSheetOpen: retrieveBottomSheetController,
+        onMoveEntry: moveEntry
       );
     }
   );
+
+  void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
+    _persistentBottomSheetController = controller;
+    _pathEntryToMove = entryPath;
+  }
+
+  void moveEntry(origin, path, type) async {
+    final entryName = removeParentFromPath(path);
+    final newDestinationPath = _currentFolder == slash
+    ? '/$entryName'
+    : '$_currentFolder/$entryName';
+
+    _persistentBottomSheetController!.close();
+    _persistentBottomSheetController = null;
+
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      MoveEntry(
+        repository: _repository!,
+        origin: origin,
+        destination: _currentFolder,
+        entryPath: path,
+        newDestinationPath: newDestinationPath,
+        navigate: false
+      )
+    );
+  }
 
   Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
     isScrollControlled: true,
@@ -642,15 +715,20 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction() {
+  void settingsAction(reposCubit, syncCubit) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return SettingsPage(
-          selectedRepository: _repositoryName,
-          repository: _repository!,
+          repositoriesCubit: reposCubit,
+          synchronizationCubit: syncCubit,
+          onRepositorySelect: switchRepository,
+          title: 'Settings',
+          currentRepository: _repository,
+          currentRepositoryName: _repositoryName,
         );
       })
     );
   }
+
 }

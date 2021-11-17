@@ -10,12 +10,20 @@ import '../custom_widgets.dart';
 
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
-    required this.cubit,
-    required this.onRepositorySelect
+    required this.repositoriesCubit,
+    required this.synchronizationCubit,
+    required this.onRepositorySelect,
+    required this.borderColor,
+    this.currentRepository,
+    this.currentRepositoryName = ''
   });
 
-  final RepositoriesCubit cubit;
+  final RepositoriesCubit repositoriesCubit;
+  final SynchronizationCubit synchronizationCubit;
   final RepositoryCallback onRepositorySelect;
+  final Color borderColor;
+  final Repository? currentRepository;
+  final String currentRepositoryName;
 
   @override
   _RepositoryPickerState createState() => _RepositoryPickerState();
@@ -24,6 +32,25 @@ class RepositoryPicker extends StatefulWidget {
 class _RepositoryPickerState extends State<RepositoryPicker> {
   Repository? _repository;
   String _repositoryName = 'No lockboxes found';
+
+  @override
+  void initState() {
+    super.initState();
+
+    initRepositoryPicker();  
+  }
+
+  void initRepositoryPicker() {
+    if (widget.currentRepository == null
+    || widget.currentRepositoryName.isEmpty) {
+      return;
+    } 
+
+    setState(() {
+      _repository = widget.currentRepository;
+      _repositoryName = widget.currentRepositoryName;
+    });
+  }
 
   updateCurrentRepository(repository, name) async {
     if (name.isEmpty) {
@@ -47,10 +74,10 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer(
-      bloc: widget.cubit,
+      bloc: widget.repositoriesCubit,
       builder: (context, state) {
         if (state is RepositoriesInitial) {
-          return _buildState(Colors.grey);
+          return _buildState(widget.borderColor, Colors.grey);
         }
 
         if (state is RepositoriesLoading) {
@@ -58,11 +85,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoriesSelection) {
-          return _buildState(Colors.black);
+          return _buildState(widget.borderColor, Colors.black);
         }
 
         if (state is RepositoriesFailure) {
-          return _buildState(Colors.red);
+          return _buildState(widget.borderColor, Colors.red);
         }
 
         return Container(child: Text('Ooops...'),);
@@ -75,18 +102,23 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     );
   }
 
-  _buildState(color) => Container(
+  _buildState(borderColor, iconColor) => Container(
     padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-    decoration: const BoxDecoration(
+    decoration: BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      border: Border.all(
+        color: borderColor,
+        width: 1.0,
+        style: BorderStyle.solid
+      ),
       color: Colors.white,
     ),
     child: Row(
       children: [
-        _repositoryIcon(color),
+        _repositoryIcon(iconColor),
         SizedBox(width: 10.0),
-        buildConstrainedText(_repositoryName, size: 20.0, softWrap: false, overflow: TextOverflow.fade, color: color),
-        _syncSection(),
+        buildConstrainedText(_repositoryName, size: 20.0, softWrap: false, overflow: TextOverflow.fade, color: iconColor),
+        _syncSection(widget.synchronizationCubit),
         _actionsSection(),
       ],
     )
@@ -100,11 +132,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     );
   }
 
-  Widget _syncSection() {
+  Widget _syncSection(syncCubit) {
     return _repository != null
     ? Expanded(
       flex: 0,
-      child: SyncWidget()
+      child: SyncWidget(cubit: syncCubit)
     )
     : Container(height: 35.0,);
   }
@@ -132,7 +164,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     builder: (context) {
       return RepositoryList(
         context: context,
-        cubit: widget.cubit,
+        cubit: widget.repositoriesCubit,
         current: _repositoryName,
       );
     }
