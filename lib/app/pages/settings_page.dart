@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/cubit/cubits.dart';
-import 'package:ouisync_app/app/custom_widgets/custom_widgets.dart';
-import 'package:ouisync_app/app/pages/pages.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+
+import '../cubit/cubits.dart';
+import '../custom_widgets/custom_widgets.dart';
+import '../utils/utils.dart';
+import 'pages.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
