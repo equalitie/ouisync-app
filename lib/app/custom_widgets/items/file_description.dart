@@ -64,7 +64,8 @@ class _FileDescription extends State<FileDescription> {
   }
 
   Future<String> getFileSize(path) async {
-    await Future.delayed(Duration(seconds: 2));
+    // TODO: Check if this delay is still needed (This delay was here because without it, the library would hang) 
+    // await Future.delayed(Duration(seconds: 2));
 
     final length = await EntryInfo(widget.repository).fileLength(path);
     return formattSize(length, units: true);
