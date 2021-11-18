@@ -47,7 +47,7 @@ class EntryInfo {
   Future<int> fileLength(String path) async {
     final type = await _repository.type(path);
     if (type != EntryType.file) {
-      print('File legth: $path is not a file.');
+      print('File length: $path is not a file.');
       return -1;
     }
 
