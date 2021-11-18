@@ -1,8 +1,8 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-class EntryValidations {
-  const EntryValidations(
+class EntryInfo {
+  const EntryInfo(
     this._repository
   );
 
@@ -10,22 +10,22 @@ class EntryValidations {
 
   Future<bool> exist({
     required String path,
-    Toast? lenght
+    Toast? length
   }) async {
     final exist = await _repository.exists(path);
     if (exist) {
       final type = await _repository.type(path);
       String message = '${_getTypeNameForMessage(type)} with the same name already exist';
-      _showToast(message, lenght);
+      _showToast(message, length);
     }
 
     return exist;
   }
 
-  void _showToast(String message, Toast? lenght) => Fluttertoast
+  void _showToast(String message, Toast? length) => Fluttertoast
   .showToast(
     msg: message,
-    toastLength: Toast.LENGTH_LONG,
+    toastLength: length,
   );
 
   String _getTypeNameForMessage(EntryType? type) {
@@ -44,26 +44,26 @@ class EntryValidations {
     : 'File';
   } 
 
-  Future<int> fileLenght(String path) async {
+  Future<int> fileLength(String path) async {
     final type = await _repository.type(path);
     if (type != EntryType.file) {
-      print('File leght: $path is not a file.');
+      print('File legth: $path is not a file.');
       return -1;
     }
 
     File? file;
-    int lenght = 0;
+    int length = 0;
     try {
       file = await File.open(_repository, path);
-      lenght = await file.length;
+      length = await file.length;
     } catch (e) {
-      print('Error getting the file lenght for $path:\n${e.toString()}');
+      print('Error getting the length for file $path:\n${e.toString()}');
     } finally {
       if (file != null) {
         file.close(); 
       }      
     }
     
-    return lenght;
+    return length;
   }
 }
