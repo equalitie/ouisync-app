@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
-import '../../utils/entry_info.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
@@ -68,7 +67,7 @@ class FolderCreation extends StatelessWidget {
   }
 
   void _onSaved(bloc, newFolderName) async {
-    final newFolderPath = this.path == slash
+    final newFolderPath = this.path == Strings.slash
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 

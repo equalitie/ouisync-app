@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../utils/entry_info.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/icon_style.dart';
@@ -49,7 +48,7 @@ class _MainPageState extends State<MainPage>
 
   String _repositoryName = '';
 
-  String _currentFolder = slash; // Initial value: /
+  String _currentFolder = Strings.slash; // Initial value: /
   List<BaseItem> _folderContents = <BaseItem>[];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -256,8 +255,8 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath(
       type: Navigation.content,
-      origin: slash,
-      destination: slash,
+      origin: Strings.slash,
+      destination: Strings.slash,
       withProgress: true
     );
 
@@ -387,7 +386,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          messageOhOh,
+          Strings.messageOhOh,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24.0,
@@ -400,7 +399,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: StyledText(
-          text: messageErrorState,
+          text: Strings.messageErrorState,
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.normal,
@@ -427,7 +426,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          messageNoRepos,
+          Strings.messageNoRepos,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24.0,
@@ -439,7 +438,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: StyledText(
-          text: messageCreateNewRepoStyled,
+          text: Strings.messageCreateNewRepoStyled,
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.normal
@@ -468,8 +467,8 @@ class _MainPageState extends State<MainPage>
             alignment: Alignment.center,
             child: Text(
               _currentFolder.isEmpty
-              ? messageEmptyRepo
-              : messageEmptyFolder,
+              ? Strings.messageEmptyRepo
+              : Strings.messageEmptyFolder,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24.0,
@@ -481,7 +480,7 @@ class _MainPageState extends State<MainPage>
           Align(
             alignment: Alignment.center,
             child: StyledText(
-              text: messageCreateAddNewItemStyled,
+              text: Strings.messageCreateAddNewItemStyled,
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.normal
@@ -570,9 +569,9 @@ class _MainPageState extends State<MainPage>
     _repository!,
     BlocProvider. of<DirectoryBloc>(context),
     { 
-      actionPreviewFile: item,
-      actionShareFile: item,
-      actionDeleteFile: item 
+      Strings.actionPreviewFile: item,
+      Strings.actionShareFile: item,
+      Strings.actionDeleteFile: item 
     }
   );
 
@@ -636,7 +635,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(origin, path, type) async {
     final entryName = removeParentFromPath(path);
-    final newDestinationPath = _currentFolder == slash
+    final newDestinationPath = _currentFolder == Strings.slash
     ? '/$entryName'
     : '$_currentFolder/$entryName';
 

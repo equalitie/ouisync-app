@@ -127,7 +127,7 @@ abstract class Dialogs {
       onSelected: (value) {
         final data = (value as MapEntry<String, BaseItem>).value;
         switch (value.key) {
-          case actionDeleteFile:
+          case Strings.actionDeleteFile:
             _deleteFileWithConfirmation(context, repository, bloc, data.path);
             break;
         }

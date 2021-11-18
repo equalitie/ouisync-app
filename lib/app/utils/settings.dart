@@ -1,5 +1,6 @@
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'utils.dart';
 
 class Settings {
   static SharedPreferences? _preferences;
@@ -15,10 +16,10 @@ class Settings {
       await _init();
     }
 
-    _preferences!.setString(appDirKey, appDir);
-    _preferences!.setString(repositoriesDirKey, repositoriesDir);
-    _preferences!.setString(sessionStoreKey, sessionStore);
-    _preferences!.setString(currentRepositoryKey, defaultRepository);
+    _preferences!.setString(Constants.appDirKey, appDir);
+    _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+    _preferences!.setString(Constants.sessionStoreKey, sessionStore);
+    _preferences!.setString(Constants.currentRepositoryKey, defaultRepository);
   }
 
   static dynamic readSetting(String key) async {

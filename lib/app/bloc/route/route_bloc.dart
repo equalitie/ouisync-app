@@ -33,7 +33,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
       children: [
         _navigation(path, action),
         SizedBox(
-          width: path == slash
+          width: path == Strings.slash
           ? 5.0
           : 0.0
         ),
@@ -65,7 +65,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
           action.call();
         }
       },
-      child: path == slash
+      child: path == Strings.slash
       ? const Icon(
           Icons.lock_rounded,
           size: 30.0,

@@ -42,7 +42,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: titleApp,
+      title: Strings.titleApp,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -68,7 +68,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
         child: MainPage(
           defaultRepository: widget.defaultRepository,
           defaultRepositoryName: widget.defaultRepositoryName,
-          title: titleApp,
+          title: Strings.titleApp,
         )
       )
     );

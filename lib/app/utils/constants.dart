@@ -1,75 +1,39 @@
 import 'package:flutter/material.dart';
+import 'utils.dart';
 
-const String repositoriesFolder = 'repos';
+class Constants{
+  Constants._();
 
-const String titleApp = 'OuiSync';
-const String titleRootPage = 'Repositories';
+  static const String repositoriesFolder = 'repos';
 
-const String slash = '/';
+  static const double actionsDialogPadding = 20.0;
+  static const double actionsDialogAvatarRadius = 10.0;
 
-const String messageNoStoragePermissionsGranted = 'OuiSync need access to the phone storage to operate.'
-'\n\nWithout this permission the app can\'t function properly.'
-'\n\nTo grant the permissions needed, please follow the instructions below:\n'
-'\n   > Go to Settings'
-'\n   > Privacy'
-'\n   > Permission manager'
-'\n   > Storage'
-'\n   > Scroll down to the DENIED apps'
-'\n   > Look for OuiSync and select it'
-'\n   > Select Allow'
-'\n\nThen you can open OuiSync again and use it as expected';
-const String messageOhOh = 'Oh oh...';
-const String messageErrorState = 'Something went wrong <bold>:\\</bold>';
-const String messageNoRepos = 'No lockboxes found';
-const String messageEmptyRepo = 'This repository is empty';
-const String messageEmptyFolder = 'This folder is empty';
-const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
-const String messageCreateNewFolderRootToStartStyled = 'Maybe start by creating a new folder using <bold>Actions</bold> <arrow_down/>'
-'\n... or just go ahead and use <bold>/</bold>, we are not your mother';
-const String messageCreateNewFolderStyled = 'You can create a new folder using (look down <arrow_down/>)'
-'\n... or just drop it here, champ';
+  static const int debouncerMiliseconds = 1500; //milliseconds
 
-const String messageCreateNewRepoStyled = 'Create a new lockbox, or link to one from a friend <arrow_down/>';
-const String messageCreateAddNewItemStyled = 'Create a new folder, or add a file, using <bold>Actions</bold> <arrow_down/>';
+  static const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds
+  static const int syncAnimationDuration = 1000; //milliseconds
 
-const double actionsDialogPadding = 20.0;
-const double actionsDialogAvatarRadius = 10.0;
+  static const String flagRepoActionsDialog = 'repo_dialog';
+  static const String flagFolderActionsDialog = 'folder_dialog';
+  static const String flagReceiveShareActionsDialog = 'receive_share_dialog';
 
-const int debouncerMiliseconds = 1500; //milliseconds
+  static const String actionPreview = 'preview';
+  static const String actionShare = 'share';
 
-const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds
-const int syncAnimationDuration = 1000; //milliseconds
+  static const Map<String, IconData> repoActions = const { Strings.actionNewRepo: Icons.create_new_folder_rounded };
+  static const Map<String, IconData> folderActions = const { 
+    Strings.actionDeleteFolder: Icons.delete_sharp,
+    Strings.actionNewFolder: Icons.create_new_folder_rounded,
+    Strings.actionNewFile: Icons.file_upload
+  };
 
-const String flagRepoActionsDialog = 'repo_dialog';
-const String flagFolderActionsDialog = 'folder_dialog';
-const String flagReceiveShareActionsDialog = 'receive_share_dialog';
+  static const int bufferSize = 64000;
+  static const String EndOfFile = "EOF";
 
-const String actionNewRepo = 'Create repo';
-
-const String actionNewFolder = 'Create folder';
-const String actionNewFile = 'Add file';
-
-const String actionDeleteFolder = 'Delete folder';
-
-const String actionPreviewFile = 'Preview file';
-const String actionShareFile = 'Share file';
-const String actionDeleteFile = 'Delete file';
-
-const String actionPreview = 'preview';
-const String actionShare = 'share';
-
-const Map<String, IconData> repoActions = const { actionNewRepo: Icons.create_new_folder_rounded };
-const Map<String, IconData> folderActions = const { 
-  actionDeleteFolder: Icons.delete_sharp,
-  actionNewFolder: Icons.create_new_folder_rounded,
-  actionNewFile: Icons.file_upload
-};
-
-const int bufferSize = 64000;
-const String EndOfFile = "EOF";
-
-const String appDirKey = 'APP_DIR';
-const String repositoriesDirKey = 'REPOS_DIR';
-const String localRepositoriesKey = 'LOCAL_REPOS';
-const String currentRepositoryKey = 'CURRENT_REPO';
-const String sessionStoreKey = 'SESSION_STORE';
+  static const String appDirKey = 'APP_DIR';
+  static const String repositoriesDirKey = 'REPOS_DIR';
+  static const String localRepositoriesKey = 'LOCAL_REPOS';
+  static const String currentRepositoryKey = 'CURRENT_REPO';
+  static const String sessionStoreKey = 'SESSION_STORE';
+}
