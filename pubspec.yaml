@@ -37,6 +37,7 @@ dependencies:
   flutter_bloc: ^7.3.3
   flutter_hooks: ^0.18.0
   flutter_treeview: ^1.0.3+2
+  fluttertoast: ^8.0.8
   mockito: ^5.0.10
   open_file: ^3.2.1
   ouisync_plugin:
