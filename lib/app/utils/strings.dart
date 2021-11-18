@@ -4,7 +4,7 @@ class Strings {
   static const String titleApp = 'OuiSync';
   static const String titleRootPage = 'Repositories';
 
-  static const String slash = '/';
+  static const String rootPath = '/';
 
   static const String messageOhOh = 'Oh oh...';
   static const String messageErrorState = 'Something went wrong <bold>:\\</bold>';

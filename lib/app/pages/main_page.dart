@@ -48,7 +48,7 @@ class _MainPageState extends State<MainPage>
 
   String _repositoryName = '';
 
-  String _currentFolder = Strings.slash; // Initial value: /
+  String _currentFolder = Strings.rootPath; // Initial value: /
   List<BaseItem> _folderContents = <BaseItem>[];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -255,8 +255,8 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath(
       type: Navigation.content,
-      origin: Strings.slash,
-      destination: Strings.slash,
+      origin: Strings.rootPath,
+      destination: Strings.rootPath,
       withProgress: true
     );
 
@@ -635,7 +635,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(origin, path, type) async {
     final entryName = removeParentFromPath(path);
-    final newDestinationPath = _currentFolder == Strings.slash
+    final newDestinationPath = _currentFolder == Strings.rootPath
     ? '/$entryName'
     : '$_currentFolder/$entryName';
 

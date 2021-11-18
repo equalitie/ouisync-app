@@ -67,7 +67,7 @@ class FolderCreation extends StatelessWidget {
   }
 
   void _onSaved(bloc, newFolderName) async {
-    final newFolderPath = this.path == Strings.slash
+    final newFolderPath = this.path == Strings.rootPath
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 
