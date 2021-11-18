@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../utils/entry_info.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:styled_text/icon_style.dart';
@@ -517,7 +518,7 @@ class _MainPageState extends State<MainPage>
             return;
           }
 
-          final fileSize = await _fileSize(item.path);
+          final fileSize = await EntryInfo(_repository!).fileLength(item.path);
           _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
         : () {
@@ -562,22 +563,6 @@ class _MainPageState extends State<MainPage>
       }
     )
   );
-
-  Future<int> _fileSize(String filePath) async {
-    int fileSize = 0;
-    File? file;
-
-    try {
-      file = await File.open(_repository!, filePath);
-      fileSize = await file.length;
-    } catch (e) {
-      print('Exception getting file $filePath size:\n${e.toString()}');
-    } finally {
-      file?.close();
-    }
-
-    return fileSize;
-  }
 
   _popupMenu(item) => Dialogs
   .filePopupMenu(
