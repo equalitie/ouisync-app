@@ -53,7 +53,7 @@ jobs:
           channel: 'stable'
           flutter-version: '2.5.2'
       - run: flutter pub get
-      - run: cd ouisync-plugin && flutter pub run ffigen
+      - run: cd ouisync-plugin && flutter pub get && flutter pub run ffigen
       - run: flutter test
       - run: flutter build apk
       - uses: actions/upload-artifact@v1
