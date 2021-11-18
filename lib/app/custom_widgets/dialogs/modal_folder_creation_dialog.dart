@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
+import '../../utils/entry_info.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
@@ -72,12 +72,8 @@ class FolderCreation extends StatelessWidget {
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 
-    final exist = await repository.exists(newFolderPath);
+    final exist = await EntryInfo(repository).exist(path: newFolderPath);
     if (exist) {
-      Fluttertoast.showToast(
-        msg: 'A folder with the same name already exist',
-        toastLength: Toast.LENGTH_LONG,
-      );
       return;
     }
 
