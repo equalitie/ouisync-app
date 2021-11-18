@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -66,10 +67,19 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(bloc, newFolderName) {
+  void _onSaved(bloc, newFolderName) async {
     final newFolderPath = this.path == slash
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
+
+    final exist = await repository.exists(newFolderPath);
+    if (exist) {
+      Fluttertoast.showToast(
+        msg: 'A folder with the same name already exist',
+        toastLength: Toast.LENGTH_LONG,
+      );
+      return;
+    }
 
     bloc.add(
       CreateFolder(
@@ -97,4 +107,5 @@ class FolderCreation extends StatelessWidget {
       child: Text('Cancel')
     ),
   ];
+
 }
