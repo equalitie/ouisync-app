@@ -27,6 +27,8 @@ jobs:
       - run: rustup target add x86_64-linux-android
       - name: Building ouisync library  
         run: cd ouisync-plugin/ouisync && cargo build --release --lib --verbose
+      - name: Generate bindings headers
+        run: cd ouisync-plugin/ouisync && cargo run --bin bindgen
       - name: Release directory contents 
         run: ls /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/
       - name: Creating directories for the library binary for tests
@@ -51,6 +53,7 @@ jobs:
           channel: 'stable'
           flutter-version: '2.5.2'
       - run: flutter pub get
+      - run: cd ouisync-plugin && flutter pub get && flutter pub run ffigen
       - run: flutter test
       - run: flutter build apk
       - uses: actions/upload-artifact@v1
