@@ -1,3 +1,5 @@
+[![CI](https://github.com/equalitie/ouisync-app/actions/workflows/ci.yml/badge.svg)](https://github.com/equalitie/ouisync-app/actions/workflows/ci.yml)
+
 # ouisync-app
 
 OuiSync Flutter application.
