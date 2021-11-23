@@ -50,7 +50,7 @@ class DirectoryRepository {
     try {
       final streamReader = ChunkedStreamIterator(fileStream);
       while (true) {
-        final buffer = await streamReader.read(bufferSize);
+        final buffer = await streamReader.read(Constants.bufferSize);
         print('Buffer size: ${buffer.length} - offset: $offset');
 
         if (buffer.isEmpty) {

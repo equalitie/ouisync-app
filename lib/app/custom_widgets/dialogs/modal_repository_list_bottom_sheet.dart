@@ -130,7 +130,7 @@ class RepositoryList extends StatelessWidget {
   );
 
   Future<List<String>> loadLocalRepositories() async {
-    final repositoriesDir = await Settings.readSetting(repositoriesDirKey);
+    final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
     final repositoryFiles = <String>[];
     if (io.Directory(repositoriesDir).existsSync()) {
       repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => removeParentFromPath(e.path)).toList());
@@ -142,7 +142,7 @@ class RepositoryList extends StatelessWidget {
   }
 
   Future<void> updateDefaultRepositorySetting(repositoryName) async {
-    final result = await Settings.saveSetting(currentRepositoryKey, repositoryName);
+    final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
     print('Current repository updated to $repositoryName: $result');
   }
 

@@ -62,7 +62,7 @@ Future<String> getLatestRepositoryOrDefault(List<String> localRepositories) asyn
   }
 
   final defaultRepository = localRepositories.first;
-  final latestRepository = await Settings.readSetting(currentRepositoryKey);
+  final latestRepository = await Settings.readSetting(Constants.currentRepositoryKey);
 
   if (latestRepository == null) {
     return defaultRepository;

@@ -48,7 +48,7 @@ class _MainPageState extends State<MainPage>
 
   String _repositoryName = '';
 
-  String _currentFolder = slash; // Initial value: /
+  String _currentFolder = Strings.rootPath; // Initial value: /
   List<BaseItem> _folderContents = <BaseItem>[];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -255,8 +255,8 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath(
       type: Navigation.content,
-      origin: slash,
-      destination: slash,
+      origin: Strings.rootPath,
+      destination: Strings.rootPath,
       withProgress: true
     );
 
@@ -386,7 +386,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          messageOhOh,
+          Strings.messageOhOh,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24.0,
@@ -399,7 +399,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: StyledText(
-          text: messageErrorState,
+          text: Strings.messageErrorState,
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.normal,
@@ -426,7 +426,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: Text(
-          messageNoRepos,
+          Strings.messageNoRepos,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24.0,
@@ -438,7 +438,7 @@ class _MainPageState extends State<MainPage>
       Align(
         alignment: Alignment.center,
         child: StyledText(
-          text: messageCreateNewRepoStyled,
+          text: Strings.messageCreateNewRepoStyled,
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.normal
@@ -467,8 +467,8 @@ class _MainPageState extends State<MainPage>
             alignment: Alignment.center,
             child: Text(
               _currentFolder.isEmpty
-              ? messageEmptyRepo
-              : messageEmptyFolder,
+              ? Strings.messageEmptyRepo
+              : Strings.messageEmptyFolder,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24.0,
@@ -480,7 +480,7 @@ class _MainPageState extends State<MainPage>
           Align(
             alignment: Alignment.center,
             child: StyledText(
-              text: messageCreateAddNewItemStyled,
+              text: Strings.messageCreateAddNewItemStyled,
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.normal
@@ -517,7 +517,7 @@ class _MainPageState extends State<MainPage>
             return;
           }
 
-          final fileSize = await _fileSize(item.path);
+          final fileSize = await EntryInfo(_repository!).fileLength(item.path);
           _showFileDetails(BlocProvider.of<DirectoryBloc>(context), item.name, item.path, fileSize);
         }
         : () {
@@ -563,31 +563,15 @@ class _MainPageState extends State<MainPage>
     )
   );
 
-  Future<int> _fileSize(String filePath) async {
-    int fileSize = 0;
-    File? file;
-
-    try {
-      file = await File.open(_repository!, filePath);
-      fileSize = await file.length;
-    } catch (e) {
-      print('Exception getting file $filePath size:\n${e.toString()}');
-    } finally {
-      file?.close();
-    }
-
-    return fileSize;
-  }
-
   _popupMenu(item) => Dialogs
   .filePopupMenu(
     context,
     _repository!,
     BlocProvider. of<DirectoryBloc>(context),
     { 
-      actionPreviewFile: item,
-      actionShareFile: item,
-      actionDeleteFile: item 
+      Strings.actionPreviewFile: item,
+      Strings.actionShareFile: item,
+      Strings.actionDeleteFile: item 
     }
   );
 
@@ -651,7 +635,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(origin, path, type) async {
     final entryName = removeParentFromPath(path);
-    final newDestinationPath = _currentFolder == slash
+    final newDestinationPath = _currentFolder == Strings.rootPath
     ? '/$entryName'
     : '$_currentFolder/$entryName';
 

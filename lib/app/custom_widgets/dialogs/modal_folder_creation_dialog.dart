@@ -66,10 +66,15 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(bloc, newFolderName) {
-    final newFolderPath = this.path == slash
+  void _onSaved(bloc, newFolderName) async {
+    final newFolderPath = this.path == Strings.rootPath
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
+
+    final exist = await EntryInfo(repository).exist(path: newFolderPath);
+    if (exist) {
+      return;
+    }
 
     bloc.add(
       CreateFolder(
@@ -97,4 +102,5 @@ class FolderCreation extends StatelessWidget {
       child: Text('Cancel')
     ),
   ];
+
 }

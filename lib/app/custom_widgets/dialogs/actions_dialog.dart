@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+
+import '../../utils/utils.dart';
 
 class ActionsDialog extends StatefulWidget {
   const ActionsDialog({
@@ -19,7 +20,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(actionsDialogPadding),
+        borderRadius: BorderRadius.circular(Constants.actionsDialogPadding),
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
@@ -31,14 +32,17 @@ class _ActionsDialogState extends State<ActionsDialog> {
     return Stack(
       children: <Widget>[
         Container(
-          padding: EdgeInsets.only(left: actionsDialogPadding, top: actionsDialogAvatarRadius
-              + actionsDialogPadding, right: actionsDialogPadding,bottom: actionsDialogPadding
+          padding: EdgeInsets.only(
+            left: Constants.actionsDialogPadding,
+            top: Constants.actionsDialogAvatarRadius + Constants.actionsDialogPadding, 
+            right: Constants.actionsDialogPadding,
+            bottom: Constants.actionsDialogPadding
           ),
-          margin: EdgeInsets.only(top: actionsDialogAvatarRadius),
+          margin: EdgeInsets.only(top: Constants.actionsDialogAvatarRadius),
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
             color: Colors.white,
-            borderRadius: BorderRadius.circular(actionsDialogPadding),
+            borderRadius: BorderRadius.circular(Constants.actionsDialogPadding),
             boxShadow: [
               BoxShadow(color: Colors.black,offset: Offset(0,10),
               blurRadius: 10

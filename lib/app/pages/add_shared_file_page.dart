@@ -38,7 +38,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
 
   late String _currentFolder;
   final rootItem = FolderItem(
-    path: slash,
+    path: Strings.rootPath,
     items: <BaseItem>[]
   ); 
 
@@ -174,7 +174,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     },
     listener: (context, state) {
       if (state is RouteLoadSuccess) {
-        if (state.path == slash) {
+        if (state.path == Strings.rootPath) {
           updateCurrentFolder(rootItem);
         }
       }
@@ -234,7 +234,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
           FloatingActionButton.extended(
             onPressed: () async => await _createNewFolder(_currentFolder),
             icon: const Icon(Icons.create_new_folder_rounded),
-            label: const Text(actionNewFolder)
+            label: const Text(Strings.actionNewFolder)
           ),
           SizedBox(width: 30.0),
           FloatingActionButton.extended(
@@ -286,7 +286,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
             Align(
               alignment: Alignment.center,
               child: Text(
-                messageEmptyFolderStructure,
+                Strings.messageEmptyFolderStructure,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 23.0,
@@ -300,9 +300,9 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: StyledText(
-                  text: _currentFolder == slash
-                  ? messageCreateNewFolderRootToStartStyled
-                  : messageCreateNewFolderStyled,
+                  text: _currentFolder == Strings.rootPath
+                  ? Strings.messageCreateNewFolderRootToStartStyled
+                  : Strings.messageCreateNewFolderStyled,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 17.0,
@@ -361,7 +361,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
                 context,
                 widget.repository,
                 BlocProvider. of<DirectoryBloc>(context),
-                { actionDeleteFile: item }
+                { Strings.actionDeleteFile: item }
               ),
           folderDotsAction: () {},
           isDestination: true,
@@ -371,7 +371,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
   }
 
   Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {
-    final filePath = destination == slash
+    final filePath = destination == Strings.rootPath
     ? '/$fileName'
     : '$destination/$fileName';
         
@@ -400,7 +400,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
   }
 
   _navigateTo({type, origin, destination}) {
-    _currentFolder == slash
+    _currentFolder == Strings.rootPath
     ? BlocProvider.of<DirectoryBloc>(context)
     .add(
       GetContent(

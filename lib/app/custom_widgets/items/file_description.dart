@@ -63,24 +63,11 @@ class _FileDescription extends State<FileDescription> {
   }
 
   Future<String> getFileSize(path) async {
-    File? file;
-    try {
-      await Future.delayed(Duration(seconds: 2));
+    // TODO: Check if this delay is still needed (This delay was here because without it, the library would hang) 
+    // await Future.delayed(Duration(seconds: 2));
 
-      file = await File.open(widget.repository, path);
-      final size = await file.length;
-
-      return formattSize(size, units: true);
-    } catch (e) {
-      print('Exception getting the file size ($path):\n${e.toString()}');
-    }
-    finally {
-      if (file != null) {
-       file.close(); 
-      }
-    }
-
-    return '0.0 B';
+    final length = await EntryInfo(widget.repository).fileLength(path);
+    return formattSize(length, units: true);
   }
 
 }

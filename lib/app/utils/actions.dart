@@ -23,21 +23,21 @@ hideSnackBar(context) =>
 String getPathFromFileName(String path) => path.split('/').last;
 
 String extractParentFromPath(String path) {
-  if (path.isEmpty) return slash;
-  if (path == slash) return slash;
+  if (path.isEmpty) return Strings.rootPath;
+  if (path == Strings.rootPath) return Strings.rootPath;
 
   final section = path.substring(0, path.lastIndexOf('/')); 
   return section.isEmpty
-  ? slash
+  ? Strings.rootPath
   : section;
 }
 
 String removeParentFromPath(String path) {
-  if (path == slash) {
+  if (path == Strings.rootPath) {
     return path;
   }
 
-  final index = path.lastIndexOf(slash);
+  final index = path.lastIndexOf(Strings.rootPath);
   final section = path.substring(index + 1);
   
   return section;
@@ -58,16 +58,16 @@ String extractFileTypeFromName(String fileName) {
 getPathMap(String path) {
   final pathMap = new Map();
 
-  var slashCount = path.split(slash).length - 1;
+  var slashCount = path.split(Strings.rootPath).length - 1;
   var offset = 1;
 
   while (slashCount > 0) {
-    var firstIndex = path.indexOf(slash, offset);
+    var firstIndex = path.indexOf(Strings.rootPath, offset);
     var section = firstIndex > 0 
     ? path.substring(0, firstIndex) 
     : path;
     
-    if (section.endsWith(slash)) {
+    if (section.endsWith(Strings.rootPath)) {
       section = section.substring(0, section.length -1);
     }
 
