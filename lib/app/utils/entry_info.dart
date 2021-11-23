@@ -66,4 +66,22 @@ class EntryInfo {
     
     return length;
   }
+
+  Future<bool> isDirectoryEmpty({
+    required String path,
+    Toast? length
+  }) async {
+    final type = await _repository.type(path);
+    if (type != EntryType.directory) {
+      print('Is directory empty: $path is not a directory.');
+      return false;
+    }
+
+    final Directory directory = await Directory.open(_repository, path);
+    if (directory.isNotEmpty) {
+      String message = '$path is not empty';
+      _showToast(message, length);
+    }
+    return directory.isEmpty;
+  }
 }
