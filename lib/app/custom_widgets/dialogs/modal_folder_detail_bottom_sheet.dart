@@ -150,29 +150,7 @@ class _FolderDetailState extends State<FolderDetail> {
       actions: <Widget>[
         TextButton(
           child: const Text('DELETE'),
-          onPressed: () {
-            bloc
-            .add(
-              DeleteFolder(
-                repository: repository,
-                parentPath: parentPath,
-                path: path,
-                recursive: false
-              )
-            );
-
-            bloc.add(
-              NavigateTo(
-                repository: repository,
-                type: Navigation.content,
-                origin: extractParentFromPath(parentPath),
-                destination: parentPath,
-                withProgress: true
-              )
-            );
-    
-            Navigator.of(context).pop(true);
-          },
+          onPressed: () => deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context),
         ),
         TextButton(
           child: const Text('CANCEL'),
@@ -182,6 +160,59 @@ class _FolderDetailState extends State<FolderDetail> {
         ),
       ],
     );
+  }
+
+  void deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context) async {
+    bool recursive = false;
+    final isEmpty = await EntryInfo(repository).isDirectoryEmpty(path: path);
+    if (!isEmpty) {
+      recursive = await Dialogs
+      .alertDialogWithActions(
+        context: context,
+        title: 'Delete not empty folder',
+        body: [Text('This folder is not empty.\n\nDo you still want to delete it, and all its contents?')],
+        actions: [
+          TextButton(
+            child: const Text('DELETE'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+          TextButton(
+            child: const Text('CANCEL'),
+            onPressed: () => Navigator.of(context).pop(false),
+          )
+        ]
+      ) ?? false;
+
+      if (!recursive) {
+        return;
+      }
+    }
+    
+    deleteAction(context, bloc, repository, parentPath, path, recursive);
+  }
+
+  void deleteAction(context, bloc, repository, parentPath, path, recursive) {
+    bloc
+    .add(
+      DeleteFolder(
+        repository: repository,
+        parentPath: parentPath,
+        path: path,
+        recursive: recursive
+      )
+    );
+    
+    bloc.add(
+      NavigateTo(
+        repository: repository,
+        type: Navigation.content,
+        origin: extractParentFromPath(parentPath),
+        destination: parentPath,
+        withProgress: true
+      )
+    );
+        
+    Navigator.of(context).pop(true);
   }
 
   GestureDetector _buildMoveFolderButton({
