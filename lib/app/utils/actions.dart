@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'utils.dart';
 
@@ -79,4 +81,14 @@ getPathMap(String path) {
   }
 
   return pathMap;
+}
+
+void showToast(String message, {Toast? length = Toast.LENGTH_SHORT}) => Fluttertoast
+.showToast(
+  msg: message,
+  toastLength: length,
+);
+
+Future<void> copyStringToClipboard(String data) async {
+  await Clipboard.setData(ClipboardData(text: data));
 }
