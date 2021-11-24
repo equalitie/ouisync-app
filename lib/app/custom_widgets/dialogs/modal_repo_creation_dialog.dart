@@ -50,8 +50,8 @@ class RepositoryCreation extends StatelessWidget {
         children: [
           buildEntry(
             context,
-            'Create a new lockbox: ',
-            'Lockbox name',
+            'Create a new repository: ',
+            'Respository name',
             (value) => _onSaved(cubit, value),
             'Please enter a valid name (unique, no spaces, ...)'),
           buildActionsSection(context, _actions(context)),

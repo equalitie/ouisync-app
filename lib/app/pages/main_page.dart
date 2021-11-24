@@ -454,7 +454,7 @@ class _MainPageState extends State<MainPage>
       SizedBox(height: 20.0),
       ElevatedButton(
         onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
-        child: Text('Create a Lockbox')
+        child: Text('Create a Repository')
       ),
     ],
   );
@@ -705,7 +705,7 @@ class _MainPageState extends State<MainPage>
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Create Lockbox',
+          title: 'Create Repository',
           body: RepositoryCreation(
             context: context,
             cubit: cubit,

@@ -31,7 +31,7 @@ class RepositoryPicker extends StatefulWidget {
 
 class _RepositoryPickerState extends State<RepositoryPicker> {
   Repository? _repository;
-  String _repositoryName = 'No lockboxes found';
+  String _repositoryName = 'No repositories found';
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   updateCurrentRepository(repository, name) async {
     if (name.isEmpty) {
       setState(() {
-        _repositoryName = 'No lockboxes found';
+        _repositoryName = 'No repositories found';
       });
 
       return;
