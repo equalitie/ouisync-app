@@ -263,13 +263,15 @@ class _MainPageState extends State<MainPage>
     subscribeToRepositoryNotifications(_repository);
   }
 
-  void shareRepository() {
+  void shareRepository() async {
     if (_repository == null) {
-      print('No repository selected');
-      return;  
+      return;
     }
 
-    print('Share repository $_repository tapped');
+    final token = await _repository!.createShareToken(name: _repositoryName);
+    print('Token for sharing repository $_repositoryName: $token');
+    
+    await _showShareRepository(context, _repositoryName, token);
   }
 
   _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
@@ -572,6 +574,25 @@ class _MainPageState extends State<MainPage>
       Strings.actionPreviewFile: item,
       Strings.actionShareFile: item,
       Strings.actionDeleteFile: item 
+    }
+  );
+
+  Future<dynamic> _showShareRepository(context, repositoryName, token) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return ShareRepository(
+        repositoryName: repositoryName,
+        token: token,
+      );
     }
   );
 
