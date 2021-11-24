@@ -54,14 +54,14 @@ class RepositoryList extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Your Lockboxes'),
+          buildTitle('Your Repositories'),
           _buildRepositoryItem(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
             child: buildIconLabel(
               Icons.add_circle_outline_rounded,
-              'Add new lockbox',
+              'Add new repository',
               iconSize: 40.0,
               iconColor: Colors.black,
               infoSize: 25.0,
@@ -154,7 +154,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Create Lockbox',
+          title: 'Create Repositories',
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
