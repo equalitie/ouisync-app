@@ -45,7 +45,7 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.5
   receive_sharing_intent: ^1.4.5
-  share: ^2.0.4
+  share_plus: ^3.0.4
   shared_preferences: ^2.0.8
   styled_text: ^3.0.3
   url_launcher: ^6.0.6
