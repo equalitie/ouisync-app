@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../utils/utils.dart';
 
@@ -79,7 +80,7 @@ class ShareRepository extends StatelessWidget {
 
   IconButton _shareTokenAction(String token) {
     return IconButton(
-      onPressed: () {},
+      onPressed: () => Share.share(token),
       icon: const Icon(Icons.share_outlined),
       iconSize: 30.0,
     );
