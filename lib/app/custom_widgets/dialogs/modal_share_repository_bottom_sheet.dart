@@ -68,7 +68,10 @@ class ShareRepository extends StatelessWidget {
 
   IconButton _copyTokenAction(String token) {
     return IconButton(
-      onPressed: () {},
+      onPressed: () async {
+        await copyStringToClipboard(token);
+        showToast('Repository token copied to clipboard');
+      },
       icon: const Icon(Icons.content_copy_rounded),
       iconSize: 30.0,
     );
