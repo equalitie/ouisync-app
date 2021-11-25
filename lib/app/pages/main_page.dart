@@ -202,10 +202,18 @@ class _MainPageState extends State<MainPage>
         padding: EdgeInsets.only(right: 10.0),
         child: buildActionIcon(
           icon: Icons.settings_outlined,
-          onTap: () => settingsAction(
-            BlocProvider.of<RepositoriesCubit>(context),
-            BlocProvider.of<SynchronizationCubit>(context)
-          ),
+          onTap: () async {
+            bool dhtStatus = false;
+            if (_repository != null) {
+              dhtStatus = await _repository!.isDhtEnabled();  
+            }
+            
+            settingsAction(
+              BlocProvider.of<RepositoriesCubit>(context),
+              BlocProvider.of<SynchronizationCubit>(context),
+              dhtStatus
+            );
+          },
           size: 35.0
         ),
       )
@@ -747,7 +755,7 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction(reposCubit, syncCubit) {
+  void settingsAction(reposCubit, syncCubit, dhtStatus) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -758,6 +766,7 @@ class _MainPageState extends State<MainPage>
           title: 'Settings',
           currentRepository: _repository,
           currentRepositoryName: _repositoryName,
+          dhtStatus: dhtStatus,
         );
       })
     );
