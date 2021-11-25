@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../cubit/cubits.dart';
+import '../../utils/utils.dart';
 
 class RepositoryCreation extends StatelessWidget {
   const RepositoryCreation({
@@ -49,11 +49,12 @@ class RepositoryCreation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildEntry(
-            context,
-            'Create a new repository: ',
-            'Respository name',
-            (value) => _onSaved(cubit, value),
-            'Please enter a valid name (unique, no spaces, ...)'),
+            context: context,
+            label: 'Create a new repository: ',
+            hint: 'Respository name',
+            onSaved: (value) => _onSaved(cubit, value),
+            validator: formNameValidator
+          ),
           buildActionsSection(context, _actions(context)),
         ]
       )

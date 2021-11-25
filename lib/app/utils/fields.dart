@@ -134,8 +134,16 @@ Widget buildConstrainedText(text, {
   ),
 );
 
-Widget buildEntry(context, label, hint, onSaved, validatorErrorMessage, {
-  padding = const EdgeInsets.only(bottom: 10.0)
+Widget buildEntry({
+  required BuildContext context,
+  required String label,
+  required String hint,
+  required Function(String?) onSaved,
+  required String? Function(String?) validator,
+  bool autofocus = false,
+  String? initialValue,
+  Function()? onTap,
+  padding = const EdgeInsets.only(bottom: 10.0),
 }) => Padding(
   padding: padding,
   child: Column(
@@ -143,25 +151,41 @@ Widget buildEntry(context, label, hint, onSaved, validatorErrorMessage, {
     crossAxisAlignment: CrossAxisAlignment.baseline,
     textBaseline: TextBaseline.alphabetic,
     children: [
-      buildTextFormField(context, label, hint, onSaved, validatorErrorMessage)
+      buildTextFormField(
+        context: context,
+        label: label,
+        hint: hint,
+        onSaved: onSaved,
+        validator: validator,
+        autofocus: autofocus,
+        initialValue: initialValue,
+        onTap: onTap
+      )
     ],
   )
 );
 
-Widget buildTextFormField(context, label, hint, onSaved, validatorErrorMessage) => TextFormField(
-  autofocus: true,
+Widget buildTextFormField({
+  required BuildContext context,
+  required String label,
+  required String hint,
+  required Function(String?) onSaved,
+  required String? Function(String?) validator,
+  bool autofocus = false,
+  String? initialValue,
+  Function()? onTap
+}) => TextFormField(
+  autofocus: autofocus,
+  initialValue: initialValue,  
   keyboardType: TextInputType.text,
   decoration: InputDecoration (
     icon: const Icon(Icons.folder),
     hintText: hint,
     labelText: label,
   ),
-  validator: (value) {
-    return value!.isEmpty
-    ? validatorErrorMessage
-    : null;
-  },
+  validator: validator,
   onSaved: onSaved,
+  onTap: onTap,
 );
 
 Widget buildActionsSection(context, List<Widget> buttons, {
