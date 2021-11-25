@@ -136,13 +136,16 @@ Widget buildConstrainedText(text, {
 
 Widget buildEntry({
   required BuildContext context,
+  TextEditingController? textEditingController,
   required String label,
   required String hint,
   required Function(String?) onSaved,
   required String? Function(String?) validator,
+  AutovalidateMode? autovalidateMode,
   bool autofocus = false,
   String? initialValue,
   Function()? onTap,
+  Function(String)? onChanged,
   padding = const EdgeInsets.only(bottom: 10.0),
 }) => Padding(
   padding: padding,
@@ -153,13 +156,16 @@ Widget buildEntry({
     children: [
       buildTextFormField(
         context: context,
+        textEditingController: textEditingController,
         label: label,
         hint: hint,
         onSaved: onSaved,
         validator: validator,
+        autovalidateMode: autovalidateMode,
         autofocus: autofocus,
         initialValue: initialValue,
-        onTap: onTap
+        onTap: onTap,
+        onChanged: onChanged
       )
     ],
   )
@@ -167,14 +173,19 @@ Widget buildEntry({
 
 Widget buildTextFormField({
   required BuildContext context,
+  TextEditingController? textEditingController,
   required String label,
   required String hint,
   required Function(String?) onSaved,
   required String? Function(String?) validator,
+  AutovalidateMode? autovalidateMode,
   bool autofocus = false,
   String? initialValue,
-  Function()? onTap
+  Function()? onTap,
+  Function(String)? onChanged
 }) => TextFormField(
+  controller: textEditingController,
+  autovalidateMode: autovalidateMode,
   autofocus: autofocus,
   initialValue: initialValue,  
   keyboardType: TextInputType.text,
@@ -186,6 +197,7 @@ Widget buildTextFormField({
   validator: validator,
   onSaved: onSaved,
   onTap: onTap,
+  onChanged: onChanged,
 );
 
 Widget buildActionsSection(context, List<Widget> buttons, {
