@@ -21,9 +21,13 @@ class AddRepositoryWithToken extends StatefulWidget {
 }
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
+
+  TextEditingController _textEditingController = TextEditingController(text: null);
+
   String _suggestedName = '';
-  String? _repoName;
   bool _showSuggestedName = false;
+
+  String? _repoName;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
     return Form(
       key: this.widget.formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: AutovalidateMode.disabled,
       child: Container(
         margin: const EdgeInsets.all(16.0),
         clipBehavior: Clip.antiAlias,
@@ -63,34 +67,60 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             hint: 'Paste the token here',
             onSaved: (value) {},
             validator: _repositoryTokenValidator,
-            autofocus: true
+            autofocus: true,
+            onChanged: (value) {
+              if (value.isEmpty) {
+                return;
+              }
+
+              bool showSuggestedNameSection = false;
+
+              try {
+                _suggestedName = this.widget.cubit.session
+                .extractSuggestedNameFromShareToken(value);  
+
+                if (_suggestedName.isNotEmpty) {
+                  _repoName = _suggestedName;
+                  showSuggestedNameSection = true;  
+                }
+              } catch (e) {
+                print('Error extracting the repository token:\n${e.toString()}');                
+
+                _suggestedName = '';
+                _repoName = '';
+
+                _textEditingController.text = '';
+
+                showSuggestedNameSection = false;
+
+                showToast('The token seems to be invalid.');
+              }
+
+              setState(() { _showSuggestedName = showSuggestedNameSection; });
+            }
           ),
           SizedBox(height: 20.0,),
           buildEntry(
             context: context,
+            textEditingController: _textEditingController,
             label: 'Repository name: ',
             hint: 'Give the repo a name',
             onSaved: (value) => _onSaved(widget.cubit, value),
             validator: formNameValidator,
-            // onTap: () {
-            //   if (_suggestedName.isNotEmpty) {
-            //     _repoName = _suggestedName;
-            //     setState(() { _showSuggestedName = true; });
-            //   }
-            // }
+            autovalidateMode: AutovalidateMode.disabled
           ),
           Visibility(
             visible: _showSuggestedName,
-            child: Row(
-              children: [
-                buildConstrainedText('Suggested: $_repoName'),
-                ElevatedButton(
-                  onPressed: () {
-                    
-                  },
-                  child: Text('Use')
-                )
-              ],
+            child: GestureDetector(
+              onTap: () {
+                _textEditingController.text = _suggestedName;
+              },
+              child: buildConstrainedText(
+                'Suggested: $_repoName\n(tap for using this name)',
+                size: 15.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black54
+              ),
             )
           ),
           buildActionsSection(context, _actions(context)),
