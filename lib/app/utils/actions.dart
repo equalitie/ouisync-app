@@ -92,3 +92,9 @@ void showToast(String message, {Toast? length = Toast.LENGTH_SHORT}) => Fluttert
 Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
+
+String? formNameValidator(String? value) {
+  return value!.isEmpty
+  ? 'Please enter a valid name (unique, no spaces, ...)'
+  : null;
+}
