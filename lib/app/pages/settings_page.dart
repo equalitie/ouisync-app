@@ -15,6 +15,7 @@ class SettingsPage extends StatefulWidget {
     required this.title,
     this.currentRepository,
     this.currentRepositoryName = '',
+    this.dhtStatus = false
   });
 
   final RepositoriesCubit repositoriesCubit;
@@ -23,14 +24,24 @@ class SettingsPage extends StatefulWidget {
   final String title;
   final Repository? currentRepository;
   final String currentRepositoryName;
+  final bool dhtStatus;
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _bittorrentDhtStatus = false;
+
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+
+    _bittorrentDhtStatus = widget.dhtStatus;  
+  }
+
+  @override
+  Widget build(BuildContext context) {    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -42,6 +53,23 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _settingBody() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildRepositoriesSection(),
+          const Divider(
+            height: 20.0,
+            thickness: 1.0,
+
+          ),
+          _buildDhtSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRepositoriesSection() {
+    return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,8 +106,36 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             )
           ),
-        ],
-      ),
+        ]
+      )
     );
+  }
+
+  Widget _buildDhtSection() {
+    return SwitchListTile(
+      title: buildConstrainedText('BitTorrent DHT'),
+      value: _bittorrentDhtStatus,
+      onChanged: (bool value) {
+        updateDhtSetting(value);
+      },
+    );
+  }
+
+  Future<void> updateDhtSetting(bool enable) async {
+    enable ? await widget.currentRepository!.enableDht()
+    : await widget.currentRepository!.disableDht();
+    
+    final isEnabled = await widget.currentRepository!.isDhtEnabled();
+    setState(() {
+      _bittorrentDhtStatus = isEnabled;
+    });
+
+    String toastMessage = 'BitTorrent DHT is ${isEnabled ? 'enabled' : 'disabled'}';
+    if (enable != isEnabled) {
+      toastMessage = enable ? 'BitTorrent DHT could not be enabled'
+      : 'Disable BitTorrent DHT failed.';
+    }
+
+    showToast(toastMessage);
   }
 }
