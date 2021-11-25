@@ -60,8 +60,8 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
       child: Row(
         children: [
           _repositoryPicker(),
-          // SizedBox(width: 10.0,),
-          // _shareAction() |removed until implemented.
+          SizedBox(width: 10.0,),
+          _shareAction()
         ],
       )
     );

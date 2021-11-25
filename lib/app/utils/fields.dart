@@ -134,8 +134,19 @@ Widget buildConstrainedText(text, {
   ),
 );
 
-Widget buildEntry(context, label, hint, onSaved, validatorErrorMessage, {
-  padding = const EdgeInsets.only(bottom: 10.0)
+Widget buildEntry({
+  required BuildContext context,
+  TextEditingController? textEditingController,
+  required String label,
+  required String hint,
+  required Function(String?) onSaved,
+  required String? Function(String?) validator,
+  AutovalidateMode? autovalidateMode,
+  bool autofocus = false,
+  String? initialValue,
+  Function()? onTap,
+  Function(String)? onChanged,
+  padding = const EdgeInsets.only(bottom: 10.0),
 }) => Padding(
   padding: padding,
   child: Column(
@@ -143,25 +154,50 @@ Widget buildEntry(context, label, hint, onSaved, validatorErrorMessage, {
     crossAxisAlignment: CrossAxisAlignment.baseline,
     textBaseline: TextBaseline.alphabetic,
     children: [
-      buildTextFormField(context, label, hint, onSaved, validatorErrorMessage)
+      buildTextFormField(
+        context: context,
+        textEditingController: textEditingController,
+        label: label,
+        hint: hint,
+        onSaved: onSaved,
+        validator: validator,
+        autovalidateMode: autovalidateMode,
+        autofocus: autofocus,
+        initialValue: initialValue,
+        onTap: onTap,
+        onChanged: onChanged
+      )
     ],
   )
 );
 
-Widget buildTextFormField(context, label, hint, onSaved, validatorErrorMessage) => TextFormField(
-  autofocus: true,
+Widget buildTextFormField({
+  required BuildContext context,
+  TextEditingController? textEditingController,
+  required String label,
+  required String hint,
+  required Function(String?) onSaved,
+  required String? Function(String?) validator,
+  AutovalidateMode? autovalidateMode,
+  bool autofocus = false,
+  String? initialValue,
+  Function()? onTap,
+  Function(String)? onChanged
+}) => TextFormField(
+  controller: textEditingController,
+  autovalidateMode: autovalidateMode,
+  autofocus: autofocus,
+  initialValue: initialValue,  
   keyboardType: TextInputType.text,
   decoration: InputDecoration (
     icon: const Icon(Icons.folder),
     hintText: hint,
     labelText: label,
   ),
-  validator: (value) {
-    return value!.isEmpty
-    ? validatorErrorMessage
-    : null;
-  },
+  validator: validator,
   onSaved: onSaved,
+  onTap: onTap,
+  onChanged: onChanged,
 );
 
 Widget buildActionsSection(context, List<Widget> buttons, {

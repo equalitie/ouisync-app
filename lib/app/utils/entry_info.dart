@@ -1,4 +1,5 @@
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 class EntryInfo {
@@ -16,17 +17,11 @@ class EntryInfo {
     if (exist) {
       final type = await _repository.type(path);
       String message = '${_getTypeNameForMessage(type)} with the same name already exist';
-      _showToast(message, length);
+      showToast(message, length: Toast.LENGTH_LONG);
     }
 
     return exist;
   }
-
-  void _showToast(String message, Toast? length) => Fluttertoast
-  .showToast(
-    msg: message,
-    toastLength: length,
-  );
 
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
@@ -80,7 +75,7 @@ class EntryInfo {
     final Directory directory = await Directory.open(_repository, path);
     if (directory.isNotEmpty) {
       String message = '$path is not empty';
-      _showToast(message, length);
+      showToast(message, length: Toast.LENGTH_LONG);
     }
     return directory.isEmpty;
   }

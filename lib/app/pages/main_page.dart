@@ -202,10 +202,18 @@ class _MainPageState extends State<MainPage>
         padding: EdgeInsets.only(right: 10.0),
         child: buildActionIcon(
           icon: Icons.settings_outlined,
-          onTap: () => settingsAction(
-            BlocProvider.of<RepositoriesCubit>(context),
-            BlocProvider.of<SynchronizationCubit>(context)
-          ),
+          onTap: () async {
+            bool dhtStatus = false;
+            if (_repository != null) {
+              dhtStatus = await _repository!.isDhtEnabled();  
+            }
+            
+            settingsAction(
+              BlocProvider.of<RepositoriesCubit>(context),
+              BlocProvider.of<SynchronizationCubit>(context),
+              dhtStatus
+            );
+          },
           size: 35.0
         ),
       )
@@ -263,13 +271,15 @@ class _MainPageState extends State<MainPage>
     subscribeToRepositoryNotifications(_repository);
   }
 
-  void shareRepository() {
+  void shareRepository() async {
     if (_repository == null) {
-      print('No repository selected');
-      return;  
+      return;
     }
 
-    print('Share repository $_repository tapped');
+    final token = await _repository!.createShareToken(name: _repositoryName);
+    print('Token for sharing repository $_repositoryName: $token');
+    
+    await _showShareRepository(context, _repositoryName, token);
   }
 
   _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
@@ -452,7 +462,11 @@ class _MainPageState extends State<MainPage>
       SizedBox(height: 20.0),
       ElevatedButton(
         onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
-        child: Text('Create a Lockbox')
+        child: Text('Create a Repository')
+      ),
+      ElevatedButton(
+        onPressed: () => addRepoWithTokenDialog(BlocProvider.of<RepositoriesCubit>(context)),
+        child: Text('Add a Shared Repository')
       ),
     ],
   );
@@ -575,6 +589,25 @@ class _MainPageState extends State<MainPage>
     }
   );
 
+  Future<dynamic> _showShareRepository(context, repositoryName, token) => showModalBottomSheet(
+    isScrollControlled: true,
+    context: context, 
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    ),
+    builder: (context) {
+      return ShareRepository(
+        repositoryName: repositoryName,
+        token: token,
+      );
+    }
+  );
+
   Future<dynamic> _showFileDetails(bloc, name, path, size) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
@@ -684,7 +717,7 @@ class _MainPageState extends State<MainPage>
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Create Lockbox',
+          title: 'Create Repository',
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
@@ -699,7 +732,30 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction(reposCubit, syncCubit) {
+  void addRepoWithTokenDialog(cubit) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Add Repository',
+          body: AddRepositoryWithToken(
+            context: context,
+            cubit: cubit,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((addedRepository) {
+      if (addedRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
+        switchMainState(_repositoryContentBuilder());
+      }
+    });
+  }
+
+  void settingsAction(reposCubit, syncCubit, dhtStatus) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -710,6 +766,7 @@ class _MainPageState extends State<MainPage>
           title: 'Settings',
           currentRepository: _repository,
           currentRepositoryName: _repositoryName,
+          dhtStatus: dhtStatus,
         );
       })
     );

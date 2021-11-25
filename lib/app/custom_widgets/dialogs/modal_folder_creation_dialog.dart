@@ -54,11 +54,12 @@ class FolderCreation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildEntry(
-            context,
-            'Create a new folder: ',
-            'Folder name',
-            (value) => _onSaved(bloc, value),
-            'Please enter a valid name (unique, no spaces, ...)'),
+            context: context,
+            label: 'Create a new folder: ',
+            hint: 'Folder name',
+            onSaved: (value) => _onSaved(bloc, value),
+            validator: formNameValidator
+          ),
           buildInfoLabel('Location: ', this.path),
           buildActionsSection(context, _actions(context)),
         ]
