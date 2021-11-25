@@ -8,6 +8,7 @@ export 'dialogs/actions_dialog.dart';
 
 export 'dialogs/modal_actions_bottom_sheet.dart';
 export 'dialogs/modal_file_detail_bottom_sheet.dart';
+export 'dialogs/modal_add_repo_token_dialog.dart';
 export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_folder_detail_bottom_sheet.dart';
 export 'dialogs/modal_repo_creation_dialog.dart';
