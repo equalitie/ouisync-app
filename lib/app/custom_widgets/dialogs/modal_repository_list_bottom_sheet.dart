@@ -61,7 +61,19 @@ class RepositoryList extends StatelessWidget {
             onTap: () => createRepoDialog(this.cubit),
             child: buildIconLabel(
               Icons.add_circle_outline_rounded,
-              'Add new repository',
+              'Create a new repository',
+              iconSize: 40.0,
+              iconColor: Colors.black,
+              infoSize: 25.0,
+              labelPadding: EdgeInsets.only(bottom: 10.0)
+            )
+          ),
+          SizedBox(height: 20.0,),
+          GestureDetector(
+            onTap: () => addRepoWithTokenDialog(this.cubit),
+            child: buildIconLabel(
+              Icons.insert_link_rounded,
+              'Add a repository with token',
               iconSize: 40.0,
               iconColor: Colors.black,
               infoSize: 25.0,
@@ -154,7 +166,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Create Repositories',
+          title: 'Create Repository',
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
@@ -165,6 +177,30 @@ class RepositoryList extends StatelessWidget {
     ).then((newRepository) {
       if (newRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
         updateDefaultRepositorySetting(newRepository);
+        Navigator.of(this.context).pop();
+      }
+    });
+  }
+
+  void addRepoWithTokenDialog(cubit) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Add Repository',
+          body: AddRepositoryWithToken(
+            context: context,
+            cubit: cubit,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((addedRepository) {
+      if (addedRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
+        updateDefaultRepositorySetting(addedRepository);
         Navigator.of(this.context).pop();
       }
     });
