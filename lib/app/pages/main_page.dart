@@ -456,6 +456,10 @@ class _MainPageState extends State<MainPage>
         onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
         child: Text('Create a Repository')
       ),
+      ElevatedButton(
+        onPressed: () => addRepoWithTokenDialog(BlocProvider.of<RepositoriesCubit>(context)),
+        child: Text('Add a Shared Repository')
+      ),
     ],
   );
 
@@ -715,6 +719,29 @@ class _MainPageState extends State<MainPage>
       }
     ).then((newRepository) {
       if (newRepository.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
+        switchMainState(_repositoryContentBuilder());
+      }
+    });
+  }
+
+  void addRepoWithTokenDialog(cubit) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: 'Add Repository',
+          body: AddRepositoryWithToken(
+            context: context,
+            cubit: cubit,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((addedRepository) {
+      if (addedRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
         switchMainState(_repositoryContentBuilder());
       }
     });
