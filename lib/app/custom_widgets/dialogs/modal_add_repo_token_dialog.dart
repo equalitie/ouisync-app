@@ -61,72 +61,86 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildEntry(
-            context: context,
-            label: 'Repository token: ',
-            hint: 'Paste the token here',
-            onSaved: (value) {},
-            validator: _repositoryTokenValidator,
-            autofocus: true,
-            onChanged: (value) {
-              if (value.isEmpty) {
-                return;
-              }
-
-              bool showSuggestedNameSection = false;
-
-              try {
-                _suggestedName = this.widget.cubit.session
-                .extractSuggestedNameFromShareToken(value);  
-
-                if (_suggestedName.isNotEmpty) {
-                  _repoName = _suggestedName;
-                  showSuggestedNameSection = true;  
-                }
-              } catch (e) {
-                print('Error extracting the repository token:\n${e.toString()}');                
-
-                _suggestedName = '';
-                _repoName = '';
-
-                _textEditingController.text = '';
-
-                showSuggestedNameSection = false;
-
-                showToast('The token seems to be invalid.');
-              }
-
-              setState(() { _showSuggestedName = showSuggestedNameSection; });
-            }
-          ),
+          _buildTokenField(context),
           SizedBox(height: 20.0,),
-          buildEntry(
-            context: context,
-            textEditingController: _textEditingController,
-            label: 'Repository name: ',
-            hint: 'Give the repo a name',
-            onSaved: (value) => _onSaved(widget.cubit, value),
-            validator: formNameValidator,
-            autovalidateMode: AutovalidateMode.disabled
-          ),
-          Visibility(
-            visible: _showSuggestedName,
-            child: GestureDetector(
-              onTap: () {
-                _textEditingController.text = _suggestedName;
-              },
-              child: buildConstrainedText(
-                'Suggested: $_repoName\n(tap for using this name)',
-                size: 15.0,
-                fontWeight: FontWeight.normal,
-                color: Colors.black54
-              ),
-            )
-          ),
+          _buildRepositoryNameField(context),
+          _buildSuggestionSection(),
           buildActionsSection(context, _actions(context)),
         ]
       )
     );
+  }
+
+  Widget _buildTokenField(BuildContext context) {
+    return buildEntry(
+          context: context,
+          label: 'Repository token: ',
+          hint: 'Paste the token here',
+          onSaved: (value) {},
+          validator: _repositoryTokenValidator,
+          autofocus: true,
+          onChanged: _onTokenChanged
+        );
+  }
+
+  Widget _buildRepositoryNameField(BuildContext context) {
+    return buildEntry(
+          context: context,
+          textEditingController: _textEditingController,
+          label: 'Repository name: ',
+          hint: 'Give the repo a name',
+          onSaved: (value) => _onSaved(widget.cubit, value),
+          validator: formNameValidator,
+          autovalidateMode: AutovalidateMode.disabled
+        );
+  }
+
+  Visibility _buildSuggestionSection() {
+    return Visibility(
+      visible: _showSuggestedName,
+      child: GestureDetector(
+        onTap: () => _updateTokenEntryController(_suggestedName),
+        child: buildConstrainedText(
+          'Suggested: $_repoName\n(tap for using this name)',
+          size: 15.0,
+          fontWeight: FontWeight.normal,
+          color: Colors.black54
+        ),
+      )
+    );
+  }
+
+  _updateTokenEntryController(String? value) {
+    _textEditingController.text = value ?? '';
+  }
+
+  _onTokenChanged(value) {
+    if (value.isEmpty) {
+      return;
+    }
+
+    bool showSuggestedNameSection = false;
+
+    try {
+      _suggestedName = this.widget.cubit.session
+      .extractSuggestedNameFromShareToken(value);  
+
+      if (_suggestedName.isNotEmpty) {
+        _repoName = _suggestedName;
+        showSuggestedNameSection = true;  
+      }
+    } catch (e) {
+      print('Error extracting the repository token:\n${e.toString()}');                
+      showToast('The token seems to be invalid.');
+
+      _suggestedName = '';
+      _repoName = '';
+
+      _updateTokenEntryController(null);
+      showSuggestedNameSection = false;
+    }
+
+    setState(() { _showSuggestedName = showSuggestedNameSection; });
   }
 
   String? _repositoryTokenValidator(String? value) {
