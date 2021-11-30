@@ -53,7 +53,8 @@ class RepositoryCreation extends StatelessWidget {
             label: 'Create a new repository: ',
             hint: 'Respository name',
             onSaved: (value) => _onSaved(cubit, value),
-            validator: formNameValidator
+            validator: formNameValidator,
+            autofocus: true
           ),
           buildActionsSection(context, _actions(context)),
         ]
