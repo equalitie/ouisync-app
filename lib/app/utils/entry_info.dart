@@ -46,13 +46,17 @@ class EntryInfo {
       return -1;
     }
 
+    File? file;
     int length = 0;
     try {
-      final file = await File.open(_repository, path);
+      file = await File.open(_repository, path);
       length = await file.length;
-      file.close(); 
     } catch (e) {
       print('Error getting the length for file $path:\n${e.toString()}');
+    }
+
+    if (file != null) {
+      file.close(); 
     }
     
     return length;
