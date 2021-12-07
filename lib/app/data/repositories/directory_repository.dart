@@ -1,4 +1,4 @@
-import 'package:chunked_stream/chunked_stream.dart';
+import 'package:async/async.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
@@ -44,13 +44,14 @@ class DirectoryRepository {
     BasicResult writeFileResult;
     String error = '';
 
-    int offset = 0;
+    final streamReader = ChunkedStreamReader(fileStream);
+    
     final file = await _openFile(repository, filePath);
-
+    int offset = 0;
+    
     try {
-      final streamReader = ChunkedStreamIterator(fileStream);
       while (true) {
-        final buffer = await streamReader.read(Constants.bufferSize);
+        final buffer = await streamReader.readChunk(Constants.bufferSize);
         print('Buffer size: ${buffer.length} - offset: $offset');
 
         if (buffer.isEmpty) {
@@ -65,6 +66,7 @@ class DirectoryRepository {
       print('Exception writing the fie $filePath:\n${e.toString()}');
       error = 'Writing to the file $filePath failed';
     } finally {
+      streamReader.cancel();
       file.close();
     }
 
