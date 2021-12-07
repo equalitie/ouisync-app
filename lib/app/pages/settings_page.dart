@@ -37,7 +37,8 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    _bittorrentDhtStatus = widget.dhtStatus;  
+    _bittorrentDhtStatus = widget.dhtStatus;
+    print('BitTorrent DHT status: ${widget.dhtStatus}');
   }
 
   @override
@@ -122,6 +123,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> updateDhtSetting(bool enable) async {
+    print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
+
     enable ? await widget.currentRepository!.enableDht()
     : await widget.currentRepository!.disableDht();
     
@@ -130,12 +133,13 @@ class _SettingsPageState extends State<SettingsPage> {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    String toastMessage = 'BitTorrent DHT is ${isEnabled ? 'enabled' : 'disabled'}';
+    String dhtStatusMessage = 'BitTorrent DHT is ${isEnabled ? 'enabled' : 'disabled'}';
     if (enable != isEnabled) {
-      toastMessage = enable ? 'BitTorrent DHT could not be enabled'
+      dhtStatusMessage = enable ? 'BitTorrent DHT could not be enabled'
       : 'Disable BitTorrent DHT failed.';
     }
 
-    showToast(toastMessage);
+    print(dhtStatusMessage);
+    showToast(dhtStatusMessage);
   }
 }
