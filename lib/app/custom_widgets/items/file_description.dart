@@ -34,10 +34,11 @@ class FileDescription extends StatelessWidget {
     );
   }
 
-  Widget size(Repository repository, String path) {
-    return FutureBuilder<String>(
-      future: getFileSize(repository, path),
-      builder: (context, AsyncSnapshot<String> snapshot) {
+  Widget size(repository, path) {
+    return FutureBuilder<int>(
+      initialData: 0,
+      future: EntryInfo(repository).fileLength(path),
+      builder: (context, AsyncSnapshot<int> snapshot) {
         if (snapshot.hasError) {
           return Text(
             '? B',
@@ -47,7 +48,7 @@ class FileDescription extends StatelessWidget {
 
         if (snapshot.hasData) {
           return Text(
-            snapshot.data!,
+            formattSize(snapshot.data ?? 0, units: true),
             style: const TextStyle(fontSize: 14.0),
           );
         }
@@ -59,16 +60,5 @@ class FileDescription extends StatelessWidget {
         );
       }
     );
-  }
-
-  Future<String> getFileSize(Repository repository, String path) async {
-    // This delay is needed for now, otherwise the library will return null several times, before returning the actual value
-    // and finish the state update. This occurs while the synchronization is on.
-    await Future.delayed(Duration(seconds: 2));
-    print('${DateTime.now()} | Getting size for file $path');
-    final length = await EntryInfo(repository).fileLength(path);
-
-    print('${DateTime.now()} | $path size: $length');
-    return formattSize(length, units: true);
   }
 }
