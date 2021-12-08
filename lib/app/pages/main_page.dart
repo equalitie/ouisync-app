@@ -200,7 +200,7 @@ class _MainPageState extends State<MainPage>
     actions: [
       Padding(
         padding: EdgeInsets.only(right: 10.0),
-        child: buildActionIcon(
+        child: Fields.actionIcon(
           icon: Icons.settings_outlined,
           onTap: () async {
             bool dhtStatus = false;
@@ -214,7 +214,8 @@ class _MainPageState extends State<MainPage>
               dhtStatus
             );
           },
-          size: 35.0
+          size: 35.0,
+          color: Theme.of(context).colorScheme.surface
         ),
       )
     ],
@@ -447,17 +448,13 @@ class _MainPageState extends State<MainPage>
       SizedBox(height: 20.0),
       Align(
         alignment: Alignment.center,
-        child: StyledText(
-          text: Strings.messageCreateNewRepoStyled,
-          style: TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.normal
-          ),
-          styles: {
-            'bold': TextStyle(fontWeight: FontWeight.bold),
-            'arrow_down': IconStyle(Icons.south),
-          },
-        ),
+        child: Fields.inPageSecondaryMessage(
+          Strings.messageCreateNewRepoStyled,
+          tags: {
+            'bold': StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold)),
+            'arrow_down': StyledTextIconTag(Icons.south),
+          }
+        )
       ),
       SizedBox(height: 20.0),
       ElevatedButton(
@@ -493,16 +490,16 @@ class _MainPageState extends State<MainPage>
           SizedBox(height: 20.0),
           Align(
             alignment: Alignment.center,
-            child: StyledText(
-              text: Strings.messageCreateAddNewItemStyled,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.normal
-              ),
-              styles: {
-                'bold': TextStyle(fontWeight: FontWeight.bold),
-                'arrow_down': IconStyle(Icons.south),
-              },
+            child: Fields.inPageSecondaryMessage(
+              Strings.messageCreateAddNewItemStyled,
+              tags: {
+                'bold': StyledTextTag(style: TextStyle(fontWeight: FontWeight.bold)),
+                'add_circle': StyledTextIconTag(
+                  Icons.add_circle,
+                  size: 34.0,
+                  color: Theme.of(context).primaryColor
+                ),
+              }
             ),
           ),
         ],

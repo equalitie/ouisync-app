@@ -32,7 +32,7 @@ class DirectoryActions extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildHandle(context),
+          Fields.bottomSheetHandle(context),
           _folderDetails(this.context, this.bloc, this.repository, this.parent),
         ],
       ),
@@ -47,7 +47,7 @@ class DirectoryActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Add Folders/Files'),
+          Fields.bottomSheetTitle('Add Folders/Files'),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

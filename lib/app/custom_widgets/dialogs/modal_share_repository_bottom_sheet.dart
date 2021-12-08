@@ -24,7 +24,7 @@ class ShareRepository extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildHandle(context),
+          Fields.bottomSheetHandle(context),
           _shareCodeDetails(context, this.repositoryName, this.token),
         ],
       ),
@@ -39,8 +39,12 @@ class ShareRepository extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Share $repositoryName'),
-          buildIconLabel(Icons.supervisor_account_rounded, 'Share this with your peer', iconSize: 40.0),
+          Fields.bottomSheetTitle('Share $repositoryName'),
+          Fields.iconText(
+            icon: Icons.supervisor_account_rounded,
+            text: 'Share this with your peer',
+            iconSize: 40.0
+          ),
           _buildShareBox(token)
         ]
       )
@@ -60,7 +64,13 @@ class ShareRepository extends StatelessWidget {
     ),
     child: Row(
       children: [
-        buildConstrainedText(token, size: 20.0, softWrap: false, overflow: TextOverflow.ellipsis, color: Colors.black),
+        Fields.constrainedText(
+          token,
+          size: 20.0,
+          softWrap: false,
+          textOverflow: TextOverflow.ellipsis,
+          color: Colors.black
+        ),
         _copyTokenAction(token),
         _shareTokenAction(token),
       ],

@@ -47,7 +47,7 @@ class MoveEntryDialog extends StatelessWidget {
         children: [
           _movingActionTitle(),
           SizedBox(width: 10.0,),
-          buildConstrainedText(
+          Fields.constrainedText(
             'from: ${extractParentFromPath(path)}',
             size: 16.0,
             fontWeight: FontWeight.w800
@@ -66,7 +66,11 @@ class MoveEntryDialog extends StatelessWidget {
               size: 40.0,
             ),
             SizedBox(width: 10.0,),
-            buildConstrainedText('${removeParentFromPath(path)}', size: 24.0, fontWeight: FontWeight.w800),
+            Fields.constrainedText(
+              '${removeParentFromPath(path)}',
+              size: 24.0,
+              fontWeight: FontWeight.w800
+            ),
           ],
         );
   }
@@ -83,7 +87,10 @@ class MoveEntryDialog extends StatelessWidget {
           }
         }
 
-        return buildActionsSection(context, _actions(context, allowAction), padding: EdgeInsets.only(top: 0.0));
+        return Fields.actionsSection(context,
+          buttons: _actions(context, allowAction),
+          padding: EdgeInsets.only(top: 0.0)
+        );
       }
     );
   }

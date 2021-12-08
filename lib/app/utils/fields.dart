@@ -1,235 +1,361 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:styled_text/styled_text.dart';
 
-Widget buildHandle(BuildContext context) {
-  final theme = Theme.of(context);
+class Fields {
+  Fields._();
 
-  return FractionallySizedBox(
-    widthFactor: 0.25,
+  static StyledText _styledTextBase(
+    String message,
+    TextAlign textAlign,
+    double fontSize,
+    FontWeight fontWeight,
+    Map<String, StyledTextTagBase>? tags
+  ) => StyledText(
+    text: message,
+    textAlign: textAlign,
+    style: TextStyle(
+      fontSize: fontSize,
+      fontWeight: fontWeight
+    ),
+    tags: tags
+  );
+
+  static StyledText inPageMainMessage(String message,
+  {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = 24.0,
+    FontWeight fontWeight = FontWeight.bold,
+    Map<String, StyledTextTagBase>? tags
+  }) => _styledTextBase(
+    message,
+    textAlign,
+    fontSize,
+    fontWeight,
+    tags
+  );
+
+  static StyledText inPageSecondaryMessage(String message,
+  {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = 18.0,
+    FontWeight fontWeight = FontWeight.normal,
+    Map<String, StyledTextTagBase>? tags
+  }) => _styledTextBase(
+    message,
+    textAlign,
+    fontSize,
+    fontWeight,
+    tags
+  );
+
+  static Widget bottomSheetHandle(BuildContext context,
+  {
+    double widthFactor = 0.25,
+    double verticalMargin = 12.0,
+    double height = 5.0,
+    double borderRadius = 2.5
+  }) => FractionallySizedBox(
+    widthFactor: widthFactor,
     child: Container(
-      margin: const EdgeInsets.symmetric(
-        vertical: 12.0,
+      margin: EdgeInsets.symmetric(
+        vertical: verticalMargin,
       ),
       child: Container(
-        height: 5.0,
+        height: height,
         decoration: BoxDecoration(
-          color: theme.dividerColor,
-          borderRadius: const BorderRadius.all(Radius.circular(2.5)),
+          color: Theme.of(context).dividerColor,
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
         ),
       ),
     ),
   );
-}
 
-Widget buildTitle(title, {
-  size = 24.0,
-  padding = const EdgeInsets.only(bottom: 30.0)
-}) => 
-Padding(
-  padding: padding,
-  child: Column(
-    children: [
-      Text(
-        title,
-        textAlign: TextAlign.center,
-        softWrap: true,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: size,
-          fontWeight: FontWeight.bold
+  static Widget bottomSheetTitle(String title,
+  {
+    EdgeInsets padding = const EdgeInsets.only(bottom: 30.0),
+    double size = 24.0,
+    TextAlign textAlign = TextAlign.center,
+    bool softWrap = true,
+    TextOverflow textOverflow = TextOverflow.ellipsis,
+    FontWeight fontWeight = FontWeight.bold
+  }) => Padding(
+    padding: padding,
+    child: Column(
+      children: [
+        Text(
+          title,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: fontWeight
+          ),
         ),
-      ),
-    ]
-  )
-);
-
-Widget buildInfoLabel(label, info, {
-  labelSize = 14.0,
-  infoSize = 18.0,
-  padding: const EdgeInsets.only(top: 20.0)
-}) => 
-Padding(
-  padding: padding,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.baseline,
-    textBaseline: TextBaseline.alphabetic,
-    children: [
-      buildIdLabel(label, size: labelSize),
-      SizedBox(width: 10.0,),
-      buildConstrainedText(info, size: infoSize)
-    ],
-  )
-);
-
-Widget buildActionIcon({icon, onTap, size = 40.0}) {
-  return GestureDetector(
-    child: Icon(
-      icon,
-      size: size,
-    ),
-    onTap: onTap
+      ]
+    )
   );
-}
 
-Widget buildIconLabel(iconInfo, info, { 
-  iconSize = 30.0,
-  iconColor = Colors.black,
-  infoSize = 18.0,
-  labelPadding = const EdgeInsets.only(bottom: 10.0)
-}) => Padding(
-  padding: labelPadding,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      _buildIcon(iconInfo, size: iconSize),
-      SizedBox(width: 10.0,),
-      buildConstrainedText(info, size: infoSize)
-    ],
-  )
-);
-
-Icon _buildIcon(icon, {
-  size = 30.0,
-  color = Colors.black,
-}) => Icon(
-  icon,
-  size: size,
-  color: color
-);
-
-Widget buildIdLabel(text, {
-  size = 14.0 
-}) => Text(
-  text,
-  textAlign: TextAlign.center,
-  softWrap: true,
-  overflow: TextOverflow.ellipsis,
-  style: TextStyle(
-    fontSize: size,
-    fontWeight: FontWeight.bold
-  ),
-); 
-
-Widget buildConstrainedText(text, {
-  size = 18.0,
-  textAlign = TextAlign.start,
-  softWrap = true,
-  overflow = TextOverflow.clip,
-  fontWeight = FontWeight.w600,
-  color = Colors.black
-})  => Expanded(
-  flex: 1,
-  child: Text(
+  static Widget idLabel(String text,
+  {
+    double size = 14.0,
+    TextAlign textAlign = TextAlign.center,
+    bool softWrap = true,
+    TextOverflow textOverflow = TextOverflow.ellipsis,
+    FontWeight fontWeight = FontWeight.bold,
+    Color color = Colors.black
+  }) => Text(
     text,
     textAlign: textAlign,
     softWrap: softWrap,
-    overflow: overflow,
+    overflow: textOverflow,
     style: TextStyle(
       fontSize: size,
       fontWeight: fontWeight,
       color: color
     ),
-  ),
-);
+  );
 
-Widget buildEntry({
-  required BuildContext context,
-  TextEditingController? textEditingController,
-  required String label,
-  required String hint,
-  required Function(String?) onSaved,
-  required String? Function(String?) validator,
-  AutovalidateMode? autovalidateMode,
-  bool autofocus = false,
-  String? initialValue,
-  Function()? onTap,
-  Function(String)? onChanged,
-  padding = const EdgeInsets.only(bottom: 10.0),
-}) => Padding(
-  padding: padding,
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.baseline,
-    textBaseline: TextBaseline.alphabetic,
-    children: [
-      buildTextFormField(
-        context: context,
-        textEditingController: textEditingController,
-        label: label,
-        hint: hint,
-        onSaved: onSaved,
-        validator: validator,
-        autovalidateMode: autovalidateMode,
-        autofocus: autofocus,
-        initialValue: initialValue,
-        onTap: onTap,
-        onChanged: onChanged
-      )
-    ],
-  )
-);
+  static Widget labeledText({
+    required String label,
+    required String text,
+    double labelSize = 14.0,
+    TextAlign labelTextAlign = TextAlign.center,
+    bool labelSoftWrap = false,
+    TextOverflow labelTextOverflow = TextOverflow.ellipsis,
+    FontWeight labelFontWeight = FontWeight.bold,
+    Color labelColor = Colors.black,
+    double textSize = 18.0,
+    TextAlign textAlign = TextAlign.center,
+    bool textSoftWrap = true,
+    TextOverflow textOverflow = TextOverflow.clip,
+    FontWeight textFontWeight = FontWeight.w600,
+    Color textColor = Colors.black,
+    EdgeInsets padding: const EdgeInsets.only(top: 20.0),
+    double space = 10.0
+  }) => Padding(
+    padding: padding,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        idLabel(
+          label,
+          size: labelSize,
+          textAlign: labelTextAlign,
+          softWrap: labelSoftWrap,
+          textOverflow: labelTextOverflow,
+          fontWeight: labelFontWeight,
+          color: labelColor
+        ),
+        SizedBox(width: space,),
+        constrainedText(text,
+          size: textSize,
+          textAlign: textAlign,
+          softWrap: textSoftWrap,
+          textOverflow: textOverflow,
+          fontWeight: textFontWeight,
+          color: textColor
+        )
+      ],
+    )
+  );
 
-Widget buildTextFormField({
-  required BuildContext context,
-  TextEditingController? textEditingController,
-  required String label,
-  required String hint,
-  required Function(String?) onSaved,
-  required String? Function(String?) validator,
-  AutovalidateMode? autovalidateMode,
-  bool autofocus = false,
-  String? initialValue,
-  Function()? onTap,
-  Function(String)? onChanged
-}) => TextFormField(
-  controller: textEditingController,
-  autovalidateMode: autovalidateMode,
-  autofocus: autofocus,
-  initialValue: initialValue,  
-  keyboardType: TextInputType.text,
-  decoration: InputDecoration (
-    icon: const Icon(Icons.folder),
-    hintText: hint,
-    labelText: label,
-  ),
-  validator: validator,
-  onSaved: onSaved,
-  onTap: onTap,
-  onChanged: onChanged,
-);
+  static Widget constrainedText(String text,
+  {
+    double size = 18.0,
+    TextAlign textAlign = TextAlign.start,
+    bool softWrap = true,
+    TextOverflow textOverflow = TextOverflow.clip,
+    FontWeight fontWeight = FontWeight.w600,
+    Color color = Colors.black
+  })  => Expanded(
+    flex: 1,
+    child: Text(
+      text,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: textOverflow,
+      style: TextStyle(
+        fontSize: size,
+        fontWeight: fontWeight,
+        color: color
+      ),
+    ),
+  );
 
-Widget buildActionsSection(context, List<Widget> buttons, {
-  padding = const EdgeInsets.only(top: 20.0)
-}) => 
-Padding(
-  padding: padding,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    mainAxisSize: MainAxisSize.max,
-    children: buttons
-  )
-);
+  static Icon _iconBase(IconData icon,
+  {
+    double size = 30.0,
+    Color color = Colors.black,
+  }) => Icon(
+    icon,
+    size: size,
+    color: color
+  );
 
-Widget buildRoundedButton(BuildContext context, Icon icon, String text, Function action, {
-  double buttonSize = 60.0,
-  double textSize = 13.0
-}) {
-  return  Column(
+  static Widget actionIcon({
+    required IconData icon,
+    required Function()? onTap,
+    double size = 40.0,
+    Color color = Colors.black
+  }) => GestureDetector(
+    child: _iconBase(
+      icon,
+      size: size,
+      color: color
+    ),
+    onTap: onTap
+  );
+
+  static Widget iconText({
+    required IconData icon, 
+    required String text, 
+    double iconSize = 30.0,
+    Color iconColor = Colors.black,
+    double textSize = 18.0,
+    TextAlign textAlign = TextAlign.center,
+    bool textSoftWrap = true,
+    TextOverflow textOverflow = TextOverflow.clip,
+    FontWeight textFontWeight = FontWeight.w600,
+    Color textColor = Colors.black,
+    EdgeInsets padding = const EdgeInsets.only(bottom: 10.0),
+    double spacing = 10.0
+  }) => Padding(
+    padding: padding,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _iconBase(
+          icon,
+          size: iconSize,
+          color: iconColor
+        ),
+        SizedBox(width: spacing,),
+        constrainedText(text,
+          size: textSize,
+          textAlign: textAlign,
+          softWrap: textSoftWrap,
+          textOverflow: textOverflow,
+          fontWeight: textFontWeight,
+          color: textColor
+        )
+      ],
+    )
+  );
+
+  static Widget _textFormFieldBase({
+    required BuildContext context,
+    TextEditingController? textEditingController,
+    required String label,
+    required String hint,
+    required Function(String?) onSaved,
+    required String? Function(String?) validator,
+    AutovalidateMode? autovalidateMode,
+    bool autofocus = false,
+    String? initialValue,
+    Function()? onTap,
+    Function(String)? onChanged
+  }) => TextFormField(
+    controller: textEditingController,
+    autovalidateMode: autovalidateMode,
+    autofocus: autofocus,
+    initialValue: initialValue,  
+    keyboardType: TextInputType.text,
+    decoration: InputDecoration (
+      icon: const Icon(Icons.folder),
+      hintText: hint,
+      labelText: label,
+    ),
+    validator: validator,
+    onSaved: onSaved,
+    onTap: onTap,
+    onChanged: onChanged,
+  );
+
+  static Widget formTextField({
+    required BuildContext context,
+    TextEditingController? textEditingController,
+    required String label,
+    required String hint,
+    required Function(String?) onSaved,
+    required String? Function(String?) validator,
+    AutovalidateMode? autovalidateMode,
+    bool autofocus = false,
+    String? initialValue,
+    Function()? onTap,
+    Function(String)? onChanged,
+    padding = const EdgeInsets.only(bottom: 10.0),
+  }) => Padding(
+    padding: padding,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        _textFormFieldBase(
+          context: context,
+          textEditingController: textEditingController,
+          label: label,
+          hint: hint,
+          onSaved: onSaved,
+          validator: validator,
+          autovalidateMode: autovalidateMode,
+          autofocus: autofocus,
+          initialValue: initialValue,
+          onTap: onTap,
+          onChanged: onChanged
+        )
+      ],
+    )
+  );  
+
+  static Widget actionsSection(BuildContext context,
+  {
+    required List<Widget> buttons,
+    EdgeInsets padding = const EdgeInsets.only(top: 20.0)
+  }) =>  Padding(
+    padding: padding,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: buttons
+    )
+  );
+
+  static Widget roundedButton(BuildContext context,
+  {
+    required IconData icon,
+    required String text,
+    required Function action,
+    double iconSize = 30.0,
+    Color iconColor = Colors.black,
+    double width = 60.0,
+    double height = 60.0,
+    double textSize = 13.0,
+    FontWeight textFontWeight = FontWeight.w700,
+    double spacing = 5.0
+  }) => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       OutlinedButton(
         onPressed: () => action.call(),
         child: Container(
-          width: buttonSize,
-          height: buttonSize,
+          width: width,
+          height: height,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle
           ),
-          child: icon,
+          child: _iconBase(
+            icon,
+            size: iconSize,
+            color: iconColor
+          ),
         ),
         style: OutlinedButton.styleFrom(
           shape: CircleBorder(),
@@ -237,14 +363,14 @@ Widget buildRoundedButton(BuildContext context, Icon icon, String text, Function
         ),
       ),
       Divider(
-        height: 5.0,
+        height: spacing,
         color: Colors.transparent,
       ),
       Text(
         text,
         style: TextStyle(
           fontSize: textSize,
-          fontWeight: FontWeight.w700,
+          fontWeight: textFontWeight,
         ),
       )
     ]

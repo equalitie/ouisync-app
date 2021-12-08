@@ -49,7 +49,7 @@ class _FolderDetailState extends State<FolderDetail> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildHandle(context),
+          Fields.bottomSheetHandle(context),
           _folderDetails(context),
         ],
       ),
@@ -64,7 +64,7 @@ class _FolderDetailState extends State<FolderDetail> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle(widget.name),
+          Fields.bottomSheetTitle(widget.name),
           GestureDetector(
             onTap: () => delete(
               widget.context,
@@ -73,12 +73,12 @@ class _FolderDetailState extends State<FolderDetail> {
               widget.parent,
               widget.path
             ),
-            child: buildIconLabel(
-              Icons.delete_outlined,
-              'Delete',
+            child: Fields.iconText(
+              icon: Icons.delete_outlined,
+              text: 'Delete',
               iconSize: 40.0,
-              infoSize: 18.0,
-              labelPadding: EdgeInsets.only(bottom: 30.0)
+              textSize: 18.0,
+              padding: EdgeInsets.only(bottom: 30.0)
             )
           ),
           _buildMoveFolderButton(
@@ -94,12 +94,12 @@ class _FolderDetailState extends State<FolderDetail> {
             indent: 20.0,
             endIndent: 20.0,
           ),
-          buildIconLabel(
-            Icons.info_rounded,
-            'Information',
+          Fields.iconText(
+            icon: Icons.info_rounded,
+            text: 'Information',
             iconSize: 40.0,
-            infoSize: 24.0,
-            labelPadding: EdgeInsets.only(bottom: 30.0)
+            textSize: 24.0,
+            padding: EdgeInsets.only(bottom: 30.0)
           ),
           syncStatus(),
         ]
@@ -230,12 +230,12 @@ class _FolderDetailState extends State<FolderDetail> {
         moveEntryCallback,
         bottomSheetControllerCallback
       ),
-      child: buildIconLabel(
-        Icons.drive_file_move_outlined,
-        'Move',
+      child: Fields.iconText(
+        icon: Icons.drive_file_move_outlined,
+        text: 'Move',
         iconSize: 40.0,
-        infoSize: 18.0,
-        labelPadding: EdgeInsets.only(bottom: 30.0)
+        textSize: 18.0,
+        padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
   }
@@ -274,7 +274,7 @@ class _FolderDetailState extends State<FolderDetail> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        buildIdLabel('Sync Status:'),
+        Fields.idLabel('Sync Status:'),
         Container(
           height: 60.0,
           alignment: Alignment.center,

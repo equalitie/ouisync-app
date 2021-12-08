@@ -53,15 +53,21 @@ class FolderCreation extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildEntry(
+          Fields.formTextField(
             context: context,
             label: 'Create a new folder: ',
             hint: 'Folder name',
             onSaved: (value) => _onSaved(bloc, value),
             validator: formNameValidator
           ),
-          buildInfoLabel('Location: ', this.path),
-          buildActionsSection(context, _actions(context)),
+          Fields.labeledText(
+            label: 'Location: ',
+            text: this.path
+          ),
+          Fields.actionsSection(
+            context,
+            buttons: _actions(context)
+          ),
         ]
       )
     );

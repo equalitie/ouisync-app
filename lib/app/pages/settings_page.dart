@@ -74,11 +74,11 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildIconLabel(
-            Icons.lock_rounded,
-            'Repository',
-            infoSize: 25.0,
-            labelPadding: EdgeInsets.fromLTRB(20.0, 0.0, 10.0, 20.0)
+          Fields.iconText(
+            icon: Icons.lock_rounded,
+            text: 'Repository',
+            textSize: 25.0,
+            padding: EdgeInsets.fromLTRB(20.0, 0.0, 10.0, 20.0)
             ),
           RepositoryPicker(
             repositoriesCubit: widget.repositoriesCubit,
@@ -114,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildDhtSection() {
     return SwitchListTile(
-      title: buildConstrainedText('BitTorrent DHT'),
+      title: Fields.constrainedText('BitTorrent DHT'),
       value: _bittorrentDhtStatus,
       onChanged: (bool value) {
         updateDhtSetting(value);
