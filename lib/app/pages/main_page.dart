@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:styled_text/icon_style.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';

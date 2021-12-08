@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
-import '../../bloc/directory/directory_bloc.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 
