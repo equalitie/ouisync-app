@@ -5,48 +5,94 @@ import 'package:styled_text/styled_text.dart';
 class Fields {
   Fields._();
 
-  static StyledText _styledTextBase(
+  static Widget _styledTextBase(
     String message,
     TextAlign textAlign,
     double fontSize,
     FontWeight fontWeight,
-    Map<String, StyledTextTagBase>? tags
-  ) => StyledText(
-    text: message,
-    textAlign: textAlign,
-    style: TextStyle(
-      fontSize: fontSize,
-      fontWeight: fontWeight
-    ),
-    tags: tags
-  );
+    FontStyle fontStyle,
+    Color color,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding
+  ) {
+    if (tags == null) {
+      tags = Map<String, StyledTextTagBase>();
+    }
+    
+    tags.addAll({
+      'font': StyledTextTag(
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          color: color
+        )
+      )
+    });
 
-  static StyledText inPageMainMessage(String message,
+    return Container(
+      padding: padding,
+      child: StyledText(
+        text: '<font>$message</font>',
+        textAlign: textAlign,
+        tags: tags
+      )
+    );
+  }
+
+  static Widget inPageMainMessage(String message,
   {
     TextAlign textAlign = TextAlign.center,
     double fontSize = 24.0,
     FontWeight fontWeight = FontWeight.bold,
-    Map<String, StyledTextTagBase>? tags
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0.0)
   }) => _styledTextBase(
     message,
     textAlign,
     fontSize,
     fontWeight,
-    tags
+    fontStyle,
+    color,
+    tags,
+    padding
   );
 
-  static StyledText inPageSecondaryMessage(String message,
+  static Widget inPageSecondaryMessage(String message,
   {
     TextAlign textAlign = TextAlign.center,
     double fontSize = 18.0,
     FontWeight fontWeight = FontWeight.normal,
-    Map<String, StyledTextTagBase>? tags
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0)
   }) => _styledTextBase(
     message,
     textAlign,
     fontSize,
     fontWeight,
-    tags
+    fontStyle,
+    color,
+    tags,
+    padding
+  );
+
+  static ElevatedButton _elevatedButtonBase ({
+    required Function()? onPressed,
+    required String text,
+    ButtonStyle? style,
+    bool autofocus = false,
+  }) => ElevatedButton(
+    onPressed: onPressed,
+    child: Container(
+
+      child: Text(text)
+    ),
+    style: style,
+    autofocus: autofocus,
   );
 
   static Widget bottomSheetHandle(BuildContext context,
