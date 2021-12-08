@@ -80,18 +80,29 @@ class Fields {
     padding
   );
 
-  static ElevatedButton _elevatedButtonBase ({
+  static ElevatedButton inPageButton ({
     required Function()? onPressed,
     required String text,
-    ButtonStyle? style,
+    Alignment alignment = Alignment.center,
+    Size? size,
+    double? fontSize,
+    FontWeight fontWeight = FontWeight.normal,
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.white,
     bool autofocus = false,
   }) => ElevatedButton(
     onPressed: onPressed,
-    child: Container(
-
-      child: Text(text)
+    child: Text(text),
+    style: ButtonStyle(
+      alignment: alignment,
+      minimumSize: MaterialStateProperty.all<Size?>(size),
+      textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        color: color
+      )),
     ),
-    style: style,
     autofocus: autofocus,
   );
 
