@@ -136,7 +136,6 @@ class _MainPageState extends State<MainPage>
   }
 
   navigateToPath({type, origin, destination, withProgress = false}) {
-    print('navigateToPath destination: $destination');
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       NavigateTo(
@@ -288,7 +287,15 @@ class _MainPageState extends State<MainPage>
     },
     builder: (context, state) {
       if (state is DirectoryInitial) {
-        return Center(child: Text('Loading contents...'));
+        return Center(
+          child: Text(
+            Strings.messageLoadingContents,
+            style: TextStyle(
+              fontSize: 23.0,
+              fontWeight: FontWeight.bold
+            )
+          )
+        );
       }
 
       if (state is DirectoryLoadInProgress) {
