@@ -43,7 +43,7 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> with TickerPr
     return Column(
       children: [
         _repositoriesBar(),
-        _routeBar(route),
+        Fields.routeBar(route: route),
       ],
     );
   }
@@ -85,35 +85,6 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> with TickerPr
         Icons.share_outlined,
         size: 40.0,
         color: Colors.white,
-      ),
-    );
-  }
-
-  Container _routeBar(route) {
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            width: 0.0,
-            color: Colors.transparent,
-            style: BorderStyle.solid
-          ),
-        ),
-        color: Colors.white,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                Expanded(child: route),
-              ],
-            )
-          ),
-        ],
       ),
     );
   }
