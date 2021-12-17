@@ -62,7 +62,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     if (event is MoveEntry) {
       yield DirectoryLoadInProgress();
 
-      yield await moveEntry(event.repository, event.origin, event.destination, event.entryPath, event.newDestinationPath, event.navigate);
+      yield await moveEntry(event.repository, event.origin, event.destination, event.entryPath, event.newDestinationPath);
     }
 
     if (event is DeleteFile) {
@@ -193,7 +193,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     return DirectoryLoadSuccess(path: filePath, contents: readFileResult.result, action: action);
   }
 
-  Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newDestinationPath, navigate) async {
+  Future<DirectoryState> moveEntry(Repository repository, String origin, String destination, String entryPath, String newDestinationPath) async {
     try {
       final moveEntryResult = await directoryRepository.moveEntry(repository, entryPath, newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {
@@ -205,9 +205,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return DirectoryLoadFailure();
     }
 
-    return navigate
-    ? await navigateTo(repository, Navigation.content, origin, destination)
-    : await getFolderContents(repository, origin);
+    return await getFolderContents(repository, destination);
   }
 
   Future<DirectoryState> deleteFile(Repository repository, String filePath, String parentPath) async {
