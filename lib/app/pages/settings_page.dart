@@ -123,6 +123,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> updateDhtSetting(bool enable) async {
+    if (widget.currentRepository == null) {
+      return;
+    }
+
     print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
 
     enable ? await widget.currentRepository!.enableDht()
