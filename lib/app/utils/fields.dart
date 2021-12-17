@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:styled_text/styled_text.dart';
 
 class Fields {
@@ -80,7 +79,7 @@ class Fields {
     padding
   );
 
-  static ElevatedButton inPageButton ({
+  static Widget inPageButton ({
     required Function()? onPressed,
     required String text,
     Alignment alignment = Alignment.center,
@@ -222,6 +221,7 @@ class Fields {
 
   static Widget constrainedText(String text,
   {
+    int flex = 1,
     double size = 18.0,
     TextAlign textAlign = TextAlign.start,
     bool softWrap = true,
@@ -229,7 +229,7 @@ class Fields {
     FontWeight fontWeight = FontWeight.w600,
     Color color = Colors.black
   })  => Expanded(
-    flex: 1,
+    flex: flex,
     child: Text(
       text,
       textAlign: textAlign,
@@ -307,6 +307,7 @@ class Fields {
   static Widget _textFormFieldBase({
     required BuildContext context,
     TextEditingController? textEditingController,
+    Icon? icon,
     required String label,
     required String hint,
     required Function(String?) onSaved,
@@ -314,16 +315,18 @@ class Fields {
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     String? initialValue,
+    bool obscureText = false,
     Function()? onTap,
     Function(String)? onChanged
   }) => TextFormField(
     controller: textEditingController,
     autovalidateMode: autovalidateMode,
     autofocus: autofocus,
-    initialValue: initialValue,  
+    initialValue: initialValue,
+    obscureText: obscureText,  
     keyboardType: TextInputType.text,
     decoration: InputDecoration (
-      icon: const Icon(Icons.folder),
+      icon: icon,
       hintText: hint,
       labelText: label,
     ),
@@ -336,6 +339,7 @@ class Fields {
   static Widget formTextField({
     required BuildContext context,
     TextEditingController? textEditingController,
+    Icon? icon,
     required String label,
     required String hint,
     required Function(String?) onSaved,
@@ -343,6 +347,7 @@ class Fields {
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     String? initialValue,
+    bool obscureText = false,
     Function()? onTap,
     Function(String)? onChanged,
     padding = const EdgeInsets.only(bottom: 10.0),
@@ -356,6 +361,7 @@ class Fields {
         _textFormFieldBase(
           context: context,
           textEditingController: textEditingController,
+          icon: icon,
           label: label,
           hint: hint,
           onSaved: onSaved,
@@ -363,6 +369,7 @@ class Fields {
           autovalidateMode: autovalidateMode,
           autofocus: autofocus,
           initialValue: initialValue,
+          obscureText: obscureText,
           onTap: onTap,
           onChanged: onChanged
         )
