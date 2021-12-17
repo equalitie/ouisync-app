@@ -36,4 +36,18 @@ class Constants{
   static const String localRepositoriesKey = 'LOCAL_REPOS';
   static const String currentRepositoryKey = 'CURRENT_REPO';
   static const String sessionStoreKey = 'SESSION_STORE';
+
+  /// In-line text style names
+  
+  static const String inlineTextBold = 'bold';
+  static const String inlineTextSize = 'size';
+  static const String inlineTextColor = 'color';
+  static const String inlineTextIcon = 'icon';
+
+  // Hero tags
+
+  static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
+
+  static const String heroTagCreateFolderSharedFile = 'CREATE_FOLDER_SHARED_FILE';
+  static const String heroTagSaveToFolderSharedFile = 'SAVE_TO_FOLDER_SHARED_FILE';
 }
