@@ -43,7 +43,7 @@ dependencies:
   ouisync_plugin:
     path: ./ouisync-plugin
   path: ^1.8.0
-  path_provider: ^2.0.5
+  path_provider: ^2.0.8
   receive_sharing_intent: ^1.4.5
   share_plus: ^3.0.4
   shared_preferences: ^2.0.8
