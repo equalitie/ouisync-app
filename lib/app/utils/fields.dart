@@ -439,4 +439,32 @@ class Fields {
       )
     ]
   );
+
+  static Container routeBar({ required Widget route })
+    => Container(
+      padding: EdgeInsets.all(10.0),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 0.0,
+            color: Colors.transparent,
+            style: BorderStyle.solid
+          ),
+        ),
+        color: Colors.white,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: [
+                Expanded(child: route),
+              ],
+            )
+          ),
+        ],
+      ),
+    ); 
 }
