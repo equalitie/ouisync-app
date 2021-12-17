@@ -47,7 +47,7 @@ dependencies:
   receive_sharing_intent: ^1.4.5
   share_plus: ^3.0.4
   shared_preferences: ^2.0.8
-  styled_text: ^3.0.3
+  styled_text: ^4.0.0+1
   url_launcher: ^6.0.6
 
 dev_dependencies:
