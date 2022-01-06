@@ -53,10 +53,10 @@ class EntryInfo {
       length = await file.length;
     } catch (e) {
       print('Error getting the length for file $path:\n${e.toString()}');
-    } finally {
-      if (file != null) {
-        file.close(); 
-      }      
+    }
+
+    if (file != null) {
+      file.close(); 
     }
     
     return length;

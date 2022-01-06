@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
+  async: ^2.8.1
   bloc: ^7.2.1
   bloc_test: ^8.1.0
   build_runner: ^2.0.5

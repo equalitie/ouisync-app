@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
-class FileDescription extends StatefulWidget {
+class FileDescription extends StatelessWidget {
   const FileDescription({
     required this.repository,
     required this.fileData,
@@ -14,59 +14,50 @@ class FileDescription extends StatefulWidget {
   final BaseItem fileData;
 
   @override
-  State<StatefulWidget> createState() => _FileDescription();
-}
-
-class _FileDescription extends State<FileDescription> {
-  @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children:  [
           Text(
-            widget.fileData.name,
+            fileData.name,
             style: const TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 16.0,
             ),
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          size(widget.fileData.path)
+          size(repository, fileData.path)
         ],
       ),
     );
   }
 
-  Widget size(path) {
-    return FutureBuilder<String>(
-      future: getFileSize(path),
-      builder: (context, AsyncSnapshot<String> snapshot) {
+  Widget size(repository, path) {
+    return FutureBuilder<int>(
+      initialData: 0,
+      future: EntryInfo(repository).fileLength(path),
+      builder: (context, AsyncSnapshot<int> snapshot) {
         if (snapshot.hasError) {
           return Text(
-            '?',
+            '? B',
             style: const TextStyle(fontSize: 14.0),
           );
         }
 
         if (snapshot.hasData) {
           return Text(
-            snapshot.data!,
+            formattSize(snapshot.data ?? 0, units: true),
             style: const TextStyle(fontSize: 14.0),
           );
-        } else {
-          return CircularProgressIndicator();
         }
+
+        return Container(
+          height: 15.0,
+          width: 15.0,
+          child: CircularProgressIndicator(strokeWidth: 2.0,)
+        );
       }
     );
   }
-
-  Future<String> getFileSize(path) async {
-    // TODO: Check if this delay is still needed (This delay was here because without it, the library would hang) 
-    // await Future.delayed(Duration(seconds: 2));
-
-    final length = await EntryInfo(widget.repository).fileLength(path);
-    return formattSize(length, units: true);
-  }
-
 }

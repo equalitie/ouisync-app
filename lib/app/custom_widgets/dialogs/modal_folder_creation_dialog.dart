@@ -58,7 +58,8 @@ class FolderCreation extends StatelessWidget {
             label: 'Create a new folder: ',
             hint: 'Folder name',
             onSaved: (value) => _onSaved(bloc, value),
-            validator: formNameValidator
+            validator: formNameValidator,
+            autofocus: true
           ),
           Fields.labeledText(
             label: 'Location: ',
