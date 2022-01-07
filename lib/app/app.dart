@@ -1,27 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
 import 'data/data.dart';
 import 'pages/pages.dart';
-import 'utils/utils.dart';
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
-    required this.appDir,
-    required this.repositoriesDir,
     required this.session,
-    required this.defaultRepository,
+    required this.appStorageLocation,
+    required this.repositoriesLocation,
     required this.defaultRepositoryName,
   });
 
-  final String appDir;
-  final String repositoriesDir;
   final Session session;
-  final Repository? defaultRepository;
+  final String appStorageLocation;
+  final String repositoriesLocation;
   final String defaultRepositoryName;
 
   @override
@@ -29,20 +28,55 @@ class OuiSyncApp extends StatefulWidget {
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> {
-  late final DirectoryRepository directoryRepository;
-
+  final StreamController<List<SharedMediaFile>> _sharedMediaStreamController = StreamController<List<SharedMediaFile>>();
+  StreamSubscription? _intentDataStreamSubscription;
+  
   @override
   void initState() {
     super.initState();
 
-    NativeChannels.init(repository: widget.defaultRepository);
+    _processSharedIntent();
+  }
+
+  void _processSharedIntent() {
+    // For sharing images coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription = ReceiveSharingIntent
+    .getMediaStream().listen((List<SharedMediaFile> listOfMedia) {
+      if (listOfMedia.isEmpty) {
+        print('[intent_listener] No media present');
+        return;
+      }
+
+      print('[intent_listener] Media shared: ${(listOfMedia.map((f)=> f.path).join(","))}');
+      _sharedMediaStreamController.add(listOfMedia);
+    }, onError: (err) {
+      print("[intent_listener] Error: $err");
+    });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> listOfMedia) {
+      if (listOfMedia.isEmpty) {
+        print('[intent] No media present');
+        return;
+      }
+
+      print('[intent] Media shared: ${(listOfMedia.map((f)=> f.path).join(","))}');
+      _sharedMediaStreamController.add(listOfMedia);
+    });
+  }
+
+  @override
+  void dispose() {
+    _sharedMediaStreamController.close();
+    _intentDataStreamSubscription?.cancel();
+
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: Strings.titleApp,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -60,15 +94,16 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
           BlocProvider<RepositoriesCubit>(
             create: (BuildContext context) => RepositoriesCubit(  
               session: widget.session,
-              appDir: widget.appDir,
-              repositoriesDir: widget.repositoriesDir
+              appDir: widget.appStorageLocation,
+              repositoriesDir: widget.repositoriesLocation
             )
           )
         ],
         child: MainPage(
-          defaultRepository: widget.defaultRepository,
+          session: widget.session,
+          repositoriesLocation: widget.repositoriesLocation,
           defaultRepositoryName: widget.defaultRepositoryName,
-          title: Strings.titleApp,
+          intentStream: _sharedMediaStreamController.stream,
         )
       )
     );

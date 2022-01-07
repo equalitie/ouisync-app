@@ -20,7 +20,11 @@ class _SearchBarState extends State<SearchBar> {
               textAlign: TextAlign.center,
             )
           ),
-          buildActionIcon(icon: Icons.search_outlined, onTap: () {}, size: 35.0)
+          Fields.actionIcon(
+            icon: Icons.search_outlined,
+            onTap: () {},
+            size: 35.0
+          )
         ]
       )
     );

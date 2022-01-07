@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -117,7 +116,13 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       children: [
         _repositoryIcon(iconColor),
         SizedBox(width: 10.0),
-        buildConstrainedText(_repositoryName, size: 20.0, softWrap: false, overflow: TextOverflow.fade, color: iconColor),
+        Fields.constrainedText(
+          _repositoryName,
+          size: 20.0,
+          softWrap: false,
+          textOverflow: TextOverflow.fade,
+          color: iconColor
+        ),
         _syncSection(widget.synchronizationCubit),
         _actionsSection(),
       ],
@@ -143,7 +148,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
 
   Widget _actionsSection() {
     return _repository != null
-    ? buildActionIcon(
+    ? Fields.actionIcon(
       icon: Icons.keyboard_arrow_down_outlined,
       onTap: () async { await _showRepositorySelector(_repositoryName); }
     )

@@ -159,8 +159,7 @@ class MoveEntry extends DirectoryEvent {
     required this.origin,
     required this.destination,
     required this.entryPath,
-    required this.newDestinationPath,
-    this.navigate = false
+    required this.newDestinationPath
   }) :
   assert (origin != ''),
   assert (destination != ''),
@@ -172,7 +171,6 @@ class MoveEntry extends DirectoryEvent {
   final String destination;
   final String entryPath;
   final String newDestinationPath;
-  final bool navigate;
 
   @override
   List<Object> get props => [
@@ -180,8 +178,7 @@ class MoveEntry extends DirectoryEvent {
     origin,
     destination,
     entryPath,
-    newDestinationPath,
-    navigate
+    newDestinationPath
   ];
 
 }

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
-import '../../bloc/directory/directory_bloc.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 
@@ -47,7 +46,7 @@ class MoveEntryDialog extends StatelessWidget {
         children: [
           _movingActionTitle(),
           SizedBox(width: 10.0,),
-          buildConstrainedText(
+          Fields.constrainedText(
             'from: ${extractParentFromPath(path)}',
             size: 16.0,
             fontWeight: FontWeight.w800
@@ -66,7 +65,11 @@ class MoveEntryDialog extends StatelessWidget {
               size: 40.0,
             ),
             SizedBox(width: 10.0,),
-            buildConstrainedText('${removeParentFromPath(path)}', size: 24.0, fontWeight: FontWeight.w800),
+            Fields.constrainedText(
+              '${removeParentFromPath(path)}',
+              size: 24.0,
+              fontWeight: FontWeight.w800
+            ),
           ],
         );
   }
@@ -83,7 +86,10 @@ class MoveEntryDialog extends StatelessWidget {
           }
         }
 
-        return buildActionsSection(context, _actions(context, allowAction), padding: EdgeInsets.only(top: 0.0));
+        return Fields.actionsSection(context,
+          buttons: _actions(context, allowAction),
+          padding: EdgeInsets.only(top: 0.0)
+        );
       }
     );
   }

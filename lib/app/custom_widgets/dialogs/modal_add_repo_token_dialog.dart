@@ -65,50 +65,50 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           SizedBox(height: 20.0,),
           _buildRepositoryNameField(context),
           _buildSuggestionSection(),
-          buildActionsSection(context, _actions(context)),
+          Fields.actionsSection(
+            context,
+            buttons: _actions(context)
+          ),
         ]
       )
     );
   }
 
-  Widget _buildTokenField(BuildContext context) {
-    return buildEntry(
-          context: context,
-          label: 'Repository token: ',
-          hint: 'Paste the token here',
-          onSaved: (value) {},
-          validator: _repositoryTokenValidator,
-          autofocus: true,
-          onChanged: _onTokenChanged
-        );
-  }
-
-  Widget _buildRepositoryNameField(BuildContext context) {
-    return buildEntry(
-          context: context,
-          textEditingController: _textEditingController,
-          label: 'Repository name: ',
-          hint: 'Give the repo a name',
-          onSaved: (value) => _onSaved(widget.cubit, value),
-          validator: formNameValidator,
-          autovalidateMode: AutovalidateMode.disabled
-        );
-  }
-
-  Visibility _buildSuggestionSection() {
-    return Visibility(
-      visible: _showSuggestedName,
-      child: GestureDetector(
-        onTap: () => _updateTokenEntryController(_suggestedName),
-        child: buildConstrainedText(
-          'Suggested: $_repoName\n(tap for using this name)',
-          size: 15.0,
-          fontWeight: FontWeight.normal,
-          color: Colors.black54
-        ),
-      )
+  Widget _buildTokenField(BuildContext context) =>
+    Fields.formTextField(
+      context: context,
+      label: 'Repository token: ',
+      hint: 'Paste the token here',
+      onSaved: (value) {},
+      validator: _repositoryTokenValidator,
+      autofocus: true,
+      onChanged: _onTokenChanged
     );
-  }
+
+  Widget _buildRepositoryNameField(BuildContext context) =>
+    Fields.formTextField(
+      context: context,
+      textEditingController: _textEditingController,
+      label: 'Repository name: ',
+      hint: 'Give the repo a name',
+      onSaved: (value) => _onSaved(widget.cubit, value),
+      validator: formNameValidator,
+      autovalidateMode: AutovalidateMode.disabled
+    );
+
+  Visibility _buildSuggestionSection() =>
+  Visibility(
+    visible: _showSuggestedName,
+    child: GestureDetector(
+      onTap: () => _updateTokenEntryController(_suggestedName),
+      child: Fields.constrainedText(
+        'Suggested: $_repoName\n(tap for using this name)',
+        size: 15.0,
+        fontWeight: FontWeight.normal,
+        color: Colors.black54
+      ),
+    )
+  );
 
   _updateTokenEntryController(String? value) {
     _textEditingController.text = value ?? '';

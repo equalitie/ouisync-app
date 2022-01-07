@@ -34,7 +34,7 @@ class RepositoryList extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                buildHandle(context),
+                Fields.bottomSheetHandle(context),
                 _folderDetails(context, snapshot.data as List<String>),
               ],
             ),
@@ -54,30 +54,30 @@ class RepositoryList extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Your Repositories'),
+          Fields.bottomSheetTitle('Your Repositories'),
           _buildRepositoryItem(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
-            child: buildIconLabel(
-              Icons.add_circle_outline_rounded,
-              'Create a new repository',
+            child: Fields.iconText(
+              icon: Icons.add_circle_outline_rounded,
+              text: 'Create a new repository',
               iconSize: 40.0,
               iconColor: Colors.black,
-              infoSize: 25.0,
-              labelPadding: EdgeInsets.only(bottom: 10.0)
+              textSize: 25.0,
+              padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
           SizedBox(height: 20.0,),
           GestureDetector(
             onTap: () => addRepoWithTokenDialog(this.cubit),
-            child: buildIconLabel(
-              Icons.insert_link_rounded,
-              'Add a repository with token',
+            child: Fields.iconText(
+              icon: Icons.insert_link_rounded,
+              text: 'Add a repository with token',
               iconSize: 40.0,
               iconColor: Colors.black,
-              infoSize: 25.0,
-              labelPadding: EdgeInsets.only(bottom: 10.0)
+              textSize: 25.0,
+              padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
         ]

@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
-import '../../bloc/directory/directory_bloc.dart';
 import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
@@ -32,7 +31,7 @@ class DirectoryActions extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildHandle(context),
+          Fields.bottomSheetHandle(context),
           _folderDetails(this.context, this.bloc, this.repository, this.parent),
         ],
       ),
@@ -47,7 +46,7 @@ class DirectoryActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('Add Folders/Files'),
+          Fields.bottomSheetTitle('Add Folders/Files'),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

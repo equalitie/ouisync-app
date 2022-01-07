@@ -1,12 +1,10 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:styled_text/styled_text.dart';
 
 import '../bloc/blocs.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -16,15 +14,19 @@ import '../utils/utils.dart';
 class AddSharedFilePage extends StatefulHookWidget {
   AddSharedFilePage({
     required this.repository,
-    required this.sharedFileInfo,
+    required this.listOfSharedMedia,
+    required this.routeBloc,
     required this.directoryBloc,
-    required this.directoryBlocPath
+    required this.directoryBlocPath,
+    required this.navigationBar
   });
 
-  final Repository repository;
-  final List<SharedMediaFile> sharedFileInfo;
-  final Bloc directoryBloc;
+  final Repository? repository;
+  final List<SharedMediaFile> listOfSharedMedia;
+  final RouteBloc routeBloc;
+  final DirectoryBloc directoryBloc;
   final String directoryBlocPath;
+  final CustomNavigationBar navigationBar;
 
   @override
   _ReceiveSharingIntentPageState createState() => _ReceiveSharingIntentPageState();
@@ -36,27 +38,22 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
   late final fileName;
   late final pathWithoutName;
 
-  late String _currentFolder;
+  String _currentFolder = Strings.rootPath;
   final rootItem = FolderItem(
     path: Strings.rootPath,
     items: <BaseItem>[]
   ); 
-
-  late Color backgroundColor;
-  late Color foregroundColor;
   
   @override
   void initState() {
     super.initState();
 
-    _currentFolder = rootItem.path;
-
-    initHeaderParams();
+    initHeaderParams(widget.listOfSharedMedia.first.path);
   }
 
-  initHeaderParams() {
-    fileName = getPathFromFileName(widget.sharedFileInfo.first.path);
-    pathWithoutName = extractParentFromPath(widget.sharedFileInfo.first.path);
+  initHeaderParams(String sharedFilePath) {
+    fileName = getPathFromFileName(sharedFilePath);
+    pathWithoutName = extractParentFromPath(sharedFilePath);
   }
 
   updateCurrentFolder(path) => setState(() {
@@ -65,30 +62,27 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
 
   @override
   Widget build(BuildContext context) {
-    backgroundColor = Theme.of(context).cardColor;
-    foregroundColor = Theme.of(context).accentColor;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add file to OuiSync'),
+        title: Text(Strings.titleAddShareFilePage),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildFileInfoHeader(),
-            _navigationRoute(),
+            _navigationRoute(widget.routeBloc),
             Divider(
               height: 10.0,
             ),
             Expanded(
               flex: 1,
-              child: _directoriesBlocBuilder()
+              child: _directoriesBlocBuilder(widget.directoryBloc)
             ),
           ]
         ),
       ),
-      floatingActionButton: _actionButtons(),
+      floatingActionButton: _actionButtons(widget.directoryBloc),
     );
   }
 
@@ -161,29 +155,30 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     );
   }
   
-  _navigationRoute() => BlocConsumer(
-    bloc: BlocProvider.of<RouteBloc>(context), 
+  _navigationRoute(RouteBloc routeBloc) => BlocConsumer(
+    bloc: routeBloc, 
     builder: (context, state) {
       if (state is RouteLoadSuccess) {
-        return state.route;
+        return Fields.routeBar(route: state.route);
       }
 
       return Container(
-        child: Text('[!]]')
+        child: Text('')
       );
     },
     listener: (context, state) {
       if (state is RouteLoadSuccess) {
         if (state.path == Strings.rootPath) {
-          updateCurrentFolder(rootItem);
+          updateCurrentFolder(rootItem.path);
         }
       }
     }
   );
 
-  _directoriesBlocBuilder() {
+  _directoriesBlocBuilder(DirectoryBloc directoryBloc) {
     return Center(
-      child: BlocBuilder<DirectoryBloc, DirectoryState>(
+      child: BlocBuilder(
+        bloc: directoryBloc,
         builder: (context, state) {
           if (state is DirectoryInitial) {
             return Center(child: Text('Loading contents...'));
@@ -194,11 +189,11 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
           }
 
           if (state is DirectoryLoadSuccess) {
-            return loadContents(state.contents as List<BaseItem>);
+            return loadContents(directoryBloc, state.contents as List<BaseItem>);
           }
 
           if (state is NavigationLoadSuccess) {
-            return loadContents(state.contents);
+            return loadContents(directoryBloc, state.contents);
           }
 
           if (state is NavigationLoadFailure) {
@@ -214,7 +209,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     );
   }
 
-  Widget loadContents(List<BaseItem> contents) {
+  Widget loadContents(DirectoryBloc directoryBloc, List<BaseItem> contents) {
     if (contents.isEmpty) {
       return _noContents();
     }
@@ -222,25 +217,28 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     final items = contents;
     items.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
 
-    return _contentsList(items);
+    return _contentsList(directoryBloc, items);
   }
 
-  Widget _actionButtons() {
+  Widget _actionButtons(DirectoryBloc directoryBloc) {
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,  
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton.extended(
-            onPressed: () async => await _createNewFolder(_currentFolder),
+            heroTag: Constants.heroTagCreateFolderSharedFile,
+            onPressed: () async => await _createNewFolder(directoryBloc, _currentFolder),
             icon: const Icon(Icons.create_new_folder_rounded),
             label: const Text(Strings.actionNewFolder)
           ),
           SizedBox(width: 30.0),
           FloatingActionButton.extended(
+            heroTag: Constants.heroTagSaveToFolderSharedFile,
             onPressed: () async => await _saveFileToSelectedFolder(
+              directoryBloc: directoryBloc,
               destination: _currentFolder,
-              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+              fileName: getPathFromFileName(widget.listOfSharedMedia.single.path)
             ),
             icon: const Icon(Icons.arrow_circle_down),
             label: Text('${removeParentFromPath(_currentFolder)}')
@@ -250,14 +248,14 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     );
   }
 
-  _createNewFolder(String current) {
+  _createNewFolder(DirectoryBloc directoryBloc, String current) {
     final formKey = GlobalKey<FormState>();
 
     final dialogTitle = 'Create Folder';
     final actionBody = FolderCreation(
       context: context,
-      bloc: BlocProvider.of<DirectoryBloc>(context),
-      repository: widget.repository,
+      bloc: directoryBloc,
+      repository: widget.repository!,
       path: current,
       formKey: formKey,
     );
@@ -285,34 +283,23 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
           children: [
             Align(
               alignment: Alignment.center,
-              child: Text(
-                Strings.messageEmptyFolderStructure,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 23.0,
-                  fontWeight: FontWeight.bold
-                ),
-              ),
+              child: Fields.inPageMainMessage(Strings.messageEmptyFolderStructure),
             ),
             SizedBox(height: 20.0),
             Align(
               alignment: Alignment.center,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                child: StyledText(
-                  text: _currentFolder == Strings.rootPath
-                  ? Strings.messageCreateNewFolderRootToStartStyled
-                  : Strings.messageCreateNewFolderStyled,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.normal
-                  ),
-                  styles: {
-                    'bold': TextStyle(fontWeight: FontWeight.bold),
-                    'arrow_down': IconStyle(Icons.south),
-                  },
-                ),
+                child: Fields.inPageSecondaryMessage(
+                  _currentFolder == Strings.rootPath
+                  ? Strings.messageCreateNewFolderRootToStart
+                  : Strings.messageCreateNewFolder,
+                  tags: {
+                    Constants.inlineTextBold: InlineTextStyles.bold,
+                    Constants.inlineTextSize: InlineTextStyles.size(size: 20.0),
+                    Constants.inlineTextIcon: InlineTextStyles.icon(Icons.south)
+                  }
+                )
               ),
             ),
           ],
@@ -321,7 +308,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     ],
   );
 
-  _contentsList(List<BaseItem> contents) {
+  _contentsList(DirectoryBloc directoryBloc, List<BaseItem> contents) {
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
       separatorBuilder: (context, index) => Divider(
@@ -332,7 +319,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
       itemBuilder: (context, index) {
         final item = contents[index];
         return ListItem (
-          repository: widget.repository,
+          repository: widget.repository!,
           itemData: item,
           mainAction: item.itemType == ItemType.file
           ? () { }
@@ -341,6 +328,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
             updateCurrentFolder(item.path);
 
             _navigateTo(
+              directoryBloc: directoryBloc,
               type: Navigation.content,
               origin: current,
               destination: item.path
@@ -352,15 +340,16 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
             updateCurrentFolder(item.path);
 
             await _saveFileToSelectedFolder(
+              directoryBloc: directoryBloc,
               destination: _currentFolder,
-              fileName: getPathFromFileName(widget.sharedFileInfo.single.path)
+              fileName: getPathFromFileName(widget.listOfSharedMedia.single.path)
             );
           },
           filePopupMenu: Dialogs
               .filePopupMenu(
                 context,
-                widget.repository,
-                BlocProvider. of<DirectoryBloc>(context),
+                widget.repository!,
+                directoryBloc,
                 { Strings.actionDeleteFile: item }
               ),
           folderDotsAction: () {},
@@ -370,20 +359,19 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     );
   }
 
-  Future<void> _saveFileToSelectedFolder({required String destination, required String fileName}) async {
+  Future<void> _saveFileToSelectedFolder({required DirectoryBloc directoryBloc, required String destination, required String fileName}) async {
     final filePath = destination == Strings.rootPath
     ? '/$fileName'
     : '$destination/$fileName';
         
-    _saveFileToOuiSync(destination, filePath);
+    _saveFileToOuiSync(directoryBloc, destination, filePath);
   }
 
-  Future<void> _saveFileToOuiSync(String destination, String filePath) async {
-    var fileStream = io.File(widget.sharedFileInfo.first.path).openRead();
-    widget.directoryBloc
-    .add(
+  Future<void> _saveFileToOuiSync(DirectoryBloc directoryBloc, String destination, String filePath) async {
+    var fileStream = io.File(widget.listOfSharedMedia.first.path).openRead();
+    directoryBloc.add(
       CreateFile(
-        repository: widget.repository,
+        repository: widget.repository!,
         parentPath: destination,
         newFilePath: filePath,
         fileByteStream: fileStream
@@ -391,6 +379,7 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     );
 
     _navigateTo(
+      directoryBloc: directoryBloc,
       type: Navigation.content,
       origin: extractParentFromPath(destination),
       destination: destination,
@@ -399,21 +388,24 @@ class _ReceiveSharingIntentPageState extends State<AddSharedFilePage>
     Navigator.pop(context);
   }
 
-  _navigateTo({type, origin, destination}) {
+  _navigateTo({
+    required DirectoryBloc directoryBloc,
+    required Navigation type,
+    required String origin,
+    required String destination
+  }) {
     _currentFolder == Strings.rootPath
-    ? BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    ? directoryBloc.add(
       GetContent(
-        repository: widget.repository,
+        repository: widget.repository!,
         path: origin,
         recursive: false,
         withProgress: true
       )
     )
-    : BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    : directoryBloc.add(
       NavigateTo(
-        repository: widget.repository,
+        repository: widget.repository!,
         type: type,
         origin: origin,
         destination: destination,

@@ -48,7 +48,7 @@ class _FileDetailState extends State<FileDetail> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildHandle(context),
+          Fields.bottomSheetHandle(context),
           _fileDetails(context),
         ],
       ),
@@ -63,7 +63,7 @@ class _FileDetailState extends State<FileDetail> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildTitle('File Details'),
+          Fields.bottomSheetTitle('File Details'),
           _buildPreviewButton(),
           _buildShareButton(),
           _buildMoveFolderButton(
@@ -80,26 +80,26 @@ class _FileDetailState extends State<FileDetail> {
             indent: 20.0,
             endIndent: 20.0,
           ),
-          buildIconLabel(
-            Icons.info_rounded,
-            'Information',
+          Fields.iconText(
+            icon: Icons.info_rounded,
+            text: 'Information',
             iconSize: 40.0,
-            infoSize: 24.0,
-            labelPadding: EdgeInsets.only(bottom: 30.0)
+            textSize: 24.0,
+            padding: EdgeInsets.only(bottom: 30.0)
           ),
-          buildInfoLabel(
-            'Name: ',
-            widget.name
+          Fields.labeledText(
+            label: 'Name: ',
+            text: widget.name
           ),
-          buildInfoLabel(
-            'Location: ', 
-            widget.path
+          Fields.labeledText(
+            label: 'Location: ', 
+            text: widget.path
             .replaceAll(widget.name, '')
             .trimRight(),
           ),
-          buildInfoLabel(
-            'Size: ',
-            formattSize(widget.size, units: true)
+          Fields.labeledText(
+            label: 'Size: ',
+            text: formattSize(widget.size, units: true)
           ),
         ],
       ),
@@ -109,12 +109,12 @@ class _FileDetailState extends State<FileDetail> {
   GestureDetector _buildPreviewButton() {
     return GestureDetector(
           onTap: () async => await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
-          child: buildIconLabel(
-            Icons.preview_rounded,
-            'Preview',
+          child: Fields.iconText(
+            icon: Icons.preview_rounded,
+            text: 'Preview',
             iconSize: 40.0,
-            infoSize: 18.0,
-            labelPadding: EdgeInsets.only(bottom: 30.0)
+            textSize: 18.0,
+            padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
   }
@@ -122,12 +122,12 @@ class _FileDetailState extends State<FileDetail> {
   GestureDetector _buildShareButton() {
     return GestureDetector(
           onTap: () async => await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
-          child: buildIconLabel(
-            Icons.share_rounded,
-            'Share',
+          child: Fields.iconText(
+            icon: Icons.share_rounded,
+            text: 'Share',
             iconSize: 40.0,
-            infoSize: 18.0,
-            labelPadding: EdgeInsets.only(bottom: 30.0)
+            textSize: 18.0,
+            padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
   }
@@ -147,12 +147,12 @@ class _FileDetailState extends State<FileDetail> {
         moveEntryCallback,
         bottomSheetControllerCallback
       ),
-      child: buildIconLabel(
-        Icons.drive_file_move_outlined,
-        'Move',
+      child: Fields.iconText(
+        icon: Icons.drive_file_move_outlined,
+        text: 'Move',
         iconSize: 40.0,
-        infoSize: 18.0,
-        labelPadding: EdgeInsets.only(bottom: 30.0)
+        textSize: 18.0,
+        padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
   }
@@ -190,12 +190,12 @@ class _FileDetailState extends State<FileDetail> {
   GestureDetector _buildDeleteButton() {
     return GestureDetector(
       onTap: () async => {},
-      child: buildIconLabel(
-        Icons.delete_outlined,
-        'Delete',
+      child: Fields.iconText(
+        icon: Icons.delete_outlined,
+        text: 'Delete',
         iconSize: 40.0,
-        infoSize: 18.0,
-        labelPadding: EdgeInsets.only(bottom: 30.0)
+        textSize: 18.0,
+        padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
   }

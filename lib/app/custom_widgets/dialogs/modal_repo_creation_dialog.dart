@@ -48,14 +48,17 @@ class RepositoryCreation extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildEntry(
+          Fields.formTextField(
             context: context,
             label: 'Create a new repository: ',
             hint: 'Respository name',
             onSaved: (value) => _onSaved(cubit, value),
-            validator: formNameValidator
+            validator: formNameValidator,
+            autofocus: true
           ),
-          buildActionsSection(context, _actions(context)),
+          Fields.actionsSection(
+            context,
+            buttons: _actions(context)),
         ]
       )
     );

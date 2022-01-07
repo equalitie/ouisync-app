@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../bloc/blocs.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../custom_widgets.dart';
 
-class NavigationBar extends StatefulWidget {
-  const NavigationBar({
+class CustomNavigationBar extends StatefulWidget {
+  const CustomNavigationBar({
     required this.repositoriesCubit,
     required this.synchronizationCubit,
     required this.onRepositorySelect,
@@ -21,10 +21,10 @@ class NavigationBar extends StatefulWidget {
   final ShareRepositoryCallback shareRepositoryOnTap;
 
   @override
-  State<NavigationBar> createState() => _NavigationBarState();
+  State<CustomNavigationBar> createState() => _CustomNavigationBarState();
 }
 
-class _NavigationBarState extends State<NavigationBar> with TickerProviderStateMixin {
+class _CustomNavigationBarState extends State<CustomNavigationBar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
     return Column(
       children: [
         _repositoriesBar(),
-        _routeBar(route),
+        Fields.routeBar(route: route),
       ],
     );
   }
@@ -85,35 +85,6 @@ class _NavigationBarState extends State<NavigationBar> with TickerProviderStateM
         Icons.share_outlined,
         size: 40.0,
         color: Colors.white,
-      ),
-    );
-  }
-
-  Container _routeBar(route) {
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            width: 0.0,
-            color: Colors.transparent,
-            style: BorderStyle.solid
-          ),
-        ),
-        color: Colors.white,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                Expanded(child: route),
-              ],
-            )
-          ),
-        ],
       ),
     );
   }

@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'app/bloc/blocs.dart';
-import 'app/utils/actions.dart';
 import 'app/utils/utils.dart';
 
 Future<void> main() async {
@@ -15,11 +14,9 @@ Future<void> main() async {
 
   Bloc.observer = SimpleBlocObserver();
 
-  Repository? defaultRepository;
-
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = '$appDir/repositories';
-  final sessionStore = '$appDir/config.db';
+  final repositoriesDir = '$appDir/${Strings.directoryRepositoriesName}';
+  final sessionStore = '$appDir/${Strings.databaseConfigurationName}';
 
   final localRepositoriesList = loadLocalRepositories(repositoriesDir).map((e) => e.substring(0, e.lastIndexOf('.'))).toList();
   final latestRepositoryOrDefaultName = await getLatestRepositoryOrDefault(localRepositoriesList);
@@ -32,16 +29,13 @@ Future<void> main() async {
   );
 
   final session = await Session.open(sessionStore);
-  if (latestRepositoryOrDefaultName.isNotEmpty) {
-   defaultRepository = await Repository.open(session, '$repositoriesDir/$latestRepositoryOrDefaultName.db'); 
-  }
-  
-  runApp(OuiSyncApp(
-    appDir: appDir,
-    repositoriesDir: repositoriesDir,
-    session: session,
-    defaultRepository: defaultRepository,
-    defaultRepositoryName: latestRepositoryOrDefaultName,
+  runApp(MaterialApp(
+    home: OuiSyncApp(
+      session: session,
+      appStorageLocation: appDir,
+      repositoriesLocation: repositoriesDir,
+      defaultRepositoryName: latestRepositoryOrDefaultName,
+    )
   ));
 }
 
