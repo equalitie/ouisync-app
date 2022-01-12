@@ -80,7 +80,7 @@ class Fields {
   );
 
   static Widget inPageButton ({
-    required Function()? onPressed,
+    required void Function()? onPressed,
     required String text,
     Alignment alignment = Alignment.center,
     Size? size,
@@ -311,7 +311,7 @@ class Fields {
     required String label,
     required String hint,
     required Function(String?) onSaved,
-    required String? Function(String?) validator,
+    required String? Function(String? value, {String error}) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     String? initialValue,
@@ -343,7 +343,7 @@ class Fields {
     required String label,
     required String hint,
     required Function(String?) onSaved,
-    required String? Function(String?) validator,
+    required String? Function(String? value, {String error}) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     String? initialValue,

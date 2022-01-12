@@ -67,7 +67,3 @@ Future<String> getLatestRepositoryOrDefault(List<String> localRepositories) asyn
 
   return latestRepository;
 }
-
-Future<Repository> openDefaultRepository(session, repositoryStore) async {
-  return await Repository.open(session, repositoryStore);
-}

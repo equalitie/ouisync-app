@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
 
 class RepositoryCreation extends StatelessWidget {
-  const RepositoryCreation({
+  RepositoryCreation({
     Key? key,
     required this.context,
     required this.cubit,
@@ -15,6 +14,10 @@ class RepositoryCreation extends StatelessWidget {
   final BuildContext context;
   final RepositoriesCubit cubit;
   final GlobalKey<FormState> formKey;
+
+  final TextEditingController _nameController = new TextEditingController(text: null);
+  final TextEditingController _passwordController = new TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +53,38 @@ class RepositoryCreation extends StatelessWidget {
         children: [
           Fields.formTextField(
             context: context,
+            textEditingController: _nameController,
             label: 'Create a new repository: ',
-            hint: 'Respository name',
-            onSaved: (value) => _onSaved(cubit, value),
+            hint: 'Repository name',
+            onSaved: (_) {},
             validator: formNameValidator,
             autofocus: true
+          ),
+          Fields.formTextField(
+            context: context,
+            textEditingController: _passwordController,
+            obscureText: true,
+            label: 'Create a password: ',
+            hint: 'Repository password',
+            onSaved: (_) {},
+            validator: (password, { error = 'Please enter a password' }) 
+              => formNameValidator(password, error: error),
+            autovalidateMode: AutovalidateMode.disabled
+          ),
+          Fields.formTextField(
+            context: context,
+            textEditingController: _retypedPasswordController,
+            obscureText: true,
+            label: 'Retype the password: ',
+            hint: 'Repository password',
+            onSaved: (_) {},
+            validator: (retypedPassword, { error = 'The password and retyped password doesn\'t match' })
+              => retypedPasswordValidator(
+                password: _passwordController.text,
+                retypedPassword: retypedPassword!,
+                error: error
+              ),
+            autovalidateMode: AutovalidateMode.disabled
           ),
           Fields.actionsSection(
             context,
@@ -64,18 +94,37 @@ class RepositoryCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(RepositoriesCubit cubit, newRepositoryName) {
-    cubit.openRepository(newRepositoryName);
+  String? retypedPasswordValidator({
+    required String password,
+    required String retypedPassword,
+    required String error
+  }) {
+    if (password != retypedPassword) {
+      return error;
+    }
 
-    Navigator.of(this.context).pop(newRepositoryName);
+    return null;
+  }
+
+  void _onSaved(RepositoriesCubit cubit, String name, String password) {
+    if (!this.formKey.currentState!.validate()) {
+      return;
+    }
+
+    this.formKey.currentState!.save();
+    Auth.setPassword(name, password);
+
+    cubit.openRepository(name: name, password: password);
+    Navigator.of(this.context).pop(name);
   }
 
   List<Widget> _actions(context) => [
     ElevatedButton(
       onPressed: () {
-        if (this.formKey.currentState!.validate()) {
-            this.formKey.currentState!.save();
-          }
+        final newRepositoryName = _nameController.text;
+        final password = _passwordController.text;
+        
+        _onSaved(cubit, newRepositoryName, password);
       },
       child: Text('Create')
     ),

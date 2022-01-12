@@ -112,18 +112,21 @@ class _MainPageState extends State<MainPage>
 
       print('Default repository: $defaultRepositoryName');
 
+      final storagedPassword = await Auth.getPassword(defaultRepositoryName);
+
       Repository? repository;
       try {
         repository = await Repository
         .open(
           session,
-          '$repositoriesLocation/$defaultRepositoryName.db'
+          store: '$repositoriesLocation/$defaultRepositoryName.db',
+          password: storagedPassword
         );
       } catch (e) {
         print('Exception opening a repository instance: ${e.toString()}');
       }
 
-      print('Repository instance opened: (${_repository?.handle ?? 'null'})');
+      print('Repository instance opened: (${repository?.handle ?? 'null'})');
 
       return repository;
     }
@@ -368,13 +371,8 @@ class _MainPageState extends State<MainPage>
       if (_repository == null) {
         return;
       }
-
-      final token = await _repository!
-      .createShareToken(name: _repositoryName);
       
-      print('Token for sharing repository $_repositoryName: $token');
-      
-      await _showShareRepository(context, repositoryName: _repositoryName, token: token);
+      await _showShareRepository(context, repository: _repository!, repositoryName: _repositoryName);
     }
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
@@ -511,7 +509,7 @@ class _MainPageState extends State<MainPage>
 
     _errorState({
       required String message,
-      required Function actionReload
+      required void Function()? actionReload
     }) => Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -542,7 +540,7 @@ class _MainPageState extends State<MainPage>
         ),
         SizedBox(height: 20.0),
         Fields.inPageButton(
-          onPressed: () => actionReload,
+          onPressed: actionReload,
           text: Strings.actionReloadContents,
           size: Size(100.0, 40.0),
           fontSize: 16.0,
@@ -721,8 +719,8 @@ class _MainPageState extends State<MainPage>
 
     Future<dynamic> _showShareRepository(context,
     {
-      required String repositoryName,
-      required String token
+      required Repository repository,
+      required String repositoryName
     }) => showModalBottomSheet(
       isScrollControlled: true,
       context: context, 
@@ -736,8 +734,8 @@ class _MainPageState extends State<MainPage>
       ),
       builder: (context) {
         return ShareRepository(
-          repositoryName: repositoryName,
-          token: token,
+          repository: repository,
+          repositoryName: repositoryName
         );
       }
     );

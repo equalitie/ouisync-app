@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/bloc/directory/directory_bloc.dart';
 import 'package:ouisync_app/app/data/data.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -29,7 +27,7 @@ void main() {
 
     setUp(() async {
       session = await Session.open(":memory:");
-      repository = await Repository.open(session, ":memory:");
+      repository = await Repository.create(session, store: ":memory:", password: '1a2b3c');
 
       directoryRepository = new DirectoryRepository();
       directoryBloc = DirectoryBloc(directoryRepository: directoryRepository);

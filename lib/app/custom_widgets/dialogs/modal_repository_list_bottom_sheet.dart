@@ -111,11 +111,12 @@ class RepositoryList extends StatelessWidget {
       : FontWeight.normal;
 
       return GestureDetector(
-        onTap: () {
-          this.cubit.openRepository(repositories[index]);
-          updateDefaultRepositorySetting(repositories[index]);
+        onTap: () async {
+          final repositoryName = repositories[index];
+          final storagedPassword = await Auth.getPassword(repositoryName);
 
-          Navigator.of(this.context).pop();
+          this.cubit.openRepository(name: repositoryName, password: storagedPassword);
+          updateDefaultRepositorySetting(repositoryName);
         },
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../bloc/blocs.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
+import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
 class CustomNavigationBar extends StatefulWidget {

@@ -13,7 +13,7 @@ void main() {
 
   setUp(() async {
     session = await Session.open(':memory:');
-    repository = await Repository.open(session, ':memory:');
+    repository = await Repository.create(session, store: ':memory:', password: 'a1b2c3');
 
     directoryRepository = DirectoryRepository(); 
   });
