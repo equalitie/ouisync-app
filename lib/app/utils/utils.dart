@@ -1,4 +1,5 @@
 export 'actions.dart';
+export 'auth.dart';
 export 'basic_result.dart';
 export 'constants.dart';
 export 'debouncer.dart';
