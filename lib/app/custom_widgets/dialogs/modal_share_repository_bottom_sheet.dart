@@ -18,17 +18,23 @@ class ShareRepository extends StatelessWidget {
   final ValueNotifier<String> _accessModeDescription = 
     ValueNotifier<String>(Constants.accessModeDescriptions[AccessMode.blind]!);
 
+  final ValueNotifier<String> _shareToken =
+    ValueNotifier<String>('Error!');
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {   
     return FutureBuilder<String>(
       initialData: '',
       future: createShareToken(repo: this.repository, name: this.repositoryName, accessMode: AccessMode.blind),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
+          _shareToken.value = 'Ack!';
           return Text('Error while creating the share token');
         }
 
         if (snapshot.hasData) {
+          _shareToken.value = snapshot.data!;
+
           return Container(
             margin: const EdgeInsets.all(16.0),
             clipBehavior: Clip.antiAlias,
@@ -44,6 +50,8 @@ class ShareRepository extends StatelessWidget {
             ),
           );  
         }
+
+        _shareToken.value = 'Baking the token...';
 
         return Container(
           height: 50.0,
@@ -88,7 +96,7 @@ class ShareRepository extends StatelessWidget {
             textAlign: TextAlign.start,
             iconSize: 40.0
           ),
-          _buildShareBox(token)
+          _buildShareBox()
         ]
       )
     );
@@ -124,17 +132,19 @@ class ShareRepository extends StatelessWidget {
                 )
               );
             }).toList(),
-            onChanged: (value) {
+            onChanged: (value) async {
               print('Access mode: $value');
               _accessMode.value = value as int;
               _accessModeDescription.value = 
                 Constants.accessModeDescriptions.values.elementAt(value);
 
-              createShareToken(
+              final token = await createShareToken(
                 repo: this.repository,
                 name: this.repositoryName,
                 accessMode: AccessMode.values[value]
               );
+
+              _shareToken.value = token;
             },
           )
       )
@@ -158,7 +168,7 @@ class ShareRepository extends StatelessWidget {
       )
     );
 
-  Widget _buildShareBox(String token) => Container(
+  Widget _buildShareBox() => Container(
     padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
@@ -171,23 +181,27 @@ class ShareRepository extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Fields.constrainedText(
-          token,
-          size: 20.0,
-          softWrap: false,
-          textOverflow: TextOverflow.ellipsis,
-          color: Colors.black
+        ValueListenableBuilder(
+          valueListenable: _shareToken,
+          builder:(context, value, child) => 
+            Fields.constrainedText(
+              value as String,
+              size: 20.0,
+              softWrap: false,
+              textOverflow: TextOverflow.ellipsis,
+              color: Colors.black
+            )
         ),
-        _copyTokenAction(token),
-        _shareTokenAction(token),
+        _copyTokenAction(),
+        _shareTokenAction(),
       ],
     )
   );
 
-  IconButton _copyTokenAction(String token) {
+  IconButton _copyTokenAction() {
     return IconButton(
       onPressed: () async {
-        await copyStringToClipboard(token);
+        await copyStringToClipboard(_shareToken.value);
         showToast('Repository token copied to clipboard');
       },
       icon: const Icon(Icons.content_copy_rounded),
@@ -195,9 +209,9 @@ class ShareRepository extends StatelessWidget {
     );
   }
 
-  IconButton _shareTokenAction(String token) {
+  IconButton _shareTokenAction() {
     return IconButton(
-      onPressed: () => Share.share(token),
+      onPressed: () => Share.share(_shareToken.value),
       icon: const Icon(Icons.share_outlined),
       iconSize: 30.0,
     );
