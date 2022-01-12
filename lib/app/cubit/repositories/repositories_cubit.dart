@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -15,14 +17,15 @@ class RepositoriesCubit extends Cubit<RepositoriesState> {
   final String appDir;
   final String repositoriesDir;
 
-  void openRepository(String name) async {
+  void openRepository({required String name, String? password}) async {
     emit(RepositoriesLoading());
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
 
     final store = _buildStoreString(name);
+    final storeExist = await io.File(store).exists();
     
     try {
-      final repository = await _getRepository(store);
+      final repository = await _getRepository(store: store, password: password, exist: storeExist);
       emit(RepositoriesSelection(
         repository: repository,
         name: name
@@ -35,7 +38,7 @@ class RepositoriesCubit extends Cubit<RepositoriesState> {
 
   void selectRepository(Repository? repository, String name) async {
     emit(RepositoriesLoading());
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 500));// TODO: Delay to allow the loading animation to show. Remove if not other use.
 
     if (repository == null) {
       emit(RepositoriesInitial());
@@ -50,5 +53,8 @@ class RepositoriesCubit extends Cubit<RepositoriesState> {
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';
 
-  Future<Repository> _getRepository(store) => Repository.open(this.session, store);
+  Future<Repository> _getRepository({required String store, String? password, required bool exist}) => 
+    exist 
+    ? Repository.open(this.session, store: store, password: password)
+    : Repository.create(this.session, store: store, password: password!);
 }

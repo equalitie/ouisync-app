@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
@@ -22,7 +21,9 @@ class AddRepositoryWithToken extends StatefulWidget {
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
-  TextEditingController _textEditingController = TextEditingController(text: null);
+  final TextEditingController _nameController = TextEditingController(text: null);
+  final TextEditingController _passwordController = new TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
 
   String _suggestedName = '';
   bool _showSuggestedName = false;
@@ -61,10 +62,63 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildTokenField(context),
+          Fields.formTextField(
+            context: context,
+            label: 'Repository token: ',
+            hint: 'Paste the token here',
+            onSaved: (value) {},
+            validator: _repositoryTokenValidator,
+            autofocus: true,
+            onChanged: _onTokenChanged
+          ),
           SizedBox(height: 20.0,),
-          _buildRepositoryNameField(context),
-          _buildSuggestionSection(),
+          Fields.formTextField(
+            context: context,
+            textEditingController: _nameController,
+            label: 'Repository name: ',
+            hint: 'Give the repo a name',
+            onSaved: (_) {},
+            validator: formNameValidator,
+            autovalidateMode: AutovalidateMode.disabled
+          ),
+          Visibility(
+            visible: _showSuggestedName,
+            child: GestureDetector(
+              onTap: () => _updateNameController(_suggestedName),
+              child: Fields.constrainedText(
+                'Suggested: $_repoName\n(tap for using this name)',
+                size: 15.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black54
+              ),
+            )
+          ),
+          Fields.formTextField(
+            context: context,
+            textEditingController: _passwordController,
+            obscureText: true,
+            label: 'Create a password: ',
+            hint: 'Repository password',
+            onSaved: (_) {},
+            validator: (password, { error = 'Please enter a password' }) 
+              => formNameValidator(password, error: error),
+            autovalidateMode: AutovalidateMode.disabled
+          ),
+          Fields.formTextField(
+            context: context,
+            textEditingController: _retypedPasswordController,
+            obscureText: true,
+            label: 'Retype the password: ',
+            hint: 'Repository password',
+            onSaved: (_) {},
+            validator: (retypedPassword, { error = 'The password and retyped password doesn\'t match' })
+              => retypedPasswordValidator(
+                password: _passwordController.text,
+                retypedPassword: retypedPassword!,
+                error: error
+              ),
+            autovalidateMode: AutovalidateMode.disabled
+          ),
           Fields.actionsSection(
             context,
             buttons: _actions(context)
@@ -74,44 +128,18 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     );
   }
 
-  Widget _buildTokenField(BuildContext context) =>
-    Fields.formTextField(
-      context: context,
-      label: 'Repository token: ',
-      hint: 'Paste the token here',
-      onSaved: (value) {},
-      validator: _repositoryTokenValidator,
-      autofocus: true,
-      onChanged: _onTokenChanged
-    );
+  _updateNameController(String? value) => _nameController.text = value ?? '';
 
-  Widget _buildRepositoryNameField(BuildContext context) =>
-    Fields.formTextField(
-      context: context,
-      textEditingController: _textEditingController,
-      label: 'Repository name: ',
-      hint: 'Give the repo a name',
-      onSaved: (value) => _onSaved(widget.cubit, value),
-      validator: formNameValidator,
-      autovalidateMode: AutovalidateMode.disabled
-    );
+  String? retypedPasswordValidator({
+    required String password,
+    required String retypedPassword,
+    required String error
+  }) {
+    if (password != retypedPassword) {
+      return error;
+    }
 
-  Visibility _buildSuggestionSection() =>
-  Visibility(
-    visible: _showSuggestedName,
-    child: GestureDetector(
-      onTap: () => _updateTokenEntryController(_suggestedName),
-      child: Fields.constrainedText(
-        'Suggested: $_repoName\n(tap for using this name)',
-        size: 15.0,
-        fontWeight: FontWeight.normal,
-        color: Colors.black54
-      ),
-    )
-  );
-
-  _updateTokenEntryController(String? value) {
-    _textEditingController.text = value ?? '';
+    return null;
   }
 
   _onTokenChanged(value) {
@@ -136,14 +164,14 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       _suggestedName = '';
       _repoName = '';
 
-      _updateTokenEntryController(null);
+      _updateNameController(null);
       showSuggestedNameSection = false;
     }
 
     setState(() { _showSuggestedName = showSuggestedNameSection; });
   }
 
-  String? _repositoryTokenValidator(String? value) {
+  String? _repositoryTokenValidator(String? value, { String error = 'Please enter a valid token'}) {
     if ((value ?? '').isEmpty) {
       return 'Please enter a token';
     }
@@ -152,24 +180,31 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       _suggestedName = this.widget.cubit.session.extractSuggestedNameFromShareToken(value!);
     } catch (e) {
       _suggestedName = '';
-      return 'Please enter a valid token';
+      return error;
     }
 
     return null;
   }
 
-  void _onSaved(RepositoriesCubit cubit, newRepositoryName) {
-    cubit.openRepository(newRepositoryName);
+  void _onSaved(RepositoriesCubit cubit, String name, String password) async {
+    if (!widget.formKey.currentState!.validate()) {
+      return;
+    }
 
-    Navigator.of(this.widget.context).pop(newRepositoryName);
+    widget.formKey.currentState!.save();
+    Auth.setPassword(name, password);
+    
+    cubit.openRepository(name: name, password: password);
+    Navigator.of(this.widget.context).pop(name);
   }
 
   List<Widget> _actions(context) => [
     ElevatedButton(
       onPressed: () {
-        if (this.widget.formKey.currentState!.validate()) {
-            this.widget.formKey.currentState!.save();
-          }
+        final newRepositoryName = _nameController.text;
+        final password = _passwordController.text;
+
+        _onSaved(widget.cubit, newRepositoryName, password);
       },
       child: Text('Create')
     ),
