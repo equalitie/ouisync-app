@@ -80,7 +80,7 @@ class Fields {
   );
 
   static Widget inPageButton ({
-    required Function()? onPressed,
+    required void Function()? onPressed,
     required String text,
     Alignment alignment = Alignment.center,
     Size? size,
