@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'utils.dart';
@@ -93,8 +92,6 @@ Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? formNameValidator(String? value) {
-  return value!.isEmpty
-  ? 'Please enter a valid name (unique, no spaces, ...)'
-  : null;
+String? formNameValidator(String? value, { String error = 'Please enter a valid name (unique, no spaces, ...)' }) {
+  return value!.isEmpty ? error : null;
 }
