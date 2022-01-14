@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -63,7 +62,7 @@ class _FileDetailState extends State<FileDetail> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetTitle('File Details'),
+          Fields.bottomSheetTitle(Strings.titleFileDetails),
           _buildPreviewButton(),
           _buildShareButton(),
           _buildMoveFolderButton(
@@ -82,24 +81,31 @@ class _FileDetailState extends State<FileDetail> {
           ),
           Fields.iconText(
             icon: Icons.info_rounded,
-            text: 'Information',
+            text: Strings.iconInformation,
             iconSize: 40.0,
-            textSize: 24.0,
+            textSize: 25.0,
+            textAlign: TextAlign.start,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
           Fields.labeledText(
-            label: 'Name: ',
-            text: widget.name
+            label: Strings.labelName,
+            labelSize: 20.0,
+            text: widget.name,
+            textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: 'Location: ', 
+            label: Strings.labelLocation, 
+            labelSize: 20.0,
             text: widget.path
             .replaceAll(widget.name, '')
             .trimRight(),
+            textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: 'Size: ',
-            text: formattSize(widget.size, units: true)
+            label: Strings.labelSize,
+            labelSize: 20.0,
+            text: formattSize(widget.size, units: true),
+            textAlign: TextAlign.start,
           ),
         ],
       ),
@@ -111,9 +117,10 @@ class _FileDetailState extends State<FileDetail> {
           onTap: () async => await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
           child: Fields.iconText(
             icon: Icons.preview_rounded,
-            text: 'Preview',
+            text: Strings.iconPreview,
+            textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 18.0,
+            textSize: 25.0,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
@@ -124,9 +131,10 @@ class _FileDetailState extends State<FileDetail> {
           onTap: () async => await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
           child: Fields.iconText(
             icon: Icons.share_rounded,
-            text: 'Share',
+            text: Strings.iconShare,
+            textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 18.0,
+            textSize: 25.0,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
@@ -149,9 +157,10 @@ class _FileDetailState extends State<FileDetail> {
       ),
       child: Fields.iconText(
         icon: Icons.drive_file_move_outlined,
-        text: 'Move',
+        text: Strings.iconMove,
+        textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 18.0,
+        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
@@ -192,9 +201,10 @@ class _FileDetailState extends State<FileDetail> {
       onTap: () async => {},
       child: Fields.iconText(
         icon: Icons.delete_outlined,
-        text: 'Delete',
+        text: Strings.iconDelete,
+        textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 18.0,
+        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );

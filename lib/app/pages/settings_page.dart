@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../cubit/cubits.dart';
@@ -76,7 +75,8 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Fields.iconText(
             icon: Icons.lock_rounded,
-            text: 'Repository',
+            text: Strings.titleRepository,
+            textAlign: TextAlign.start,
             textSize: 25.0,
             padding: EdgeInsets.fromLTRB(20.0, 0.0, 10.0, 20.0)
             ),
@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () {},
             child: Text(
-              'Edit name',
+              Strings.actionEditRepositoryName,
               style: TextStyle(
                 fontSize: 18.0
               ),
@@ -101,7 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () {},
             child: Text(
-              'Delete repository',
+              Strings.actionDeleteRepository,
               style: TextStyle(
                 fontSize: 18.0
               ),
@@ -114,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildDhtSection() {
     return SwitchListTile(
-      title: Fields.constrainedText('BitTorrent DHT'),
+      title: Fields.constrainedText(Strings.labelBitTorrentDHT),
       value: _bittorrentDhtStatus,
       onChanged: (bool value) {
         updateDhtSetting(value);
@@ -137,10 +137,14 @@ class _SettingsPageState extends State<SettingsPage> {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    String dhtStatusMessage = 'BitTorrent DHT is ${isEnabled ? 'enabled' : 'disabled'}';
+    String dhtStatusMessage = Strings.messageBitTorrentDHTStatus
+    .replaceAll(
+      Strings.replacementStatus,
+      isEnabled ? 'enabled' : 'disabled'
+    );
     if (enable != isEnabled) {
-      dhtStatusMessage = enable ? 'BitTorrent DHT could not be enabled'
-      : 'Disable BitTorrent DHT failed.';
+      dhtStatusMessage = enable ? Strings.messageBitTorrentDHTEnableFailed
+      : Strings.messageBitTorrentDHTDisableFailed;
     }
 
     print(dhtStatusMessage);

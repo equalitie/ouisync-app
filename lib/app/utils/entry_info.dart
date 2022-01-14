@@ -1,6 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+
+import 'utils.dart';
 
 class EntryInfo {
   const EntryInfo(
@@ -25,18 +26,18 @@ class EntryInfo {
 
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
-      return 'An entry';
+      return Strings.messageEntryTypeDefault;
     }
 
     return type == EntryType.directory
-    ? 'A directory'
-    : 'A file';
+    ? Strings.messageEntryTypeFolder
+    : Strings.messageEntryTypeFile;
   }
 
   String typeName(EntryType type) {
     return type == EntryType.directory
-    ? 'Directory'
-    : 'File';
+    ? Strings.entryTypeFolder
+    : Strings.entryTypeFile;
   } 
 
   Future<int> fileLength(String path) async {
@@ -74,7 +75,11 @@ class EntryInfo {
 
     final Directory directory = await Directory.open(_repository, path);
     if (directory.isNotEmpty) {
-      String message = '$path is not empty';
+      String message = Strings.messageErrorPathNotEmpty
+      .replaceAll(
+        Strings.replacementPath,
+        path
+      );
       showToast(message, length: Toast.LENGTH_LONG);
     }
     return directory.isEmpty;

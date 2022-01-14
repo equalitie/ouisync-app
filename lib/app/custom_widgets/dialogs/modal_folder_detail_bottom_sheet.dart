@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -75,9 +74,10 @@ class _FolderDetailState extends State<FolderDetail> {
             ),
             child: Fields.iconText(
               icon: Icons.delete_outlined,
-              text: 'Delete',
+              text: Strings.iconDelete,
+              textAlign: TextAlign.start,
               iconSize: 40.0,
-              textSize: 18.0,
+              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 30.0)
             )
           ),
@@ -96,12 +96,13 @@ class _FolderDetailState extends State<FolderDetail> {
           ),
           Fields.iconText(
             icon: Icons.info_rounded,
-            text: 'Information',
+            text: Strings.iconInformation,
+            textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 24.0,
+            textSize: 25.0,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
-          syncStatus(),
+          _buildSyncStatus(),
         ]
       )
     );
@@ -129,7 +130,7 @@ class _FolderDetailState extends State<FolderDetail> {
 
   AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, parentPath, path) {
     return AlertDialog(
-      title: const Text('Delete folder'),
+      title: const Text(Strings.titleDeleteFolder),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
@@ -143,17 +144,17 @@ class _FolderDetailState extends State<FolderDetail> {
             const SizedBox(
               height: 30.0,
             ),
-            const Text('Are you sure you want to delete this folder?'),
+            const Text(Strings.messageConfirmFolderDeletion),
           ],
         ),
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('DELETE'),
+          child: const Text(Strings.actionDelete),
           onPressed: () => deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context),
         ),
         TextButton(
-          child: const Text('CANCEL'),
+          child: const Text(Strings.actionCancel),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
@@ -169,15 +170,15 @@ class _FolderDetailState extends State<FolderDetail> {
       recursive = await Dialogs
       .alertDialogWithActions(
         context: context,
-        title: 'Delete not empty folder',
-        body: [Text('This folder is not empty.\n\nDo you still want to delete it, and all its contents?')],
+        title: Strings.titleDeleteNotEmptyFolder,
+        body: [Text(Strings.messageConfirmNotEmptyFolderDeletion)],
         actions: [
           TextButton(
-            child: const Text('DELETE'),
+            child: const Text(Strings.actionDelete),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
-            child: const Text('CANCEL'),
+            child: const Text(Strings.actionCancel),
             onPressed: () => Navigator.of(context).pop(false),
           )
         ]
@@ -232,9 +233,10 @@ class _FolderDetailState extends State<FolderDetail> {
       ),
       child: Fields.iconText(
         icon: Icons.drive_file_move_outlined,
-        text: 'Move',
+        text: Strings.iconMove,
+        textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 18.0,
+        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
@@ -270,11 +272,14 @@ class _FolderDetailState extends State<FolderDetail> {
     widget.onBottomSheetOpen.call(controller!, path);
   }
 
-  Widget syncStatus() {
+  Widget _buildSyncStatus() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Fields.idLabel('Sync Status:'),
+        Fields.idLabel(
+          Strings.labelSyncStatus,
+          size: 20.0
+        ),
         Container(
           height: 60.0,
           alignment: Alignment.center,
@@ -294,7 +299,7 @@ class _FolderDetailState extends State<FolderDetail> {
                   Icons.check
                 ),
                 Text(
-                  'SYNCED',
+                  Strings.statusSync,
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold
