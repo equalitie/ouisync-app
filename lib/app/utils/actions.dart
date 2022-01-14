@@ -16,18 +16,18 @@ showSnackBar(BuildContext context, { required Widget content, SnackBarAction? ac
 
 hideSnackBar(context) => 
   SnackBarAction(
-    label: 'HIDE',
+    label: Strings.actionHide,
     onPressed: () => 
       ScaffoldMessenger.of(context).hideCurrentSnackBar()
   );
 
-String getPathFromFileName(String path) => path.split('/').last;
+String getPathFromFileName(String path) => path.split(Strings.rootPath).last;
 
 String extractParentFromPath(String path) {
   if (path.isEmpty) return Strings.rootPath;
   if (path == Strings.rootPath) return Strings.rootPath;
 
-  final section = path.substring(0, path.lastIndexOf('/')); 
+  final section = path.substring(0, path.lastIndexOf(Strings.rootPath)); 
   return section.isEmpty
   ? Strings.rootPath
   : section;
@@ -92,6 +92,6 @@ Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? formNameValidator(String? value, { String error = 'Please enter a valid name (unique, no spaces, ...)' }) {
+String? formNameValidator(String? value, { String error = Strings.messageErrorNameFormValidator }) {
   return value!.isEmpty ? error : null;
 }

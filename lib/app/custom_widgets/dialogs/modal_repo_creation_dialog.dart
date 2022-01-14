@@ -54,8 +54,8 @@ class RepositoryCreation extends StatelessWidget {
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,
-            label: 'Create a new repository: ',
-            hint: 'Repository name',
+            label: Strings.labelCreateRepository,
+            hint: Strings.messageRepositoryName,
             onSaved: (_) {},
             validator: formNameValidator,
             autofocus: true
@@ -64,26 +64,30 @@ class RepositoryCreation extends StatelessWidget {
             context: context,
             textEditingController: _passwordController,
             obscureText: true,
-            label: 'Create a password: ',
-            hint: 'Repository password',
+            label: Strings.labelCreatePassword,
+            hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
-            validator: (password, { error = 'Please enter a password' }) 
-              => formNameValidator(password, error: error),
+            validator: (
+              password,
+              { error = Strings.messageErrorRepositoryPasswordValidation }
+            ) => formNameValidator(password, error: error),
             autovalidateMode: AutovalidateMode.disabled
           ),
           Fields.formTextField(
             context: context,
             textEditingController: _retypedPasswordController,
             obscureText: true,
-            label: 'Retype the password: ',
-            hint: 'Repository password',
+            label: Strings.labelRetypePassword,
+            hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
-            validator: (retypedPassword, { error = 'The password and retyped password doesn\'t match' })
-              => retypedPasswordValidator(
-                password: _passwordController.text,
-                retypedPassword: retypedPassword!,
-                error: error
-              ),
+            validator: (
+              retypedPassword,
+              { error = Strings.messageErrorRetypePassword }
+            ) => retypedPasswordValidator(
+              password: _passwordController.text,
+              retypedPassword: retypedPassword!,
+              error: error
+            ),
             autovalidateMode: AutovalidateMode.disabled
           ),
           Fields.actionsSection(
@@ -126,12 +130,12 @@ class RepositoryCreation extends StatelessWidget {
         
         _onSaved(cubit, newRepositoryName, password);
       },
-      child: Text('Create')
+      child: Text(Strings.actionCreate)
     ),
     SizedBox(width: 20.0,),
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text('Cancel')
+      child: Text(Strings.actionCancel)
     ),
   ];
 }

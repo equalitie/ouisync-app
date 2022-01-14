@@ -54,8 +54,8 @@ class Constants{
   static const String heroTagSaveToFolderSharedFile = 'SAVE_TO_FOLDER_SHARED_FILE';
 
   static const Map<AccessMode, String> accessModeDescriptions = const {
-    AccessMode.blind: 'Your peer can hold it for you; can\'t write or read it',
-    AccessMode.read: 'They can  come in an see, but not touching! (can\'t modify it)',
-    AccessMode.write: 'Full access. We are guessing your BFF?'
+    AccessMode.blind: Strings.messageAccessModeBlind,
+    AccessMode.read: Strings.messageAccessModeRead,
+    AccessMode.write: Strings.messageAccessModeWrite
   };
 }

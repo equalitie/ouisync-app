@@ -30,7 +30,7 @@ class RepositoryPicker extends StatefulWidget {
 
 class _RepositoryPickerState extends State<RepositoryPicker> {
   Repository? _repository;
-  String _repositoryName = 'No repositories found';
+  String _repositoryName = Strings.messageNoRepos;
 
   @override
   void initState() {
@@ -54,7 +54,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   updateCurrentRepository(repository, name) async {
     if (name.isEmpty) {
       setState(() {
-        _repositoryName = 'No repositories found';
+        _repositoryName = Strings.messageNoRepos;
       });
 
       return;
@@ -91,7 +91,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           return _buildState(widget.borderColor, Colors.red);
         }
 
-        return Container(child: Text('Ooops...'),);
+        return Container(child: Text(Strings.messageOoops),);
       },
       listener: (context, state) {
         if (state is RepositoriesSelection) {

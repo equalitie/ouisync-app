@@ -64,8 +64,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         children: [
           Fields.formTextField(
             context: context,
-            label: 'Repository token: ',
-            hint: 'Paste the token here',
+            label: Strings.labelRepositoryToken,
+            hint: Strings.messageRepositoryToken,
             onSaved: (value) {},
             validator: _repositoryTokenValidator,
             autofocus: true,
@@ -75,8 +75,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,
-            label: 'Repository name: ',
-            hint: 'Give the repo a name',
+            label: Strings.labelRepositoryName,
+            hint: Strings.messageRepositoryName,
             onSaved: (_) {},
             validator: formNameValidator,
             autovalidateMode: AutovalidateMode.disabled
@@ -86,7 +86,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             child: GestureDetector(
               onTap: () => _updateNameController(_suggestedName),
               child: Fields.constrainedText(
-                'Suggested: $_repoName\n(tap for using this name)',
+                Strings.messageRepositorySuggestedName
+                  .replaceAll(Strings.replacementName, _repoName ?? ''),
                 size: 15.0,
                 fontWeight: FontWeight.normal,
                 color: Colors.black54
@@ -97,22 +98,26 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             context: context,
             textEditingController: _passwordController,
             obscureText: true,
-            label: 'Create a password: ',
-            hint: 'Repository password',
+            label: Strings.labelCreatePassword,
+            hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
-            validator: (password, { error = 'Please enter a password' }) 
-              => formNameValidator(password, error: error),
+            validator: (
+              password,
+              { error = Strings.messageErrorRepositoryPasswordValidation }
+            ) => formNameValidator(password, error: error),
             autovalidateMode: AutovalidateMode.disabled
           ),
           Fields.formTextField(
             context: context,
             textEditingController: _retypedPasswordController,
             obscureText: true,
-            label: 'Retype the password: ',
-            hint: 'Repository password',
+            label: Strings.labelRetypePassword,
+            hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
-            validator: (retypedPassword, { error = 'The password and retyped password doesn\'t match' })
-              => retypedPasswordValidator(
+            validator: (
+              retypedPassword,
+              { error = Strings.messageErrorRetypePassword }
+            ) => retypedPasswordValidator(
                 password: _passwordController.text,
                 retypedPassword: retypedPassword!,
                 error: error
@@ -150,7 +155,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     bool showSuggestedNameSection = false;
 
     try {
-      _suggestedName = this.widget.cubit.session
+      _suggestedName = this
+      .widget
+      .cubit
+      .session
       .extractSuggestedNameFromShareToken(value);  
 
       if (_suggestedName.isNotEmpty) {
@@ -159,7 +167,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       }
     } catch (e) {
       print('Error extracting the repository token:\n${e.toString()}');                
-      showToast('The token seems to be invalid.');
+      showToast(Strings.messageErrorTokenInvalid);
 
       _suggestedName = '';
       _repoName = '';
@@ -171,13 +179,17 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     setState(() { _showSuggestedName = showSuggestedNameSection; });
   }
 
-  String? _repositoryTokenValidator(String? value, { String error = 'Please enter a valid token'}) {
+  String? _repositoryTokenValidator(String? value, { String error = Strings.messageErrorTokenValidator}) {
     if ((value ?? '').isEmpty) {
-      return 'Please enter a token';
+      return Strings.messageErrorTokenEmpty;
     }
 
     try {
-      _suggestedName = this.widget.cubit.session.extractSuggestedNameFromShareToken(value!);
+      _suggestedName = this
+      .widget
+      .cubit
+      .session
+      .extractSuggestedNameFromShareToken(value!);
     } catch (e) {
       _suggestedName = '';
       return error;
@@ -206,12 +218,12 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
         _onSaved(widget.cubit, newRepositoryName, password);
       },
-      child: Text('Create')
+      child: Text(Strings.actionCreate)
     ),
     SizedBox(width: 20.0,),
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text('Cancel')
+      child: Text(Strings.actionCancel)
     ),
   ];
 }

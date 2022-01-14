@@ -15,7 +15,7 @@ Future<void> main() async {
   Bloc.observer = SimpleBlocObserver();
 
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = '$appDir/${Strings.directoryRepositoriesName}';
+  final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
   final sessionStore = '$appDir/${Strings.databaseConfigurationName}';
 
   final localRepositoriesList = loadLocalRepositories(repositoriesDir).map((e) => e.substring(0, e.lastIndexOf('.'))).toList();

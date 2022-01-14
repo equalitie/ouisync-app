@@ -1,8 +1,6 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
@@ -41,7 +39,7 @@ class RepositoryList extends StatelessWidget {
           ); 
         }
 
-        return Container(child: Text('Error'),);
+        return Container(child: Text(Strings.messageError),);
       }
     );
   }
@@ -54,14 +52,15 @@ class RepositoryList extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetTitle('Your Repositories'),
+          Fields.bottomSheetTitle(Strings.titleRepositoriesList),
           _buildRepositoryItem(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
             child: Fields.iconText(
               icon: Icons.add_circle_outline_rounded,
-              text: 'Create a new repository',
+              text: Strings.iconCreateRepository,
+              textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
               textSize: 25.0,
@@ -73,7 +72,8 @@ class RepositoryList extends StatelessWidget {
             onTap: () => addRepoWithTokenDialog(this.cubit),
             child: Fields.iconText(
               icon: Icons.insert_link_rounded,
-              text: 'Add a repository with token',
+              text: Strings.iconAddRepositoryWithToken,
+              textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
               textSize: 25.0,
@@ -167,7 +167,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Create Repository',
+          title: Strings.titleCreateRepository,
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
@@ -191,7 +191,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: 'Add Repository',
+          title: Strings.titleAddRepository,
           body: AddRepositoryWithToken(
             context: context,
             cubit: cubit,

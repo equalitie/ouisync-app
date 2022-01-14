@@ -55,14 +55,14 @@ class FolderCreation extends StatelessWidget {
           Fields.formTextField(
             context: context,
             icon: const Icon(Icons.folder),
-            label: 'Create a new folder: ',
-            hint: 'Folder name',
+            label: Strings.labelCreateFolder,
+            hint: Strings.messageCreateFolder,
             onSaved: (value) => _onSaved(bloc, value),
             validator: formNameValidator,
             autofocus: true
           ),
           Fields.labeledText(
-            label: 'Location: ',
+            label: Strings.labelLocation,
             text: this.path
           ),
           Fields.actionsSection(
@@ -102,12 +102,12 @@ class FolderCreation extends StatelessWidget {
             this.formKey.currentState!.save();
           }
       },
-      child: Text('Create')
+      child: Text(Strings.actionCreate)
     ),
     SizedBox(width: 20.0,),
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text('Cancel')
+      child: Text(Strings.actionCancel)
     ),
   ];
 
