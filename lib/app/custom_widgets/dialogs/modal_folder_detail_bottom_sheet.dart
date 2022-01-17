@@ -26,7 +26,7 @@ class FolderDetail extends StatefulWidget {
   final String path;
   final String parent;
   final GlobalKey<ScaffoldState> scaffoldKey;
-  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
@@ -221,7 +221,7 @@ class _FolderDetailState extends State<FolderDetail> {
     required String path,
     required EntryType type,
     required MoveEntryCallback moveEntryCallback,
-    required MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    required BottomSheetControllerCallback bottomSheetControllerCallback
   }) {
     return GestureDetector(
       onTap: () => _showMoveEntryBottomSheet(
@@ -247,7 +247,7 @@ class _FolderDetailState extends State<FolderDetail> {
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
-    MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    BottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
     

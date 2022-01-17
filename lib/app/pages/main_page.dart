@@ -16,8 +16,8 @@ import 'pages.dart';
 
 typedef RepositoryCallback = void Function(Repository repository, String name);
 typedef ShareRepositoryCallback = void Function();
+typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef MoveEntryBottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 
 class MainPage extends StatefulWidget {
   const MainPage({

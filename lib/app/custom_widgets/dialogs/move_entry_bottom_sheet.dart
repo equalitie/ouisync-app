@@ -18,7 +18,7 @@ class MoveEntryDialog extends StatelessWidget {
   final String origin;
   final String path;
   final EntryType type;
-  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
