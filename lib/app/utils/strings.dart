@@ -114,6 +114,8 @@ class Strings {
   static const String messageMoveEntryOrigin = 'from [path]';
   static const String messageConfirmFileDeletion = 'Are you sure you want to delete this file?';
 
+  static const String mesageNoMediaPresent = 'There is no media present';
+
   static const String messageEntryTypeDefault = 'An entry';
   static const String messageEntryTypeFolder = 'A folder';
   static const String messageEntryTypeFile = 'A file';
@@ -148,6 +150,7 @@ class Strings {
   static const String actionCancel = 'Cancel';
   static const String actionDelete = 'Delete';
   static const String actionMove = 'Move';
+  static const String actionSave = 'Save';
 
   static const String actionDeleteFolder = 'Delete folder';
 
