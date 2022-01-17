@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ typedef RepositoryCallback = void Function(Repository repository, String name);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
+typedef SaveFileCallback = void Function();
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -58,6 +60,9 @@ class _MainPageState extends State<MainPage>
 
     Widget _mainState = Container();
 
+    final double defaultBottomPadding = kFloatingActionButtonMargin + Constants.paddingBottomWithFloatingButtonExtra;
+    late ValueNotifier<double> _bottomPaddingWithBottomSheet;
+
     @override
     void initState() {
       super.initState();
@@ -67,30 +72,7 @@ class _MainPageState extends State<MainPage>
         _intentPayload = listOfMedia;
       });
 
-      _syncingCubit = BlocProvider.of<SynchronizationCubit>(context);
-
-      initOuiSync(
-        widget.session,
-        widget.defaultRepositoryName,
-        widget.repositoriesLocation
-      )
-      .then((repository) {
-        NativeChannels.init(repository: repository);
-        initMainPageLayout(repository, widget.defaultRepositoryName);
-
-        if (_intentPayload.isEmpty) {
-          return;
-        }
-
-        if (repository == null) {
-          Fluttertoast
-          .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
-
-          return;
-        }
-
-        _saveSharedMedia(repository, _currentFolder, _intentPayload);
-      });
+      initMainPage();
     }
 
     @override
@@ -99,6 +81,23 @@ class _MainPageState extends State<MainPage>
       _repository?.close();
   
       super.dispose();
+    }
+
+    void initMainPage() async {
+      _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
+      _syncingCubit = BlocProvider
+
+      .of<SynchronizationCubit>(context);
+
+      final repository = await initOuiSync(
+        widget.session,
+        widget.defaultRepositoryName,
+        widget.repositoriesLocation
+      );
+      
+      NativeChannels.init(repository: repository);
+      initMainPageLayout(repository, widget.defaultRepositoryName);
+      handleShareIntentPayload(repository, _intentPayload);
     }
 
     Future<Repository?> initOuiSync(
@@ -142,6 +141,26 @@ class _MainPageState extends State<MainPage>
         repository,
         repositoryName
       );
+    }
+
+    void handleShareIntentPayload(
+      Repository? repository,
+      List<SharedMediaFile> payload
+    ) {
+      if (_intentPayload.isEmpty) {
+        return;
+      }
+
+      if (repository == null) {
+        Fluttertoast
+        .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
+
+        return;
+      }
+
+      // _saveSharedMedia(repository, _currentFolder, _intentPayload);
+      _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Constants.paddingBottomWithBottomSheetExtra;
+      _showSaveSharedMedia(sharedMedia: _intentPayload);
     }
 
     Future<void> _saveSharedMedia(
@@ -622,83 +641,86 @@ class _MainPageState extends State<MainPage>
     _contentsList({
       required Repository repository,
       required String path
-    }) => RefreshIndicator(
-      onRefresh: () => refreshCurrent(repository: repository, path: path),
-      child: ListView.separated(
-        padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 48),
-        separatorBuilder: (context, index) => Divider(
-            height: 1,
-            color: Colors.transparent
-        ),
-        itemCount: _folderContents.length,
-        itemBuilder: (context, index) {
-          final item = _folderContents[index];
-          final actionByType = item.itemType == ItemType.file
-          ? () async {
-            if (_persistentBottomSheetController != null) {
-              await Dialogs.simpleAlertDialog(
-                context: context,
-                title: Strings.titleMovingEntry,
-                message: Strings.messageMovingEntry
-              );
-              return;
-            }
-
-            final fileSize = await EntryInfo(repository).fileLength(item.path);
-            _showFileDetails(
-              repository: repository,
-              directoryBloc: BlocProvider.of<DirectoryBloc>(context),
-              scaffoldKey: _scaffoldKey,
-              name: item.name,
-              path: item.path,
-              size: fileSize
-            );
-          }
-          : () {
-            if (_persistentBottomSheetController != null &&
-            _pathEntryToMove == item.path) {
-              return;
-            }
-
-            navigateToPath(
-              repository: repository,
-              type: Navigation.content,
-              origin: path,
-              destination: item.path,
-              withProgress: true
-            );
-          };
-
-          final listItem = ListItem (
-            repository: repository,
-            itemData: item,
-            mainAction: actionByType,
-            secondaryAction: () => {},
-            filePopupMenu: _popupMenu(repository: repository, data: item),
-            folderDotsAction: () async {
+    }) => ValueListenableBuilder(
+      valueListenable: _bottomPaddingWithBottomSheet,
+      builder: (context, value, child) => RefreshIndicator(
+        onRefresh: () => refreshCurrent(repository: repository, path: path),
+        child: ListView.separated(
+          padding: EdgeInsets.only(bottom: value as double),
+          separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: Colors.transparent
+          ),
+          itemCount: _folderContents.length,
+          itemBuilder: (context, index) {
+            final item = _folderContents[index];
+            final actionByType = item.itemType == ItemType.file
+            ? () async {
               if (_persistentBottomSheetController != null) {
-                await Dialogs
-                .simpleAlertDialog(
+                await Dialogs.simpleAlertDialog(
                   context: context,
                   title: Strings.titleMovingEntry,
                   message: Strings.messageMovingEntry
                 );
-
                 return;
               }
-              
-              await _showFolderDetails(
+
+              final fileSize = await EntryInfo(repository).fileLength(item.path);
+              _showFileDetails(
                 repository: repository,
                 directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                 scaffoldKey: _scaffoldKey,
-                name: removeParentFromPath(item.path),
-                path: item.path
+                name: item.name,
+                path: item.path,
+                size: fileSize
               );
             }
-          );
+            : () {
+              if (_persistentBottomSheetController != null &&
+              _pathEntryToMove == item.path) {
+                return;
+              }
 
-          return listItem;
-        }
+              navigateToPath(
+                repository: repository,
+                type: Navigation.content,
+                origin: path,
+                destination: item.path,
+                withProgress: true
+              );
+            };
+
+            final listItem = ListItem (
+              repository: repository,
+              itemData: item,
+              mainAction: actionByType,
+              secondaryAction: () => {},
+              filePopupMenu: _popupMenu(repository: repository, data: item),
+              folderDotsAction: () async {
+                if (_persistentBottomSheetController != null) {
+                  await Dialogs
+                  .simpleAlertDialog(
+                    context: context,
+                    title: Strings.titleMovingEntry,
+                    message: Strings.messageMovingEntry
+                  );
+
+                  return;
+                }
+                
+                await _showFolderDetails(
+                  repository: repository,
+                  directoryBloc: BlocProvider.of<DirectoryBloc>(context),
+                  scaffoldKey: _scaffoldKey,
+                  name: removeParentFromPath(item.path),
+                  path: item.path
+                );
+              }
+            );
+
+            return listItem;
+          }
+        )
       )
     );
 
@@ -806,9 +828,31 @@ class _MainPageState extends State<MainPage>
       }
     );
 
+  PersistentBottomSheetController _showSaveSharedMedia({
+    required List<SharedMediaFile> sharedMedia
+  }) => _scaffoldKey.currentState!.showBottomSheet(
+    (context) {
+      return SaveSharedMedia(
+        sharedMedia: sharedMedia,
+        onBottomSheetOpen: retrieveBottomSheetController,
+        onSaveFile: saveSharedMedia
+      );
+    },
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20.0),
+        topRight: Radius.circular(20.0),
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero
+      ),
+    )
+  )!;
+
   void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
+
+    _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
   }
 
   void moveEntry(origin, path, type) async {
@@ -830,6 +874,51 @@ class _MainPageState extends State<MainPage>
         newDestinationPath: newDestinationPath
       )
     );
+  }
+
+  void saveSharedMedia() async {
+    if (_repository == null) {
+      Fluttertoast.showToast(msg: Strings.messageNoRepo);
+      return;
+    }
+
+    SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
+    if (mediaInfo == null) {
+      Fluttertoast.showToast(msg: Strings.mesageNoMediaPresent);
+      return;
+    }
+
+    final fileName = getPathFromFileName(_intentPayload.first.path);
+    final filePath = _currentFolder == Strings.rootPath
+    ? '/$fileName'
+    : '$_currentFolder/$fileName';
+        
+    final directoryBloc = BlocProvider.of<DirectoryBloc>(context);
+    await _saveFileToOuiSync(_repository!,
+      sharedMedia: _intentPayload,
+      directoryBloc: directoryBloc,
+      destinationPath: _currentFolder,
+      newFilePath: filePath
+    );
+  }
+
+  Future<void> _saveFileToOuiSync(Repository repository, {
+    required List<SharedMediaFile> sharedMedia,
+    required DirectoryBloc directoryBloc,
+    required String destinationPath,
+    required String newFilePath
+  }) async {
+    var fileStream = io.File(sharedMedia.first.path).openRead();
+    directoryBloc.add(
+      CreateFile(
+        repository: repository,
+        parentPath: destinationPath,
+        newFilePath: newFilePath,
+        fileByteStream: fileStream
+      )
+    );
+
+    Navigator.of(context).pop();
   }
 
   Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
