@@ -74,14 +74,17 @@ class ShareRepository extends StatelessWidget {
   }
 
   Widget _shareCodeDetails(BuildContext context, String repositoryName, String token) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetTitle(Strings.titleShareRepository.replaceAll(Strings.replacementName, repositoryName)),
+          Fields.bottomSheetTitle(
+            Strings.titleShareRepository
+            .replaceAll(Strings.replacementName, repositoryName)
+          ),
           Fields.iconText(
             icon: Icons.lock_rounded,
             text: Strings.iconAccessMode,
@@ -89,7 +92,9 @@ class ShareRepository extends StatelessWidget {
             iconSize: 40.0
           ),
           _buildAccessModeDropdown(),
+          SizedBox(height: 10.0,),
           _buildAccessModeDescription(),
+          SizedBox(height: 10.0,),
           Fields.iconText(
             icon: Icons.supervisor_account_rounded,
             text: Strings.iconShareTokenWithPeer  ,
@@ -118,9 +123,9 @@ class ShareRepository extends StatelessWidget {
         valueListenable: _accessMode,
         builder:(context, value, child) => 
           DropdownButton(
-            isExpanded: false,
+            isExpanded: true,
             value: value,
-            underline: Container(),
+            underline: SizedBox(),
             items: AccessMode.values.map((AccessMode element) {
               return DropdownMenuItem(
                 value: element.index,
@@ -153,20 +158,16 @@ class ShareRepository extends StatelessWidget {
   }
 
   Widget _buildAccessModeDescription() =>
-    Container(
-      padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
-      child:
-      ValueListenableBuilder(
-        valueListenable: _accessModeDescription,
-        builder:(context, value, child) => 
-          Fields.constrainedText(
-            value as String,
-            flex: 0,
-            size: 15.0,
-            fontWeight: FontWeight.normal,
-            color: Colors.black54
-          ),
-      )
+    ValueListenableBuilder(
+      valueListenable: _accessModeDescription,
+      builder:(context, value, child) => 
+        Fields.constrainedText(
+          value as String,
+          flex: 0,
+          size: 15.0,
+          fontWeight: FontWeight.normal,
+          color: Colors.black54
+        )
     );
 
   Widget _buildShareBox() => Container(
