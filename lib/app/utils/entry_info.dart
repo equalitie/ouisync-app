@@ -17,8 +17,9 @@ class EntryInfo {
     final exist = await _repository.exists(path);
     if (exist) {
       final type = await _repository.type(path);
-      String message = '${_getTypeNameForMessage(type)} with the same name already exist';
-      showToast(message, length: Toast.LENGTH_LONG);
+      final typeNameForMessage = _getTypeNameForMessage(type);
+      
+      showToast(Strings.messageEntryAlreadyExist.replaceAll(Strings.replacementEntry, typeNameForMessage), length: Toast.LENGTH_LONG);
     }
 
     return exist;

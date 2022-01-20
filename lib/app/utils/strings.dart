@@ -120,9 +120,13 @@ class Strings {
   static const String messageEntryTypeFolder = 'A folder';
   static const String messageEntryTypeFile = 'A file';
 
+  static const String messageEntryAlreadyExist = '[entry] with the same name already '
+  'exist in this location';
+
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
+  static const String replacementEntry = '[entry]';
 
   static const String statusSync = 'SYNCED';
 
