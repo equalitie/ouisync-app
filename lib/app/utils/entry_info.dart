@@ -57,7 +57,7 @@ class EntryInfo {
     }
 
     if (file != null) {
-      file.close(); 
+      await file.close(); 
     }
     
     return length;
