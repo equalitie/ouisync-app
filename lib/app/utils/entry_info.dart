@@ -26,6 +26,7 @@ class EntryInfo {
 
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
+      print('Entry type was null');
       return Strings.messageEntryTypeDefault;
     }
 
