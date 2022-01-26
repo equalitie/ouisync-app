@@ -889,36 +889,22 @@ class _MainPageState extends State<MainPage>
     }
 
     final fileName = getPathFromFileName(_intentPayload.first.path);
+    final length = io.File(_intentPayload.first.path).statSync().size;
     final filePath = _currentFolder == Strings.rootPath
     ? '/$fileName'
     : '$_currentFolder/$fileName';
+    final fileByteStream = io.File(_intentPayload.first.path).openRead();
         
-    final directoryBloc = BlocProvider.of<DirectoryBloc>(context);
-    await _saveFileToOuiSync(_repository!,
-      sharedMedia: _intentPayload,
-      directoryBloc: directoryBloc,
-      destinationPath: _currentFolder,
-      newFilePath: filePath
-    );
-  }
-
-  Future<void> _saveFileToOuiSync(Repository repository, {
-    required List<SharedMediaFile> sharedMedia,
-    required DirectoryBloc directoryBloc,
-    required String destinationPath,
-    required String newFilePath
-  }) async {
-    var fileStream = io.File(sharedMedia.first.path).openRead();
-    directoryBloc.add(
-      CreateFile(
-        repository: repository,
-        parentPath: destinationPath,
-        newFilePath: newFilePath,
-        fileByteStream: fileStream
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      SaveFile(
+        repository: _repository!,
+        newFilePath: filePath,
+        fileName: fileName,
+        length: length,
+        fileByteStream: fileByteStream
       )
     );
-
-    Navigator.of(context).pop();
   }
 
   Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
