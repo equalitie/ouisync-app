@@ -370,7 +370,12 @@ class _MainPageState extends State<MainPage>
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
       buildWhen: (context, state) {
-        return !(state is SyncingInProgress);
+        return !(state is SyncingInProgress ||
+        state is CreateFileDone ||
+        state is CreateFileFailure ||
+        state is WriteToFileInProgress ||
+        state is WriteToFileDone ||
+        state is WriteToFileFailure);
       },
       builder: (context, state) {
         if (state is DirectoryInitial) {
@@ -445,6 +450,31 @@ class _MainPageState extends State<MainPage>
         if (state is SyncingInProgress) {
           _syncingCubit?.syncing();
           return;
+        }
+
+        if (state is CreateFileDone) {
+          Fluttertoast.showToast(msg: 'New file created: ${state.path}');
+        }
+
+        if (state is CreateFileFailure) {
+          Fluttertoast.showToast(msg: 'Error creating new file: ${state.filePath}');
+          print('Error creating new file ${state.filePath}: ${state.error}');
+        }
+
+        if (state is WriteToFileInProgress) {
+          _showSavingFileProgress(context, state.fileName, state.length.toDouble());
+        }
+
+        if (state is WriteToFileDone) {
+          _updateSavingFileProgress(state.length.toDouble());
+          _hideSavingFileProgress();
+        }
+
+        if (state is WriteToFileFailure) {
+          _hideSavingFileProgress();
+
+          print('Writing to file ${state.fileName} failed (${state.filePath}): ${state.error}');
+          Fluttertoast.showToast(msg: 'Writing to file ${state.filePath}', toastLength: Toast.LENGTH_SHORT);
         }
 
         if (state is DirectoryLoadSuccess) {
@@ -973,6 +1003,47 @@ class _MainPageState extends State<MainPage>
         );
       })
     );
+  }
+
+  final GlobalKey<SavingFileState> _savingFileKey = GlobalKey();
+  OverlayEntry? savingFileOverlay;
+
+  void _showSavingFileProgress(BuildContext context, String fileName, double size) async {
+
+    OverlayState? overlayState = Overlay.of(context);
+    savingFileOverlay = OverlayEntry(
+      opaque: false,
+      builder: (context) {
+        return Positioned(
+          left: MediaQuery.of(context).size.width * 0.02,
+          top: MediaQuery.of(context).size.height * 0.92,
+          child: Material(
+            color: Colors.teal.shade50,
+            elevation: 2.0,
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: SavingFile(
+                key: _savingFileKey,
+                fileName: fileName,
+                size: size
+              )
+            ) 
+          )
+        );
+      }
+    );
+
+    overlayState?.insert(savingFileOverlay!);
+  }
+
+  void _updateSavingFileProgress(double progress) {
+    _savingFileKey.currentState?.updateProgress(progress);
+  }
+
+  void _hideSavingFileProgress() {
+    savingFileOverlay?.remove();
   }
 
 }
