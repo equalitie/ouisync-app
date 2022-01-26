@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../data/data.dart';
+import '../../utils/utils.dart';
 import '../blocs.dart';
 
 class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
@@ -47,10 +48,30 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield await navigateTo(event.repository, event.type, event.origin, event.destination);
     }
 
-    if (event is CreateFile) {
-      yield DirectoryLoadInProgress();
+    if (event is SaveFile) {
+      final fileCreationResult = await createFile(
+        event.repository,
+        event.newFilePath,
+        event.fileName,
+        event.length
+      );
+      yield fileCreationResult; 
 
-      yield await createFile(event.repository, event.newFilePath, event.fileByteStream, event.parentPath);
+      if (fileCreationResult is CreateFileDone) {
+        yield WriteToFileInProgress(
+          path: event.newFilePath,
+          fileName: event.fileName,
+          length: event.length
+        );
+
+        yield await writeFile(
+          event.repository,
+          event.newFilePath,
+          event.fileName,
+          event.length,
+          event.fileByteStream
+        );
+      }
     }
 
     if (event is ReadFile) {
@@ -145,35 +166,75 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       );
   }
 
-  Future<DirectoryState> createFile(Repository repository, String newFilePath, Stream<List<int>> fileByteStream, String parentPath) async {
+  Future<DirectoryState> createFile(
+    Repository repository,
+    String newFilePath,
+    String fileName,
+    int length
+  ) async {
+    BasicResult? createFileResult;
+    
     try {
-      final createFileResult = await directoryRepository.createFile(repository, newFilePath);
+      createFileResult = await directoryRepository.createFile(repository, newFilePath);
       if (createFileResult.errorMessage.isNotEmpty) {
-        if (createFileResult.errorMessage != 'File exists') {
-          print('File $newFilePath creation failed:\n${createFileResult.errorMessage}');
-          // ignore: todo
-          // TODO: Make a validation using the library function instead of guessing
-          print('The file $newFilePath already exist.');    
-          return DirectoryLoadFailure();
-        }
+        print('File $newFilePath creation failed:\n${createFileResult.errorMessage}');
+        
+        return CreateFileFailure(
+          filePath: newFilePath,
+          fileName: fileName,
+          length: length,
+          error: createFileResult.errorMessage
+        );
       }
     } catch (e) {
       print('Exception creating file $newFilePath:\n${e.toString()}');
-      return DirectoryLoadFailure();
+      
+      return CreateFileFailure(
+        filePath: newFilePath,
+        fileName: fileName,
+        length: length,
+        error: e.toString()
+      );
     }
 
+    final name = removeParentFromPath(newFilePath);
+    final extension = extractFileTypeFromName(newFilePath);
+    return CreateFileDone(fileName: name, path: newFilePath, extension: extension);
+  }
+
+  Future<DirectoryState> writeFile(
+    Repository repository,
+    String newFilePath,
+    String fileName,
+    int length,
+    Stream<List<int>> fileByteStream
+  ) async {
+    BasicResult? writeFileResult;
     try {
-      final writeFileResult = await directoryRepository.writeFile(repository, newFilePath, fileByteStream);
+      writeFileResult = await directoryRepository.writeFile(repository, newFilePath, fileByteStream);
       if (writeFileResult.errorMessage.isNotEmpty) {
         print('Writing to the file $newFilePath failed:\n${writeFileResult.errorMessage}');
-        return DirectoryLoadFailure();
+        
+        return WriteToFileFailure(
+          filePath: newFilePath,
+          fileName: fileName,
+          length: length,
+          error: writeFileResult.errorMessage
+        );
       }
     } catch (e) {
       print('Exception writing to file $newFilePath:\n${e.toString()}');
-      return DirectoryLoadFailure();
+      
+      return WriteToFileFailure(
+        filePath: newFilePath,
+        fileName: fileName,
+        length: length,
+        error: e.toString()
+      );
     }
 
-    return await getFolderContents(repository, parentPath);
+    final fileLength = writeFileResult.result;
+    return WriteToFileDone(filePath: newFilePath, fileName: fileName, length: fileLength);
   }
 
   Future<DirectoryState> readFile(Repository repository, String filePath, String action) async {
