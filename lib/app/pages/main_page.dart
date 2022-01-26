@@ -272,20 +272,25 @@ class _MainPageState extends State<MainPage>
     );
 
     void subscribeToRepositoryNotifications({
-      required Repository repository,
-      required String path
-    }) async {
+      required Repository repository
+    }) {
       _repositorySubscription = repository
-      .subscribe(() { 
-        _syncingCubit?.syncing();
-
-        getContents(
-          repository: repository,
-          path: path,
-          isSyncing: true
-        );
-      });
+      .subscribe(syncCurrentFolder);
     }
+
+    void syncCurrentFolder() { 
+      _syncingCubit?.syncing();
+    
+      getContents(
+        repository: _repository!,
+        path: _currentFolder,
+        isSyncing: true
+      );
+
+      print('[Syncing] Current folder: $_currentFolder');
+    }
+
+
 
     @override
     Widget build(BuildContext context) {
@@ -370,15 +375,16 @@ class _MainPageState extends State<MainPage>
         print('Repository closed'); 
       }
 
-      NativeChannels.setRepository(repository);
-
       _repository = repository;
       _repositoryName = name;
+
+      NativeChannels.setRepository(_repository!);
+      
 
       switchMainState(newState: _repositoryContentBuilder());
 
       navigateToPath(
-        repository: repository,
+        repository: _repository!,
         type: Navigation.content,
         origin: Strings.rootPath,
         destination: Strings.rootPath,
@@ -386,8 +392,7 @@ class _MainPageState extends State<MainPage>
       );
 
       subscribeToRepositoryNotifications(
-        repository: repository,
-        path: Strings.rootPath
+        repository: _repository!,
       );
     }
 
