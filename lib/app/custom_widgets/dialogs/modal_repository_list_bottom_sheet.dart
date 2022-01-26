@@ -33,7 +33,7 @@ class RepositoryList extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.bottomSheetHandle(context),
-                _folderDetails(context, snapshot.data as List<String>),
+                _repositoryListDetails(context, snapshot.data as List<String>),
               ],
             ),
           ); 
@@ -44,7 +44,7 @@ class RepositoryList extends StatelessWidget {
     );
   }
 
-  Widget _folderDetails(BuildContext context, List<String> localRepositories) {
+  Widget _repositoryListDetails(BuildContext context, List<String> localRepositories) {
     return Padding(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
       child: Column(
@@ -53,7 +53,7 @@ class RepositoryList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.bottomSheetTitle(Strings.titleRepositoriesList),
-          _buildRepositoryItem(localRepositories, current),
+          _buildRepositoryList(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
@@ -83,7 +83,7 @@ class RepositoryList extends StatelessWidget {
     );
   }
 
-  Widget _buildRepositoryItem(List<String> repositories, String current) => ListView.builder(
+  Widget _buildRepositoryList(List<String> repositories, String current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     itemCount: repositories.length,

@@ -85,8 +85,8 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
+      
       _syncingCubit = BlocProvider
-
       .of<SynchronizationCubit>(context);
 
       final repository = await initOuiSync(
@@ -96,7 +96,9 @@ class _MainPageState extends State<MainPage>
       );
       
       NativeChannels.init(repository: repository);
+
       initMainPageLayout(repository, widget.defaultRepositoryName);
+
       handleShareIntentPayload(repository, _intentPayload);
     }
 
@@ -254,8 +256,6 @@ class _MainPageState extends State<MainPage>
       print('[Syncing] Current folder: $_currentFolder');
     }
 
-
-
     @override
     Widget build(BuildContext context) {
       return Scaffold(
@@ -342,8 +342,7 @@ class _MainPageState extends State<MainPage>
       _repository = repository;
       _repositoryName = name;
 
-      NativeChannels.setRepository(_repository!);
-      
+      NativeChannels.setRepository(_repository!);    
 
       switchMainState(newState: _repositoryContentBuilder());
 
