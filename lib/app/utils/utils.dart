@@ -3,6 +3,7 @@ export 'auth.dart';
 export 'basic_result.dart';
 export 'constants.dart';
 export 'dialogs.dart';
+export 'dimensions.dart';
 export 'entry_info.dart';
 export 'fields.dart';
 export 'format.dart';

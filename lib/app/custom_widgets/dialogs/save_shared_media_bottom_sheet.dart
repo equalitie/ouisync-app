@@ -43,7 +43,6 @@ class SaveSharedMedia extends StatelessWidget {
             getPathFromFileName(this.sharedMedia.first.path),
             softWrap: true,
             textOverflow: TextOverflow.ellipsis,
-            size: 20.0,
             fontWeight: FontWeight.w800
           ),
           Fields.actionsSection(context,
@@ -65,7 +64,7 @@ class SaveSharedMedia extends StatelessWidget {
         SizedBox(width: 10.0,),
         Fields.constrainedText(
           Strings.titleAddShareFilePage,
-          size: 24.0,
+          fontSize: Dimensions.fontBig,
           fontWeight: FontWeight.w800
         ),
       ],

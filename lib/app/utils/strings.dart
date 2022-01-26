@@ -62,6 +62,7 @@ class Strings {
   static const String titleSettings = 'Settings';
   static const String titleRepository = 'Repository';
   static const String titleFileDetails = 'File Details';
+  static const String titleFolderDetails = 'Folder Details';
   static const String titleDeleteFolder = 'Delete Folder';
   static const String titleDeleteNotEmptyFolder = 'Delete not Empty Folder';
   static const String titleRepositoriesList = 'Your Repositories';

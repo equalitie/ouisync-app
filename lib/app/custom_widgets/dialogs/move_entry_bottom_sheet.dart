@@ -51,7 +51,6 @@ class MoveEntryDialog extends StatelessWidget {
               Strings.replacementPath,
               extractParentFromPath(path)
             ),
-            size: 16.0,
             fontWeight: FontWeight.w800
           ),
           _selectActions(context)
@@ -70,7 +69,7 @@ class MoveEntryDialog extends StatelessWidget {
             SizedBox(width: 10.0,),
             Fields.constrainedText(
               '${removeParentFromPath(path)}',
-              size: 24.0,
+              fontSize: Dimensions.fontBig,
               fontWeight: FontWeight.w800
             ),
           ],

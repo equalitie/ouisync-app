@@ -63,7 +63,6 @@ class RepositoryList extends StatelessWidget {
               textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
-              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
@@ -76,7 +75,6 @@ class RepositoryList extends StatelessWidget {
               textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
-              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
@@ -129,7 +127,7 @@ class RepositoryList extends StatelessWidget {
                 child: Text(
                   repositories[index],
                   style:  TextStyle(
-                    fontSize: 25.0,
+                    fontSize: Dimensions.fontBig,
                     color: textColor,
                     fontWeight: fontWeight
                   )

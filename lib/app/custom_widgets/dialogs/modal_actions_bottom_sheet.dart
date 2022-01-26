@@ -80,7 +80,7 @@ class DirectoryActions extends StatelessWidget {
           Text(
             name,
             style: TextStyle(
-              fontSize: 14.0 
+              fontSize: Dimensions.fontAverage
             )
           )
         ],

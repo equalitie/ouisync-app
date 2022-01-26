@@ -59,7 +59,13 @@ class _ActionsDialogState extends State<ActionsDialog> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(widget.title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),),
+                      Text(
+                        widget.title,
+                        style: TextStyle(
+                          fontSize: Dimensions.fontBig,
+                          fontWeight: FontWeight.w600
+                        ),
+                      ),
                       SizedBox(height: 15,),
                       widget.body!,
                     ],
