@@ -54,14 +54,6 @@ class Strings {
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
 
-  // add_shared_file_page.dart
-  static const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
-  static const String messageCreateNewFolderRootToStart = 'Maybe start by creating a new '
-  '<bold>folder</bold>\n... or just go ahead and use <size><bold>\/</bold></size>, we are not '
-  'your mother';
-  static const String messageCreateNewFolder = 'You can create a new <bold>folder</bold> '
-  '(look down <icon></icon>)\n... or just drop it here, champ';
-
   // Dialogs
 
   static const String titleMovingEntry = 'Moving Entry';
