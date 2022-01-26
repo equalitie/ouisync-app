@@ -158,44 +158,8 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      // _saveSharedMedia(repository, _currentFolder, _intentPayload);
       _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Constants.paddingBottomWithBottomSheetExtra;
       _showSaveSharedMedia(sharedMedia: _intentPayload);
-    }
-
-    Future<void> _saveSharedMedia(
-      Repository repository,
-      String currentFolder,
-      List<SharedMediaFile> sharedMedia
-    ) async {
-      final routeBloc = BlocProvider.of<RouteBloc>(context);
-      final directoryBloc = BlocProvider.of<DirectoryBloc>(context);
-
-      final navigationBar = CustomNavigationBar(
-        repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
-        synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
-        onRepositorySelect: switchRepository,
-        shareRepositoryOnTap: shareRepository,
-      );
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return BlocProvider.value(
-              value: routeBloc,
-              child: AddSharedFilePage(
-                repository:  repository,
-                listOfSharedMedia: sharedMedia,
-                routeBloc: routeBloc,
-                directoryBloc: directoryBloc,
-                directoryBlocPath: currentFolder,
-                navigationBar: navigationBar
-              )
-            );
-          }
-        )
-      );
     }
 
     switchMainState({newState}) => setState(() { _mainState = newState; });
