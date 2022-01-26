@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
@@ -155,11 +156,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     bool showSuggestedNameSection = false;
 
     try {
-      _suggestedName = this
-      .widget
-      .cubit
-      .session
-      .extractSuggestedNameFromShareToken(value);  
+      final shareToken = ShareToken(this.widget.cubit.session, value);
+      _suggestedName = shareToken.suggestedName; 
 
       if (_suggestedName.isNotEmpty) {
         _repoName = _suggestedName;
@@ -185,11 +183,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     }
 
     try {
-      _suggestedName = this
-      .widget
-      .cubit
-      .session
-      .extractSuggestedNameFromShareToken(value!);
+      final shareToken = ShareToken(this.widget.cubit.session, value!);
+      _suggestedName = shareToken.suggestedName;
     } catch (e) {
       _suggestedName = '';
       return error;
