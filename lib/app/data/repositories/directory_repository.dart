@@ -6,31 +6,26 @@ import '../../utils/utils.dart';
 
 class DirectoryRepository {
 
-  _openDirectory(repository, path) async => 
-    await Directory.open(repository, path);
-
-  _openFile(repository, path) async => 
-    await File.open(repository, path);
-
   Future<BasicResult> createFile(Repository repository, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
 
     File? newFile;
+    int? handle;
 
     try {
       print('Creating file $newFilePath');
 
       newFile = await File.create(repository, newFilePath);
+      handle = newFile.handle;
     } catch (e) {
       print('Error creating file $newFilePath: $e');
       error = e.toString();
     } finally {
-      // ignore: todo
-      newFile!.close(); // TODO: Necessary?
+      await newFile?.close();
     }
 
-    createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
+    createFileResult = CreateFileResult(functionName: 'createFile', result: handle);
     if (error.isNotEmpty) {
       createFileResult.errorMessage = error;
     }
@@ -46,7 +41,7 @@ class DirectoryRepository {
 
     final streamReader = ChunkedStreamReader(fileStream);
     
-    final file = await _openFile(repository, filePath);
+    final file = await File.open(repository, filePath);
     int offset = 0;
     
     try {
@@ -67,10 +62,10 @@ class DirectoryRepository {
       error = 'Writing to the file $filePath failed';
     } finally {
       streamReader.cancel();
-      file.close();
+      await file.close();
     }
 
-    writeFileResult = WriteFileResult(functionName: 'writeFile', result: file);
+    writeFileResult = WriteFileResult(functionName: 'writeFile', result: offset);
     if (error.isNotEmpty) {
       writeFileResult.errorMessage = error;
     }
@@ -83,7 +78,7 @@ class DirectoryRepository {
     String error = '';
 
     final content = <int>[];
-    final file = await _openFile(repository, filePath);    
+    final file = await File.open(repository, filePath);    
 
     try {
       final length = await file.length;
@@ -177,29 +172,31 @@ class DirectoryRepository {
     BasicResult getContentsResult;
     String error = '';
 
-    final returnedContent = <BaseItem>[];
-    final directory = await _openDirectory(repository, path);
+    final content = <BaseItem>[];
     
-    try {
-      final iterator = directory.iterator;
+    final directory = await Directory.open(repository, path);
+    final iterator = directory.iterator;
+
+    try {  
       while (iterator.moveNext()) {
-        final returned =  await _castToBaseItem(
+        final item =  await _castToBaseItem(
           path,
           iterator.current.name,
           iterator.current.type,
           0.0
         );
 
-        returnedContent.add(returned);
+        content.add(item);
       } 
     } catch (e) {
       print('Error traversing directory $path: $e');
       error = e.toString();
-    } finally {
+    }
+    finally {
       directory.close();
     }
     
-    getContentsResult = GetContentResult(functionName: 'getFolderContents', result: returnedContent);
+    getContentsResult = GetContentResult(functionName: 'getFolderContents', result: content);
     if (error.isNotEmpty) {
       getContentsResult.errorMessage = error;
     }
@@ -208,7 +205,7 @@ class DirectoryRepository {
   }
 
   Future<List<BaseItem>> getContentsRecursive(Repository repository, String path, List<BaseItem> contentNodes) async {
-    final directory = await _openDirectory(repository, path);
+    final directory = await Directory.open(repository, path);
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
