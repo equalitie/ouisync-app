@@ -175,7 +175,7 @@ abstract class Dialogs {
           Text(
             fileName,
             style: TextStyle(
-              fontSize: 18.0,
+              fontSize: Dimensions.fontAverage,
               fontWeight: FontWeight.bold
             ),
           ),
@@ -184,14 +184,14 @@ abstract class Dialogs {
               Text(
                 Strings.atSymbol,
                 style: TextStyle(
-                  fontSize: 14.0,
+                  fontSize: Dimensions.fontAverage,
                   fontWeight: FontWeight.bold
                 ),
               ),
               Text(
                 parent,
                 style: TextStyle(
-                  fontSize: 18.0,
+                  fontSize: Dimensions.fontAverage,
                   fontWeight: FontWeight.w700
                 ),
               )

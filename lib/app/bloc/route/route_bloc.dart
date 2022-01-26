@@ -44,7 +44,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
               softWrap: false,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 20.0,
+                fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.w600,
               ),
             ),

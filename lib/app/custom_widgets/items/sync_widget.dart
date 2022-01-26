@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubit/cubits.dart';
 import '../../models/models.dart';
+import '../../utils/utils.dart';
 
 class SyncWidget extends StatefulWidget {
   SyncWidget({
@@ -69,7 +69,7 @@ class _SyncWidgetState extends State<SyncWidget> {
     return Text(
       _textForStatus(status),
       style: TextStyle(
-        fontSize: 18.0,
+        fontSize: Dimensions.fontAverage,
         fontWeight: FontWeight.w900,
         color: _colorForStatus(status)
       ),

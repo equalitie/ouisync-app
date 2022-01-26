@@ -1,7 +1,7 @@
-export 'bars/app_branding.dart';
+export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repository_picker.dart';
-export 'bars/navigation_bar.dart';
+export 'bars/repositories_bar.dart';
 export 'bars/search_bar.dart';
 
 export 'dialogs/actions_dialog.dart';
@@ -15,6 +15,8 @@ export 'dialogs/modal_repo_creation_dialog.dart';
 export 'dialogs/modal_repository_list_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
+export 'dialogs/save_shared_media_bottom_sheet.dart';
+export 'dialogs/saving_file_overlay.dart';
 
 export 'items/file_description.dart';
 export 'items/folder_description.dart';

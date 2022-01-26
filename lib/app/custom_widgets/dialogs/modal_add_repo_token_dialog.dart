@@ -88,7 +88,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
               child: Fields.constrainedText(
                 Strings.messageRepositorySuggestedName
                   .replaceAll(Strings.replacementName, _repoName ?? ''),
-                size: 15.0,
+                fontSize: Dimensions.fontSmall,
                 fontWeight: FontWeight.normal,
                 color: Colors.black54
               ),

@@ -26,7 +26,7 @@ class FolderDetail extends StatefulWidget {
   final String path;
   final String parent;
   final GlobalKey<ScaffoldState> scaffoldKey;
-  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
@@ -63,7 +63,14 @@ class _FolderDetailState extends State<FolderDetail> {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetTitle(widget.name),
+          Fields.bottomSheetTitle(Strings.titleFolderDetails),
+          _buildMoveFolderButton(
+            origin: widget.parent,
+            path: widget.path,
+            type: EntryType.directory,
+            moveEntryCallback: widget.onMoveEntry,
+            bottomSheetControllerCallback: widget.onBottomSheetOpen
+          ),
           GestureDetector(
             onTap: () => delete(
               widget.context,
@@ -77,19 +84,11 @@ class _FolderDetailState extends State<FolderDetail> {
               text: Strings.iconDelete,
               textAlign: TextAlign.start,
               iconSize: 40.0,
-              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 30.0)
             )
           ),
-          _buildMoveFolderButton(
-            origin: widget.parent,
-            path: widget.path,
-            type: EntryType.directory,
-            moveEntryCallback: widget.onMoveEntry,
-            bottomSheetControllerCallback: widget.onBottomSheetOpen
-          ),
           Divider(
-            height: 50.0,
+            height: 10.0,
             thickness: 2.0,
             indent: 20.0,
             endIndent: 20.0,
@@ -97,12 +96,24 @@ class _FolderDetailState extends State<FolderDetail> {
           Fields.iconText(
             icon: Icons.info_rounded,
             text: Strings.iconInformation,
-            textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 25.0,
-            padding: EdgeInsets.only(bottom: 30.0)
+            textAlign: TextAlign.start,
+            padding: EdgeInsets.only(top: 10.0)
           ),
-          _buildSyncStatus(),
+          Fields.labeledText(
+            label: Strings.labelName,
+            labelFontSize: Dimensions.fontAverage,
+            text: widget.name,
+            textAlign: TextAlign.start,
+          ),
+          Fields.labeledText(
+            label: Strings.labelLocation, 
+            labelFontSize: Dimensions.fontAverage,
+            text: widget.path
+            .replaceAll(widget.name, '')
+            .trimRight(),
+            textAlign: TextAlign.start,
+          ),
         ]
       )
     );
@@ -137,7 +148,7 @@ class _FolderDetailState extends State<FolderDetail> {
             Text(
               path,
               style: TextStyle(
-                fontSize: 18.0,
+                fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.bold
               ),
             ),
@@ -221,7 +232,7 @@ class _FolderDetailState extends State<FolderDetail> {
     required String path,
     required EntryType type,
     required MoveEntryCallback moveEntryCallback,
-    required MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    required BottomSheetControllerCallback bottomSheetControllerCallback
   }) {
     return GestureDetector(
       onTap: () => _showMoveEntryBottomSheet(
@@ -236,7 +247,6 @@ class _FolderDetailState extends State<FolderDetail> {
         text: Strings.iconMove,
         textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
@@ -247,7 +257,7 @@ class _FolderDetailState extends State<FolderDetail> {
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
-    MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    BottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
     
@@ -270,46 +280,5 @@ class _FolderDetailState extends State<FolderDetail> {
     );
 
     widget.onBottomSheetOpen.call(controller!, path);
-  }
-
-  Widget _buildSyncStatus() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Fields.idLabel(
-          Strings.labelSyncStatus,
-          size: 20.0
-        ),
-        Container(
-          height: 60.0,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.green.shade100,
-            border: Border.all(
-              color: Colors.green.shade600,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.check
-                ),
-                Text(
-                  Strings.statusSync,
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold
-                  ),
-                )
-              ],
-            ),
-          ),
-        )
-      ],
-    );
   }
 }

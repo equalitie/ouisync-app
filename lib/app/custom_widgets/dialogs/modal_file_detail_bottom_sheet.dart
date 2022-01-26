@@ -28,7 +28,7 @@ class FileDetail extends StatefulWidget {
   final String parent;
   final int size;
   final GlobalKey<ScaffoldState> scaffoldKey;
-  final MoveEntryBottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
@@ -74,7 +74,7 @@ class _FileDetailState extends State<FileDetail> {
           ),
           _buildDeleteButton(),
           Divider(
-            height: 50.0,
+            height: 10.0,
             thickness: 2.0,
             indent: 20.0,
             endIndent: 20.0,
@@ -83,19 +83,18 @@ class _FileDetailState extends State<FileDetail> {
             icon: Icons.info_rounded,
             text: Strings.iconInformation,
             iconSize: 40.0,
-            textSize: 25.0,
             textAlign: TextAlign.start,
-            padding: EdgeInsets.only(bottom: 30.0)
+            padding: EdgeInsets.only(top: 10.0)
           ),
           Fields.labeledText(
             label: Strings.labelName,
-            labelSize: 20.0,
+            labelFontSize: Dimensions.fontAverage,
             text: widget.name,
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
             label: Strings.labelLocation, 
-            labelSize: 20.0,
+            labelFontSize: Dimensions.fontAverage,
             text: widget.path
             .replaceAll(widget.name, '')
             .trimRight(),
@@ -103,7 +102,7 @@ class _FileDetailState extends State<FileDetail> {
           ),
           Fields.labeledText(
             label: Strings.labelSize,
-            labelSize: 20.0,
+            labelFontSize: Dimensions.fontAverage,
             text: formattSize(widget.size, units: true),
             textAlign: TextAlign.start,
           ),
@@ -120,7 +119,6 @@ class _FileDetailState extends State<FileDetail> {
             text: Strings.iconPreview,
             textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 25.0,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
@@ -134,7 +132,6 @@ class _FileDetailState extends State<FileDetail> {
             text: Strings.iconShare,
             textAlign: TextAlign.start,
             iconSize: 40.0,
-            textSize: 25.0,
             padding: EdgeInsets.only(bottom: 30.0)
           ),
         );
@@ -145,7 +142,7 @@ class _FileDetailState extends State<FileDetail> {
     required String path,
     required EntryType type,
     required MoveEntryCallback moveEntryCallback,
-    required MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    required BottomSheetControllerCallback bottomSheetControllerCallback
   }) {
     return GestureDetector(
       onTap: () => _showMoveEntryBottomSheet(
@@ -160,7 +157,6 @@ class _FileDetailState extends State<FileDetail> {
         text: Strings.iconMove,
         textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );
@@ -171,7 +167,7 @@ class _FileDetailState extends State<FileDetail> {
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
-    MoveEntryBottomSheetControllerCallback bottomSheetControllerCallback
+    BottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
     
@@ -204,7 +200,6 @@ class _FileDetailState extends State<FileDetail> {
         text: Strings.iconDelete,
         textAlign: TextAlign.start,
         iconSize: 40.0,
-        textSize: 25.0,
         padding: EdgeInsets.only(bottom: 30.0)
       ),
     );

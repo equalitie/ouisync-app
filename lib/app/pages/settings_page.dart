@@ -77,7 +77,6 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: Icons.lock_rounded,
             text: Strings.titleRepository,
             textAlign: TextAlign.start,
-            textSize: 25.0,
             padding: EdgeInsets.fromLTRB(20.0, 0.0, 10.0, 20.0)
             ),
           RepositoryPicker(
@@ -94,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(
               Strings.actionEditRepositoryName,
               style: TextStyle(
-                fontSize: 18.0
+                fontSize: Dimensions.fontAverage
               ),
             )
           ),
@@ -103,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(
               Strings.actionDeleteRepository,
               style: TextStyle(
-                fontSize: 18.0
+                fontSize: Dimensions.fontAverage
               ),
             )
           ),

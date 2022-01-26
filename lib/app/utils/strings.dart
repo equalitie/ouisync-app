@@ -29,11 +29,9 @@ class Strings {
   static const String messageOoops = 'Oooops...';
   static const String mesageLoading = 'Loading...';
 
-  static const String messageAccessModeBlind = 'Your peer can hold it for you; can\'t write or '
-  'read it';
-  static const String messageAccessModeRead = 'They can  come in an see, but not touching! '
-  '(can\'t modify it)';
-  static const String messageAccessModeWrite = 'Full access. We are guessing your BFF?';
+  static const String messageAccessModeBlind = 'Your peer can\'t write or read the contents.';
+  static const String messageAccessModeRead = 'Can\'t be modified, just access the contents.';
+  static const String messageAccessModeWrite = 'Full access. Your peer can read and write.';
 
   static const String messageBitTorrentDHTStatus = 'BitTorrent DHT is [status]';
   static const String messageBitTorrentDHTEnableFailed = 'BitTorrent DHT could not be enabled';
@@ -54,14 +52,6 @@ class Strings {
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
 
-  // add_shared_file_page.dart
-  static const String messageEmptyFolderStructure = 'Move along, nothing to see here...';
-  static const String messageCreateNewFolderRootToStart = 'Maybe start by creating a new '
-  '<bold>folder</bold>\n... or just go ahead and use <size><bold>\/</bold></size>, we are not '
-  'your mother';
-  static const String messageCreateNewFolder = 'You can create a new <bold>folder</bold> '
-  '(look down <icon></icon>)\n... or just drop it here, champ';
-
   // Dialogs
 
   static const String titleMovingEntry = 'Moving Entry';
@@ -72,6 +62,7 @@ class Strings {
   static const String titleSettings = 'Settings';
   static const String titleRepository = 'Repository';
   static const String titleFileDetails = 'File Details';
+  static const String titleFolderDetails = 'Folder Details';
   static const String titleDeleteFolder = 'Delete Folder';
   static const String titleDeleteNotEmptyFolder = 'Delete not Empty Folder';
   static const String titleRepositoriesList = 'Your Repositories';
@@ -105,22 +96,28 @@ class Strings {
   static const String messageCreateFolder = 'Folder name';
   static const String messageConfirmFolderDeletion = 'Are you sure you want to delete this folder?';
   static const String messageConfirmNotEmptyFolderDeletion = 'This folder is not empty.\n\n'
-  'Do you still want to delete it, and all its contents?';
+  'Do you still want to delete it? (this will delete all its contents)';
   static const String messageError = 'Error!';
   static const String messageAck = 'Ack!';
-  static const String messageCreatingToken = 'Baking the token...';
+  static const String messageCreatingToken = 'Creating the share token...';
   static const String messageErrorCreatingToken = 'Error while creating the share token';
   static const String messageTokenCopiedToClipboard = 'Repository token copied to the clipboard';
   static const String messageMoveEntryOrigin = 'from [path]';
   static const String messageConfirmFileDeletion = 'Are you sure you want to delete this file?';
 
+  static const String mesageNoMediaPresent = 'There is no media present';
+
   static const String messageEntryTypeDefault = 'An entry';
   static const String messageEntryTypeFolder = 'A folder';
   static const String messageEntryTypeFile = 'A file';
 
+  static const String messageEntryAlreadyExist = '[entry] with the same name already '
+  'exist in this location';
+
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
+  static const String replacementEntry = '[entry]';
 
   static const String statusSync = 'SYNCED';
 
@@ -148,6 +145,7 @@ class Strings {
   static const String actionCancel = 'Cancel';
   static const String actionDelete = 'Delete';
   static const String actionMove = 'Move';
+  static const String actionSave = 'Save';
 
   static const String actionDeleteFolder = 'Delete folder';
 

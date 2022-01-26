@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:styled_text/styled_text.dart';
 
 class Fields {
@@ -42,7 +43,7 @@ class Fields {
   static Widget inPageMainMessage(String message,
   {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = 24.0,
+    double fontSize = Dimensions.fontBig,
     FontWeight fontWeight = FontWeight.bold,
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.black,
@@ -62,7 +63,7 @@ class Fields {
   static Widget inPageSecondaryMessage(String message,
   {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = 18.0,
+    double fontSize = Dimensions.fontAverage,
     FontWeight fontWeight = FontWeight.normal,
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.black,
@@ -83,8 +84,8 @@ class Fields {
     required void Function()? onPressed,
     required String text,
     Alignment alignment = Alignment.center,
-    Size? size,
-    double? fontSize,
+    Size size = Dimensions.sizeInPageButtonRegular,
+    double fontSize = Dimensions.fontAverage,
     FontWeight fontWeight = FontWeight.normal,
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.white,
@@ -130,10 +131,10 @@ class Fields {
   static Widget bottomSheetTitle(String title,
   {
     EdgeInsets padding = const EdgeInsets.only(bottom: 30.0),
-    double size = 24.0,
     TextAlign textAlign = TextAlign.center,
-    bool softWrap = true,
     TextOverflow textOverflow = TextOverflow.ellipsis,
+    bool softWrap = true,
+    double fontSize = Dimensions.fontBig,
     FontWeight fontWeight = FontWeight.bold
   }) => Padding(
     padding: padding,
@@ -145,7 +146,7 @@ class Fields {
           softWrap: softWrap,
           overflow: textOverflow,
           style: TextStyle(
-            fontSize: size,
+            fontSize: fontSize,
             fontWeight: fontWeight
           ),
         ),
@@ -155,10 +156,10 @@ class Fields {
 
   static Widget idLabel(String text,
   {
-    double size = 14.0,
     TextAlign textAlign = TextAlign.center,
-    bool softWrap = true,
     TextOverflow textOverflow = TextOverflow.ellipsis,
+    bool softWrap = true,
+    double fontSize = Dimensions.fontSmall,
     FontWeight fontWeight = FontWeight.bold,
     Color color = Colors.black
   }) => Text(
@@ -167,7 +168,7 @@ class Fields {
     softWrap: softWrap,
     overflow: textOverflow,
     style: TextStyle(
-      fontSize: size,
+      fontSize: fontSize,
       fontWeight: fontWeight,
       color: color
     ),
@@ -176,16 +177,16 @@ class Fields {
   static Widget labeledText({
     required String label,
     required String text,
-    double labelSize = 14.0,
     TextAlign labelTextAlign = TextAlign.center,
-    bool labelSoftWrap = false,
     TextOverflow labelTextOverflow = TextOverflow.ellipsis,
+    bool labelSoftWrap = false,
+    double labelFontSize = Dimensions.fontSmall,
     FontWeight labelFontWeight = FontWeight.bold,
     Color labelColor = Colors.black,
-    double textSize = 18.0,
     TextAlign textAlign = TextAlign.center,
-    bool textSoftWrap = true,
     TextOverflow textOverflow = TextOverflow.clip,
+    bool textSoftWrap = true,
+    double textFontSize = Dimensions.fontAverage,
     FontWeight textFontWeight = FontWeight.w600,
     Color textColor = Colors.black,
     EdgeInsets padding: const EdgeInsets.only(top: 20.0),
@@ -199,19 +200,19 @@ class Fields {
       children: [
         idLabel(
           label,
-          size: labelSize,
           textAlign: labelTextAlign,
-          softWrap: labelSoftWrap,
           textOverflow: labelTextOverflow,
+          softWrap: labelSoftWrap,
+          fontSize: labelFontSize,
           fontWeight: labelFontWeight,
           color: labelColor
         ),
         SizedBox(width: space,),
         constrainedText(text,
-          size: textSize,
           textAlign: textAlign,
-          softWrap: textSoftWrap,
           textOverflow: textOverflow,
+          softWrap: textSoftWrap,
+          fontSize: textFontSize,
           fontWeight: textFontWeight,
           color: textColor
         )
@@ -222,10 +223,10 @@ class Fields {
   static Widget constrainedText(String text,
   {
     int flex = 1,
-    double size = 18.0,
     TextAlign textAlign = TextAlign.start,
-    bool softWrap = true,
     TextOverflow textOverflow = TextOverflow.clip,
+    bool softWrap = true,
+    double fontSize = Dimensions.fontAverage,
     FontWeight fontWeight = FontWeight.w600,
     Color color = Colors.black
   })  => Expanded(
@@ -236,7 +237,7 @@ class Fields {
       softWrap: softWrap,
       overflow: textOverflow,
       style: TextStyle(
-        fontSize: size,
+        fontSize: fontSize,
         fontWeight: fontWeight,
         color: color
       ),
@@ -272,10 +273,10 @@ class Fields {
     required String text, 
     double iconSize = 30.0,
     Color iconColor = Colors.black,
-    double textSize = 18.0,
     TextAlign textAlign = TextAlign.center,
-    bool textSoftWrap = true,
     TextOverflow textOverflow = TextOverflow.clip,
+    bool textSoftWrap = true,
+    double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.w600,
     Color textColor = Colors.black,
     EdgeInsets padding = const EdgeInsets.only(bottom: 10.0),
@@ -293,10 +294,10 @@ class Fields {
         ),
         SizedBox(width: spacing,),
         constrainedText(text,
-          size: textSize,
           textAlign: textAlign,
-          softWrap: textSoftWrap,
           textOverflow: textOverflow,
+          softWrap: textSoftWrap,
+          fontSize: textFontSize,
           fontWeight: textFontWeight,
           color: textColor
         )
@@ -399,7 +400,7 @@ class Fields {
     Color iconColor = Colors.black,
     double width = 60.0,
     double height = 60.0,
-    double textSize = 13.0,
+    double textFontSize = Dimensions.fontSmall,
     FontWeight textFontWeight = FontWeight.w700,
     double spacing = 5.0
   }) => Column(
@@ -433,7 +434,7 @@ class Fields {
       Text(
         text,
         style: TextStyle(
-          fontSize: textSize,
+          fontSize: textFontSize,
           fontWeight: textFontWeight,
         ),
       )

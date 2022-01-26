@@ -33,7 +33,7 @@ class RepositoryList extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.bottomSheetHandle(context),
-                _folderDetails(context, snapshot.data as List<String>),
+                _repositoryListDetails(context, snapshot.data as List<String>),
               ],
             ),
           ); 
@@ -44,7 +44,7 @@ class RepositoryList extends StatelessWidget {
     );
   }
 
-  Widget _folderDetails(BuildContext context, List<String> localRepositories) {
+  Widget _repositoryListDetails(BuildContext context, List<String> localRepositories) {
     return Padding(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
       child: Column(
@@ -53,7 +53,7 @@ class RepositoryList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.bottomSheetTitle(Strings.titleRepositoriesList),
-          _buildRepositoryItem(localRepositories, current),
+          _buildRepositoryList(localRepositories, current),
           SizedBox(height: 50.0,),
           GestureDetector(
             onTap: () => createRepoDialog(this.cubit),
@@ -63,7 +63,6 @@ class RepositoryList extends StatelessWidget {
               textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
-              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
@@ -76,7 +75,6 @@ class RepositoryList extends StatelessWidget {
               textAlign: TextAlign.start,
               iconSize: 40.0,
               iconColor: Colors.black,
-              textSize: 25.0,
               padding: EdgeInsets.only(bottom: 10.0)
             )
           ),
@@ -85,7 +83,7 @@ class RepositoryList extends StatelessWidget {
     );
   }
 
-  Widget _buildRepositoryItem(List<String> repositories, String current) => ListView.builder(
+  Widget _buildRepositoryList(List<String> repositories, String current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     itemCount: repositories.length,
@@ -117,6 +115,8 @@ class RepositoryList extends StatelessWidget {
 
           this.cubit.openRepository(name: repositoryName, password: storagedPassword);
           updateDefaultRepositorySetting(repositoryName);
+
+          Navigator.of(context).pop();
         },
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
@@ -129,7 +129,7 @@ class RepositoryList extends StatelessWidget {
                 child: Text(
                   repositories[index],
                   style:  TextStyle(
-                    fontSize: 25.0,
+                    fontSize: Dimensions.fontBig,
                     color: textColor,
                     fontWeight: fontWeight
                   )

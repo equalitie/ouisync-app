@@ -80,7 +80,7 @@ class DirectoryActions extends StatelessWidget {
           Text(
             name,
             style: TextStyle(
-              fontSize: 14.0 
+              fontSize: Dimensions.fontAverage
             )
           )
         ],
@@ -122,22 +122,23 @@ class DirectoryActions extends StatelessWidget {
     );
 
     if(result != null) {
+      final file = result.files.single;
       final newFilePath = parent == '/'
-      ? '/${result.files.single.name}'
-      : '$parent/${result.files.single.name}';
+      ? '/${file.name}'
+      : '$parent/${file.name}';
       
       final exist = await EntryInfo(repository).exist(path: newFilePath);
       if (exist) {
         return;
       }
 
-      final fileByteStream = result.files.single.readStream!;
       bloc.add(
-        CreateFile(
+        SaveFile(
           repository: repository,
-          parentPath: parent,
           newFilePath: newFilePath,
-          fileByteStream: fileByteStream
+          fileName: file.name,
+          length: file.size,
+          fileByteStream: file.readStream!
         )
       );
 

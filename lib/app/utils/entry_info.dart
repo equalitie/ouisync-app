@@ -17,8 +17,9 @@ class EntryInfo {
     final exist = await _repository.exists(path);
     if (exist) {
       final type = await _repository.type(path);
-      String message = '${_getTypeNameForMessage(type)} with the same name already exist';
-      showToast(message, length: Toast.LENGTH_LONG);
+      final typeNameForMessage = _getTypeNameForMessage(type);
+      
+      showToast(Strings.messageEntryAlreadyExist.replaceAll(Strings.replacementEntry, typeNameForMessage), length: Toast.LENGTH_LONG);
     }
 
     return exist;
@@ -26,6 +27,7 @@ class EntryInfo {
 
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
+      print('Entry type was null');
       return Strings.messageEntryTypeDefault;
     }
 
@@ -41,12 +43,6 @@ class EntryInfo {
   } 
 
   Future<int> fileLength(String path) async {
-    final type = await _repository.type(path);
-    if (type != EntryType.file) {
-      print('File length: $path is not a file.');
-      return -1;
-    }
-
     File? file;
     int length = 0;
     try {
@@ -54,11 +50,10 @@ class EntryInfo {
       length = await file.length;
     } catch (e) {
       print('Error getting the length for file $path:\n${e.toString()}');
+      length = -1;
     }
 
-    if (file != null) {
-      file.close(); 
-    }
+    await file?.close();
     
     return length;
   }

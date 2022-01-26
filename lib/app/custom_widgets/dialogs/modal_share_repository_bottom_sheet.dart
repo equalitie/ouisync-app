@@ -132,7 +132,7 @@ class ShareRepository extends StatelessWidget {
                 child: Text(
                   element.name,
                   style: TextStyle(
-                    fontSize: 20.0
+                    fontSize: Dimensions.fontAverage
                   ),
                 )
               );
@@ -164,7 +164,7 @@ class ShareRepository extends StatelessWidget {
         Fields.constrainedText(
           value as String,
           flex: 0,
-          size: 15.0,
+          fontSize: Dimensions.fontSmall,
           fontWeight: FontWeight.normal,
           color: Colors.black54
         )
@@ -188,7 +188,6 @@ class ShareRepository extends StatelessWidget {
           builder:(context, value, child) => 
             Fields.constrainedText(
               value as String,
-              size: 20.0,
               softWrap: false,
               textOverflow: TextOverflow.ellipsis,
               color: Colors.black

@@ -118,7 +118,6 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         SizedBox(width: 10.0),
         Fields.constrainedText(
           _repositoryName,
-          size: 20.0,
           softWrap: false,
           textOverflow: TextOverflow.fade,
           color: iconColor

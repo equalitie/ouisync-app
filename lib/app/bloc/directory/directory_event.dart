@@ -104,28 +104,29 @@ class NavigateTo extends DirectoryEvent {
   ];
 } 
 
-class CreateFile extends DirectoryEvent {
-  const CreateFile({
+class SaveFile extends DirectoryEvent {
+  const SaveFile({
     required this.repository,
-    required this.parentPath,
     required this.newFilePath,
+    required this.fileName,
+    required this.length,
     required this.fileByteStream
-  }) :
-  assert (newFilePath != '');
+  });
 
   final Repository repository;
-  final String parentPath;
   final String newFilePath;
+  final String fileName;
+  final int length;
   final Stream<List<int>> fileByteStream;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
     repository,
-    parentPath,
     newFilePath,
+    fileName,
+    length,
     fileByteStream
   ];
-  
 }
 
 class ReadFile extends DirectoryEvent {

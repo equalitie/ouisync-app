@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:ouisync_app/app/models/models.dart';
+
+import '../../models/models.dart';
+import '../../utils/utils.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({
@@ -25,7 +27,7 @@ class FolderDescription extends StatelessWidget {
         folderData.name,
         style: const TextStyle(
           fontWeight: FontWeight.w500,
-          fontSize: 16.0,
+          fontSize: Dimensions.fontAverage,
         ),
       ),
     ];
