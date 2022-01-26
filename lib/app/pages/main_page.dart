@@ -535,8 +535,6 @@ class _MainPageState extends State<MainPage>
         Fields.inPageButton(
           onPressed: actionReload,
           text: Strings.actionReloadContents,
-          size: Size(100.0, 40.0),
-          fontSize: 16.0,
           autofocus: true
         )
       ],
@@ -562,16 +560,14 @@ class _MainPageState extends State<MainPage>
         Fields.inPageButton(
           onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
           text: Strings.actionCreateRepository,
-          size: Size(250.0, 40.0),
-          fontSize: 16.0,
+          size: Dimensions.sizeInPageButtonLong,
           autofocus: true
         ),
         SizedBox(height: 20.0),
         Fields.inPageButton(
           onPressed: () => addRepoWithTokenDialog(BlocProvider.of<RepositoriesCubit>(context)),
           text: Strings.actionAddRepositoryWithToken,
-          size: Size(250.0, 40.0),
-          fontSize: 16.0
+          size: Dimensions.sizeInPageButtonLong,
         ),
       ],
     );
@@ -802,9 +798,9 @@ class _MainPageState extends State<MainPage>
       }
     );
 
-  PersistentBottomSheetController _showSaveSharedMedia({
+  PersistentBottomSheetController? _showSaveSharedMedia({
     required List<SharedMediaFile> sharedMedia
-  }) => _scaffoldKey.currentState!.showBottomSheet(
+  }) => _scaffoldKey.currentState?.showBottomSheet(
     (context) {
       return SaveSharedMedia(
         sharedMedia: sharedMedia,
