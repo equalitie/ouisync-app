@@ -24,6 +24,108 @@ class SyncingInProgress extends DirectoryState {
   ];
 }
 
+class CreateFileDone extends DirectoryState {
+  const CreateFileDone({
+    required this.fileName,
+    required this.path,
+    required this.extension
+  });
+
+  final String fileName;
+  final String path;
+  final String extension;
+
+  @override
+  List<Object> get props => [
+    fileName,
+    path,
+    extension
+  ];
+}
+
+class CreateFileFailure extends DirectoryState {
+  const CreateFileFailure({
+    required this.filePath,
+    required this.fileName,
+    required this.length,
+    required this.error
+  });
+
+  final String filePath;
+  final String fileName;
+  final int length;
+  final String error;
+
+  @override
+  List<Object> get props => [
+    filePath,
+    fileName,
+    length,
+    error
+  ];
+}
+
+class WriteToFileInProgress extends DirectoryState {
+  const WriteToFileInProgress({
+    required this.path,
+    required this.fileName,
+    required this.length
+    
+  });
+
+  final String path;
+  final String fileName;
+  final int length;
+
+  @override
+  List<Object> get props => [
+    path,
+    fileName,
+    length
+  ];
+}
+
+class WriteToFileDone extends DirectoryState {
+  const WriteToFileDone({
+    required this.filePath,
+    required this.fileName,
+    required this.length
+  });
+
+  final String filePath;
+  final String fileName;
+  final int length;
+
+  @override
+  List<Object> get props => [
+    filePath,
+    fileName,
+    length
+  ];
+}
+
+class WriteToFileFailure extends DirectoryState {
+  const WriteToFileFailure({
+    required this.filePath,
+    required this.fileName,
+    required this.length,
+    required this.error
+  });
+
+  final String filePath;
+  final String error;
+  final String fileName;
+  final int length;
+
+  @override
+  List<Object> get props => [
+    filePath,
+    fileName,
+    length,
+    error
+  ];
+}
+
 class DirectoryLoadInProgress extends DirectoryState {
   const DirectoryLoadInProgress({
     this.isSyncing = false
