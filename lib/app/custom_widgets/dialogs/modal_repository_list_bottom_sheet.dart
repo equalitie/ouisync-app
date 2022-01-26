@@ -115,6 +115,8 @@ class RepositoryList extends StatelessWidget {
 
           this.cubit.openRepository(name: repositoryName, password: storagedPassword);
           updateDefaultRepositorySetting(repositoryName);
+
+          Navigator.of(context).pop();
         },
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
