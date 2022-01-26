@@ -43,12 +43,6 @@ class EntryInfo {
   } 
 
   Future<int> fileLength(String path) async {
-    final type = await _repository.type(path);
-    if (type != EntryType.file) {
-      print('File length: $path is not a file.');
-      return -1;
-    }
-
     File? file;
     int length = 0;
     try {
@@ -56,11 +50,10 @@ class EntryInfo {
       length = await file.length;
     } catch (e) {
       print('Error getting the length for file $path:\n${e.toString()}');
+      length = -1;
     }
 
-    if (file != null) {
-      await file.close(); 
-    }
+    await file?.close();
     
     return length;
   }
