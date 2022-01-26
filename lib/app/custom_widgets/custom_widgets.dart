@@ -1,7 +1,7 @@
-export 'bars/app_branding.dart';
+export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repository_picker.dart';
-export 'bars/navigation_bar.dart';
+export 'bars/repositories_bar.dart';
 export 'bars/search_bar.dart';
 
 export 'dialogs/actions_dialog.dart';

@@ -301,37 +301,42 @@ class _MainPageState extends State<MainPage>
     }
 
     _buildOuiSyncBar({required Repository? repository}) => OuiSyncBar(
-      appBranding: AppBranding(appName: Strings.titleApp),
-      centralWidget: Container(), //SearchBar(), |removed until implemented
-      actions: [
-        Padding(
-          padding: EdgeInsets.only(right: 10.0),
-          child: Fields.actionIcon(
-            icon: Icons.settings_outlined,
-            onTap: () async {
-              bool dhtStatus = await repository?.isDhtEnabled() ?? false;
-              
-              settingsAction(
-                BlocProvider.of<RepositoriesCubit>(context),
-                BlocProvider.of<SynchronizationCubit>(context),
-                dhtStatus
-              );
-            },
-            size: 35.0,
-            color: Theme.of(context).colorScheme.surface
-          ),
-        )
-      ],
-      bottom: CustomNavigationBar(
-        repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
-        synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
-        onRepositorySelect: switchRepository,
-        shareRepositoryOnTap: shareRepository,
-      ),
-      mode: BarMode.full,
-      toolbarHeight: 200.0,
-      preferredSize: Size.fromHeight(200.0)
+      leadingAppBranding: null,
+      titleCentralWidget: _buildRepositoriesBar(),
+      actionList: _buildActionList(repository),
+      bottomWidget: FolderNavigationBar(),
+      bottomPreferredSize: Size.fromHeight(140.0),
+      toolbarHeight: 90.0,
     );
+
+    RepositoriesBar _buildRepositoriesBar() {
+      return RepositoriesBar(
+      repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+      synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
+      onRepositorySelect: switchRepository,
+      shareRepositoryOnTap: shareRepository,
+    );
+    }
+
+    List<Widget> _buildActionList(Repository? repository) => [
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+        child: Fields.actionIcon(
+          icon: Icons.settings_outlined,
+          onTap: () async {
+            bool dhtStatus = await repository?.isDhtEnabled() ?? false;
+            
+            settingsAction(
+              BlocProvider.of<RepositoriesCubit>(context),
+              BlocProvider.of<SynchronizationCubit>(context),
+              dhtStatus
+            );
+          },
+          size: 35.0,
+          color: Theme.of(context).colorScheme.surface
+        ),
+      )
+    ];
 
     StatelessWidget _buildFAB(BuildContext context,
     {

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/blocs.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
-import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
-class CustomNavigationBar extends StatefulWidget {
-  const CustomNavigationBar({
+class RepositoriesBar extends StatefulWidget {
+  const RepositoriesBar({
     required this.repositoriesCubit,
     required this.synchronizationCubit,
     required this.onRepositorySelect,
@@ -21,34 +18,13 @@ class CustomNavigationBar extends StatefulWidget {
   final ShareRepositoryCallback shareRepositoryOnTap;
 
   @override
-  State<CustomNavigationBar> createState() => _CustomNavigationBarState();
+  State<RepositoriesBar> createState() => _RepositoriesBarState();
 }
 
-class _CustomNavigationBarState extends State<CustomNavigationBar> with TickerProviderStateMixin {
+class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RouteBloc, RouteState>(
-      builder: (context, state) {
-        if (state is RouteLoadSuccess) {
-          return _buildBar(state.route);
-        }
-
-        return _buildBar(Text(''));
-      }
-    );
-  }
-
-  _buildBar(route) {
-    return Column(
-      children: [
-        _repositoriesBar(),
-        Fields.routeBar(route: route),
-      ],
-    );
-  }
-
-  Container _repositoriesBar() {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.transparent,
@@ -56,7 +32,7 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> with TickerPr
           top: BorderSide(width: 1.0, color: Colors.transparent, style: BorderStyle.solid),
         ),
       ),
-      padding: EdgeInsets.only(right: 10.0, left: 10.0, bottom: 10.0),
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
       child: Row(
         children: [
           _repositoryPicker(),
