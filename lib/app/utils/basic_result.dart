@@ -39,7 +39,7 @@ class CreateFileResult extends BasicResult {
   );
 
   final String functionName;
-  final File? result;
+  final int? result; // File.handle
 }
 
 class WriteFileResult extends BasicResult {
@@ -52,7 +52,7 @@ class WriteFileResult extends BasicResult {
   );
 
   final String functionName;
-  final File? result;
+  final int result; //File.length
 }
 
 class   GetContentResult extends BasicResult {
