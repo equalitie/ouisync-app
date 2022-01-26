@@ -281,45 +281,4 @@ class _FolderDetailState extends State<FolderDetail> {
 
     widget.onBottomSheetOpen.call(controller!, path);
   }
-
-  Widget _buildSyncStatus() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Fields.idLabel(
-          Strings.labelSyncStatus,
-          size: 20.0
-        ),
-        Container(
-          height: 60.0,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.green.shade100,
-            border: Border.all(
-              color: Colors.green.shade600,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.check
-                ),
-                Text(
-                  Strings.statusSync,
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold
-                  ),
-                )
-              ],
-            ),
-          ),
-        )
-      ],
-    );
-  }
 }
