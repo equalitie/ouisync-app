@@ -905,6 +905,8 @@ class _MainPageState extends State<MainPage>
         fileByteStream: fileByteStream
       )
     );
+
+    Navigator.of(context).pop();
   }
 
   Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
