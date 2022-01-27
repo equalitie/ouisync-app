@@ -68,9 +68,7 @@ class ShareRepository extends StatelessWidget {
     required AccessMode accessMode
   }) async {
     final shareToken = await repo.createShareToken(accessMode: accessMode, name: name);
-    print('Token for sharing repository $name: $shareToken (${accessMode.name})');
-
-    return shareToken;
+    return shareToken.token;
   }
 
   Widget _shareCodeDetails(BuildContext context, String repositoryName, String token) {
