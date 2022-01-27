@@ -59,7 +59,7 @@ class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderSt
       onTap: widget.shareRepositoryOnTap,
       child: const Icon(
         Icons.share_outlined,
-        size: 40.0,
+        size: 30.0,
         color: Colors.white,
       ),
     );

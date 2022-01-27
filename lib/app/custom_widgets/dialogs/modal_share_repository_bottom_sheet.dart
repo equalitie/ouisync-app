@@ -92,7 +92,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
             icon: Icons.lock_rounded,
             text: Strings.iconAccessMode,
             textAlign: TextAlign.start,
-            iconSize: 40.0
+            iconSize: 30.0
           ),
           _buildAccessModeDropdown(),
           SizedBox(height: 10.0,),
@@ -102,7 +102,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
             icon: Icons.supervisor_account_rounded,
             text: Strings.iconShareTokenWithPeer  ,
             textAlign: TextAlign.start,
-            iconSize: 40.0
+            iconSize: 30.0
           ),
           _buildShareBox()
         ]

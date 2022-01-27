@@ -29,7 +29,7 @@ class Strings {
   static const String messageOoops = 'Oooops...';
   static const String mesageLoading = 'Loading...';
 
-  static const String messageAccessModeBlind = 'Your peer can\'t write or read the contents.';
+  static const String messageAccessModeBlind = 'Your peer can\'t write nor read the contents.';
   static const String messageAccessModeRead = 'Can\'t be modified, just access the contents.';
   static const String messageAccessModeWrite = 'Full access. Your peer can read and write.';
 
@@ -66,7 +66,7 @@ class Strings {
   static const String titleDeleteFolder = 'Delete Folder';
   static const String titleDeleteNotEmptyFolder = 'Delete not Empty Folder';
   static const String titleRepositoriesList = 'Your Repositories';
-  static const String titleShareRepository = 'Share [name]';
+  static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete File';
 
   static const String labelRepositoryToken = 'Repository token: ';

@@ -274,7 +274,7 @@ class _MainPageState extends State<MainPage>
       titleCentralWidget: _buildRepositoriesBar(),
       actionList: _buildActionList(repository),
       bottomWidget: FolderNavigationBar(),
-      bottomPreferredSize: Size.fromHeight(140.0),
+      bottomPreferredSize: Size.fromHeight(120.0),
       toolbarHeight: 90.0,
     );
 
@@ -301,7 +301,7 @@ class _MainPageState extends State<MainPage>
               dhtStatus
             );
           },
-          size: 35.0,
+          size: 30.0,
           color: Theme.of(context).colorScheme.surface
         ),
       )
