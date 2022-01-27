@@ -84,6 +84,7 @@ class Strings {
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
   static const String messageRepositoryName = 'Give the repo a name';
+  static const String messageRepositoryAccessMode = 'Access mode granted: [access]';
   static const String messageRepositorySuggestedName = 'Suggested: [name]\n'
   '(tap here for using this name)';
   static const String messageRepositoryPassword = 'Repository password';
@@ -118,6 +119,7 @@ class Strings {
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
   static const String replacementEntry = '[entry]';
+  static const String replacementAccess = '[access]';
 
   static const String statusSync = 'SYNCED';
 
