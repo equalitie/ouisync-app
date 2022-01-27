@@ -18,17 +18,17 @@ class ShareRepository extends StatefulWidget {
 }
 
 class _ShareRepositoryState extends State<ShareRepository> {
-  ValueNotifier<int> _accessMode =
-    ValueNotifier<int>(AccessMode.blind.index);
+  ValueNotifier<AccessMode> _accessMode =
+    ValueNotifier<AccessMode>(AccessMode.blind);
 
   final ValueNotifier<String> _shareToken =
     ValueNotifier<String>(Strings.messageError);
 
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) {
     return FutureBuilder<String>(
       initialData: '',
-      future: createShareToken(repo: widget.repository, name: widget.repositoryName, accessMode: AccessMode.values[_accessMode.value]),
+      future: createShareToken(repo: widget.repository, name: widget.repositoryName, accessMode: _accessMode.value),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           _shareToken.value = Strings.messageAck;
@@ -51,7 +51,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
                 _shareCodeDetails(context, widget.repositoryName, snapshot.data!),
               ],
             ),
-          );  
+          );
         }
 
         _shareToken.value = Strings.messageCreatingToken;
@@ -62,7 +62,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
           child: CircularProgressIndicator(strokeWidth: 2.0,)
         );
       }
-    ); 
+    );
   }
 
   Future<String> createShareToken({
@@ -124,14 +124,14 @@ class _ShareRepositoryState extends State<ShareRepository> {
       ),
       child: ValueListenableBuilder(
         valueListenable: _accessMode,
-        builder:(context, value, child) => 
+        builder:(context, value, child) =>
           DropdownButton(
             isExpanded: true,
             value: value,
             underline: SizedBox(),
             items: AccessMode.values.map((AccessMode element) {
               return DropdownMenuItem(
-                value: element.index,
+                value: element,
                 child: Text(
                   element.name,
                   style: TextStyle(
@@ -140,15 +140,14 @@ class _ShareRepositoryState extends State<ShareRepository> {
                 )
               );
             }).toList(),
-            onChanged: (index) async {
-              final accessModeName =  AccessMode.values[index as int];
-              print('Access mode: $accessModeName');
-              _accessMode.value = index;
+            onChanged: (accessMode) async {
+              print('Access mode: $accessMode');
+              _accessMode.value = accessMode as AccessMode;
 
               final token = await createShareToken(
                 repo: widget.repository,
                 name: widget.repositoryName,
-                accessMode: AccessMode.values[index]
+                accessMode: accessMode
               );
 
               _shareToken.value = token;
@@ -161,9 +160,9 @@ class _ShareRepositoryState extends State<ShareRepository> {
   Widget _buildAccessModeDescription() =>
     ValueListenableBuilder(
       valueListenable: _accessMode,
-      builder:(context, value, child) => 
+      builder:(context, accessMode, child) =>
         Fields.constrainedText(
-          _tokenDescription(value as int),
+          _tokenDescription(accessMode as AccessMode),
           flex: 0,
           fontSize: Dimensions.fontSmall,
           fontWeight: FontWeight.normal,
@@ -186,7 +185,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
       children: [
         ValueListenableBuilder(
           valueListenable: _shareToken,
-          builder:(context, value, child) => 
+          builder:(context, value, child) =>
             Fields.constrainedText(
               value as String,
               softWrap: false,
@@ -219,7 +218,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
     );
   }
 
-  String _tokenDescription(int index) {
-    return Constants.accessModeDescriptions.values.elementAt(index);
+  String _tokenDescription(AccessMode accessMode) {
+    return Constants.accessModeDescriptions.values.elementAt(accessMode.index);
   }
 }
