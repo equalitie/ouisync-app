@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../utils/utils.dart';
 
-class ShareRepository extends StatelessWidget {
+class ShareRepository extends StatefulWidget {
   ShareRepository({
     required this.repository,
     required this.repositoryName
@@ -13,19 +13,22 @@ class ShareRepository extends StatelessWidget {
   final Repository repository;
   final String repositoryName;
 
-  final ValueNotifier<int> _accessMode = 
-    ValueNotifier<int>(AccessMode.blind.index);
-  final ValueNotifier<String> _accessModeDescription = 
-    ValueNotifier<String>(Constants.accessModeDescriptions[AccessMode.blind]!);
+  @override
+  State<StatefulWidget> createState() => _ShareRepositoryState();
+}
+
+class _ShareRepositoryState extends State<ShareRepository> {
+  ValueNotifier<AccessMode> _accessMode =
+    ValueNotifier<AccessMode>(AccessMode.blind);
 
   final ValueNotifier<String> _shareToken =
     ValueNotifier<String>(Strings.messageError);
 
   @override
-  Widget build(BuildContext context) {   
+  Widget build(BuildContext context) {
     return FutureBuilder<String>(
       initialData: '',
-      future: createShareToken(repo: this.repository, name: this.repositoryName, accessMode: AccessMode.blind),
+      future: createShareToken(repo: widget.repository, name: widget.repositoryName, accessMode: _accessMode.value),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           _shareToken.value = Strings.messageAck;
@@ -45,10 +48,10 @@ class ShareRepository extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.bottomSheetHandle(context),
-                _shareCodeDetails(context, this.repositoryName, snapshot.data!),
+                _shareCodeDetails(context, widget.repositoryName, snapshot.data!),
               ],
             ),
-          );  
+          );
         }
 
         _shareToken.value = Strings.messageCreatingToken;
@@ -59,7 +62,7 @@ class ShareRepository extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2.0,)
         );
       }
-    ); 
+    );
   }
 
   Future<String> createShareToken({
@@ -68,6 +71,8 @@ class ShareRepository extends StatelessWidget {
     required AccessMode accessMode
   }) async {
     final shareToken = await repo.createShareToken(accessMode: accessMode, name: name);
+    // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
+    //print('Token for sharing repository $name: $shareToken (${accessMode.name})');
     return shareToken.token;
   }
 
@@ -119,14 +124,14 @@ class ShareRepository extends StatelessWidget {
       ),
       child: ValueListenableBuilder(
         valueListenable: _accessMode,
-        builder:(context, value, child) => 
+        builder:(context, value, child) =>
           DropdownButton(
             isExpanded: true,
             value: value,
             underline: SizedBox(),
             items: AccessMode.values.map((AccessMode element) {
               return DropdownMenuItem(
-                value: element.index,
+                value: element,
                 child: Text(
                   element.name,
                   style: TextStyle(
@@ -135,17 +140,14 @@ class ShareRepository extends StatelessWidget {
                 )
               );
             }).toList(),
-            onChanged: (index) async {
-              final accessModeName =  AccessMode.values[index as int];
-              print('Access mode: $accessModeName');
-              _accessMode.value = index;
-              _accessModeDescription.value = 
-                Constants.accessModeDescriptions.values.elementAt(index);
+            onChanged: (accessMode) async {
+              print('Access mode: $accessMode');
+              _accessMode.value = accessMode as AccessMode;
 
               final token = await createShareToken(
-                repo: this.repository,
-                name: this.repositoryName,
-                accessMode: AccessMode.values[index]
+                repo: widget.repository,
+                name: widget.repositoryName,
+                accessMode: accessMode
               );
 
               _shareToken.value = token;
@@ -157,10 +159,10 @@ class ShareRepository extends StatelessWidget {
 
   Widget _buildAccessModeDescription() =>
     ValueListenableBuilder(
-      valueListenable: _accessModeDescription,
-      builder:(context, value, child) => 
+      valueListenable: _accessMode,
+      builder:(context, accessMode, child) =>
         Fields.constrainedText(
-          value as String,
+          _tokenDescription(accessMode as AccessMode),
           flex: 0,
           fontSize: Dimensions.fontSmall,
           fontWeight: FontWeight.normal,
@@ -183,7 +185,7 @@ class ShareRepository extends StatelessWidget {
       children: [
         ValueListenableBuilder(
           valueListenable: _shareToken,
-          builder:(context, value, child) => 
+          builder:(context, value, child) =>
             Fields.constrainedText(
               value as String,
               softWrap: false,
@@ -214,5 +216,9 @@ class ShareRepository extends StatelessWidget {
       icon: const Icon(Icons.share_outlined),
       iconSize: 30.0,
     );
+  }
+
+  String _tokenDescription(AccessMode accessMode) {
+    return Constants.accessModeDescriptions.values.elementAt(accessMode.index);
   }
 }
