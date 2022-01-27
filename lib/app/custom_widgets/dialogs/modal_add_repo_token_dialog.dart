@@ -22,9 +22,13 @@ class AddRepositoryWithToken extends StatefulWidget {
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
+  final TextEditingController _tokenController = TextEditingController(text: null);
   final TextEditingController _nameController = TextEditingController(text: null);
   final TextEditingController _passwordController = new TextEditingController(text: null);
   final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
+
+  ValueNotifier _accessModeNotifier = ValueNotifier<String>('');
+  bool _showAccessModeMessage = false;
 
   String _suggestedName = '';
   bool _showSuggestedName = false;
@@ -65,6 +69,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         children: [
           Fields.formTextField(
             context: context,
+            textEditingController: _tokenController,
             label: Strings.labelRepositoryToken,
             hint: Strings.messageRepositoryToken,
             onSaved: (value) {},
@@ -72,7 +77,21 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             autofocus: true,
             onChanged: _onTokenChanged
           ),
-          SizedBox(height: 20.0,),
+          ValueListenableBuilder(
+            valueListenable: _accessModeNotifier,
+            builder: (context, message, child) => 
+              Visibility(
+                visible: _showAccessModeMessage,
+                child: Fields.constrainedText(
+                    Strings.messageRepositoryAccessMode
+                    .replaceAll(Strings.replacementAccess, message as String? ?? '?'),
+                    flex: 0,
+                    fontSize: Dimensions.fontSmall,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black54
+                  )
+              )
+          ),
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,
@@ -150,31 +169,51 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
   _onTokenChanged(value) {
     if (value.isEmpty) {
+      cleanupFormOnEmptyToken();
       return;
     }
 
-    bool showSuggestedNameSection = false;
+    _tokenController.selection = TextSelection.collapsed(offset: 0);
 
+    ShareToken? shareToken;
     try {
-      final shareToken = ShareToken(this.widget.cubit.session, value);
-      _suggestedName = shareToken.suggestedName; 
-
-      if (_suggestedName.isNotEmpty) {
-        _repoName = _suggestedName;
-        showSuggestedNameSection = true;  
-      }
+      shareToken = ShareToken(this.widget.cubit.session, value);
     } catch (e) {
       print('Error extracting the repository token:\n${e.toString()}');                
       showToast(Strings.messageErrorTokenInvalid);
 
+      cleanupFormOnEmptyToken();
+    }
+
+    if (shareToken == null) {
+      return;
+    }
+
+    _suggestedName = shareToken.suggestedName; 
+    _accessModeNotifier.value = shareToken.mode.name;
+
+    if (_suggestedName.isNotEmpty) {
+      _repoName = _suggestedName;
+    }
+
+    setState(() { 
+      _showSuggestedName = _suggestedName.isNotEmpty; 
+      _showAccessModeMessage = _accessModeNotifier.value.toString().isNotEmpty;
+    });
+  }
+
+  void cleanupFormOnEmptyToken() {
+    setState(() { 
+        _showSuggestedName = false; 
+        _showAccessModeMessage = false;
+      });
+
       _suggestedName = '';
       _repoName = '';
 
-      _updateNameController(null);
-      showSuggestedNameSection = false;
-    }
+      _accessModeNotifier.value = '';
 
-    setState(() { _showSuggestedName = showSuggestedNameSection; });
+      _updateNameController(null);
   }
 
   String? _repositoryTokenValidator(String? value, { String error = Strings.messageErrorTokenValidator}) {
@@ -184,9 +223,13 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
     try {
       final shareToken = ShareToken(this.widget.cubit.session, value!);
+      
       _suggestedName = shareToken.suggestedName;
+      _accessModeNotifier.value = shareToken.mode.name;
     } catch (e) {
       _suggestedName = '';
+      _accessModeNotifier.value = '';
+
       return error;
     }
 
