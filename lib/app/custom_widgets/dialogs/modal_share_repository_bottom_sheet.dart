@@ -21,9 +21,6 @@ class _ShareRepositoryState extends State<ShareRepository> {
   ValueNotifier<int> _accessMode =
     ValueNotifier<int>(AccessMode.blind.index);
 
-  final ValueNotifier<String> _accessModeDescription = 
-    ValueNotifier<String>(Constants.accessModeDescriptions[AccessMode.blind]!);
-
   final ValueNotifier<String> _shareToken =
     ValueNotifier<String>(Strings.messageError);
 
@@ -147,8 +144,6 @@ class _ShareRepositoryState extends State<ShareRepository> {
               final accessModeName =  AccessMode.values[index as int];
               print('Access mode: $accessModeName');
               _accessMode.value = index;
-              _accessModeDescription.value = 
-                Constants.accessModeDescriptions.values.elementAt(index);
 
               final token = await createShareToken(
                 repo: widget.repository,
@@ -165,10 +160,10 @@ class _ShareRepositoryState extends State<ShareRepository> {
 
   Widget _buildAccessModeDescription() =>
     ValueListenableBuilder(
-      valueListenable: _accessModeDescription,
+      valueListenable: _accessMode,
       builder:(context, value, child) => 
         Fields.constrainedText(
-          value as String,
+          _tokenDescription(value as int),
           flex: 0,
           fontSize: Dimensions.fontSmall,
           fontWeight: FontWeight.normal,
@@ -222,5 +217,9 @@ class _ShareRepositoryState extends State<ShareRepository> {
       icon: const Icon(Icons.share_outlined),
       iconSize: 30.0,
     );
+  }
+
+  String _tokenDescription(int index) {
+    return Constants.accessModeDescriptions.values.elementAt(index);
   }
 }
