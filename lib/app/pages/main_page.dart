@@ -301,7 +301,7 @@ class _MainPageState extends State<MainPage>
               dhtStatus
             );
           },
-          size: 30.0,
+          size: 25.0,
           color: Theme.of(context).colorScheme.surface
         ),
       )

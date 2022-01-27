@@ -102,9 +102,9 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   _buildState(borderColor, iconColor) => Container(
-    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+    padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderRadius: BorderRadius.all(Radius.circular(5.0)),
       border: Border.all(
         color: borderColor,
         width: 1.0,
@@ -131,7 +131,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   Icon _repositoryIcon(color) {
     return Icon(
       Icons.cloud_outlined,
-      size: 30.0,
+      size: 20.0,
       color: color,
     );
   }
@@ -142,7 +142,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       flex: 0,
       child: SyncWidget(cubit: syncCubit)
     )
-    : Container(height: 35.0,);
+    : Container(height: 20.0,);
   }
 
   Widget _actionsSection() {
