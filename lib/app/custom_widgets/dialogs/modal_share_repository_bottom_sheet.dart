@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../utils/utils.dart';
 
-class ShareRepository extends StatelessWidget {
+class ShareRepository extends StatefulWidget {
   ShareRepository({
     required this.repository,
     required this.repositoryName
@@ -13,8 +13,14 @@ class ShareRepository extends StatelessWidget {
   final Repository repository;
   final String repositoryName;
 
-  final ValueNotifier<int> _accessMode = 
+  @override
+  State<StatefulWidget> createState() => _ShareRepositoryState();
+}
+
+class _ShareRepositoryState extends State<ShareRepository> {
+  ValueNotifier<int> _accessMode =
     ValueNotifier<int>(AccessMode.blind.index);
+
   final ValueNotifier<String> _accessModeDescription = 
     ValueNotifier<String>(Constants.accessModeDescriptions[AccessMode.blind]!);
 
@@ -25,7 +31,7 @@ class ShareRepository extends StatelessWidget {
   Widget build(BuildContext context) {   
     return FutureBuilder<String>(
       initialData: '',
-      future: createShareToken(repo: this.repository, name: this.repositoryName, accessMode: AccessMode.blind),
+      future: createShareToken(repo: widget.repository, name: widget.repositoryName, accessMode: AccessMode.values[_accessMode.value]),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           _shareToken.value = Strings.messageAck;
@@ -45,7 +51,7 @@ class ShareRepository extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.bottomSheetHandle(context),
-                _shareCodeDetails(context, this.repositoryName, snapshot.data!),
+                _shareCodeDetails(context, widget.repositoryName, snapshot.data!),
               ],
             ),
           );  
@@ -68,6 +74,8 @@ class ShareRepository extends StatelessWidget {
     required AccessMode accessMode
   }) async {
     final shareToken = await repo.createShareToken(accessMode: accessMode, name: name);
+    // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
+    //print('Token for sharing repository $name: $shareToken (${accessMode.name})');
     return shareToken.token;
   }
 
@@ -143,8 +151,8 @@ class ShareRepository extends StatelessWidget {
                 Constants.accessModeDescriptions.values.elementAt(index);
 
               final token = await createShareToken(
-                repo: this.repository,
-                name: this.repositoryName,
+                repo: widget.repository,
+                name: widget.repositoryName,
                 accessMode: AccessMode.values[index]
               );
 
