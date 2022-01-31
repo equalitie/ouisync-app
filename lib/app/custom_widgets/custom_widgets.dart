@@ -20,5 +20,6 @@ export 'dialogs/saving_file_overlay.dart';
 
 export 'items/file_description.dart';
 export 'items/folder_description.dart';
+export 'items/labeled_switch.dart';
 export 'items/list_item.dart';
 export 'items/sync_widget.dart';

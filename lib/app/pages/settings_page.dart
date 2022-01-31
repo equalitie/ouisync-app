@@ -46,31 +46,33 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _settingBody()
-    );
-  }
+      body: Container(
+        padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildRepositoriesSection(),
+            const Divider(
+              height: 20.0,
+              thickness: 1.0,
 
-  Widget _settingBody() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildRepositoriesSection(),
-          const Divider(
-            height: 20.0,
-            thickness: 1.0,
-
-          ),
-          _buildDhtSection(),
-        ],
-      ),
+            ),
+            LabeledSwitch(
+              label: Strings.labelBitTorrentDHT,
+              padding: const EdgeInsets.all(0.0),
+              value: _bittorrentDhtStatus,
+              onChanged: updateDhtSetting,
+            )
+          ],
+        )
+      )
     );
   }
 
   Widget _buildRepositoriesSection() {
-    return Container(
-      child: Column(
+    return Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Fields.iconText(
@@ -107,17 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
             )
           ),
         ]
-      )
-    );
-  }
-
-  Widget _buildDhtSection() {
-    return SwitchListTile(
-      title: Fields.constrainedText(Strings.labelBitTorrentDHT),
-      value: _bittorrentDhtStatus,
-      onChanged: (bool value) {
-        updateDhtSetting(value);
-      },
+      
     );
   }
 
