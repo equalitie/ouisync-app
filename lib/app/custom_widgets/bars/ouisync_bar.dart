@@ -20,6 +20,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       toolbarHeight: toolbarHeight,
       shadowColor: Colors.black26,
       leading: leadingAppBranding,
