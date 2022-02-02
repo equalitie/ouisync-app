@@ -3,19 +3,25 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 
 import '../../cubit/cubits.dart';
+import '../../pages/pages.dart';
+import '../../services/services.dart';
 import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
 class RepositoryList extends StatelessWidget {
-  const RepositoryList({
+  RepositoryList({
     required this.context,
     required this.cubit,
     required this.current,
+    required this.onRepositorySelect
   });
 
   final BuildContext context;
   final RepositoriesCubit cubit;
   final String current;
+  final RepositoryCallback onRepositorySelect;
+
+  final RepositoriesService repositoriesSession = RepositoriesService();
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +115,19 @@ class RepositoryList extends StatelessWidget {
       : FontWeight.normal;
 
       return GestureDetector(
-        onTap: () async {
+        onTap: () { 
           final repositoryName = repositories[index];
-          final storagedPassword = await Auth.getPassword(repositoryName);
+          final repository = repositoriesSession.repositories[repositoryName];
 
-          this.cubit.openRepository(name: repositoryName, password: storagedPassword);
+          if(repository != null) {
+            this.cubit
+            .selectRepository(
+              repository,
+              repositoryName
+            );    
+          }
+
+          this.onRepositorySelect.call(repository, repositoryName); 
           updateDefaultRepositorySetting(repositoryName);
 
           Navigator.of(context).pop();
