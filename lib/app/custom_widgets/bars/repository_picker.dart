@@ -77,15 +77,15 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     return BlocConsumer(
       bloc: widget.repositoriesCubit,
       builder: (context, state) {
-        if (state is RepositoriesInitial) {
+        if (state is RepositoryPickerInitial) {
           return _buildState(widget.borderColor, Colors.grey);
         }
 
-        if (state is RepositoriesLoading) {
+        if (state is RepositoryPickerLoading) {
           return Column(children: [CircularProgressIndicator(color: Colors.white)],);
         }
 
-        if (state is RepositoriesSelection) {
+        if (state is RepositoryPickerSelection) {
           return _buildState(widget.borderColor, Colors.black);
         }
 
@@ -96,7 +96,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         return Container(child: Text(Strings.messageOoops),);
       },
       listener: (context, state) {
-        if (state is RepositoriesSelection) {
+        if (state is RepositoryPickerSelection) {
           updateCurrentRepository(state.repository, state.name);
         }
       },

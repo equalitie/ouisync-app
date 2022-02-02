@@ -6,19 +6,19 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 part 'repositories_state.dart';
 
-class RepositoriesCubit extends Cubit<RepositoriesState> {
+class RepositoriesCubit extends Cubit<RepositoryPickerState> {
   RepositoriesCubit({
     required this.session,
     required this.appDir,
     required this.repositoriesDir
-  }) : super(RepositoriesInitial());
+  }) : super(RepositoryPickerInitial());
 
   final Session session;
   final String appDir;
   final String repositoriesDir;
 
   void openRepository({required String name, String? password}) async {
-    emit(RepositoriesLoading());
+    emit(RepositoryPickerLoading());
     await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
 
     final store = _buildStoreString(name);
@@ -26,7 +26,7 @@ class RepositoriesCubit extends Cubit<RepositoriesState> {
     
     try {
       final repository = await _getRepository(store: store, password: password, exist: storeExist);
-      emit(RepositoriesSelection(
+      emit(RepositoryPickerSelection(
         repository: repository,
         name: name
       ));
@@ -37,15 +37,15 @@ class RepositoriesCubit extends Cubit<RepositoriesState> {
   }
 
   void selectRepository(Repository? repository, String name) async {
-    emit(RepositoriesLoading());
+    emit(RepositoryPickerLoading());
     await Future.delayed(Duration(milliseconds: 500));// TODO: Delay to allow the loading animation to show. Remove if not other use.
 
-    if (repository == null) {
-      emit(RepositoriesInitial());
+    if (name.isEmpty) {
+      emit(RepositoryPickerInitial());
       return;
     }
 
-    emit(RepositoriesSelection(
+    emit(RepositoryPickerSelection(
         repository: repository,
         name: name
       ));
