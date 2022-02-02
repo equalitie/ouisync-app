@@ -65,7 +65,7 @@ class _FileDetailState extends State<FileDetail> {
           Fields.bottomSheetTitle(Strings.titleFileDetails),
           _buildPreviewButton(),
           _buildShareButton(),
-          _buildMoveFolderButton(
+          _buildMoveFileButton(
             origin: widget.parent,
             path: widget.path,
             type: EntryType.file,
@@ -137,7 +137,7 @@ class _FileDetailState extends State<FileDetail> {
         );
   }
 
-  GestureDetector _buildMoveFolderButton({
+  GestureDetector _buildMoveFileButton({
     required String origin,
     required String path,
     required EntryType type,

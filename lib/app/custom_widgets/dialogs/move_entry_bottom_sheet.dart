@@ -70,7 +70,8 @@ class MoveEntryDialog extends StatelessWidget {
             Fields.constrainedText(
               '${removeParentFromPath(path)}',
               fontSize: Dimensions.fontBig,
-              fontWeight: FontWeight.w800
+              fontWeight: FontWeight.w800,
+              textOverflow: TextOverflow.ellipsis
             ),
           ],
         );
