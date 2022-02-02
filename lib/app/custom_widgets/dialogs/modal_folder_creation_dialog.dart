@@ -63,7 +63,8 @@ class FolderCreation extends StatelessWidget {
           ),
           Fields.labeledText(
             label: Strings.labelLocation,
-            text: this.path
+            text: this.path,
+            textAlign: TextAlign.start
           ),
           Fields.actionsSection(
             context,
