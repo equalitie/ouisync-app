@@ -1,18 +1,18 @@
 part of 'repositories_cubit.dart';
 
-abstract class RepositoriesState extends Equatable {
-  const RepositoriesState();
+abstract class RepositoryPickerState extends Equatable {
+  const RepositoryPickerState();
 
   @override
   List<Object> get props => [];
 }
 
-class RepositoriesInitial extends RepositoriesState {}
+class RepositoryPickerInitial extends RepositoryPickerState {}
 
-class RepositoriesLoading extends RepositoriesState {}
+class RepositoryPickerLoading extends RepositoryPickerState {}
 
-class RepositoriesSelection extends RepositoriesState {
-  const RepositoriesSelection({
+class RepositoryPickerSelection extends RepositoryPickerState {
+  const RepositoryPickerSelection({
     this.repository,
     required this.name
   });
@@ -27,4 +27,4 @@ class RepositoriesSelection extends RepositoriesState {
   ];
 }
 
-class RepositoriesFailure extends RepositoriesState {}
+class RepositoriesFailure extends RepositoryPickerState {}
