@@ -116,7 +116,6 @@ class RepositoryCreation extends StatelessWidget {
     }
 
     this.formKey.currentState!.save();
-    Auth.setPassword(name, password);
 
     cubit.openRepository(name: name, password: password);
     Navigator.of(this.context).pop(name);

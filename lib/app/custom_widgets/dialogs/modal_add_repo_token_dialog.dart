@@ -242,7 +242,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     }
 
     widget.formKey.currentState!.save();
-    Auth.setPassword(name, password);
     
     cubit.openRepository(name: name, password: password);
     Navigator.of(this.widget.context).pop(name);
