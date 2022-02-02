@@ -51,7 +51,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     });
   }
 
-  updateCurrentRepository(repository, name) async {
+  updateCurrentRepository(Repository? repository, String name) async {
     if (name.isEmpty) {
       setState(() {
         _repositoryName = Strings.messageNoRepos;
@@ -60,11 +60,13 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       return;
     }
 
-    if (_repositoryName != name) {
-      setState(() {
-        _repository = repository;
-        _repositoryName = name;
-      });
+    setState(() {
+      _repository = repository;
+      _repositoryName = name;
+    });
+
+    if (_repository == null) {
+      return;
     }
 
     widget.onRepositorySelect.call(repository, name);
@@ -146,12 +148,12 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   Widget _actionsSection() {
-    return _repository != null
-    ? Fields.actionIcon(
+    return Fields.actionIcon(
       icon: Icons.keyboard_arrow_down_outlined,
-      onTap: () async { await _showRepositorySelector(_repositoryName); }
-    )
-    : Container();
+      onTap: () async { 
+        await _showRepositorySelector(_repositoryName); 
+      }
+    );
   }
 
   Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
@@ -170,6 +172,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         context: context,
         cubit: widget.repositoriesCubit,
         current: _repositoryName,
+        onRepositorySelect: widget.onRepositorySelect,
       );
     }
   );

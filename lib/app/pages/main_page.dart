@@ -12,10 +12,11 @@ import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
 import '../models/models.dart';
+import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-typedef RepositoryCallback = void Function(Repository repository, String name);
+typedef RepositoryCallback = void Function(Repository? repository, String name);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -40,6 +41,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin {
+
+    RepositoriesService _repositoriesSession = RepositoriesService();
 
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
@@ -67,12 +70,13 @@ class _MainPageState extends State<MainPage>
     void initState() {
       super.initState();
       
+      initMainPage();
+
       widget.intentStream
       .listen((listOfMedia) {
         _intentPayload = listOfMedia;
+        handleShareIntentPayload(widget.defaultRepositoryName, _intentPayload);
       });
-
-      initMainPage();
     }
 
     @override
@@ -89,71 +93,45 @@ class _MainPageState extends State<MainPage>
       _syncingCubit = BlocProvider
       .of<SynchronizationCubit>(context);
 
-      final repository = await initOuiSync(
-        widget.session,
-        widget.defaultRepositoryName,
-        widget.repositoriesLocation
+      initMainPageLayout(widget.defaultRepositoryName);
+    }
+
+    void initMainPageLayout(String repositoryName) {
+      switchMainState(newState:
+        repositoryName.isEmpty
+        ? _noRepositoriesState()
+        : LockedRepositoryState(
+          repositoryName: repositoryName,
+          onUnlockPressed: unlockRepositoryDialog
+        )
       );
-      
-      NativeChannels.init(repository: repository);
-
-      initMainPageLayout(repository, widget.defaultRepositoryName);
-
-      handleShareIntentPayload(repository, _intentPayload);
-    }
-
-    Future<Repository?> initOuiSync(
-      Session session,
-      String defaultRepositoryName,
-      String repositoriesLocation
-    ) async {
-      if (defaultRepositoryName.isEmpty) {
-        return null;
-      }
-
-      print('Default repository: $defaultRepositoryName');
-
-      final storagedPassword = await Auth.getPassword(defaultRepositoryName);
-
-      Repository? repository;
-      try {
-        repository = await Repository
-        .open(
-          session,
-          store: '$repositoriesLocation/$defaultRepositoryName.db',
-          password: storagedPassword
-        );
-      } catch (e) {
-        print('Exception opening a repository instance: ${e.toString()}');
-      }
-
-      print('Repository instance opened: (${repository?.handle ?? 'null'})');
-
-      return repository;
-    }
-
-    void initMainPageLayout(Repository? repository, String repositoryName) {
-      if (repository == null) {
-        switchMainState(newState: _noRepositoriesState());
-      }
 
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(
-        repository,
+        _repository,
         repositoryName
       );
     }
 
+    Future<void> unlockRepository(String repositoryName, String password) async {
+      BlocProvider
+      .of<RepositoriesCubit>(context)
+      .openRepository(
+        name: repositoryName,
+        password: password
+      );
+    }
+
     void handleShareIntentPayload(
-      Repository? repository,
+      String repositoryName,
       List<SharedMediaFile> payload
     ) {
       if (_intentPayload.isEmpty) {
         return;
       }
 
-      if (repository == null) {
+      if (repositoryName.isEmpty) {
         Fluttertoast
         .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
 
@@ -165,6 +143,7 @@ class _MainPageState extends State<MainPage>
     }
 
     switchMainState({newState}) => setState(() { _mainState = newState; });
+
     updateCurrentFolder({required String path}) => setState(() { _currentFolder = path; });
 
     getContents({
@@ -326,23 +305,28 @@ class _MainPageState extends State<MainPage>
       : Container();
     }
 
-    void switchRepository(Repository repository, String name) {
-      assert((_repository?.handle ?? 0) != repository.handle);
-
+    void switchRepository(Repository? repository, String name) {
       if (_repositorySubscription != null) {
         _repositorySubscription!.cancel();
-        print('Repository subscription closed');
-      }
+        _repositorySubscription = null;
 
-      if (_repository != null) {
-        _repository!.close();
-        print('Repository closed'); 
+        print('Repository subscription closed');
       }
 
       _repository = repository;
       _repositoryName = name;
 
-      NativeChannels.setRepository(_repository!);    
+      NativeChannels.setRepository(_repository);  
+
+      if (_repository == null) {
+        initMainPageLayout(_repositoryName);
+
+        return;
+      }
+
+      print('Saving repository: $_repositoryName');
+      _repositoriesSession.put(_repositoryName, _repository!);
+      print('Repositories in memory: ${_repositoriesSession.repositories.keys}');
 
       switchMainState(newState: _repositoryContentBuilder());
 
@@ -845,7 +829,7 @@ class _MainPageState extends State<MainPage>
         bottomRight: Radius.zero
       ),
     )
-  )!;
+  );
 
   void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
     _persistentBottomSheetController = controller;
@@ -971,6 +955,33 @@ class _MainPageState extends State<MainPage>
     ).then((addedRepository) {
       if (addedRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
         switchMainState(newState: _repositoryContentBuilder());
+      }
+    });
+  }
+
+  void unlockRepositoryDialog(String repositoryName) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: Strings.messageUnlockRepository,
+          body: UnlockRepository(
+            context: context,
+            formKey: formKey,
+            repositoryName:  repositoryName
+          ),
+        );
+      }
+    ).then((password) {
+      if (password.isNotEmpty) { // The password provided by the user.
+        BlocProvider.of<RepositoriesCubit>(context)
+        .openRepository(
+          name: repositoryName,
+          password: password
+        );
       }
     });
   }

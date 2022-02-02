@@ -54,7 +54,7 @@ class RepositoryCreation extends StatelessWidget {
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,
-            label: Strings.labelCreateRepository,
+            label: Strings.labelName,
             hint: Strings.messageRepositoryName,
             onSaved: (_) {},
             validator: formNameValidator,
@@ -64,7 +64,7 @@ class RepositoryCreation extends StatelessWidget {
             context: context,
             textEditingController: _passwordController,
             obscureText: true,
-            label: Strings.labelCreatePassword,
+            label: Strings.labelPassword,
             hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
             validator: (

@@ -55,7 +55,7 @@ class FolderCreation extends StatelessWidget {
           Fields.formTextField(
             context: context,
             icon: const Icon(Icons.folder),
-            label: Strings.labelCreateFolder,
+            label: Strings.labelName,
             hint: Strings.messageCreateFolder,
             onSaved: (value) => _onSaved(bloc, value),
             validator: formNameValidator,

@@ -43,41 +43,46 @@ class Strings {
   static const String messageErrorPathNotEmpty = '[path] is not empty';
 
   // main_page.dart
-  static const String messageNoRepo = 'Before adding a file, you need to create a repository';
+  static const String messageNoRepo = 'Before adding a <bold>file</bold>, you need to create a '
+  '<bold>repository</bold>';
   static const String messageCreateNewRepo = 'Create a new <bold>repository</bold>,'
   ' or link to one from a friend using a <bold>repository token</bold>';
   static const String messageNoRepos = 'No repositories found';
-  static const String messageEmptyRepo = 'This repository is empty';
-  static const String messageEmptyFolder = 'This folder is empty';
+  static const String messageEmptyRepo = 'This <bold>repository</bold> is empty';
+  static const String messageEmptyFolder = 'This <bold>folder</bold> is empty';
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
+  static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
+  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input its password '
+  'to access its contents';
+  static const String messageUnlockRepository = 'Enter password to unlock';
+  
 
   // Dialogs
 
-  static const String titleMovingEntry = 'Moving Entry';
-  static const String titleFolderActions = 'Add Folders or Files';
+  static const String titleMovingEntry = 'Moving entry';
+  static const String titleFolderActions = 'Add folders or files';
   static const String titleCreateFolder = 'Create a folder';
-  static const String titleCreateRepository = 'Create a Repository';
-  static const String titleAddRepository = 'Add a Repository';
+  static const String titleCreateRepository = 'Create a repository';
+  static const String titleUnlockRepository = 'Unlock repository';
+  static const String titleAddRepository = 'Add a repository';
   static const String titleSettings = 'Settings';
   static const String titleRepository = 'Repository';
-  static const String titleFileDetails = 'File Details';
-  static const String titleFolderDetails = 'Folder Details';
-  static const String titleDeleteFolder = 'Delete Folder';
-  static const String titleDeleteNotEmptyFolder = 'Delete not Empty Folder';
-  static const String titleRepositoriesList = 'Your Repositories';
+  static const String titleFileDetails = 'File details';
+  static const String titleFolderDetails = 'Folder details';
+  static const String titleDeleteFolder = 'Delete folder';
+  static const String titleDeleteNotEmptyFolder = 'Delete not empty folder';
+  static const String titleRepositoriesList = 'Your repositories';
   static const String titleShareRepository = 'Share repository "[name]"';
-  static const String titleDeleteFile = 'Delete File';
+  static const String titleDeleteFile = 'Delete file';
 
-  static const String labelRepositoryToken = 'Repository token: ';
+  static const String labelRepositoryToken = 'Token: ';
   static const String labelName = 'Name: ';
   static const String labelLocation = 'Location: ';
   static const String labelSize = 'Size: ';
-  static const String labelRepositoryName = 'Repository name: ';
-  static const String labelCreatePassword = 'Create a password: : ';
+  static const String labelPassword = 'Password: ';
   static const String labelRetypePassword = 'Retype password: ';
-  static const String labelCreateFolder = 'Create a new folder: ';
-  static const String labelCreateRepository = 'Create a new repository: ';
+  static const String labelTypePassword = 'Type password:';
   static const String labelSyncStatus = 'Sync Status: ';
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   
@@ -148,6 +153,7 @@ class Strings {
   static const String actionDelete = 'Delete';
   static const String actionMove = 'Move';
   static const String actionSave = 'Save';
+  static const String actionUnlock = 'Unlock';
 
   static const String actionDeleteFolder = 'Delete folder';
 

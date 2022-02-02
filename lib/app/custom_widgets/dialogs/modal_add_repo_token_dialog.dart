@@ -95,7 +95,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,
-            label: Strings.labelRepositoryName,
+            label: Strings.labelName,
             hint: Strings.messageRepositoryName,
             onSaved: (_) {},
             validator: formNameValidator,
@@ -118,7 +118,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             context: context,
             textEditingController: _passwordController,
             obscureText: true,
-            label: Strings.labelCreatePassword,
+            label: Strings.labelPassword,
             hint: Strings.messageRepositoryPassword,
             onSaved: (_) {},
             validator: (
