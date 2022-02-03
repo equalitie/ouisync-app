@@ -436,28 +436,64 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is CreateFileDone) {
-          Fluttertoast.showToast(msg: 'New file created: ${state.path}');
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageNewFile
+            .replaceAll(
+              Strings.replacementName,
+              state.path
+            )
+          );
         }
 
         if (state is CreateFileFailure) {
-          Fluttertoast.showToast(msg: 'Error creating new file: ${state.filePath}');
           print('Error creating new file ${state.filePath}: ${state.error}');
+
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageNewFileError
+            .replaceAll(
+              Strings.replacementName,
+              state.filePath
+            )
+          );
         }
 
         if (state is WriteToFileInProgress) {
-          _showSavingFileProgress(context, state.fileName, state.length.toDouble());
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageWritingFile
+            .replaceAll(
+              Strings.replacementName,
+              state.fileName
+            )
+          );
         }
 
         if (state is WriteToFileDone) {
-          _updateSavingFileProgress(state.length.toDouble());
-          _hideSavingFileProgress();
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageWritingFileDone
+            .replaceAll(
+              Strings.replacementName,
+              state.filePath
+            ) 
+          );
         }
 
         if (state is WriteToFileFailure) {
-          _hideSavingFileProgress();
-
           print('Writing to file ${state.fileName} failed (${state.filePath}): ${state.error}');
-          Fluttertoast.showToast(msg: 'Writing to file ${state.filePath}', toastLength: Toast.LENGTH_SHORT);
+
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageWritingFileError
+            .replaceAll(
+              Strings.replacementName,
+              state.filePath
+            )
+          );
+
+          
         }
 
         if (state is DirectoryLoadSuccess) {
@@ -1001,47 +1037,6 @@ class _MainPageState extends State<MainPage>
         );
       })
     );
-  }
-
-  final GlobalKey<SavingFileState> _savingFileKey = GlobalKey();
-  OverlayEntry? savingFileOverlay;
-
-  void _showSavingFileProgress(BuildContext context, String fileName, double size) async {
-
-    OverlayState? overlayState = Overlay.of(context);
-    savingFileOverlay = OverlayEntry(
-      opaque: false,
-      builder: (context) {
-        return Positioned(
-          left: MediaQuery.of(context).size.width * 0.02,
-          top: MediaQuery.of(context).size.height * 0.92,
-          child: Material(
-            color: Colors.teal.shade50,
-            elevation: 2.0,
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-              width: MediaQuery.of(context).size.width * 0.8,
-              child: SavingFile(
-                key: _savingFileKey,
-                fileName: fileName,
-                size: size
-              )
-            ) 
-          )
-        );
-      }
-    );
-
-    overlayState?.insert(savingFileOverlay!);
-  }
-
-  void _updateSavingFileProgress(double progress) {
-    _savingFileKey.currentState?.updateProgress(progress);
-  }
-
-  void _hideSavingFileProgress() {
-    savingFileOverlay?.remove();
   }
 
 }
