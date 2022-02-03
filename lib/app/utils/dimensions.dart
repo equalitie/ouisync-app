@@ -11,6 +11,7 @@ class Dimensions {
   static const Size sizeInPageButtonLong = Size(250.0, 60.0);
 
   static const Size sizeCircularProgressIndicatorSmall = Size(14.0, 14.0);
+  static const double strokeCircularProgressIndicatorSmall = 2.0;
 
   static const EdgeInsets paddingContents = EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0);
   static const EdgeInsets paddingDialog = EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0);
