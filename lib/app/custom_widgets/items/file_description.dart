@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -15,10 +13,20 @@ class FileDescription extends StatelessWidget {
   final Repository repository;
   final BaseItem fileData;
 
-  final ValueNotifier<String> _size = ValueNotifier<String>('-');
+  final ValueNotifier<int> _fileSize = ValueNotifier<int>(0);
+
+  Future<int> getFileSize() async {
+    final length = await EntryInfo(repository).fileLength(fileData.path);
+    return length;
+  }
 
   @override
   Widget build(BuildContext context) {
+    getFileSize()
+    .then((formattedSize) {
+      _fileSize.value = formattedSize;
+    });
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,42 +37,31 @@ class FileDescription extends StatelessWidget {
             softWrap: true
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          size(repository, fileData.path)
+          ValueListenableBuilder(
+            valueListenable: _fileSize,
+            builder: (context, length, widget) {
+              if ((length as int) <= 0) {
+                return Container(
+                  height: Dimensions.sizeCircularProgressIndicatorSmall.height,
+                  width: Dimensions.sizeCircularProgressIndicatorSmall.width,
+                  child: CircularProgressIndicator(
+                    strokeWidth: Dimensions.strokeCircularProgressIndicatorSmall,
+                  )
+                );
+              }
+            
+              final fileSize = formattSize(length, units: true);
+              return Fields.constrainedText(
+                fileSize,
+                flex: 0,
+                fontSize: Dimensions.fontSmall,
+                fontWeight: FontWeight.w400,
+                softWrap: true
+              );
+            }
+          )
         ],
       ),
-    );
-  }
-
-  Widget size(repository, path){
-    return FutureBuilder<int>(
-      future: EntryInfo(repository).fileLength(path),
-      builder: (context, AsyncSnapshot<int> snapshot) {
-        if (snapshot.hasError) {
-          return Fields.constrainedText(
-            '? B',
-            flex: 0,
-            fontSize: Dimensions.fontSmall,
-            fontWeight: FontWeight.w400,
-            softWrap: true
-          );
-        }
-
-        if (snapshot.hasData) {
-          return Fields.constrainedText(
-            formattSize(snapshot.data ?? 0, units: true),
-            flex: 0,
-            fontSize: Dimensions.fontSmall,
-            fontWeight: FontWeight.w400,
-            softWrap: true
-          );
-        }
-
-        return Container(
-          height: Dimensions.sizeCircularProgressIndicatorSmall.height,
-          width: Dimensions.sizeCircularProgressIndicatorSmall.width,
-          child: CircularProgressIndicator(strokeWidth: 2.0,)
-        );
-      }
     );
   }
 }
