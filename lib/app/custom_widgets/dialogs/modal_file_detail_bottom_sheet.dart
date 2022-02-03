@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -72,7 +73,12 @@ class _FileDetailState extends State<FileDetail> {
             moveEntryCallback: widget.onMoveEntry,
             bottomSheetControllerCallback: widget.onBottomSheetOpen
           ),
-          _buildDeleteButton(),
+          _buildDeleteButton(
+            widget.context,
+            repository: widget.repository,
+            bloc: widget.bloc,
+            path: widget.path
+          ),
           Divider(
             height: 10.0,
             thickness: 2.0,
@@ -192,9 +198,42 @@ class _FileDetailState extends State<FileDetail> {
     widget.onBottomSheetOpen.call(controller!, path);
   }
 
-  GestureDetector _buildDeleteButton() {
+  GestureDetector _buildDeleteButton(BuildContext context, {
+    required Repository repository,
+    required DirectoryBloc bloc,
+    required String path
+  }) {
     return GestureDetector(
-      onTap: () async => {},
+      onTap: () async => {
+        showDialog<String>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            final fileName = getPathFromFileName(path);
+            final parent = extractParentFromPath(path);
+
+            return Dialogs
+            .buildDeleteFileAlertDialog(
+              repository,
+              bloc,
+              path,
+              context,
+              fileName,
+              parent
+            );
+          },
+        ).then((fileName) {
+          Navigator.of(context).pop();
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageFileDeleted
+            .replaceAll(
+              Strings.replacementName,
+              fileName ?? ''
+            )
+          );
+        })
+      },
       child: Fields.iconText(
         icon: Icons.delete_outlined,
         text: Strings.iconDelete,

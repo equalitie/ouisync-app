@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
@@ -217,7 +218,16 @@ abstract class Dialogs {
             )
           );
   
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(fileName);
+
+          Fluttertoast.showToast(msg:
+            Strings
+            .messageFileDeleted
+            .replaceAll(
+              Strings.replacementName,
+              fileName
+            )
+          );
         },
       ),
       TextButton(
