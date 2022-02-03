@@ -56,7 +56,12 @@ class Strings {
   static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input its password '
   'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
-  
+
+  static const String messageNewFile = 'New file: [name]';
+  static const String messageNewFileError = 'Error creating file [name]';
+  static const String messageWritingFile = 'Writing to file [name] started...';
+  static const String messageWritingFileError = 'Writing to file [name] failed';
+  static const String messageWritingFileDone = 'File saved successfully: [name]';
 
   // Dialogs
 
@@ -119,6 +124,8 @@ class Strings {
 
   static const String messageEntryAlreadyExist = '[entry] with the same name already '
   'exist in this location';
+
+  static const String messageFileDeleted = 'File deleted successfully: [name]';
 
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
