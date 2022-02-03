@@ -58,6 +58,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       yield fileCreationResult; 
 
       if (fileCreationResult is CreateFileDone) {
+        
+        final parentPath = extractParentFromPath(event.newFilePath);
+        yield await getFolderContents(event.repository, parentPath);
+
         yield WriteToFileInProgress(
           path: event.newFilePath,
           fileName: event.fileName,
