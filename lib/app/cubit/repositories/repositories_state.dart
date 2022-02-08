@@ -4,7 +4,7 @@ abstract class RepositoryPickerState extends Equatable {
   const RepositoryPickerState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class RepositoryPickerInitial extends RepositoryPickerState {}
@@ -21,8 +21,8 @@ class RepositoryPickerSelection extends RepositoryPickerState {
   final String name;
 
   @override
-  List<Object> get props => [
-    repository!,
+  List<Object?> get props => [
+    repository,
     name
   ];
 }
