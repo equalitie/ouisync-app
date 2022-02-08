@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -36,56 +37,56 @@ class FolderDetail extends StatefulWidget {
 class _FolderDetailState extends State<FolderDetail> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
-      margin: const EdgeInsets.all(16.0),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: const BorderRadius.all(Radius.circular(16.0))
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Fields.bottomSheetHandle(context),
-          _folderDetails(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _folderDetails(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
+      padding: Dimensions.paddingBottomSheet,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(Strings.titleFolderDetails),
-          _buildMoveFolderButton(
-            origin: widget.parent,
-            path: widget.path,
-            type: EntryType.directory,
-            moveEntryCallback: widget.onMoveEntry,
-            bottomSheetControllerCallback: widget.onBottomSheetOpen
-          ),
-          GestureDetector(
-            onTap: () => delete(
-              widget.context,
-              widget.bloc,
-              widget.repository,
+          Fields.actionText(
+            Strings.iconMove,
+            onTap: () => _showMoveEntryBottomSheet(
               widget.parent,
-              widget.path
+              widget.path,
+              EntryType.directory,
+              widget.onMoveEntry,
+              widget.onBottomSheetOpen
             ),
-            child: Fields.iconText(
-              icon: Icons.delete_outlined,
-              text: Strings.iconDelete,
-              textAlign: TextAlign.start,
-              iconSize: 40.0,
-              padding: EdgeInsets.only(bottom: 30.0)
-            )
+            icon: Icons.drive_file_move_outlined,
+          ),
+          Fields.actionText(
+            Strings.iconDelete,
+            onTap: () async => {
+              await showDialog<bool>(
+                context: widget.context,
+                barrierDismissible: false, // user must tap button!
+                builder: (context) {
+                  return buildDeleteFolderAlertDialog(
+                    context,
+                    widget.bloc,
+                    widget.repository,
+                    widget.parent,
+                    widget.path,
+                  );
+                },
+              ).then((result) {
+                if (result ?? false) {
+                  Navigator.of(context).pop(result);
+                  Fluttertoast.showToast(msg:
+                    Strings
+                    .messageFolderDeleted
+                    .replaceAll(
+                      Strings.replacementName,
+                      widget.name
+                    )
+                  );
+                }
+              })
+            },
+            icon: Icons.delete_outlined,
           ),
           Divider(
             height: 10.0,
@@ -93,12 +94,11 @@ class _FolderDetailState extends State<FolderDetail> {
             indent: 20.0,
             endIndent: 20.0,
           ),
-          Fields.iconText(
+          Fields.iconLabel(
             icon: Icons.info_rounded,
             text: Strings.iconInformation,
-            iconSize: 40.0,
+            iconSize: Dimensions.sizeIconBig,
             textAlign: TextAlign.start,
-            padding: EdgeInsets.only(top: 10.0)
           ),
           Fields.labeledText(
             label: Strings.labelName,
@@ -117,26 +117,6 @@ class _FolderDetailState extends State<FolderDetail> {
         ]
       )
     );
-  }
-
-  void delete(context, bloc, repository, parent, path) async {
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (context) {
-        return buildDeleteFolderAlertDialog(
-          context,
-          bloc,
-          repository,
-          parent,
-          path,
-        );
-      },
-    );
-
-    if (result ?? false) {
-      Navigator.of(context).pop(false);
-    }
   }
 
   AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, parentPath, path) {
@@ -227,31 +207,6 @@ class _FolderDetailState extends State<FolderDetail> {
     Navigator.of(context).pop(true);
   }
 
-  GestureDetector _buildMoveFolderButton({
-    required String origin,
-    required String path,
-    required EntryType type,
-    required MoveEntryCallback moveEntryCallback,
-    required BottomSheetControllerCallback bottomSheetControllerCallback
-  }) {
-    return GestureDetector(
-      onTap: () => _showMoveEntryBottomSheet(
-        origin,
-        path,
-        type,
-        moveEntryCallback,
-        bottomSheetControllerCallback
-      ),
-      child: Fields.iconText(
-        icon: Icons.drive_file_move_outlined,
-        text: Strings.iconMove,
-        textAlign: TextAlign.start,
-        iconSize: 40.0,
-        padding: EdgeInsets.only(bottom: 30.0)
-      ),
-    );
-  }
-
   _showMoveEntryBottomSheet(
     String origin,
     String path,
@@ -271,8 +226,8 @@ class _FolderDetailState extends State<FolderDetail> {
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
+          topLeft: Radius.circular(Dimensions.radiusSmall),
+          topRight: Radius.circular(Dimensions.radiusSmall),
           bottomLeft: Radius.zero,
           bottomRight: Radius.zero
         ),

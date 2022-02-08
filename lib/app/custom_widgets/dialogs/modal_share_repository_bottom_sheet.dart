@@ -39,17 +39,31 @@ class _ShareRepositoryState extends State<ShareRepository> {
           _shareToken.value = snapshot.data!;
 
           return Container(
-            margin: const EdgeInsets.all(16.0),
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(16.0))
-            ),
+            padding: Dimensions.paddingBottomSheet,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Fields.bottomSheetHandle(context),
-                _shareCodeDetails(context, widget.repositoryName, snapshot.data!),
-              ],
+                Fields.bottomSheetTitle(
+                  Strings.titleShareRepository
+                  .replaceAll(Strings.replacementName, widget.repositoryName)
+                ),
+                Fields.iconLabel(
+                  icon: Icons.lock_rounded,
+                  text: Strings.iconAccessMode,
+                ),
+                _buildAccessModeDropdown(),
+                Dimensions.spacingVertical,
+                _buildAccessModeDescription(),
+                Dimensions.spacingVertical,
+                Fields.iconLabel(
+                  icon: Icons.supervisor_account_rounded,
+                  text: Strings.iconShareTokenWithPeer,
+                ),
+                _buildShareBox()
+              ]
             ),
           );
         }
@@ -57,9 +71,9 @@ class _ShareRepositoryState extends State<ShareRepository> {
         _shareToken.value = Strings.messageCreatingToken;
 
         return Container(
-          height: 50.0,
-          width: 50.0,
-          child: CircularProgressIndicator(strokeWidth: 2.0,)
+          height: Dimensions.sizeCircularProgressIndicatorAverage.height,
+          width: Dimensions.sizeCircularProgressIndicatorAverage.width,
+          child: CircularProgressIndicator(strokeWidth: Dimensions.strokeCircularProgressIndicatorSmall,)
         );
       }
     );
@@ -76,45 +90,11 @@ class _ShareRepositoryState extends State<ShareRepository> {
     return shareToken.token;
   }
 
-  Widget _shareCodeDetails(BuildContext context, String repositoryName, String token) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetTitle(
-            Strings.titleShareRepository
-            .replaceAll(Strings.replacementName, repositoryName)
-          ),
-          Fields.iconText(
-            icon: Icons.lock_rounded,
-            text: Strings.iconAccessMode,
-            textAlign: TextAlign.start,
-            iconSize: 30.0
-          ),
-          _buildAccessModeDropdown(),
-          SizedBox(height: 10.0,),
-          _buildAccessModeDescription(),
-          SizedBox(height: 10.0,),
-          Fields.iconText(
-            icon: Icons.supervisor_account_rounded,
-            text: Strings.iconShareTokenWithPeer  ,
-            textAlign: TextAlign.start,
-            iconSize: 30.0
-          ),
-          _buildShareBox()
-        ]
-      )
-    );
-  }
-
   Widget _buildAccessModeDropdown() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+      padding: Dimensions.paddingActionBox,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
         border: Border.all(
           color: Colors.black45,
           width: 1.0,
@@ -171,9 +151,9 @@ class _ShareRepositoryState extends State<ShareRepository> {
     );
 
   Widget _buildShareBox() => Container(
-    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+    padding: Dimensions.paddingActionBox,
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
       border: Border.all(
         color: Colors.black45,
         width: 1.0,
@@ -193,30 +173,20 @@ class _ShareRepositoryState extends State<ShareRepository> {
               color: Colors.black
             )
         ),
-        _copyTokenAction(),
-        _shareTokenAction(),
+        Fields.actionIcon(
+          const Icon(Icons.content_copy_rounded),
+          onPressed: () async {
+            await copyStringToClipboard(_shareToken.value);
+            showToast(Strings.messageTokenCopiedToClipboard);
+          },
+        ),
+        Fields.actionIcon(
+          const Icon(Icons.share_outlined),
+          onPressed: () => Share.share(_shareToken.value),
+        ),
       ],
     )
   );
-
-  IconButton _copyTokenAction() {
-    return IconButton(
-      onPressed: () async {
-        await copyStringToClipboard(_shareToken.value);
-        showToast(Strings.messageTokenCopiedToClipboard);
-      },
-      icon: const Icon(Icons.content_copy_rounded),
-      iconSize: 30.0,
-    );
-  }
-
-  IconButton _shareTokenAction() {
-    return IconButton(
-      onPressed: () => Share.share(_shareToken.value),
-      icon: const Icon(Icons.share_outlined),
-      iconSize: 30.0,
-    );
-  }
 
   String _tokenDescription(AccessMode accessMode) {
     return Constants.accessModeDescriptions.values.elementAt(accessMode.index);

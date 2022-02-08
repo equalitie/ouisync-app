@@ -53,7 +53,7 @@ class Strings {
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
   static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
-  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input its password '
+  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input the password '
   'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
 
@@ -66,9 +66,10 @@ class Strings {
   // Dialogs
 
   static const String titleMovingEntry = 'Moving entry';
-  static const String titleFolderActions = 'Add folders or files';
+  static const String titleFolderActions = 'Create';
   static const String titleCreateFolder = 'Create a folder';
   static const String titleCreateRepository = 'Create a repository';
+  static const String titleEditRepository = 'Edit repository';
   static const String titleUnlockRepository = 'Unlock repository';
   static const String titleAddRepository = 'Add a repository';
   static const String titleSettings = 'Settings';
@@ -83,6 +84,7 @@ class Strings {
 
   static const String labelRepositoryToken = 'Token: ';
   static const String labelName = 'Name: ';
+  static const String labelNewName = 'New name: ';
   static const String labelLocation = 'Location: ';
   static const String labelSize = 'Size: ';
   static const String labelPassword = 'Password: ';
@@ -93,7 +95,8 @@ class Strings {
   
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
-  static const String messageRepositoryName = 'Give the repo a name';
+  static const String messageRepositoryName = 'Give the repository a name';
+  static const String messageRepositoryNewName = 'Repository new name';
   static const String messageRepositoryAccessMode = 'Access mode granted: [access]';
   static const String messageRepositorySuggestedName = 'Suggested: [name]\n'
   '(tap here for using this name)';
@@ -126,6 +129,7 @@ class Strings {
   'exist in this location';
 
   static const String messageFileDeleted = 'File deleted successfully: [name]';
+  static const String messageFolderDeleted = 'Folder deleted successfully: [name]';
 
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';

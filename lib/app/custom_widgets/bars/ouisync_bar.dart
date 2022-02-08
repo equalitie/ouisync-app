@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({
@@ -25,7 +26,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
       shadowColor: Colors.black26,
       leading: leadingAppBranding,
       title: titleCentralWidget,
-      titleSpacing: 0.0,
+      titleSpacing: Dimensions.spacingAppBarTitle,
       actions: actionList,
       bottom: PreferredSize(
         preferredSize: bottomPreferredSize,

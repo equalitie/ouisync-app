@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
+import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
 class RepositoriesBar extends StatefulWidget {
@@ -32,36 +33,26 @@ class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderSt
           top: BorderSide(width: 1.0, color: Colors.transparent, style: BorderStyle.solid),
         ),
       ),
-      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+      padding: Dimensions.paddingRepositoryBar,
       child: Row(
         children: [
-          _repositoryPicker(),
-          SizedBox(width: 10.0,),
-          _shareAction()
+          Expanded(
+            child: RepositoryPicker(
+              repositoriesCubit: widget.repositoriesCubit,
+              synchronizationCubit: widget.synchronizationCubit,
+              onRepositorySelect: widget.onRepositorySelect,
+              borderColor: Colors.white,
+            ),
+          ),
+          Dimensions.spacingHorizontal,
+          Fields.actionIcon(
+            const Icon(Icons.share_outlined),
+            onPressed: widget.shareRepositoryOnTap,
+            size: Dimensions.sizeIconSmall,
+            color: Colors.white,            
+          )
         ],
       )
-    );
-  }
-
-  Expanded _repositoryPicker() {
-    return Expanded(
-          child: RepositoryPicker(
-            repositoriesCubit: widget.repositoriesCubit,
-            synchronizationCubit: widget.synchronizationCubit,
-            onRepositorySelect: widget.onRepositorySelect,
-            borderColor: Colors.white,
-          ),
-        );
-  }
-
-  GestureDetector _shareAction() {
-    return GestureDetector(
-      onTap: widget.shareRepositoryOnTap,
-      child: const Icon(
-        Icons.share_outlined,
-        size: 25.0,
-        color: Colors.white,
-      ),
     );
   }
 }

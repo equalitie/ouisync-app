@@ -18,14 +18,9 @@ class SaveSharedMedia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+      padding: Dimensions.paddingBottomSheet,
       height: 180.0,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24.0),
-          topRight: Radius.circular(24.0)
-        ),
         border: Border.all(
           color: Colors.black26,
           width: 1.0,
@@ -34,11 +29,14 @@ class SaveSharedMedia extends StatelessWidget {
         color: Colors.white
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildTitle(),
-          SizedBox(height: 10.0,),
+          Fields.iconLabel(
+            icon: Icons.save_outlined,
+            text: Strings.titleAddShareFilePage,
+          ),
           Fields.constrainedText(
             getPathFromFileName(this.sharedMedia.first.path),
             softWrap: true,
@@ -47,28 +45,12 @@ class SaveSharedMedia extends StatelessWidget {
           ),
           Fields.actionsSection(context,
             buttons: _actions(context),
-            padding: EdgeInsets.only(top: 0.0)
+            // padding: EdgeInsets.only(top: 0.0)
           )
         ],
       ),
     );
   }
-
-  Row _buildTitle() =>
-    Row(
-      children: [
-        const Icon(
-          Icons.save_outlined,
-          size: 40.0,
-        ),
-        SizedBox(width: 10.0,),
-        Fields.constrainedText(
-          Strings.titleAddShareFilePage,
-          fontSize: Dimensions.fontBig,
-          fontWeight: FontWeight.w800
-        ),
-      ],
-    );
 
   List<Widget> _actions(BuildContext context) {
     List<Widget> actions = <Widget>[];

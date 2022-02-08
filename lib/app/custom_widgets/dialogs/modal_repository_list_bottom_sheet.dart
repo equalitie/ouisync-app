@@ -30,17 +30,27 @@ class RepositoryList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Container(
-            margin: const EdgeInsets.all(16.0),
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(16.0))
-            ),
+            padding: Dimensions.paddingBottomSheet,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Fields.bottomSheetHandle(context),
-                _repositoryListDetails(context, snapshot.data as List<String>),
-              ],
+                Fields.bottomSheetTitle(Strings.titleRepositoriesList),
+                _buildRepositoryList(snapshot.data as List<String>, current),
+                Dimensions.spacingActionsVertical,
+                Fields.actionText(
+                  Strings.iconCreateRepository,
+                  onTap: () => createRepoDialog(this.cubit),
+                  icon: Icons.add_circle_outline_rounded,
+                ),
+                Fields.actionText(
+                  Strings.iconAddRepositoryWithToken,
+                  onTap: () => addRepoWithTokenDialog(this.cubit),
+                  icon: Icons.insert_link_rounded,
+                ),
+              ]
             ),
           ); 
         }
@@ -50,75 +60,17 @@ class RepositoryList extends StatelessWidget {
     );
   }
 
-  Widget _repositoryListDetails(BuildContext context, List<String> localRepositories) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetTitle(Strings.titleRepositoriesList),
-          _buildRepositoryList(localRepositories, current),
-          SizedBox(height: 50.0,),
-          GestureDetector(
-            onTap: () => createRepoDialog(this.cubit),
-            child: Fields.iconText(
-              icon: Icons.add_circle_outline_rounded,
-              text: Strings.iconCreateRepository,
-              textAlign: TextAlign.start,
-              iconSize: 40.0,
-              iconColor: Colors.black,
-              padding: EdgeInsets.only(bottom: 10.0)
-            )
-          ),
-          SizedBox(height: 20.0,),
-          GestureDetector(
-            onTap: () => addRepoWithTokenDialog(this.cubit),
-            child: Fields.iconText(
-              icon: Icons.insert_link_rounded,
-              text: Strings.iconAddRepositoryWithToken,
-              textAlign: TextAlign.start,
-              iconSize: 40.0,
-              iconColor: Colors.black,
-              padding: EdgeInsets.only(bottom: 10.0)
-            )
-          ),
-        ]
-      )
-    );
-  }
-
   Widget _buildRepositoryList(List<String> repositories, String current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     itemCount: repositories.length,
     itemBuilder: (context, index) {
-      final icon = repositories[index] == current
-      ? const Icon(
-        Icons.lock_open_rounded,
-        size: 40.0,
-        color:  Colors.black
-      )
-      : const Icon(
-        Icons.lock,
-        size: 40.0,
-        color:  Colors.black54
-      );
 
-      final textColor = repositories[index] == current
-      ? Colors.black
-      : Colors.black54;
-
-      final fontWeight = repositories[index] == current
-      ? FontWeight.bold
-      : FontWeight.normal;
-
-      return GestureDetector(
+      final repositoryName = repositories[index];
+      return Fields.actionText(
+        repositoryName,
         onTap: () { 
-          final repositoryName = repositories[index];
           final repository = repositoriesSession.repositories[repositoryName];
-
           if(repository != null) {
             this.cubit
             .selectRepository(
@@ -132,26 +84,18 @@ class RepositoryList extends StatelessWidget {
 
           Navigator.of(context).pop();
         },
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
-          child: Row(
-            children: [
-              icon,
-              SizedBox(width: 10.0,),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  repositories[index],
-                  style:  TextStyle(
-                    fontSize: Dimensions.fontBig,
-                    color: textColor,
-                    fontWeight: fontWeight
-                  )
-                ),
-              )
-            ],
-          ),
-        ),
+        icon: repositoryName == current
+        ? Icons.lock_open_rounded
+        : Icons.lock,
+        textColor: repositoryName == current
+        ? Colors.black
+        : Colors.black54,
+        textFontWeight: repositoryName == current
+        ? FontWeight.bold
+        : FontWeight.normal,
+        iconColor: repositoryName == current
+        ? Colors.black
+        : Colors.black54
       );
     }
   );

@@ -40,8 +40,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   void initRepositoryPicker() {
-    if (widget.currentRepository == null
-    || widget.currentRepositoryName.isEmpty) {
+    if (widget.currentRepositoryName.isEmpty) {
       return;
     } 
 
@@ -52,14 +51,6 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   updateCurrentRepository(Repository? repository, String name) async {
-    if (name.isEmpty) {
-      setState(() {
-        _repositoryName = Strings.messageNoRepos;
-      });
-
-      return;
-    }
-
     setState(() {
       _repository = repository;
       _repositoryName = name;
@@ -104,9 +95,9 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   _buildState(borderColor, iconColor) => Container(
-    padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+    padding: Dimensions.paddingepositoryPicker,
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
       border: Border.all(
         color: borderColor,
         width: 1.0,
@@ -116,53 +107,42 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     ),
     child: Row(
       children: [
-        _repositoryIcon(iconColor),
-        SizedBox(width: 10.0),
+        Icon(
+          Icons.cloud_outlined,
+          size: Dimensions.sizeIconSmall,
+          color: iconColor,
+        ),
+        Dimensions.spacingHorizontal,
         Fields.constrainedText(
           _repositoryName,
           softWrap: false,
           textOverflow: TextOverflow.fade,
           color: iconColor
         ),
-        _syncSection(widget.synchronizationCubit),
-        _actionsSection(),
+        if(_repository != null) Expanded(
+          flex: 0,
+          child: SyncWidget(
+            cubit: widget.synchronizationCubit
+          )
+        ),
+        Fields.actionIcon(
+          const Icon(Icons.keyboard_arrow_down_outlined),
+          onPressed: () async { 
+            await _showRepositorySelector(_repositoryName); 
+          },
+          size: Dimensions.sizeIconSmall,
+        )
       ],
     )
   );
-
-  Icon _repositoryIcon(color) {
-    return Icon(
-      Icons.cloud_outlined,
-      size: 20.0,
-      color: color,
-    );
-  }
-
-  Widget _syncSection(syncCubit) {
-    return _repository != null
-    ? Expanded(
-      flex: 0,
-      child: SyncWidget(cubit: syncCubit)
-    )
-    : Container(height: 20.0,);
-  }
-
-  Widget _actionsSection() {
-    return Fields.actionIcon(
-      icon: Icons.keyboard_arrow_down_outlined,
-      onTap: () async { 
-        await _showRepositorySelector(_repositoryName); 
-      }
-    );
-  }
 
   Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20.0),
-        topRight: Radius.circular(20.0),
+        topLeft: Radius.circular(Dimensions.radiusSmall),
+        topRight: Radius.circular(Dimensions.radiusSmall),
         bottomLeft: Radius.zero,
         bottomRight: Radius.zero
       ),

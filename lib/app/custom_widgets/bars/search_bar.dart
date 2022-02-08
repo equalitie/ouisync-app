@@ -20,9 +20,9 @@ class _SearchBarState extends State<SearchBar> {
             )
           ),
           Fields.actionIcon(
-            icon: Icons.search_outlined,
-            onTap: () {},
-            size: 35.0
+            const Icon(Icons.search_outlined),
+            onPressed: () {},
+            size: Dimensions.sizeIconAverage
           )
         ]
       )

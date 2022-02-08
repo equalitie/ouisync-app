@@ -8,12 +8,6 @@ class Constants{
 
   static const String repositoriesFolder = 'repos';
 
-  static const double actionsDialogPadding = 20.0;
-  static const double actionsDialogAvatarRadius = 10.0;
-
-  static const double paddingBottomWithFloatingButtonExtra = 48.0;
-  static const double paddingBottomWithBottomSheetExtra = 130.0;
-
   static const int debouncerMiliseconds = 1500; //milliseconds
 
   static const int actionsFloatingActionButtonAnimationDuration = 300; //milliseconds

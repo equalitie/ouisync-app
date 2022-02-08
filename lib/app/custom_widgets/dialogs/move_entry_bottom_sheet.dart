@@ -24,14 +24,9 @@ class MoveEntryDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+      padding: Dimensions.paddingBottomSheet,
       height: 160.0,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24.0),
-          topRight: Radius.circular(24.0)
-        ),
         border: Border.all(
           color: Colors.black26,
           width: 1.0,
@@ -40,11 +35,14 @@ class MoveEntryDialog extends StatelessWidget {
         color: Colors.white
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _movingActionTitle(),
-          SizedBox(width: 10.0,),
+          Fields.iconLabel(
+            icon: Icons.drive_file_move_outlined,
+            text: '${removeParentFromPath(path)}'
+          ),
           Fields.constrainedText(
             Strings.messageMoveEntryOrigin
             .replaceAll(
@@ -59,48 +57,31 @@ class MoveEntryDialog extends StatelessWidget {
     );
   }
 
-  Row _movingActionTitle() {
-    return Row(
-          children: [
-            const Icon(
-              Icons.drive_file_move_outlined,
-              size: 40.0,
-            ),
-            SizedBox(width: 10.0,),
-            Fields.constrainedText(
-              '${removeParentFromPath(path)}',
-              fontSize: Dimensions.fontBig,
-              fontWeight: FontWeight.w800,
-              textOverflow: TextOverflow.ellipsis
-            ),
-          ],
-        );
-  }
-
   _selectActions(context) {
     return BlocBuilder(
       bloc: BlocProvider.of<DirectoryBloc>(context),
       builder: (context, state) {
-        bool allowAction = false;
+        
+        bool canMove = false;
         if (state is NavigationLoadSuccess) {
           if (state.destination != origin &&
           state.destination != path) {
-            allowAction = true;
+            canMove = true;
           }
         }
 
         return Fields.actionsSection(context,
-          buttons: _actions(context, allowAction),
+          buttons: _actions(context, canMove),
           padding: EdgeInsets.only(top: 0.0)
         );
       }
     );
   }
 
-  List<Widget> _actions(context, allowAction) {
+  List<Widget> _actions(context, canMove) {
     List<Widget> actions = <Widget>[];
 
-    if (allowAction) {
+    if (canMove) {
       actions.addAll([ElevatedButton(
         onPressed: () => onMoveEntry.call(origin, path, type),
         child: Text(Strings.actionMove)

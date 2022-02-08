@@ -37,119 +37,101 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Form(
       key: this.widget.formKey,
       autovalidateMode: AutovalidateMode.disabled,
-      child: Container(
-        margin: const EdgeInsets.all(16.0),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: const BorderRadius.all(Radius.circular(16.0))
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildCreateFolderWidget(this.widget.context),
-          ],
-        ),
-      )
+      child: _buildAddRepoWithTokenWidget(this.widget.context),
     );
   }
 
-  Widget _buildCreateFolderWidget(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.formTextField(
-            context: context,
-            textEditingController: _tokenController,
-            label: Strings.labelRepositoryToken,
-            hint: Strings.messageRepositoryToken,
-            onSaved: (value) {},
-            validator: _repositoryTokenValidator,
-            autofocus: true,
-            onChanged: _onTokenChanged
-          ),
-          ValueListenableBuilder(
-            valueListenable: _accessModeNotifier,
-            builder: (context, message, child) => 
-              Visibility(
-                visible: _showAccessModeMessage,
-                child: Fields.constrainedText(
-                    Strings.messageRepositoryAccessMode
-                    .replaceAll(Strings.replacementAccess, message as String? ?? '?'),
-                    flex: 0,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54
-                  )
-              )
-          ),
-          Fields.formTextField(
-            context: context,
-            textEditingController: _nameController,
-            label: Strings.labelName,
-            hint: Strings.messageRepositoryName,
-            onSaved: (_) {},
-            validator: formNameValidator,
-            autovalidateMode: AutovalidateMode.disabled
-          ),
-          Visibility(
-            visible: _showSuggestedName,
-            child: GestureDetector(
-              onTap: () => _updateNameController(_suggestedName),
+  Widget _buildAddRepoWithTokenWidget(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Fields.formTextField(
+          context: context,
+          textEditingController: _tokenController,
+          label: Strings.labelRepositoryToken,
+          hint: Strings.messageRepositoryToken,
+          onSaved: (value) {},
+          validator: _repositoryTokenValidator,
+          autofocus: true,
+          onChanged: _onTokenChanged
+        ),
+        ValueListenableBuilder(
+          valueListenable: _accessModeNotifier,
+          builder: (context, message, child) => 
+            Visibility(
+              visible: _showAccessModeMessage,
               child: Fields.constrainedText(
-                Strings.messageRepositorySuggestedName
-                  .replaceAll(Strings.replacementName, _repoName ?? ''),
+                Strings.messageRepositoryAccessMode
+                .replaceAll(Strings.replacementAccess, message as String? ?? '?'),
+                flex: 0,
                 fontSize: Dimensions.fontSmall,
                 fontWeight: FontWeight.normal,
                 color: Colors.black54
-              ),
+              )
             )
-          ),
-          Fields.formTextField(
-            context: context,
-            textEditingController: _passwordController,
-            obscureText: true,
-            label: Strings.labelPassword,
-            hint: Strings.messageRepositoryPassword,
-            onSaved: (_) {},
-            validator: (
-              password,
-              { error = Strings.messageErrorRepositoryPasswordValidation }
-            ) => formNameValidator(password, error: error),
-            autovalidateMode: AutovalidateMode.disabled
-          ),
-          Fields.formTextField(
-            context: context,
-            textEditingController: _retypedPasswordController,
-            obscureText: true,
-            label: Strings.labelRetypePassword,
-            hint: Strings.messageRepositoryPassword,
-            onSaved: (_) {},
-            validator: (
-              retypedPassword,
-              { error = Strings.messageErrorRetypePassword }
-            ) => retypedPasswordValidator(
-                password: _passwordController.text,
-                retypedPassword: retypedPassword!,
-                error: error
-              ),
-            autovalidateMode: AutovalidateMode.disabled
-          ),
-          Fields.actionsSection(
-            context,
-            buttons: _actions(context)
-          ),
-        ]
-      )
+        ),
+        Fields.formTextField(
+          context: context,
+          textEditingController: _nameController,
+          label: Strings.labelName,
+          hint: Strings.messageRepositoryName,
+          onSaved: (_) {},
+          validator: formNameValidator,
+          autovalidateMode: AutovalidateMode.disabled
+        ),
+        Visibility(
+          visible: _showSuggestedName,
+          child: GestureDetector(
+            onTap: () => _updateNameController(_suggestedName),
+            child: Fields.constrainedText(
+              Strings.messageRepositorySuggestedName
+                .replaceAll(Strings.replacementName, _repoName ?? ''),
+              fontSize: Dimensions.fontSmall,
+              fontWeight: FontWeight.normal,
+              color: Colors.black54
+            ),
+          )
+        ),
+        Fields.formTextField(
+          context: context,
+          textEditingController: _passwordController,
+          obscureText: true,
+          label: Strings.labelPassword,
+          hint: Strings.messageRepositoryPassword,
+          onSaved: (_) {},
+          validator: (
+            password,
+            { error = Strings.messageErrorRepositoryPasswordValidation }
+          ) => formNameValidator(password, error: error),
+          autovalidateMode: AutovalidateMode.disabled
+        ),
+        Fields.formTextField(
+          context: context,
+          textEditingController: _retypedPasswordController,
+          obscureText: true,
+          label: Strings.labelRetypePassword,
+          hint: Strings.messageRepositoryPassword,
+          onSaved: (_) {},
+          validator: (
+            retypedPassword,
+            { error = Strings.messageErrorRetypePassword }
+          ) => retypedPasswordValidator(
+              password: _passwordController.text,
+              retypedPassword: retypedPassword!,
+              error: error
+            ),
+          autovalidateMode: AutovalidateMode.disabled
+        ),
+        Fields.actionsSection(
+          context,
+          buttons: _actions(context)
+        ),
+      ]
     );
   }
 
@@ -257,7 +239,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       },
       child: Text(Strings.actionCreate)
     ),
-    SizedBox(width: 20.0,),
+    Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
       child: Text(Strings.actionCancel)

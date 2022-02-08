@@ -63,7 +63,7 @@ class _MainPageState extends State<MainPage>
 
     Widget _mainState = Container();
 
-    final double defaultBottomPadding = kFloatingActionButtonMargin + Constants.paddingBottomWithFloatingButtonExtra;
+    final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     late ValueNotifier<double> _bottomPaddingWithBottomSheet;
 
     @override
@@ -138,7 +138,7 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Constants.paddingBottomWithBottomSheetExtra;
+      _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
       _showSaveSharedMedia(sharedMedia: _intentPayload);
     }
 
@@ -270,8 +270,8 @@ class _MainPageState extends State<MainPage>
       Padding(
         padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
         child: Fields.actionIcon(
-          icon: Icons.settings_outlined,
-          onTap: () async {
+          const Icon(Icons.settings_outlined),
+          onPressed: () async {
             bool dhtStatus = await repository?.isDhtEnabled() ?? false;
             
             settingsAction(
@@ -280,7 +280,7 @@ class _MainPageState extends State<MainPage>
               dhtStatus
             );
           },
-          size: 25.0,
+          size: Dimensions.sizeIconSmall,
           color: Theme.of(context).colorScheme.surface
         ),
       )
@@ -767,8 +767,8 @@ class _MainPageState extends State<MainPage>
       context: context, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
+          topLeft: Radius.circular(Dimensions.radiusSmall),
+          topRight: Radius.circular(Dimensions.radiusSmall),
           bottomLeft: Radius.zero,
           bottomRight: Radius.zero
         ),
@@ -793,8 +793,8 @@ class _MainPageState extends State<MainPage>
       context: context, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
+          topLeft: Radius.circular(Dimensions.radiusSmall),
+          topRight: Radius.circular(Dimensions.radiusSmall),
           bottomLeft: Radius.zero,
           bottomRight: Radius.zero
         ),
@@ -826,8 +826,8 @@ class _MainPageState extends State<MainPage>
       context: context, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
+          topLeft: Radius.circular(Dimensions.radiusSmall),
+          topRight: Radius.circular(Dimensions.radiusSmall),
           bottomLeft: Radius.zero,
           bottomRight: Radius.zero
         ),
@@ -933,8 +933,8 @@ class _MainPageState extends State<MainPage>
     context: context, 
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20.0),
-        topRight: Radius.circular(20.0),
+        topLeft: Radius.circular(Dimensions.radiusSmall),
+        topRight: Radius.circular(Dimensions.radiusSmall),
         bottomLeft: Radius.zero,
         bottomRight: Radius.zero
       ),

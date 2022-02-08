@@ -18,60 +18,41 @@ class UnlockRepository extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Form(
       key: this.formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 00.0, horizontal: 16.0),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: const BorderRadius.all(Radius.circular(16.0))
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildUnlockRepositoryWidget(this.context),
-          ],
-        ),
-      )
+      child: _buildUnlockRepositoryWidget(this.context),
     );
   }
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
-    return Padding(
-      padding: Dimensions.paddingDialog,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: 10.0,),
-          Fields.constrainedText(
-            '\"${this.repositoryName}\"',
-            flex: 0,
-            fontWeight: FontWeight.w400
-          ),
-          Fields.formTextField(
-            context: context,
-            textEditingController: _passwordController,
-            obscureText: true,
-            label: Strings.labelTypePassword,
-            hint: Strings.messageRepositoryPassword,
-            onSaved: _returnPassword,
-            validator: (
-              password,
-              { error = Strings.messageErrorRepositoryPasswordValidation }
-            ) => formNameValidator(password, error: error),
-            autofocus: true
-          ),
-          Fields.actionsSection(
-            context,
-            buttons: _actions(context)),
-        ]
-      )
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Fields.constrainedText(
+          '\"${this.repositoryName}\"',
+          flex: 0,
+          fontWeight: FontWeight.w400
+        ),
+        Fields.formTextField(
+          context: context,
+          textEditingController: _passwordController,
+          obscureText: true,
+          label: Strings.labelTypePassword,
+          hint: Strings.messageRepositoryPassword,
+          onSaved: _returnPassword,
+          validator: (
+            password,
+            { error = Strings.messageErrorRepositoryPasswordValidation }
+          ) => formNameValidator(password, error: error),
+          autofocus: true
+        ),
+        Fields.actionsSection(
+          context,
+          buttons: _actions(context)),
+      ]
     );
   }
 
@@ -88,7 +69,7 @@ class UnlockRepository extends StatelessWidget {
       },
       child: Text(Strings.actionUnlock)
     ),
-    SizedBox(width: 20.0,),
+    Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
       child: Text(Strings.actionCancel)

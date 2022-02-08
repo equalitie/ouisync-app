@@ -75,11 +75,11 @@ class _SettingsPageState extends State<SettingsPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.iconText(
+          Fields.iconLabel(
             icon: Icons.lock_rounded,
             text: Strings.titleRepository,
+            iconSize: Dimensions.sizeIconBig,
             textAlign: TextAlign.start,
-            padding: EdgeInsets.fromLTRB(20.0, 0.0, 10.0, 20.0)
             ),
           RepositoryPicker(
             repositoriesCubit: widget.repositoriesCubit,

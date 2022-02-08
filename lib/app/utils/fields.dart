@@ -48,7 +48,7 @@ class Fields {
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.black,
     Map<String, StyledTextTagBase>? tags,
-    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0.0)
+    EdgeInsets padding = Dimensions.paddingInPageMain
   }) => _styledTextBase(
     message,
     textAlign,
@@ -68,7 +68,7 @@ class Fields {
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.black,
     Map<String, StyledTextTagBase>? tags,
-    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0)
+    EdgeInsets padding = Dimensions.paddingInPageSecondary
   }) => _styledTextBase(
     message,
     textAlign,
@@ -109,7 +109,7 @@ class Fields {
   static Widget bottomSheetHandle(BuildContext context,
   {
     double widthFactor = 0.25,
-    double verticalMargin = 12.0,
+    double verticalMargin = 20.0,
     double height = 5.0,
     double borderRadius = 2.5
   }) => FractionallySizedBox(
@@ -130,7 +130,7 @@ class Fields {
 
   static Widget bottomSheetTitle(String title,
   {
-    EdgeInsets padding = const EdgeInsets.only(bottom: 30.0),
+    EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
     TextAlign textAlign = TextAlign.center,
     TextOverflow textOverflow = TextOverflow.ellipsis,
     bool softWrap = true,
@@ -180,17 +180,17 @@ class Fields {
     TextAlign labelTextAlign = TextAlign.center,
     TextOverflow labelTextOverflow = TextOverflow.ellipsis,
     bool labelSoftWrap = false,
-    double labelFontSize = Dimensions.fontSmall,
+    double labelFontSize = Dimensions.fontAverage,
     FontWeight labelFontWeight = FontWeight.bold,
     Color labelColor = Colors.black,
-    TextAlign textAlign = TextAlign.center,
+    TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
     double textFontSize = Dimensions.fontAverage,
     FontWeight textFontWeight = FontWeight.w600,
     Color textColor = Colors.black,
-    EdgeInsets padding: const EdgeInsets.only(top: 20.0),
-    double space = 10.0
+    EdgeInsets padding: Dimensions.paddingBox,
+    Widget space = Dimensions.spacingHorizontal
   }) => Padding(
     padding: padding,
     child: Row(
@@ -207,7 +207,45 @@ class Fields {
           fontWeight: labelFontWeight,
           color: labelColor
         ),
-        SizedBox(width: space,),
+        space,
+        constrainedText(text,
+          textAlign: textAlign,
+          textOverflow: textOverflow,
+          softWrap: textSoftWrap,
+          fontSize: textFontSize,
+          fontWeight: textFontWeight,
+          color: textColor
+        )
+      ],
+    )
+  );
+
+  static Widget iconLabel({
+    required IconData icon,
+    required String text,
+    double iconSize = Dimensions.sizeIconBig,
+    Color iconColor = Colors.black,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.clip,
+    bool textSoftWrap = true,
+    double textFontSize = Dimensions.fontBig,
+    FontWeight textFontWeight = FontWeight.w600,
+    Color textColor = Colors.black,
+    EdgeInsets padding: Dimensions.paddingBox,
+    Widget space = Dimensions.spacingHorizontal
+  }) => Padding(
+    padding: padding,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        _iconBase(
+          icon,
+          size: iconSize,
+          color: iconColor
+        ),
+        space,
         constrainedText(text,
           textAlign: textAlign,
           textOverflow: textOverflow,
@@ -246,7 +284,7 @@ class Fields {
 
   static Icon _iconBase(IconData icon,
   {
-    double size = 30.0,
+    double size = Dimensions.sizeIconAverage,
     Color color = Colors.black,
   }) => Icon(
     icon,
@@ -254,54 +292,62 @@ class Fields {
     color: color
   );
 
-  static Widget actionIcon({
-    required IconData icon,
-    required Function()? onTap,
-    double size = 40.0,
-    Color color = Colors.black
-  }) => GestureDetector(
-    child: _iconBase(
-      icon,
-      size: size,
-      color: color
-    ),
-    onTap: onTap
+  static Widget actionIcon(Icon icon, {
+    required void Function()? onPressed,
+    double size = Dimensions.sizeIconBig,
+    EdgeInsets padding = Dimensions.paddingIconButton,
+    AlignmentGeometry alignment = Dimensions.alignmentIconButton,
+    Color color = Colors.black,
+    bool autofocus = false,
+    String? tooltip,
+  }) => IconButton(
+    icon: icon,
+    iconSize: size,
+    padding: padding,
+    alignment: alignment,
+    color: color,
+    autofocus: autofocus,
+    tooltip: tooltip,
+    onPressed: onPressed,
   );
 
-  static Widget iconText({
-    required IconData icon, 
-    required String text, 
-    double iconSize = 30.0,
-    Color iconColor = Colors.black,
-    TextAlign textAlign = TextAlign.center,
+  static Widget actionText(String text, {
+    required void Function()? onTap,
+    TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
     double textFontSize = Dimensions.fontBig,
-    FontWeight textFontWeight = FontWeight.w600,
+    FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
-    EdgeInsets padding = const EdgeInsets.only(bottom: 10.0),
-    double spacing = 10.0
-  }) => Padding(
-    padding: padding,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _iconBase(
-          icon,
-          size: iconSize,
-          color: iconColor
-        ),
-        SizedBox(width: spacing,),
-        constrainedText(text,
-          textAlign: textAlign,
-          textOverflow: textOverflow,
-          softWrap: textSoftWrap,
-          fontSize: textFontSize,
-          fontWeight: textFontWeight,
-          color: textColor
-        )
-      ],
+    IconData? icon,
+    double iconSize = Dimensions.sizeIconBig,
+    Color iconColor = Colors.black,
+    EdgeInsets padding = Dimensions.paddingActionButton,
+    Widget spacing = Dimensions.spacingHorizontal
+  }) => GestureDetector(
+    onTap: onTap,
+    child: Padding(
+      padding: padding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (icon != null) _iconBase(
+            icon,
+            size: iconSize,
+            color: iconColor
+          ),
+          spacing,
+          constrainedText(text,
+            textAlign: textAlign,
+            textOverflow: textOverflow,
+            softWrap: textSoftWrap,
+            fontSize: textFontSize,
+            fontWeight: textFontWeight,
+            color: textColor
+          )
+        ],
+      )
     )
   );
 
@@ -351,7 +397,7 @@ class Fields {
     bool obscureText = false,
     Function()? onTap,
     Function(String)? onChanged,
-    padding = const EdgeInsets.only(bottom: 10.0),
+    padding = Dimensions.paddingFormTextField,
   }) => Padding(
     padding: padding,
     child: Column(
@@ -381,7 +427,7 @@ class Fields {
   static Widget actionsSection(BuildContext context,
   {
     required List<Widget> buttons,
-    EdgeInsets padding = const EdgeInsets.only(top: 20.0)
+    EdgeInsets padding = Dimensions.paddingActionsSection
   }) =>  Padding(
     padding: padding,
     child: Row(
@@ -389,56 +435,6 @@ class Fields {
       mainAxisSize: MainAxisSize.max,
       children: buttons
     )
-  );
-
-  static Widget roundedButton(BuildContext context,
-  {
-    required IconData icon,
-    required String text,
-    required Function action,
-    double iconSize = 30.0,
-    Color iconColor = Colors.black,
-    double width = 60.0,
-    double height = 60.0,
-    double textFontSize = Dimensions.fontSmall,
-    FontWeight textFontWeight = FontWeight.w700,
-    double spacing = 5.0
-  }) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      OutlinedButton(
-        onPressed: () => action.call(),
-        child: Container(
-          width: width,
-          height: height,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle
-          ),
-          child: _iconBase(
-            icon,
-            size: iconSize,
-            color: iconColor
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          shape: CircleBorder(),
-          primary: Theme.of(context).primaryColor
-        ),
-      ),
-      Divider(
-        height: spacing,
-        color: Colors.transparent,
-      ),
-      Text(
-        text,
-        style: TextStyle(
-          fontSize: textFontSize,
-          fontWeight: textFontWeight,
-        ),
-      )
-    ]
   );
 
   static Container routeBar({ required Widget route })

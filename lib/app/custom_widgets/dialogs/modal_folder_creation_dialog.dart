@@ -22,56 +22,32 @@ class FolderCreation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Form(
       key: this.formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Container(
-        margin: const EdgeInsets.all(16.0),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: const BorderRadius.all(Radius.circular(16.0))
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildCreateFolderWidget(this.context),
-          ],
-        ),
-      )
+      child: _buildCreateFolderWidget(this.context),
     );
   }
 
   Widget _buildCreateFolderWidget(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.formTextField(
-            context: context,
-            icon: const Icon(Icons.folder),
-            label: Strings.labelName,
-            hint: Strings.messageCreateFolder,
-            onSaved: (value) => _onSaved(bloc, value),
-            validator: formNameValidator,
-            autofocus: true
-          ),
-          Fields.labeledText(
-            label: Strings.labelLocation,
-            text: this.path,
-            textAlign: TextAlign.start
-          ),
-          Fields.actionsSection(
-            context,
-            buttons: _actions(context)
-          ),
-        ]
-      )
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Fields.formTextField(
+          context: context,
+          label: Strings.labelName,
+          hint: Strings.messageCreateFolder,
+          onSaved: (value) => _onSaved(bloc, value),
+          validator: formNameValidator,
+          autofocus: true
+        ),
+        Fields.actionsSection(
+          context,
+          buttons: _actions(context)
+        ),
+      ]
     );
   }
 
@@ -105,7 +81,7 @@ class FolderCreation extends StatelessWidget {
       },
       child: Text(Strings.actionCreate)
     ),
-    SizedBox(width: 20.0,),
+    Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
       child: Text(Strings.actionCancel)

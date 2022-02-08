@@ -21,62 +21,43 @@ class DirectoryActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(16.0))
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Fields.bottomSheetHandle(context),
-          _folderDetails(this.context, this.bloc, this.repository, this.parent),
-        ],
-      ),
-    );
-  }
-
-  Widget _folderDetails(context, bloc, repository, parent) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetTitle(Strings.titleFolderActions),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildAction(
-                name: Strings.actionNewFolder,
-                icon: Icons.folder_outlined,
-                action: () => createFolderDialog(context, bloc, repository, parent)
-              ),
-              _buildAction(
-                name: Strings.actionNewFile,
-                icon: Icons.insert_drive_file_outlined,
-                action: () async => await addFile(context, bloc, repository, parent)
-              )
-            ]
-          ),
-        ]
-      )
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Fields.bottomSheetHandle(context),
+        Fields.bottomSheetTitle(Strings.titleFolderActions),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildAction(
+              name: Strings.actionNewFolder,
+              icon: Icons.folder_outlined,
+              action: () => createFolderDialog(context, bloc, repository, parent)
+            ),
+            _buildAction(
+              name: Strings.actionNewFile,
+              icon: Icons.insert_drive_file_outlined,
+              action: () async => await addFile(context, bloc, repository, parent)
+            )
+          ]
+        ),
+      ]
     );
   }
 
   Widget _buildAction({name, icon, action}) => Padding(
-    padding: EdgeInsets.all(10.0),
+    padding: Dimensions.paddingBottomSheetActions,
     child: GestureDetector(
       onTap: action,
       child: Column(
         children: [
           Icon(
             icon,
-            size: 100.0,
+            size: Dimensions.sizeIconExtraBig,
           ),
-          SizedBox(height: 10.0,),
+          Dimensions.spacingVertical,
           Text(
             name,
             style: TextStyle(
