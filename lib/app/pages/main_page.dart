@@ -106,12 +106,16 @@ class _MainPageState extends State<MainPage>
         )
       );
 
+      _repositoryName = repositoryName;
+
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(
         _repository,
-        repositoryName
+        _repositoryName
       );
+
+      
     }
 
     Future<void> unlockRepository(String repositoryName, String password) async {
