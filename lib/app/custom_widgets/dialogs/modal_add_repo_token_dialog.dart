@@ -33,6 +33,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
   String _suggestedName = '';
   bool _showSuggestedName = false;
 
+  ShareToken? _shareToken;
   String? _repoName;
 
   @override
@@ -157,9 +158,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
     _tokenController.selection = TextSelection.collapsed(offset: 0);
 
-    ShareToken? shareToken;
     try {
-      shareToken = ShareToken(this.widget.cubit.session, value);
+      _shareToken = ShareToken(this.widget.cubit.session, value);
     } catch (e) {
       print('Error extracting the repository token:\n${e.toString()}');                
       showToast(Strings.messageErrorTokenInvalid);
@@ -167,12 +167,12 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       cleanupFormOnEmptyToken();
     }
 
-    if (shareToken == null) {
+    if (_shareToken == null) {
       return;
     }
 
-    _suggestedName = shareToken.suggestedName; 
-    _accessModeNotifier.value = shareToken.mode.name;
+    _suggestedName = _shareToken!.suggestedName; 
+    _accessModeNotifier.value = _shareToken!.mode.name;
 
     if (_suggestedName.isNotEmpty) {
       _repoName = _suggestedName;
@@ -224,8 +224,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     }
 
     widget.formKey.currentState!.save();
-    
-    cubit.openRepository(name: name, password: password);
+    cubit.openRepository(name: name, password: password, shareToken: _shareToken);
+
     Navigator.of(this.widget.context).pop(name);
   }
 
