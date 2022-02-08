@@ -30,6 +30,7 @@ Future<void> main() async {
 
   final session = await Session.open(sessionStore);
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     home: OuiSyncApp(
       session: session,
       appStorageLocation: appDir,
