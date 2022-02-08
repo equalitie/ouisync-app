@@ -89,12 +89,17 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           visible: _showSuggestedName,
           child: GestureDetector(
             onTap: () => _updateNameController(_suggestedName),
-            child: Fields.constrainedText(
-              Strings.messageRepositorySuggestedName
-                .replaceAll(Strings.replacementName, _repoName ?? ''),
-              fontSize: Dimensions.fontSmall,
-              fontWeight: FontWeight.normal,
-              color: Colors.black54
+            child: Row(
+              children: [
+                Fields.constrainedText(
+                  Strings.messageRepositorySuggestedName
+                    .replaceAll(Strings.replacementName, _repoName ?? ''),
+                  flex: 0,
+                  fontSize: Dimensions.fontSmall,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black54
+                )
+              ]
             ),
           )
         ),
@@ -136,7 +141,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     );
   }
 
-  _updateNameController(String? value) => _nameController.text = value ?? '';
+  _updateNameController(String? value) {
+    _nameController.text = value ?? '';
+    // _nameController.selection = TextSelection.collapsed(offset: value?.length ?? 0);
+  }
 
   String? retypedPasswordValidator({
     required String password,
