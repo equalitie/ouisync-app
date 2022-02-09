@@ -34,6 +34,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   @override
   void initState() {
     super.initState();
+    NativeChannels.init();
 
     _processSharedIntent();
   }
