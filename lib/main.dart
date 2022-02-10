@@ -1,5 +1,3 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -18,15 +16,19 @@ Future<void> main() async {
   final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
   final sessionStore = '$appDir/${Strings.databaseConfigurationName}';
 
-  final localRepositoriesList = loadLocalRepositories(repositoriesDir).map((e) => e.substring(0, e.lastIndexOf('.'))).toList();
-  final latestRepositoryOrDefaultName = await getLatestRepositoryOrDefault(localRepositoriesList);
-  
   Settings.initSettings(
     appDir,
     repositoriesDir,
     sessionStore,
-    latestRepositoryOrDefaultName
   );
+
+  final localRepositoriesList = RepositoryHelper
+  .localRepositoriesFiles(repositoriesDir) as List<String>;
+  
+  final latestRepositoryOrDefaultName = await RepositoryHelper
+  .latestRepositoryOrDefault(localRepositoriesList);
+  
+  Settings.saveSetting(Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
 
   final session = await Session.open(sessionStore);
   runApp(MaterialApp(
@@ -38,33 +40,4 @@ Future<void> main() async {
       defaultRepositoryName: latestRepositoryOrDefaultName,
     )
   ));
-}
-
-List<String> loadLocalRepositories(String repositoriesDir) {
-  final repositoryFiles = <String>[];
-  if (io.Directory(repositoriesDir).existsSync()) {
-    repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => removeParentFromPath(e.path)).toList());
-    repositoryFiles.removeWhere((e) => !e.endsWith('db'));
-  }
-
-  print('Local repositories found: $repositoryFiles');
-  return repositoryFiles;
-}
-
-Future<String> getLatestRepositoryOrDefault(List<String> localRepositories) async {
-  if (localRepositories.isEmpty) {
-    return '';
-  }
-
-  final defaultRepository = localRepositories.first;
-  final latestRepository = await Settings.readSetting(Constants.currentRepositoryKey);
-
-  if (latestRepository == null) {
-    return defaultRepository;
-  }
-  if (!localRepositories.contains(latestRepository)) {
-    return defaultRepository;
-  }
-
-  return latestRepository;
 }

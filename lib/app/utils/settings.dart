@@ -11,7 +11,11 @@ class Settings {
     }
   }
 
-  static void initSettings(String appDir, String repositoriesDir, String sessionStore, String defaultRepository) async {
+  static void initSettings(
+    String appDir,
+    String repositoriesDir,
+    String sessionStore
+  ) async {
     if (_preferences == null) {
       await _init();
     }
@@ -19,7 +23,6 @@ class Settings {
     _preferences!.setString(Constants.appDirKey, appDir);
     _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
     _preferences!.setString(Constants.sessionStoreKey, sessionStore);
-    _preferences!.setString(Constants.currentRepositoryKey, defaultRepository);
   }
 
   static dynamic readSetting(String key) async {
