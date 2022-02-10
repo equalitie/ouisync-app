@@ -361,16 +361,20 @@ class Fields {
     required String? Function(String? value, {String error}) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
+    FocusNode? focusNode,
     String? initialValue,
     bool obscureText = false,
+    int? maxLines = 1,
     Function()? onTap,
     Function(String)? onChanged
   }) => TextFormField(
     controller: textEditingController,
     autovalidateMode: autovalidateMode,
     autofocus: autofocus,
+    focusNode: focusNode,
     initialValue: initialValue,
     obscureText: obscureText,  
+    maxLines: maxLines,
     keyboardType: TextInputType.text,
     decoration: InputDecoration (
       icon: icon,
@@ -393,8 +397,10 @@ class Fields {
     required String? Function(String? value, {String error}) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
+    FocusNode? focusNode,
     String? initialValue,
     bool obscureText = false,
+    int? maxLines = 1,
     Function()? onTap,
     Function(String)? onChanged,
     padding = Dimensions.paddingFormTextField,
@@ -415,8 +421,10 @@ class Fields {
           validator: validator,
           autovalidateMode: autovalidateMode,
           autofocus: autofocus,
+          focusNode: focusNode,
           initialValue: initialValue,
           obscureText: obscureText,
+          maxLines: maxLines,
           onTap: onTap,
           onChanged: onChanged
         )
