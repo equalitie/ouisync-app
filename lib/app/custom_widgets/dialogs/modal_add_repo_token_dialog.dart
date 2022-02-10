@@ -118,11 +118,12 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           child: GestureDetector(
             onTap: () => _updateNameController(_suggestedName),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.constrainedText(
                   Strings.messageRepositorySuggestedName
                     .replaceAll(Strings.replacementName, _repoName ?? ''),
-                  flex: 0,
+                  flex: 1,
                   fontSize: Dimensions.fontSmall,
                   fontWeight: FontWeight.normal,
                   color: Colors.black54
