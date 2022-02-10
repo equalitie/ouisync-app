@@ -10,6 +10,8 @@ class Constants{
   static const String currentRepositoryKey = 'CURRENT_REPO';
   static const String sessionStoreKey = 'SESSION_STORE';
 
+  static const int bufferSize = 64000;
+
   /// In-line text style names
   
   static const String inlineTextBold = 'bold';
