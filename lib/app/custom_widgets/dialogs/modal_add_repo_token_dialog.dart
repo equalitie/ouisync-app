@@ -37,6 +37,18 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
   String? _repoName;
 
   @override
+  void dispose() {
+    _tokenController.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
+    _retypedPasswordController.dispose();
+
+    _accessModeNotifier.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
       key: this.widget.formKey,
