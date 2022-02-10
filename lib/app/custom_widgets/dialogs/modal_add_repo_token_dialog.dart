@@ -36,16 +36,17 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
   ShareToken? _shareToken;
   String? _repoName;
 
+  final FocusNode _tokenFocus = FocusNode(debugLabel: 'TokenTextField');
+
   @override
-  void dispose() {
-    _tokenController.dispose();
-    _nameController.dispose();
-    _passwordController.dispose();
-    _retypedPasswordController.dispose();
+  void initState() {
+    _tokenFocus.addListener(() {
+      if (!_tokenFocus.hasFocus) {
+        _validateToken();
+      }
+    });
 
-    _accessModeNotifier.dispose();
-
-    super.dispose();
+    super.initState();
   }
 
   @override
@@ -55,6 +56,20 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       autovalidateMode: AutovalidateMode.disabled,
       child: _buildAddRepoWithTokenWidget(this.widget.context),
     );
+  }
+
+  @override
+  void dispose() {
+    _tokenController.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
+    _retypedPasswordController.dispose();
+
+    _accessModeNotifier.dispose();
+    
+    _tokenFocus.dispose();
+
+    super.dispose();
   }
 
   Widget _buildAddRepoWithTokenWidget(BuildContext context) {
@@ -71,7 +86,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
           onSaved: (value) {},
           validator: _repositoryTokenValidator,
           autofocus: true,
-          onChanged: _onTokenChanged
+          focusNode: _tokenFocus,
+          maxLines: null,
         ),
         ValueListenableBuilder(
           valueListenable: _accessModeNotifier,
@@ -170,16 +186,15 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     return null;
   }
 
-  _onTokenChanged(value) {
-    if (value.isEmpty) {
+  _validateToken() {
+    if (_tokenController.text.isEmpty) {
       cleanupFormOnEmptyToken();
       return;
     }
 
-    _tokenController.selection = TextSelection.collapsed(offset: 0);
-
+    final token = _tokenController.text;
     try {
-      _shareToken = ShareToken(this.widget.cubit.session, value);
+      _shareToken = ShareToken(this.widget.cubit.session, token);
     } catch (e) {
       print('Error extracting the repository token:\n${e.toString()}');                
       showToast(Strings.messageErrorTokenInvalid);
