@@ -38,7 +38,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
         Expanded(
           flex: 1,
           child: Padding(
-            padding: EdgeInsets.all(5.0),
+            padding: Dimensions.paddingActionBox,
             child: Text(
               '$current',
               softWrap: false,
@@ -66,11 +66,11 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
       child: path == Strings.rootPath
       ? const Icon(
           Icons.lock_rounded,
-          size: 30.0,
+          size: Dimensions.sizeIconAverage,
         )
       : const Icon(
           Icons.arrow_back,
-          size: 30.0,
+          size: Dimensions.sizeIconAverage,
         ),
     );
   }
