@@ -54,7 +54,6 @@ dependencies:
   url_launcher: ^6.0.6
 
 dev_dependencies:
-  change_app_package_name: ^1.0.0
   flutter_test:
     sdk: flutter
   integration_test:
