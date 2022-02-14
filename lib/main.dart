@@ -16,7 +16,7 @@ Future<void> main() async {
   final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
   final sessionStore = '$appDir/${Strings.databaseConfigurationName}';
 
-  Settings.initSettings(
+  await Settings.initSettings(
     appDir,
     repositoriesDir,
     sessionStore,
@@ -28,9 +28,10 @@ Future<void> main() async {
   final latestRepositoryOrDefaultName = await RepositoryHelper
   .latestRepositoryOrDefault(localRepositoriesList);
   
-  Settings.saveSetting(Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
+  await Settings.saveSetting(Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
 
   final session = await Session.open(sessionStore);
+  
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     home: OuiSyncApp(
