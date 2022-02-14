@@ -11,7 +11,7 @@ class Settings {
     }
   }
 
-  static void initSettings(
+  static Future<void> initSettings(
     String appDir,
     String repositoriesDir,
     String sessionStore
@@ -20,9 +20,9 @@ class Settings {
       await _init();
     }
 
-    _preferences!.setString(Constants.appDirKey, appDir);
-    _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
-    _preferences!.setString(Constants.sessionStoreKey, sessionStore);
+    await _preferences!.setString(Constants.appDirKey, appDir);
+    await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+    await _preferences!.setString(Constants.sessionStoreKey, sessionStore);
   }
 
   static dynamic readSetting(String key) async {
@@ -45,31 +45,31 @@ class Settings {
     switch (value.runtimeType) {
       case bool:
         print('Saving setting $key<${value.runtimeType}>: $value');
-        _preferences!.setBool(key, value);
+        await _preferences!.setBool(key, value);
 
         break;
 
       case double:
         print('Saving setting $key<${value.runtimeType}>: $value');
-        _preferences!.setDouble(key, value);
+        await _preferences!.setDouble(key, value);
         
         break;
 
       case int:
         print('Saving setting $key<${value.runtimeType}>: $value');
-        _preferences!.setInt(key, value);
+        await _preferences!.setInt(key, value);
         
         break;
 
       case String:
         print('Saving setting $key<${value.runtimeType}>: $value');
-        _preferences!.setString(key, value);
+        await _preferences!.setString(key, value);
 
         break;
 
       case List:
         print('Saving setting $key<${value.runtimeType}>: $value');
-        _preferences!.setStringList(key, value);
+        await _preferences!.setStringList(key, value);
 
         break;
       
