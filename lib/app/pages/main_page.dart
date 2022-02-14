@@ -264,7 +264,6 @@ class _MainPageState extends State<MainPage>
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
       repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
-      synchronizationCubit: BlocProvider.of<SynchronizationCubit>(context),
       onRepositorySelect: switchRepository,
       shareRepositoryOnTap: shareRepository,
     );
@@ -280,7 +279,6 @@ class _MainPageState extends State<MainPage>
             
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
-              BlocProvider.of<SynchronizationCubit>(context),
               dhtStatus
             );
           },
@@ -1026,13 +1024,12 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction(reposCubit, syncCubit, dhtStatus) {
+  void settingsAction(reposCubit, dhtStatus) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return SettingsPage(
           repositoriesCubit: reposCubit,
-          synchronizationCubit: syncCubit,
           onRepositorySelect: switchRepository,
           title: Strings.titleSettings,
           currentRepository: _repository,
