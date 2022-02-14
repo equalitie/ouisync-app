@@ -10,7 +10,6 @@ import '../custom_widgets.dart';
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
     required this.repositoriesCubit,
-    required this.synchronizationCubit,
     required this.onRepositorySelect,
     required this.borderColor,
     this.currentRepository,
@@ -18,7 +17,6 @@ class RepositoryPicker extends StatefulWidget {
   });
 
   final RepositoriesCubit repositoriesCubit;
-  final SynchronizationCubit synchronizationCubit;
   final RepositoryCallback onRepositorySelect;
   final Color borderColor;
   final Repository? currentRepository;
@@ -118,12 +116,6 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           softWrap: false,
           textOverflow: TextOverflow.fade,
           color: iconColor
-        ),
-        if(_repository != null) Expanded(
-          flex: 0,
-          child: SyncWidget(
-            cubit: widget.synchronizationCubit
-          )
         ),
         Fields.actionIcon(
           const Icon(Icons.keyboard_arrow_down_outlined),

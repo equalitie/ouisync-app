@@ -9,7 +9,6 @@ import 'pages.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.repositoriesCubit,
-    required this.synchronizationCubit,
     required this.onRepositorySelect,
     required this.title,
     this.currentRepository,
@@ -18,7 +17,6 @@ class SettingsPage extends StatefulWidget {
   });
 
   final RepositoriesCubit repositoriesCubit;
-  final SynchronizationCubit synchronizationCubit;
   final RepositoryCallback onRepositorySelect;
   final String title;
   final Repository? currentRepository;
@@ -83,7 +81,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           RepositoryPicker(
             repositoriesCubit: widget.repositoriesCubit,
-            synchronizationCubit: widget.synchronizationCubit,
             onRepositorySelect: widget.onRepositorySelect,
             borderColor: Colors.black38,
             currentRepository: widget.currentRepository,

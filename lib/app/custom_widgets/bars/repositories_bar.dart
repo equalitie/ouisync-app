@@ -8,13 +8,11 @@ import '../custom_widgets.dart';
 class RepositoriesBar extends StatefulWidget {
   const RepositoriesBar({
     required this.repositoriesCubit,
-    required this.synchronizationCubit,
     required this.onRepositorySelect,
     required this.shareRepositoryOnTap
   });
 
   final RepositoriesCubit repositoriesCubit;
-  final SynchronizationCubit synchronizationCubit;
   final RepositoryCallback onRepositorySelect;
   final ShareRepositoryCallback shareRepositoryOnTap;
 
@@ -39,7 +37,6 @@ class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderSt
           Expanded(
             child: RepositoryPicker(
               repositoriesCubit: widget.repositoriesCubit,
-              synchronizationCubit: widget.synchronizationCubit,
               onRepositorySelect: widget.onRepositorySelect,
               borderColor: Colors.white,
             ),
