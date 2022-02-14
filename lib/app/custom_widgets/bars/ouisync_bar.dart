@@ -30,10 +30,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
       actions: actionList,
       bottom: PreferredSize(
         preferredSize: bottomPreferredSize,
-        child: Container(
-          color: Theme.of(context).primaryColor,
-          child: bottomWidget
-        ),
+        child: bottomWidget,
       ),
     );
   }

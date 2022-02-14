@@ -104,6 +104,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       color: Colors.white,
     ),
     child: Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.cloud_outlined,
