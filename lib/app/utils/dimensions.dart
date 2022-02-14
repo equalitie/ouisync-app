@@ -27,8 +27,8 @@ class Dimensions {
   static const EdgeInsets paddingIconButton = const EdgeInsets.all(2.0);
   static const EdgeInsets paddingActionButton = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0);
   static const EdgeInsets paddingBox = const EdgeInsets.only(top: 10.0, bottom: 10.0);
-  static const EdgeInsets paddingRepositoryBar = const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0);
-  static const EdgeInsets paddingepositoryPicker = const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0);
+  static const EdgeInsets paddingRepositoryBar = const EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0);
+  static const EdgeInsets paddingepositoryPicker = const EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0);
   static const EdgeInsets paddingInPageMain = const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0.0);
   static const EdgeInsets paddingInPageSecondary = const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0);
   static const EdgeInsets paddingBottomSheetTitle = const EdgeInsets.only(bottom: 20.0);
