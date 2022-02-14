@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/blocs.dart';
@@ -15,7 +15,17 @@ class FolderNavigationBar extends StatelessWidget {
           return Fields.routeBar(route: state.route);
         }
 
-        return Fields.routeBar(route: Text(''));
+        return Fields.routeBar(
+          route: Row(
+            children: [
+              const Icon(
+                Icons.lock_rounded,
+                color: Colors.black26,
+                size: Dimensions.sizeIconAverage,
+              )
+            ]
+          )
+        );
       }
     );
   }

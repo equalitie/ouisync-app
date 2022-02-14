@@ -41,7 +41,6 @@ class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderSt
               borderColor: Colors.white,
             ),
           ),
-          Dimensions.spacingHorizontal,
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
             onPressed: widget.shareRepositoryOnTap,

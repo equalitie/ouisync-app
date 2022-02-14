@@ -270,8 +270,7 @@ class _MainPageState extends State<MainPage>
     }
 
     List<Widget> _buildActionList(Repository? repository) => [
-      Padding(
-        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+      Container(
         child: Fields.actionIcon(
           const Icon(Icons.settings_outlined),
           onPressed: () async {
