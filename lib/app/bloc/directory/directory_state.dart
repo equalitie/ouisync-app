@@ -201,6 +201,8 @@ class NavigationLoadSuccess extends DirectoryState {
   ];
 }
 
+class NavigationLoadBlind extends DirectoryState {}
+
 class DirectoryLoadFailure extends DirectoryState {
   const DirectoryLoadFailure({
     this.isSyncing = false
