@@ -13,7 +13,11 @@ class RepositoriesService {
   Map<String, Repository> get repositories => _repositories ?? <String, Repository>{};
   
   put(String name, Repository repository) => {
-    _repositories?.putIfAbsent(name, () => repository) ?? <String, Repository>{}
+    _repositories?.update(
+      name,
+      (value) => repository,
+      ifAbsent: () => repository
+    ) ?? <String, Repository>{}
   };
     
 }
