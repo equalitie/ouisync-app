@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
+import '../../utils/utils.dart';
 import '../custom_widgets.dart';
 
 class ListItem extends StatelessWidget {
@@ -55,11 +56,11 @@ class ListItem extends StatelessWidget {
     return itemData.itemType == ItemType.folder
       ? Icon(
         itemData.icon,
-        size: 40.0
+        size: Dimensions.sizeIconBig
       )
       : Icon(
         itemData.icon,
-        size: 38.0,
+        size: Dimensions.sizeIconAverage
       );
   }
 
@@ -81,12 +82,12 @@ class ListItem extends StatelessWidget {
   Widget _getActionByType(Function secondaryAction, PopupMenuButton<dynamic>? filePopupMenu, Function? folderDotsAction, bool isDestination) {
     if (isDestination) {
       return itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: 30.0,), onPressed: () => secondaryAction.call())
+        ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: Dimensions.sizeIconAverage,), onPressed: () => secondaryAction.call())
         : IconButton(onPressed: null, icon: Container());
     }
 
     return itemData.itemType == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: 30.0,), onPressed: () async => await folderDotsAction!.call())
+        ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconAverage,), onPressed: () async => await folderDotsAction!.call())
         : filePopupMenu!;
   }
 

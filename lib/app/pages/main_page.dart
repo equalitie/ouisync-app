@@ -665,7 +665,7 @@ class _MainPageState extends State<MainPage>
                 Constants.inlineTextBold: InlineTextStyles.bold,
                 Constants.inlineTextIcon: InlineTextStyles.icon(
                   Icons.add_circle,
-                  size: 34.0,
+                  size: Dimensions.sizeIconBig,
                   color: Theme.of(context).primaryColor
                 )
               }
