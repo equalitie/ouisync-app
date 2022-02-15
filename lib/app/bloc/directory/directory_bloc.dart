@@ -149,6 +149,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   }
 
   Future<DirectoryState> navigateTo(Repository repository, Navigation type, String origin, String destination) async {
+    if (repository.accessMode == AccessMode.blind) {
+      return NavigationLoadBlind();
+    }
+
     var folderContentsResult;
 
     try {

@@ -395,6 +395,15 @@ class _MainPageState extends State<MainPage>
           );
         }
 
+        if (state is NavigationLoadBlind) {
+          return _selectLayoutWidget(
+            repository: _repository!,
+            path: '',
+            isContentsEmpty: true,
+            isBlind: true
+          ); 
+        }
+
         if (state is DirectoryLoadFailure) {
           return _errorState(
             message: Strings.messageErrorState,
@@ -525,8 +534,16 @@ class _MainPageState extends State<MainPage>
     _selectLayoutWidget({
       required Repository repository,
       required String path,
-      required bool isContentsEmpty
+      required bool isContentsEmpty,
+      bool isBlind = false
     }) {
+      if (isBlind) {
+        return BlindRepositoryState(
+          repositoryName: _repositoryName,
+          onUnlockPressed: unlockRepositoryDialog,
+        );
+      }
+      
       if (isContentsEmpty) {
         return _noContents(repository: repository, path: path);
       }
