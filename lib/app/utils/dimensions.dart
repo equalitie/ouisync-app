@@ -46,6 +46,7 @@ class Dimensions {
 
   static const double spacingAppBarTitle = 0.0;
   static const Widget spacingVertical = SizedBox(height: 10.0);
+  static const Widget spacingVerticalDouble = SizedBox(height: 20.0);
   static const Widget spacingHorizontal = SizedBox(width: 10.0);
   static const Widget spacingActionsVertical = SizedBox(height: 20.0);
   static const Widget spacingActionsHorizontal = SizedBox(width: 20.0);

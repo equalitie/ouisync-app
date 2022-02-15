@@ -53,6 +53,8 @@ class Strings {
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
   static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
+  static const String messageBlindRepository = 'This repository is a blind replica';
+  static const String messageBlindRepositoryContent = 'The provided <bold>password</bold> do not grant you access to its contents';
   static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input the password '
   'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
@@ -165,6 +167,7 @@ class Strings {
   static const String actionMove = 'Move';
   static const String actionSave = 'Save';
   static const String actionUnlock = 'Unlock';
+  static const String actionRetry = 'Retry';
 
   static const String actionDeleteFolder = 'Delete folder';
 
