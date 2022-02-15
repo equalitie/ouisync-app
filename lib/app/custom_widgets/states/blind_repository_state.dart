@@ -33,11 +33,6 @@ class BlindRepositoryState extends StatelessWidget {
               Strings.messageBlindRepositoryContent,
               tags: {
                 Constants.inlineTextBold: InlineTextStyles.bold,
-                Constants.inlineTextIcon: InlineTextStyles.icon(
-                  Icons.add_circle,
-                  size: 34.0,
-                  color: Theme.of(context).primaryColor
-                )
               }
             ),
           ),
