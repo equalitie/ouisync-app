@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
+import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
@@ -11,16 +11,12 @@ class SettingsPage extends StatefulWidget {
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.title,
-    this.currentRepository,
-    this.currentRepositoryName = '',
     this.dhtStatus = false
   });
 
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final String title;
-  final Repository? currentRepository;
-  final String currentRepositoryName;
   final bool dhtStatus;
 
   @override
@@ -28,6 +24,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  RepositoriesService _repositoriesSession = RepositoriesService();
   bool _bittorrentDhtStatus = false;
 
   @override
@@ -83,12 +80,19 @@ class _SettingsPageState extends State<SettingsPage> {
             repositoriesCubit: widget.repositoriesCubit,
             onRepositorySelect: widget.onRepositorySelect,
             borderColor: Colors.black38,
-            currentRepository: widget.currentRepository,
-            currentRepositoryName: widget.currentRepositoryName,
+            currentRepository: _repositoriesSession.current?.repository,
+            currentRepositoryName: _repositoriesSession.current?.name ?? '',
           ),
           SizedBox(height: 20.0,),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              if (!_repositoriesSession.hasCurrent) {
+                return;
+              }
+              
+              widget.repositoriesCubit
+              .renameRepository(_repositoriesSession.current!.name, 'test');
+            },
             child: Text(
               Strings.actionEditRepositoryName,
               style: TextStyle(
@@ -97,7 +101,14 @@ class _SettingsPageState extends State<SettingsPage> {
             )
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () { 
+              if (!_repositoriesSession.hasCurrent) {
+                return;
+              }  
+
+              widget.repositoriesCubit
+              .deleteRepository(_repositoriesSession.current?.name ?? '');
+            },
             child: Text(
               Strings.actionDeleteRepository,
               style: TextStyle(
@@ -111,16 +122,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> updateDhtSetting(bool enable) async {
-    if (widget.currentRepository == null) {
+    if (!_repositoriesSession.hasCurrent) {
       return;
     }
 
     print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
 
-    enable ? await widget.currentRepository!.enableDht()
-    : await widget.currentRepository!.disableDht();
+    enable ? await _repositoriesSession.current!.repository.enableDht()
+    : await _repositoriesSession.current!.repository.disableDht();
     
-    final isEnabled = await widget.currentRepository!.isDhtEnabled();
+    final isEnabled = await _repositoriesSession.current!.repository.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });

@@ -46,10 +46,6 @@ class _MainPageState extends State<MainPage>
 
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
-    Repository? _repository;
-    Subscription? _repositorySubscription;
-
-    String _repositoryName = '';
     String _currentFolder = Strings.rootPath; // Initial value: /
   
     List<BaseItem> _folderContents = <BaseItem>[];
@@ -70,6 +66,10 @@ class _MainPageState extends State<MainPage>
     void initState() {
       super.initState();
       
+      _repositoriesSession
+      .setSubscriptionCallback(_syncCurrentFolder);
+
+
       initMainPage();
 
       widget.intentStream
@@ -81,9 +81,8 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() {
-      _repositorySubscription?.cancel();
-      _repository?.close();
-  
+      // TODO: dispose all repositories
+
       super.dispose();
     }
 
@@ -106,16 +105,12 @@ class _MainPageState extends State<MainPage>
         )
       );
 
-      _repositoryName = repositoryName;
-
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(
-        _repository,
-        _repositoryName
+        null,
+        repositoryName
       );
-
-      
     }
 
     Future<void> unlockRepository(String repositoryName, String password) async {
@@ -135,7 +130,7 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      if (repositoryName.isEmpty) {
+      if (!_repositoriesSession.hasCurrent) {
         Fluttertoast
         .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
 
@@ -220,42 +215,42 @@ class _MainPageState extends State<MainPage>
       withProgress: true
     );
 
-    void subscribeToRepositoryNotifications({
-      required Repository repository
-    }) {
-      _repositorySubscription = repository
-      .subscribe(syncCurrentFolder);
-    }
+    void _syncCurrentFolder(String repositoryName) { 
+      if (!_repositoriesSession.hasCurrent) {
+        return;
+      }
 
-    void syncCurrentFolder() { 
+      if (_repositoriesSession.current!.name != repositoryName) {
+        print('[Syncing $repositoryName in background] (Current: ${_repositoriesSession.current!.repository.handle})');
+        return;
+      }
+
       _syncingCubit?.syncing();
     
       getContents(
-        repository: _repository!,
+        repository: _repositoriesSession.current!.repository,
         path: _currentFolder,
         isSyncing: true
       );
 
-      print('[Syncing] Current folder: $_currentFolder');
+      print('[Syncing $repositoryName (${_repositoriesSession.current!.repository.handle})] Current folder: $_currentFolder');
     }
 
     @override
     Widget build(BuildContext context) {
       return Scaffold(
         key: _scaffoldKey,
-        appBar: _buildOuiSyncBar(repository: _repository),
+        appBar: _buildOuiSyncBar(),
         body: _mainState,
         floatingActionButton: _buildFAB(context,
-          repository: _repository,
-          path: _currentFolder
         ),
       );
     }
 
-    _buildOuiSyncBar({required Repository? repository}) => OuiSyncBar(
+    _buildOuiSyncBar() => OuiSyncBar(
       leadingAppBranding: null,
       titleCentralWidget: _buildRepositoriesBar(),
-      actionList: _buildActionList(repository),
+      actionList: _buildActionList(),
       bottomWidget: FolderNavigationBar(),
       bottomPreferredSize: Size.fromHeight(120.0),
       toolbarHeight: 90.0,
@@ -269,12 +264,12 @@ class _MainPageState extends State<MainPage>
     );
     }
 
-    List<Widget> _buildActionList(Repository? repository) => [
+    List<Widget> _buildActionList() => [
       Container(
         child: Fields.actionIcon(
           const Icon(Icons.settings_outlined),
           onPressed: () async {
-            bool dhtStatus = await repository?.isDhtEnabled() ?? false;
+            bool dhtStatus = await _repositoriesSession.current?.repository.isDhtEnabled() ?? false;
             
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
@@ -287,69 +282,56 @@ class _MainPageState extends State<MainPage>
       )
     ];
 
-    StatelessWidget _buildFAB(BuildContext context,
-    {
-      required Repository? repository,
-      required String path
-    }) {
-      return repository != null
+    StatelessWidget _buildFAB(BuildContext context,) {
+      return _repositoriesSession.hasCurrent
       ? new FloatingActionButton(
         heroTag: Constants.heroTagMainPageActions,
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
           context, 
-          BlocProvider.of<DirectoryBloc>(context), 
-          repository, 
-          path
+          bloc: BlocProvider.of<DirectoryBloc>(context), 
+          repository: _repositoriesSession.current!.repository, 
+          parent: _currentFolder
         ),
       )
       : Container();
     }
 
     void switchRepository(Repository? repository, String name) {
-      if (_repositorySubscription != null) {
-        _repositorySubscription!.cancel();
-        _repositorySubscription = null;
-
-        print('Repository subscription closed');
-      }
-
-      _repository = repository;
-      _repositoryName = name;
-
-      NativeChannels.setRepository(_repository);  
-
-      if (_repository == null) {
-        initMainPageLayout(_repositoryName);
-
+      
+      if (repository == null) {
+        initMainPageLayout(name);
         return;
       }
 
-      print('Saving repository: $_repositoryName');
-      _repositoriesSession.put(_repositoryName, _repository!);
-      print('Repositories in memory: ${_repositoriesSession.repositories.keys}');
+      NativeChannels.setRepository(repository);  
+
+      print('Saving repository: $name');
+      _repositoriesSession.put(name, repository, isCurrent: true);
+    
+      print('Repositories in memory: ${_repositoriesSession.repositories}');
+      print('Current repository: ${_repositoriesSession.current}');
 
       switchMainState(newState: _repositoryContentBuilder());
 
       navigateToPath(
-        repository: _repository!,
+        repository: _repositoriesSession.current!.repository,
         type: Navigation.content,
         origin: Strings.rootPath,
         destination: Strings.rootPath,
         withProgress: true
       );
-
-      subscribeToRepositoryNotifications(
-        repository: _repository!,
-      );
     }
 
     void shareRepository() async {
-      if (_repository == null) {
+      if (!_repositoriesSession.hasCurrent) {
         return;
       }
       
-      await _showShareRepository(context, repository: _repository!, repositoryName: _repositoryName);
+      await _showShareRepository(context,
+        repository: _repositoriesSession.current!.repository,
+        repositoryName: _repositoriesSession.current!.name
+      );
     }
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
@@ -375,13 +357,13 @@ class _MainPageState extends State<MainPage>
         if (state is DirectoryLoadSuccess) {
           if (state.path == _currentFolder) {
             return _selectLayoutWidget(
-              repository: _repository!,
+              persistedRepo: _repositoriesSession.current!,
               path: _currentFolder,
               isContentsEmpty: state.contents.isEmpty
             );  
           }
           return _selectLayoutWidget(
-            repository: _repository!,
+            persistedRepo: _repositoriesSession.current!,
             path: _currentFolder,
             isContentsEmpty: _folderContents.isEmpty
           );
@@ -389,7 +371,7 @@ class _MainPageState extends State<MainPage>
         
         if (state is NavigationLoadSuccess) {
           return _selectLayoutWidget(
-            repository: _repository!,
+            persistedRepo: _repositoriesSession.current!,
             path: _currentFolder,
             isContentsEmpty: state.contents.isEmpty
           );
@@ -397,7 +379,7 @@ class _MainPageState extends State<MainPage>
 
         if (state is NavigationLoadBlind) {
           return _selectLayoutWidget(
-            repository: _repository!,
+            persistedRepo: _repositoriesSession.current!,
             path: '',
             isContentsEmpty: true,
             isBlind: true
@@ -407,20 +389,29 @@ class _MainPageState extends State<MainPage>
         if (state is DirectoryLoadFailure) {
           return _errorState(
             message: Strings.messageErrorState,
-            actionReload: () => refreshCurrent(repository: _repository!, path: _currentFolder)
+            actionReload: () => refreshCurrent(
+              repository: _repositoriesSession.current!.repository,
+              path: _currentFolder
+            )
           );
         }
 
         if (state is NavigationLoadFailure) {
           return _errorState(
             message: Strings.messageErrorState,
-            actionReload: () => refreshCurrent(repository: _repository!, path: _currentFolder)
+            actionReload: () => refreshCurrent(
+              repository: _repositoriesSession.current!.repository,
+              path: _currentFolder
+            )
           );
         }
 
         return _errorState(
           message: Strings.messageErrorLoadingContents,
-          actionReload: () => refreshCurrent(repository: _repository!, path: _currentFolder)
+          actionReload: () => refreshCurrent(
+            repository: _repositoriesSession.current!.repository,
+            path: _currentFolder
+          )
         );
       },
       listener: (context, state) {
@@ -432,7 +423,7 @@ class _MainPageState extends State<MainPage>
             updateCurrentFolder(path: state.destination);
             updateFolderContents(newContent: state.contents);
             updateRoute(
-              repository: _repository!,
+              repository: _repositoriesSession.current!.repository,
               destination: state.destination
             );
 
@@ -502,8 +493,6 @@ class _MainPageState extends State<MainPage>
               state.filePath
             )
           );
-
-          
         }
 
         if (state is DirectoryLoadSuccess) {
@@ -532,23 +521,29 @@ class _MainPageState extends State<MainPage>
     );
 
     _selectLayoutWidget({
-      required Repository repository,
+      required PersistedRepository persistedRepo,
       required String path,
       required bool isContentsEmpty,
       bool isBlind = false
     }) {
       if (isBlind) {
         return BlindRepositoryState(
-          repositoryName: _repositoryName,
+          repositoryName: persistedRepo.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
       }
       
       if (isContentsEmpty) {
-        return _noContents(repository: repository, path: path);
+        return _noContents(
+          repository: persistedRepo.repository,
+          path: path
+        );
       }
 
-      return _contentsList(repository: repository, path: path);
+      return _contentsList(
+        repository: persistedRepo.repository,
+        path: path
+      );
     }
 
     Future<void> updateFolderContents({required List<BaseItem> newContent}) async {
@@ -904,7 +899,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       MoveEntry(
-        repository: _repository!,
+        repository: _repositoriesSession.current!.repository,
         origin: origin,
         destination: _currentFolder,
         entryPath: path,
@@ -914,7 +909,7 @@ class _MainPageState extends State<MainPage>
   }
 
   void saveSharedMedia() async {
-    if (_repository == null) {
+    if (!_repositoriesSession.hasCurrent) {
       Fluttertoast.showToast(msg: Strings.messageNoRepo);
       return;
     }
@@ -935,7 +930,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       SaveFile(
-        repository: _repository!,
+        repository: _repositoriesSession.current!.repository,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
@@ -946,7 +941,11 @@ class _MainPageState extends State<MainPage>
     Navigator.of(context).pop();
   }
 
-  Future<dynamic> _showDirectoryActions(context, bloc, repository, parent) => showModalBottomSheet(
+  Future<dynamic> _showDirectoryActions(BuildContext context,{
+    required DirectoryBloc bloc,
+    required Repository repository,
+    required String parent
+  }) => showModalBottomSheet(
     isScrollControlled: true,
     context: context, 
     shape: RoundedRectangleBorder(
@@ -1048,8 +1047,6 @@ class _MainPageState extends State<MainPage>
           repositoriesCubit: reposCubit,
           onRepositorySelect: switchRepository,
           title: Strings.titleSettings,
-          currentRepository: _repository,
-          currentRepositoryName: _repositoryName,
           dhtStatus: dhtStatus,
         );
       })
