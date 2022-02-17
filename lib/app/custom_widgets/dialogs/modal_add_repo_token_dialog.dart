@@ -172,7 +172,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
   _updateNameController(String? value) {
     _nameController.text = value ?? '';
-    // _nameController.selection = TextSelection.collapsed(offset: value?.length ?? 0);
   }
 
   String? retypedPasswordValidator({
