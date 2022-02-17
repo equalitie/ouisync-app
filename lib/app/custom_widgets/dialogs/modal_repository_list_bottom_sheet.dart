@@ -70,18 +70,15 @@ class RepositoryList extends StatelessWidget {
       return Fields.actionText(
         repositoryName,
         onTap: () { 
-          final repository = repositoriesSession.repositories[repositoryName];
-          if(repository != null) {
-            this.cubit
-            .selectRepository(
-              repository,
-              repositoryName
-            );    
-          }
-
-          this.onRepositorySelect.call(repository, repositoryName); 
+          final persisted = repositoriesSession.get(repositoryName);
+          
+          this.cubit
+          .selectRepository(
+            persisted?.repository,
+            repositoryName
+          );
+          
           updateDefaultRepositorySetting(repositoryName);
-
           Navigator.of(context).pop();
         },
         icon: repositoryName == current
