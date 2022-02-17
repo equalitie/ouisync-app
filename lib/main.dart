@@ -14,12 +14,11 @@ Future<void> main() async {
 
   final appDir = (await getApplicationSupportDirectory()).path;
   final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
-  final sessionStore = '$appDir/${Strings.databaseConfigurationName}';
+  final configDir = '$appDir/${Strings.configuratiosDirName}';
 
   await Settings.initSettings(
     appDir,
     repositoriesDir,
-    sessionStore,
   );
 
   final localRepositoriesList = RepositoryHelper
@@ -30,7 +29,7 @@ Future<void> main() async {
   
   await Settings.saveSetting(Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
 
-  final session = await Session.open(sessionStore);
+  final session = await Session.open(configDir);
   
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,

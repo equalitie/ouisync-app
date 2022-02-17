@@ -14,7 +14,6 @@ class Settings {
   static Future<void> initSettings(
     String appDir,
     String repositoriesDir,
-    String sessionStore
   ) async {
     if (_preferences == null) {
       await _init();
@@ -22,7 +21,6 @@ class Settings {
 
     await _preferences!.setString(Constants.appDirKey, appDir);
     await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
-    await _preferences!.setString(Constants.sessionStoreKey, sessionStore);
   }
 
   static dynamic readSetting(String key) async {

@@ -3,7 +3,7 @@ class Strings {
 
   /// Configuration
   static const String folderRepositoriesName = 'repositories';
-  static const String databaseConfigurationName = 'config.db';
+  static const String configuratiosDirName = 'configs';
 
   /// Page titles
   static const String titleApp = 'OuiSync';

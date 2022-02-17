@@ -8,7 +8,6 @@ class Constants{
   static const String appDirKey = 'APP_DIR';
   static const String repositoriesDirKey = 'REPOS_DIR';
   static const String currentRepositoryKey = 'CURRENT_REPO';
-  static const String sessionStoreKey = 'SESSION_STORE';
 
   static const int bufferSize = 64000;
 
