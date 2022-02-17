@@ -20,6 +20,27 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
   final String appDir;
   final String repositoriesDir;
 
+  /// Opens a repository in blind mode to allow synchronization, even before the
+  /// user unlocks it.
+  Future<Repository?> initRepository(String name) async {
+    final store = _buildStoreString(name);
+    final storeExist = await io.File(store).exists();
+    
+    Repository? blindRepository;
+    try {
+      blindRepository = await _getRepository(
+        store: store,
+        password: '',
+        shareToken: null,
+        exist: storeExist
+      );
+    } catch (e) {
+      print('Exception opening the repository $name:\n${e.toString()}');
+    }
+
+    return blindRepository;
+  }
+
   void openRepository({required String name, String? password, ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
     await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
