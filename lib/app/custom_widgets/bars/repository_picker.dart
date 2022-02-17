@@ -49,14 +49,15 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }
 
   updateCurrentRepository(Repository? repository, String name) async {
+    if (repository == null) { /// Every repository is initialized as a blind replica
+      repository = await widget.repositoriesCubit
+      .initRepository(name);
+    }
+
     setState(() {
       _repository = repository;
       _repositoryName = name;
     });
-
-    if (_repository == null) {
-      return;
-    }
 
     widget.onRepositorySelect.call(repository, name);
   }
