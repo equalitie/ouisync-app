@@ -10,12 +10,14 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.repositoriesCubit,
     required this.onRepositorySelect,
+    required this.onShareRepository,
     required this.title,
-    this.dhtStatus = false
+    this.dhtStatus = false, 
   });
 
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
+  final void Function() onShareRepository;
   final String title;
   final bool dhtStatus;
 

@@ -1046,6 +1046,7 @@ class _MainPageState extends State<MainPage>
         return SettingsPage(
           repositoriesCubit: reposCubit,
           onRepositorySelect: switchRepository,
+          onShareRepository: shareRepository,
           title: Strings.titleSettings,
           dhtStatus: dhtStatus,
         );
