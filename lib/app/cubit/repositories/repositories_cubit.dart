@@ -92,7 +92,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
     final repositoriesService = RepositoriesService();
-    repositoriesService.remove(newName); // 1
+    repositoriesService.remove(oldName); // 1
 
     await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
 
@@ -101,14 +101,15 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
       newName: newName
     ); // 3
 
-    final latestRepositoryOrDefaultName = await RepositoryHelper
-    .latestRepositoryOrDefault(null); //4
-    
-    final newDefaultRepository = repositoriesService
-    .get(latestRepositoryOrDefaultName); // 5
+    final repository = await initRepository(newName);
+
+    final newDefaultRepository = PersistedRepository(
+      repository: repository!,
+      name: newName
+    );
 
     emit(RepositoryPickerSelection(
-      repository: newDefaultRepository!.repository,
+      repository: newDefaultRepository.repository,
       name: newDefaultRepository.name
     )); // 6
   }
