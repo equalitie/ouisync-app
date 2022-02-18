@@ -58,6 +58,7 @@ class Strings {
   static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input the password '
   'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
+  static const String messageRenameRepository = 'Rename repository';
 
   static const String messageNewFile = 'New file: [name]';
   static const String messageNewFileError = 'Error creating file [name]';
@@ -84,6 +85,8 @@ class Strings {
   static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete file';
 
+  static const String titleDeleteRepository = 'Delete repository';
+
   static const String labelRepositoryToken = 'Token: ';
   static const String labelName = 'Name: ';
   static const String labelNewName = 'New name: ';
@@ -94,6 +97,8 @@ class Strings {
   static const String labelTypePassword = 'Type password:';
   static const String labelSyncStatus = 'Sync Status: ';
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
+  static const String labelSelectRepository = 'select repository';
+  static const String labelRenameRepository = 'Enter the new name';
   
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
@@ -120,6 +125,8 @@ class Strings {
   static const String messageTokenCopiedToClipboard = 'Repository token copied to the clipboard';
   static const String messageMoveEntryOrigin = 'from [path]';
   static const String messageConfirmFileDeletion = 'Are you sure you want to delete this file?';
+
+  static const String messageConfirmRepositoryDeletion = 'Are you sure you want to delete this repository?';
 
   static const String mesageNoMediaPresent = 'There is no media present';
 
@@ -168,6 +175,9 @@ class Strings {
   static const String actionSave = 'Save';
   static const String actionUnlock = 'Unlock';
   static const String actionRetry = 'Retry';
+  static const String actionEdit = 'Edit';
+  static const String actionShare = 'Share';
+  static const String actionRename = 'Rename';
 
   static const String actionDeleteFolder = 'Delete folder';
 
@@ -178,7 +188,8 @@ class Strings {
   static const String actionEditRepositoryName = 'Edit name';
   static const String actionDeleteRepository = 'Delete repository';
 
-  static const String actionHide = 'HIDE';
-  static const String actionClose = 'CLOSE';
+  static const String actionHideCapital = 'HIDE';
+  static const String actionCloseCapital = 'CLOSE';
+  static const String actionDeleteCapital = 'DELETE';
 
 }
