@@ -13,12 +13,12 @@ class RepositoryPickerLoading extends RepositoryPickerState {}
 
 class RepositoryPickerSelection extends RepositoryPickerState {
   const RepositoryPickerSelection({
-    this.repository,
+    required this.repository,
     required this.name
   });
 
   final Repository? repository;
-  final String name;
+  final String? name;
 
   @override
   List<Object?> get props => [
