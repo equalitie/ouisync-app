@@ -79,20 +79,27 @@ abstract class Dialogs {
     required BuildContext context,
     required String title,
     required String message,
-  }) => showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return _alertDialog(
-        title,
-        [Text(message)],
-        [TextButton(
-          child: const Text(Strings.actionClose),
-          onPressed: () => Navigator.of(context).pop(false),
-        )]
-      );
-    }
-  );
+    List<Widget>? actions
+  }) {
+    if (actions == null) {
+      actions = [TextButton(
+        child: const Text(Strings.actionCloseCapital),
+        onPressed: () => Navigator.of(context).pop(false),
+      )];
+    }  
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return _alertDialog(
+          title,
+          [Text(message)],
+          actions!
+        );
+      }
+    );
+  }
 
   static actionDialog(
     BuildContext context,
