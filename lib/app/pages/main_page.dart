@@ -982,9 +982,9 @@ class _MainPageState extends State<MainPage>
         );
       }
     ).then((newRepository) {
-      if (newRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
-        switchMainState(newState: _repositoryContentBuilder());
-      }
+      // if (newRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
+      //   switchMainState(newState: _repositoryContentBuilder());
+      // }
     });
   }
 
