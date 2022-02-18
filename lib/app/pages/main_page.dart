@@ -298,13 +298,12 @@ class _MainPageState extends State<MainPage>
     }
 
     void switchRepository(Repository? repository, String name) {
-      
+      NativeChannels.setRepository(repository); 
+
       if (repository == null) {
         initMainPageLayout(name);
         return;
       }
-
-      NativeChannels.setRepository(repository);  
 
       print('Saving repository: $name');
       _repositoriesSession.put(name, repository, isCurrent: true);
