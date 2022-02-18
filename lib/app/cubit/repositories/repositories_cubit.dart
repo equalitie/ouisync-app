@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../services/services.dart';
@@ -136,12 +137,26 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
     final latestRepositoryOrDefaultName = await RepositoryHelper
     .latestRepositoryOrDefault(null); // 4
-    
-    final newDefaultRepository = repositoriesService
+
+    if (latestRepositoryOrDefaultName.isEmpty) { /// No more repositories available
+      emit(RepositoryPickerSelection(repository: null, name: null));
+      return;
+    }
+
+    PersistedRepository? newDefaultRepository = repositoriesService
     .get(latestRepositoryOrDefaultName); // 5
 
+    if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
+      final repository = await initRepository(latestRepositoryOrDefaultName);
+
+      newDefaultRepository = PersistedRepository(
+        repository: repository!,
+        name: latestRepositoryOrDefaultName
+      );
+    }
+
     emit(RepositoryPickerSelection(
-      repository: newDefaultRepository!.repository,
+      repository: newDefaultRepository.repository,
       name: newDefaultRepository.name
     )); // 6
   }
