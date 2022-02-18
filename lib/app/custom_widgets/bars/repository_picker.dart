@@ -11,56 +11,44 @@ class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
     required this.repositoriesCubit,
     required this.onRepositorySelect,
-    required this.borderColor,
-    this.currentRepository,
-    this.currentRepositoryName = ''
+    required this.borderColor
   });
 
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final Color borderColor;
-  final Repository? currentRepository;
-  final String currentRepositoryName;
 
   @override
   _RepositoryPickerState createState() => _RepositoryPickerState();
 }
 
 class _RepositoryPickerState extends State<RepositoryPicker> {
-  Repository? _repository;
   String _repositoryName = Strings.messageNoRepos;
 
-  @override
-  void initState() {
-    super.initState();
-
-    initRepositoryPicker();  
-  }
-
-  void initRepositoryPicker() {
-    if (widget.currentRepositoryName.isEmpty) {
-      return;
-    } 
-
+  updateCurrentRepository(Repository? repository, String? name) async {
     setState(() {
-      _repository = widget.currentRepository;
-      _repositoryName = widget.currentRepositoryName;
+      _repositoryName = name == null
+      ? Strings.messageNoRepos
+      : name;
     });
-  }
 
-  updateCurrentRepository(Repository? repository, String name) async {
-    if (repository == null) { /// Every repository is initialized as a blind replica
-      repository = await widget.repositoriesCubit
-      .initRepository(name);
+    if (repository == null && (name?.isEmpty ?? true)) {  
+      widget.onRepositorySelect.call(null, '');
+      return;
     }
 
-    setState(() {
-      _repository = repository;
-      _repositoryName = name;
-    });
+    if (repository == null) { /// Every repository is initialized as a blind replica
+      repository = await widget.repositoriesCubit
+      .initRepository(name ?? '');
+    }
 
-    widget.onRepositorySelect.call(repository, name);
+    widget.onRepositorySelect.call(repository, name!);
   }
+
+  static final Color colorNoRepo = Colors.grey;
+  static final Color colorLockedRepo = Colors.grey;
+  static final Color colorUnlockedRepo = Colors.black;
+  static final Color colorError = Colors.red;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +56,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       bloc: widget.repositoriesCubit,
       builder: (context, state) {
         if (state is RepositoryPickerInitial) {
-          return _buildState(widget.borderColor, Colors.grey);
+          return _buildState(
+            borderColor: widget.borderColor,
+            iconColor: colorNoRepo,
+            textColor: colorNoRepo
+          );
         }
 
         if (state is RepositoryPickerLoading) {
@@ -76,11 +68,25 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerSelection) {
-          return _buildState(widget.borderColor, Colors.black);
+          final color = state.repository == null
+          ? colorLockedRepo
+          : state.repository!.accessMode != AccessMode.blind
+          ? colorUnlockedRepo
+          : colorLockedRepo;
+
+          return _buildState(
+            borderColor: widget.borderColor,
+            iconColor: colorUnlockedRepo,
+            textColor: color
+          );
         }
 
         if (state is RepositoriesFailure) {
-          return _buildState(widget.borderColor, Colors.red);
+          return _buildState(
+            borderColor: widget.borderColor,
+            iconColor: colorError,
+            textColor: colorError
+          );
         }
 
         return Container(child: Text(Strings.messageOoops),);
@@ -93,7 +99,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     );
   }
 
-  _buildState(borderColor, iconColor) => Container(
+  _buildState({
+    required Color borderColor,
+    required Color iconColor,
+    required Color textColor
+  }) => Container(
     padding: Dimensions.paddingepositoryPicker,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
@@ -117,7 +127,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           _repositoryName,
           softWrap: false,
           textOverflow: TextOverflow.fade,
-          color: iconColor
+          color: textColor
         ),
         Fields.actionIcon(
           const Icon(Icons.keyboard_arrow_down_outlined),
