@@ -50,7 +50,7 @@ class RepositoriesService {
     .singleWhereOrNull((element) => element.name == name);
 
     if (repo != null) {
-      repo.update(name, repository, _subscriptionCallback!);
+      repo.update(name, repository);
     }
 
     if (repo == null) {
