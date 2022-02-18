@@ -20,7 +20,7 @@ class Dimensions {
   static const double sizeIconAverage = 30.0;
   static const double sizeIconSmall = 25.0;
 
-  static const EdgeInsets paddingContents = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0);
+  static const EdgeInsets paddingContents = const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog = const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 20.0);
   static const EdgeInsets paddingBottomSheet = const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0);
   static const EdgeInsets paddingBottomSheetActions = const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 20.0);
@@ -45,8 +45,10 @@ class Dimensions {
   static const AlignmentGeometry alignmentIconButton = Alignment.center;
 
   static const double spacingAppBarTitle = 0.0;
+  static const Widget spacingVerticalHalf = SizedBox(height: 5.0);
   static const Widget spacingVertical = SizedBox(height: 10.0);
   static const Widget spacingVerticalDouble = SizedBox(height: 20.0);
+  static const Widget spacingHorizontalHalf = SizedBox(width: 5.0);
   static const Widget spacingHorizontal = SizedBox(width: 10.0);
   static const Widget spacingActionsVertical = SizedBox(height: 20.0);
   static const Widget spacingActionsHorizontal = SizedBox(width: 20.0);
