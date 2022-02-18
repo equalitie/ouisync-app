@@ -10,7 +10,7 @@ class PersistedRepository {
     required this.name,
   });
 
-  void update(String newName, Repository newRepository, void Function(String) callback) {
+  void update(String newName, Repository newRepository) {
     if (this.repository != newRepository) {
       this.repository.close();
       this.repository = newRepository;
