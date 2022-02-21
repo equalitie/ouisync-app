@@ -21,11 +21,13 @@ class RepositoriesService {
     _repositories.singleWhereOrNull((repo) => repo.name == name)
   );
 
-  bool get hasCurrent => _current != null;
+  bool get hasCurrent => (_current ?? '').isNotEmpty;
 
   void _updateCurrentRepository(PersistedRepository? persisted) {
     if (persisted == null) {
       print('No repository matched the name. Current repository can not be updated');
+      _current = null;
+
       return;
     }
 
