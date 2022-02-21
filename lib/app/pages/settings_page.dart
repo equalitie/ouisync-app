@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/custom_widgets/dialogs/modal_rename_repository_dialog.dart';
-import 'package:ouisync_app/app/models/data_models/persisted_repository.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
+import '../models/data_models/persisted_repository.dart';
 import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -204,30 +203,37 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconSize: Dimensions.sizeIconSmall,
                   iconColor: Colors.red,
                   spacing: Dimensions.spacingHorizontalHalf,
-                  onTap: () {
+                  onTap: () async {
                     if (!_repositoriesSession.hasCurrent) {
                       return;
                     }
 
-                    final actions = [
-                      TextButton(
-                        child: const Text(Strings.actionDeleteCapital),
-                        onPressed: () => 
-                        Navigator.of(context).pop(true),
-                      ),
-                      TextButton(
-                        child: const Text(Strings.actionCloseCapital),
-                        onPressed: () => 
-                        Navigator.of(context).pop(false),
-                      )
-                    ];
-
-                    Dialogs.simpleAlertDialog(
+                    await showDialog<bool>(
                       context: context,
-                      title: Strings.titleDeleteRepository,
-                      message: Strings.messageConfirmRepositoryDeletion,
-                      actions: actions
-                    ).then((delete) {
+                      barrierDismissible: false, // user must tap button!
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(Strings.titleDeleteRepository),
+                          content: SingleChildScrollView(
+                            child: ListBody(children: [
+                              Text(Strings.messageConfirmRepositoryDeletion)
+                            ]),
+                          ),
+                          actions: [
+                            TextButton(
+                              child: const Text(Strings.actionDeleteCapital),
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              }
+                            ),
+                            TextButton(
+                              child: const Text(Strings.actionCloseCapital),
+                              onPressed: () => 
+                              Navigator.of(context).pop(false),
+                            )
+                          ],
+                        );
+                    }).then((delete) {
                       if (delete ?? false) {
                         widget.repositoriesCubit
                         .deleteRepository(_repositoriesSession.current?.name ?? '');
