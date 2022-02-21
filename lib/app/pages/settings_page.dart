@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -105,42 +106,78 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 color: Colors.grey.shade300,
               ),
-              child: DropdownButton(
-                isExpanded: true,
-                value: _persistedRepository,
-                underline: SizedBox(),
-                items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
-                  return DropdownMenuItem(
-                    value: persisted,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Fields.idLabel(
-                          Strings.labelSelectRepository,
-                          textAlign: TextAlign.start,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.grey.shade600
-                        ),
-                        Dimensions.spacingVerticalHalf,
-                        Row(
-                          children: [
-                            Fields.constrainedText(
-                              persisted.name,
-                              fontWeight: FontWeight.normal
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+              child: BlocConsumer(
+                bloc: widget.repositoriesCubit,
+                builder: (context, state) {
+                  if (state is RepositoryPickerSelection) {
+                    return DropdownButton(
+                      isExpanded: true,
+                      value: _persistedRepository,
+                      underline: SizedBox(),
+                      items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
+                        return DropdownMenuItem(
+                          value: persisted,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Fields.idLabel(
+                                Strings.labelSelectRepository,
+                                textAlign: TextAlign.start,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey.shade600
+                              ),
+                              Dimensions.spacingVerticalHalf,
+                              Row(
+                                children: [
+                                  Fields.constrainedText(
+                                    persisted.name,
+                                    fontWeight: FontWeight.normal
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (persisted) async {
+                        print('Selected: $persisted');
+                        
+                        setState(() {
+                          _persistedRepository = persisted as PersistedRepository;
+                        });
+                      },
+                    );
+                  }
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Fields.idLabel(
+                        Strings.labelSelectRepository,
+                        textAlign: TextAlign.start,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey.shade600
+                      ),
+                      Dimensions.spacingVerticalHalf,
+                      Row(
+                        children: [
+                          Fields.constrainedText(
+                            Strings.messageNoRepos,
+                            fontWeight: FontWeight.normal
+                          ),
+                        ],
+                      ),
+                    ],
                   );
-                }).toList(),
-                onChanged: (persisted) async {
-                  print('Selected: $persisted');
-                  
-                  setState(() {
-                    _persistedRepository = persisted as PersistedRepository;
-                  });
+                },
+                listener: (context, state) {
+                  if (state is RepositoryPickerSelection) {
+                    setState(() {
+                      _persistedRepository = _repositoriesSession.current!;
+                    });
+                  }
                 },
               ),
             ),
@@ -191,7 +228,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.share,
                   iconSize: Dimensions.sizeIconSmall,
                   spacing: Dimensions.spacingHorizontalHalf,
-                  onTap: widget.onShareRepository
+                  onTap: () {
+                    if (!_repositoriesSession.hasCurrent) {
+                      return;
+                    }
+
+                    widget.onShareRepository.call();
+                  }
                 )
               ),
               Expanded(
@@ -207,7 +250,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     if (!_repositoriesSession.hasCurrent) {
                       return;
                     }
-
                     await showDialog<bool>(
                       context: context,
                       barrierDismissible: false, // user must tap button!
