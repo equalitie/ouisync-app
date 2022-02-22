@@ -36,12 +36,12 @@ class RepositoriesService {
     }
 
     _subscription?.cancel();
-    print('Subscription to $_current canceled: (${_subscription?.handle})');
+    print('Subscription to ${persisted.name} canceled: ${_subscription?.handle}');
 
     _current = persisted.name;
     
     _subscription = persisted.repository.subscribe(() => _subscriptionCallback!.call(_current!));
-    print('Subscribed to ${persisted.name} notifications');
+    print('Subscribed to notifications: ${persisted.name}');
   }
 
   PersistedRepository? get(String name) =>
@@ -52,6 +52,7 @@ class RepositoriesService {
     .singleWhereOrNull((element) => element.name == name);
 
     if (repo != null) {
+      print('Updating repository: $name (${repository.accessMode.name})');
       repo.update(name, repository);
     }
 
@@ -61,6 +62,7 @@ class RepositoriesService {
         name: name
       ); 
 
+      print('Saving repository: $name (${repository.accessMode.name})');
       _repositories.add(repo);
     }
 
@@ -71,12 +73,19 @@ class RepositoriesService {
 
   void remove(String name) {
     if (_current == name) {
+      print('Canceling subscription to $_current');
+      _subscription?.cancel();
+      _subscription = null;
+
+      print('Cleaning current selection for repository $_current');
       _current = '';
     }
 
     final repo = get(name);
+    print('Closing repository ${repo?.name}');
     repo?.repository.close();
     
+    print('Removing repository ${repo?.name} from memory');
     _repositories.remove(repo);
   }
 

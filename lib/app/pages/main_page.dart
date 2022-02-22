@@ -352,7 +352,6 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      print('Saving repository: $name');
       _repositoriesSession.put(name, repository, isCurrent: true);
     
       print('Repositories in memory: ${_repositoriesSession.repositories}');
@@ -1076,6 +1075,9 @@ class _MainPageState extends State<MainPage>
       }
     ).then((password) {
       if (password.isNotEmpty) { // The password provided by the user.
+        final name = _repositoriesSession.current?.name;
+        _repositoriesSession.remove(name!);
+
         BlocProvider.of<RepositoriesCubit>(context)
         .openRepository(
           name: repositoryName,
