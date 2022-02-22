@@ -1,7 +1,9 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dart_ipify/dart_ipify.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:network_info_plus/network_info_plus.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -15,6 +17,7 @@ class SettingsPage extends StatefulWidget {
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.onShareRepository,
+    required this.connectivitySubscription,
     required this.title,
     this.dhtStatus = false, 
   });
@@ -22,6 +25,7 @@ class SettingsPage extends StatefulWidget {
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
+  final StreamSubscription<ConnectivityResult>? connectivitySubscription;
   final String title;
   final bool dhtStatus;
 
@@ -33,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
   RepositoriesService _repositoriesSession = RepositoriesService();
 
   PersistedRepository? _persistedRepository;
-  ConnectivityInfo? _connectivityInfo;
+  String? _localEndpoint;
   bool _bittorrentDhtStatus = false;
 
   Color? _titlesColor = Colors.black;
@@ -42,11 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-
-    _getConnectivityInfo()
-    .then((connectivityInfo) => 
-      setState(() => _connectivityInfo = connectivityInfo)
-    );
+ 
+    _getLocalEndpoint();
 
     _bittorrentDhtStatus = widget.dhtStatus;
     print('BitTorrent DHT status: ${widget.dhtStatus}');
@@ -56,46 +57,39 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  Future<ConnectivityInfo> _getConnectivityInfo() async {
-    String? ipAddress = widget.repositoriesCubit.session
+  void _getLocalEndpoint() async {
+    final connectivity = await Connectivity().checkConnectivity();
+    final isConnected = [
+      ConnectivityResult.ethernet,
+      ConnectivityResult.mobile,
+      ConnectivityResult.wifi
+    ].contains(connectivity);
+
+    _getConnectivityInfo(isConnected)
+    .then((localEndpoint) => 
+      setState(() => _localEndpoint = localEndpoint)
+    );
+  }
+
+  Future<String> _getConnectivityInfo(bool connected) async {
+    String localEndpoint = widget.repositoriesCubit.session
     .local_network_address();
 
-    final indexFirstSemicolon = ipAddress.indexOf(':');
-    final indexLastSemicolon = ipAddress.lastIndexOf(':');
-
-    final protocol = ipAddress.substring(0, indexFirstSemicolon);
-    final port = ipAddress.substring(indexLastSemicolon + 1);
-    String ipAddressValue = ipAddress
-    .substring(
-      indexFirstSemicolon + 1,
-      indexLastSemicolon  
-    );
-
-    final networkInfo = NetworkInfo();
-    if (ipAddress.contains(Strings.emptyIPv4)) {  
-      ipAddressValue = await networkInfo.getWifiIP() ?? ipAddressValue;
+    if (!connected) {
+      return localEndpoint;
     }
 
-    if (ipAddress.contains(Strings.undeterminedIPv6)) {
-      ipAddressValue = await networkInfo.getWifiIPv6() ?? ipAddressValue;
+    if (localEndpoint.contains(Strings.emptyIPv4) ||
+    localEndpoint.contains(Strings.undeterminedIPv6)) { 
+      try {
+        final iPv64 = await Ipify.ipv64();
+        localEndpoint = iPv64;  
+      } catch (e) {
+        print('error getting the IP address: $e');
+      }
     }
 
-    final wiFiConnected = await WiFiForIoTPlugin.isConnected();
-    final wiFiEnabled = await WiFiForIoTPlugin.isEnabled();
-    final wiFiStatus = wiFiConnected 
-    ? WiFiStatus.Connected
-    : wiFiEnabled
-    ? WiFiStatus.Enabled
-    : WiFiStatus.Disconnected;
-
-    final connectivityInfo = ConnectivityInfo(
-      protocol: protocol,
-      ipAddress: ipAddressValue,
-      portNumber: int.tryParse(port) ?? 0,
-      wiFiStatus: wiFiStatus
-    );
-  
-    return connectivityInfo;
+    return localEndpoint;
   }
 
   @override
@@ -128,26 +122,20 @@ class _SettingsPageState extends State<SettingsPage> {
               value: _bittorrentDhtStatus,
               onChanged: updateDhtSetting,
             ),
-            Fields.labeledText(
-              label: Strings.labelProtocol,
-              text: _connectivityInfo?.protocol ?? Strings.statusUnspecified,
-              labelTextAlign: TextAlign.start
+            BlocConsumer<ConnectivityCubit, ConnectivityState>(
+              builder: (context, state) {
+                return Fields.labeledText(
+                  label: Strings.labelLocalEndpoint,
+                  text: _localEndpoint ?? Strings.statusUnspecified,
+                  labelTextAlign: TextAlign.start
+                );
+              },
+              listener: (context, state) {
+                if (state is ConnectivityChanged) {
+                  _getLocalEndpoint();
+                }
+              }
             ),
-            Fields.labeledText(
-              label: Strings.labelIpAddress,
-              text: _connectivityInfo?.ipAddress ?? Strings.statusUnspecified,
-              labelTextAlign: TextAlign.start
-            ),
-            Fields.labeledText(
-              label: Strings.labelPortNumber,
-              text: _connectivityInfo?.portNumber.toString() ?? Strings.statusUnspecified,
-              labelTextAlign: TextAlign.start
-            ),
-            Fields.labeledText(
-              label: Strings.labelWiFiStatus,
-              text: _connectivityInfo?.wiFiStatus.name ?? Strings.statusUnspecified,
-              labelTextAlign: TextAlign.start
-            )
           ],
         )
       )
