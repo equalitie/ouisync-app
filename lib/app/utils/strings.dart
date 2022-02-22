@@ -84,8 +84,8 @@ class Strings {
   static const String titleRepositoriesList = 'Your repositories';
   static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete file';
-
   static const String titleDeleteRepository = 'Delete repository';
+  static const String titleExitOuiSync = 'Close OuiSync';
 
   static const String labelRepositoryToken = 'Token: ';
   static const String labelName = 'Name: ';
@@ -140,6 +140,8 @@ class Strings {
   static const String messageFileDeleted = 'File deleted successfully: [name]';
   static const String messageFolderDeleted = 'Folder deleted successfully: [name]';
 
+  static const String messageExitOuiSync = 'Do you want to close the app?';
+
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
@@ -178,6 +180,7 @@ class Strings {
   static const String actionEdit = 'Edit';
   static const String actionShare = 'Share';
   static const String actionRename = 'Rename';
+  static const String actionAccept = 'Accept';
 
   static const String actionDeleteFolder = 'Delete folder';
 
@@ -188,6 +191,8 @@ class Strings {
   static const String actionEditRepositoryName = 'Edit name';
   static const String actionDeleteRepository = 'Delete repository';
 
+  static const String actionAcceptCapital = 'ACCEPT';
+  static const String actionCancelCapital = 'CANCEL';
   static const String actionHideCapital = 'HIDE';
   static const String actionCloseCapital = 'CLOSE';
   static const String actionDeleteCapital = 'DELETE';
