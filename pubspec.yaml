@@ -43,6 +43,7 @@ dependencies:
   flutter_treeview: ^1.0.3+2
   fluttertoast: ^8.0.8
   mockito: ^5.0.10
+  network_info_plus: ^2.1.2
   open_file: ^3.2.1
   ouisync_plugin:
     path: ./ouisync-plugin
