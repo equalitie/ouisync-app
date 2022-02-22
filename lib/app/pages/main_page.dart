@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
@@ -44,6 +45,7 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesService _repositoriesSession = RepositoriesService();
 
+    StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
     String _currentFolder = Strings.rootPath; // Initial value: /
@@ -77,13 +79,26 @@ class _MainPageState extends State<MainPage>
         _intentPayload = listOfMedia;
         handleShareIntentPayload(widget.defaultRepositoryName, _intentPayload);
       });
+
+      _connectivitySubscription = Connectivity()
+      .onConnectivityChanged
+      .listen(_connectivityChange);
     }
 
     @override
     void dispose() {
       // TODO: dispose all repositories
+      _connectivitySubscription?.cancel();
 
       super.dispose();
+    }
+
+    void _connectivityChange(ConnectivityResult result) {
+      print('Connectivity event: ${result.name}');
+      
+      BlocProvider
+      .of<ConnectivityCubit>(context)
+      .connectivityEvent(result);
     }
 
     void initMainPage() async {
@@ -1039,16 +1054,22 @@ class _MainPageState extends State<MainPage>
   }
 
   void settingsAction(reposCubit, dhtStatus) {
+    final connectivityCubit = BlocProvider
+    .of<ConnectivityCubit>(context);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return SettingsPage(
-          repositoriesCubit: reposCubit,
-          onRepositorySelect: switchRepository,
-          onShareRepository: shareRepository,
-          title: Strings.titleSettings,
-          dhtStatus: dhtStatus,
-        );
+        return BlocProvider.value(
+          value: connectivityCubit,
+          child: SettingsPage(
+            repositoriesCubit: reposCubit,
+            onRepositorySelect: switchRepository,
+            onShareRepository: shareRepository,
+            connectivitySubscription: _connectivitySubscription,
+            title: Strings.titleSettings,
+            dhtStatus: dhtStatus,
+          )
+        );;
       })
     );
   }
