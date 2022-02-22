@@ -37,7 +37,7 @@ class ListItem extends StatelessWidget {
         onTap:() => mainAction.call(),
         splashColor: Colors.blue,
         child: Container(
-          padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 15.0),
+          padding: Dimensions.paddingListItem,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -69,11 +69,11 @@ class ListItem extends StatelessWidget {
       flex: 1,
       child: itemData.itemType == ItemType.folder
         ? Padding(
-          padding: EdgeInsets.only(left: 4.0),
+          padding: Dimensions.paddingFolderItem,
           child: FolderDescription(folderData: itemData)
         )
         : Padding(
-          padding: EdgeInsets.only(left: 10.0),
+          padding: Dimensions.paddingFileItem,
           child: FileDescription(repository: repository, fileData: itemData)
         )
     );
