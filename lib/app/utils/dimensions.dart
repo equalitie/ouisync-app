@@ -35,7 +35,10 @@ class Dimensions {
   static const EdgeInsets paddingFormTextField = const EdgeInsets.only(bottom: 10.0);
   static const EdgeInsets paddingActionsSection = const EdgeInsets.only(top: 20.0);
   static const EdgeInsets paddingActionBox = const EdgeInsets.all(5.0);
-
+  static const EdgeInsets paddingListItem = const EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0) ;
+  static const EdgeInsets paddingFolderItem = const EdgeInsets.only(left: 4.0);
+  static const EdgeInsets paddingFileItem = const EdgeInsets.only(left: 10.0);
+  
   static const double actionsDialogPadding = 20.0;
   static const double actionsDialogAvatarRadius = 10.0;
 
