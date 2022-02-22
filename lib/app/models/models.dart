@@ -1,3 +1,4 @@
+export 'data_models/connectivity_info.dart';
 export 'data_models/persisted_repository.dart';
 
 export 'item/base_item.dart';
