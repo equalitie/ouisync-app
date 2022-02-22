@@ -84,6 +84,8 @@ class Strings {
   static const String titleRepositoriesList = 'Your repositories';
   static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete file';
+  static const String titleNetwork = 'Network';
+
   static const String titleDeleteRepository = 'Delete repository';
   static const String titleExitOuiSync = 'Close OuiSync';
 
@@ -99,6 +101,10 @@ class Strings {
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   static const String labelSelectRepository = 'select repository';
   static const String labelRenameRepository = 'Enter the new name';
+  static const String labelProtocol = 'Protocol: ';
+  static const String labelIpAddress = 'IP address: ';
+  static const String labelPortNumber = 'Port number:';
+  static const String labelWiFiStatus = 'WiFi status: ';
   
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
@@ -149,6 +155,7 @@ class Strings {
   static const String replacementAccess = '[access]';
 
   static const String statusSync = 'SYNCED';
+  static const String statusUnspecified = '(unspecificed)';
 
   static const String iconInformation = 'Information';
   static const String iconPreview = 'Preview';
@@ -196,5 +203,8 @@ class Strings {
   static const String actionHideCapital = 'HIDE';
   static const String actionCloseCapital = 'CLOSE';
   static const String actionDeleteCapital = 'DELETE';
+
+  static const String emptyIPv4 = '0.0.0.0';
+  static const String undeterminedIPv6 = '[::]';
 
 }
