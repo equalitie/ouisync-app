@@ -241,10 +241,57 @@ class _MainPageState extends State<MainPage>
       return Scaffold(
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
-        body: _mainState,
+        body: WillPopScope(
+          child: _mainState,
+          onWillPop: _onBackPressed
+        ),
         floatingActionButton: _buildFAB(context,
         ),
       );
+    }
+
+    Future<bool> _onBackPressed() async {
+      if (_currentFolder == Strings.rootPath) {
+        final closeApp = await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text(Strings.titleExitOuiSync),
+            content: new Text(Strings.messageExitOuiSync),
+            actions: <Widget>[
+              TextButton(
+                child: const Text(Strings.actionAcceptCapital),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                }
+              ),
+              TextButton(
+                child: const Text(Strings.actionCancelCapital),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                }
+              )
+            ],
+          ),
+        );
+
+        return closeApp;
+      }
+
+      if (_repositoriesSession.hasCurrent) {
+        final parent = extractParentFromPath(_currentFolder);
+
+        BlocProvider
+        .of<DirectoryBloc>(context)
+        .add(NavigateTo(
+          repository: _repositoriesSession.current!.repository,
+          type: Navigation.content,
+          origin: _currentFolder,
+          destination: parent,
+          withProgress: true
+        ));
+      }
+
+      return false;
     }
 
     _buildOuiSyncBar() => OuiSyncBar(
