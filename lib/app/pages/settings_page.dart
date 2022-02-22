@@ -36,6 +36,9 @@ class _SettingsPageState extends State<SettingsPage> {
   ConnectivityInfo? _connectivityInfo;
   bool _bittorrentDhtStatus = false;
 
+  Color? _titlesColor = Colors.black;
+
+
   @override
   void initState() {
     super.initState();
@@ -97,6 +100,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    _titlesColor = Theme.of(context).colorScheme.secondaryVariant;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -111,7 +116,11 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(
               height: 20.0,
               thickness: 1.0,
-
+            ),
+            Fields.idLabel(Strings.titleNetwork,
+              fontSize: Dimensions.fontAverage,
+              fontWeight: FontWeight.normal,
+              color: _titlesColor!
             ),
             LabeledSwitch(
               label: Strings.labelBitTorrentDHT,
@@ -152,7 +161,8 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Fields.idLabel(Strings.titleRepository,
             fontSize: Dimensions.fontAverage,
-            fontWeight: FontWeight.normal
+            fontWeight: FontWeight.normal,
+            color: _titlesColor!
           ),
           Dimensions.spacingVertical,
           Container(
