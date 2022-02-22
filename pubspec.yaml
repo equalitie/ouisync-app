@@ -28,8 +28,10 @@ dependencies:
   chunked_stream: ^1.4.1
   clock: ^1.1.0
   collection: ^1.15.0
+  connectivity_plus: ^2.2.1
   crypt: ^4.0.1
   cupertino_icons: ^1.0.3
+  dart_ipify: ^1.1.1
   equatable: ^2.0.3
   ffi: ^1.0.0
   file: ^6.1.2
