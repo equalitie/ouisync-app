@@ -1,11 +1,9 @@
-import 'package:async/async.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class DirectoryRepository {
-
   Future<BasicResult> createFile(Repository repository, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
@@ -35,33 +33,24 @@ class DirectoryRepository {
 
   Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
     print('Writing file $filePath');
-    
+
     BasicResult writeFileResult;
     String error = '';
 
-    final streamReader = ChunkedStreamReader(fileStream);
-    
     final file = await File.open(repository, filePath);
     int offset = 0;
-    
+
     try {
-      while (true) {
-        final buffer = await streamReader.readChunk(Constants.bufferSize);
+      await for (final buffer in fileStream) {
         print('Buffer size: ${buffer.length} - offset: $offset');
-
-        if (buffer.isEmpty) {
-          print('The buffer is empty; reading from the stream is done!');
-          break;
-        }
-
         await file.write(offset, buffer);
         offset += buffer.length;
       }
     } catch (e) {
-      print('Exception writing the fie $filePath:\n${e.toString()}');
+      print('Exception writing the file $filePath:\n${e.toString()}');
       error = 'Writing to the file $filePath failed';
     } finally {
-      streamReader.cancel();
+      print('Writing file $filePath done - closing');
       await file.close();
     }
 
@@ -70,19 +59,19 @@ class DirectoryRepository {
       writeFileResult.errorMessage = error;
     }
 
-    return writeFileResult; 
+    return writeFileResult;
   }
 
-  Future<BasicResult> readFile(Repository repository, String filePath, { String action = '' }) async {
+  Future<BasicResult> readFile(Repository repository, String filePath, {String action = ''}) async {
     BasicResult readFileResult;
     String error = '';
 
     final content = <int>[];
-    final file = await File.open(repository, filePath);    
+    final file = await File.open(repository, filePath);
 
     try {
       final length = await file.length;
-      content.addAll(await file.read(0, length));  
+      content.addAll(await file.read(0, length));
     } catch (e) {
       print('Exception reading file $filePath:\n${e.toString()}');
       error = 'Read file $filePath failed';
@@ -91,8 +80,8 @@ class DirectoryRepository {
     }
 
     readFileResult = action.isEmpty
-    ? ReadFileResult(functionName: 'readFile', result: content)
-    : ShareFileResult(functionName: 'readFile', result: content, action: action);
+        ? ReadFileResult(functionName: 'readFile', result: content)
+        : ShareFileResult(functionName: 'readFile', result: content, action: action);
     if (error.isNotEmpty) {
       readFileResult.errorMessage = error;
     }
@@ -140,7 +129,7 @@ class DirectoryRepository {
     return deleteFileResult;
   }
 
-  Future<BasicResult> createFolder(Repository repository, String path)  async {
+  Future<BasicResult> createFolder(Repository repository, String path) async {
     BasicResult createFolderResult;
     String error = '';
 
@@ -168,34 +157,28 @@ class DirectoryRepository {
 
   Future<BasicResult> getFolderContents(Repository repository, String path) async {
     print("Getting folder $path contents");
-  
+
     BasicResult getContentsResult;
     String error = '';
 
     final content = <BaseItem>[];
-    
+
     final directory = await Directory.open(repository, path);
     final iterator = directory.iterator;
 
-    try {  
+    try {
       while (iterator.moveNext()) {
-        final item =  await _castToBaseItem(
-          path,
-          iterator.current.name,
-          iterator.current.type,
-          0.0
-        );
+        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
 
         content.add(item);
-      } 
+      }
     } catch (e) {
       print('Error traversing directory $path: $e');
       error = e.toString();
-    }
-    finally {
+    } finally {
       directory.close();
     }
-    
+
     getContentsResult = GetContentResult(functionName: 'getFolderContents', result: content);
     if (error.isNotEmpty) {
       getContentsResult.errorMessage = error;
@@ -209,23 +192,16 @@ class DirectoryRepository {
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        final newNode = await _castToBaseItem(
-          path,
-          iterator.current.name,
-          iterator.current.type,
-          0.0
-        );
+        final newNode = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
 
         if (newNode.itemType == ItemType.folder) {
-          final itemPath = path == '/'
-          ? '/${iterator.current.name}'
-          : '$path/${iterator.current.name}';
+          final itemPath = path == '/' ? '/${iterator.current.name}' : '$path/${iterator.current.name}';
 
-          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath, contentNodes);  
+          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath, contentNodes);
         }
-        
+
         contentNodes.add(newNode);
-      }  
+      }
     } catch (e) {
       print('Error traversing directory $path: $e');
     } finally {
@@ -236,31 +212,22 @@ class DirectoryRepository {
   }
 
   Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, double size) async {
-    final itemPath = path == '/'
-    ? '/$name'
-    : '$path/$name';
+    final itemPath = path == '/' ? '/$name' : '$path/$name';
 
     if (type == EntryType.directory) {
       return FolderItem(
-        name: name,
-        path: itemPath,
-        size: size,
-        syncStatus: SyncStatus.idle,
-        itemType: ItemType.folder,
-        items: <BaseItem>[]
-      );
+          name: name,
+          path: itemPath,
+          size: size,
+          syncStatus: SyncStatus.idle,
+          itemType: ItemType.folder,
+          items: <BaseItem>[]);
     }
 
     if (type == EntryType.file) {
       String fileType = extractFileTypeFromName(name);
 
-      return FileItem(
-        name: name,
-        extension: fileType,
-        path: itemPath,
-        size: size,
-        syncStatus: SyncStatus.idle
-      ); 
+      return FileItem(name: name, extension: fileType, path: itemPath, size: size, syncStatus: SyncStatus.idle);
     }
 
     return <BaseItem>[].single;
