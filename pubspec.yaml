@@ -56,7 +56,6 @@ dependencies:
   shared_preferences: ^2.0.8
   styled_text: ^4.0.0+1
   url_launcher: ^6.0.6
-  wifi_iot: ^0.3.15
 
 flutter_icons:
     image_path: "assets/OuiSync-App-Icon-1200.png"
