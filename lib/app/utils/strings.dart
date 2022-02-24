@@ -101,7 +101,7 @@ class Strings {
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   static const String labelSelectRepository = 'select repository';
   static const String labelRenameRepository = 'Enter the new name';
-  static const String labelLocalEndpoint = 'Local endpoint: ';
+  static const String labelEndpoint = 'Endpoint: ';
   
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
@@ -152,7 +152,7 @@ class Strings {
   static const String replacementAccess = '[access]';
 
   static const String statusSync = 'SYNCED';
-  static const String statusUnspecified = '(unspecified)';
+  static const String statusUnspecified = 'Unspecified';
 
   static const String iconInformation = 'Information';
   static const String iconPreview = 'Preview';
