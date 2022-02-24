@@ -81,12 +81,22 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (localEndpoint.contains(Strings.emptyIPv4) ||
     localEndpoint.contains(Strings.undeterminedIPv6)) { 
+      final iPv64;
       try {
-        final iPv64 = await Ipify.ipv64();
-        localEndpoint = iPv64;  
+        iPv64 = await Ipify.ipv64();
       } catch (e) {
-        print('error getting the IP address: $e');
+        print('Error getting the IP address: $e');
+        return localEndpoint;
       }
+
+      final indexFirstSemicolon = localEndpoint.indexOf(':');
+      final indexLastSemicolon = localEndpoint.lastIndexOf(':');
+
+      final protocol = localEndpoint.substring(0, indexFirstSemicolon);
+      final port = localEndpoint.substring(indexLastSemicolon + 1);
+
+      final newLocalEndpoint = '$protocol:$iPv64:$port';
+      return newLocalEndpoint;
     }
 
     return localEndpoint;
@@ -125,9 +135,11 @@ class _SettingsPageState extends State<SettingsPage> {
             BlocConsumer<ConnectivityCubit, ConnectivityState>(
               builder: (context, state) {
                 return Fields.labeledText(
-                  label: Strings.labelLocalEndpoint,
+                  label: Strings.labelEndpoint,
                   text: _localEndpoint ?? Strings.statusUnspecified,
-                  labelTextAlign: TextAlign.start
+                  labelTextAlign: TextAlign.start,
+                  textAlign: TextAlign.end,
+                  space: Dimensions.spacingHorizontalHalf
                 );
               },
               listener: (context, state) {
