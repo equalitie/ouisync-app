@@ -142,6 +142,8 @@ class Strings {
 
   static const String messageExitOuiSync = 'Do you want to close the app?';
 
+  static const String messageInitializing = 'Initializing...';
+
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
