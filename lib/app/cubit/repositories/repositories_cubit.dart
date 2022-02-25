@@ -42,6 +42,36 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
     return blindRepository;
   }
 
+  void unlockRepository({required String name, required String password}) async {
+    emit(RepositoryPickerLoading());
+    
+    final store = _buildStoreString(name);
+    final storeExist = await io.File(store).exists();
+    
+    if (!storeExist) {
+      print('The repository store doesn\'t exist: $store');
+      return;
+    }
+
+    try {
+      final repository = await _getRepository(
+        store: store,
+        password: password,
+        shareToken: null,
+        exist: storeExist
+      );
+
+      emit(RepositoryPickerUnlocked(
+        repository: repository,
+        repositoryName: name,
+        previousAccessMode: repository.accessMode
+      ));
+    } catch (e) {
+      print('Exception unlocking the repository $name:\n${e.toString()}');
+      emit(RepositoriesFailure());
+    }
+  }
+
   void openRepository({required String name, String? password, ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
     await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
