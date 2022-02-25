@@ -106,72 +106,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 color: Colors.grey.shade300,
               ),
-              child: BlocConsumer(
+              child: BlocListener(
                 bloc: widget.repositoriesCubit,
-                builder: (context, state) {
-                  if (state is RepositoryPickerSelection) {
-                    return DropdownButton(
-                      isExpanded: true,
-                      value: _persistedRepository,
-                      underline: SizedBox(),
-                      items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
-                        return DropdownMenuItem(
-                          value: persisted,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Fields.idLabel(
-                                Strings.labelSelectRepository,
-                                textAlign: TextAlign.start,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey.shade600
-                              ),
-                              Dimensions.spacingVerticalHalf,
-                              Row(
-                                children: [
-                                  Fields.constrainedText(
-                                    persisted.name,
-                                    fontWeight: FontWeight.normal
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (persisted) async {
-                        print('Selected: $persisted');
-                        
-                        setState(() {
-                          _persistedRepository = persisted as PersistedRepository;
-                        });
-                      },
-                    );
-                  }
-
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Fields.idLabel(
-                        Strings.labelSelectRepository,
-                        textAlign: TextAlign.start,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.grey.shade600
-                      ),
-                      Dimensions.spacingVerticalHalf,
-                      Row(
-                        children: [
-                          Fields.constrainedText(
-                            Strings.messageNoRepos,
-                            fontWeight: FontWeight.normal
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
@@ -179,6 +115,44 @@ class _SettingsPageState extends State<SettingsPage> {
                     });
                   }
                 },
+                child: DropdownButton<PersistedRepository?>(
+                  isExpanded: true,
+                  value: _persistedRepository,
+                  underline: SizedBox(),
+                  items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
+                    return DropdownMenuItem(
+                      value: persisted,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Fields.idLabel(
+                            Strings.labelSelectRepository,
+                            textAlign: TextAlign.start,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.grey.shade600
+                          ),
+                          Dimensions.spacingVerticalHalf,
+                          Row(
+                            children: [
+                              Fields.constrainedText(
+                                persisted.name,
+                                fontWeight: FontWeight.normal
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (persisted) async {
+                    print('Selected: $persisted');
+                    
+                    setState(() { _persistedRepository = persisted; });
+
+                    _repositoriesSession.setCurrent(_persistedRepository!.name);
+                  },
+                ),
               ),
             ),
           ),
@@ -193,7 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconSize: Dimensions.sizeIconSmall,
                   spacing: Dimensions.spacingHorizontalHalf,
                   onTap: () async {
-                    if (!_repositoriesSession.hasCurrent) {
+                    if (_persistedRepository == null) {
                       return;
                     }
 
@@ -214,8 +188,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       }
                     ).then((newName) {
                       if (newName?.isNotEmpty ?? false) {
+                        final oldName = _persistedRepository!.name;
+                        setState(() { _persistedRepository = null; });  
+
                         widget.repositoriesCubit
-                        .renameRepository(_repositoriesSession.current!.name, newName!);
+                        .renameRepository(oldName, newName!);
                       }
                     });
                   }
@@ -229,7 +206,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconSize: Dimensions.sizeIconSmall,
                   spacing: Dimensions.spacingHorizontalHalf,
                   onTap: () {
-                    if (!_repositoriesSession.hasCurrent) {
+                    if (_persistedRepository == null) {
                       return;
                     }
 
@@ -247,7 +224,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconColor: Colors.red,
                   spacing: Dimensions.spacingHorizontalHalf,
                   onTap: () async {
-                    if (!_repositoriesSession.hasCurrent) {
+                    if (_persistedRepository == null) {
                       return;
                     }
                     await showDialog<bool>(
@@ -277,8 +254,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         );
                     }).then((delete) {
                       if (delete ?? false) {
+                        final repositoryName = _persistedRepository!.name;
+                        setState(() { 
+                          _persistedRepository = null;
+                          _bittorrentDhtStatus = false;
+                        });
+
                         widget.repositoriesCubit
-                        .deleteRepository(_repositoriesSession.current?.name ?? '');
+                        .deleteRepository(repositoryName);
                       }
                     });
                   }

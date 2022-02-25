@@ -169,7 +169,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
     .latestRepositoryOrDefault(null); // 4
 
     if (latestRepositoryOrDefaultName.isEmpty) { /// No more repositories available
-      emit(RepositoryPickerSelection(repository: null, name: null));
+      emit(RepositoryPickerInitial());
       return;
     }
 
@@ -184,6 +184,11 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
         name: latestRepositoryOrDefaultName
       );
     }
+
+    repositoriesService.put(
+      newDefaultRepository.name,
+      newDefaultRepository.repository
+    );
 
     emit(RepositoryPickerSelection(
       repository: newDefaultRepository.repository,
