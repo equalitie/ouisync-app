@@ -27,4 +27,23 @@ class RepositoryPickerSelection extends RepositoryPickerState {
   ];
 }
 
+class RepositoryPickerUnlocked extends RepositoryPickerState {
+  const RepositoryPickerUnlocked({
+    required this.repository,
+    required this.repositoryName,
+    required this.previousAccessMode
+  });
+
+  final Repository repository;
+  final String repositoryName;
+  final AccessMode previousAccessMode;
+
+  @override
+  List<Object?> get props => [
+    repository,
+    repositoryName,
+    previousAccessMode
+  ];
+}
+
 class RepositoriesFailure extends RepositoryPickerState {}
