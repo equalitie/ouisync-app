@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
 
@@ -6,7 +7,7 @@ abstract class DirectoryState extends Equatable {
   const DirectoryState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class DirectoryInitial extends DirectoryState {}
@@ -201,7 +202,18 @@ class NavigationLoadSuccess extends DirectoryState {
   ];
 }
 
-class NavigationLoadBlind extends DirectoryState {}
+class NavigationLoadBlind extends DirectoryState {
+  NavigationLoadBlind({
+    this.previousAccessMode
+  });
+
+  final AccessMode? previousAccessMode;
+
+  @override
+  List<Object?> get props => [
+    previousAccessMode
+  ];
+}
 
 class DirectoryLoadFailure extends DirectoryState {
   const DirectoryLoadFailure({
