@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
@@ -44,6 +45,7 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesService _repositoriesSession = RepositoriesService();
 
+    StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
     String _currentFolder = Strings.rootPath; // Initial value: /
@@ -62,6 +64,12 @@ class _MainPageState extends State<MainPage>
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
 
+    // A timestamp (ms since epoch) when was the last time the user hit the
+    // back button from the directory root. If the user hits it twice within
+    // exitBackButtonTimeoutMs duration, then the app will exit.
+    int lastExitAttempt = 0;
+    final int exitBackButtonTimeoutMs = 3000;
+
     @override
     void initState() {
       super.initState();
@@ -79,15 +87,20 @@ class _MainPageState extends State<MainPage>
         _intentPayload = listOfMedia;
         handleShareIntentPayload(widget.defaultRepositoryName, _intentPayload);
       });
+
+      _connectivitySubscription = Connectivity()
+      .onConnectivityChanged
+      .listen(_connectivityChange);
     }
 
     @override
     void dispose() {
       // TODO: dispose all repositories
+      _connectivitySubscription?.cancel();
 
       super.dispose();
     }
-
+  
     Future<void> _initRepositories() async {
       final repositoriesCubit = BlocProvider
       .of<RepositoriesCubit>(context);
@@ -121,8 +134,18 @@ class _MainPageState extends State<MainPage>
       final initRepo = await cubit.initRepository(repositoryName);
       return PersistedRepository(repository: initRepo!, name: repositoryName);
     }
+  
+  void _connectivityChange(ConnectivityResult result) {
+      print('Connectivity event: ${result.name}');
+      
+      BlocProvider
+      .of<ConnectivityCubit>(context)
+      .connectivityEvent(result);
+    }
 
     void initMainPage() async {
+      _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
+      
       _syncingCubit = BlocProvider
       .of<SynchronizationCubit>(context);
 
@@ -268,29 +291,23 @@ class _MainPageState extends State<MainPage>
 
     Future<bool> _onBackPressed() async {
       if (_currentFolder == Strings.rootPath) {
-        final closeApp = await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: new Text(Strings.titleExitOuiSync),
-            content: new Text(Strings.messageExitOuiSync),
-            actions: <Widget>[
-              TextButton(
-                child: const Text(Strings.actionAcceptCapital),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                }
-              ),
-              TextButton(
-                child: const Text(Strings.actionCancelCapital),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                }
-              )
-            ],
-          ),
-        );
+        // If the user clicks twice the back button within
+        // exitBackButtonTimeoutMs timeout, then exit the app.
+        int now = DateTime.now().millisecondsSinceEpoch;
 
-        return closeApp;
+        if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
+          lastExitAttempt = now;
+          Fluttertoast.showToast(
+            msg: Strings.messageExitOuiSync,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER);
+
+          // Don't pop => don't exit
+          return false;
+        } else {
+          // Don't interfere with the ModalRoute => do pop => exit the app.
+          return true;
+        }
       }
 
       if (_repositoriesSession.hasCurrent) {
@@ -1160,16 +1177,22 @@ class _MainPageState extends State<MainPage>
   }
 
   void settingsAction(reposCubit, dhtStatus) {
+    final connectivityCubit = BlocProvider
+    .of<ConnectivityCubit>(context);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return SettingsPage(
-          repositoriesCubit: reposCubit,
-          onRepositorySelect: switchRepository,
-          onShareRepository: shareRepository,
-          title: Strings.titleSettings,
-          dhtStatus: dhtStatus,
-        );
+        return BlocProvider.value(
+          value: connectivityCubit,
+          child: SettingsPage(
+            repositoriesCubit: reposCubit,
+            onRepositorySelect: switchRepository,
+            onShareRepository: shareRepository,
+            connectivitySubscription: _connectivitySubscription,
+            title: Strings.titleSettings,
+            dhtStatus: dhtStatus,
+          )
+        );;
       })
     );
   }
