@@ -98,6 +98,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
               appDir: widget.appStorageLocation,
               repositoriesDir: widget.repositoriesLocation
             )
+          ),
+          BlocProvider<ConnectivityCubit>(
+            create: (BuildContext context) => ConnectivityCubit()
           )
         ],
         child: MainPage(

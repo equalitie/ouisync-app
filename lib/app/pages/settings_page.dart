@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r_get_ip/r_get_ip.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
-import '../models/data_models/persisted_repository.dart';
+import '../models/models.dart';
 import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -13,6 +17,7 @@ class SettingsPage extends StatefulWidget {
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.onShareRepository,
+    required this.connectivitySubscription,
     required this.title,
     this.dhtStatus = false, 
   });
@@ -20,6 +25,7 @@ class SettingsPage extends StatefulWidget {
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
+  final StreamSubscription<ConnectivityResult>? connectivitySubscription;
   final String title;
   final bool dhtStatus;
 
@@ -31,11 +37,17 @@ class _SettingsPageState extends State<SettingsPage> {
   RepositoriesService _repositoriesSession = RepositoriesService();
 
   PersistedRepository? _persistedRepository;
+  String? _localEndpoint;
   bool _bittorrentDhtStatus = false;
+
+  Color? _titlesColor = Colors.black;
+
 
   @override
   void initState() {
     super.initState();
+ 
+    _getLocalEndpoint();
 
     _bittorrentDhtStatus = widget.dhtStatus;
     print('BitTorrent DHT status: ${widget.dhtStatus}');
@@ -45,8 +57,51 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  void _getLocalEndpoint({ConnectivityResult? connectivityResult}) async {
+    final connectivity = connectivityResult ?? await Connectivity().checkConnectivity();
+    final isConnected = [
+      ConnectivityResult.ethernet,
+      ConnectivityResult.mobile,
+      ConnectivityResult.wifi
+    ].contains(connectivity);
+
+    _getConnectivityInfo(isConnected)
+    .then((localEndpoint) => 
+      setState(() => _localEndpoint = localEndpoint)
+    );
+  }
+
+  Future<String> _getConnectivityInfo(bool connected) async {
+    String localEndpoint = widget.repositoriesCubit.session
+    .local_network_address();
+
+    if (!connected) {
+      print('Network unavailable');
+      return localEndpoint;
+    }
+
+    if (localEndpoint.contains(Strings.emptyIPv4) ||
+    localEndpoint.contains(Strings.undeterminedIPv6)) { 
+      final internalIPAddress = await RGetIp.internalIP;
+
+      final indexFirstSemicolon = localEndpoint.indexOf(':');
+      final indexLastSemicolon = localEndpoint.lastIndexOf(':');
+
+      final protocol = localEndpoint.substring(0, indexFirstSemicolon);
+      final port = localEndpoint.substring(indexLastSemicolon + 1);
+
+      final newLocalEndpoint = '$protocol:$internalIPAddress:$port';
+
+      return newLocalEndpoint;
+    }
+
+    return localEndpoint;
+  }
+
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
+    _titlesColor = Theme.of(context).colorScheme.secondaryVariant;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -61,13 +116,33 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(
               height: 20.0,
               thickness: 1.0,
-
+            ),
+            Fields.idLabel(Strings.titleNetwork,
+              fontSize: Dimensions.fontAverage,
+              fontWeight: FontWeight.normal,
+              color: _titlesColor!
             ),
             LabeledSwitch(
               label: Strings.labelBitTorrentDHT,
               padding: const EdgeInsets.all(0.0),
               value: _bittorrentDhtStatus,
               onChanged: updateDhtSetting,
+            ),
+            BlocConsumer<ConnectivityCubit, ConnectivityState>(
+              builder: (context, state) {
+                return Fields.labeledText(
+                  label: Strings.labelEndpoint,
+                  text: _localEndpoint ?? Strings.statusUnspecified,
+                  labelTextAlign: TextAlign.start,
+                  textAlign: TextAlign.end,
+                  space: Dimensions.spacingHorizontalHalf
+                );
+              },
+              listener: (context, state) {
+                if (state is ConnectivityChanged) {
+                  _getLocalEndpoint(connectivityResult: state.connectivityResult);
+                }
+              }
             ),
           ],
         )
@@ -82,7 +157,8 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Fields.idLabel(Strings.titleRepository,
             fontSize: Dimensions.fontAverage,
-            fontWeight: FontWeight.normal
+            fontWeight: FontWeight.normal,
+            color: _titlesColor!
           ),
           Dimensions.spacingVertical,
           Container(
