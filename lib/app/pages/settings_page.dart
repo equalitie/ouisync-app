@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dart_ipify/dart_ipify.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r_get_ip/r_get_ip.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -57,8 +57,8 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  void _getLocalEndpoint() async {
-    final connectivity = await Connectivity().checkConnectivity();
+  void _getLocalEndpoint({ConnectivityResult? connectivityResult}) async {
+    final connectivity = connectivityResult ?? await Connectivity().checkConnectivity();
     final isConnected = [
       ConnectivityResult.ethernet,
       ConnectivityResult.mobile,
@@ -76,18 +76,13 @@ class _SettingsPageState extends State<SettingsPage> {
     .local_network_address();
 
     if (!connected) {
+      print('Network unavailable');
       return localEndpoint;
     }
 
     if (localEndpoint.contains(Strings.emptyIPv4) ||
     localEndpoint.contains(Strings.undeterminedIPv6)) { 
-      final iPv64;
-      try {
-        iPv64 = await Ipify.ipv64();
-      } catch (e) {
-        print('Error getting the IP address: $e');
-        return localEndpoint;
-      }
+      final internalIPAddress = await RGetIp.internalIP;
 
       final indexFirstSemicolon = localEndpoint.indexOf(':');
       final indexLastSemicolon = localEndpoint.lastIndexOf(':');
@@ -95,7 +90,8 @@ class _SettingsPageState extends State<SettingsPage> {
       final protocol = localEndpoint.substring(0, indexFirstSemicolon);
       final port = localEndpoint.substring(indexLastSemicolon + 1);
 
-      final newLocalEndpoint = '$protocol:$iPv64:$port';
+      final newLocalEndpoint = '$protocol:$internalIPAddress:$port';
+
       return newLocalEndpoint;
     }
 
@@ -144,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
               listener: (context, state) {
                 if (state is ConnectivityChanged) {
-                  _getLocalEndpoint();
+                  _getLocalEndpoint(connectivityResult: state.connectivityResult);
                 }
               }
             ),
