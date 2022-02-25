@@ -45,7 +45,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         yield DirectoryLoadInProgress(); 
       }
 
-      yield await navigateTo(event.repository, event.type, event.origin, event.destination);
+      yield await navigateTo(event.repository, event.previousAccesMode, event.type, event.origin, event.destination);
     }
 
     if (event is SaveFile) {
@@ -110,7 +110,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return DirectoryLoadFailure();
     }
     
-    return await navigateTo(repository, Navigation.content, origin, newFolderPath);
+    return await navigateTo(repository, null, Navigation.content, origin, newFolderPath);
   }
 
   Future<DirectoryState> getFolderContents(Repository repository, String path, {bool isSyncing = false}) async {
@@ -148,9 +148,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     return await getFolderContents(repository, parentPath);
   }
 
-  Future<DirectoryState> navigateTo(Repository repository, Navigation type, String origin, String destination) async {
+  Future<DirectoryState> navigateTo(Repository repository, AccessMode? previousAccessMode, Navigation type, String origin, String destination) async {
     if (repository.accessMode == AccessMode.blind) {
-      return NavigationLoadBlind();
+      return NavigationLoadBlind(previousAccessMode: previousAccessMode);
     }
 
     var folderContentsResult;

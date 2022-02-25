@@ -17,7 +17,7 @@ import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-typedef RepositoryCallback = void Function(Repository? repository, String name);
+typedef RepositoryCallback = void Function(Repository? repository, String name, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -59,10 +59,10 @@ class _MainPageState extends State<MainPage>
     String _pathEntryToMove = '';
     PersistentBottomSheetController? _persistentBottomSheetController;
 
-    Widget _mainState = Container();
+    Widget _mainState = LoadingMainPageState();
 
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
-    late ValueNotifier<double> _bottomPaddingWithBottomSheet;
+    ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
 
     // A timestamp (ms since epoch) when was the last time the user hit the
     // back button from the directory root. If the user hits it twice within
@@ -77,8 +77,10 @@ class _MainPageState extends State<MainPage>
       _repositoriesSession
       .setSubscriptionCallback(_syncCurrentFolder);
 
-
-      initMainPage();
+      _initRepositories()
+      .then((_) {
+        initMainPage();
+      });
 
       widget.intentStream
       .listen((listOfMedia) {
@@ -98,8 +100,42 @@ class _MainPageState extends State<MainPage>
 
       super.dispose();
     }
+  
+    Future<void> _initRepositories() async {
+      final repositoriesCubit = BlocProvider
+      .of<RepositoriesCubit>(context);
 
-    void _connectivityChange(ConnectivityResult result) {
+      final repositoriesInitTasks = RepositoryHelper
+      .localRepositoriesFiles(
+        widget.repositoriesLocation,
+        justNames: true
+      ).map((repositoryName) => 
+        initializeRepository(repositoriesCubit, repositoryName as String)
+      ).toList();
+
+      final persistedRepositories = await Future
+      .wait(repositoriesInitTasks);
+
+      if (persistedRepositories.isEmpty) {
+        return;
+      }
+
+      _repositoriesSession.repositories
+      .addAll(persistedRepositories);
+
+      _repositoriesSession
+      .setCurrent(widget.defaultRepositoryName);  
+    }
+
+    Future<PersistedRepository> initializeRepository(
+      RepositoriesCubit cubit,
+      String repositoryName
+    ) async {
+      final initRepo = await cubit.initRepository(repositoryName);
+      return PersistedRepository(repository: initRepo!, name: repositoryName);
+    }
+  
+  void _connectivityChange(ConnectivityResult result) {
       print('Connectivity event: ${result.name}');
       
       BlocProvider
@@ -113,24 +149,11 @@ class _MainPageState extends State<MainPage>
       _syncingCubit = BlocProvider
       .of<SynchronizationCubit>(context);
 
-      initMainPageLayout(widget.defaultRepositoryName);
-    }
-
-    void initMainPageLayout(String repositoryName) {
-      switchMainState(newState:
-        repositoryName.isEmpty
-        ? _noRepositoriesState()
-        : LockedRepositoryState(
-          repositoryName: repositoryName,
-          onUnlockPressed: unlockRepositoryDialog
-        )
-      );
-
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(
-        null,
-        repositoryName
+        _repositoriesSession.current?.repository,
+        _repositoriesSession.current?.name ?? ''
       );
     }
 
@@ -148,13 +171,6 @@ class _MainPageState extends State<MainPage>
       List<SharedMediaFile> payload
     ) {
       if (_intentPayload.isEmpty) {
-        return;
-      }
-
-      if (!_repositoriesSession.hasCurrent) {
-        Fluttertoast
-        .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
-
         return;
       }
 
@@ -186,6 +202,7 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath({
       required Repository repository,
+      AccessMode? previousAccessMode,
       required Navigation type,
       required String origin,
       required String destination,
@@ -195,6 +212,7 @@ class _MainPageState extends State<MainPage>
       .of<DirectoryBloc>(context)
       .add(NavigateTo(
         repository: repository,
+        previousAccesMode: previousAccessMode,
         type: type,
         origin: origin,
         destination: destination,
@@ -359,11 +377,13 @@ class _MainPageState extends State<MainPage>
       : Container();
     }
 
-    void switchRepository(Repository? repository, String name) {
+    void switchRepository(Repository? repository, String name, AccessMode? previousAccessMode) {
       NativeChannels.setRepository(repository); 
 
       if (repository == null) {
-        initMainPageLayout(name);
+        switchMainState(newState:
+          _noRepositoriesState()
+        );
         return;
       }
 
@@ -376,6 +396,7 @@ class _MainPageState extends State<MainPage>
 
       navigateToPath(
         repository: _repositoriesSession.current!.repository,
+        previousAccessMode: previousAccessMode,
         type: Navigation.content,
         origin: Strings.rootPath,
         destination: Strings.rootPath,
@@ -496,6 +517,34 @@ class _MainPageState extends State<MainPage>
           return;
         }
 
+        if (state is NavigationLoadBlind) {
+          if (state.previousAccessMode == AccessMode.blind) {
+            showDialog<bool>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Unlock repository'),
+                content: SingleChildScrollView(
+                  child: ListBody(children: [
+                    Text('Unlocking the repository failed'
+                      '\n\n'
+                      'Check the password and try again'
+                    )
+                  ]),
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text(Strings.actionCloseCapital),
+                    onPressed: () => 
+                    Navigator.of(context).pop(),
+                  )
+                ],
+              );
+            }); 
+          }
+        }
+
         if (state is CreateFileDone) {
           Fluttertoast.showToast(msg:
             Strings
@@ -587,7 +636,7 @@ class _MainPageState extends State<MainPage>
       bool isBlind = false
     }) {
       if (isBlind) {
-        return BlindRepositoryState(
+        return LockedRepositoryState(
           repositoryName: persistedRepo.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
@@ -980,6 +1029,31 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
+    if (_repositoriesSession.current!.repository.accessMode == AccessMode.blind) {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (context) {
+          return AlertDialog(
+            title: Text(Strings.titleAddShareFilePage),
+            content: SingleChildScrollView(
+              child: ListBody(children: [
+                Text(Strings.messageAddingFileToLockedRepository)
+              ]),
+            ),
+            actions: [
+              TextButton(
+                child: const Text(Strings.actionCloseCapital),
+                onPressed: () => 
+                Navigator.of(context).pop(),
+              )
+            ],
+          );
+      });
+
+      return;
+    }
+
     final fileName = getPathFromFileName(_intentPayload.first.path);
     final length = io.File(_intentPayload.first.path).statSync().size;
     final filePath = _currentFolder == Strings.rootPath
@@ -1094,7 +1168,7 @@ class _MainPageState extends State<MainPage>
         _repositoriesSession.remove(name!);
 
         BlocProvider.of<RepositoriesCubit>(context)
-        .openRepository(
+        .unlockRepository(
           name: repositoryName,
           password: password
         );

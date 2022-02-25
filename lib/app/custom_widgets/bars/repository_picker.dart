@@ -25,26 +25,6 @@ class RepositoryPicker extends StatefulWidget {
 class _RepositoryPickerState extends State<RepositoryPicker> {
   String _repositoryName = Strings.messageNoRepos;
 
-  updateCurrentRepository(Repository? repository, String? name) async {
-    setState(() {
-      _repositoryName = name == null
-      ? Strings.messageNoRepos
-      : name;
-    });
-
-    if (repository == null && (name?.isEmpty ?? true)) {  
-      widget.onRepositorySelect.call(null, '');
-      return;
-    }
-
-    if (repository == null) { /// Every repository is initialized as a blind replica
-      repository = await widget.repositoriesCubit
-      .initRepository(name ?? '');
-    }
-
-    widget.onRepositorySelect.call(repository, name!);
-  }
-
   static final Color colorNoRepo = Colors.grey;
   static final Color colorLockedRepo = Colors.grey;
   static final Color colorUnlockedRepo = Colors.black;
@@ -81,6 +61,18 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           );
         }
 
+        if (state is RepositoryPickerUnlocked) {
+          final color = state.repository.accessMode != AccessMode.blind
+          ? colorUnlockedRepo
+          : colorLockedRepo;
+
+          return _buildState(
+            borderColor: widget.borderColor,
+            iconColor: colorUnlockedRepo,
+            textColor: color
+          );
+        }
+
         if (state is RepositoriesFailure) {
           return _buildState(
             borderColor: widget.borderColor,
@@ -93,10 +85,45 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
-          updateCurrentRepository(state.repository, state.name);
+          _updateCurrentRepository(
+            repository: state.repository,
+            name: state.name
+          );
+        }
+        if (state is RepositoryPickerUnlocked) {
+          _updateCurrentRepository(
+            repository: state.repository,
+            name: state.repositoryName,
+            previousAccessMode: state.previousAccessMode);
+        }
+        if (state is RepositoryPickerInitial) {
+          _updateCurrentRepository(
+            repository: null,
+            name: ''
+          );
         }
       },
     );
+  }
+
+  _updateCurrentRepository({Repository? repository, String? name, AccessMode? previousAccessMode}) async {
+    setState(() {
+      _repositoryName = (name?.isEmpty ?? true
+      ? Strings.messageNoRepos
+      : name)!;
+    });
+
+    if (repository == null && (name?.isEmpty ?? true)) {  
+      widget.onRepositorySelect.call(null, '', null);
+      return;
+    }
+
+    if (repository == null && (name?.isNotEmpty ?? false)) { /// Every repository is initialized as a blind replica
+      repository = await widget.repositoriesCubit
+      .initRepository(name!);
+    }
+
+    widget.onRepositorySelect.call(repository, name!, previousAccessMode);
   }
 
   _buildState({

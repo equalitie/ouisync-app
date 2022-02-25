@@ -26,4 +26,4 @@ export 'items/list_item.dart';
 export 'items/sync_widget.dart';
 
 export 'states/locked_repository_state.dart';
-export 'states/blind_repository_state.dart';
+export 'states/loading_main_page_state.dart';

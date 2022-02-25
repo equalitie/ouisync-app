@@ -80,6 +80,7 @@ class DeleteFolder extends DirectoryEvent {
 class NavigateTo extends DirectoryEvent {
   const NavigateTo({
     required this.repository,
+    this.previousAccesMode,
     required this.type,
     required this.origin,
     required this.destination,
@@ -89,6 +90,7 @@ class NavigateTo extends DirectoryEvent {
   assert (destination != '');
 
   final Repository repository;
+  final AccessMode? previousAccesMode;
   final Navigation type;
   final String origin;
   final String destination;
@@ -97,6 +99,7 @@ class NavigateTo extends DirectoryEvent {
   @override
   List<Object?> get props => [
     repository,
+    previousAccesMode,
     type,
     origin,
     destination,
