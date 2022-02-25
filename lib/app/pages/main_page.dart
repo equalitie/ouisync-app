@@ -151,13 +151,6 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      if (!_repositoriesSession.hasCurrent) {
-        Fluttertoast
-        .showToast(msg: Strings.messageNoRepo, toastLength: Toast.LENGTH_LONG);
-
-        return;
-      }
-
       _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
       _showSaveSharedMedia(sharedMedia: _intentPayload);
     }
@@ -1016,6 +1009,31 @@ class _MainPageState extends State<MainPage>
     SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
     if (mediaInfo == null) {
       Fluttertoast.showToast(msg: Strings.mesageNoMediaPresent);
+      return;
+    }
+
+    if (_repositoriesSession.current!.repository.accessMode == AccessMode.blind) {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (context) {
+          return AlertDialog(
+            title: Text(Strings.titleAddShareFilePage),
+            content: SingleChildScrollView(
+              child: ListBody(children: [
+                Text(Strings.messageAddingFileToLockedRepository)
+              ]),
+            ),
+            actions: [
+              TextButton(
+                child: const Text(Strings.actionCloseCapital),
+                onPressed: () => 
+                Navigator.of(context).pop(),
+              )
+            ],
+          );
+      });
+
       return;
     }
 
