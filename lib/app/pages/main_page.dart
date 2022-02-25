@@ -16,7 +16,7 @@ import '../services/services.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
-typedef RepositoryCallback = void Function(Repository? repository, String name);
+typedef RepositoryCallback = void Function(Repository? repository, String name, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -165,6 +165,7 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath({
       required Repository repository,
+      AccessMode? previousAccessMode,
       required Navigation type,
       required String origin,
       required String destination,
@@ -174,6 +175,7 @@ class _MainPageState extends State<MainPage>
       .of<DirectoryBloc>(context)
       .add(NavigateTo(
         repository: repository,
+        previousAccesMode: previousAccessMode,
         type: type,
         origin: origin,
         destination: destination,
@@ -344,7 +346,7 @@ class _MainPageState extends State<MainPage>
       : Container();
     }
 
-    void switchRepository(Repository? repository, String name) {
+    void switchRepository(Repository? repository, String name, AccessMode? previousAccessMode) {
       NativeChannels.setRepository(repository); 
 
       if (repository == null) {
@@ -361,6 +363,7 @@ class _MainPageState extends State<MainPage>
 
       navigateToPath(
         repository: _repositoriesSession.current!.repository,
+        previousAccessMode: previousAccessMode,
         type: Navigation.content,
         origin: Strings.rootPath,
         destination: Strings.rootPath,
@@ -481,6 +484,34 @@ class _MainPageState extends State<MainPage>
           return;
         }
 
+        if (state is NavigationLoadBlind) {
+          if (state.previousAccessMode == AccessMode.blind) {
+            showDialog<bool>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Unlock repository'),
+                content: SingleChildScrollView(
+                  child: ListBody(children: [
+                    Text('Unlocking the repository failed'
+                      '\n\n'
+                      'Check the password and try again'
+                    )
+                  ]),
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text(Strings.actionCloseCapital),
+                    onPressed: () => 
+                    Navigator.of(context).pop(),
+                  )
+                ],
+              );
+            }); 
+          }
+        }
+
         if (state is CreateFileDone) {
           Fluttertoast.showToast(msg:
             Strings
@@ -572,7 +603,7 @@ class _MainPageState extends State<MainPage>
       bool isBlind = false
     }) {
       if (isBlind) {
-        return BlindRepositoryState(
+        return LockedRepositoryState(
           repositoryName: persistedRepo.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
@@ -1079,7 +1110,7 @@ class _MainPageState extends State<MainPage>
         _repositoriesSession.remove(name!);
 
         BlocProvider.of<RepositoriesCubit>(context)
-        .openRepository(
+        .unlockRepository(
           name: repositoryName,
           password: password
         );

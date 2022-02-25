@@ -144,6 +144,10 @@ class Strings {
 
   static const String messageInitializing = 'Initializing...';
 
+  static const String messageAddingFileToLockedRepository = 'This repository is locked or is a blind replica.'
+  '\n\n'
+  'If you have the password, unlock it and try again.';
+
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
   static const String replacementStatus = '[status]';
