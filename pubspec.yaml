@@ -31,7 +31,6 @@ dependencies:
   connectivity_plus: ^2.2.1
   crypt: ^4.0.1
   cupertino_icons: ^1.0.3
-  dart_ipify: ^1.1.1
   equatable: ^2.0.3
   ffi: ^1.0.0
   file: ^6.1.2
@@ -51,6 +50,7 @@ dependencies:
     path: ./ouisync-plugin
   path: ^1.8.0
   path_provider: ^2.0.8
+  r_get_ip: ^0.1.1
   receive_sharing_intent: ^1.4.5
   share_plus: ^3.0.4
   shared_preferences: ^2.0.8
@@ -58,8 +58,8 @@ dependencies:
   url_launcher: ^6.0.6
 
 flutter_icons:
-    image_path: "assets/OuiSync-App-Icon-1200.png"
-    android: true
+  image_path: "assets/OuiSync-App-Icon-1200.png"
+  android: true
 
 dev_dependencies:
   flutter_test:
