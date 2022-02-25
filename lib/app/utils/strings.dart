@@ -85,7 +85,6 @@ class Strings {
   static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete file';
   static const String titleDeleteRepository = 'Delete repository';
-  static const String titleExitOuiSync = 'Close OuiSync';
 
   static const String labelRepositoryToken = 'Token: ';
   static const String labelName = 'Name: ';
@@ -140,7 +139,7 @@ class Strings {
   static const String messageFileDeleted = 'File deleted successfully: [name]';
   static const String messageFolderDeleted = 'Folder deleted successfully: [name]';
 
-  static const String messageExitOuiSync = 'Do you want to close the app?';
+  static const String messageExitOuiSync = 'Press back again to exit';
 
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';

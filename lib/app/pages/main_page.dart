@@ -62,6 +62,12 @@ class _MainPageState extends State<MainPage>
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     late ValueNotifier<double> _bottomPaddingWithBottomSheet;
 
+    // A timestamp (ms since epoch) when was the last time the user hit the
+    // back button from the directory root. If the user hits it twice within
+    // exitBackButtonTimeoutMs duration, then the app will exit.
+    int lastExitAttempt = 0;
+    final int exitBackButtonTimeoutMs = 3000;
+
     @override
     void initState() {
       super.initState();
@@ -252,29 +258,23 @@ class _MainPageState extends State<MainPage>
 
     Future<bool> _onBackPressed() async {
       if (_currentFolder == Strings.rootPath) {
-        final closeApp = await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: new Text(Strings.titleExitOuiSync),
-            content: new Text(Strings.messageExitOuiSync),
-            actions: <Widget>[
-              TextButton(
-                child: const Text(Strings.actionAcceptCapital),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                }
-              ),
-              TextButton(
-                child: const Text(Strings.actionCancelCapital),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                }
-              )
-            ],
-          ),
-        );
+        // If the user clicks twice the back button within
+        // exitBackButtonTimeoutMs timeout, then exit the app.
+        int now = DateTime.now().millisecondsSinceEpoch;
 
-        return closeApp;
+        if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
+          lastExitAttempt = now;
+          Fluttertoast.showToast(
+            msg: Strings.messageExitOuiSync,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER);
+
+          // Don't pop => don't exit
+          return false;
+        } else {
+          // Don't interfere with the ModalRoute => do pop => exit the app.
+          return true;
+        }
       }
 
       if (_repositoriesSession.hasCurrent) {
