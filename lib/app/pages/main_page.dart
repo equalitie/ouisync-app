@@ -57,10 +57,10 @@ class _MainPageState extends State<MainPage>
     String _pathEntryToMove = '';
     PersistentBottomSheetController? _persistentBottomSheetController;
 
-    Widget _mainState = Container();
+    Widget _mainState = LoadingMainPageState();
 
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
-    late ValueNotifier<double> _bottomPaddingWithBottomSheet;
+    ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
 
     @override
     void initState() {
@@ -69,8 +69,10 @@ class _MainPageState extends State<MainPage>
       _repositoriesSession
       .setSubscriptionCallback(_syncCurrentFolder);
 
-
-      initMainPage();
+      _initRepositories()
+      .then((_) {
+        initMainPage();
+      });
 
       widget.intentStream
       .listen((listOfMedia) {
@@ -86,30 +88,49 @@ class _MainPageState extends State<MainPage>
       super.dispose();
     }
 
-    void initMainPage() async {
-      _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-      
-      _syncingCubit = BlocProvider
-      .of<SynchronizationCubit>(context);
+    Future<void> _initRepositories() async {
+      final repositoriesCubit = BlocProvider
+      .of<RepositoriesCubit>(context);
 
-      initMainPageLayout(widget.defaultRepositoryName);
+      final repositoriesInitTasks = RepositoryHelper
+      .localRepositoriesFiles(
+        widget.repositoriesLocation,
+        justNames: true
+      ).map((repositoryName) => 
+        initializeRepository(repositoriesCubit, repositoryName as String)
+      ).toList();
+
+      final persistedRepositories = await Future
+      .wait(repositoriesInitTasks);
+
+      if (persistedRepositories.isEmpty) {
+        return;
+      }
+
+      _repositoriesSession.repositories
+      .addAll(persistedRepositories);
+
+      _repositoriesSession
+      .setCurrent(widget.defaultRepositoryName);  
     }
 
-    void initMainPageLayout(String repositoryName) {
-      switchMainState(newState:
-        repositoryName.isEmpty
-        ? _noRepositoriesState()
-        : LockedRepositoryState(
-          repositoryName: repositoryName,
-          onUnlockPressed: unlockRepositoryDialog
-        )
-      );
+    Future<PersistedRepository> initializeRepository(
+      RepositoriesCubit cubit,
+      String repositoryName
+    ) async {
+      final initRepo = await cubit.initRepository(repositoryName);
+      return PersistedRepository(repository: initRepo!, name: repositoryName);
+    }
+
+    void initMainPage() async {
+      _syncingCubit = BlocProvider
+      .of<SynchronizationCubit>(context);
 
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(
-        null,
-        repositoryName
+        _repositoriesSession.current?.repository,
+        _repositoriesSession.current?.name ?? ''
       );
     }
 
@@ -350,7 +371,9 @@ class _MainPageState extends State<MainPage>
       NativeChannels.setRepository(repository); 
 
       if (repository == null) {
-        initMainPageLayout(name);
+        switchMainState(newState:
+          _noRepositoriesState()
+        );
         return;
       }
 
