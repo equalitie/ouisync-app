@@ -59,7 +59,7 @@ class Strings {
   static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
   static const String messageBlindRepository = 'This repository is a blind replica';
   static const String messageBlindRepositoryContent = 'The provided <bold>password</bold> do not grant you access to its contents';
-  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button an input the password '
+  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button and input the password '
   'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
   static const String messageRenameRepository = 'Rename repository';
