@@ -217,13 +217,16 @@ class NavigationLoadBlind extends DirectoryState {
 
 class DirectoryLoadFailure extends DirectoryState {
   const DirectoryLoadFailure({
+    this.error,
     this.isSyncing = false
   });
 
+  final String? error;
   final bool isSyncing;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
+    error,
     isSyncing
   ];
 }
