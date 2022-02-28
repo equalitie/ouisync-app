@@ -85,7 +85,7 @@ class _MainPageState extends State<MainPage>
       widget.intentStream
       .listen((listOfMedia) {
         _intentPayload = listOfMedia;
-        handleShareIntentPayload(widget.defaultRepositoryName, _intentPayload);
+        handleShareIntentPayload(_intentPayload);
       });
 
       _connectivitySubscription = Connectivity()
@@ -167,7 +167,6 @@ class _MainPageState extends State<MainPage>
     }
 
     void handleShareIntentPayload(
-      String repositoryName,
       List<SharedMediaFile> payload
     ) {
       if (_intentPayload.isEmpty) {
