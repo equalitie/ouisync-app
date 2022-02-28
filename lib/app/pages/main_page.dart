@@ -477,6 +477,14 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadFailure) {
+          if (state.error == Strings.errorEntryNotFound) {
+            final parent = extractParentFromPath(_currentFolder);
+            return _contentsList(
+              repository: _repositoriesSession.current!.repository,
+              path: parent,
+            );
+          }
+
           return _errorState(
             message: Strings.messageErrorState,
             actionReload: () => refreshCurrent(
@@ -505,6 +513,26 @@ class _MainPageState extends State<MainPage>
         );
       },
       listener: (context, state) {
+        if (state is DirectoryLoadFailure) {
+          final destination = extractParentFromPath(_currentFolder);
+          final parent = extractParentFromPath(destination);
+
+          final errorMessage = Strings.messageErrorCurrentPathMissing
+          .replaceAll(Strings.replacementPath, destination);
+
+          print(errorMessage);
+          Fluttertoast.showToast(msg: errorMessage);
+
+          updateCurrentFolder(path: destination);
+          navigateToPath(
+            repository: _repositoriesSession.current!.repository,
+            type: Navigation.content,
+            origin: parent,
+            destination: destination,
+            withProgress: true
+          );
+        }
+
         if (state is NavigationLoadSuccess) {
           if (state.type == Navigation.content) {
             
