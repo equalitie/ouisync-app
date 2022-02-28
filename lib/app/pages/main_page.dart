@@ -265,12 +265,14 @@ class _MainPageState extends State<MainPage>
 
       _syncingCubit?.syncing();
     
-      getContents(
-        repository: _repositoriesSession.current!.repository,
-        path: _currentFolder,
-        isSyncing: true
-      );
-
+      if (_repositoriesSession.current!.repository.accessMode != AccessMode.blind) {
+        getContents(
+          repository: _repositoriesSession.current!.repository,
+          path: _currentFolder,
+          isSyncing: true
+        ); 
+      }
+      
       print('[Syncing $repositoryName (${_repositoriesSession.current!.repository.handle})] Current folder: $_currentFolder');
     }
 
