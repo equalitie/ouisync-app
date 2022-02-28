@@ -124,7 +124,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       }
     } catch (e) {
       print('Exception getting contents for $path:\n${e.toString()}');
-      return DirectoryLoadFailure();
+      return DirectoryLoadFailure(error: e.toString());
     }
     
     return DirectoryLoadSuccess(path:  path, contents: getContentsResult.result, isSyncing: isSyncing);
