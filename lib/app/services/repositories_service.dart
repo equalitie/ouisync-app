@@ -66,7 +66,8 @@ class RepositoriesService {
       _repositories.add(repo);
     }
 
-    if (isCurrent) {
+    if (isCurrent &&
+    repo.name != _current) {
       _updateCurrentRepository(repo);
     }
   }
