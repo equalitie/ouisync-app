@@ -7,11 +7,13 @@ import '../../utils/utils.dart';
 class ShareRepository extends StatefulWidget {
   ShareRepository({
     required this.repository,
-    required this.repositoryName
+    required this.repositoryName,
+    required this.availableAccessModes
   });
 
   final Repository repository;
   final String repositoryName;
+  final List<AccessMode> availableAccessModes;
 
   @override
   State<StatefulWidget> createState() => _ShareRepositoryState();
@@ -28,7 +30,11 @@ class _ShareRepositoryState extends State<ShareRepository> {
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
       initialData: '',
-      future: createShareToken(repo: widget.repository, name: widget.repositoryName, accessMode: _accessMode.value),
+      future: createShareToken(
+        repo: widget.repository,
+        name: widget.repositoryName,
+        accessMode: _accessMode.value
+      ),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           _shareToken.value = Strings.messageAck;
@@ -109,7 +115,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
             isExpanded: true,
             value: value,
             underline: SizedBox(),
-            items: AccessMode.values.map((AccessMode element) {
+            items: widget.availableAccessModes.map((AccessMode element) {
               return DropdownMenuItem(
                 value: element,
                 child: Text(

@@ -896,9 +896,16 @@ class _MainPageState extends State<MainPage>
         ),
       ),
       builder: (context) {
+        final accessModes = repository.accessMode == AccessMode.write
+        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+        : repository.accessMode == AccessMode.read
+        ? [AccessMode.blind, AccessMode.read]
+        : [AccessMode.blind];
+  
         return ShareRepository(
           repository: repository,
-          repositoryName: repositoryName
+          repositoryName: repositoryName,
+          availableAccessModes: accessModes,
         );
       }
     );
