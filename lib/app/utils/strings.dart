@@ -42,6 +42,9 @@ class Strings {
 
   static const String messageErrorPathNotEmpty = '[path] is not empty';
 
+  static const String messageErrorCurrentPathMissing = 'The current folder is missing, navigating'
+  ' to its parent: [path]';
+
   // main_page.dart
   static const String messageNoRepo = 'Before adding a <bold>file</bold>, you need to create a '
   '<bold>repository</bold>';
@@ -210,5 +213,7 @@ class Strings {
 
   static const String emptyIPv4 = '0.0.0.0';
   static const String undeterminedIPv6 = '[::]';
+
+  static const String errorEntryNotFound = 'entry not found';
 
 }
