@@ -52,6 +52,7 @@ class Strings {
   static const String messageEmptyFolder = 'This <bold>folder</bold> is empty';
   static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
   '<bold>file</bold>, using <icon></icon>';
+  static const String messageReadOnlyContents = 'This repository is <bold>read-only</bold>';
   static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
   static const String messageBlindRepository = 'This repository is a blind replica';
   static const String messageBlindRepositoryContent = 'The provided <bold>password</bold> do not grant you access to its contents';
@@ -149,6 +150,7 @@ class Strings {
   static const String messageAddingFileToLockedRepository = 'This repository is locked or is a blind replica.'
   '\n\n'
   'If you have the password, unlock it and try again.';
+  static const String messageAddingFileToReadRepository = 'This repository is a read-only replica.';
 
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';

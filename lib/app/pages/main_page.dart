@@ -135,7 +135,7 @@ class _MainPageState extends State<MainPage>
       return PersistedRepository(repository: initRepo!, name: repositoryName);
     }
   
-  void _connectivityChange(ConnectivityResult result) {
+    void _connectivityChange(ConnectivityResult result) {
       print('Connectivity event: ${result.name}');
       
       BlocProvider
@@ -363,8 +363,17 @@ class _MainPageState extends State<MainPage>
     ];
 
     StatelessWidget _buildFAB(BuildContext context,) {
-      return _repositoriesSession.hasCurrent
-      ? new FloatingActionButton(
+      if (!_repositoriesSession.hasCurrent) {
+        return Container();
+      }
+
+      if ([AccessMode.blind, AccessMode.read]
+      .contains(_repositoriesSession.current!.repository.accessMode)
+      ) {
+        return Container();
+      }
+
+      return new FloatingActionButton(
         heroTag: Constants.heroTagMainPageActions,
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
@@ -373,8 +382,7 @@ class _MainPageState extends State<MainPage>
           repository: _repositoriesSession.current!.repository, 
           parent: _currentFolder
         ),
-      )
-      : Container();
+      );
     }
 
     void switchRepository(Repository? repository, String name, AccessMode? previousAccessMode) {
@@ -764,7 +772,9 @@ class _MainPageState extends State<MainPage>
           Align(
             alignment: Alignment.center,
             child: Fields.inPageSecondaryMessage(
-              Strings.messageCreateAddNewItem,
+              repository.accessMode == AccessMode.write
+              ? Strings.messageCreateAddNewItem
+              : Strings.messageReadOnlyContents,
               tags: {
                 Constants.inlineTextBold: InlineTextStyles.bold,
                 Constants.inlineTextIcon: InlineTextStyles.icon(
@@ -868,17 +878,25 @@ class _MainPageState extends State<MainPage>
     _popupMenu({
       required Repository repository,
       required BaseItem data
-    }) => Dialogs
-    .filePopupMenu(
-      context,
-      repository,
-      BlocProvider. of<DirectoryBloc>(context),
-      { 
+    }) { 
+      final availableActions = repository.accessMode == AccessMode.write
+      ? {
         Strings.actionPreviewFile: data,
         Strings.actionShareFile: data,
         Strings.actionDeleteFile: data 
-      }
-    );
+      } : { 
+        Strings.actionPreviewFile: data,
+        Strings.actionShareFile: data, 
+      };
+
+      return Dialogs
+      .filePopupMenu(
+        context,
+        repository,
+        BlocProvider. of<DirectoryBloc>(context),
+        availableActions
+      );
+    }
 
     Future<dynamic> _showShareRepository(context,
     {
@@ -1036,7 +1054,13 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    if (_repositoriesSession.current!.repository.accessMode == AccessMode.blind) {
+    String? accessModeMessage = _repositoriesSession.current!.repository.accessMode == AccessMode.blind
+    ? Strings.messageAddingFileToLockedRepository
+    : _repositoriesSession.current!.repository.accessMode == AccessMode.read
+    ? Strings.messageAddingFileToReadRepository
+    : null;
+
+    if (accessModeMessage != null) {
       await showDialog<bool>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -1045,7 +1069,7 @@ class _MainPageState extends State<MainPage>
             title: Text(Strings.titleAddShareFilePage),
             content: SingleChildScrollView(
               child: ListBody(children: [
-                Text(Strings.messageAddingFileToLockedRepository)
+                Text(accessModeMessage)
               ]),
             ),
             actions: [

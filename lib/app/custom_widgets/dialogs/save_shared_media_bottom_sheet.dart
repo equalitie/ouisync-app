@@ -45,7 +45,6 @@ class SaveSharedMedia extends StatelessWidget {
           ),
           Fields.actionsSection(context,
             buttons: _actions(context),
-            // padding: EdgeInsets.only(top: 0.0)
           )
         ],
       ),
