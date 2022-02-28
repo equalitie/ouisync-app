@@ -33,6 +33,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
   String _suggestedName = '';
   bool _showSuggestedName = false;
 
+  bool _requiresPassword = false;
+
   ShareToken? _shareToken;
   String? _repoName;
 
@@ -132,35 +134,41 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             ),
           )
         ),
-        Fields.formTextField(
-          context: context,
-          textEditingController: _passwordController,
-          obscureText: true,
-          label: Strings.labelPassword,
-          hint: Strings.messageRepositoryPassword,
-          onSaved: (_) {},
-          validator: (
-            password,
-            { error = Strings.messageErrorRepositoryPasswordValidation }
-          ) => formNameValidator(password, error: error),
-          autovalidateMode: AutovalidateMode.disabled
+        Visibility(
+          visible: _requiresPassword,
+          child: Fields.formTextField(
+            context: context,
+            textEditingController: _passwordController,
+            obscureText: true,
+            label: Strings.labelPassword,
+            hint: Strings.messageRepositoryPassword,
+            onSaved: (_) {},
+            validator: (
+              password,
+              { error = Strings.messageErrorRepositoryPasswordValidation }
+            ) => formNameValidator(password, error: error),
+            autovalidateMode: AutovalidateMode.disabled
+          )
         ),
-        Fields.formTextField(
-          context: context,
-          textEditingController: _retypedPasswordController,
-          obscureText: true,
-          label: Strings.labelRetypePassword,
-          hint: Strings.messageRepositoryPassword,
-          onSaved: (_) {},
-          validator: (
-            retypedPassword,
-            { error = Strings.messageErrorRetypePassword }
-          ) => retypedPasswordValidator(
-              password: _passwordController.text,
-              retypedPassword: retypedPassword!,
-              error: error
-            ),
-          autovalidateMode: AutovalidateMode.disabled
+        Visibility(
+          visible: _requiresPassword,
+          child: Fields.formTextField(
+            context: context,
+            textEditingController: _retypedPasswordController,
+            obscureText: true,
+            label: Strings.labelRetypePassword,
+            hint: Strings.messageRepositoryPassword,
+            onSaved: (_) {},
+            validator: (
+              retypedPassword,
+              { error = Strings.messageErrorRetypePassword }
+            ) => retypedPasswordValidator(
+                password: _passwordController.text,
+                retypedPassword: retypedPassword!,
+                error: error
+              ),
+            autovalidateMode: AutovalidateMode.disabled
+          ),
         ),
         Fields.actionsSection(
           context,
@@ -216,6 +224,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     setState(() { 
       _showSuggestedName = _suggestedName.isNotEmpty; 
       _showAccessModeMessage = _accessModeNotifier.value.toString().isNotEmpty;
+
+      _requiresPassword = _shareToken!.mode != AccessMode.blind;
     });
   }
 
