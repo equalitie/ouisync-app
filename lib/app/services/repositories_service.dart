@@ -98,6 +98,14 @@ class RepositoriesService {
     }
   }
 
+  void close() {
+      _subscription?.cancel();
+      
+      for (var persisted in repositories) {
+        persisted.repository.close();
+      }
+    }
+
   Subscription? _subscription;
   Subscription? get subscription => _subscription;
 
