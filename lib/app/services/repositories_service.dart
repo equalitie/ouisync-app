@@ -36,12 +36,15 @@ class RepositoriesService {
     }
 
     _subscription?.cancel();
-    print('Subscription to ${persisted.name} canceled: ${_subscription?.handle}');
+    print('Subscription to $_current canceled: ${_subscription?.handle}');
+    _subscription = null;
 
     _current = persisted.name;
     
-    _subscription = persisted.repository.subscribe(() => _subscriptionCallback!.call(_current!));
-    print('Subscribed to notifications: ${persisted.name}');
+    _subscription = persisted.repository.subscribe(() => 
+      _subscriptionCallback!.call(_current!)
+    );
+    print('Subscribed to notifications: ${persisted.name} (${persisted.repository.accessMode.name})');
   }
 
   PersistedRepository? get(String name) =>
@@ -83,12 +86,25 @@ class RepositoriesService {
     }
 
     final repo = get(name);
-    print('Closing repository ${repo?.name}');
-    repo?.repository.close();
-    
-    print('Removing repository ${repo?.name} from memory');
-    _repositories.remove(repo);
+    if (repo != null) {
+      final name = repo.name;
+      final accessMode = repo.repository.accessMode.name;
+
+      print('Closing repository $name ($accessMode)');
+      repo.repository.close();
+      
+      print('Removing repository $name ($accessMode) from memory');
+      _repositories.remove(repo); 
+    }
   }
+
+  void close() {
+      _subscription?.cancel();
+      
+      for (var persisted in repositories) {
+        persisted.repository.close();
+      }
+    }
 
   Subscription? _subscription;
   Subscription? get subscription => _subscription;
