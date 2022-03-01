@@ -70,19 +70,21 @@ class WriteToFileInProgress extends DirectoryState {
   const WriteToFileInProgress({
     required this.path,
     required this.fileName,
-    required this.length
-    
+    required this.length,
+    required this.progress
   });
 
   final String path;
   final String fileName;
   final int length;
+  final int progress;
 
   @override
   List<Object> get props => [
     path,
     fileName,
-    length
+    length,
+    progress
   ];
 }
 
