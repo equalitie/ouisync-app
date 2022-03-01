@@ -99,12 +99,17 @@ class RepositoriesService {
   }
 
   void close() {
-      _subscription?.cancel();
-      
-      for (var persisted in repositories) {
-        persisted.repository.close();
-      }
+    // Make sure this function is idempotent, i.e. that calling it more than once
+    // one after another won't change it's meaning nor it will crash.
+    _subscription?.cancel();
+    _subscirption = null;
+
+    for (var persisted in _repositories) {
+      persisted.repository.close();
     }
+
+    _repositories.clear();
+  }
 
   Subscription? _subscription;
   Subscription? get subscription => _subscription;

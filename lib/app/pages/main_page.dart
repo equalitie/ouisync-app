@@ -95,13 +95,15 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() {
-      _repositoriesService.close();
-
-      _connectivitySubscription?.cancel();
-
+      onDispose();
       super.dispose();
     }
-  
+
+    void onDispose() {
+      _repositoriesService.close();
+      _connectivitySubscription?.cancel();
+    }
+
     Future<void> _initRepositories() async {
       final repositoriesCubit = BlocProvider
       .of<RepositoriesCubit>(context);
@@ -307,6 +309,7 @@ class _MainPageState extends State<MainPage>
           // Don't pop => don't exit
           return false;
         } else {
+          onDispose();
           // Don't interfere with the ModalRoute => do pop => exit the app.
           return true;
         }
