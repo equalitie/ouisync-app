@@ -95,7 +95,9 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() {
-      // TODO: dispose all repositories
+      _repositoriesSession.subscription?.cancel();
+      _closeRepositories();
+
       _connectivitySubscription?.cancel();
 
       super.dispose();
@@ -125,6 +127,12 @@ class _MainPageState extends State<MainPage>
 
       _repositoriesSession
       .setCurrent(widget.defaultRepositoryName);  
+    }
+
+    void _closeRepositories() {
+      for (var persisted in _repositoriesSession.repositories) {
+        persisted.repository.close();
+      }
     }
 
     Future<PersistedRepository> initializeRepository(
