@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/bloc/blocs.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
@@ -74,7 +75,10 @@ class ListItem extends StatelessWidget {
         )
         : Padding(
           padding: Dimensions.paddingFileItem,
-          child: FileDescription(repository: repository, fileData: itemData)
+          child: FileDescription(
+            repository: repository,
+            fileData: itemData,
+          )
         )
     );
   }

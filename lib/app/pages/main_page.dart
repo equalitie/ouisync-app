@@ -895,7 +895,7 @@ class _MainPageState extends State<MainPage>
                   name: removeParentFromPath(item.path),
                   path: item.path
                 );
-              }
+              },
             );
 
             return listItem;
