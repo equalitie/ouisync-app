@@ -62,18 +62,40 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         final parentPath = extractParentFromPath(event.newFilePath);
         yield await getFolderContents(event.repository, parentPath);
 
-        yield WriteToFileInProgress(
-          path: event.newFilePath,
+        final file = await File.open(event.repository, event.newFilePath);
+        int offset = 0;
+
+        try {
+          await for (final buffer in event.fileByteStream) {
+            print('Buffer size: ${buffer.length} - offset: $offset');
+            await file.write(offset, buffer);
+            offset += buffer.length;
+
+            yield WriteToFileInProgress(
+              path: event.newFilePath,
+              fileName: event.fileName,
+              length: event.length,
+              progress: offset
+            );
+          }
+        } catch (e) {
+          print('Exception writing the file ${event.newFilePath}:\n${e.toString()}');
+          yield WriteToFileFailure(
+            filePath: event.newFilePath,
+            fileName: event.fileName,
+            length: event.length,
+            error: e.toString()
+          );
+          // error = 'Writing to the file $filePath failed';
+        } finally {
+          print('Writing file ${event.newFilePath} done - closing');
+          await file.close();
+        }
+
+        yield WriteToFileDone(
+          filePath: event.newFilePath,
           fileName: event.fileName,
           length: event.length
-        );
-
-        yield await writeFile(
-          event.repository,
-          event.newFilePath,
-          event.fileName,
-          event.length,
-          event.fileByteStream
         );
       }
     }
