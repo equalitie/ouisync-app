@@ -688,9 +688,10 @@ class _MainPageState extends State<MainPage>
       }
       
       if (isContentsEmpty) {
-        return _noContents(
-          repository: persistedRepo.repository,
-          path: path
+        return NoContentsState(
+          repository: _repositoriesService.current!.repository,
+          path: _currentFolder,
+          onRefresh: refreshCurrent,
         );
       }
 
@@ -754,44 +755,6 @@ class _MainPageState extends State<MainPage>
           autofocus: true
         )
       ],
-    );
-
-    _noContents({
-      required Repository repository,
-      required String path
-    }) => RefreshIndicator(
-      onRefresh: () => refreshCurrent(repository: repository, path: path),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Fields.inPageMainMessage(
-              path.isEmpty
-              ? Strings.messageEmptyRepo
-              : Strings.messageEmptyFolder,
-            ),
-          ),
-          SizedBox(height: 10.0),
-          Align(
-            alignment: Alignment.center,
-            child: Fields.inPageSecondaryMessage(
-              repository.accessMode == AccessMode.write
-              ? Strings.messageCreateAddNewItem
-              : Strings.messageReadOnlyContents,
-              tags: {
-                Constants.inlineTextBold: InlineTextStyles.bold,
-                Constants.inlineTextIcon: InlineTextStyles.icon(
-                  Icons.add_circle,
-                  size: Dimensions.sizeIconBig,
-                  color: Theme.of(context).primaryColor
-                )
-              }
-            ),
-          ),
-        ],
-      )
     );
 
     _contentsList({
