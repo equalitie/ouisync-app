@@ -36,6 +36,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints viewportConstraints) {
                 return SingleChildScrollView(
+                  reverse: true,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: viewportConstraints.minHeight 

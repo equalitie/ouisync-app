@@ -24,14 +24,24 @@ class RepositoryCreation extends StatelessWidget {
     return Form(
       key: this.formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: _buildCreateRepositoryWidget(this.context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SingleChildScrollView(
+            reverse: true,
+            child: _buildCreateRepositoryWidget(this.context)
+          )
+        ]
+      ),
     );
   }
 
   Widget _buildCreateRepositoryWidget(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.formTextField(
