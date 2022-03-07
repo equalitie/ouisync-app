@@ -394,8 +394,12 @@ class _MainPageState extends State<MainPage>
       NativeChannels.setRepository(repository); 
 
       if (repository == null) {
-        switchMainState(newState:
-          _noRepositoriesState()
+        switchMainState(
+          newState:NoRepositoriesState(
+            repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+            onNewRepositoryPressed: createRepoDialog,
+            onAddRepositoryPressed: addRepoWithTokenDialog
+          )
         );
         return;
       }
@@ -749,38 +753,6 @@ class _MainPageState extends State<MainPage>
           text: Strings.actionReloadContents,
           autofocus: true
         )
-      ],
-    );
-
-    _noRepositoriesState() => Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Align(
-          alignment: Alignment.center,
-          child: Fields.inPageMainMessage(Strings.messageNoRepos),
-        ),
-        SizedBox(height: 10.0),
-        Align(
-          alignment: Alignment.center,
-          child: Fields.inPageSecondaryMessage(
-            Strings.messageCreateNewRepo,
-            tags: { Constants.inlineTextBold: InlineTextStyles.bold }
-          )
-        ),
-        SizedBox(height: 30.0),
-        Fields.inPageButton(
-          onPressed: () => createRepoDialog(BlocProvider.of<RepositoriesCubit>(context)),
-          text: Strings.actionCreateRepository,
-          size: Dimensions.sizeInPageButtonLong,
-          autofocus: true
-        ),
-        SizedBox(height: 20.0),
-        Fields.inPageButton(
-          onPressed: () => addRepoWithTokenDialog(BlocProvider.of<RepositoriesCubit>(context)),
-          text: Strings.actionAddRepositoryWithToken,
-          size: Dimensions.sizeInPageButtonLong,
-        ),
       ],
     );
 
@@ -1180,11 +1152,7 @@ class _MainPageState extends State<MainPage>
           ),
         );
       }
-    ).then((newRepository) {
-      // if (newRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
-      //   switchMainState(newState: _repositoryContentBuilder());
-      // }
-    });
+    );
   }
 
   void addRepoWithTokenDialog(cubit) async {
@@ -1256,7 +1224,7 @@ class _MainPageState extends State<MainPage>
             title: Strings.titleSettings,
             dhtStatus: dhtStatus,
           )
-        );;
+        );
       })
     );
   }
