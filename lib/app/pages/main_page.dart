@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
@@ -720,41 +720,9 @@ class _MainPageState extends State<MainPage>
     _errorState({
       required String message,
       required void Function()? actionReload
-    }) => Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Align(
-          alignment: Alignment.center,
-          child: Fields.inPageMainMessage(
-            Strings.messageOhOh,
-            color: Colors.red,
-            tags: {
-              Constants.inlineTextColor: InlineTextStyles.color(Colors.black),
-              Constants.inlineTextSize: InlineTextStyles.size(),
-              Constants.inlineTextBold: InlineTextStyles.bold
-            }
-          )
-        ),
-        SizedBox(height: 10.0),
-        Align(
-          alignment: Alignment.center,
-          child: Fields.inPageSecondaryMessage(
-            message,
-            tags: {
-              Constants.inlineTextSize: InlineTextStyles.size(),
-              Constants.inlineTextBold: InlineTextStyles.bold,
-              Constants.inlineTextIcon: InlineTextStyles.icon(Icons.south)
-            }
-          )
-        ),
-        SizedBox(height: 20.0),
-        Fields.inPageButton(
-          onPressed: actionReload,
-          text: Strings.actionReloadContents,
-          autofocus: true
-        )
-      ],
+    }) => ErrorState(
+      message: message,
+      onReload: actionReload
     );
 
     _contentsList({
