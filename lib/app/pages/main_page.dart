@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:move_to_background/move_to_background.dart';
 
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
@@ -95,13 +96,9 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() {
-      onDispose();
-      super.dispose();
-    }
-
-    void onDispose() {
       _repositoriesService.close();
       _connectivitySubscription?.cancel();
+      super.dispose();
     }
 
     Future<void> _initRepositories() async {
@@ -309,9 +306,16 @@ class _MainPageState extends State<MainPage>
           // Don't pop => don't exit
           return false;
         } else {
-          onDispose();
-          // Don't interfere with the ModalRoute => do pop => exit the app.
-          return true;
+          // We still don't want to do the pop because that would destroy the
+          // current Isolate's execution context and we would lose track of
+          // open OuiSync objects (i.e. repositories, files, directories,
+          // network handles,...). This is bad because even though the current
+          // execution context is deleted, the OuiSync Rust global variables
+          // and threads stay alive. If the user at that point tried to open
+          // the app again, this widget would try to reinitialize all those
+          // variables without previously properly closing them.
+          MoveToBackground.moveTaskToBack();
+          return false;
         }
       }
 
