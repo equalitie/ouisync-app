@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/globals.dart';
 
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
@@ -21,7 +22,7 @@ class RepositoryList extends StatelessWidget {
   final String current;
   final RepositoryCallback onRepositorySelect;
 
-  final RepositoriesService repositoriesSession = RepositoriesService();
+  // final RepositoriesService repositoriesSession = RepositoriesService();
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,7 @@ class RepositoryList extends StatelessWidget {
       return Fields.actionText(
         repositoryName,
         onTap: () { 
-          final persisted = repositoriesSession.get(repositoryName);
+          final persisted = repositoriesService.get(repositoryName);
           
           this.cubit
           .selectRepository(

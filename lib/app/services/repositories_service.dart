@@ -105,6 +105,7 @@ class RepositoriesService {
     _subscription = null;
 
     for (var persisted in _repositories) {
+      print('Closing repository ${persisted.name}');
       persisted.repository.close();
     }
 

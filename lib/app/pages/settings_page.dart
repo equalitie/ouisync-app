@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/globals.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 
@@ -34,7 +35,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  RepositoriesService _repositoriesSession = RepositoriesService();
+  // RepositoriesService _repositoriesSession = RepositoriesService();
 
   PersistedRepository? _persistedRepository;
   String? _localEndpoint;
@@ -53,7 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
     print('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _persistedRepository = _repositoriesSession.current;
+      _persistedRepository = repositoriesService.current;
     });
   }
 
@@ -187,7 +188,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _persistedRepository = _repositoriesSession.current!;
+                      _persistedRepository = repositoriesService.current!;
                     });
                   }
                 },
@@ -195,7 +196,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   isExpanded: true,
                   value: _persistedRepository,
                   underline: SizedBox(),
-                  items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
+                  items: repositoriesService.repositories.map((PersistedRepository persisted) {
                     return DropdownMenuItem(
                       value: persisted,
                       child: Column(
@@ -226,7 +227,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     
                     setState(() { _persistedRepository = persisted; });
 
-                    _repositoriesSession.setCurrent(_persistedRepository!.name);
+                    repositoriesService.setCurrent(_persistedRepository!.name);
                   },
                 ),
               ),
@@ -258,7 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           body: RenameRepository(
                             context: context,
                             formKey: formKey,
-                            repositoryName: _repositoriesSession.current!.name
+                            repositoryName: repositoriesService.current!.name
                           ),
                         );
                       }
@@ -350,16 +351,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> updateDhtSetting(bool enable) async {
-    if (!_repositoriesSession.hasCurrent) {
+    if (!repositoriesService.hasCurrent) {
       return;
     }
 
     print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
 
-    enable ? await _repositoriesSession.current!.repository.enableDht()
-    : await _repositoriesSession.current!.repository.disableDht();
+    enable ? await repositoriesService.current!.repository.enableDht()
+    : await repositoriesService.current!.repository.disableDht();
     
-    final isEnabled = await _repositoriesSession.current!.repository.isDhtEnabled();
+    final isEnabled = await repositoriesService.current!.repository.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });

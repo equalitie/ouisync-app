@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_app/app/models/models.dart';
+import 'package:ouisync_app/app/utils/globals.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../services/services.dart';
@@ -122,7 +123,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
-    final repositoriesService = RepositoriesService();
+    // final repositoriesService = RepositoriesService();
     repositoriesService.remove(oldName); // 1
 
     await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
@@ -155,7 +156,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void deleteRepository(String repositoryName) async {
-    final repositoriesService = RepositoriesService();
+    // final repositoriesService = RepositoriesService();
     repositoriesService.remove(repositoryName); // 1
 
     await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2

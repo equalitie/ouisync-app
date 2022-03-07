@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/lifecycle.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'app/bloc/blocs.dart';
 import 'app/utils/utils.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -33,11 +33,14 @@ Future<void> main() async {
   
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: OuiSyncApp(
-      session: session,
-      appStorageLocation: appDir,
-      repositoriesLocation: repositoriesDir,
-      defaultRepositoryName: latestRepositoryOrDefaultName,
-    )
+    home: LifeCycle(
+      session:  session,
+      child: OuiSyncApp(
+        session: session,
+        appStorageLocation: appDir,
+        repositoriesLocation: repositoriesDir,
+        defaultRepositoryName: latestRepositoryOrDefaultName,
+      )
+   )
   ));
 }
