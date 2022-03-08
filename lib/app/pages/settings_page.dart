@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r_get_ip/r_get_ip.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -102,6 +103,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     _titlesColor = Theme.of(context).colorScheme.secondaryVariant;
 
+    final info = PackageInfo.fromPlatform();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -130,13 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             BlocConsumer<ConnectivityCubit, ConnectivityState>(
               builder: (context, state) {
-                return Fields.labeledText(
-                  label: Strings.labelEndpoint,
-                  text: _localEndpoint ?? Strings.statusUnspecified,
-                  labelTextAlign: TextAlign.start,
-                  textAlign: TextAlign.end,
-                  space: Dimensions.spacingHorizontalHalf
-                );
+                return _labeledText(Strings.labelEndpoint, _localEndpoint ?? Strings.statusUnspecified);
               },
               listener: (context, state) {
                 if (state is ConnectivityChanged) {
@@ -144,9 +141,35 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               }
             ),
+            _futureLabeledText(Strings.labelAppVersion, info.then((info) => info.version)),
           ],
         )
       )
+    );
+  }
+
+  static Widget _labeledText(String key, String value) {
+    return Fields.labeledText(
+      label: key,
+      text: value,
+      labelTextAlign: TextAlign.start,
+      textAlign: TextAlign.end,
+      space: Dimensions.spacingHorizontal,
+    );
+  }
+
+  static _futureLabeledText(String key, Future<String> value) {
+    return FutureBuilder<String>(
+      future: value,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        if (snapshot.hasData) {
+          return _labeledText(key, snapshot.data!);
+        } else if (snapshot.hasError) {
+          return _labeledText(key, "???");
+        } else {
+          return _labeledText(key, "...");
+        }
+      }
     );
   }
 

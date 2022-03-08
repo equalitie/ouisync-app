@@ -102,7 +102,8 @@ class Strings {
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   static const String labelSelectRepository = 'select repository';
   static const String labelRenameRepository = 'Enter the new name';
-  static const String labelEndpoint = 'Endpoint: ';
+  static const String labelEndpoint = 'Endpoint:';
+  static const String labelAppVersion = 'App version:';
   
   static const String messageMovingEntry = 'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';

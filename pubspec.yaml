@@ -49,6 +49,7 @@ dependencies:
   open_file: ^3.2.1
   ouisync_plugin:
     path: ./ouisync-plugin
+  package_info_plus: ^1.4.0
   path: ^1.8.0
   path_provider: ^2.0.8
   r_get_ip: ^0.1.1
