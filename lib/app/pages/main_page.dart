@@ -594,17 +594,6 @@ class _MainPageState extends State<MainPage>
           }
         }
 
-        if (state is CreateFileDone) {
-          Fluttertoast.showToast(msg:
-            Strings
-            .messageNewFile
-            .replaceAll(
-              Strings.replacementName,
-              state.path
-            )
-          );
-        }
-
         if (state is CreateFileFailure) {
           print('Error creating new file ${state.filePath}: ${state.error}');
 
@@ -614,17 +603,6 @@ class _MainPageState extends State<MainPage>
             .replaceAll(
               Strings.replacementName,
               state.filePath
-            )
-          );
-        }
-
-        if (state is WriteToFileInProgress) {
-          Fluttertoast.showToast(msg:
-            Strings
-            .messageWritingFile
-            .replaceAll(
-              Strings.replacementName,
-              state.fileName
             )
           );
         }
