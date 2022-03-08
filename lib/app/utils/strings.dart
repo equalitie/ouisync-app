@@ -64,11 +64,9 @@ class Strings {
   static const String messageUnlockRepository = 'Enter password to unlock';
   static const String messageRenameRepository = 'Rename repository';
 
-  static const String messageNewFile = 'New file: [name]';
   static const String messageNewFileError = 'Error creating file [name]';
-  static const String messageWritingFile = 'Writing to file [name] started...';
-  static const String messageWritingFileError = 'Writing to file [name] failed';
-  static const String messageWritingFileDone = 'File saved successfully: [name]';
+  static const String messageWritingFileError = '[name] - writing failed';
+  static const String messageWritingFileDone = '[name] - saved successfully';
 
   // Dialogs
 
