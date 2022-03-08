@@ -44,8 +44,7 @@ fi
 dirty=""
 if [[ $(git diff --stat) != '' ]]; then
     while true; do
-        echo "Git is dirty:"
-        echo "Continue anyway? (y/N/d=diff/s=status)"
+        echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
         read answer
         case "$answer" in
             y)
@@ -65,10 +64,18 @@ if [[ $(git diff --stat) != '' ]]; then
     done
 fi
 
-
 # https://stackoverflow.com/a/1248795/273348
 date_tag=$(date -u "+%Y-%m-%d--%H-%M-%S--UTC")
 git_commit="$(git rev-parse --short HEAD)"
+
+tags="release--$(printf '%05d' $build_number)--v${build_name}--${date_tag}--${git_commit}${dirty}"
+release_dir="./releases/$tags"
+
+if [ -d "$release_dir" ]; then
+  echo "The release \"$tags\" already exists"
+  exit 1
+fi
+
 input_bundle=./build/app/outputs/bundle/release/app-release.aab
 
 NO_SIGN="true" \
@@ -79,8 +86,35 @@ NO_SIGN="true" \
 
 jarsigner -keystore "$keystore" -storepass:file $storepass $input_bundle upload
 
-mkdir -p ./build/releases/
 
-output_bundle=./build/releases/ouisync-release--v${build_name}--$build_number--${date_tag}--${git_commit}${dirty}.aab
+bundletool_version="1.8.2"
+bundletool="bundletool-all-$bundletool_version.jar"
+
+mkdir -p $release_dir
+
+output_bundle=$release_dir/ouisync-$tags.aab
 echo "Moving signed bundle to $output_bundle"
 mv $input_bundle $output_bundle
+
+if [ ! -f "./releases/$bundletool" ]; then
+  echo "Downloading bundletool to generate apk"
+  wget --directory-prefix ./releases \
+    https://github.com/google/bundletool/releases/download/$bundletool_version/$bundletool
+fi
+
+java -jar ./releases/$bundletool \
+  build-apks \
+  --bundle=$output_bundle \
+  --mode=universal \
+  --ks=$keystore \
+  --ks-pass=file:$storepass \
+  --ks-key-alias=upload \
+  --key-pass=file:$storepass \
+  --output=$release_dir/ouisync-$tags.apks
+
+cd $release_dir;
+mv ouisync-$tags.apks ouisync-$tags.zip
+unzip ouisync-$tags.zip;
+rm toc.pb # created by unzip
+rm ouisync-$tags.zip;
+mv universal.apk ouisync-$tags.apk
