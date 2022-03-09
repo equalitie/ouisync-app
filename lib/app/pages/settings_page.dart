@@ -260,7 +260,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               Expanded(
                 child: Fields.actionText(
-                  Strings.actionEdit,
+                  Strings.actionRename,
                   textFontSize: Dimensions.fontAverage,
                   icon: Icons.edit,
                   iconSize: Dimensions.sizeIconSmall,

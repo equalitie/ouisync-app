@@ -190,7 +190,6 @@ class Strings {
   static const String actionSave = 'Save';
   static const String actionUnlock = 'Unlock';
   static const String actionRetry = 'Retry';
-  static const String actionEdit = 'Edit';
   static const String actionShare = 'Share';
   static const String actionRename = 'Rename';
   static const String actionAccept = 'Accept';
