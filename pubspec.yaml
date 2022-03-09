@@ -22,7 +22,6 @@ environment:
 
 dependencies:
   async: ^2.8.1
-  bloc: ^7.2.1
   bloc_test: ^8.1.0
   build_runner: ^2.0.5
   chunked_stream: ^1.4.1
