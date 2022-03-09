@@ -4,13 +4,11 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
-import 'app/bloc/blocs.dart';
+import 'app/bloc/simpleblocobserver.dart';
 import 'app/utils/utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  Bloc.observer = SimpleBlocObserver();
 
   final appDir = (await getApplicationSupportDirectory()).path;
   final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
@@ -31,13 +29,16 @@ Future<void> main() async {
 
   final session = await Session.open(configDir);
   
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: OuiSyncApp(
-      session: session,
-      appStorageLocation: appDir,
-      repositoriesLocation: repositoriesDir,
-      defaultRepositoryName: latestRepositoryOrDefaultName,
-    )
-  ));
+  BlocOverrides.runZoned(
+    () => runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: OuiSyncApp(
+        session: session,
+        appStorageLocation: appDir,
+        repositoriesLocation: repositoriesDir,
+        defaultRepositoryName: latestRepositoryOrDefaultName,
+      )
+    )),
+    blocObserver: SimpleBlocObserver(),
+  );
 }
