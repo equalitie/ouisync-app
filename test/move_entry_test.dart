@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/data/data.dart';
+import 'package:ouisync_app/app/data/directory_repository.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
