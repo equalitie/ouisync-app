@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../data/data.dart';
+export '../../data/directory_repository.dart';
 import '../../utils/utils.dart';
 import '../blocs.dart';
 

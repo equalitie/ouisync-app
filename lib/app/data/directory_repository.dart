@@ -1,7 +1,7 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../models/models.dart';
-import '../../utils/utils.dart';
+import '../models/models.dart';
+import '../utils/utils.dart';
 
 class DirectoryRepository {
   Future<BasicResult> createFile(Repository repository, String newFilePath) async {

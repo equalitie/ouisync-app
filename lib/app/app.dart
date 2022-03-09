@@ -7,7 +7,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
-import 'data/data.dart';
 import 'pages/pages.dart';
 
 class OuiSyncApp extends StatefulWidget {
