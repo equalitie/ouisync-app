@@ -134,10 +134,7 @@ class _MainPageState extends State<MainPage>
 
       BlocProvider
       .of<RepositoriesCubit>(context)
-      .selectRepository(
-        _repositoriesService.current?.repo,
-        _repositoriesService.current?.name ?? ''
-      );
+      .selectRepository(_repositoriesService.current);
     }
 
     Future<void> unlockRepository(String repositoryName, String password) async {

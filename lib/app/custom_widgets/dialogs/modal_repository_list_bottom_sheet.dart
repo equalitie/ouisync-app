@@ -70,9 +70,8 @@ class RepositoryList extends StatelessWidget {
       return Fields.actionText(
         repositoryName,
         onTap: () { 
-          final repo = repositoriesSession.get(repositoryName);
-          
-          this.cubit.selectRepository(repo, repositoryName);
+          this.cubit.selectRepository(
+            repositoriesSession.getNamed(repositoryName));
           
           updateDefaultRepositorySetting(repositoryName);
           Navigator.of(context).pop();

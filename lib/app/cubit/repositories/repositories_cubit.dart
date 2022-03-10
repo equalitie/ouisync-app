@@ -74,7 +74,6 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
   void openRepository({required String name, String? password, ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
-    await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
 
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
@@ -87,29 +86,19 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
         exist: storeExist
       );
 
-      emit(RepositoryPickerSelection(
-        repository: repository,
-        name: name
-      ));
+      emit(RepositoryPickerSelection(NamedRepo(name, repository)));
     } catch (e) {
       print('Exception opening the repository $name:\n${e.toString()}');
       emit(RepositoriesFailure());
     }
   }
 
-  void selectRepository(Repository? repository, String name) async {
-    emit(RepositoryPickerLoading());
-    await Future.delayed(Duration(milliseconds: 500));// TODO: Delay to allow the loading animation to show. Remove if not other use.
-
-    if (name.isEmpty) {
+  void selectRepository(NamedRepo? named_repo) async {
+    if (named_repo == null) {
       emit(RepositoryPickerInitial());
-      return;
+    } else {
+      emit(RepositoryPickerSelection(named_repo));
     }
-
-    emit(RepositoryPickerSelection(
-        repository: repository,
-        name: name
-      ));
   }
 
   /// Renames a repository
@@ -134,10 +123,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
     final repository = await initRepository(newName);
 
-    emit(RepositoryPickerSelection(
-      repository: repository!,
-      name: newName
-    )); // 6
+    emit(RepositoryPickerSelection(NamedRepo(newName, repository!))); // 6
   }
 
   /// Deletes a repository
@@ -182,9 +168,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
     );
 
     emit(RepositoryPickerSelection(
-      repository: newDefaultRepository,
-      name: latestRepositoryOrDefaultName
-    )); // 6
+      NamedRepo(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
   }
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';
