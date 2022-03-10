@@ -37,7 +37,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   RepositoriesService _repositoriesSession = RepositoriesService();
 
-  PersistedRepository? _persistedRepository;
+  NamedRepo? _persistedRepository;
   String? _localEndpoint;
   bool _bittorrentDhtStatus = false;
 
@@ -214,13 +214,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     });
                   }
                 },
-                child: DropdownButton<PersistedRepository?>(
+                child: DropdownButton<NamedRepo?>(
                   isExpanded: true,
                   value: _persistedRepository,
                   underline: SizedBox(),
-                  items: _repositoriesSession.repositories.map((PersistedRepository persisted) {
+                  items: _repositoriesSession.repos.map((NamedRepo named_repo) {
                     return DropdownMenuItem(
-                      value: persisted,
+                      value: named_repo,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +235,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           Row(
                             children: [
                               Fields.constrainedText(
-                                persisted.name,
+                                named_repo.name,
                                 fontWeight: FontWeight.normal
                               ),
                             ],
@@ -244,11 +244,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   }).toList(),
-                  onChanged: (persisted) async {
-                    print('Selected: $persisted');
-                    
-                    setState(() { _persistedRepository = persisted; });
-
+                  onChanged: (named_repo) async {
+                    print('Selected repository: ${named_repo?.name}');
+                    setState(() { _persistedRepository = named_repo; });
                     _repositoriesSession.setCurrent(_persistedRepository!.name);
                   },
                 ),
@@ -379,10 +377,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
 
-    enable ? await _repositoriesSession.current!.repository.enableDht()
-    : await _repositoriesSession.current!.repository.disableDht();
+    enable ? await _repositoriesSession.current!.repo.enableDht()
+    : await _repositoriesSession.current!.repo.disableDht();
     
-    final isEnabled = await _repositoriesSession.current!.repository.isDhtEnabled();
+    final isEnabled = await _repositoriesSession.current!.repo.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });

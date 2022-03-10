@@ -1,4 +1,4 @@
-export 'data_models/persisted_repository.dart';
+export 'named_repo.dart';
 
 export 'item/base_item.dart';
 export 'item/file_item.dart';

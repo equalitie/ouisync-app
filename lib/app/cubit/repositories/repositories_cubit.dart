@@ -134,14 +134,9 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
     final repository = await initRepository(newName);
 
-    final newDefaultRepository = PersistedRepository(
+    emit(RepositoryPickerSelection(
       repository: repository!,
       name: newName
-    );
-
-    emit(RepositoryPickerSelection(
-      repository: newDefaultRepository.repository,
-      name: newDefaultRepository.name
     )); // 6
   }
 
@@ -173,26 +168,22 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
       return;
     }
 
-    PersistedRepository? newDefaultRepository = repositoriesService
+    Repository? newDefaultRepository = repositoriesService
     .get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
       final repository = await initRepository(latestRepositoryOrDefaultName);
-
-      newDefaultRepository = PersistedRepository(
-        repository: repository!,
-        name: latestRepositoryOrDefaultName
-      );
+      newDefaultRepository = repository!;
     }
 
     repositoriesService.put(
-      newDefaultRepository.name,
-      newDefaultRepository.repository
+      latestRepositoryOrDefaultName,
+      newDefaultRepository
     );
 
     emit(RepositoryPickerSelection(
-      repository: newDefaultRepository.repository,
-      name: newDefaultRepository.name
+      repository: newDefaultRepository,
+      name: latestRepositoryOrDefaultName
     )); // 6
   }
 
