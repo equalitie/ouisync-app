@@ -11,18 +11,13 @@ part 'route_event.dart';
 part 'route_state.dart';
 
 class RouteBloc extends Bloc<RouteEvent, RouteState> {
-  RouteBloc() : super(RouteInitial());
-
-  @override
-  Stream<RouteState> mapEventToState(
-    RouteEvent event,
-  ) async* {
-    if (event is UpdateRoute) {
-      yield RouteLoadSuccess(
+  RouteBloc() : super(RouteInitial()){
+    on<UpdateRoute>((event, emit) => emit(
+      RouteLoadSuccess(
         path: event.path,
         route: _currentLocationBar(event.path, event.action)
-        );
-    }
+      ))
+    );
   }
 
   Widget _currentLocationBar(String path, Function action) {
