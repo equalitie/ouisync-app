@@ -211,7 +211,7 @@ class _MainPageState extends State<MainPage>
       .of<DirectoryBloc>(context)
       .add(NavigateTo(
         repository: repository,
-        previousAccesMode: previousAccessMode,
+        previousAccessMode: previousAccessMode,
         type: type,
         origin: origin,
         destination: destination,
