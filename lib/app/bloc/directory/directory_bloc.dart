@@ -67,7 +67,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _getContents(
+    await _updateContens(
       GetContent(
         repository: event.repository,
         path: event.path,
@@ -89,7 +89,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
 
     if (fileCreationResult is CreateFileDone) {
       final parentPath = extractParentFromPath(event.newFilePath);
-      await _getContents(
+      await _updateContens(
         GetContent(
           repository: event.repository,
           path: parentPath,
@@ -213,7 +213,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _getContents(GetContent(
+    await _updateContens(GetContent(
       repository: event.repository,
       path: event.destination,
       withProgress: true
@@ -235,7 +235,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _getContents(GetContent(
+    await _updateContens(GetContent(
       repository: event.repository,
       path: event.parentPath,
       withProgress: true
@@ -275,48 +275,63 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   }
 
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
-    await _getContents(event, emit);
+    await _updateContens(event, emit);
   }
 
   GetContent? _curGetContentEvent;
   GetContent? _nextGetContentEvent;
+  List<Completer> _getContentCompleters = <Completer>[];
 
-  Future<void> _getContents(GetContent event, Emitter<DirectoryState> emit) async {
+  // Trigger content update. If a content update is already in progress, it is scheduled
+  // to be done afterwards.
+  Future<void> _updateContens(GetContent event, Emitter<DirectoryState> emit) async {
+    final completer = Completer<void>();
+    final future = completer.future;
+    _getContentCompleters.add(completer);
+
     if (_curGetContentEvent != null) {
       _nextGetContentEvent = event;
-      return;
+      return future;
     }
 
     _nextGetContentEvent = event;
 
+    _runUpdateLoop(emit); // don't await
+
+    return future;
+  }
+
+  void _runUpdateLoop(Emitter<DirectoryState> emit) async {
     while (_nextGetContentEvent != null) {
       _curGetContentEvent = _nextGetContentEvent;
       _nextGetContentEvent = null;
 
-      if (_curGetContentEvent!.withProgress) {
-        emit(DirectoryLoadInProgress());
+      final completers = _getContentCompleters;
+      _getContentCompleters = <Completer>[];
+
+      final state = await _getContents(_curGetContentEvent!);
+
+      _curGetContentEvent = null;
+
+      for (var completer in completers) {
+        completer.complete();
       }
 
-      late final getContentsResult;
-
-      try {
-        getContentsResult =
-            await directoryRepository.getFolderContents(
-                _curGetContentEvent!.repository,
-                _curGetContentEvent!.path);
-
-        if (getContentsResult.errorMessage.isNotEmpty) {
-          emit(DirectoryLoadFailure());
-        } else {
-          emit(DirectoryLoadSuccess(
-                  path: _curGetContentEvent!.path,
-                  contents: getContentsResult.result));
-        }
-      } catch (e) {
-        emit(DirectoryLoadFailure(error: e.toString()));
-      }
+      emit(state);
     }
+  }
 
-    _curGetContentEvent = null;
+  Future<DirectoryState> _getContents(GetContent event) async {
+    try {
+      final result = await directoryRepository.getFolderContents(event.repository, event.path);
+
+      if (result.errorMessage.isNotEmpty) {
+        return DirectoryLoadFailure();
+      } else {
+        return DirectoryLoadSuccess(path: event.path, contents: result.result);
+      }
+    } catch (e) {
+      return DirectoryLoadFailure(error: e.toString());
+    }
   }
 }
