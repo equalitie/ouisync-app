@@ -155,6 +155,13 @@ class DirectoryRepository {
     return createFolderResult;
   }
 
+  Future<int> getFileSize(Repository repository, String path) async {
+    final file = await File.open(repository, path);
+    final length = await file.length;
+    file.close();
+    return length;
+  }
+
   Future<BasicResult> getFolderContents(Repository repository, String path) async {
     print("Getting folder $path contents");
 
@@ -168,7 +175,8 @@ class DirectoryRepository {
 
     try {
       while (iterator.moveNext()) {
-        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
+        final size = await getFileSize(repository, path + '/' + iterator.current.name);
+        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
         content.add(item);
       }
@@ -192,7 +200,8 @@ class DirectoryRepository {
     try {
       final iterator = directory.iterator;
       while (iterator.moveNext()) {
-        final newNode = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
+        final size = await getFileSize(repository, path + '/' + iterator.current.name);
+        final newNode = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
         if (newNode.itemType == ItemType.folder) {
           final itemPath = path == '/' ? '/${iterator.current.name}' : '$path/${iterator.current.name}';
@@ -211,14 +220,17 @@ class DirectoryRepository {
     return contentNodes;
   }
 
-  Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, double size) async {
+  Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {
     final itemPath = path == '/' ? '/$name' : '$path/$name';
+
+    // TODO: Do we need to do this conversion?
+    final dSize = size.toDouble();
 
     if (type == EntryType.directory) {
       return FolderItem(
           name: name,
           path: itemPath,
-          size: size,
+          size: dSize,
           syncStatus: SyncStatus.idle,
           itemType: ItemType.folder,
           items: <BaseItem>[]);
@@ -227,7 +239,7 @@ class DirectoryRepository {
     if (type == EntryType.file) {
       String fileType = extractFileTypeFromName(name);
 
-      return FileItem(name: name, extension: fileType, path: itemPath, size: size, syncStatus: SyncStatus.idle);
+      return FileItem(name: name, extension: fileType, path: itemPath, size: dSize, syncStatus: SyncStatus.idle);
     }
 
     return <BaseItem>[].single;
