@@ -32,7 +32,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -42,7 +42,7 @@ void main() {
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -50,7 +50,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -111,7 +111,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -122,7 +122,7 @@ void main() {
         name: 'file1.txt',
         extension: 'txt',
         path: file1InFolder2Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle
       )
     ];
@@ -130,7 +130,7 @@ void main() {
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -138,7 +138,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[
@@ -146,7 +146,7 @@ void main() {
             name: 'file1.txt',
             extension: 'txt',
             path: file1InFolder2Path,
-            size: 0.0,
+            size: 0,
             syncStatus: SyncStatus.idle
           )
         ]
