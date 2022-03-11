@@ -65,34 +65,6 @@ void main() {
         // ]);
     });
 
-    group('RequestContent', () {
-      blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when RequestContent is added '
-      'and getFolderContents succeeds', 
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: true)),
-      expect: () => [
-        DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
-      ]);
-
-      blocTest('emits [DirectoryLoadInProgress, SyncingInProgress] with isSyncing=true, when RequestContent is added, '
-      'getFolderContents succeeds, and it is from a syncing request', 
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: false, isSyncing: true)),
-      expect: () => [
-        SyncingInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[], isSyncing: true)
-      ]);
-      // TODO: find out what is the expected behaviour in the library for this: get content for path ' ' 
-      // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when RequestFolder is added and getFolderContents fails',
-      // build: () => directoryBloc,
-      // act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '', recursive: false, withProgress: true)),
-      // expect: () => [
-      //   DirectoryLoadInProgress(),
-      //   DirectoryLoadFailure()
-      // ]);
-    });
-
     group('DeleteFolder', () {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFolder is added and deleteFolder succeeds', 
       setUp: () async { await Directory.create(repository, '/testFolder'); },
