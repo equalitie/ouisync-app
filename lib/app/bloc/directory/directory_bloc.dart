@@ -31,11 +31,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       if (!createFileResult.result) 
       {
         print('The new directory ($event.newFolderPath) could not be created.');
-        return emit(DirectoryLoadFailure());
+        emit(DirectoryLoadFailure());
+        return;
       }
     } catch (e) {
       print('Exception creating a new directory ($event.newFolderPath):\n${e.toString()}');
-      return emit(DirectoryLoadFailure());
+      emit(DirectoryLoadFailure());
+      return;
     }
     
     await _onNavigateTo(NavigateTo(
@@ -56,11 +58,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       if (deleteFolderResult.errorMessage.isNotEmpty) 
       {
         print('The folder (${event.path}) could not be deleted.');
-        return emit(DirectoryLoadFailure());
+        emit(DirectoryLoadFailure());
+        return;
       }
     } catch (e) {
       print('Exception deleting the folder ${event.path}:\n${e.toString()}');
-      return emit(DirectoryLoadFailure());
+      emit(DirectoryLoadFailure());
+      return;
     }
 
     await _onGetContents(
@@ -114,12 +118,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         }
       } catch (e) {
         print('Exception writing the file ${event.newFilePath}:\n${e.toString()}');
-        return emit(WriteToFileFailure(
+        emit(WriteToFileFailure(
           filePath: event.newFilePath,
           fileName: event.fileName,
           length: event.length,
           error: e.toString()
         ));
+        return;
       } finally {
         print('Writing file ${event.newFilePath} done - closing');
         await file.close();
@@ -181,11 +186,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       readFileResult = await directoryRepository.readFile(event.repository, event.filePath, action: event.action);
       if (readFileResult.errorMessage.isNotEmpty) {
         print('Reading file ${event.filePath} failed:\n${readFileResult.errorMessage}');
-        return emit(DirectoryLoadFailure());
+        emit(DirectoryLoadFailure());
+        return;
       }  
     } catch (e) {
       print('Exception reading file ${event.filePath}:\n${e.toString()}');
-      return emit(DirectoryLoadFailure());
+      emit(DirectoryLoadFailure());
+      return;
     }
 
     emit(DirectoryLoadSuccess(
@@ -200,11 +207,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       final moveEntryResult = await directoryRepository.moveEntry(event.repository, event.entryPath, event.newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {
         print('Moving entry from ${event.entryPath} to ${event.newDestinationPath} failed:\n${moveEntryResult.errorMessage}');
-        return emit(DirectoryLoadFailure());
+        emit(DirectoryLoadFailure());
+        return;
       }  
     } catch (e) {
       print('Exception moving entry from ${event.entryPath} to ${event.newDestinationPath} :\n${e.toString()}');
-      return emit(DirectoryLoadFailure());
+      emit(DirectoryLoadFailure());
+      return;
     }
 
     await _onGetContents(GetContent(
@@ -221,11 +230,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       if (deleteFileResult.errorMessage.isNotEmpty) 
       {
         print('The file (${event.filePath}) could not be deleted.');
-        return emit(DirectoryLoadFailure());
+        emit(DirectoryLoadFailure());
+        return;
       }
     } catch (e) {
       print('Exception deleting the file ${event.filePath}:\n${e.toString()}');
-      return emit(DirectoryLoadFailure());
+      emit(DirectoryLoadFailure());
+      return;
     }
 
     await _onGetContents(GetContent(
@@ -242,7 +253,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     }
 
     if (event.repository.accessMode == AccessMode.blind) {
-      return emit(NavigationLoadBlind(previousAccessMode: event.previousAccessMode));
+      emit(NavigationLoadBlind(previousAccessMode: event.previousAccessMode));
+      return;
     }
 
     var folderContentsResult;
@@ -250,11 +262,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       folderContentsResult = await directoryRepository.getFolderContents(event.repository, event.destination);
       if (folderContentsResult.errorMessage.isNotEmpty) {
         print('Navigation to ${event.destination} failed:\n${folderContentsResult.errorMessage}');
-        return  emit(NavigationLoadFailure());
+        emit(NavigationLoadFailure());
+        return;
       }
     } catch (e) {
       print('Exception navigating to ${event.destination}:\n${e.toString()}');
-      return emit(NavigationLoadFailure());
+      emit(NavigationLoadFailure());
+      return;
     }
 
     emit(NavigationLoadSuccess(
@@ -279,11 +293,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       getContentsResult = await directoryRepository.getFolderContents(event.repository, event.path);
       if (getContentsResult.errorMessage.isNotEmpty) {
         print('Get contents in folder ${event.path} failed:\n${getContentsResult.errorMessage}');
-        return emit(DirectoryLoadFailure(isSyncing: event.isSyncing));
+        emit(DirectoryLoadFailure(isSyncing: event.isSyncing));
+        return;
       }
     } catch (e) {
       print('Exception getting contents for ${event.path}:\n${e.toString()}');
-      return emit(DirectoryLoadFailure(error: e.toString()));
+      emit(DirectoryLoadFailure(error: e.toString()));
+      return;
     }
     
     emit(DirectoryLoadSuccess(path: event.path, contents: getContentsResult.result, isSyncing: event.isSyncing));
