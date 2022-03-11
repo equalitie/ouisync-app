@@ -110,12 +110,13 @@ class _MainPageState extends State<MainPage>
         justNames: true
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
-        _repositoriesService.add(repoName, repo!);
+        _repositoriesService.put(
+            repoName,
+            repo!,
+            setCurrent: (repoName == widget.defaultRepositoryName));
       }).toList();
 
       await Future.wait(initRepos);
-
-      _repositoriesService.setCurrent(widget.defaultRepositoryName);  
     }
 
     void _connectivityChange(ConnectivityResult result) {

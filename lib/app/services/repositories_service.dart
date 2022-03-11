@@ -29,10 +29,6 @@ class RepositoriesService {
     _updateCurrentRepository(name, _repos[name]);
   }
 
-  void add(String name, Repository repo) {
-    _repos[name] = repo;
-  }
-
   bool get hasCurrent => _currentRepoName != null;
 
   void _updateCurrentRepository(String name, Repository? repo) {
