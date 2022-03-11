@@ -284,16 +284,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       emit(DirectoryLoadInProgress());
     }
 
-    if (event.isSyncing) {
-      emit(SyncingInProgress(isSyncing: true));
-    }
-
     late final getContentsResult;
     try {
       getContentsResult = await directoryRepository.getFolderContents(event.repository, event.path);
       if (getContentsResult.errorMessage.isNotEmpty) {
         print('Get contents in folder ${event.path} failed:\n${getContentsResult.errorMessage}');
-        emit(DirectoryLoadFailure(isSyncing: event.isSyncing));
+        emit(DirectoryLoadFailure());
         return;
       }
     } catch (e) {
@@ -302,6 +298,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
     
-    emit(DirectoryLoadSuccess(path: event.path, contents: getContentsResult.result, isSyncing: event.isSyncing));
+    emit(DirectoryLoadSuccess(path: event.path, contents: getContentsResult.result));
   }
 }

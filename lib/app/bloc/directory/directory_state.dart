@@ -12,19 +12,6 @@ abstract class DirectoryState extends Equatable {
 
 class DirectoryInitial extends DirectoryState {}
 
-class SyncingInProgress extends DirectoryState {
-  const SyncingInProgress({
-    this.isSyncing = false
-  });
-
-  final bool isSyncing;
-
-  @override
-  List<Object> get props => [
-    isSyncing
-  ];
-}
-
 class CreateFileDone extends DirectoryState {
   const CreateFileDone({
     required this.fileName,
@@ -130,28 +117,18 @@ class WriteToFileFailure extends DirectoryState {
 }
 
 class DirectoryLoadInProgress extends DirectoryState {
-  const DirectoryLoadInProgress({
-    this.isSyncing = false
-  });
-
-  final bool isSyncing;
+  const DirectoryLoadInProgress();
 
   @override
   List<Object> get props => [
-    isSyncing
   ];
 }
 
 class SyncingDone extends DirectoryState {
-  const SyncingDone({
-    this.isSyncing = false
-  });
-
-  final bool isSyncing;
+  const SyncingDone();
 
   @override
   List<Object> get props => [
-    isSyncing
   ];
 }
 
@@ -160,20 +137,17 @@ class DirectoryLoadSuccess extends DirectoryState {
     required this.path,
     required this.contents,
     this.action = '',
-    this.isSyncing = false
   });
 
   final String path;
   final List<dynamic> contents;
   final String action;
-  final bool isSyncing;
 
   @override
   List<Object> get props => [
     path,
     contents,
     action,
-    isSyncing
   ];
 }
 
@@ -183,7 +157,6 @@ class NavigationLoadSuccess extends DirectoryState {
     required this.origin,
     required this.destination,
     required this.contents,
-    this.isSyncing = false,
   }) :
   assert (origin != ''),
   assert (destination != '');
@@ -192,7 +165,6 @@ class NavigationLoadSuccess extends DirectoryState {
   final String origin;
   final String destination;
   final List<BaseItem> contents;
-  final bool isSyncing;
 
   @override
   List<Object> get props => [
@@ -200,7 +172,6 @@ class NavigationLoadSuccess extends DirectoryState {
     origin,
     destination,
     contents,
-    isSyncing
   ];
 }
 
@@ -220,16 +191,13 @@ class NavigationLoadBlind extends DirectoryState {
 class DirectoryLoadFailure extends DirectoryState {
   const DirectoryLoadFailure({
     this.error,
-    this.isSyncing = false
   });
 
   final String? error;
-  final bool isSyncing;
 
   @override
   List<Object?> get props => [
     error,
-    isSyncing
   ];
 }
 
