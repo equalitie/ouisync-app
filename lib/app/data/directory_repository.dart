@@ -195,31 +195,6 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<BaseItem>> getContentsRecursive(Repository repository, String path, List<BaseItem> contentNodes) async {
-    final directory = await Directory.open(repository, path);
-    try {
-      final iterator = directory.iterator;
-      while (iterator.moveNext()) {
-        final size = await getFileSize(repository, path + '/' + iterator.current.name);
-        final newNode = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
-
-        if (newNode.itemType == ItemType.folder) {
-          final itemPath = path == '/' ? '/${iterator.current.name}' : '$path/${iterator.current.name}';
-
-          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath, contentNodes);
-        }
-
-        contentNodes.add(newNode);
-      }
-    } catch (e) {
-      print('Error traversing directory $path: $e');
-    } finally {
-      directory.close();
-    }
-
-    return contentNodes;
-  }
-
   Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {
     final itemPath = path == '/' ? '/$name' : '$path/$name';
 
