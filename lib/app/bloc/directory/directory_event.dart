@@ -33,14 +33,12 @@ class GetContent extends DirectoryEvent {
     required this.path,
     required this.recursive,
     required this.withProgress,
-    this.isSyncing = false
   });
 
   final Repository repository;
   final String path;
   final bool recursive;
   final bool withProgress;
-  final bool isSyncing;
 
   @override
   List<Object> get props => [
@@ -48,7 +46,6 @@ class GetContent extends DirectoryEvent {
     path,
     recursive,
     withProgress,
-    isSyncing
   ];
 
 }

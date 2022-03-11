@@ -162,7 +162,6 @@ class _MainPageState extends State<MainPage>
       required String path,
       bool recursive = false,
       bool withProgress = false,
-      bool isSyncing = false
     }) { 
       BlocProvider
       .of<DirectoryBloc>(context)
@@ -171,7 +170,6 @@ class _MainPageState extends State<MainPage>
         path: path,
         recursive: recursive,
         withProgress: withProgress,
-        isSyncing: isSyncing
       ));
     }
 
@@ -243,7 +241,6 @@ class _MainPageState extends State<MainPage>
         getContents(
           repository: _repositoriesService.current!.repo,
           path: _currentFolder,
-          isSyncing: true
         ); 
       }
       
@@ -597,14 +594,6 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadSuccess) {
-          if (state.isSyncing) {  
-            if (state.path == _currentFolder) {
-              updateFolderContents(newContent: state.contents as List<BaseItem>);    
-            }
-
-            return;
-          }
-
           updateFolderContents(newContent: state.contents as List<BaseItem>);
           return;
         }
