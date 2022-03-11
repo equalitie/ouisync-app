@@ -233,7 +233,6 @@ class _MainPageState extends State<MainPage>
       }
 
       if (_repositoriesService.current!.name != repositoryName) {
-        print('[Syncing $repositoryName in background] (Current: ${_repositoriesService.current!.repo.handle})');
         return;
       }
 
@@ -243,8 +242,6 @@ class _MainPageState extends State<MainPage>
           path: _currentFolder,
         ); 
       }
-      
-      print('[Syncing $repositoryName (${_repositoriesService.current!})] Current folder: $_currentFolder');
     }
 
     @override
@@ -631,7 +628,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    Future<void> updateFolderContents({required List<BaseItem> newContent}) async {
+    void updateFolderContents({required List<BaseItem> newContent}) {
       if (newContent.isEmpty) {
         if (_folderContents.isNotEmpty) {
           setState(() { _folderContents.clear(); }); 
