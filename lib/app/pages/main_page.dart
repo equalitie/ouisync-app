@@ -679,14 +679,13 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              final fileSize = await EntryInfo(repository).fileLength(item.path);
               _showFileDetails(
                 repository: repository,
                 directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                 scaffoldKey: _scaffoldKey,
                 name: item.name,
                 path: item.path,
-                size: fileSize
+                size: item.size
               );
             }
             : () {

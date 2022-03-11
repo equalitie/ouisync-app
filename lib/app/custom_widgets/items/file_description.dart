@@ -65,7 +65,6 @@ class FileDescription extends StatelessWidget {
               if (state is WriteToFileInProgress) {
                 if (state.fileName == this.fileData.name) {
                   final progress = state.progress / state.length;
-                  print('name: ${state.fileName} - length: ${state.length} - offset: ${state.progress} - progress: $progress');
                   return LinearProgressIndicator(value: progress);
                 }
               }
@@ -83,7 +82,6 @@ class FileDescription extends StatelessWidget {
             listener: (context, state) {
               if (state is WriteToFileInProgress) {
                 if (state.fileName == this.fileData.name) {
-                  print('[WriteToFileInProgress fileName: ${state.fileName} (${state.length} bytes)]');
                   _length.value = state.progress;
                 }
               }
