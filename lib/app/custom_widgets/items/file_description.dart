@@ -84,7 +84,7 @@ class FileDescription extends StatelessWidget {
               if (state is WriteToFileInProgress) {
                 if (state.fileName == this.fileData.name) {
                   print('[WriteToFileInProgress fileName: ${state.fileName} (${state.length} bytes)]');
-                  getFileSize();
+                  _length.value = state.progress;
                 }
               }
             }
