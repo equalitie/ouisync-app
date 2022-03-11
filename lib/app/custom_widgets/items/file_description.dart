@@ -66,7 +66,6 @@ class FileDescription extends StatelessWidget {
                 if (state.fileName == this.fileData.name) {
                   final progress = state.progress / state.length;
                   print('name: ${state.fileName} - length: ${state.length} - offset: ${state.progress} - progress: $progress');
-
                   return LinearProgressIndicator(value: progress);
                 }
               }
