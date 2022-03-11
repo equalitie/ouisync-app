@@ -53,8 +53,6 @@ class _MainPageState extends State<MainPage>
   
     List<BaseItem> _folderContents = <BaseItem>[];
     
-    SynchronizationCubit? _syncingCubit;
-    
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     String _pathEntryToMove = '';
@@ -130,9 +128,6 @@ class _MainPageState extends State<MainPage>
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
       
-      _syncingCubit = BlocProvider
-      .of<SynchronizationCubit>(context);
-
       BlocProvider
       .of<RepositoriesCubit>(context)
       .selectRepository(_repositoriesService.current);
@@ -244,8 +239,6 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      _syncingCubit?.syncing();
-    
       if (_repositoriesService.current!.repo.accessMode != AccessMode.blind) {
         getContents(
           repository: _repositoriesService.current!.repo,
@@ -266,8 +259,7 @@ class _MainPageState extends State<MainPage>
           child: _mainState,
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: _buildFAB(context,
-        ),
+        floatingActionButton: _buildFAB(context),
       );
     }
 
@@ -416,7 +408,7 @@ class _MainPageState extends State<MainPage>
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
       buildWhen: (context, state) {
-        return !(state is SyncingInProgress ||
+        return !(
         state is CreateFileDone ||
         state is CreateFileFailure ||
         state is WriteToFileInProgress ||
@@ -539,11 +531,6 @@ class _MainPageState extends State<MainPage>
           }
         }
 
-        if (state is SyncingInProgress) {
-          _syncingCubit?.syncing();
-          return;
-        }
-
         if (state is NavigationLoadBlind) {
           if (state.previousAccessMode == AccessMode.blind) {
             showDialog<bool>(
@@ -611,8 +598,6 @@ class _MainPageState extends State<MainPage>
 
         if (state is DirectoryLoadSuccess) {
           if (state.isSyncing) {  
-            _syncingCubit?.done();
-
             if (state.path == _currentFolder) {
               updateFolderContents(newContent: state.contents as List<BaseItem>);    
             }
@@ -625,10 +610,6 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadFailure) {
-          if (state.isSyncing) {
-            _syncingCubit?.failed();
-          }
-
           return;
         }
       }

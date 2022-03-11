@@ -88,9 +88,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
           BlocProvider<RouteBloc>(
             create: (BuildContext context) => RouteBloc()
           ),
-          BlocProvider<SynchronizationCubit>(
-            create: (BuildContext context) => SynchronizationCubit()
-          ),
           BlocProvider<RepositoriesCubit>(
             create: (BuildContext context) => RepositoriesCubit(  
               session: widget.session,

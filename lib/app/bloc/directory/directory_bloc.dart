@@ -284,10 +284,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       emit(DirectoryLoadInProgress());
     }
 
-    if (event.isSyncing) {
-      emit(SyncingInProgress(isSyncing: true));
-    }
-
     late final getContentsResult;
     try {
       getContentsResult = await directoryRepository.getFolderContents(event.repository, event.path);

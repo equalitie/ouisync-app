@@ -12,19 +12,6 @@ abstract class DirectoryState extends Equatable {
 
 class DirectoryInitial extends DirectoryState {}
 
-class SyncingInProgress extends DirectoryState {
-  const SyncingInProgress({
-    this.isSyncing = false
-  });
-
-  final bool isSyncing;
-
-  @override
-  List<Object> get props => [
-    isSyncing
-  ];
-}
-
 class CreateFileDone extends DirectoryState {
   const CreateFileDone({
     required this.fileName,
