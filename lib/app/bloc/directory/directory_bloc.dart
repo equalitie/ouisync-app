@@ -71,7 +71,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       GetContent(
         repository: event.repository,
         path: event.path,
-        recursive: event.recursive,
         withProgress: true
       ),
       emit
@@ -94,7 +93,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         GetContent(
           repository: event.repository,
           path: parentPath,
-          recursive: false,
           withProgress: true
         ),
         emit
@@ -105,7 +103,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
 
       try {
         await for (final buffer in event.fileByteStream) {
-          print('Buffer size: ${buffer.length} - offset: $offset');
           await file.write(offset, buffer);
           offset += buffer.length;
 
@@ -219,7 +216,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     await _getContents(GetContent(
       repository: event.repository,
       path: event.destination,
-      recursive: false,
       withProgress: true
     ), emit);
   }
@@ -242,7 +238,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     await _getContents(GetContent(
       repository: event.repository,
       path: event.parentPath,
-      recursive: false,
       withProgress: true
     ), emit);
   }

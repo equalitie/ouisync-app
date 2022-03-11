@@ -160,7 +160,6 @@ class _MainPageState extends State<MainPage>
     getContents({
       required Repository repository,
       required String path,
-      bool recursive = false,
       bool withProgress = false,
     }) { 
       BlocProvider
@@ -168,7 +167,6 @@ class _MainPageState extends State<MainPage>
       .add(GetContent(
         repository: repository,
         path: path,
-        recursive: recursive,
         withProgress: withProgress,
       ));
     }
@@ -377,9 +375,6 @@ class _MainPageState extends State<MainPage>
 
       _repositoriesService.put(name, repository, setCurrent: true);
     
-      //print('Repositories in memory: ${_repositoriesService.repositories}');
-      //print('Current repository: ${_repositoriesService.current}');
-
       switchMainState(newState: _repositoryContentBuilder());
 
       navigateToPath(
@@ -640,7 +635,7 @@ class _MainPageState extends State<MainPage>
       orderedContent.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
       
       if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
-        setState(() {_folderContents  = orderedContent; });
+        setState(() { _folderContents = orderedContent; });
       }
     }
 
