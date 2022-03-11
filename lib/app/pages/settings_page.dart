@@ -74,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<String> _getConnectivityInfo(bool connected) async {
     String localEndpoint = widget.repositoriesCubit.session
-    .local_network_address();
+    .listenerLocalAddress;
 
     if (!connected) {
       print('Network unavailable');
