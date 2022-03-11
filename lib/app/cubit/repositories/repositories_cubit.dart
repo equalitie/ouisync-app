@@ -74,7 +74,6 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
   void openRepository({required String name, String? password, ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
-    await Future.delayed(Duration(milliseconds: 500)); // TODO: Delay to allow the loading animation to show. Remove if not other use.
 
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
@@ -87,29 +86,19 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
         exist: storeExist
       );
 
-      emit(RepositoryPickerSelection(
-        repository: repository,
-        name: name
-      ));
+      emit(RepositoryPickerSelection(NamedRepo(name, repository)));
     } catch (e) {
       print('Exception opening the repository $name:\n${e.toString()}');
       emit(RepositoriesFailure());
     }
   }
 
-  void selectRepository(Repository? repository, String name) async {
-    emit(RepositoryPickerLoading());
-    await Future.delayed(Duration(milliseconds: 500));// TODO: Delay to allow the loading animation to show. Remove if not other use.
-
-    if (name.isEmpty) {
+  void selectRepository(NamedRepo? named_repo) async {
+    if (named_repo == null) {
       emit(RepositoryPickerInitial());
-      return;
+    } else {
+      emit(RepositoryPickerSelection(named_repo));
     }
-
-    emit(RepositoryPickerSelection(
-        repository: repository,
-        name: name
-      ));
   }
 
   /// Renames a repository
@@ -134,15 +123,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
 
     final repository = await initRepository(newName);
 
-    final newDefaultRepository = PersistedRepository(
-      repository: repository!,
-      name: newName
-    );
-
-    emit(RepositoryPickerSelection(
-      repository: newDefaultRepository.repository,
-      name: newDefaultRepository.name
-    )); // 6
+    emit(RepositoryPickerSelection(NamedRepo(newName, repository!))); // 6
   }
 
   /// Deletes a repository
@@ -173,27 +154,21 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
       return;
     }
 
-    PersistedRepository? newDefaultRepository = repositoriesService
+    Repository? newDefaultRepository = repositoriesService
     .get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
       final repository = await initRepository(latestRepositoryOrDefaultName);
-
-      newDefaultRepository = PersistedRepository(
-        repository: repository!,
-        name: latestRepositoryOrDefaultName
-      );
+      newDefaultRepository = repository!;
     }
 
     repositoriesService.put(
-      newDefaultRepository.name,
-      newDefaultRepository.repository
+      latestRepositoryOrDefaultName,
+      newDefaultRepository
     );
 
     emit(RepositoryPickerSelection(
-      repository: newDefaultRepository.repository,
-      name: newDefaultRepository.name
-    )); // 6
+      NamedRepo(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
   }
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';

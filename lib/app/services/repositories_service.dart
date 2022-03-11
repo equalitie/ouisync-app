@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../models/named_repo.dart';
 import '../models/models.dart';
 
 class RepositoriesService {
@@ -9,25 +10,31 @@ class RepositoriesService {
   RepositoriesService._internal();
   factory RepositoriesService() => _instance;
 
-  static final List<PersistedRepository> _repositories = <PersistedRepository>[];
-  List<PersistedRepository> get repositories => _repositories;
+  static final Map<String, Repository> _repos = Map();
   
-  String? _current;
-  
-  PersistedRepository? get current => _repositories
-  .singleWhereOrNull((repo) => repo.name == _current);
+  String? _currentRepoName;
 
-  setCurrent(String name) => _updateCurrentRepository(
-    _repositories.singleWhereOrNull((repo) => repo.name == name)
-  );
+  NamedRepo? get current {
+    if (_currentRepoName == null) {
+      return null;
+    } else {
+      return getNamed(_currentRepoName!);
+    }
+  }
 
-  bool get hasCurrent => (_current ?? '').isNotEmpty;
+  Iterable<NamedRepo> get repos
+    => _repos.entries.map((entry) => NamedRepo(entry.key, entry.value));
 
-  void _updateCurrentRepository(PersistedRepository? persisted) {
-    if (persisted == null) {
-      print('No repository matched the name. Current repository can not be updated');
-      _current = null;
+  setCurrent(String name) {
+    _updateCurrentRepository(name, _repos[name]);
+  }
 
+  bool get hasCurrent => _currentRepoName != null;
+
+  void _updateCurrentRepository(String name, Repository? repo) {
+    if (repo == null) {
+      print("Can't set current repository to null");
+      _currentRepoName = null;
       return;
     }
 
@@ -36,79 +43,71 @@ class RepositoriesService {
     }
 
     _subscription?.cancel();
-    print('Subscription to $_current canceled: ${_subscription?.handle}');
     _subscription = null;
 
-    _current = persisted.name;
+    _currentRepoName = name;
     
-    _subscription = persisted.repository.subscribe(() => 
-      _subscriptionCallback!.call(_current!)
+    _subscription = repo.subscribe(() => 
+      _subscriptionCallback!.call(_currentRepoName!)
     );
-    print('Subscribed to notifications: ${persisted.name} (${persisted.repository.accessMode.name})');
+    print('Subscribed to notifications: ${name} (${repo.accessMode.name})');
   }
 
-  PersistedRepository? get(String name) =>
-    _repositories.singleWhereOrNull((element) => element.name == name);
+  Repository? get(String name) {
+    return _repos[name];
+  }
 
-  void put(String name, Repository repository, {bool isCurrent = false}) {
-    PersistedRepository? repo = _repositories
-    .singleWhereOrNull((element) => element.name == name);
+  NamedRepo? getNamed(String name) {
+    final repo = _repos[name];
+    if (repo == null) return null;
+    return NamedRepo(name, repo);
+  }
 
-    if (repo != null) {
-      print('Updating repository: $name (${repository.accessMode.name})');
-      repo.update(name, repository);
+  void put(String name, Repository newRepo, { bool setCurrent = false }) {
+    Repository? oldRepo = _repos.remove(name);
+
+    if (oldRepo != null && oldRepo != newRepo) {
+      oldRepo.close();
     }
 
-    if (repo == null) {
-      repo = PersistedRepository(
-        repository: repository,
-        name: name
-      ); 
+    _repos[name] = newRepo;
 
-      print('Saving repository: $name (${repository.accessMode.name})');
-      _repositories.add(repo);
-    }
-
-    if (isCurrent &&
-    repo.name != _current) {
-      _updateCurrentRepository(repo);
+    if (setCurrent && name != _currentRepoName) {
+      _updateCurrentRepository(name, newRepo);
     }
   }
 
   void remove(String name) {
-    if (_current == name) {
-      print('Canceling subscription to $_current');
+    if (_currentRepoName == name) {
+      print('Canceling subscription to $name');
       _subscription?.cancel();
       _subscription = null;
 
-      print('Cleaning current selection for repository $_current');
-      _current = '';
+      print('Cleaning current selection for repository $name');
+      _currentRepoName = null;
     }
 
-    final repo = get(name);
-    if (repo != null) {
-      final name = repo.name;
-      final accessMode = repo.repository.accessMode.name;
+    final repo = _repos.remove(name);
 
-      print('Closing repository $name ($accessMode)');
-      repo.repository.close();
-      
-      print('Removing repository $name ($accessMode) from memory');
-      _repositories.remove(repo); 
+    if (repo != null) {
+      print('Closing repository $name');
+      repo.close();
     }
   }
 
   void close() {
     // Make sure this function is idempotent, i.e. that calling it more than once
     // one after another won't change it's meaning nor it will crash.
+    _currentRepoName = null;
+
     _subscription?.cancel();
     _subscription = null;
 
-    for (var persisted in _repositories) {
-      persisted.repository.close();
+    for (var repo in _repos.values) {
+      repo.close();
     }
 
-    _repositories.clear();
+    _repos.clear();
   }
 
   Subscription? _subscription;

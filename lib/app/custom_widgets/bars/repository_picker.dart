@@ -48,9 +48,9 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerSelection) {
-          final color = state.repository == null
+          final color = state.named_repo == null
           ? colorLockedRepo
-          : state.repository!.accessMode != AccessMode.blind
+          : state.named_repo!.repo.accessMode != AccessMode.blind
           ? colorUnlockedRepo
           : colorLockedRepo;
 
@@ -86,8 +86,8 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
           _updateCurrentRepository(
-            repository: state.repository,
-            name: state.name
+            repository: state.named_repo?.repo,
+            name: state.named_repo?.name
           );
         }
         if (state is RepositoryPickerUnlocked) {
