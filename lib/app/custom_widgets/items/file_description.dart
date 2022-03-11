@@ -10,22 +10,17 @@ class FileDescription extends StatelessWidget {
   FileDescription({
     required this.repository,
     required this.fileData
-  });
+  }) {
+    _length.value = fileData.size;
+  }
 
   final Repository repository;
   final BaseItem fileData;
 
   final ValueNotifier<int> _length = ValueNotifier<int>(0);
 
-  Future<void> getFileSize() async {
-    _length.value = await EntryInfo(repository)
-    .fileLength(fileData.path);
-  }
-
   @override
   Widget build(BuildContext context) {
-    getFileSize();
-    
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
