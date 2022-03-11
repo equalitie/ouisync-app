@@ -198,14 +198,11 @@ class DirectoryRepository {
   Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {
     final itemPath = path == '/' ? '/$name' : '$path/$name';
 
-    // TODO: Do we need to do this conversion?
-    final dSize = size.toDouble();
-
     if (type == EntryType.directory) {
       return FolderItem(
           name: name,
           path: itemPath,
-          size: dSize,
+          size: size,
           syncStatus: SyncStatus.idle,
           itemType: ItemType.folder,
           items: <BaseItem>[]);
@@ -214,7 +211,7 @@ class DirectoryRepository {
     if (type == EntryType.file) {
       String fileType = extractFileTypeFromName(name);
 
-      return FileItem(name: name, extension: fileType, path: itemPath, size: dSize, syncStatus: SyncStatus.idle);
+      return FileItem(name: name, extension: fileType, path: itemPath, size: size, syncStatus: SyncStatus.idle);
     }
 
     return <BaseItem>[].single;

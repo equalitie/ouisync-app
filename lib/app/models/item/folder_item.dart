@@ -10,7 +10,7 @@ class FolderItem extends Equatable implements BaseItem {
   FolderItem({
     this.name = '',
     this.path = '',
-    this.size = 0.0,
+    this.size = 0,
     this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.folder,
     this.icon = Icons.folder_outlined,
@@ -55,7 +55,7 @@ class FolderItem extends Equatable implements BaseItem {
   String path;
 
   @override
-  double size;
+  int size;
 
   @override
   SyncStatus syncStatus;
