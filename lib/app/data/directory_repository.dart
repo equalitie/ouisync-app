@@ -175,7 +175,10 @@ class DirectoryRepository {
 
     try {
       while (iterator.moveNext()) {
-        final size = await getFileSize(repository, path + '/' + iterator.current.name);
+        var size = 0;
+        if (iterator.current.type == EntryType.file) {
+          size = await getFileSize(repository, path + '/' + iterator.current.name);
+        }
         final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
         content.add(item);
