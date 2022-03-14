@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/data/directory_repository.dart';
@@ -12,8 +13,9 @@ void main() {
   late DirectoryRepository directoryRepository;
 
   setUp(() async {
-    session = await Session.open(':memory:');
-    repository = await Repository.create(session, store: ':memory:', password: 'a1b2c3');
+    final dir = await io.Directory.systemTemp.createTemp();
+    session = await Session.open(dir.path);
+    repository = await Repository.create(session, store: '${dir.path}/store.db', password: 'a1b2c3');
 
     directoryRepository = DirectoryRepository(); 
   });

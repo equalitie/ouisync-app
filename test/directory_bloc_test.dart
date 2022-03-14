@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,8 +27,9 @@ void main() {
     String loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 
     setUp(() async {
-      session = await Session.open(":memory:");
-      repository = await Repository.create(session, store: ":memory:", password: '1a2b3c');
+      final dir = await io.Directory.systemTemp.createTemp();
+      session = await Session.open(dir.path);
+      repository = await Repository.create(session, store: "${dir.path}/store.db", password: '1a2b3c');
 
       directoryRepository = new DirectoryRepository();
       directoryBloc = DirectoryBloc(directoryRepository: directoryRepository);
