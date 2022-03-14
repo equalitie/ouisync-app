@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
 import 'pages/pages.dart';
@@ -77,6 +78,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: S.of(context).appTitle,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
