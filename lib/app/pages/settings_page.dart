@@ -22,7 +22,6 @@ class SettingsPage extends StatefulWidget {
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.onShareRepository,
-    required this.connectivitySubscription,
     required this.title,
     this.dhtStatus = false,
   });
@@ -30,7 +29,6 @@ class SettingsPage extends StatefulWidget {
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
-  final StreamSubscription<ConnectivityResult>? connectivitySubscription;
   final String title;
   final bool dhtStatus;
 

@@ -1069,7 +1069,6 @@ class _MainPageState extends State<MainPage>
             repositoriesCubit: reposCubit,
             onRepositorySelect: switchRepository,
             onShareRepository: shareRepository,
-            connectivitySubscription: _connectivitySubscription,
             title: Strings.titleSettings,
             dhtStatus: dhtStatus,
           )
