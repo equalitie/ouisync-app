@@ -18,49 +18,68 @@ class Strings {
 
   // General
   static const String messageLoadingContents = 'Loading the folder contents...';
-  static const String messageErrorLoadingContents = 'Oooops!\n(Something went wrong trying to do '
-  'the thing, sorry about that. Please try again)';
+  static const String messageErrorLoadingContents =
+      'Oooops!\n(Something went wrong trying to do '
+      'the thing, sorry about that. Please try again)';
 
-  static const String messageOhOh = '<color>Oh oh...</color> <size><bold>o.0</bold></size>';
-  static const String messageErrorState = 'That did not work as we expected <size>'
-  '<bold>:\\</bold></size>\nWould you please try again... ? Thanks!\n\n<size><bold>'
-  '<icon></icon><bold></size>';
+  static const String messageOhOh =
+      '<color>Oh oh...</color> <size><bold>o.0</bold></size>';
+  static const String messageErrorState =
+      'That did not work as we expected <size>'
+      '<bold>:\\</bold></size>\nWould you please try again... ? Thanks!\n\n<size><bold>'
+      '<icon></icon><bold></size>';
 
   static const String messageOoops = 'Oooops...';
   static const String mesageLoading = 'Loading...';
 
-  static const String messageAccessModeBlind = 'Your peer can\'t write nor read the contents.';
-  static const String messageAccessModeRead = 'Can\'t be modified, just access the contents.';
-  static const String messageAccessModeWrite = 'Full access. Your peer can read and write.';
+  static const String messageAccessModeBlind =
+      'Your peer can\'t write nor read the contents.';
+  static const String messageAccessModeRead =
+      'Can\'t be modified, just access the contents.';
+  static const String messageAccessModeWrite =
+      'Full access. Your peer can read and write.';
 
   static const String messageBitTorrentDHTStatus = 'BitTorrent DHT is [status]';
-  static const String messageBitTorrentDHTEnableFailed = 'BitTorrent DHT could not be enabled';
-  static const String messageBitTorrentDHTDisableFailed = 'Disabling BitTorrent DHT failed';
+  static const String messageBitTorrentDHTEnableFailed =
+      'BitTorrent DHT could not be enabled';
+  static const String messageBitTorrentDHTDisableFailed =
+      'Disabling BitTorrent DHT failed';
 
-  static const String messageErrorNameFormValidator = 'Please enter a valid name '
-  '(unique, no spaces, ...)';
+  static const String messageErrorNameFormValidator =
+      'Please enter a valid name '
+      '(unique, no spaces, ...)';
 
   static const String messageErrorPathNotEmpty = '[path] is not empty';
 
-  static const String messageErrorCurrentPathMissing = 'The current folder is missing, navigating'
-  ' to its parent: [path]';
+  static const String messageErrorCurrentPathMissing =
+      'The current folder is missing, navigating'
+      ' to its parent: [path]';
 
   // main_page.dart
-  static const String messageNoRepo = 'Before adding a <bold>file</bold>, you need to create a '
-  '<bold>repository</bold>';
-  static const String messageCreateNewRepo = 'Create a new <bold>repository</bold>,'
-  ' or link to one from a friend using a <bold>repository token</bold>';
+  static const String messageNoRepo =
+      'Before adding a <bold>file</bold>, you need to create a '
+      '<bold>repository</bold>';
+  static const String messageCreateNewRepo =
+      'Create a new <bold>repository</bold>,'
+      ' or link to one from a friend using a <bold>repository token</bold>';
   static const String messageNoRepos = 'No repositories found';
-  static const String messageEmptyRepo = 'This <bold>repository</bold> is empty';
+  static const String messageEmptyRepo =
+      'This <bold>repository</bold> is empty';
   static const String messageEmptyFolder = 'This <bold>folder</bold> is empty';
-  static const String messageCreateAddNewItem = 'Create a new <bold>folder</bold>, or add a '
-  '<bold>file</bold>, using <icon></icon>';
-  static const String messageReadOnlyContents = 'This repository is <bold>read-only</bold>';
-  static const String messageLockedRepository = 'This <bold>repository</bold> is locked';
-  static const String messageBlindRepository = 'This repository is a blind replica';
-  static const String messageBlindRepositoryContent = 'The provided <bold>password</bold> do not grant you access to its contents';
-  static const String messageInputPasswordToUnlock = 'Tap on the <bold>Unlock</bold> button and input the password '
-  'to access its contents';
+  static const String messageCreateAddNewItem =
+      'Create a new <bold>folder</bold>, or add a '
+      '<bold>file</bold>, using <icon></icon>';
+  static const String messageReadOnlyContents =
+      'This repository is <bold>read-only</bold>';
+  static const String messageLockedRepository =
+      'This <bold>repository</bold> is locked';
+  static const String messageBlindRepository =
+      'This repository is a blind replica';
+  static const String messageBlindRepositoryContent =
+      'The provided <bold>password</bold> do not grant you access to its contents';
+  static const String messageInputPasswordToUnlock =
+      'Tap on the <bold>Unlock</bold> button and input the password '
+      'to access its contents';
   static const String messageUnlockRepository = 'Enter password to unlock';
   static const String messageRenameRepository = 'Rename repository';
 
@@ -87,6 +106,7 @@ class Strings {
   static const String titleShareRepository = 'Share repository "[name]"';
   static const String titleDeleteFile = 'Delete file';
   static const String titleNetwork = 'Network';
+  static const String titleLogs = 'Logs';
 
   static const String titleDeleteRepository = 'Delete repository';
 
@@ -104,34 +124,45 @@ class Strings {
   static const String labelRenameRepository = 'Enter the new name';
   static const String labelEndpoint = 'Endpoint:';
   static const String labelAppVersion = 'App version:';
-  
-  static const String messageMovingEntry = 'This function is not availabe when moving an entry';
+
+  static const String messageMovingEntry =
+      'This function is not availabe when moving an entry';
   static const String messageRepositoryToken = 'Paste the token here';
   static const String messageRepositoryName = 'Give the repository a name';
   static const String messageRepositoryNewName = 'Repository new name';
-  static const String messageRepositoryAccessMode = 'Access mode granted: [access]';
+  static const String messageRepositoryAccessMode =
+      'Access mode granted: [access]';
   static const String messageRepositorySuggestedName = 'Suggested: [name]\n'
-  '(tap here for using this name)';
+      '(tap here for using this name)';
   static const String messageRepositoryPassword = 'Repository password';
-  static const String messageErrorRepositoryPasswordValidation = 'Please enter a password';
-  static const String messageErrorRetypePassword = 'The password and retyped password doesn\'t '
-  'match';
-  static const String messageErrorTokenInvalid = 'The token seems to be invalid';
+  static const String messageErrorRepositoryPasswordValidation =
+      'Please enter a password';
+  static const String messageErrorRetypePassword =
+      'The password and retyped password doesn\'t '
+      'match';
+  static const String messageErrorTokenInvalid =
+      'The token seems to be invalid';
   static const String messageErrorTokenValidator = 'Please enter a valid token';
   static const String messageErrorTokenEmpty = 'Please enter a token';
   static const String messageCreateFolder = 'Folder name';
-  static const String messageConfirmFolderDeletion = 'Are you sure you want to delete this folder?';
-  static const String messageConfirmNotEmptyFolderDeletion = 'This folder is not empty.\n\n'
-  'Do you still want to delete it? (this will delete all its contents)';
+  static const String messageConfirmFolderDeletion =
+      'Are you sure you want to delete this folder?';
+  static const String messageConfirmNotEmptyFolderDeletion =
+      'This folder is not empty.\n\n'
+      'Do you still want to delete it? (this will delete all its contents)';
   static const String messageError = 'Error!';
   static const String messageAck = 'Ack!';
   static const String messageCreatingToken = 'Creating the share token...';
-  static const String messageErrorCreatingToken = 'Error while creating the share token';
-  static const String messageTokenCopiedToClipboard = 'Repository token copied to the clipboard';
+  static const String messageErrorCreatingToken =
+      'Error while creating the share token';
+  static const String messageTokenCopiedToClipboard =
+      'Repository token copied to the clipboard';
   static const String messageMoveEntryOrigin = 'from [path]';
-  static const String messageConfirmFileDeletion = 'Are you sure you want to delete this file?';
+  static const String messageConfirmFileDeletion =
+      'Are you sure you want to delete this file?';
 
-  static const String messageConfirmRepositoryDeletion = 'Are you sure you want to delete this repository?';
+  static const String messageConfirmRepositoryDeletion =
+      'Are you sure you want to delete this repository?';
 
   static const String mesageNoMediaPresent = 'There is no media present';
 
@@ -139,20 +170,24 @@ class Strings {
   static const String messageEntryTypeFolder = 'A folder';
   static const String messageEntryTypeFile = 'A file';
 
-  static const String messageEntryAlreadyExist = '[entry] with the same name already '
-  'exist in this location';
+  static const String messageEntryAlreadyExist =
+      '[entry] with the same name already '
+      'exist in this location';
 
   static const String messageFileDeleted = 'File deleted successfully: [name]';
-  static const String messageFolderDeleted = 'Folder deleted successfully: [name]';
+  static const String messageFolderDeleted =
+      'Folder deleted successfully: [name]';
 
   static const String messageExitOuiSync = 'Press back again to exit';
 
   static const String messageInitializing = 'Initializing...';
 
-  static const String messageAddingFileToLockedRepository = 'This repository is locked or is a blind replica.'
-  '\n\n'
-  'If you have the password, unlock it and try again.';
-  static const String messageAddingFileToReadRepository = 'This repository is a read-only replica.';
+  static const String messageAddingFileToLockedRepository =
+      'This repository is locked or is a blind replica.'
+      '\n\n'
+      'If you have the password, unlock it and try again.';
+  static const String messageAddingFileToReadRepository =
+      'This repository is a read-only replica.';
 
   static const String replacementName = '[name]';
   static const String replacementPath = '[path]';
@@ -169,7 +204,8 @@ class Strings {
   static const String iconMove = 'Move';
   static const String iconDelete = 'Delete';
   static const String iconCreateRepository = 'Create a new repository';
-  static const String iconAddRepositoryWithToken = 'Add a repository with token';
+  static const String iconAddRepositoryWithToken =
+      'Add a repository with token';
   static const String iconAccessMode = 'Access mode';
   static const String iconShareTokenWithPeer = 'Share this with your peer';
 
@@ -213,5 +249,4 @@ class Strings {
   static const String undeterminedIPv6 = '[::]';
 
   static const String errorEntryNotFound = 'entry not found';
-
 }

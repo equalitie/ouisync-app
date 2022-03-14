@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../cubit/cubits.dart';
 import '../custom_widgets/custom_widgets.dart';
@@ -20,7 +24,7 @@ class SettingsPage extends StatefulWidget {
     required this.onShareRepository,
     required this.connectivitySubscription,
     required this.title,
-    this.dhtStatus = false, 
+    this.dhtStatus = false,
   });
 
   final RepositoriesCubit repositoriesCubit;
@@ -43,11 +47,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Color? _titlesColor = Colors.black;
 
-
   @override
   void initState() {
     super.initState();
- 
+
     _getLocalEndpoint();
 
     _bittorrentDhtStatus = widget.dhtStatus;
@@ -59,22 +62,21 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _getLocalEndpoint({ConnectivityResult? connectivityResult}) async {
-    final connectivity = connectivityResult ?? await Connectivity().checkConnectivity();
+    final connectivity =
+        connectivityResult ?? await Connectivity().checkConnectivity();
     final isConnected = [
       ConnectivityResult.ethernet,
       ConnectivityResult.mobile,
       ConnectivityResult.wifi
     ].contains(connectivity);
 
-    _getConnectivityInfo(isConnected)
-    .then((localEndpoint) => 
-      setState(() => _localEndpoint = localEndpoint)
-    );
+    _getConnectivityInfo(isConnected).then(
+        (localEndpoint) => setState(() => _localEndpoint = localEndpoint));
   }
 
   Future<String> _getConnectivityInfo(bool connected) async {
-    String localEndpoint = widget.repositoriesCubit.session
-    .listenerLocalAddress;
+    String localEndpoint =
+        widget.repositoriesCubit.session.listenerLocalAddress;
 
     if (!connected) {
       print('Network unavailable');
@@ -82,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     if (localEndpoint.contains(Strings.emptyIPv4) ||
-    localEndpoint.contains(Strings.undeterminedIPv6)) { 
+        localEndpoint.contains(Strings.undeterminedIPv6)) {
       final internalIPAddress = await RGetIp.internalIP;
 
       final indexFirstSemicolon = localEndpoint.indexOf(':');
@@ -106,46 +108,44 @@ class _SettingsPageState extends State<SettingsPage> {
     final info = PackageInfo.fromPlatform();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildRepositoriesSection(),
-            const Divider(
-              height: 20.0,
-              thickness: 1.0,
-            ),
-            Fields.idLabel(Strings.titleNetwork,
-              fontSize: Dimensions.fontAverage,
-              fontWeight: FontWeight.normal,
-              color: _titlesColor!
-            ),
-            LabeledSwitch(
-              label: Strings.labelBitTorrentDHT,
-              padding: const EdgeInsets.all(0.0),
-              value: _bittorrentDhtStatus,
-              onChanged: updateDhtSetting,
-            ),
-            BlocConsumer<ConnectivityCubit, ConnectivityState>(
-              builder: (context, state) {
-                return _labeledText(Strings.labelEndpoint, _localEndpoint ?? Strings.statusUnspecified);
-              },
-              listener: (context, state) {
-                if (state is ConnectivityChanged) {
-                  _getLocalEndpoint(connectivityResult: state.connectivityResult);
-                }
-              }
-            ),
-            _futureLabeledText(Strings.labelAppVersion, info.then((info) => info.version)),
-          ],
-        )
-      )
-    );
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Container(
+            padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildRepositoriesSection(),
+                _divider(),
+                Fields.idLabel(Strings.titleNetwork,
+                    fontSize: Dimensions.fontAverage,
+                    fontWeight: FontWeight.normal,
+                    color: _titlesColor!),
+                LabeledSwitch(
+                  label: Strings.labelBitTorrentDHT,
+                  padding: const EdgeInsets.all(0.0),
+                  value: _bittorrentDhtStatus,
+                  onChanged: updateDhtSetting,
+                ),
+                BlocConsumer<ConnectivityCubit, ConnectivityState>(
+                    builder: (context, state) {
+                  return _labeledText(Strings.labelEndpoint,
+                      _localEndpoint ?? Strings.statusUnspecified);
+                }, listener: (context, state) {
+                  if (state is ConnectivityChanged) {
+                    _getLocalEndpoint(
+                        connectivityResult: state.connectivityResult);
+                  }
+                }),
+                _divider(),
+                _buildLogsSection(),
+                _divider(),
+                _futureLabeledText(
+                    Strings.labelAppVersion, info.then((info) => info.version)),
+              ],
+            )));
   }
 
   static Widget _labeledText(String key, String value) {
@@ -160,18 +160,19 @@ class _SettingsPageState extends State<SettingsPage> {
 
   static _futureLabeledText(String key, Future<String> value) {
     return FutureBuilder<String>(
-      future: value,
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        if (snapshot.hasData) {
-          return _labeledText(key, snapshot.data!);
-        } else if (snapshot.hasError) {
-          return _labeledText(key, "???");
-        } else {
-          return _labeledText(key, "...");
-        }
-      }
-    );
+        future: value,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          if (snapshot.hasData) {
+            return _labeledText(key, snapshot.data!);
+          } else if (snapshot.hasError) {
+            return _labeledText(key, "???");
+          } else {
+            return _labeledText(key, "...");
+          }
+        });
   }
+
+  static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
   Widget _buildRepositoriesSection() {
     return Column(
@@ -179,30 +180,29 @@ class _SettingsPageState extends State<SettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Fields.idLabel(Strings.titleRepository,
-            fontSize: Dimensions.fontAverage,
-            fontWeight: FontWeight.normal,
-            color: _titlesColor!
-          ),
+              fontSize: Dimensions.fontAverage,
+              fontWeight: FontWeight.normal,
+              color: _titlesColor!),
           Dimensions.spacingVertical,
           Container(
             decoration: BoxDecoration(
-              borderRadius : BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(4),
                 bottomLeft: Radius.circular(0),
                 bottomRight: Radius.circular(0),
               ),
-              color : Color.fromRGBO(33, 33, 33, 0.07999999821186066),
+              color: Color.fromRGBO(33, 33, 33, 0.07999999821186066),
             ),
             child: Container(
               padding: Dimensions.paddingActionBox,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
+                borderRadius:
+                    BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
                 border: Border.all(
-                  color: Colors.black45,
-                  width: 1.0,
-                  style: BorderStyle.solid
-                ),
+                    color: Colors.black45,
+                    width: 1.0,
+                    style: BorderStyle.solid),
                 color: Colors.grey.shade300,
               ),
               child: BlocListener(
@@ -225,19 +225,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Fields.idLabel(
-                            Strings.labelSelectRepository,
-                            textAlign: TextAlign.start,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.grey.shade600
-                          ),
+                          Fields.idLabel(Strings.labelSelectRepository,
+                              textAlign: TextAlign.start,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.grey.shade600),
                           Dimensions.spacingVerticalHalf,
                           Row(
                             children: [
-                              Fields.constrainedText(
-                                named_repo.name,
-                                fontWeight: FontWeight.normal
-                              ),
+                              Fields.constrainedText(named_repo.name,
+                                  fontWeight: FontWeight.normal),
                             ],
                           ),
                         ],
@@ -246,7 +242,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   }).toList(),
                   onChanged: (named_repo) async {
                     print('Selected repository: ${named_repo?.name}');
-                    setState(() { _persistedRepository = named_repo; });
+                    setState(() {
+                      _persistedRepository = named_repo;
+                    });
                     _repositoriesSession.setCurrent(_persistedRepository!.name);
                   },
                 ),
@@ -257,18 +255,16 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Expanded(
-                child: Fields.actionText(
-                  Strings.actionRename,
-                  textFontSize: Dimensions.fontAverage,
-                  icon: Icons.edit,
-                  iconSize: Dimensions.sizeIconSmall,
-                  spacing: Dimensions.spacingHorizontalHalf,
-                  onTap: () async {
-                    if (_persistedRepository == null) {
-                      return;
-                    }
+                child: Fields.actionText(Strings.actionRename,
+                    textFontSize: Dimensions.fontAverage,
+                    icon: Icons.edit,
+                    iconSize: Dimensions.sizeIconSmall,
+                    spacing: Dimensions.spacingHorizontalHalf, onTap: () async {
+                  if (_persistedRepository == null) {
+                    return;
+                  }
 
-                    await showDialog<String>(
+                  await showDialog<String>(
                       context: context,
                       barrierDismissible: false,
                       builder: (BuildContext context) {
@@ -277,125 +273,161 @@ class _SettingsPageState extends State<SettingsPage> {
                         return ActionsDialog(
                           title: Strings.messageRenameRepository,
                           body: RenameRepository(
-                            context: context,
-                            formKey: formKey,
-                            repositoryName: _repositoriesSession.current!.name
-                          ),
+                              context: context,
+                              formKey: formKey,
+                              repositoryName:
+                                  _repositoriesSession.current!.name),
                         );
-                      }
-                    ).then((newName) {
-                      if (newName?.isNotEmpty ?? false) {
-                        final oldName = _persistedRepository!.name;
-                        setState(() { _persistedRepository = null; });  
+                      }).then((newName) {
+                    if (newName?.isNotEmpty ?? false) {
+                      final oldName = _persistedRepository!.name;
+                      setState(() {
+                        _persistedRepository = null;
+                      });
 
-                        widget.repositoriesCubit
-                        .renameRepository(oldName, newName!);
-                      }
-                    });
-                  }
-                ),
+                      widget.repositoriesCubit
+                          .renameRepository(oldName, newName!);
+                    }
+                  });
+                }),
               ),
               Expanded(
-                child: Fields.actionText(
-                  Strings.actionShare,
-                  textFontSize: Dimensions.fontAverage,
-                  icon: Icons.share,
-                  iconSize: Dimensions.sizeIconSmall,
-                  spacing: Dimensions.spacingHorizontalHalf,
-                  onTap: () {
-                    if (_persistedRepository == null) {
-                      return;
-                    }
+                  child: Fields.actionText(Strings.actionShare,
+                      textFontSize: Dimensions.fontAverage,
+                      icon: Icons.share,
+                      iconSize: Dimensions.sizeIconSmall,
+                      spacing: Dimensions.spacingHorizontalHalf, onTap: () {
+                if (_persistedRepository == null) {
+                  return;
+                }
 
-                    widget.onShareRepository.call();
-                  }
-                )
-              ),
+                widget.onShareRepository.call();
+              })),
               Expanded(
-                child: Fields.actionText(
-                  Strings.actionDelete,
-                  textFontSize: Dimensions.fontAverage,
-                  textColor: Colors.red,
-                  icon: Icons.delete,
-                  iconSize: Dimensions.sizeIconSmall,
-                  iconColor: Colors.red,
-                  spacing: Dimensions.spacingHorizontalHalf,
-                  onTap: () async {
-                    if (_persistedRepository == null) {
-                      return;
-                    }
-                    await showDialog<bool>(
-                      context: context,
-                      barrierDismissible: false, // user must tap button!
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text(Strings.titleDeleteRepository),
-                          content: SingleChildScrollView(
-                            child: ListBody(children: [
-                              Text(Strings.messageConfirmRepositoryDeletion)
-                            ]),
-                          ),
-                          actions: [
-                            TextButton(
+                  child: Fields.actionText(Strings.actionDelete,
+                      textFontSize: Dimensions.fontAverage,
+                      textColor: Colors.red,
+                      icon: Icons.delete,
+                      iconSize: Dimensions.sizeIconSmall,
+                      iconColor: Colors.red,
+                      spacing: Dimensions.spacingHorizontalHalf,
+                      onTap: () async {
+                if (_persistedRepository == null) {
+                  return;
+                }
+                await showDialog<bool>(
+                    context: context,
+                    barrierDismissible: false, // user must tap button!
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(Strings.titleDeleteRepository),
+                        content: SingleChildScrollView(
+                          child: ListBody(children: [
+                            Text(Strings.messageConfirmRepositoryDeletion)
+                          ]),
+                        ),
+                        actions: [
+                          TextButton(
                               child: const Text(Strings.actionDeleteCapital),
                               onPressed: () {
                                 Navigator.of(context).pop(true);
-                              }
-                            ),
-                            TextButton(
-                              child: const Text(Strings.actionCloseCapital),
-                              onPressed: () => 
-                              Navigator.of(context).pop(false),
-                            )
-                          ],
-                        );
+                              }),
+                          TextButton(
+                            child: const Text(Strings.actionCloseCapital),
+                            onPressed: () => Navigator.of(context).pop(false),
+                          )
+                        ],
+                      );
                     }).then((delete) {
-                      if (delete ?? false) {
-                        final repositoryName = _persistedRepository!.name;
-                        setState(() { 
-                          _persistedRepository = null;
-                          _bittorrentDhtStatus = false;
-                        });
-
-                        widget.repositoriesCubit
-                        .deleteRepository(repositoryName);
-                      }
+                  if (delete ?? false) {
+                    final repositoryName = _persistedRepository!.name;
+                    setState(() {
+                      _persistedRepository = null;
+                      _bittorrentDhtStatus = false;
                     });
+
+                    widget.repositoriesCubit.deleteRepository(repositoryName);
                   }
-                )
-              )
+                });
+              }))
             ],
           ),
-        ]
-    );
+        ]);
   }
+
+  Widget _buildLogsSection() => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Fields.idLabel(Strings.titleLogs,
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.normal,
+                color: _titlesColor!),
+            Row(children: [
+              Expanded(
+                  child: Fields.actionText(Strings.actionSave,
+                      textFontSize: Dimensions.fontAverage,
+                      icon: Icons.save,
+                      iconSize: Dimensions.sizeIconSmall,
+                      spacing: Dimensions.spacingHorizontalHalf,
+                      onTap: _saveLogs)),
+              Expanded(
+                  child: Fields.actionText(Strings.actionShare,
+                      textFontSize: Dimensions.fontAverage,
+                      icon: Icons.share,
+                      iconSize: Dimensions.sizeIconSmall,
+                      spacing: Dimensions.spacingHorizontalHalf,
+                      onTap: _shareLogs))
+            ]),
+          ]);
 
   Future<void> updateDhtSetting(bool enable) async {
     if (!_repositoriesSession.hasCurrent) {
       return;
     }
 
-    print('${enable ? 'Enabling': 'Disabling'} BitTorrent DHT...');
+    print('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
-    enable ? await _repositoriesSession.current!.repo.enableDht()
-    : await _repositoriesSession.current!.repo.disableDht();
-    
+    enable
+        ? await _repositoriesSession.current!.repo.enableDht()
+        : await _repositoriesSession.current!.repo.disableDht();
+
     final isEnabled = await _repositoriesSession.current!.repo.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    String dhtStatusMessage = Strings.messageBitTorrentDHTStatus
-    .replaceAll(
-      Strings.replacementStatus,
-      isEnabled ? 'enabled' : 'disabled'
-    );
+    String dhtStatusMessage = Strings.messageBitTorrentDHTStatus.replaceAll(
+        Strings.replacementStatus, isEnabled ? 'enabled' : 'disabled');
     if (enable != isEnabled) {
-      dhtStatusMessage = enable ? Strings.messageBitTorrentDHTEnableFailed
-      : Strings.messageBitTorrentDHTDisableFailed;
+      dhtStatusMessage = enable
+          ? Strings.messageBitTorrentDHTEnableFailed
+          : Strings.messageBitTorrentDHTDisableFailed;
     }
 
     print(dhtStatusMessage);
     showToast(dhtStatusMessage);
+  }
+
+  Future<void> _saveLogs() async {
+    final tempPath = await _dumpLogs();
+    final params = SaveFileDialogParams(sourceFilePath: tempPath);
+    await FlutterFileDialog.saveFile(params: params);
+  }
+
+  Future<void> _shareLogs() async {
+    final tempPath = await _dumpLogs();
+    await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
+  }
+
+  Future<String> _dumpLogs() async {
+    final dir = await getTemporaryDirectory();
+    final info = await PackageInfo.fromPlatform();
+    final name = info.appName.toLowerCase();
+    final path = '${dir.path}/$name.log';
+
+    await dumpLogs(path);
+
+    return path;
   }
 }
