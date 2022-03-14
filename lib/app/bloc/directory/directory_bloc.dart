@@ -70,7 +70,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     await _updateContens(
       GetContent(
         repository: event.repository,
-        path: event.path,
+        path: event.parentPath,
         withProgress: true
       ),
       emit
@@ -221,6 +221,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   }
 
   Future<void> _onDeleteFile(DeleteFile event, Emitter<DirectoryState> emit) async {
+    emit(DirectoryLoadInProgress());
+
     try{
       final deleteFileResult = await directoryRepository.deleteFile(event.repository, event.filePath);
       if (deleteFileResult.errorMessage.isNotEmpty) 

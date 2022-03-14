@@ -50,6 +50,7 @@ void main() {
         blocTest('emits [DirectoryLoadInProgress, NavigationLoadSuccess] when CreateFolder is added and createFolder succeeds',
         build: () => directoryBloc,
         act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
+        wait: Duration(seconds: 1),
         expect: () => [
           DirectoryLoadInProgress(),
           NavigationLoadSuccess(type: Navigation.content, origin: '/', destination: '/test', contents: <BaseItem>[])
@@ -70,6 +71,7 @@ void main() {
       setUp: () async { await Directory.create(repository, '/testFolder'); },
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
@@ -79,6 +81,7 @@ void main() {
       ' because the folder do not exist',
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadFailure()
@@ -137,6 +140,7 @@ void main() {
         await file.write(0, utf8.encode(loremIpsum));
         await file.close();
       },
+      wait: Duration(seconds: 1),
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(
         DeleteFile(

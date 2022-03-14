@@ -122,7 +122,7 @@ void main() {
         name: 'file1.txt',
         extension: 'txt',
         path: file1InFolder2Path,
-        size: 0,
+        size: filePathContent.length,
         syncStatus: SyncStatus.idle
       )
     ];
@@ -146,7 +146,7 @@ void main() {
             name: 'file1.txt',
             extension: 'txt',
             path: file1InFolder2Path,
-            size: 0,
+            size: filePathContent.length,
             syncStatus: SyncStatus.idle
           )
         ]
