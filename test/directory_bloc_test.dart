@@ -4,7 +4,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/data/directory_repository.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -78,10 +77,9 @@ void main() {
       blocTest('emits [DirectoryLoadInProgress, SyncingInProgress] with isSyncing=true, when RequestContent is added, '
       'getFolderContents succeeds, and it is from a syncing request', 
       build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: false, isSyncing: true)),
+      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: false)),
       expect: () => [
-        SyncingInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[], isSyncing: true)
+        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
       ]);
       // TODO: find out what is the expected behaviour in the library for this: get content for path ' ' 
       // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when RequestFolder is added and getFolderContents fails',
