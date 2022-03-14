@@ -8,7 +8,7 @@ class FileItem extends Equatable implements BaseItem {
     this.name = '',
     this.extension = '',
     this.path = '',
-    this.size = 0.0,
+    this.size = 0,
     this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.file,
     this.icon = Icons.insert_drive_file_outlined
@@ -39,7 +39,7 @@ class FileItem extends Equatable implements BaseItem {
   String path;
 
   @override
-  double size;
+  int size;
 
   @override
   SyncStatus syncStatus;

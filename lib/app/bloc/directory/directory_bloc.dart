@@ -67,11 +67,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _onGetContents(
+    await _updateContens(
       GetContent(
         repository: event.repository,
-        path: event.path,
-        recursive: event.recursive,
+        path: event.parentPath,
         withProgress: true
       ),
       emit
@@ -90,11 +89,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
 
     if (fileCreationResult is CreateFileDone) {
       final parentPath = extractParentFromPath(event.newFilePath);
-      await _onGetContents(
+      await _updateContens(
         GetContent(
           repository: event.repository,
           path: parentPath,
-          recursive: false,
           withProgress: true
         ),
         emit
@@ -105,7 +103,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
 
       try {
         await for (final buffer in event.fileByteStream) {
-          print('Buffer size: ${buffer.length} - offset: $offset');
           await file.write(offset, buffer);
           offset += buffer.length;
 
@@ -216,15 +213,16 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _onGetContents(GetContent(
+    await _updateContens(GetContent(
       repository: event.repository,
       path: event.destination,
-      recursive: false,
       withProgress: true
     ), emit);
   }
 
   Future<void> _onDeleteFile(DeleteFile event, Emitter<DirectoryState> emit) async {
+    emit(DirectoryLoadInProgress());
+
     try{
       final deleteFileResult = await directoryRepository.deleteFile(event.repository, event.filePath);
       if (deleteFileResult.errorMessage.isNotEmpty) 
@@ -239,10 +237,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    await _onGetContents(GetContent(
+    await _updateContens(GetContent(
       repository: event.repository,
       path: event.parentPath,
-      recursive: false,
       withProgress: true
     ), emit);
   }
@@ -280,24 +277,63 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
   }
 
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
-    if (event.withProgress) {
-      emit(DirectoryLoadInProgress());
+    await _updateContens(event, emit);
+  }
+
+  GetContent? _curGetContentEvent;
+  GetContent? _nextGetContentEvent;
+  List<Completer> _getContentCompleters = <Completer>[];
+
+  // Trigger content update. If a content update is already in progress, it is scheduled
+  // to be done afterwards.
+  Future<void> _updateContens(GetContent event, Emitter<DirectoryState> emit) async {
+    final completer = Completer<void>();
+    final future = completer.future;
+    _getContentCompleters.add(completer);
+
+    if (_curGetContentEvent != null) {
+      _nextGetContentEvent = event;
+      return future;
     }
 
-    late final getContentsResult;
+    _nextGetContentEvent = event;
+
+    _runUpdateLoop(emit); // don't await
+
+    return future;
+  }
+
+  void _runUpdateLoop(Emitter<DirectoryState> emit) async {
+    while (_nextGetContentEvent != null) {
+      _curGetContentEvent = _nextGetContentEvent;
+      _nextGetContentEvent = null;
+
+      final completers = _getContentCompleters;
+      _getContentCompleters = <Completer>[];
+
+      final state = await _getContents(_curGetContentEvent!);
+
+      _curGetContentEvent = null;
+
+      for (var completer in completers) {
+        completer.complete();
+      }
+
+      emit(state);
+    }
+  }
+
+  Future<DirectoryState> _getContents(GetContent event) async {
     try {
-      getContentsResult = await directoryRepository.getFolderContents(event.repository, event.path);
-      if (getContentsResult.errorMessage.isNotEmpty) {
-        print('Get contents in folder ${event.path} failed:\n${getContentsResult.errorMessage}');
-        emit(DirectoryLoadFailure());
-        return;
+      final result = await directoryRepository.getFolderContents(event.repository, event.path);
+
+      if (result.errorMessage.isNotEmpty) {
+        return DirectoryLoadFailure();
+      } else {
+        return DirectoryLoadSuccess(path: event.path, contents: result.result);
       }
     } catch (e) {
-      print('Exception getting contents for ${event.path}:\n${e.toString()}');
-      emit(DirectoryLoadFailure(error: e.toString()));
-      return;
+      return DirectoryLoadFailure(error: e.toString());
     }
-    
-    emit(DirectoryLoadSuccess(path: event.path, contents: getContentsResult.result));
   }
 }

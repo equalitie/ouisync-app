@@ -155,6 +155,13 @@ class DirectoryRepository {
     return createFolderResult;
   }
 
+  Future<int> getFileSize(Repository repository, String path) async {
+    final file = await File.open(repository, path);
+    final length = await file.length;
+    file.close();
+    return length;
+  }
+
   Future<BasicResult> getFolderContents(Repository repository, String path) async {
     print("Getting folder $path contents");
 
@@ -168,7 +175,11 @@ class DirectoryRepository {
 
     try {
       while (iterator.moveNext()) {
-        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
+        var size = 0;
+        if (iterator.current.type == EntryType.file) {
+          size = await getFileSize(repository, path + '/' + iterator.current.name);
+        }
+        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
         content.add(item);
       }
@@ -187,31 +198,7 @@ class DirectoryRepository {
     return getContentsResult;
   }
 
-  Future<List<BaseItem>> getContentsRecursive(Repository repository, String path, List<BaseItem> contentNodes) async {
-    final directory = await Directory.open(repository, path);
-    try {
-      final iterator = directory.iterator;
-      while (iterator.moveNext()) {
-        final newNode = await _castToBaseItem(path, iterator.current.name, iterator.current.type, 0.0);
-
-        if (newNode.itemType == ItemType.folder) {
-          final itemPath = path == '/' ? '/${iterator.current.name}' : '$path/${iterator.current.name}';
-
-          (newNode as FolderItem).items = await getContentsRecursive(repository, itemPath, contentNodes);
-        }
-
-        contentNodes.add(newNode);
-      }
-    } catch (e) {
-      print('Error traversing directory $path: $e');
-    } finally {
-      directory.close();
-    }
-
-    return contentNodes;
-  }
-
-  Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, double size) async {
+  Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {
     final itemPath = path == '/' ? '/$name' : '$path/$name';
 
     if (type == EntryType.directory) {

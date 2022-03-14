@@ -10,22 +10,17 @@ class FileDescription extends StatelessWidget {
   FileDescription({
     required this.repository,
     required this.fileData
-  });
+  }) {
+    _length.value = fileData.size;
+  }
 
   final Repository repository;
   final BaseItem fileData;
 
   final ValueNotifier<int> _length = ValueNotifier<int>(0);
 
-  Future<void> getFileSize() async {
-    _length.value = await EntryInfo(repository)
-    .fileLength(fileData.path);
-  }
-
   @override
   Widget build(BuildContext context) {
-    getFileSize();
-    
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,8 +60,6 @@ class FileDescription extends StatelessWidget {
               if (state is WriteToFileInProgress) {
                 if (state.fileName == this.fileData.name) {
                   final progress = state.progress / state.length;
-                  print('name: ${state.fileName} - length: ${state.length} - offset: ${state.progress} - progress: $progress');
-
                   return LinearProgressIndicator(value: progress);
                 }
               }
@@ -84,8 +77,7 @@ class FileDescription extends StatelessWidget {
             listener: (context, state) {
               if (state is WriteToFileInProgress) {
                 if (state.fileName == this.fileData.name) {
-                  print('[WriteToFileInProgress fileName: ${state.fileName} (${state.length} bytes)]');
-                  getFileSize();
+                  _length.value = state.progress;
                 }
               }
             }

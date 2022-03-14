@@ -39,6 +39,6 @@ Future<void> main() async {
         defaultRepositoryName: latestRepositoryOrDefaultName,
       )
     )),
-    blocObserver: SimpleBlocObserver(),
+    //blocObserver: SimpleBlocObserver(),
   );
 }

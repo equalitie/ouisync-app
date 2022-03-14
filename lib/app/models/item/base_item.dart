@@ -7,7 +7,7 @@ abstract class BaseItem extends Equatable {
   BaseItem(
       String name,
       String path,
-      double size,
+      int size,
       SyncStatus syncStatus,
       ItemType itemType, //folder, file, safe (?)
       IconData icon,
@@ -32,7 +32,7 @@ abstract class BaseItem extends Equatable {
 
   String name = '';
   String path = '';
-  double size = 0.0;
+  int size = 0;
   SyncStatus syncStatus = SyncStatus.idle;
   ItemType itemType = ItemType.folder; //folder, file, safe (?)
   IconData icon = Icons.adb;

@@ -160,7 +160,6 @@ class _MainPageState extends State<MainPage>
     getContents({
       required Repository repository,
       required String path,
-      bool recursive = false,
       bool withProgress = false,
     }) { 
       BlocProvider
@@ -168,7 +167,6 @@ class _MainPageState extends State<MainPage>
       .add(GetContent(
         repository: repository,
         path: path,
-        recursive: recursive,
         withProgress: withProgress,
       ));
     }
@@ -233,7 +231,6 @@ class _MainPageState extends State<MainPage>
       }
 
       if (_repositoriesService.current!.name != repositoryName) {
-        print('[Syncing $repositoryName in background] (Current: ${_repositoriesService.current!.repo.handle})');
         return;
       }
 
@@ -243,8 +240,6 @@ class _MainPageState extends State<MainPage>
           path: _currentFolder,
         ); 
       }
-      
-      print('[Syncing $repositoryName (${_repositoriesService.current!})] Current folder: $_currentFolder');
     }
 
     @override
@@ -380,9 +375,6 @@ class _MainPageState extends State<MainPage>
 
       _repositoriesService.put(name, repository, setCurrent: true);
     
-      //print('Repositories in memory: ${_repositoriesService.repositories}');
-      //print('Current repository: ${_repositoriesService.current}');
-
       switchMainState(newState: _repositoryContentBuilder());
 
       navigateToPath(
@@ -631,7 +623,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    Future<void> updateFolderContents({required List<BaseItem> newContent}) async {
+    void updateFolderContents({required List<BaseItem> newContent}) {
       if (newContent.isEmpty) {
         if (_folderContents.isNotEmpty) {
           setState(() { _folderContents.clear(); }); 
@@ -643,7 +635,7 @@ class _MainPageState extends State<MainPage>
       orderedContent.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
       
       if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
-        setState(() {_folderContents  = orderedContent; });
+        setState(() { _folderContents = orderedContent; });
       }
     }
 
@@ -682,14 +674,13 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              final fileSize = await EntryInfo(repository).fileLength(item.path);
               _showFileDetails(
                 repository: repository,
                 directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                 scaffoldKey: _scaffoldKey,
                 name: item.name,
                 path: item.path,
-                size: fileSize
+                size: item.size
               );
             }
             : () {

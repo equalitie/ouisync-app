@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,8 +27,9 @@ void main() {
     String loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 
     setUp(() async {
-      session = await Session.open(":memory:");
-      repository = await Repository.create(session, store: ":memory:", password: '1a2b3c');
+      final dir = await io.Directory.systemTemp.createTemp();
+      session = await Session.open(dir.path);
+      repository = await Repository.create(session, store: "${dir.path}/store.db", password: '1a2b3c');
 
       directoryRepository = new DirectoryRepository();
       directoryBloc = DirectoryBloc(directoryRepository: directoryRepository);
@@ -50,6 +52,7 @@ void main() {
         blocTest('emits [DirectoryLoadInProgress, NavigationLoadSuccess] when CreateFolder is added and createFolder succeeds',
         build: () => directoryBloc,
         act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
+        wait: Duration(seconds: 1),
         expect: () => [
           DirectoryLoadInProgress(),
           NavigationLoadSuccess(type: Navigation.content, origin: '/', destination: '/test', contents: <BaseItem>[])
@@ -65,39 +68,12 @@ void main() {
         // ]);
     });
 
-    group('RequestContent', () {
-      blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when RequestContent is added '
-      'and getFolderContents succeeds', 
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: true)),
-      expect: () => [
-        DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
-      ]);
-
-      blocTest('emits [DirectoryLoadInProgress, SyncingInProgress] with isSyncing=true, when RequestContent is added, '
-      'getFolderContents succeeds, and it is from a syncing request', 
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '/', recursive: false, withProgress: false, isSyncing: true)),
-      expect: () => [
-        SyncingInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[], isSyncing: true)
-      ]);
-      // TODO: find out what is the expected behaviour in the library for this: get content for path ' ' 
-      // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when RequestFolder is added and getFolderContents fails',
-      // build: () => directoryBloc,
-      // act: (DirectoryBloc bloc) => bloc.add(GetContent(repository: repository, path: '', recursive: false, withProgress: true)),
-      // expect: () => [
-      //   DirectoryLoadInProgress(),
-      //   DirectoryLoadFailure()
-      // ]);
-    });
-
     group('DeleteFolder', () {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFolder is added and deleteFolder succeeds', 
       setUp: () async { await Directory.create(repository, '/testFolder'); },
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
@@ -107,6 +83,7 @@ void main() {
       ' because the folder do not exist',
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryLoadFailure()
@@ -165,6 +142,7 @@ void main() {
         await file.write(0, utf8.encode(loremIpsum));
         await file.close();
       },
+      wait: Duration(seconds: 1),
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(
         DeleteFile(

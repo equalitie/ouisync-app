@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/data/directory_repository.dart';
@@ -12,8 +13,9 @@ void main() {
   late DirectoryRepository directoryRepository;
 
   setUp(() async {
-    session = await Session.open(':memory:');
-    repository = await Repository.create(session, store: ':memory:', password: 'a1b2c3');
+    final dir = await io.Directory.systemTemp.createTemp();
+    session = await Session.open(dir.path);
+    repository = await Repository.create(session, store: '${dir.path}/store.db', password: 'a1b2c3');
 
     directoryRepository = DirectoryRepository(); 
   });
@@ -32,7 +34,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -42,7 +44,7 @@ void main() {
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -50,7 +52,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -111,7 +113,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -122,7 +124,7 @@ void main() {
         name: 'file1.txt',
         extension: 'txt',
         path: file1InFolder2Path,
-        size: 0.0,
+        size: filePathContent.length,
         syncStatus: SyncStatus.idle
       )
     ];
@@ -130,7 +132,7 @@ void main() {
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[]
@@ -138,7 +140,7 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0.0,
+        size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
         items: <BaseItem>[
@@ -146,7 +148,7 @@ void main() {
             name: 'file1.txt',
             extension: 'txt',
             path: file1InFolder2Path,
-            size: 0.0,
+            size: filePathContent.length,
             syncStatus: SyncStatus.idle
           )
         ]
