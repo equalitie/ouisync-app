@@ -122,7 +122,9 @@ class Strings {
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   static const String labelSelectRepository = 'select repository';
   static const String labelRenameRepository = 'Enter the new name';
-  static const String labelEndpoint = 'Endpoint:';
+  static const String labelListenerEndpoint = 'Endpoint:';
+  static const String labelDHTv4Endpoint = 'DHT IPv4:';
+  static const String labelDHTv6Endpoint = 'DHT IPv6:';
   static const String labelAppVersion = 'App version:';
 
   static const String messageMovingEntry =

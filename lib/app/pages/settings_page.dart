@@ -40,7 +40,11 @@ class _SettingsPageState extends State<SettingsPage> {
   RepositoriesService _repositoriesSession = RepositoriesService();
 
   NamedRepo? _persistedRepository;
-  String? _localEndpoint;
+
+  String? _listenerEndpoint;
+  String? _dhtEndpointV4;
+  String? _dhtEndpointV6;
+
   bool _bittorrentDhtStatus = false;
 
   Color? _titlesColor = Colors.black;
@@ -49,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    _getLocalEndpoint();
+    _updateLocalEndpoints();
 
     _bittorrentDhtStatus = widget.dhtStatus;
     print('BitTorrent DHT status: ${widget.dhtStatus}');
@@ -59,44 +63,80 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  void _getLocalEndpoint({ConnectivityResult? connectivityResult}) async {
+  void _updateLocalEndpoints({ConnectivityResult? connectivityResult}) async {
     final connectivity =
         connectivityResult ?? await Connectivity().checkConnectivity();
+
     final isConnected = [
       ConnectivityResult.ethernet,
       ConnectivityResult.mobile,
       ConnectivityResult.wifi
     ].contains(connectivity);
 
-    _getConnectivityInfo(isConnected).then(
-        (localEndpoint) => setState(() => _localEndpoint = localEndpoint));
+    final session = widget.repositoriesCubit.session;
+
+    String? listenerEndpoint = session.listenerLocalAddress;
+    var dhtEndpointV4 = session.dhtLocalAddressV4;
+    var dhtEndpointV6 = session.dhtLocalAddressV6;
+
+    if (isConnected) {
+      print('Network unavailable');
+      listenerEndpoint = await _replaceIfUndeterminedIP(listenerEndpoint);
+      dhtEndpointV4 = await _replaceIfUndeterminedIP(dhtEndpointV4);
+      dhtEndpointV6 = await _replaceIfUndeterminedIP(dhtEndpointV6);
+    }
+
+    setState(() {
+      _listenerEndpoint = listenerEndpoint;
+      _dhtEndpointV4 = dhtEndpointV4;
+      _dhtEndpointV6 = dhtEndpointV6;
+    });
   }
 
-  Future<String> _getConnectivityInfo(bool connected) async {
-    String localEndpoint =
-        widget.repositoriesCubit.session.listenerLocalAddress;
-
-    if (!connected) {
-      print('Network unavailable');
-      return localEndpoint;
+  Future<String?> _replaceIfUndeterminedIP(String? endpoint) async {
+    if (endpoint == null) {
+      return null;
     }
 
-    if (localEndpoint.contains(Strings.emptyIPv4) ||
-        localEndpoint.contains(Strings.undeterminedIPv6)) {
-      final internalIPAddress = await RGetIp.internalIP;
+    final nullable_internal = await RGetIp.internalIP;
 
-      final indexFirstSemicolon = localEndpoint.indexOf(':');
-      final indexLastSemicolon = localEndpoint.lastIndexOf(':');
-
-      final protocol = localEndpoint.substring(0, indexFirstSemicolon);
-      final port = localEndpoint.substring(indexLastSemicolon + 1);
-
-      final newLocalEndpoint = '$protocol:$internalIPAddress:$port';
-
-      return newLocalEndpoint;
+    if (nullable_internal == null) {
+      return endpoint;
     }
 
-    return localEndpoint;
+    InternetAddress? internal = InternetAddress.tryParse(nullable_internal);
+
+    if (internal == null) {
+      return endpoint;
+    }
+
+    var replace = false;
+
+    if (endpoint.contains(Strings.emptyIPv4)) {
+      if (internal.type != InternetAddressType.IPv4) {
+        return null;
+      }
+      replace = true;
+    }
+
+    if (endpoint.contains(Strings.undeterminedIPv6)) {
+      if (internal.type != InternetAddressType.IPv6) {
+        return null;
+      }
+      replace = true;
+    }
+
+    if (replace) {
+      final indexFirstSemicolon = endpoint.indexOf(':');
+      final indexLastSemicolon = endpoint.lastIndexOf(':');
+
+      final protocol = endpoint.substring(0, indexFirstSemicolon);
+      final port = endpoint.substring(indexLastSemicolon + 1);
+
+      return '$protocol:${internal.address}:$port';
+    }
+
+    return endpoint;
   }
 
   @override
@@ -129,11 +169,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 BlocConsumer<ConnectivityCubit, ConnectivityState>(
                     builder: (context, state) {
-                  return _labeledText(Strings.labelEndpoint,
-                      _localEndpoint ?? Strings.statusUnspecified);
+                  return Column(
+                    children: [
+                      _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
+                      _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
+                      _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
+                    ]
+                    .whereType<Widget>()
+                    .toList()
+                  );
                 }, listener: (context, state) {
                   if (state is ConnectivityChanged) {
-                    _getLocalEndpoint(
+                    _updateLocalEndpoints(
                         connectivityResult: state.connectivityResult);
                   }
                 }),
@@ -144,6 +191,20 @@ class _SettingsPageState extends State<SettingsPage> {
                     Strings.labelAppVersion, info.then((info) => info.version)),
               ],
             )));
+  }
+
+  static Widget? _labeledNullableText(String key, String? value) {
+    if (value == null) {
+      return null;
+    }
+
+    return Fields.labeledText(
+      label: key,
+      text: value,
+      labelTextAlign: TextAlign.start,
+      textAlign: TextAlign.end,
+      space: Dimensions.spacingHorizontal,
+    );
   }
 
   static Widget _labeledText(String key, String value) {
