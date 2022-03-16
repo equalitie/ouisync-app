@@ -156,9 +156,24 @@ class DirectoryRepository {
   }
 
   Future<int> getFileSize(Repository repository, String path) async {
-    final file = await File.open(repository, path);
-    final length = await file.length;
+    var file = null;
+    var length = 0;
+
+    try {
+      file = await File.open(repository, path);
+    } catch (e) {
+      print("Failed to open file to get its size $path: $e");
+      return length;
+    }
+
+    try {
+      length = await file.length;
+    } catch (e) {
+      print("Failed to get file size of $path: $e");
+    }
+
     file.close();
+
     return length;
   }
 
