@@ -54,11 +54,11 @@ class Strings {
   /// TODO: do replacement string in the il10n file
   // static const String messageFolderDeleted = 'Folder deleted successfully: [name]';
   /// TODO: These need no translation, delete after implementing replacement in the il10n file
-  // static const String replacementName = '[name]';
-  // static const String replacementPath = '[path]';
-  // static const String replacementStatus = '[status]';
-  // static const String replacementEntry = '[entry]';
-  // static const String replacementAccess = '[access]';
+  static const String replacementName = '[name]';
+  static const String replacementPath = '[path]';
+  static const String replacementStatus = '[status]';
+  static const String replacementEntry = '[entry]';
+  static const String replacementAccess = '[access]';
 
   /// TODO: Not used?
   // static const String statusSync = 'SYNCED';
