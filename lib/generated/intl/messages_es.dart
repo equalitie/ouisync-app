@@ -119,7 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Localización: "),
-        "labelName": MessageLookupByLibrary.simpleMessage("Nomber: "),
+        "labelName": MessageLookupByLibrary.simpleMessage("Nombre: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("Nuevo nombre: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),
         "labelRenameRepository":
@@ -165,11 +165,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageConfirmRepositoryDeletion":
             MessageLookupByLibrary.simpleMessage("¿Borrar este repositorio?"),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
-            "Crear un nuevo <bold>directorio</bold>, o agregar un <bold>archivo</bold>, usando <icon></icon>"),
+            "Crea un nuevo <bold>directorio</bold>, o agregar un <bold>archivo</bold>, usando <icon></icon>"),
         "messageCreateFolder":
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
-            "Crear un  nuevo <bold>repositorio</bold>, o conectarse a uno de un amigo usando un <bold>token de repositorio</bold>"),
+            "Crea un  nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
         "messageCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Creando el token para compartir..."),
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -216,7 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Inicializando..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
-            "Clic en el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos"),
+            "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos"),
         "messageLoadingContents": MessageLookupByLibrary.simpleMessage(
             "Cargando los contenidos del directorio…"),
         "messageLoadingDefault":
