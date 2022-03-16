@@ -51,16 +51,6 @@ class S {
   }
 
   /// `OuiSync`
-  String get appTitle {
-    return Intl.message(
-      'OuiSync',
-      name: 'appTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `OuiSync`
   String get titleAppTitle {
     return Intl.message(
       'OuiSync',
@@ -200,10 +190,10 @@ class S {
     );
   }
 
-  /// `Delete not empty folder`
+  /// `Delete non-empty folder`
   String get titleDeleteNotEmptyFolder {
     return Intl.message(
-      'Delete not empty folder',
+      'Delete non-empty folder',
       name: 'titleDeleteNotEmptyFolder',
       desc: '',
       args: [],
@@ -380,30 +370,30 @@ class S {
     );
   }
 
-  /// `BitTorrent DHT`
+  /// `BitTorrent DHT: `
   String get labelBitTorrentDHT {
     return Intl.message(
-      'BitTorrent DHT',
+      'BitTorrent DHT: ',
       name: 'labelBitTorrentDHT',
       desc: '',
       args: [],
     );
   }
 
-  /// `select repository`
+  /// `Select repository `
   String get labelSelectRepository {
     return Intl.message(
-      'select repository',
+      'Select repository ',
       name: 'labelSelectRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `Enter the new name`
+  /// `Enter the new name: `
   String get labelRenameRepository {
     return Intl.message(
-      'Enter the new name',
+      'Enter the new name: ',
       name: 'labelRenameRepository',
       desc: '',
       args: [],
@@ -450,40 +440,40 @@ class S {
     );
   }
 
-  /// `Something went wrong. Please try again`
+  /// `Something went wrong. Please try again.`
   String get messageErrorDefault {
     return Intl.message(
-      'Something went wrong. Please try again',
+      'Something went wrong. Please try again.',
       name: 'messageErrorDefault',
       desc: '',
       args: [],
     );
   }
 
-  /// `Failed`
+  /// `Failed.`
   String get messageErrorDefaultShort {
     return Intl.message(
-      'Failed',
+      'Failed.',
       name: 'messageErrorDefaultShort',
       desc: '',
       args: [],
     );
   }
 
-  /// `We couldn’t load this folder contents. Please try again`
+  /// `We couldn’t load this folder's contents. Please try again.`
   String get messageErrorLoadingContents {
     return Intl.message(
-      'We couldn’t load this folder contents. Please try again',
+      'We couldn’t load this folder\'s contents. Please try again.',
       name: 'messageErrorLoadingContents',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter a valid name (unique, no spaces, …)`
+  /// `Please enter a valid name (unique, no spaces)`
   String get messageErrorFormValidatorNameDefault {
     return Intl.message(
-      'Please enter a valid name (unique, no spaces, …)',
+      'Please enter a valid name (unique, no spaces)',
       name: 'messageErrorFormValidatorNameDefault',
       desc: '',
       args: [],
@@ -500,10 +490,10 @@ class S {
     );
   }
 
-  /// `The current folder is missing, navigating  to its parent: {path}`
+  /// `The current folder is missing, navigating to its parent: {path}`
   String messageErrorCurrentPathMissing(Object path) {
     return Intl.message(
-      'The current folder is missing, navigating  to its parent: $path',
+      'The current folder is missing, navigating to its parent: $path',
       name: 'messageErrorCurrentPathMissing',
       desc: '',
       args: [path],
@@ -660,50 +650,50 @@ class S {
     );
   }
 
-  /// `This repository is <bold>read-only</bold>`
+  /// `This repository is <bold>read-only</bold>.`
   String get messageReadOnlyContents {
     return Intl.message(
-      'This repository is <bold>read-only</bold>',
+      'This repository is <bold>read-only</bold>.',
       name: 'messageReadOnlyContents',
       desc: '',
       args: [],
     );
   }
 
-  /// `This <bold>repository</bold> is locked`
+  /// `This <bold>repository</bold> is locked.`
   String get messageLockedRepository {
     return Intl.message(
-      'This <bold>repository</bold> is locked',
+      'This <bold>repository</bold> is locked.',
       name: 'messageLockedRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `This repository is a blind replica`
+  /// `This repository is a blind replica.`
   String get messageBlindRepository {
     return Intl.message(
-      'This repository is a blind replica',
+      'This repository is a blind replica.',
       name: 'messageBlindRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `The provided <bold>password</bold> do not grant you access to its contents`
+  /// `The provided <bold>password</bold> does not grant you access to view the content of this repository.`
   String get messageBlindRepositoryContent {
     return Intl.message(
-      'The provided <bold>password</bold> do not grant you access to its contents',
+      'The provided <bold>password</bold> does not grant you access to view the content of this repository.',
       name: 'messageBlindRepositoryContent',
       desc: '',
       args: [],
     );
   }
 
-  /// `Tap on the <bold>Unlock</bold> button and input the password to access its contents`
+  /// `Tap on the <bold>Unlock</bold> button and input the password to access content in this repository.`
   String get messageInputPasswordToUnlock {
     return Intl.message(
-      'Tap on the <bold>Unlock</bold> button and input the password to access its contents',
+      'Tap on the <bold>Unlock</bold> button and input the password to access content in this repository.',
       name: 'messageInputPasswordToUnlock',
       desc: '',
       args: [],
@@ -740,10 +730,10 @@ class S {
     );
   }
 
-  /// `This function is not available when moving an entry`
+  /// `This function is not available when moving an entry.`
   String get messageMovingEntry {
     return Intl.message(
-      'This function is not available when moving an entry',
+      'This function is not available when moving an entry.',
       name: 'messageMovingEntry',
       desc: '',
       args: [],
@@ -790,10 +780,10 @@ class S {
     );
   }
 
-  /// `Suggested: {name}\n(tap here for using this name)`
+  /// `Suggested: {name}\n(tap here to use this name)`
   String messageRepositorySuggestedName(Object name) {
     return Intl.message(
-      'Suggested: $name\n(tap here for using this name)',
+      'Suggested: $name\n(tap here to use this name)',
       name: 'messageRepositorySuggestedName',
       desc: '',
       args: [name],
@@ -810,50 +800,50 @@ class S {
     );
   }
 
-  /// `Please enter a password`
+  /// `Please enter a password.`
   String get messageErrorRepositoryPasswordValidation {
     return Intl.message(
-      'Please enter a password',
+      'Please enter a password.',
       name: 'messageErrorRepositoryPasswordValidation',
       desc: '',
       args: [],
     );
   }
 
-  /// `The password and retyped password do not match`
+  /// `The passwords do not match.`
   String get messageErrorRetypePassword {
     return Intl.message(
-      'The password and retyped password do not match',
+      'The passwords do not match.',
       name: 'messageErrorRetypePassword',
       desc: '',
       args: [],
     );
   }
 
-  /// `The token seems to be invalid`
+  /// `This token is invalid.`
   String get messageErrorTokenInvalid {
     return Intl.message(
-      'The token seems to be invalid',
+      'This token is invalid.',
       name: 'messageErrorTokenInvalid',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter a valid token`
+  /// `Please enter a valid token.`
   String get messageErrorTokenValidator {
     return Intl.message(
-      'Please enter a valid token',
+      'Please enter a valid token.',
       name: 'messageErrorTokenValidator',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter a token`
+  /// `Please enter a token.`
   String get messageErrorTokenEmpty {
     return Intl.message(
-      'Please enter a token',
+      'Please enter a token.',
       name: 'messageErrorTokenEmpty',
       desc: '',
       args: [],
@@ -920,20 +910,20 @@ class S {
     );
   }
 
-  /// `Error while creating the share token`
+  /// `Error creating the share token.`
   String get messageErrorCreatingToken {
     return Intl.message(
-      'Error while creating the share token',
+      'Error creating the share token.',
       name: 'messageErrorCreatingToken',
       desc: '',
       args: [],
     );
   }
 
-  /// `Repository token copied to the clipboard`
+  /// `Repository token copied to the clipboard.`
   String get messageTokenCopiedToClipboard {
     return Intl.message(
-      'Repository token copied to the clipboard',
+      'Repository token copied to the clipboard.',
       name: 'messageTokenCopiedToClipboard',
       desc: '',
       args: [],
@@ -970,10 +960,10 @@ class S {
     );
   }
 
-  /// `There is no media present`
+  /// `There is no media present.`
   String get mesageNoMediaPresent {
     return Intl.message(
-      'There is no media present',
+      'There is no media present.',
       name: 'mesageNoMediaPresent',
       desc: '',
       args: [],
@@ -1010,10 +1000,10 @@ class S {
     );
   }
 
-  /// `{entry} with the same name already exist in this location`
+  /// `{entry} already exists.`
   String messageEntryAlreadyExist(Object entry) {
     return Intl.message(
-      '$entry with the same name already exist in this location',
+      '$entry already exists.',
       name: 'messageEntryAlreadyExist',
       desc: '',
       args: [entry],
@@ -1040,10 +1030,10 @@ class S {
     );
   }
 
-  /// `Press back again to exit`
+  /// `Press back again to exit.`
   String get messageExitOuiSync {
     return Intl.message(
-      'Press back again to exit',
+      'Press back again to exit.',
       name: 'messageExitOuiSync',
       desc: '',
       args: [],
@@ -1220,10 +1210,10 @@ class S {
     );
   }
 
-  /// `Access mode`
+  /// `Access Mode`
   String get iconAccessMode {
     return Intl.message(
-      'Access mode',
+      'Access Mode',
       name: 'iconAccessMode',
       desc: '',
       args: [],
