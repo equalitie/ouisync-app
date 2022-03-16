@@ -1,7 +1,3 @@
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-
-import 'utils.dart';
-
 class Constants{
   Constants._();
 
@@ -21,10 +17,4 @@ class Constants{
   // Hero tags
 
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
-
-  static const Map<AccessMode, String> accessModeDescriptions = const {
-    AccessMode.blind: Strings.messageAccessModeBlind,
-    AccessMode.read: Strings.messageAccessModeRead,
-    AccessMode.write: Strings.messageAccessModeWrite
-  };
 }
