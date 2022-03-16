@@ -78,7 +78,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: S.of(context).appTitle,
+      title: S.of(context).titleAppTitle,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
