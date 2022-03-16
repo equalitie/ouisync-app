@@ -6,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -264,7 +265,7 @@ class _MainPageState extends State<MainPage>
         if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
           lastExitAttempt = now;
           Fluttertoast.showToast(
-            msg: Strings.messageExitOuiSync,
+            msg: S.current.messageExitOuiSync,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER);
 
@@ -407,7 +408,7 @@ class _MainPageState extends State<MainPage>
       builder: (context, state) {
         if (state is DirectoryInitial) {
           return Center(
-            child: Fields.inPageSecondaryMessage(Strings.messageLoadingContents)
+            child: Fields.inPageSecondaryMessage(S.current.messageLoadingContents)
           );
         }
 
@@ -448,7 +449,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadFailure) {
-          if (state.error == Strings.errorEntryNotFound) {
+          if (state.error == S.current.messageErrorEntryNotFound) {
             final parent = extractParentFromPath(_currentFolder);
             return _contentsList(
               repository: _repositoriesService.current!.repo,
@@ -457,7 +458,7 @@ class _MainPageState extends State<MainPage>
           }
 
           return _errorState(
-            message: Strings.messageErrorState,
+            message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _repositoriesService.current!.repo,
               path: _currentFolder
@@ -467,7 +468,7 @@ class _MainPageState extends State<MainPage>
 
         if (state is NavigationLoadFailure) {
           return _errorState(
-            message: Strings.messageErrorState,
+            message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _repositoriesService.current!.repo,
               path: _currentFolder
@@ -476,7 +477,7 @@ class _MainPageState extends State<MainPage>
         }
 
         return _errorState(
-          message: Strings.messageErrorLoadingContents,
+          message: S.current.messageErrorLoadingContents,
           actionReload: () => refreshCurrent(
             repository: _repositoriesService.current!.repo,
             path: _currentFolder
@@ -488,7 +489,7 @@ class _MainPageState extends State<MainPage>
           final destination = extractParentFromPath(_currentFolder);
           final parent = extractParentFromPath(destination);
 
-          final errorMessage = Strings.messageErrorCurrentPathMissing
+          final errorMessage = S.current.messageErrorCurrentPathMissing.toString()
           .replaceAll(Strings.replacementPath, destination);
 
           print(errorMessage);
@@ -538,7 +539,7 @@ class _MainPageState extends State<MainPage>
                 ),
                 actions: [
                   TextButton(
-                    child: const Text(Strings.actionCloseCapital),
+                    child: Text(S.current.actionCloseCapital),
                     onPressed: () => 
                     Navigator.of(context).pop(),
                   )
@@ -552,8 +553,8 @@ class _MainPageState extends State<MainPage>
           print('Error creating new file ${state.filePath}: ${state.error}');
 
           Fluttertoast.showToast(msg:
-            Strings
-            .messageNewFileError
+            S.current
+            .messageNewFileError.toString()
             .replaceAll(
               Strings.replacementName,
               state.filePath
@@ -563,8 +564,8 @@ class _MainPageState extends State<MainPage>
 
         if (state is WriteToFileDone) {
           Fluttertoast.showToast(msg:
-            Strings
-            .messageWritingFileDone
+            S.current
+            .messageWritingFileDone.toString()
             .replaceAll(
               Strings.replacementName,
               state.filePath
@@ -576,8 +577,8 @@ class _MainPageState extends State<MainPage>
           print('Writing to file ${state.fileName} failed (${state.filePath}): ${state.error}');
 
           Fluttertoast.showToast(msg:
-            Strings
-            .messageWritingFileError
+            S.current
+            .messageWritingFileError.toString()
             .replaceAll(
               Strings.replacementName,
               state.filePath
@@ -668,8 +669,8 @@ class _MainPageState extends State<MainPage>
               if (_persistentBottomSheetController != null) {
                 await Dialogs.simpleAlertDialog(
                   context: context,
-                  title: Strings.titleMovingEntry,
-                  message: Strings.messageMovingEntry
+                  title: S.current.titleMovingEntry,
+                  message: S.current.messageMovingEntry
                 );
                 return;
               }
@@ -709,8 +710,8 @@ class _MainPageState extends State<MainPage>
                   await Dialogs
                   .simpleAlertDialog(
                     context: context,
-                    title: Strings.titleMovingEntry,
-                    message: Strings.messageMovingEntry
+                    title: S.current.titleMovingEntry,
+                    message: S.current.messageMovingEntry
                   );
 
                   return;
@@ -738,12 +739,12 @@ class _MainPageState extends State<MainPage>
     }) { 
       final availableActions = repository.accessMode == AccessMode.write
       ? {
-        Strings.actionPreviewFile: data,
-        Strings.actionShareFile: data,
-        Strings.actionDeleteFile: data 
+        S.current.actionPreviewFile: data,
+        S.current.actionShareFile: data,
+        S.current.actionDeleteFile: data 
       } : { 
-        Strings.actionPreviewFile: data,
-        Strings.actionShareFile: data, 
+        S.current.actionPreviewFile: data,
+        S.current.actionShareFile: data, 
       };
 
       return Dialogs
@@ -898,20 +899,20 @@ class _MainPageState extends State<MainPage>
 
   void saveSharedMedia() async {
     if (!_repositoriesService.hasCurrent) {
-      Fluttertoast.showToast(msg: Strings.messageNoRepo);
+      Fluttertoast.showToast(msg: S.current.messageNoRepo);
       return;
     }
 
     SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
     if (mediaInfo == null) {
-      Fluttertoast.showToast(msg: Strings.mesageNoMediaPresent);
+      Fluttertoast.showToast(msg: S.current.mesageNoMediaPresent);
       return;
     }
 
     String? accessModeMessage = _repositoriesService.current!.repo.accessMode == AccessMode.blind
-    ? Strings.messageAddingFileToLockedRepository
+    ? S.current.messageAddingFileToLockedRepository
     : _repositoriesService.current!.repo.accessMode == AccessMode.read
-    ? Strings.messageAddingFileToReadRepository
+    ? S.current.messageAddingFileToReadRepository
     : null;
 
     if (accessModeMessage != null) {
@@ -920,7 +921,7 @@ class _MainPageState extends State<MainPage>
         barrierDismissible: false, // user must tap button!
         builder: (context) {
           return AlertDialog(
-            title: Text(Strings.titleAddShareFilePage),
+            title: Text(S.current.titleAddFile),
             content: SingleChildScrollView(
               child: ListBody(children: [
                 Text(accessModeMessage)
@@ -928,7 +929,7 @@ class _MainPageState extends State<MainPage>
             ),
             actions: [
               TextButton(
-                child: const Text(Strings.actionCloseCapital),
+                child: Text(S.current.actionCloseCapital),
                 onPressed: () => 
                 Navigator.of(context).pop(),
               )
@@ -993,7 +994,7 @@ class _MainPageState extends State<MainPage>
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.titleCreateRepository,
+          title: S.current.titleCreateRepository,
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
@@ -1012,7 +1013,7 @@ class _MainPageState extends State<MainPage>
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.titleAddRepository,
+          title: S.current.titleAddRepository,
           body: AddRepositoryWithToken(
             context: context,
             cubit: cubit,
@@ -1035,7 +1036,7 @@ class _MainPageState extends State<MainPage>
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.messageUnlockRepository,
+          title: S.current.messageUnlockRepository,
           body: UnlockRepository(
             context: context,
             formKey: formKey,
@@ -1070,7 +1071,7 @@ class _MainPageState extends State<MainPage>
             onRepositorySelect: switchRepository,
             onShareRepository: shareRepository,
             connectivitySubscription: _connectivitySubscription,
-            title: Strings.titleSettings,
+            title: S.current.titleSettings,
             dhtStatus: dhtStatus,
           )
         );

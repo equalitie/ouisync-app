@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 
 class ErrorState extends StatelessWidget {
   const ErrorState({
@@ -23,7 +24,7 @@ class ErrorState extends StatelessWidget {
             Align(
               alignment: Alignment.center,
               child: Fields.inPageMainMessage(
-                Strings.messageOhOh,
+                S.current.messageErrorDefault,
                 color: Colors.red,
                 tags: {
                   Constants.inlineTextColor: InlineTextStyles.color(Colors.black),
@@ -47,7 +48,7 @@ class ErrorState extends StatelessWidget {
             Dimensions.spacingVerticalDouble,
             Fields.inPageButton(
               onPressed: this.onReload,
-              text: Strings.actionReloadContents,
+              text: S.current.actionReloadContents,
               autofocus: true
             )
           ],

@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -27,17 +28,17 @@ class DirectoryActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.bottomSheetHandle(context),
-        Fields.bottomSheetTitle(Strings.titleFolderActions),
+        Fields.bottomSheetTitle(S.current.titleFolderActions),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildAction(
-              name: Strings.actionNewFolder,
+              name: S.current.actionNewFolder,
               icon: Icons.folder_outlined,
               action: () => createFolderDialog(context, bloc, repository, parent)
             ),
             _buildAction(
-              name: Strings.actionNewFile,
+              name: S.current.actionNewFile,
               icon: Icons.insert_drive_file_outlined,
               action: () async => await addFile(context, bloc, repository, parent)
             )
@@ -77,7 +78,7 @@ class DirectoryActions extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.titleCreateFolder,
+          title: S.current.titleCreateFolder,
           body: FolderCreation(
             context: context,
             bloc: bloc,

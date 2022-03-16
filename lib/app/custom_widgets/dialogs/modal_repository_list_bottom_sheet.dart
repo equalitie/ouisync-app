@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
@@ -37,16 +38,16 @@ class RepositoryList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Fields.bottomSheetHandle(context),
-                Fields.bottomSheetTitle(Strings.titleRepositoriesList),
+                Fields.bottomSheetTitle(S.current.titleRepositoriesList),
                 _buildRepositoryList(snapshot.data as List<String>, current),
                 Dimensions.spacingActionsVertical,
                 Fields.actionText(
-                  Strings.iconCreateRepository,
+                  S.current.iconCreateRepository,
                   onTap: () => createRepoDialog(this.cubit),
                   icon: Icons.add_circle_outline_rounded,
                 ),
                 Fields.actionText(
-                  Strings.iconAddRepositoryWithToken,
+                  S.current.iconAddRepositoryWithToken,
                   onTap: () => addRepoWithTokenDialog(this.cubit),
                   icon: Icons.insert_link_rounded,
                 ),
@@ -55,7 +56,7 @@ class RepositoryList extends StatelessWidget {
           ); 
         }
 
-        return Container(child: Text(Strings.messageError),);
+        return Container(child: Text(S.current.messageError),);
       }
     );
   }
@@ -117,7 +118,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.titleCreateRepository,
+          title: S.current.titleCreateRepository,
           body: RepositoryCreation(
             context: context,
             cubit: cubit,
@@ -141,7 +142,7 @@ class RepositoryList extends StatelessWidget {
         final formKey = GlobalKey<FormState>();
 
         return ActionsDialog(
-          title: Strings.titleAddRepository,
+          title: S.current.titleAddRepository,
           body: AddRepositoryWithToken(
             context: context,
             cubit: cubit,

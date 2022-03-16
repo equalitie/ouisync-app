@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -24,7 +25,13 @@ class _ShareRepositoryState extends State<ShareRepository> {
     ValueNotifier<AccessMode>(AccessMode.blind);
 
   final ValueNotifier<String> _shareToken =
-    ValueNotifier<String>(Strings.messageError);
+    ValueNotifier<String>(S.current.messageError);
+
+  final accessModeDescriptions = {
+    AccessMode.blind: S.current.messageBlindReplicaExplanation,
+    AccessMode.read: S.current.messageReadReplicaExplanation,
+    AccessMode.write: S.current.messageWriteReplicaExplanation
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +44,8 @@ class _ShareRepositoryState extends State<ShareRepository> {
       ),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
-          _shareToken.value = Strings.messageAck;
-          return Text(Strings.messageErrorCreatingToken);
+          _shareToken.value = S.current.messageAck;
+          return Text(S.current.messageErrorCreatingToken);
         }
 
         if (snapshot.hasData) {
@@ -53,12 +60,12 @@ class _ShareRepositoryState extends State<ShareRepository> {
               children: [
                 Fields.bottomSheetHandle(context),
                 Fields.bottomSheetTitle(
-                  Strings.titleShareRepository
+                  S.current.titleShareRepository.toString()
                   .replaceAll(Strings.replacementName, widget.repositoryName)
                 ),
                 Fields.iconLabel(
                   icon: Icons.lock_rounded,
-                  text: Strings.iconAccessMode,
+                  text: S.current.iconAccessMode,
                 ),
                 _buildAccessModeDropdown(),
                 Dimensions.spacingVertical,
@@ -66,7 +73,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
                 Dimensions.spacingVertical,
                 Fields.iconLabel(
                   icon: Icons.supervisor_account_rounded,
-                  text: Strings.iconShareTokenWithPeer,
+                  text: S.current.iconShareTokenWithPeer,
                 ),
                 _buildShareBox()
               ]
@@ -74,7 +81,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
           );
         }
 
-        _shareToken.value = Strings.messageCreatingToken;
+        _shareToken.value = S.current.messageCreatingToken;
 
         return Container(
           height: Dimensions.sizeCircularProgressIndicatorAverage.height,
@@ -183,7 +190,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
           const Icon(Icons.content_copy_rounded),
           onPressed: () async {
             await copyStringToClipboard(_shareToken.value);
-            showToast(Strings.messageTokenCopiedToClipboard);
+            showToast(S.current.messageTokenCopiedToClipboard);
           },
         ),
         Fields.actionIcon(
@@ -195,6 +202,6 @@ class _ShareRepositoryState extends State<ShareRepository> {
   );
 
   String _tokenDescription(AccessMode accessMode) {
-    return Constants.accessModeDescriptions.values.elementAt(accessMode.index);
+    return accessModeDescriptions.values.elementAt(accessMode.index);
   }
 }

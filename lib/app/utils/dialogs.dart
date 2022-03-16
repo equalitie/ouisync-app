@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
@@ -32,7 +33,7 @@ abstract class Dialogs {
   }
 
   static showLoadingDialog(BuildContext context, {
-    Widget widget = const Text(Strings.mesageLoading) 
+    Widget? widget
   }) {
     final alert = AlertDialog(
       content: new Row(
@@ -40,7 +41,7 @@ abstract class Dialogs {
           CircularProgressIndicator(),
           Container(
             margin: EdgeInsets.only(left: 7),
-            child:widget
+            child:widget ?? Text(S.current.messageLoadingDefault)
             ),
         ],
       ),
@@ -83,7 +84,7 @@ abstract class Dialogs {
   }) {
     if (actions == null) {
       actions = [TextButton(
-        child: const Text(Strings.actionCloseCapital),
+        child: Text(S.current.actionCloseCapital),
         onPressed: () => Navigator.of(context).pop(false),
       )];
     }  
@@ -144,10 +145,8 @@ abstract class Dialogs {
     },
     onSelected: (value) {
       final data = (value as MapEntry<String, BaseItem>).value;
-      switch (value.key) {
-        case Strings.actionDeleteFile:
-          _deleteFileWithConfirmation(context, repository, bloc, data.path);
-          break;
+      if (value.key == S.current.actionDeleteFile) {
+        _deleteFileWithConfirmation(context, repository, bloc, data.path);
       }
     }
   );
@@ -176,7 +175,7 @@ abstract class Dialogs {
     String fileName,
     String parent
   ) => AlertDialog(
-    title: const Text(Strings.titleDeleteFile),
+    title: Text(S.current.titleDeleteFile),
     content: SingleChildScrollView(
       child: ListBody(
         children: <Widget>[
@@ -208,13 +207,13 @@ abstract class Dialogs {
           const SizedBox(
             height: 30.0,
           ),
-          const Text(Strings.messageConfirmFileDeletion),
+          Text(S.current.messageConfirmFileDeletion),
         ],
       ),
     ),
     actions: <Widget>[
       TextButton(
-        child: const Text(Strings.actionDelete),
+        child: Text(S.current.actionDelete),
         onPressed: () {
           bloc
           .add(
@@ -228,8 +227,8 @@ abstract class Dialogs {
           Navigator.of(context).pop(fileName);
 
           Fluttertoast.showToast(msg:
-            Strings
-            .messageFileDeleted
+            S.current
+            .messageFileDeleted.toString()
             .replaceAll(
               Strings.replacementName,
               fileName
@@ -238,7 +237,7 @@ abstract class Dialogs {
         },
       ),
       TextButton(
-        child: const Text(Strings.actionCancel),
+        child: Text(S.current.actionCancel),
         onPressed: () {
           Navigator.of(context).pop();
         },

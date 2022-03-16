@@ -1,4 +1,5 @@
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
@@ -19,7 +20,7 @@ class EntryInfo {
       final type = await _repository.type(path);
       final typeNameForMessage = _getTypeNameForMessage(type);
       
-      showToast(Strings.messageEntryAlreadyExist.replaceAll(Strings.replacementEntry, typeNameForMessage), length: Toast.LENGTH_LONG);
+      showToast(S.current.messageEntryAlreadyExist.toString().replaceAll(Strings.replacementEntry, typeNameForMessage), length: Toast.LENGTH_LONG);
     }
 
     return exist;
@@ -28,18 +29,18 @@ class EntryInfo {
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
       print('Entry type was null');
-      return Strings.messageEntryTypeDefault;
+      return S.current.messageEntryTypeDefault;
     }
 
     return type == EntryType.directory
-    ? Strings.messageEntryTypeFolder
-    : Strings.messageEntryTypeFile;
+    ? S.current.messageEntryTypeFolder
+    : S.current.messageEntryTypeFile;
   }
 
   String typeName(EntryType type) {
     return type == EntryType.directory
-    ? Strings.entryTypeFolder
-    : Strings.entryTypeFile;
+    ? S.current.typeFolder
+    : S.current.typeFile;
   } 
 
   Future<int> fileLength(String path) async {
@@ -70,7 +71,7 @@ class EntryInfo {
 
     final Directory directory = await Directory.open(_repository, path);
     if (directory.isNotEmpty) {
-      String message = Strings.messageErrorPathNotEmpty
+      String message = S.current.messageErrorPathNotEmpty.toString()
       .replaceAll(
         Strings.replacementPath,
         path

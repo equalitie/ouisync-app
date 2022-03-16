@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 
 import '../../utils/utils.dart';
 
@@ -23,7 +24,7 @@ class LockedRepositoryState extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: Fields.inPageMainMessage(
-              Strings.messageLockedRepository,
+              S.current.messageLockedRepository,
               tags: {
                 Constants.inlineTextColor: InlineTextStyles.color(Colors.black),
                 Constants.inlineTextSize: InlineTextStyles.size(),
@@ -35,7 +36,7 @@ class LockedRepositoryState extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: Fields.inPageSecondaryMessage(
-              Strings.messageInputPasswordToUnlock,
+              S.current.messageInputPasswordToUnlock,
               tags: {
                 Constants.inlineTextSize: InlineTextStyles.size(),
                 Constants.inlineTextBold: InlineTextStyles.bold,
@@ -45,7 +46,7 @@ class LockedRepositoryState extends StatelessWidget {
           SizedBox(height: 20.0),
           Fields.inPageButton(
             onPressed: () { onUnlockPressed!.call(this.repositoryName); },
-            text: Strings.actionUnlock,
+            text: S.current.actionUnlock,
             autofocus: true
           )
         ],

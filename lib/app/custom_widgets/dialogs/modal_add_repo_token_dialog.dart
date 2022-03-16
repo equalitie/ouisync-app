@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../cubit/cubits.dart';
@@ -83,8 +84,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         Fields.formTextField(
           context: context,
           textEditingController: _tokenController,
-          label: Strings.labelRepositoryToken,
-          hint: Strings.messageRepositoryToken,
+          label: S.current.labelRepositoryToken,
+          hint: S.current.messageRepositoryToken,
           onSaved: (value) {},
           validator: _repositoryTokenValidator,
           autofocus: true,
@@ -97,7 +98,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             Visibility(
               visible: _showAccessModeMessage,
               child: Fields.constrainedText(
-                Strings.messageRepositoryAccessMode
+                S.current.messageRepositoryAccessMode.toString()
                 .replaceAll(Strings.replacementAccess, message as String? ?? '?'),
                 flex: 0,
                 fontSize: Dimensions.fontSmall,
@@ -109,8 +110,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
         Fields.formTextField(
           context: context,
           textEditingController: _nameController,
-          label: Strings.labelName,
-          hint: Strings.messageRepositoryName,
+          label: S.current.labelName,
+          hint: S.current.messageRepositoryName,
           onSaved: (_) {},
           validator: formNameValidator,
           autovalidateMode: AutovalidateMode.disabled
@@ -123,7 +124,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.constrainedText(
-                  Strings.messageRepositorySuggestedName
+                  S.current.messageRepositorySuggestedName.toString()
                     .replaceAll(Strings.replacementName, _repoName ?? ''),
                   flex: 1,
                   fontSize: Dimensions.fontSmall,
@@ -140,8 +141,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             context: context,
             textEditingController: _passwordController,
             obscureText: true,
-            label: Strings.labelPassword,
-            hint: Strings.messageRepositoryPassword,
+            label: S.current.labelPassword,
+            hint: S.current.messageRepositoryPassword,
             onSaved: (_) {},
             validator: (
               password,
@@ -156,8 +157,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
             context: context,
             textEditingController: _retypedPasswordController,
             obscureText: true,
-            label: Strings.labelRetypePassword,
-            hint: Strings.messageRepositoryPassword,
+            label: S.current.labelRetypePassword,
+            hint: S.current.messageRepositoryPassword,
             onSaved: (_) {},
             validator: (
               retypedPassword,
@@ -205,7 +206,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       _shareToken = ShareToken(this.widget.cubit.session, token);
     } catch (e) {
       print('Error extracting the repository token:\n${e.toString()}');                
-      showToast(Strings.messageErrorTokenInvalid);
+      showToast(S.current.messageErrorTokenInvalid);
 
       cleanupFormOnEmptyToken();
     }
@@ -243,9 +244,9 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       _updateNameController(null);
   }
 
-  String? _repositoryTokenValidator(String? value, { String error = Strings.messageErrorTokenValidator}) {
+  String? _repositoryTokenValidator(String? value, {String? error}) {
     if ((value ?? '').isEmpty) {
-      return Strings.messageErrorTokenEmpty;
+      return S.current.messageErrorTokenEmpty;
     }
 
     try {
@@ -257,7 +258,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
       _suggestedName = '';
       _accessModeNotifier.value = '';
 
-      return error;
+      return error ?? S.current.messageErrorTokenValidator;
     }
 
     return null;
@@ -282,12 +283,12 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
 
         _onSaved(widget.cubit, newRepositoryName, password);
       },
-      child: Text(Strings.actionCreate)
+      child: Text(S.current.actionCreate)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ),
   ];
 }

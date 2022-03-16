@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 
 import '../../utils/utils.dart';
 
@@ -40,8 +41,8 @@ class UnlockRepository extends StatelessWidget {
           context: context,
           textEditingController: _passwordController,
           obscureText: true,
-          label: Strings.labelTypePassword,
-          hint: Strings.messageRepositoryPassword,
+          label: S.current.labelTypePassword,
+          hint: S.current.messageRepositoryPassword,
           onSaved: _returnPassword,
           validator: (
             password,
@@ -67,12 +68,12 @@ class UnlockRepository extends StatelessWidget {
           this.formKey.currentState!.save();
         }
       },
-      child: Text(Strings.actionUnlock)
+      child: Text(S.current.actionUnlock)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ),
   ];
 }

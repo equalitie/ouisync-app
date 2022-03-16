@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../pages/pages.dart';
@@ -35,7 +36,7 @@ class SaveSharedMedia extends StatelessWidget {
         children: [
           Fields.iconLabel(
             icon: Icons.save_outlined,
-            text: Strings.titleAddShareFilePage,
+            text: S.current.titleAddFile,
           ),
           Fields.constrainedText(
             getPathFromFileName(this.sharedMedia.first.path),
@@ -56,7 +57,7 @@ class SaveSharedMedia extends StatelessWidget {
 
     actions.addAll([ElevatedButton(
       onPressed: () => onSaveFile.call(),
-      child: Text(Strings.actionSave)
+      child: Text(S.current.actionSave)
     ),
     SizedBox(width: 20.0,),]);
     actions.add(OutlinedButton(
@@ -64,7 +65,7 @@ class SaveSharedMedia extends StatelessWidget {
         onBottomSheetOpen.call(null, '');
         Navigator.of(context).pop('');
       },
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ));
 
     return actions;

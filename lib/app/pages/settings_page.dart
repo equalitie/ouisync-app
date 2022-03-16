@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -119,20 +120,20 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 _buildRepositoriesSection(),
                 _divider(),
-                Fields.idLabel(Strings.titleNetwork,
+                Fields.idLabel(S.current.titleNetwork,
                     fontSize: Dimensions.fontAverage,
                     fontWeight: FontWeight.normal,
                     color: _titlesColor!),
                 LabeledSwitch(
-                  label: Strings.labelBitTorrentDHT,
+                  label: S.current.labelBitTorrentDHT,
                   padding: const EdgeInsets.all(0.0),
                   value: _bittorrentDhtStatus,
                   onChanged: updateDhtSetting,
                 ),
                 BlocConsumer<ConnectivityCubit, ConnectivityState>(
                     builder: (context, state) {
-                  return _labeledText(Strings.labelEndpoint,
-                      _localEndpoint ?? Strings.statusUnspecified);
+                  return _labeledText(S.current.labelEndpoint,
+                      _localEndpoint ?? S.current.statusUnspecified);
                 }, listener: (context, state) {
                   if (state is ConnectivityChanged) {
                     _getLocalEndpoint(
@@ -143,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildLogsSection(),
                 _divider(),
                 _futureLabeledText(
-                    Strings.labelAppVersion, info.then((info) => info.version)),
+                    S.current.labelAppVersion, info.then((info) => info.version)),
               ],
             )));
   }
@@ -179,7 +180,7 @@ class _SettingsPageState extends State<SettingsPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.idLabel(Strings.titleRepository,
+          Fields.idLabel(S.current.titleRepository,
               fontSize: Dimensions.fontAverage,
               fontWeight: FontWeight.normal,
               color: _titlesColor!),
@@ -225,7 +226,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Fields.idLabel(Strings.labelSelectRepository,
+                          Fields.idLabel(S.current.labelSelectRepository,
                               textAlign: TextAlign.start,
                               fontWeight: FontWeight.normal,
                               color: Colors.grey.shade600),
@@ -255,7 +256,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Expanded(
-                child: Fields.actionText(Strings.actionRename,
+                child: Fields.actionText(S.current.actionRename,
                     textFontSize: Dimensions.fontAverage,
                     icon: Icons.edit,
                     iconSize: Dimensions.sizeIconSmall,
@@ -271,7 +272,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         final formKey = GlobalKey<FormState>();
 
                         return ActionsDialog(
-                          title: Strings.messageRenameRepository,
+                          title: S.current.messageRenameRepository,
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
@@ -292,7 +293,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 }),
               ),
               Expanded(
-                  child: Fields.actionText(Strings.actionShare,
+                  child: Fields.actionText(S.current.actionShare,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
@@ -304,7 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 widget.onShareRepository.call();
               })),
               Expanded(
-                  child: Fields.actionText(Strings.actionDelete,
+                  child: Fields.actionText(S.current.actionDelete,
                       textFontSize: Dimensions.fontAverage,
                       textColor: Colors.red,
                       icon: Icons.delete,
@@ -320,20 +321,20 @@ class _SettingsPageState extends State<SettingsPage> {
                     barrierDismissible: false, // user must tap button!
                     builder: (context) {
                       return AlertDialog(
-                        title: Text(Strings.titleDeleteRepository),
+                        title: Text(S.current.titleDeleteRepository),
                         content: SingleChildScrollView(
                           child: ListBody(children: [
-                            Text(Strings.messageConfirmRepositoryDeletion)
+                            Text(S.current.messageConfirmRepositoryDeletion)
                           ]),
                         ),
                         actions: [
                           TextButton(
-                              child: const Text(Strings.actionDeleteCapital),
+                              child: Text(S.current.actionDeleteCapital),
                               onPressed: () {
                                 Navigator.of(context).pop(true);
                               }),
                           TextButton(
-                            child: const Text(Strings.actionCloseCapital),
+                            child: Text(S.current.actionCloseCapital),
                             onPressed: () => Navigator.of(context).pop(false),
                           )
                         ],
@@ -359,20 +360,20 @@ class _SettingsPageState extends State<SettingsPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Fields.idLabel(Strings.titleLogs,
+            Fields.idLabel(S.current.titleLogs,
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.normal,
                 color: _titlesColor!),
             Row(children: [
               Expanded(
-                  child: Fields.actionText(Strings.actionSave,
+                  child: Fields.actionText(S.current.actionSave,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.save,
                       iconSize: Dimensions.sizeIconSmall,
                       spacing: Dimensions.spacingHorizontalHalf,
                       onTap: _saveLogs)),
               Expanded(
-                  child: Fields.actionText(Strings.actionShare,
+                  child: Fields.actionText(S.current.actionShare,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
@@ -397,12 +398,12 @@ class _SettingsPageState extends State<SettingsPage> {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    String dhtStatusMessage = Strings.messageBitTorrentDHTStatus.replaceAll(
+    String dhtStatusMessage = S.current.messageBitTorrentDHTStatus.toString().replaceAll(
         Strings.replacementStatus, isEnabled ? 'enabled' : 'disabled');
     if (enable != isEnabled) {
       dhtStatusMessage = enable
-          ? Strings.messageBitTorrentDHTEnableFailed
-          : Strings.messageBitTorrentDHTDisableFailed;
+          ? S.current.messageBitTorrentDHTEnableFailed
+          : S.current.messageBitTorrentDHTDisableFailed;
     }
 
     print(dhtStatusMessage);

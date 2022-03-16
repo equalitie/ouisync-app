@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../bloc/blocs.dart';
@@ -37,8 +38,8 @@ class FolderCreation extends StatelessWidget {
       children: [
         Fields.formTextField(
           context: context,
-          label: Strings.labelName,
-          hint: Strings.messageCreateFolder,
+          label: S.current.labelName,
+          hint: S.current.messageCreateFolder,
           onSaved: (value) => _onSaved(bloc, value),
           validator: formNameValidator,
           autofocus: true
@@ -79,12 +80,12 @@ class FolderCreation extends StatelessWidget {
             this.formKey.currentState!.save();
           }
       },
-      child: Text(Strings.actionCreate)
+      child: Text(S.current.actionCreate)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ),
   ];
 
