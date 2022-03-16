@@ -100,7 +100,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile":
             MessageLookupByLibrary.simpleMessage("Compartir archivo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Abrir"),
-        "appTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Modo de aceso"),
         "iconAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
             "Agregar un repositorio usando un token"),

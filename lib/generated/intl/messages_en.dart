@@ -22,11 +22,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(status) => "BitTorrent DHT is ${status}";
 
-  static String m1(entry) =>
-      "${entry} with the same name already exist in this location";
+  static String m1(entry) => "${entry} already exists.";
 
   static String m2(path) =>
-      "The current folder is missing, navigating  to its parent: ${path}";
+      "The current folder is missing, navigating to its parent: ${path}";
 
   static String m3(path) => "${path} is not empty";
 
@@ -40,8 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m8(access) => "Access mode granted: ${access}";
 
-  static String m9(name) =>
-      "Suggested: ${name}\n(tap here for using this name)";
+  static String m9(name) => "Suggested: ${name}\n(tap here to use this name)";
 
   static String m10(name) => "${name} - saved successfully";
 
@@ -96,8 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShare": MessageLookupByLibrary.simpleMessage("Share"),
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
-        "appTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
-        "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access mode"),
+        "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddRepositoryWithToken":
             MessageLookupByLibrary.simpleMessage("Add a repository with token"),
         "iconCreateRepository":
@@ -112,26 +109,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelAppVersion":
             MessageLookupByLibrary.simpleMessage("App version: "),
         "labelBitTorrentDHT":
-            MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
+            MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("New name: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Password: "),
         "labelRenameRepository":
-            MessageLookupByLibrary.simpleMessage("Enter the new name"),
+            MessageLookupByLibrary.simpleMessage("Enter the new name: "),
         "labelRepositoryToken": MessageLookupByLibrary.simpleMessage("Token: "),
         "labelRetypePassword":
             MessageLookupByLibrary.simpleMessage("Retype password: "),
         "labelSelectRepository":
-            MessageLookupByLibrary.simpleMessage("select repository"),
+            MessageLookupByLibrary.simpleMessage("Select repository "),
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
         "labelTypePassword":
             MessageLookupByLibrary.simpleMessage("Type password: "),
         "mesageNoMediaPresent":
-            MessageLookupByLibrary.simpleMessage("There is no media present"),
+            MessageLookupByLibrary.simpleMessage("There is no media present."),
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
         "messageAddingFileToLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This repository is locked or is a blind replica.\n\nIf you have the password, unlock it and try again."),
@@ -148,9 +145,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Your peer can not write nor read the contents"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
-            "This repository is a blind replica"),
+            "This repository is a blind replica."),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
-            "The provided <bold>password</bold> do not grant you access to its contents"),
+            "The provided <bold>password</bold> does not grant you access to view the content of this repository."),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to delete this file?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
@@ -181,54 +178,54 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("A folder"),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
-            "Error while creating the share token"),
+            "Error creating the share token."),
         "messageErrorCurrentPathMissing": m2,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
-            "Something went wrong. Please try again"),
+            "Something went wrong. Please try again."),
         "messageErrorDefaultShort":
-            MessageLookupByLibrary.simpleMessage("Failed"),
+            MessageLookupByLibrary.simpleMessage("Failed."),
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entry not found"),
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage(
-                "Please enter a valid name (unique, no spaces, …)"),
+                "Please enter a valid name (unique, no spaces)"),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "We couldn’t load this folder contents. Please try again"),
+            "We couldn’t load this folder\'s contents. Please try again."),
         "messageErrorPathNotEmpty": m3,
         "messageErrorRepositoryPasswordValidation":
-            MessageLookupByLibrary.simpleMessage("Please enter a password"),
-        "messageErrorRetypePassword": MessageLookupByLibrary.simpleMessage(
-            "The password and retyped password do not match"),
+            MessageLookupByLibrary.simpleMessage("Please enter a password."),
+        "messageErrorRetypePassword":
+            MessageLookupByLibrary.simpleMessage("The passwords do not match."),
         "messageErrorTokenEmpty":
-            MessageLookupByLibrary.simpleMessage("Please enter a token"),
-        "messageErrorTokenInvalid": MessageLookupByLibrary.simpleMessage(
-            "The token seems to be invalid"),
+            MessageLookupByLibrary.simpleMessage("Please enter a token."),
+        "messageErrorTokenInvalid":
+            MessageLookupByLibrary.simpleMessage("This token is invalid."),
         "messageErrorTokenValidator":
-            MessageLookupByLibrary.simpleMessage("Please enter a valid token"),
+            MessageLookupByLibrary.simpleMessage("Please enter a valid token."),
         "messageExitOuiSync":
-            MessageLookupByLibrary.simpleMessage("Press back again to exit"),
+            MessageLookupByLibrary.simpleMessage("Press back again to exit."),
         "messageFileDeleted": m4,
         "messageFolderDeleted": m5,
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Initializing..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
-            "Tap on the <bold>Unlock</bold> button and input the password to access its contents"),
+            "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
         "messageLoadingContents": MessageLookupByLibrary.simpleMessage(
             "Loading the folder contents…"),
         "messageLoadingDefault":
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
-            "This <bold>repository</bold> is locked"),
+            "This <bold>repository</bold> is locked."),
         "messageMoveEntryOrigin": m6,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
-            "This function is not available when moving an entry"),
+            "This function is not available when moving an entry."),
         "messageNewFileError": m7,
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No repositories found"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
-            "This repository is <bold>read-only</bold>"),
+            "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Can not be modified, just access the contents"),
         "messageRenameRepository":
@@ -244,7 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the token here"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
-            "Repository token copied to the clipboard"),
+            "Repository token copied to the clipboard."),
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -272,7 +269,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Delete folder"),
         "titleDeleteNotEmptyFolder":
-            MessageLookupByLibrary.simpleMessage("Delete not empty folder"),
+            MessageLookupByLibrary.simpleMessage("Delete non-empty folder"),
         "titleDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
         "titleEditRepository":
