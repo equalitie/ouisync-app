@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
-import '../custom_widgets.dart';
+import '../widgets.dart';
 
 class RepositoriesBar extends StatefulWidget {
   const RepositoriesBar({
