@@ -6,7 +6,7 @@ import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../services/services.dart';
 import '../../utils/utils.dart';
-import '../custom_widgets.dart';
+import '../widgets.dart';
 
 class RepositoryList extends StatelessWidget {
   RepositoryList({

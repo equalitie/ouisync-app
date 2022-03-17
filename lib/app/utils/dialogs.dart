@@ -4,7 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../bloc/blocs.dart';
-import '../custom_widgets/custom_widgets.dart';
+import '../widgets/widgets.dart';
 import '../models/models.dart';
 import 'utils.dart';
 

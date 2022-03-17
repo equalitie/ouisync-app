@@ -12,7 +12,7 @@ import 'package:move_to_background/move_to_background.dart';
 
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
-import '../custom_widgets/custom_widgets.dart';
+import '../widgets/widgets.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../utils/utils.dart';

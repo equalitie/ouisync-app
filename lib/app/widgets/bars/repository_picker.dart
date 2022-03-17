@@ -5,7 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
-import '../custom_widgets.dart';
+import '../widgets.dart';
 
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({

@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
 import '../../utils/utils.dart';
-import '../custom_widgets.dart';
+import '../widgets.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
