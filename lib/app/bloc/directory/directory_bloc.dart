@@ -69,7 +69,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       GetContent(
         repository: event.repository,
         path: event.parentPath,
-        withProgress: true
       ),
       emit
     );
@@ -91,7 +90,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         GetContent(
           repository: event.repository,
           path: parentPath,
-          withProgress: true
         ),
         emit
       );
@@ -189,7 +187,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     await _updateContens(GetContent(
       repository: event.repository,
       path: event.destination,
-      withProgress: true
     ), emit);
   }
 
@@ -213,7 +210,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     await _updateContens(GetContent(
       repository: event.repository,
       path: event.parentPath,
-      withProgress: true
     ), emit);
   }
   

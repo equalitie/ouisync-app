@@ -160,14 +160,12 @@ class _MainPageState extends State<MainPage>
     getContents({
       required Repository repository,
       required String path,
-      bool withProgress = false,
     }) { 
       BlocProvider
       .of<DirectoryBloc>(context)
       .add(GetContent(
         repository: repository,
         path: path,
-        withProgress: withProgress,
       ));
     }
 
@@ -219,7 +217,6 @@ class _MainPageState extends State<MainPage>
     }) async => getContents(
       repository: repository,
       path: path,
-      withProgress: true
     );
 
     void _syncCurrentFolder(String repositoryName) { 

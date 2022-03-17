@@ -31,18 +31,15 @@ class GetContent extends DirectoryEvent {
   const GetContent({
     required this.repository,
     required this.path,
-    required this.withProgress,
   });
 
   final Repository repository;
   final String path;
-  final bool withProgress;
 
   @override
   List<Object> get props => [
     repository,
     path,
-    withProgress,
   ];
 
 }
