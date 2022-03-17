@@ -140,7 +140,7 @@ class DirectoryLoadSuccess extends DirectoryState {
   });
 
   final String path;
-  final List<dynamic> contents;
+  final List<BaseItem> contents;
   final String action;
 
   @override
