@@ -9,7 +9,6 @@ class FileItem extends Equatable implements BaseItem {
     this.extension = '',
     this.path = '',
     this.size = 0,
-    this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.file,
     this.icon = Icons.insert_drive_file_outlined
   });
@@ -19,7 +18,6 @@ class FileItem extends Equatable implements BaseItem {
     name,
     path,
     size,
-    syncStatus,
     itemType,
     icon
   ];
@@ -42,9 +40,6 @@ class FileItem extends Equatable implements BaseItem {
   int size;
 
   @override
-  SyncStatus syncStatus;
-
-  @override
   void move(String newPath) {
     this.path = newPath;
   }
@@ -57,10 +52,5 @@ class FileItem extends Equatable implements BaseItem {
   @override
   void setIcon(IconData icon) {
     this.icon = icon;
-  }
-
-  @override
-  void setSyncStatus(SyncStatus newSyncStatus) {
-    this.syncStatus = newSyncStatus;
   }
 }

@@ -9,7 +9,6 @@ class FolderItem extends Equatable implements BaseItem {
     this.name = '',
     this.path = '',
     this.size = 0,
-    this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.folder,
     this.icon = Icons.folder_outlined,
   }) {}
@@ -19,7 +18,6 @@ class FolderItem extends Equatable implements BaseItem {
     name,
     path,
     size,
-    syncStatus,
     itemType,
     icon,
   ];
@@ -40,9 +38,6 @@ class FolderItem extends Equatable implements BaseItem {
   int size;
 
   @override
-  SyncStatus syncStatus;
-
-  @override
   void move(String newPath) {
     this.path = newPath;
   }
@@ -56,10 +51,4 @@ class FolderItem extends Equatable implements BaseItem {
   void setIcon(IconData icon) {
     this.icon = icon;
   }
-
-  @override
-  void setSyncStatus(SyncStatus status) {
-    this.syncStatus = status;
-  }
-
 }

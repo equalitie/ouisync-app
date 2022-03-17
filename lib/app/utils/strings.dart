@@ -118,7 +118,6 @@ class Strings {
   static const String labelPassword = 'Password: ';
   static const String labelRetypePassword = 'Retype password: ';
   static const String labelTypePassword = 'Type password:';
-  static const String labelSyncStatus = 'Sync Status: ';
   static const String labelBitTorrentDHT = 'BitTorrent DHT';
   static const String labelSelectRepository = 'select repository';
   static const String labelRenameRepository = 'Enter the new name';

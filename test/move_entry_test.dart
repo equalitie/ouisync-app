@@ -35,7 +35,6 @@ void main() {
         name: 'folder2',
         path: folder2Path,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       )
     ];
@@ -44,14 +43,12 @@ void main() {
         name: 'folder1',
         path: folder1Path,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       )
     ];
@@ -111,7 +108,6 @@ void main() {
         name: 'folder2',
         path: folder2Path,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       )
     ];
@@ -121,7 +117,6 @@ void main() {
         extension: 'txt',
         path: file1InFolder2Path,
         size: filePathContent.length,
-        syncStatus: SyncStatus.idle
       )
     ];
     final rootExpectedContentsWithFolder1AndFolder2 = [
@@ -129,14 +124,12 @@ void main() {
         name: 'folder1',
         path: folder1Path,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
         size: 0,
-        syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
       )
     ];

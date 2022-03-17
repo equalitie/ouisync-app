@@ -221,14 +221,13 @@ class DirectoryRepository {
           name: name,
           path: itemPath,
           size: size,
-          syncStatus: SyncStatus.idle,
           itemType: ItemType.folder);
     }
 
     if (type == EntryType.file) {
       String fileType = extractFileTypeFromName(name);
 
-      return FileItem(name: name, extension: fileType, path: itemPath, size: size, syncStatus: SyncStatus.idle);
+      return FileItem(name: name, extension: fileType, path: itemPath, size: size);
     }
 
     return <BaseItem>[].single;
