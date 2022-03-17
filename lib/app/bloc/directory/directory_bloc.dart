@@ -14,7 +14,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     on<CreateFolder>(_onCreateFolder);
     on<DeleteFolder>(_onDeleteFolder);
     on<SaveFile>(_onSaveFile);
-    on<ReadFile>(_onReadFile);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
     on<NavigateTo>(_onNavigateTo);
@@ -172,31 +171,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       path: newFilePath,
       extension: extension
     );
-  }
-
-  Future<void> _onReadFile(ReadFile event, Emitter<DirectoryState> emit) async {
-    emit(DirectoryLoadInProgress());
-
-    late final readFileResult;
-
-    try {
-      readFileResult = await directoryRepository.readFile(event.repository, event.filePath, action: event.action);
-      if (readFileResult.errorMessage.isNotEmpty) {
-        print('Reading file ${event.filePath} failed:\n${readFileResult.errorMessage}');
-        emit(DirectoryLoadFailure());
-        return;
-      }  
-    } catch (e) {
-      print('Exception reading file ${event.filePath}:\n${e.toString()}');
-      emit(DirectoryLoadFailure());
-      return;
-    }
-
-    emit(DirectoryLoadSuccess(
-      path: event.filePath,
-      contents: readFileResult.result,
-      action: event.action
-    ));
   }
 
  Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {

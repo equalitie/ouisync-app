@@ -126,31 +126,6 @@ class SaveFile extends DirectoryEvent {
   ];
 }
 
-class ReadFile extends DirectoryEvent {
-  const ReadFile({
-    required this.repository,
-    required this.parentPath,
-    required this.filePath,
-    required this.action,
-  }) :
-  assert (filePath != ''),
-  assert (action != '');
-
-  final Repository repository;
-  final String parentPath;
-  final String filePath;
-  final String action;
-
-  @override
-  List<Object> get props => [
-    repository,
-    parentPath,
-    filePath,
-    action
-  ];
-
-}
-
 class MoveEntry extends DirectoryEvent {
   const MoveEntry({
     required this.repository,
