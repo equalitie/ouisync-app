@@ -228,14 +228,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    var folderContentsResult;
+    var entries;
     try {
-      folderContentsResult = await directoryRepository.getFolderContents(event.repository, event.destination);
-      if (folderContentsResult.errorMessage.isNotEmpty) {
-        print('Navigation to ${event.destination} failed:\n${folderContentsResult.errorMessage}');
-        emit(NavigationLoadFailure());
-        return;
-      }
+      entries = await directoryRepository.getFolderContents(event.repository, event.destination);
     } catch (e) {
       print('Exception navigating to ${event.destination}:\n${e.toString()}');
       emit(NavigationLoadFailure());
@@ -246,7 +241,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       type: event.type,
       origin: event.origin,
       destination: event.destination,
-      contents: folderContentsResult.result
+      contents: entries
     ));
   }
 
@@ -299,13 +294,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
 
   Future<DirectoryState> _getContents(GetContent event) async {
     try {
-      final result = await directoryRepository.getFolderContents(event.repository, event.path);
-
-      if (result.errorMessage.isNotEmpty) {
-        return DirectoryLoadFailure();
-      } else {
-        return DirectoryLoadSuccess(path: event.path, contents: result.result);
-      }
+      final entries = await directoryRepository.getFolderContents(event.repository, event.path);
+      return DirectoryLoadSuccess(path: event.path, contents: entries);
     } catch (e) {
       return DirectoryLoadFailure(error: e.toString());
     }

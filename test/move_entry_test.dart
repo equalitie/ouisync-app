@@ -67,11 +67,7 @@ void main() {
     // Get contents of folder1 (/folder1) and confirm it contains folder2 (/folder1/folder2)
     {
       final folder1Contents = await directoryRepository.getFolderContents(repository, folder1Path);
-      expect(folder1Contents.functionName, equals('getFolderContents'));
-      expect(folder1Contents.errorMessage, isEmpty);
-      expect(folder1Contents.result, equals(folder1ExpectedContents));
-
-      print(folder1Contents.result);
+      expect(folder1Contents, equals(folder1ExpectedContents));
     }
     // Move folder2 (/folder1/folder2) to root (/folder2)
     {
@@ -79,17 +75,11 @@ void main() {
       expect(moveFolder2ToRoot.functionName, equals('moveEntry'));
       expect(moveFolder2ToRoot.errorMessage, isEmpty);
       expect(moveFolder2ToRoot.result, equals(folder2RootPath));
-
-      print('folder2 new path: ${moveFolder2ToRoot.result}');
     }
 
     {
       final rootContentsAfterMovingFolder2 = await directoryRepository.getFolderContents(repository, '/');
-      expect(rootContentsAfterMovingFolder2.functionName, equals('getFolderContents'));
-      expect(rootContentsAfterMovingFolder2.errorMessage, isEmpty);
-      expect(rootContentsAfterMovingFolder2.result, equals(rootExpectedContentsWithFolder1AndFolder2));
-
-      print(rootContentsAfterMovingFolder2.result);
+      expect(rootContentsAfterMovingFolder2, equals(rootExpectedContentsWithFolder1AndFolder2));
     }
   });
 
@@ -151,20 +141,12 @@ void main() {
     // Get contents of folder1 (/folder1) and confirm it contains folder2 (/folder1/folder2)
     {
       final folder1Contents = await directoryRepository.getFolderContents(repository, folder1Path);
-      expect(folder1Contents.functionName, equals('getFolderContents'));
-      expect(folder1Contents.errorMessage, isEmpty);
-      expect(folder1Contents.result, equals(folder1ExpectedContents));
-
-      print(folder1Contents.result);
+      expect(folder1Contents, equals(folder1ExpectedContents));
     }
     // Get contents of folder2 (/folder1/folder2) and confirm it contains file1.txt (/folder1/folder2/file1.txt)
     {
       final folder2Contents = await directoryRepository.getFolderContents(repository, folder2Path);
-      expect(folder2Contents.functionName, equals('getFolderContents'));
-      expect(folder2Contents.errorMessage, isEmpty);
-      expect(folder2Contents.result, equals(folder2WithFile1ExpectedContents));
-
-      print(folder2Contents.result);
+      expect(folder2Contents, equals(folder2WithFile1ExpectedContents));
     }
     // Move folder2 (/folder1/folder2) to root (/folder2) containing file1.txt (/folder1/folder2/file1.txt)
     {
@@ -178,11 +160,7 @@ void main() {
 
     {
       final rootContentsAfterMovingFolder2 = await directoryRepository.getFolderContents(repository, '/');
-      expect(rootContentsAfterMovingFolder2.functionName, equals('getFolderContents'));
-      expect(rootContentsAfterMovingFolder2.errorMessage, isEmpty);
-      expect(rootContentsAfterMovingFolder2.result, equals(rootExpectedContentsWithFolder1AndFolder2));
-
-      print(rootContentsAfterMovingFolder2.result);
+      expect(rootContentsAfterMovingFolder2, equals(rootExpectedContentsWithFolder1AndFolder2));
     }
   });
 }

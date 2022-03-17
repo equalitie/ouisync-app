@@ -177,11 +177,10 @@ class DirectoryRepository {
     return length;
   }
 
-  Future<BasicResult> getFolderContents(Repository repository, String path) async {
+  Future<List<BaseItem>> getFolderContents(Repository repository, String path) async {
     print("Getting folder $path contents");
 
-    BasicResult getContentsResult;
-    String error = '';
+    String? error = null;
 
     final content = <BaseItem>[];
 
@@ -205,12 +204,11 @@ class DirectoryRepository {
       directory.close();
     }
 
-    getContentsResult = GetContentResult(functionName: 'getFolderContents', result: content);
-    if (error.isNotEmpty) {
-      getContentsResult.errorMessage = error;
+    if (error != null) {
+      throw error;
     }
 
-    return getContentsResult;
+    return content;
   }
 
   Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {

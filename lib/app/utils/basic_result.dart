@@ -52,19 +52,6 @@ class WriteFileResult extends BasicResult {
   final int result; //File.length
 }
 
-class   GetContentResult extends BasicResult {
-  GetContentResult({
-    required this.functionName,
-    required this.result,
-  }) : super(
-    functionName: functionName,
-    result: result
-  );
-
-  final String functionName;
-  final List<BaseItem> result;
-}
-
 class ReadFileResult extends BasicResult {
   ReadFileResult({
     required this.functionName,
