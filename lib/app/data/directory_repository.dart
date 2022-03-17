@@ -222,8 +222,7 @@ class DirectoryRepository {
           path: itemPath,
           size: size,
           syncStatus: SyncStatus.idle,
-          itemType: ItemType.folder,
-          items: <BaseItem>[]);
+          itemType: ItemType.folder);
     }
 
     if (type == EntryType.file) {

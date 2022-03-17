@@ -5,8 +5,6 @@ import '../models.dart';
 
 
 class FolderItem extends Equatable implements BaseItem {
-  late List<BaseItem> items;
-
   FolderItem({
     this.name = '',
     this.path = '',
@@ -14,10 +12,7 @@ class FolderItem extends Equatable implements BaseItem {
     this.syncStatus = SyncStatus.idle,
     this.itemType = ItemType.folder,
     this.icon = Icons.folder_outlined,
-    required this.items,
-  }) {
-    this.items = <BaseItem>[];
-  }
+  }) {}
 
   @override
   List<Object> get props => [
@@ -27,20 +22,7 @@ class FolderItem extends Equatable implements BaseItem {
     syncStatus,
     itemType,
     icon,
-    items
   ];
-
-  void addItem(BaseItem item) {
-    items.add(item);
-  }
-
-  BaseItem getItem(String name) {
-    return items.firstWhere((element) => element.name == name);
-  }
-  
-  void removeItem(BaseItem item) {
-    items.remove(item);
-  }
 
   @override
   IconData icon;

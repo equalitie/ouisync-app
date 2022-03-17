@@ -37,7 +37,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[]
       )
     ];
     final rootExpectedContentsWithFolder1AndFolder2 = [
@@ -47,7 +46,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[]
       ),
       FolderItem(
         name: 'folder2',
@@ -55,7 +53,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[]
       )
     ];
 
@@ -116,7 +113,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[]
       )
     ];
     final folder2WithFile1ExpectedContents = [
@@ -135,7 +131,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[]
       ),
       FolderItem(
         name: 'folder2',
@@ -143,15 +138,6 @@ void main() {
         size: 0,
         syncStatus: SyncStatus.idle,
         itemType: ItemType.folder,
-        items: <BaseItem>[
-          FileItem(
-            name: 'file1.txt',
-            extension: 'txt',
-            path: file1InFolder2Path,
-            size: filePathContent.length,
-            syncStatus: SyncStatus.idle
-          )
-        ]
       )
     ];
 
