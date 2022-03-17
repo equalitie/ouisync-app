@@ -10,7 +10,6 @@ class FolderItem extends Equatable implements BaseItem {
     this.path = '',
     this.size = 0,
     this.itemType = ItemType.folder,
-    this.icon = Icons.folder_outlined,
   }) {}
 
   @override
@@ -19,11 +18,7 @@ class FolderItem extends Equatable implements BaseItem {
     path,
     size,
     itemType,
-    icon,
   ];
-
-  @override
-  IconData icon;
 
   @override
   ItemType itemType;
@@ -45,10 +40,5 @@ class FolderItem extends Equatable implements BaseItem {
   @override
   void rename(String newName) {
     this.name = newName;
-  }
-
-  @override
-  void setIcon(IconData icon) {
-    this.icon = icon;
   }
 }

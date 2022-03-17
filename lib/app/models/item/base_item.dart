@@ -8,14 +8,11 @@ abstract class BaseItem extends Equatable {
       String name,
       String path,
       int size,
-      ItemType itemType, //folder, file, safe (?)
-      IconData icon,
-      ) {
+      ItemType itemType) {
     this.name = name;
     this.path = path;
     this.size = size;
-    this.itemType = itemType; //folder, file, safe (?)
-    this.icon = icon;
+    this.itemType = itemType;
   }
 
   @override
@@ -23,17 +20,14 @@ abstract class BaseItem extends Equatable {
     name,
     path,
     size,
-    itemType, //folder, file, safe (?)
-    icon
+    itemType,
   ];
 
   String name = '';
   String path = '';
   int size = 0;
-  ItemType itemType = ItemType.folder; //folder, file, safe (?)
-  IconData icon = Icons.adb;
+  ItemType itemType = ItemType.folder;
   
   void rename(String newName);
   void move(String newPath);
-  void setIcon(IconData icon);
 }

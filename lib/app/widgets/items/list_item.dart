@@ -56,11 +56,11 @@ class ListItem extends StatelessWidget {
   Widget _getIconByType() {
     return itemData.itemType == ItemType.folder
       ? Icon(
-        itemData.icon,
+        Icons.insert_drive_file_outlined,
         size: Dimensions.sizeIconBig
       )
       : Icon(
-        itemData.icon,
+        Icons.folder_outlined,
         size: Dimensions.sizeIconAverage
       );
   }

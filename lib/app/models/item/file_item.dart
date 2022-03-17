@@ -10,7 +10,6 @@ class FileItem extends Equatable implements BaseItem {
     this.path = '',
     this.size = 0,
     this.itemType = ItemType.file,
-    this.icon = Icons.insert_drive_file_outlined
   });
 
   @override
@@ -19,14 +18,10 @@ class FileItem extends Equatable implements BaseItem {
     path,
     size,
     itemType,
-    icon
   ];
   
   String extension;
   
-  @override
-  IconData icon;
-
   @override
   ItemType itemType;
 
@@ -47,10 +42,5 @@ class FileItem extends Equatable implements BaseItem {
   @override
   void rename(String newName) {
     this.name = newName;
-  }
-
-  @override
-  void setIcon(IconData icon) {
-    this.icon = icon;
   }
 }
