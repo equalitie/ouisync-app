@@ -75,7 +75,6 @@ class NavigateTo extends DirectoryEvent {
   const NavigateTo({
     required this.repository,
     this.previousAccessMode,
-    required this.type,
     required this.origin,
     required this.destination,
     required this.withProgress
@@ -85,7 +84,6 @@ class NavigateTo extends DirectoryEvent {
 
   final Repository repository;
   final AccessMode? previousAccessMode;
-  final Navigation type;
   final String origin;
   final String destination;
   final bool withProgress;
@@ -94,7 +92,6 @@ class NavigateTo extends DirectoryEvent {
   List<Object?> get props => [
     repository,
     previousAccessMode,
-    type,
     origin,
     destination,
     withProgress

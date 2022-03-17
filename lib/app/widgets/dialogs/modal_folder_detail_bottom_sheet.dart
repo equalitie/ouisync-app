@@ -197,7 +197,6 @@ class _FolderDetailState extends State<FolderDetail> {
     bloc.add(
       NavigateTo(
         repository: repository,
-        type: Navigation.content,
         origin: extractParentFromPath(parentPath),
         destination: parentPath,
         withProgress: true

@@ -153,7 +153,6 @@ class DirectoryLoadSuccess extends DirectoryState {
 
 class NavigationLoadSuccess extends DirectoryState {
   const NavigationLoadSuccess({
-    required this.type,
     required this.origin,
     required this.destination,
     required this.contents,
@@ -161,14 +160,12 @@ class NavigationLoadSuccess extends DirectoryState {
   assert (origin != ''),
   assert (destination != '');
 
-  final Navigation type;
   final String origin;
   final String destination;
   final List<BaseItem> contents;
 
   @override
   List<Object> get props => [
-    type,
     origin,
     destination,
     contents,
@@ -202,9 +199,3 @@ class DirectoryLoadFailure extends DirectoryState {
 }
 
 class NavigationLoadFailure extends DirectoryState {}
-
-enum Navigation {
-  content,
-  receive_intent,
-}
-

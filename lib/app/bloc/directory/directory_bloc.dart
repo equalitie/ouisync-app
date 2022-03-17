@@ -41,7 +41,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     
     await _onNavigateTo(NavigateTo(
       repository: event.repository,
-      type: Navigation.content,
       origin: event.parentPath,
       destination: event.newFolderPath,
       withProgress: true
@@ -238,7 +237,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     }
 
     emit(NavigationLoadSuccess(
-      type: event.type,
       origin: event.origin,
       destination: event.destination,
       contents: entries

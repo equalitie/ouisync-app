@@ -174,7 +174,6 @@ class _MainPageState extends State<MainPage>
     navigateToPath({
       required Repository repository,
       AccessMode? previousAccessMode,
-      required Navigation type,
       required String origin,
       required String destination,
       bool withProgress = false
@@ -184,7 +183,6 @@ class _MainPageState extends State<MainPage>
       .add(NavigateTo(
         repository: repository,
         previousAccessMode: previousAccessMode,
-        type: type,
         origin: origin,
         destination: destination,
         withProgress: withProgress
@@ -207,7 +205,6 @@ class _MainPageState extends State<MainPage>
           .of<DirectoryBloc>(context)
           .add(NavigateTo(
             repository: repository,
-            type: Navigation.content,
             origin: from,
             destination: backTo,
             withProgress: true
@@ -291,7 +288,6 @@ class _MainPageState extends State<MainPage>
         .of<DirectoryBloc>(context)
         .add(NavigateTo(
           repository: _repositoriesService.current!.repo,
-          type: Navigation.content,
           origin: _currentFolder,
           destination: parent,
           withProgress: true
@@ -380,7 +376,6 @@ class _MainPageState extends State<MainPage>
       navigateToPath(
         repository: _repositoriesService.current!.repo,
         previousAccessMode: previousAccessMode,
-        type: Navigation.content,
         origin: Strings.rootPath,
         destination: Strings.rootPath,
         withProgress: true
@@ -497,7 +492,6 @@ class _MainPageState extends State<MainPage>
           updateCurrentFolder(path: destination);
           navigateToPath(
             repository: _repositoriesService.current!.repo,
-            type: Navigation.content,
             origin: parent,
             destination: destination,
             withProgress: true
@@ -505,19 +499,16 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is NavigationLoadSuccess) {
-          if (state.type == Navigation.content) {
-            
-            print('Current path updated: $_currentFolder, ${state.contents.length} entries');
+          print('Current path updated: $_currentFolder, ${state.contents.length} entries');
 
-            updateCurrentFolder(path: state.destination);
-            updateFolderContents(newContent: state.contents);
-            updateRoute(
-              repository: _repositoriesService.current!.repo,
-              destination: state.destination
-            );
+          updateCurrentFolder(path: state.destination);
+          updateFolderContents(newContent: state.contents);
+          updateRoute(
+            repository: _repositoriesService.current!.repo,
+            destination: state.destination
+          );
 
-            return;
-          }
+          return;
         }
 
         if (state is NavigationLoadBlind) {
@@ -586,7 +577,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadSuccess) {
-          updateFolderContents(newContent: state.contents as List<BaseItem>);
+          updateFolderContents(newContent: state.contents);
           return;
         }
 
@@ -691,7 +682,6 @@ class _MainPageState extends State<MainPage>
 
               navigateToPath(
                 repository: repository,
-                type: Navigation.content,
                 origin: path,
                 destination: item.path,
                 withProgress: true

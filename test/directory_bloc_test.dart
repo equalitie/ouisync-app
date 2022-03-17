@@ -54,7 +54,7 @@ void main() {
         wait: Duration(seconds: 1),
         expect: () => [
           DirectoryLoadInProgress(),
-          NavigationLoadSuccess(type: Navigation.content, origin: '/', destination: '/test', contents: <BaseItem>[])
+          NavigationLoadSuccess(origin: '/', destination: '/test', contents: <BaseItem>[])
         ]);
         // TODO: find out what is the expected behaviour in the library for this: create directory '//' .
         // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when CreateFolder is added '
