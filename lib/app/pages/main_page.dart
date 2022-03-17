@@ -632,7 +632,7 @@ class _MainPageState extends State<MainPage>
       }
 
       final orderedContent = newContent;
-      orderedContent.sort((a, b) => a.itemType.index.compareTo(b.itemType.index));
+      orderedContent.sort((a, b) => a.type.index.compareTo(b.type.index));
       
       if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
         setState(() { _folderContents = orderedContent; });
@@ -663,7 +663,7 @@ class _MainPageState extends State<MainPage>
           itemCount: _folderContents.length,
           itemBuilder: (context, index) {
             final item = _folderContents[index];
-            final actionByType = item.itemType == ItemType.file
+            final actionByType = item.type == ItemType.file
             ? () async {
               if (_persistentBottomSheetController != null) {
                 await Dialogs.simpleAlertDialog(

@@ -54,7 +54,7 @@ class ListItem extends StatelessWidget {
   }
 
   Widget _getIconByType() {
-    return itemData.itemType == ItemType.folder
+    return itemData.type == ItemType.folder
       ? Icon(
         Icons.insert_drive_file_outlined,
         size: Dimensions.sizeIconBig
@@ -68,7 +68,7 @@ class ListItem extends StatelessWidget {
   Expanded _getExpandedDescriptionByType() {
     return Expanded(
       flex: 1,
-      child: itemData.itemType == ItemType.folder
+      child: itemData.type == ItemType.folder
         ? Padding(
           padding: Dimensions.paddingFolderItem,
           child: FolderDescription(folderData: itemData)
@@ -85,12 +85,12 @@ class ListItem extends StatelessWidget {
 
   Widget _getActionByType(Function secondaryAction, PopupMenuButton<dynamic>? filePopupMenu, Function? folderDotsAction, bool isDestination) {
     if (isDestination) {
-      return itemData.itemType == ItemType.folder
+      return itemData.type == ItemType.folder
         ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: Dimensions.sizeIconAverage,), onPressed: () => secondaryAction.call())
         : IconButton(onPressed: null, icon: Container());
     }
 
-    return itemData.itemType == ItemType.folder
+    return itemData.type == ItemType.folder
         ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconAverage,), onPressed: () async => await folderDotsAction!.call())
         : filePopupMenu!;
   }

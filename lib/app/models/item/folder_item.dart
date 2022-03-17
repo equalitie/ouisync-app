@@ -8,7 +8,6 @@ class FolderItem extends Equatable implements BaseItem {
     this.name = '',
     this.path = '',
     this.size = 0,
-    this.itemType = ItemType.folder,
   }) {}
 
   @override
@@ -16,11 +15,7 @@ class FolderItem extends Equatable implements BaseItem {
     name,
     path,
     size,
-    itemType,
   ];
-
-  @override
-  ItemType itemType;
 
   @override
   String name;
@@ -30,4 +25,7 @@ class FolderItem extends Equatable implements BaseItem {
 
   @override
   int size;
+
+  @override
+  ItemType get type => ItemType.folder;
 }

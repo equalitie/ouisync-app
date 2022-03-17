@@ -35,7 +35,6 @@ void main() {
         name: 'folder2',
         path: folder2Path,
         size: 0,
-        itemType: ItemType.folder,
       )
     ];
     final rootExpectedContentsWithFolder1AndFolder2 = [
@@ -43,13 +42,11 @@ void main() {
         name: 'folder1',
         path: folder1Path,
         size: 0,
-        itemType: ItemType.folder,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
         size: 0,
-        itemType: ItemType.folder,
       )
     ];
 
@@ -108,7 +105,6 @@ void main() {
         name: 'folder2',
         path: folder2Path,
         size: 0,
-        itemType: ItemType.folder,
       )
     ];
     final folder2WithFile1ExpectedContents = [
@@ -124,13 +120,11 @@ void main() {
         name: 'folder1',
         path: folder1Path,
         size: 0,
-        itemType: ItemType.folder,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
         size: 0,
-        itemType: ItemType.folder,
       )
     ];
 

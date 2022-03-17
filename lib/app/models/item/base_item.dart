@@ -7,12 +7,10 @@ abstract class BaseItem extends Equatable {
   BaseItem(
       String name,
       String path,
-      int size,
-      ItemType itemType) {
+      int size) {
     this.name = name;
     this.path = path;
     this.size = size;
-    this.itemType = itemType;
   }
 
   @override
@@ -20,11 +18,11 @@ abstract class BaseItem extends Equatable {
     name,
     path,
     size,
-    itemType,
   ];
 
   String name = '';
   String path = '';
   int size = 0;
-  ItemType itemType = ItemType.folder;
+
+  ItemType get type;
 }

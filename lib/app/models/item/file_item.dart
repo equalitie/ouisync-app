@@ -9,7 +9,6 @@ class FileItem extends Equatable implements BaseItem {
     this.extension = '',
     this.path = '',
     this.size = 0,
-    this.itemType = ItemType.file,
   });
 
   @override
@@ -17,14 +16,10 @@ class FileItem extends Equatable implements BaseItem {
     name,
     path,
     size,
-    itemType,
   ];
   
   String extension;
   
-  @override
-  ItemType itemType;
-
   @override
   String name;
 
@@ -33,4 +28,7 @@ class FileItem extends Equatable implements BaseItem {
 
   @override
   int size;
+
+  @override
+  ItemType get type => ItemType.file;
 }

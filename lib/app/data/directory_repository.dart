@@ -220,8 +220,7 @@ class DirectoryRepository {
       return FolderItem(
           name: name,
           path: itemPath,
-          size: size,
-          itemType: ItemType.folder);
+          size: size);
     }
 
     if (type == EntryType.file) {
