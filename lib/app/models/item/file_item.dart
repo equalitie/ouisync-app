@@ -6,7 +6,6 @@ import '../models.dart';
 class FileItem extends Equatable implements BaseItem {
   FileItem({
     this.name = '',
-    this.extension = '',
     this.path = '',
     this.size = 0,
   });
@@ -17,8 +16,6 @@ class FileItem extends Equatable implements BaseItem {
     path,
     size,
   ];
-  
-  String extension;
   
   @override
   String name;

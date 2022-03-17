@@ -110,7 +110,6 @@ void main() {
     final folder2WithFile1ExpectedContents = [
       FileItem(
         name: 'file1.txt',
-        extension: 'txt',
         path: file1InFolder2Path,
         size: filePathContent.length,
       )

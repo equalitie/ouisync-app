@@ -37,7 +37,6 @@ void main() {
       dummyFileItem = FileItem(
         name: 'testFile.txt',
         path: '/testFile.txt',
-        extension: 'txt',
       );
     });
 

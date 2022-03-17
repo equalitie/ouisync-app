@@ -224,9 +224,7 @@ class DirectoryRepository {
     }
 
     if (type == EntryType.file) {
-      String fileType = extractFileTypeFromName(name);
-
-      return FileItem(name: name, extension: fileType, path: itemPath, size: size);
+      return FileItem(name: name, path: itemPath, size: size);
     }
 
     return <BaseItem>[].single;
