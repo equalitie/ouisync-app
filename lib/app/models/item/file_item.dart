@@ -33,14 +33,4 @@ class FileItem extends Equatable implements BaseItem {
 
   @override
   int size;
-
-  @override
-  void move(String newPath) {
-    this.path = newPath;
-  }
-
-  @override
-  void rename(String newName) {
-    this.name = newName;
-  }
 }

@@ -27,7 +27,4 @@ abstract class BaseItem extends Equatable {
   String path = '';
   int size = 0;
   ItemType itemType = ItemType.folder;
-  
-  void rename(String newName);
-  void move(String newPath);
 }

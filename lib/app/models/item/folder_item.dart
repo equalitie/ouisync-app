@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../models.dart';
 
-
 class FolderItem extends Equatable implements BaseItem {
   FolderItem({
     this.name = '',
@@ -31,14 +30,4 @@ class FolderItem extends Equatable implements BaseItem {
 
   @override
   int size;
-
-  @override
-  void move(String newPath) {
-    this.path = newPath;
-  }
-
-  @override
-  void rename(String newName) {
-    this.name = newName;
-  }
 }
