@@ -4,35 +4,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
 
-class FolderNavigationBar extends StatefulWidget {
-  const FolderNavigationBar({Key? key}) : super(key: key);
+class FolderNavigationBar extends StatelessWidget {
+  final String? _path;
+  final Function _action;
 
-  @override
-  State<StatefulWidget> createState() => _FolderNavigationBarState();
-}
+  FolderNavigationBar(this._path, this._action);
 
-class _FolderNavigationBarState extends State<FolderNavigationBar> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RouteBloc, RouteState>(
-      builder: (context, state) {
-        if (state is RouteLoadSuccess) {
-          return _routeBar(route: _currentLocationBar(state.path, state.action));
-        }
+    final path = _path;
 
-        return _routeBar(
-          route: Row(
-            children: [
-              const Icon(
-                Icons.lock_rounded,
-                color: Colors.black26,
-                size: Dimensions.sizeIconAverage,
-              )
-            ]
-          )
-        );
-      }
-    );
+    if (path != null) {
+      return _routeBar(route: _currentLocationBar(path, _action));
+    } else {
+      return _routeBar(
+        route: Row(
+          children: [
+            const Icon(
+              Icons.lock_rounded,
+              color: Colors.black26,
+              size: Dimensions.sizeIconAverage,
+            )
+          ]
+        )
+      );
+    }
   }
 
   static Container _routeBar({ required Widget route })

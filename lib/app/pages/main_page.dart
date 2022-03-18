@@ -187,28 +187,30 @@ class _MainPageState extends State<MainPage>
       )); 
     }
 
-    updateRoute({
-      required Repository repository,
-      required String destination
-    }) {
-      BlocProvider
-      .of<RouteBloc>(context)
-      .add(UpdateRoute(
-        path: destination,
-        action: () { //Back button action, hence we invert the origin and destination values
-          final from = destination;
-          final backTo = extractParentFromPath(from);
+    Widget _buildNavigationBar() {
+      final current = _repositoriesService.current;
 
-          BlocProvider
-          .of<DirectoryBloc>(context)
-          .add(NavigateTo(
-            repository: repository,
-            origin: from,
-            destination: backTo,
-            withProgress: true
-          ));
-        }
-      ));
+      if (current == null || current.repo.accessMode == AccessMode.blind) {
+        return FolderNavigationBar(null, () {});
+      }
+
+      final repository = current.repo;
+      final destination = _currentFolder;
+
+      return FolderNavigationBar(destination,
+          () {
+            final from = destination;
+            final backTo = extractParentFromPath(from);
+
+            BlocProvider
+            .of<DirectoryBloc>(context)
+            .add(NavigateTo(
+              repository: repository,
+              origin: from,
+              destination: backTo,
+              withProgress: true
+            ));
+          });
     }
 
     Future<void> refreshCurrent({
@@ -298,7 +300,7 @@ class _MainPageState extends State<MainPage>
       leadingAppBranding: null,
       titleCentralWidget: _buildRepositoriesBar(),
       actionList: _buildActionList(),
-      bottomWidget: FolderNavigationBar(),
+      bottomWidget: _buildNavigationBar(),
       bottomPreferredSize: Size.fromHeight(120.0),
       toolbarHeight: 90.0,
     );
@@ -505,10 +507,6 @@ class _MainPageState extends State<MainPage>
 
           updateCurrentFolder(path: state.destination);
           updateFolderContents(newContent: state.contents);
-          updateRoute(
-            repository: _repositoriesService.current!.repo,
-            destination: state.destination
-          );
 
           return;
         }

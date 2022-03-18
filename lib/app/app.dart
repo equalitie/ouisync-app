@@ -87,9 +87,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
           BlocProvider<DirectoryBloc>(
             create: (BuildContext context) => DirectoryBloc(directoryRepository: DirectoryRepository()),
           ),
-          BlocProvider<RouteBloc>(
-            create: (BuildContext context) => RouteBloc()
-          ),
           BlocProvider<RepositoriesCubit>(
             create: (BuildContext context) => RepositoriesCubit(  
               session: widget.session,
