@@ -8,5 +8,5 @@ class OuiSyncAppLogger implements LoggyType {
 const LogLevel appLevel = LogLevel('ouisync-app', 1);
 
 extension OuiSyncAppLoggy on Loggy {
-  void app(dynamic message, Object? error, StackTrace? stackTrace) => log(appLevel, message, error, stackTrace);
+  void app(dynamic message, [Object? error, StackTrace? stackTrace]) => log(appLevel, message, error, stackTrace);
 }
