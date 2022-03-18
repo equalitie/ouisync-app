@@ -5,7 +5,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../utils/utils.dart';
+import '../../utils/actions.dart';
+import '../../utils/strings.dart';
+import '../../utils/dimensions.dart';
 
 part 'route_event.dart';
 part 'route_state.dart';

@@ -305,10 +305,10 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
-      repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
-      onRepositorySelect: switchRepository,
-      shareRepositoryOnTap: shareRepository,
-    );
+        repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+        onRepositorySelect: switchRepository,
+        shareRepositoryOnTap: shareRepository,
+      );
     }
 
     List<Widget> _buildActionList() => [
@@ -317,7 +317,7 @@ class _MainPageState extends State<MainPage>
           const Icon(Icons.settings_outlined),
           onPressed: () async {
             bool dhtStatus = await _repositoriesService.current?.repo.isDhtEnabled() ?? false;
-            
+
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
               dhtStatus
@@ -495,6 +495,11 @@ class _MainPageState extends State<MainPage>
           );
         }
 
+        if (state is DirectoryLoadSuccess) {
+          updateFolderContents(newContent: state.contents);
+          return;
+        }
+
         if (state is NavigationLoadSuccess) {
           print('Current path updated: $_currentFolder, ${state.contents.length} entries');
 
@@ -511,28 +516,27 @@ class _MainPageState extends State<MainPage>
         if (state is NavigationLoadBlind) {
           if (state.previousAccessMode == AccessMode.blind) {
             showDialog<bool>(
-            context: context,
-            barrierDismissible: false, // user must tap button!
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Unlock repository'),
-                content: SingleChildScrollView(
-                  child: ListBody(children: [
-                    Text('Unlocking the repository failed'
-                      '\n\n'
-                      'Check the password and try again'
+              context: context,
+              barrierDismissible: false, // user must tap button!
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Unlock repository'),
+                  content: SingleChildScrollView(
+                    child: ListBody(children: [
+                      Text('Unlocking the repository failed'
+                        '\n\n'
+                        'Check the password and try again'
+                      )
+                    ]),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: const Text(Strings.actionCloseCapital),
+                      onPressed: () => Navigator.of(context).pop(),
                     )
-                  ]),
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text(Strings.actionCloseCapital),
-                    onPressed: () => 
-                    Navigator.of(context).pop(),
-                  )
-                ],
-              );
-            }); 
+                  ],
+                );
+              });
           }
         }
 
@@ -571,15 +575,6 @@ class _MainPageState extends State<MainPage>
               state.filePath
             )
           );
-        }
-
-        if (state is DirectoryLoadSuccess) {
-          updateFolderContents(newContent: state.contents);
-          return;
-        }
-
-        if (state is DirectoryLoadFailure) {
-          return;
         }
       }
     );
