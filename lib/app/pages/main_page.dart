@@ -569,8 +569,7 @@ class _MainPageState extends State<MainPage>
       if (_folderContents.isEmpty) {
         return NoContentsState(
           repository: current.repo,
-          path: _currentFolder,
-          onRefresh: refreshCurrent,
+          path: _currentFolder
         );
       }
 

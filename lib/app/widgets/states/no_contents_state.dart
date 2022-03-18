@@ -8,12 +8,10 @@ class NoContentsState extends StatelessWidget {
     Key? key,
     required this.repository,
     required this.path,
-    required this.onRefresh
   }) : super(key: key);
 
   final Repository repository;
   final String path;
-  final Future<void> Function({required Repository repository, required String path}) onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +47,6 @@ class NoContentsState extends StatelessWidget {
                 }
               ),
             ),
-            // Fields.actionIcon(
-            //   Icon(
-            //     Icons.refresh_outlined,
-            //     color: Theme.of(context).primaryColor,
-            //   ),
-            //   onPressed: () async => await onRefresh.call(repository: this.repository, path: this.path),
-            // )
           ],
         )
       )
