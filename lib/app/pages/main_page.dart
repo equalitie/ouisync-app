@@ -359,7 +359,7 @@ class _MainPageState extends State<MainPage>
 
       if (repository == null) {
         switchMainState(
-          newState:NoRepositoriesState(
+          newState: NoRepositoriesState(
             repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
@@ -409,38 +409,12 @@ class _MainPageState extends State<MainPage>
           return Center(child: CircularProgressIndicator());
         }
 
-        if (state is DirectoryLoadSuccess) {
-          if (state.path == _currentFolder) {
-            return _selectLayoutWidget(
-              repo: _repositoriesService.current!,
-              path: _currentFolder,
-              isContentsEmpty: state.contents.isEmpty
-            );  
-          }
-          return _selectLayoutWidget(
-            repo: _repositoriesService.current!,
-            path: _currentFolder,
-            isContentsEmpty: _folderContents.isEmpty
-          );
+        if (state is DirectoryLoadSuccess ||
+            state is NavigationLoadSuccess ||
+            state is NavigationLoadBlind) {
+          return _selectLayoutWidget();
         }
         
-        if (state is NavigationLoadSuccess) {
-          return _selectLayoutWidget(
-            repo: _repositoriesService.current!,
-            path: _currentFolder,
-            isContentsEmpty: state.contents.isEmpty
-          );
-        }
-
-        if (state is NavigationLoadBlind) {
-          return _selectLayoutWidget(
-            repo: _repositoriesService.current!,
-            path: '',
-            isContentsEmpty: true,
-            isBlind: true
-          ); 
-        }
-
         if (state is DirectoryLoadFailure) {
           if (state.error == Strings.errorEntryNotFound) {
             final parent = extractParentFromPath(_currentFolder);
@@ -503,11 +477,8 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is NavigationLoadSuccess) {
-          print('Current path updated: $_currentFolder, ${state.contents.length} entries');
-
           updateCurrentFolder(path: state.destination);
           updateFolderContents(newContent: state.contents);
-
           return;
         }
 
@@ -577,30 +548,35 @@ class _MainPageState extends State<MainPage>
       }
     );
 
-    _selectLayoutWidget({
-      required NamedRepo repo,
-      required String path,
-      required bool isContentsEmpty,
-      bool isBlind = false
-    }) {
-      if (isBlind) {
+    _selectLayoutWidget() {
+      final current = _repositoriesService.current;
+
+      if (current == null) {
+        return NoRepositoriesState(
+          repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+          onNewRepositoryPressed: createRepoDialog,
+          onAddRepositoryPressed: addRepoWithTokenDialog
+        );
+      }
+
+      if (current.repo.accessMode == AccessMode.blind) {
         return LockedRepositoryState(
-          repositoryName: repo.name,
+          repositoryName: current.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
       }
       
-      if (isContentsEmpty) {
+      if (_folderContents.isEmpty) {
         return NoContentsState(
-          repository: _repositoriesService.current!.repo,
+          repository: current.repo,
           path: _currentFolder,
           onRefresh: refreshCurrent,
         );
       }
 
       return _contentsList(
-        repository: repo.repo,
-        path: path
+        repository: current.repo,
+        path: _currentFolder
       );
     }
 
@@ -1056,5 +1032,4 @@ class _MainPageState extends State<MainPage>
       })
     );
   }
-
 }

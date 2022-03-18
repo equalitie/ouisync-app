@@ -178,8 +178,6 @@ class DirectoryRepository {
   }
 
   Future<List<BaseItem>> getFolderContents(Repository repository, String path) async {
-    print("Getting folder $path contents");
-
     String? error = null;
 
     final content = <BaseItem>[];

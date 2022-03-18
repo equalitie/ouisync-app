@@ -223,20 +223,16 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       return;
     }
 
-    var entries;
     try {
-      entries = await directoryRepository.getFolderContents(event.repository, event.destination);
+      emit(NavigationLoadSuccess(
+        origin: event.origin,
+        destination: event.destination,
+        contents: await directoryRepository.getFolderContents(event.repository, event.destination)
+      ));
     } catch (e) {
       print('Exception navigating to ${event.destination}:\n${e.toString()}');
       emit(NavigationLoadFailure());
-      return;
     }
-
-    emit(NavigationLoadSuccess(
-      origin: event.origin,
-      destination: event.destination,
-      contents: entries
-    ));
   }
 
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
