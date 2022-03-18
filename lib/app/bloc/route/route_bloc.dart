@@ -16,59 +16,8 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   RouteBloc() : super(RouteInitial()){
     on<UpdateRoute>((event, emit) => emit(
       RouteLoadSuccess(
-        path: event.path,
-        route: _currentLocationBar(event.path, event.action)
+        path: event.path, action: event.action
       ))
-    );
-  }
-
-  Widget _currentLocationBar(String path, Function action) {
-    final current = removeParentFromPath(path);
-    return Row(
-      children: [
-        _navigation(path, action),
-        SizedBox(
-          width: path == Strings.rootPath
-          ? 5.0
-          : 0.0
-        ),
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: Dimensions.paddingActionBox,
-            child: Text(
-              '$current',
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: Dimensions.fontAverage,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  GestureDetector _navigation(String path, Function action) {
-    final target = extractParentFromPath(path);
-
-    return GestureDetector(
-      onTap: () {
-        if (target != path) {
-          action.call();
-        }
-      },
-      child: path == Strings.rootPath
-      ? const Icon(
-          Icons.lock_rounded,
-          size: Dimensions.sizeIconAverage,
-        )
-      : const Icon(
-          Icons.arrow_back,
-          size: Dimensions.sizeIconAverage,
-        ),
     );
   }
 }

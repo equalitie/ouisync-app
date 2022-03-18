@@ -12,15 +12,14 @@ class RouteInitial extends RouteState {}
 class RouteLoadSuccess extends RouteState {
   const RouteLoadSuccess({
     required this.path,
-    required this.route
+    required this.action
   });
 
   final String path;
-  final Widget route;
+  final Function action;
 
   @override
   List<Object> get props => [
-    path,
-    route
+    path, action
   ];
 }
