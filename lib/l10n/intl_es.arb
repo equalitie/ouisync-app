@@ -54,7 +54,7 @@
 
     "messageBlindReplicaExplanation":"Tu colega no puede escribir o leer los contenidos",
     "messageReadReplicaExplanation":"No puede ser modificado, sólo acceder sus contenidos",
-    "messageWriteReplicaExplanation":"Aceso total. Tu colefa puede leer y modificar",
+    "messageWriteReplicaExplanation":"Aceso total. Tu colega puede leer y modificar",
 
     "messageBitTorrentDHTStatus":"Estado del BitTorrent DHT:  {status}",
     "messageBitTorrentDHTEnableFailed":"No fue posible habilitar BitTorrent DHT",

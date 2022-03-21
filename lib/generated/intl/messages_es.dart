@@ -251,7 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Ingrese la clave para abrir el repositorio"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Aceso total. Tu colefa puede leer y modificar"),
+            "Aceso total. Tu colega puede leer y modificar"),
         "messageWritingFileDone": m10,
         "messageWritingFileError": m11,
         "replacementAccess": m12,
