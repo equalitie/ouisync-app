@@ -1,10 +1,6 @@
 class Strings {
   Strings._();
 
-  /// Configuration
-  static const String folderRepositoriesName = 'repositories';
-  static const String configuratiosDirName = 'configs';
-
   /// Page titles
   static const String titleApp = 'OuiSync';
   static const String titleRootPage = 'Repositories';
