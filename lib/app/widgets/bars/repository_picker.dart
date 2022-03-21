@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -23,7 +24,7 @@ class RepositoryPicker extends StatefulWidget {
 }
 
 class _RepositoryPickerState extends State<RepositoryPicker> {
-  String _repositoryName = Strings.messageNoRepos;
+  String _repositoryName = S.current.messageNoRepos;
 
   static final Color colorNoRepo = Colors.grey;
   static final Color colorLockedRepo = Colors.grey;
@@ -81,7 +82,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           );
         }
 
-        return Container(child: Text(Strings.messageOoops),);
+        return Container(child: Text(S.current.messageErrorDefaultShort),);
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
@@ -109,7 +110,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   _updateCurrentRepository({Repository? repository, String? name, AccessMode? previousAccessMode}) async {
     setState(() {
       _repositoryName = (name?.isEmpty ?? true
-      ? Strings.messageNoRepos
+      ? S.current.messageNoRepos
       : name)!;
     });
 

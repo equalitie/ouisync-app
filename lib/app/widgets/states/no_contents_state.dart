@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class NoContentsState extends StatelessWidget {
@@ -26,8 +27,8 @@ class NoContentsState extends StatelessWidget {
               alignment: Alignment.center,
               child: Fields.inPageMainMessage(
                 path.isEmpty
-                ? Strings.messageEmptyRepo
-                : Strings.messageEmptyFolder,
+                ? S.current.messageEmptyRepo
+                : S.current.messageEmptyFolder,
               ),
             ),
             Dimensions.spacingVertical,
@@ -35,8 +36,8 @@ class NoContentsState extends StatelessWidget {
               alignment: Alignment.center,
               child: Fields.inPageSecondaryMessage(
                 repository.accessMode == AccessMode.write
-                ? Strings.messageCreateAddNewItem
-                : Strings.messageReadOnlyContents,
+                ? S.current.messageCreateAddNewItem
+                : S.current.messageReadOnlyContents,
                 tags: {
                   Constants.inlineTextBold: InlineTextStyles.bold,
                   Constants.inlineTextIcon: InlineTextStyles.icon(

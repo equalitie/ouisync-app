@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/cubit/cubits.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+
+import '../../../generated/l10n.dart';
+import '../../cubit/cubits.dart';
+import '../../utils/utils.dart';
 
 class NoRepositoriesState extends StatelessWidget {
   const NoRepositoriesState({
@@ -25,13 +27,13 @@ class NoRepositoriesState extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.center,
-              child: Fields.inPageMainMessage(Strings.messageNoRepos),
+              child: Fields.inPageMainMessage(S.current.messageNoRepos),
             ),
             Dimensions.spacingVertical,
             Align(
               alignment: Alignment.center,
               child: Fields.inPageSecondaryMessage(
-                Strings.messageCreateNewRepo,
+                S.current.messageCreateNewRepo,
                 tags: { Constants.inlineTextBold: InlineTextStyles.bold }
               )
             ),
@@ -39,14 +41,14 @@ class NoRepositoriesState extends StatelessWidget {
             Dimensions.spacingVertical,
             Fields.inPageButton(
               onPressed: () => onNewRepositoryPressed.call(repositoriesCubit),
-              text: Strings.actionCreateRepository,
+              text: S.current.actionCreateRepository,
               size: Dimensions.sizeInPageButtonLong,
               autofocus: true
             ),
             Dimensions.spacingVerticalDouble,
             Fields.inPageButton(
               onPressed: () => onAddRepositoryPressed(repositoriesCubit),
-              text: Strings.actionAddRepositoryWithToken,
+              text: S.current.actionAddRepositoryWithToken,
               size: Dimensions.sizeInPageButtonLong,
             ),
           ],

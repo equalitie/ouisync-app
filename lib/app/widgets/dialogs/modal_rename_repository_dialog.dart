@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class RenameRepository extends StatelessWidget {
@@ -36,8 +37,8 @@ class RenameRepository extends StatelessWidget {
         ),
         Fields.formTextField(
           context: context,
-          label: Strings.labelRenameRepository,
-          hint: Strings.messageRepositoryNewName,
+          label: S.current.labelRenameRepository,
+          hint: S.current.messageRepositoryNewName,
           onSaved: _returnName,
           validator: formNameValidator,
           autofocus: true
@@ -60,12 +61,12 @@ class RenameRepository extends StatelessWidget {
           this.formKey.currentState!.save();
         }
       },
-      child: Text(Strings.actionRename)
+      child: Text(S.current.actionRename)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ),
   ];
 }

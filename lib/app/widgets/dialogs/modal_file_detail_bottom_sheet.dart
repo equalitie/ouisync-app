@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -47,19 +48,19 @@ class _FileDetailState extends State<FileDetail> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(Strings.titleFileDetails),
+          Fields.bottomSheetTitle(S.current.titleFileDetails),
           Fields.actionText(
-            Strings.iconPreview,
+            S.current.iconPreview,
             onTap: () async => await NativeChannels.previewOuiSyncFile(widget.path, widget.size),
             icon: Icons.preview_rounded,
           ),
           Fields.actionText(
-            Strings.iconShare,
+            S.current.iconShare,
             onTap: () async => await NativeChannels.shareOuiSyncFile(widget.path, widget.size),
             icon: Icons.share_rounded,
           ),
           Fields.actionText(
-            Strings.iconMove,
+            S.current.iconMove,
             onTap: () => _showMoveEntryBottomSheet(
               widget.parent,
               widget.path,
@@ -70,7 +71,7 @@ class _FileDetailState extends State<FileDetail> {
             icon: Icons.drive_file_move_outlined,
           ),
           Fields.actionText(
-            Strings.iconDelete,
+            S.current.iconDelete,
             onTap: () async => {
               showDialog<String>(
                 context: widget.context,
@@ -91,14 +92,7 @@ class _FileDetailState extends State<FileDetail> {
                 },
               ).then((fileName) {
                 Navigator.of(context).pop();
-                Fluttertoast.showToast(msg:
-                  Strings
-                  .messageFileDeleted
-                  .replaceAll(
-                    Strings.replacementName,
-                    fileName ?? ''
-                  )
-                );
+                Fluttertoast.showToast(msg: S.current.messageFileDeleted(fileName ?? ''));
               })
             },
             icon: Icons.delete_outlined,
@@ -111,20 +105,20 @@ class _FileDetailState extends State<FileDetail> {
           ),
           Fields.iconLabel(
             icon: Icons.info_rounded,
-            text: Strings.iconInformation,
+            text: S.current.iconInformation,
           ),
           Fields.labeledText(
-            label: Strings.labelName,
+            label: S.current.labelName,
             text: widget.name,
           ),
           Fields.labeledText(
-            label: Strings.labelLocation,
+            label: S.current.labelLocation,
             text: widget.path
             .replaceAll(widget.name, '')
             .trimRight(),
           ),
           Fields.labeledText(
-            label: Strings.labelSize,
+            label: S.current.labelSize,
             text: formattSize(widget.size, units: true),
           ),
         ],

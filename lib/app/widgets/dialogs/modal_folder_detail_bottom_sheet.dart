@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -45,9 +46,9 @@ class _FolderDetailState extends State<FolderDetail> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(Strings.titleFolderDetails),
+          Fields.bottomSheetTitle(S.current.titleFolderDetails),
           Fields.actionText(
-            Strings.iconMove,
+            S.current.iconMove,
             onTap: () => _showMoveEntryBottomSheet(
               widget.parent,
               widget.path,
@@ -58,7 +59,7 @@ class _FolderDetailState extends State<FolderDetail> {
             icon: Icons.drive_file_move_outlined,
           ),
           Fields.actionText(
-            Strings.iconDelete,
+            S.current.iconDelete,
             onTap: () async => {
               await showDialog<bool>(
                 context: widget.context,
@@ -75,14 +76,7 @@ class _FolderDetailState extends State<FolderDetail> {
               ).then((result) {
                 if (result ?? false) {
                   Navigator.of(context).pop(result);
-                  Fluttertoast.showToast(msg:
-                    Strings
-                    .messageFolderDeleted
-                    .replaceAll(
-                      Strings.replacementName,
-                      widget.name
-                    )
-                  );
+                  Fluttertoast.showToast(msg: S.current.messageFolderDeleted(widget.name));
                 }
               })
             },
@@ -96,18 +90,18 @@ class _FolderDetailState extends State<FolderDetail> {
           ),
           Fields.iconLabel(
             icon: Icons.info_rounded,
-            text: Strings.iconInformation,
+            text: S.current.iconInformation,
             iconSize: Dimensions.sizeIconBig,
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: Strings.labelName,
+            label: S.current.labelName,
             labelFontSize: Dimensions.fontAverage,
             text: widget.name,
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: Strings.labelLocation, 
+            label: S.current.labelLocation, 
             labelFontSize: Dimensions.fontAverage,
             text: widget.path
             .replaceAll(widget.name, '')
@@ -121,7 +115,7 @@ class _FolderDetailState extends State<FolderDetail> {
 
   AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, parentPath, path) {
     return AlertDialog(
-      title: const Text(Strings.titleDeleteFolder),
+      title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
@@ -135,17 +129,17 @@ class _FolderDetailState extends State<FolderDetail> {
             const SizedBox(
               height: 30.0,
             ),
-            const Text(Strings.messageConfirmFolderDeletion),
+            Text(S.current.messageConfirmFolderDeletion),
           ],
         ),
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text(Strings.actionDelete),
+          child: Text(S.current.actionDelete),
           onPressed: () => deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context),
         ),
         TextButton(
-          child: const Text(Strings.actionCancel),
+          child: Text(S.current.actionCancel),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
@@ -161,15 +155,15 @@ class _FolderDetailState extends State<FolderDetail> {
       recursive = await Dialogs
       .alertDialogWithActions(
         context: context,
-        title: Strings.titleDeleteNotEmptyFolder,
-        body: [Text(Strings.messageConfirmNotEmptyFolderDeletion)],
+        title: S.current.titleDeleteNotEmptyFolder,
+        body: [Text(S.current.messageConfirmNotEmptyFolderDeletion)],
         actions: [
           TextButton(
-            child: const Text(Strings.actionDelete),
+            child: Text(S.current.actionDelete),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
-            child: const Text(Strings.actionCancel),
+            child: Text(S.current.actionCancel),
             onPressed: () => Navigator.of(context).pop(false),
           )
         ]

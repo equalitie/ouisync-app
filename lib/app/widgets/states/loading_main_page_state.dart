@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+
+import '../../../generated/l10n.dart';
+import '../../utils/utils.dart';
 
 class LoadingMainPageState extends StatelessWidget {
   const LoadingMainPageState({
@@ -18,7 +20,7 @@ class LoadingMainPageState extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: Fields.inPageMainMessage(
-              Strings.messageInitializing
+              S.current.messageInitializing
             ),
           )
         ],
