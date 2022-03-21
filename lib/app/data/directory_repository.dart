@@ -1,9 +1,10 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 
-class DirectoryRepository {
+class DirectoryRepository with OuiSyncAppLogger {
   Future<BasicResult> createFile(Repository repository, String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
@@ -12,12 +13,12 @@ class DirectoryRepository {
     int? handle;
 
     try {
-      print('Creating file $newFilePath');
+      loggy.app('Creating file $newFilePath');
 
       newFile = await File.create(repository, newFilePath);
       handle = newFile.handle;
-    } catch (e) {
-      print('Error creating file $newFilePath: $e');
+    } catch (e, st) {
+      loggy.app('Creating file $newFilePath exception', e, st);
       error = e.toString();
     } finally {
       await newFile?.close();
@@ -32,7 +33,7 @@ class DirectoryRepository {
   }
 
   Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
-    print('Writing file $filePath');
+    loggy.app('Writing file $filePath');
 
     BasicResult writeFileResult;
     String error = '';
@@ -42,15 +43,15 @@ class DirectoryRepository {
 
     try {
       await for (final buffer in fileStream) {
-        print('Buffer size: ${buffer.length} - offset: $offset');
+        loggy.app('Buffer size: ${buffer.length} - offset: $offset');
         await file.write(offset, buffer);
         offset += buffer.length;
       }
-    } catch (e) {
-      print('Exception writing the file $filePath:\n${e.toString()}');
-      error = 'Writing to the file $filePath failed';
+    } catch (e, st) {
+      loggy.app('Writing file $filePath', e, st);
+      error = 'Writing file $filePath failed';
     } finally {
-      print('Writing file $filePath done - closing');
+      loggy.app('Writing file $filePath done - closing');
       await file.close();
     }
 
@@ -72,8 +73,8 @@ class DirectoryRepository {
     try {
       final length = await file.length;
       content.addAll(await file.read(0, length));
-    } catch (e) {
-      print('Exception reading file $filePath:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Read file $filePath', e, st);
       error = 'Read file $filePath failed';
     } finally {
       file.close();
@@ -94,11 +95,11 @@ class DirectoryRepository {
     String error = '';
 
     try {
-      print('Moving entry from $originPath to $destinationPath');
+      loggy.app('Move entry from $originPath to $destinationPath');
 
       await repository.move(originPath, destinationPath);
-    } catch (e) {
-      print('Error moving entry from $originPath to $destinationPath: $e');
+    } catch (e, st) {
+      loggy.app('Move entry from $originPath to $destinationPath exception', e, st);
       error = e.toString();
     }
 
@@ -116,8 +117,8 @@ class DirectoryRepository {
 
     try {
       await File.remove(repository, filePath);
-    } catch (e) {
-      print('Exception deleting file $filePath:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Delete file $filePath exception', e, st);
       error = 'Delete file $filePath failed';
     }
 
@@ -136,12 +137,12 @@ class DirectoryRepository {
     bool created = false;
 
     try {
-      print('Creating folder $path');
+      loggy.app('Create folder $path');
 
       await Directory.create(repository, path);
       created = true;
-    } catch (e) {
-      print('Error creating folder $path: $e');
+    } catch (e, st) {
+      loggy.app('Create folder $path exception', e, st);
 
       created = false;
       error = e.toString();
@@ -156,20 +157,20 @@ class DirectoryRepository {
   }
 
   Future<int> getFileSize(Repository repository, String path) async {
-    var file = null;
+    var file;
     var length = 0;
 
     try {
       file = await File.open(repository, path);
-    } catch (e) {
-      print("Failed to open file to get its size $path: $e");
+    } catch (e, st) {
+      loggy.app("Open file $path exception (getFileSize)", e, st);
       return length;
     }
 
     try {
       length = await file.length;
-    } catch (e) {
-      print("Failed to get file size of $path: $e");
+    } catch (e, st) {
+      loggy.app("Get file size $path exception", e, st);
     }
 
     file.close();
@@ -195,8 +196,8 @@ class DirectoryRepository {
 
         content.add(item);
       }
-    } catch (e) {
-      print('Error traversing directory $path: $e');
+    } catch (e, st) {
+      loggy.app('Traversing directory $path exception', e, st);
       error = e.toString();
     } finally {
       directory.close();
@@ -232,8 +233,8 @@ class DirectoryRepository {
 
     try {
       await Directory.remove(repository, path, recursive: recursive);
-    } catch (e) {
-      print('Exception deleting folder $path:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Delete folder $path exception', e, st);
       error = 'Delete folder $path failed';
     }
 

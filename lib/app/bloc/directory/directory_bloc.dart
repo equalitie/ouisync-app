@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-export '../../data/directory_repository.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../blocs.dart';
 
-class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
+export '../../data/directory_repository.dart';
+
+class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncAppLogger {
   DirectoryBloc({
     required this.directoryRepository
   }) : super(DirectoryInitial()) {
@@ -29,12 +31,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       final createFileResult = await directoryRepository.createFolder(event.repository, event.newFolderPath);
       if (!createFileResult.result) 
       {
-        print('The new directory ($event.newFolderPath) could not be created.');
+        loggy.app('Directory ${event.newFolderPath} creation failed');
         emit(DirectoryLoadFailure());
         return;
       }
-    } catch (e) {
-      print('Exception creating a new directory ($event.newFolderPath):\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Directory ${event.newFolderPath} creation exception', e, st);
       emit(DirectoryLoadFailure());
       return;
     }
@@ -55,12 +57,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       deleteFolderResult = await directoryRepository.deleteFolder(event.repository, event.path, event.recursive);
       if (deleteFolderResult.errorMessage.isNotEmpty) 
       {
-        print('The folder (${event.path}) could not be deleted.');
+        loggy.app('Delete directory ${event.path} failed');
         emit(DirectoryLoadFailure());
         return;
       }
-    } catch (e) {
-      print('Exception deleting the folder ${event.path}:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Directory ${event.path} deletion exception', e, st);
       emit(DirectoryLoadFailure());
       return;
     }
@@ -109,8 +111,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
             progress: offset
           ));
         }
-      } catch (e) {
-        print('Exception writing the file ${event.newFilePath}:\n${e.toString()}');
+      } catch (e, st) {
+        loggy.app('Writing to file ${event.newFilePath} exception', e, st);
         emit(WriteToFileFailure(
           filePath: event.newFilePath,
           fileName: event.fileName,
@@ -119,7 +121,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         ));
         return;
       } finally {
-        print('Writing file ${event.newFilePath} done - closing');
+        loggy.app('Writing to file ${event.newFilePath} done - closing');
         await file.close();
       }
 
@@ -141,7 +143,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     try {
       createFileResult = await directoryRepository.createFile(repository, newFilePath);
       if (createFileResult.errorMessage.isNotEmpty) {
-        print('File $newFilePath creation failed:\n${createFileResult.errorMessage}');
+        loggy.app('Create file $newFilePath failed:\n${createFileResult.errorMessage}');
         
         return CreateFileFailure(
           filePath: newFilePath,
@@ -150,8 +152,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
           error: createFileResult.errorMessage
         );
       }
-    } catch (e) {
-      print('Exception creating file $newFilePath:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Create file $newFilePath exception', e, st);
       
       return CreateFileFailure(
         filePath: newFilePath,
@@ -174,12 +176,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
     try {
       final moveEntryResult = await directoryRepository.moveEntry(event.repository, event.entryPath, event.newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {
-        print('Moving entry from ${event.entryPath} to ${event.newDestinationPath} failed:\n${moveEntryResult.errorMessage}');
+        loggy.app('Move entry from ${event.entryPath} to ${event.newDestinationPath} failed:\n${moveEntryResult.errorMessage}');
         emit(DirectoryLoadFailure());
         return;
       }  
-    } catch (e) {
-      print('Exception moving entry from ${event.entryPath} to ${event.newDestinationPath} :\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Move entry from ${event.entryPath} to ${event.newDestinationPath} exception', e, st);
       emit(DirectoryLoadFailure());
       return;
     }
@@ -197,12 +199,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
       final deleteFileResult = await directoryRepository.deleteFile(event.repository, event.filePath);
       if (deleteFileResult.errorMessage.isNotEmpty) 
       {
-        print('The file (${event.filePath}) could not be deleted.');
+        loggy.app('Delete file ${event.filePath} failed');
         emit(DirectoryLoadFailure());
         return;
       }
-    } catch (e) {
-      print('Exception deleting the file ${event.filePath}:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Delete file ${event.filePath} exception', e, st);
       emit(DirectoryLoadFailure());
       return;
     }
@@ -229,8 +231,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> {
         destination: event.destination,
         contents: await directoryRepository.getFolderContents(event.repository, event.destination)
       ));
-    } catch (e) {
-      print('Exception navigating to ${event.destination}:\n${e.toString()}');
+    } catch (e,st) {
+      loggy.app('Navigate to ${event.destination} exception', e, st);
       emit(NavigationLoadFailure());
     }
   }
