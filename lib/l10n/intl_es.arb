@@ -110,6 +110,8 @@
     "messageAddingFileToLockedRepository":"Este repositorio está cerrado o es una copia ciega.\n\nSi usted tiene la clave, abralo e intente de nuevo.",
     "messageAddingFileToReadRepository":"Este repositorio es sólo-lectura.",
 
+    "messageProtocolVersionMismatch":"Bo fue posible crear el enlace: las versiones del protocolo no concuerdan",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

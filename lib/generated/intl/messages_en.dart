@@ -224,6 +224,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No repositories found"),
+        "messageProtocolVersionMismatch": MessageLookupByLibrary.simpleMessage(
+            "Failed to perform handshake: protocol version mismatch"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

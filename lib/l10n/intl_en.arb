@@ -110,6 +110,8 @@
     "messageAddingFileToLockedRepository":"This repository is locked or is a blind replica.\n\nIf you have the password, unlock it and try again.",
     "messageAddingFileToReadRepository":"This repository is a read-only replica.",
 
+    "messageProtocolVersionMismatch":"Failed to perform handshake: protocol version mismatch",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

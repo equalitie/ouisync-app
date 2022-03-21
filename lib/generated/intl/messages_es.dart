@@ -230,6 +230,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
+        "messageProtocolVersionMismatch": MessageLookupByLibrary.simpleMessage(
+            "Bo fue posible crear el enlace: las versiones del protocolo no concuerdan"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "Este repositorio es de <bold>solo lectura</bold>"),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

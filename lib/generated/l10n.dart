@@ -1070,6 +1070,16 @@ class S {
     );
   }
 
+  /// `Failed to perform handshake: protocol version mismatch`
+  String get messageProtocolVersionMismatch {
+    return Intl.message(
+      'Failed to perform handshake: protocol version mismatch',
+      name: 'messageProtocolVersionMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
