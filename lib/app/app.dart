@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -31,6 +32,8 @@ class OuiSyncApp extends StatefulWidget {
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   final StreamController<List<SharedMediaFile>> _sharedMediaStreamController = StreamController<List<SharedMediaFile>>();
   StreamSubscription? _intentDataStreamSubscription;
+
+  Subscription? _networkSubscription;
   
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
     NativeChannels.init();
 
     _processSharedIntent();
+    _subscribeToNetworkNotifications();
   }
 
   void _processSharedIntent() {
@@ -67,10 +71,29 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
     });
   }
 
+  void _subscribeToNetworkNotifications() {
+    _networkSubscription = widget.session.subscribeToNetworkEvents(_notifyNetworkEvent);
+  }
+
+  void _notifyNetworkEvent(NetworkEvent event) {
+    String message = '';
+    switch (event) {
+      case NetworkEvent.protocolVersionMismatch:
+        message = S.current.messageProtocolVersionMismatch;
+        break;
+    }
+    
+    if (message.isNotEmpty) {
+      Fluttertoast.showToast(msg: message); 
+    }
+  }
+
   @override
   void dispose() {
     _sharedMediaStreamController.close();
     _intentDataStreamSubscription?.cancel();
+
+    _networkSubscription?.cancel();
 
     super.dispose();
   }
