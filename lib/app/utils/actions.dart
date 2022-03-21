@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 
 import 'utils.dart';
 
@@ -16,7 +17,7 @@ showSnackBar(BuildContext context, { required Widget content, SnackBarAction? ac
 
 hideSnackBar(context) => 
   SnackBarAction(
-    label: Strings.actionHideCapital,
+    label: S.current.actionHideCapital,
     onPressed: () => 
       ScaffoldMessenger.of(context).hideCurrentSnackBar()
   );
@@ -92,6 +93,6 @@ Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? formNameValidator(String? value, { String error = Strings.messageErrorNameFormValidator }) {
-  return value!.isEmpty ? error : null;
+String? formNameValidator(String? value, { String? error }) {
+  return value!.isEmpty ? (error ?? S.current.messageErrorFormValidatorNameDefault) : null;
 }

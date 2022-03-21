@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
 
@@ -47,8 +48,8 @@ class RepositoryCreation extends StatelessWidget {
         Fields.formTextField(
           context: context,
           textEditingController: _nameController,
-          label: Strings.labelName,
-          hint: Strings.messageRepositoryName,
+          label: S.current.labelName,
+          hint: S.current.messageRepositoryName,
           onSaved: (_) {},
           validator: formNameValidator,
           autofocus: true
@@ -57,8 +58,8 @@ class RepositoryCreation extends StatelessWidget {
           context: context,
           textEditingController: _passwordController,
           obscureText: true,
-          label: Strings.labelPassword,
-          hint: Strings.messageRepositoryPassword,
+          label: S.current.labelPassword,
+          hint: S.current.messageRepositoryPassword,
           onSaved: (_) {},
           validator: (
             password,
@@ -70,8 +71,8 @@ class RepositoryCreation extends StatelessWidget {
           context: context,
           textEditingController: _retypedPasswordController,
           obscureText: true,
-          label: Strings.labelRetypePassword,
-          hint: Strings.messageRepositoryPassword,
+          label: S.current.labelRetypePassword,
+          hint: S.current.messageRepositoryPassword,
           onSaved: (_) {},
           validator: (
             retypedPassword,
@@ -121,12 +122,12 @@ class RepositoryCreation extends StatelessWidget {
         
         _onSaved(cubit, newRepositoryName, password);
       },
-      child: Text(Strings.actionCreate)
+      child: Text(S.current.actionCreate)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
       onPressed: () => Navigator.of(context).pop(''),
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ),
   ];
 }

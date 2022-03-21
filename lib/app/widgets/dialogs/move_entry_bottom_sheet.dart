@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -44,11 +45,7 @@ class MoveEntryDialog extends StatelessWidget {
             text: '${removeParentFromPath(path)}'
           ),
           Fields.constrainedText(
-            Strings.messageMoveEntryOrigin
-            .replaceAll(
-              Strings.replacementPath,
-              extractParentFromPath(path)
-            ),
+            S.current.messageMoveEntryOrigin(extractParentFromPath(path)),
             fontWeight: FontWeight.w800
           ),
           _selectActions(context)
@@ -84,7 +81,7 @@ class MoveEntryDialog extends StatelessWidget {
     if (canMove) {
       actions.addAll([ElevatedButton(
         onPressed: () => onMoveEntry.call(origin, path, type),
-        child: Text(Strings.actionMove)
+        child: Text(S.current.actionMove)
       ),
       SizedBox(width: 20.0,),]);
     }
@@ -94,7 +91,7 @@ class MoveEntryDialog extends StatelessWidget {
         onBottomSheetOpen.call(null, '');
         Navigator.of(context).pop('');
       },
-      child: Text(Strings.actionCancel)
+      child: Text(S.current.actionCancel)
     ));
 
     return actions;
