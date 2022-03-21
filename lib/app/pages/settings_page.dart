@@ -14,6 +14,7 @@ import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
 import '../models/models.dart';
 import '../services/services.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -37,7 +38,7 @@ class SettingsPage extends StatefulWidget {
   _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   RepositoriesService _repositoriesSession = RepositoriesService();
 
   NamedRepo? _persistedRepository;
@@ -57,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _updateLocalEndpoints();
 
     _bittorrentDhtStatus = widget.dhtStatus;
-    print('BitTorrent DHT status: ${widget.dhtStatus}');
+    loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
       _persistedRepository = _repositoriesSession.current;
@@ -81,7 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
     var dhtEndpointV6 = session.dhtLocalAddressV6;
 
     if (isConnected) {
-      print('Network unavailable');
+      loggy.app('Network unavailable');
       listenerEndpoint = await _replaceIfUndeterminedIP(listenerEndpoint);
       dhtEndpointV4 = await _replaceIfUndeterminedIP(dhtEndpointV4);
       dhtEndpointV6 = await _replaceIfUndeterminedIP(dhtEndpointV6);
@@ -301,7 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   }).toList(),
                   onChanged: (named_repo) async {
-                    print('Selected repository: ${named_repo?.name}');
+                    loggy.app('Selected repository: ${named_repo?.name}');
                     setState(() {
                       _persistedRepository = named_repo;
                     });
@@ -446,7 +447,7 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-    print('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
+    loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
     enable
         ? await _repositoriesSession.current!.repo.enableDht()
@@ -464,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> {
           : S.current.messageBitTorrentDHTDisableFailed;
     }
 
-    print(dhtStatusMessage);
+    loggy.app(dhtStatusMessage);
     showToast(dhtStatusMessage);
   }
 

@@ -15,6 +15,7 @@ import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
 import '../models/models.dart';
 import '../services/services.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -43,7 +44,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-  with TickerProviderStateMixin {
+  with TickerProviderStateMixin, OuiSyncAppLogger {
 
     RepositoriesService _repositoriesService = RepositoriesService();
 
@@ -119,7 +120,7 @@ class _MainPageState extends State<MainPage>
     }
 
     void _connectivityChange(ConnectivityResult result) {
-      print('Connectivity event: ${result.name}');
+      loggy.app('Connectivity event: ${result.name}');
       
       BlocProvider
       .of<ConnectivityCubit>(context)
@@ -458,7 +459,7 @@ class _MainPageState extends State<MainPage>
           final parent = extractParentFromPath(destination);
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
-          print(errorMessage);
+          loggy.app(errorMessage);
           Fluttertoast.showToast(msg: errorMessage);
 
           updateCurrentFolder(path: destination);
@@ -509,8 +510,6 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is CreateFileFailure) {
-          print('Error creating new file ${state.filePath}: ${state.error}');
-
           Fluttertoast.showToast(msg: S.current.messageNewFileError(state.filePath));
         }
 
@@ -519,10 +518,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is WriteToFileFailure) {
-          print('Writing to file ${state.fileName} failed (${state.filePath}): ${state.error}');
-
-          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.filePath)
-          );
+          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.filePath));
         }
       }
     );

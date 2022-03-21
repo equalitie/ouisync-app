@@ -3,6 +3,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class AddRepositoryWithToken extends StatefulWidget {
@@ -21,7 +22,7 @@ class AddRepositoryWithToken extends StatefulWidget {
   State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState();
 }
 
-class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
+class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with OuiSyncAppLogger {
 
   final TextEditingController _tokenController = TextEditingController(text: null);
   final TextEditingController _nameController = TextEditingController(text: null);
@@ -202,8 +203,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> {
     final token = _tokenController.text;
     try {
       _shareToken = ShareToken(this.widget.cubit.session, token);
-    } catch (e) {
-      print('Error extracting the repository token:\n${e.toString()}');                
+    } catch (e, st) {
+      loggy.app('Extract repository token exception', e, st);                
       showToast(S.current.messageErrorTokenInvalid);
 
       cleanupFormOnEmptyToken();

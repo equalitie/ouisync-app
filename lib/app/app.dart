@@ -9,6 +9,7 @@ import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
 import 'pages/pages.dart';
+import 'utils/loggers/ouisync_app_logger.dart';
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
@@ -27,7 +28,7 @@ class OuiSyncApp extends StatefulWidget {
   _OuiSyncAppState createState() => _OuiSyncAppState();
 }
 
-class _OuiSyncAppState extends State<OuiSyncApp> {
+class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   final StreamController<List<SharedMediaFile>> _sharedMediaStreamController = StreamController<List<SharedMediaFile>>();
   StreamSubscription? _intentDataStreamSubscription;
   
@@ -44,24 +45,24 @@ class _OuiSyncAppState extends State<OuiSyncApp> {
     _intentDataStreamSubscription = ReceiveSharingIntent
     .getMediaStream().listen((List<SharedMediaFile> listOfMedia) {
       if (listOfMedia.isEmpty) {
-        print('[intent_listener] No media present');
+        loggy.app('No media present (intent_listener)');
         return;
       }
 
-      print('[intent_listener] Media shared: ${(listOfMedia.map((f)=> f.path).join(","))}');
+      loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent_listener)');
       _sharedMediaStreamController.add(listOfMedia);
     }, onError: (err) {
-      print("[intent_listener] Error: $err");
+      loggy.app("Error: $err (intent_listener)");
     });
 
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> listOfMedia) {
       if (listOfMedia.isEmpty) {
-        print('[intent] No media present');
+        loggy.app('No media present (intent)');
         return;
       }
 
-      print('[intent] Media shared: ${(listOfMedia.map((f)=> f.path).join(","))}');
+      loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent)');
       _sharedMediaStreamController.add(listOfMedia);
     });
   }

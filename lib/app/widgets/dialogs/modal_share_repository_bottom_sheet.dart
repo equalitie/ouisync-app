@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class ShareRepository extends StatefulWidget {
@@ -20,7 +22,7 @@ class ShareRepository extends StatefulWidget {
   State<StatefulWidget> createState() => _ShareRepositoryState();
 }
 
-class _ShareRepositoryState extends State<ShareRepository> {
+class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger {
   ValueNotifier<AccessMode> _accessMode =
     ValueNotifier<AccessMode>(AccessMode.blind);
 
@@ -95,8 +97,11 @@ class _ShareRepositoryState extends State<ShareRepository> {
     required AccessMode accessMode
   }) async {
     final shareToken = await repo.createShareToken(accessMode: accessMode, name: name);
-    // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
-    //print('Token for sharing repository $name: $shareToken (${accessMode.name})');
+    
+    if (kDebugMode) { // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
+      loggy.app('Token for sharing repository $name: $shareToken (${accessMode.name})');
+    }
+
     return shareToken.token;
   }
 
@@ -131,7 +136,7 @@ class _ShareRepositoryState extends State<ShareRepository> {
               );
             }).toList(),
             onChanged: (accessMode) async {
-              print('Access mode: $accessMode');
+              loggy.app('Access mode: $accessMode');
               _accessMode.value = accessMode as AccessMode;
 
               final token = await createShareToken(

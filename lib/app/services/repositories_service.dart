@@ -1,10 +1,10 @@
-import 'package:collection/collection.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../models/named_repo.dart';
 import '../models/models.dart';
+import '../models/named_repo.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 
-class RepositoriesService {
+class RepositoriesService with OuiSyncAppLogger {
   static final RepositoriesService _instance = RepositoriesService._internal();
 
   RepositoriesService._internal();
@@ -33,7 +33,7 @@ class RepositoriesService {
 
   void _updateCurrentRepository(String name, Repository? repo) {
     if (repo == null) {
-      print("Can't set current repository to null");
+      loggy.app("Can't set current repository to null");
       _currentRepoName = null;
       return;
     }
@@ -50,7 +50,7 @@ class RepositoriesService {
     _subscription = repo.subscribe(() => 
       _subscriptionCallback!.call(_currentRepoName!)
     );
-    print('Subscribed to notifications: ${name} (${repo.accessMode.name})');
+    loggy.app('Subscribed to notifications: $name (${repo.accessMode.name})');
   }
 
   Repository? get(String name) {
@@ -79,18 +79,18 @@ class RepositoriesService {
 
   void remove(String name) {
     if (_currentRepoName == name) {
-      print('Canceling subscription to $name');
+      loggy.app('Canceling subscription to $name');
       _subscription?.cancel();
       _subscription = null;
 
-      print('Cleaning current selection for repository $name');
+      loggy.app('Cleaning current selection for repository $name');
       _currentRepoName = null;
     }
 
     final repo = _repos.remove(name);
 
     if (repo != null) {
-      print('Closing repository $name');
+      loggy.app('Closing repository $name');
       repo.close();
     }
   }

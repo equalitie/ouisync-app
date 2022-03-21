@@ -2,15 +2,16 @@ import 'dart:io' as io;
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../models/models.dart';
 import '../../services/services.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 part 'repositories_state.dart';
 
-class RepositoriesCubit extends Cubit<RepositoryPickerState> {
+class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogger {
   RepositoriesCubit({
     required this.session,
     required this.appDir,
@@ -35,8 +36,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
         shareToken: null,
         exist: storeExist
       );
-    } catch (e) {
-      print('Exception opening the repository $name:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Init the repository $name exception', e, st);
     }
 
     return blindRepository;
@@ -49,7 +50,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
     final storeExist = await io.File(store).exists();
     
     if (!storeExist) {
-      print('The repository store doesn\'t exist: $store');
+      loggy.app('The repository store doesn\'t exist: $store');
       return;
     }
 
@@ -66,8 +67,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
         repositoryName: name,
         previousAccessMode: repository.accessMode
       ));
-    } catch (e) {
-      print('Exception unlocking the repository $name:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Unlock repository $name exception', e, st);
       emit(RepositoriesFailure());
     }
   }
@@ -87,8 +88,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> {
       );
 
       emit(RepositoryPickerSelection(NamedRepo(name, repository)));
-    } catch (e) {
-      print('Exception opening the repository $name:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Open repository $name exception', e, st);
       emit(RepositoriesFailure());
     }
   }

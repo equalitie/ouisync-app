@@ -6,10 +6,11 @@ import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../services/services.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoryList extends StatelessWidget {
+class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   RepositoryList({
     required this.context,
     required this.cubit,
@@ -101,13 +102,13 @@ class RepositoryList extends StatelessWidget {
       repositoryFiles.removeWhere((e) => !e.endsWith('db'));
     }
 
-    print('Local repositories found: $repositoryFiles');
+    loggy.app('Local repositories found: $repositoryFiles');
     return repositoryFiles.map((e) => e.substring(0, e.lastIndexOf('.'))).toList();
   }
 
   Future<void> updateDefaultRepositorySetting(repositoryName) async {
     final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
-    print('Current repository updated to $repositoryName: $result');
+    loggy.app('Current repository updated to $repositoryName: $result');
   }
 
   void createRepoDialog(cubit) async {

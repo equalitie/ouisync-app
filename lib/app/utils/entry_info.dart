@@ -2,9 +2,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
+import 'loggers/ouisync_app_logger.dart';
 import 'utils.dart';
 
-class EntryInfo {
+class EntryInfo with OuiSyncAppLogger {
   const EntryInfo(
     this._repository
   );
@@ -28,7 +29,7 @@ class EntryInfo {
 
   String _getTypeNameForMessage(EntryType? type) {
     if (type == null) {
-      print('Entry type was null');
+      loggy.app('Entry type was null');
       return S.current.messageEntryTypeDefault;
     }
 
@@ -49,8 +50,8 @@ class EntryInfo {
     try {
       file = await File.open(_repository, path);
       length = await file.length;
-    } catch (e) {
-      print('Error getting the length for file $path:\n${e.toString()}');
+    } catch (e, st) {
+      loggy.app('Get file length for $path exception', e, st);
       length = -1;
     }
 
@@ -65,7 +66,7 @@ class EntryInfo {
   }) async {
     final type = await _repository.type(path);
     if (type != EntryType.directory) {
-      print('Is directory empty: $path is not a directory.');
+      loggy.app('Is directory empty: $path is not a directory.');
       return false;
     }
 
