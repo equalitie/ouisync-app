@@ -13,8 +13,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = '$appDir/${Strings.folderRepositoriesName}';
-  final configDir = '$appDir/${Strings.configuratiosDirName}';
+  final repositoriesDir = '$appDir/${Constants.folderRepositoriesName}';
+  final configDir = '$appDir/${Constants.configuratiosDirName}';
 
   await Settings.initSettings(
     appDir,
