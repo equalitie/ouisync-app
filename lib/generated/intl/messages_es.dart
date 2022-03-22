@@ -109,6 +109,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconInformation": MessageLookupByLibrary.simpleMessage("Información"),
         "iconMove": MessageLookupByLibrary.simpleMessage("Mover"),
         "iconPreview": MessageLookupByLibrary.simpleMessage("Vista previa"),
+        "iconRename": MessageLookupByLibrary.simpleMessage("Renombrar"),
         "iconShare": MessageLookupByLibrary.simpleMessage("Compartir"),
         "iconShareTokenWithPeer": MessageLookupByLibrary.simpleMessage(
             "Comparte este token con tu colega"),
@@ -165,8 +166,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("¿Borrar este repositorio?"),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Crea un nuevo <bold>directorio</bold>, o agregar un <bold>archivo</bold>, usando <icon></icon>"),
-        "messageCreateFolder":
-            MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
             "Crea un  nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
         "messageCreatingToken": MessageLookupByLibrary.simpleMessage(
@@ -211,7 +210,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Presione de nuevo el botón para ir atrás para salir de la aplicación"),
         "messageFileDeleted": m4,
+        "messageFileName":
+            MessageLookupByLibrary.simpleMessage("Nombre de archivo"),
         "messageFolderDeleted": m5,
+        "messageFolderName":
+            MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Inicializando..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
@@ -234,6 +237,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Este repositorio es de <bold>solo lectura</bold>"),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "No puede ser modificado, sólo acceder sus contenidos"),
+        "messageRenameFile":
+            MessageLookupByLibrary.simpleMessage("Cambiar nombre de archivo"),
+        "messageRenameFolder": MessageLookupByLibrary.simpleMessage(
+            "Cambiar nombre de directorio"),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(
             "Cambiar nombre de repositorio"),
         "messageRepositoryAccessMode": m8,

@@ -73,6 +73,8 @@
     "messageInputPasswordToUnlock":"Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos",
     "messageUnlockRepository":"Ingrese la clave para abrir el repositorio",
     "messageRenameRepository":"Cambiar nombre de repositorio",
+    "messageRenameFile":"Cambiar nombre de archivo",
+    "messageRenameFolder":"Cambiar nombre de directorio",
     "messageWritingFileDone":"{name} - guardado exitosamente",
 
     "messageMovingEntry":"Esta función no está disponible mientras se está moviendo una entrada",
@@ -87,7 +89,7 @@
     "messageErrorTokenInvalid":"El token parece no ser válido",
     "messageErrorTokenValidator":"Por favor ingrese in token válido",
     "messageErrorTokenEmpty":"Por favor ingrese un token",
-    "messageCreateFolder":"Nombre de directorio",
+    "messageFolderName":"Nombre de directorio",
     "messageConfirmFolderDeletion":"¿Borrar este directorio?",
     "messageConfirmNotEmptyFolderDeletion":"Este directorio no está vacío.\n\n¿Aún así quiere borrarlo? (esto borrarar todos sus contenidos)",
     "messageError":"Error!",
@@ -109,6 +111,7 @@
     "messageInitializing":"Inicializando...",
     "messageAddingFileToLockedRepository":"Este repositorio está cerrado o es una copia ciega.\n\nSi usted tiene la clave, abralo e intente de nuevo.",
     "messageAddingFileToReadRepository":"Este repositorio es sólo-lectura.",
+    "messageFileName":"Nombre de archivo",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
@@ -122,6 +125,7 @@
     "iconInformation":"Información",
     "iconPreview":"Vista previa",
     "iconShare":"Compartir",
+    "iconRename":"Renombrar",
     "iconMove":"Mover",
     "iconDelete":"Borrar",
     "iconCreateRepository":"Crear un nuevo repositorio",

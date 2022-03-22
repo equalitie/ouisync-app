@@ -720,6 +720,26 @@ class S {
     );
   }
 
+  /// `Rename file`
+  String get messageRenameFile {
+    return Intl.message(
+      'Rename file',
+      name: 'messageRenameFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename folder`
+  String get messageRenameFolder {
+    return Intl.message(
+      'Rename folder',
+      name: 'messageRenameFolder',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name} - saved successfully`
   String messageWritingFileDone(Object name) {
     return Intl.message(
@@ -851,10 +871,10 @@ class S {
   }
 
   /// `Folder name`
-  String get messageCreateFolder {
+  String get messageFolderName {
     return Intl.message(
       'Folder name',
-      name: 'messageCreateFolder',
+      name: 'messageFolderName',
       desc: '',
       args: [],
     );
@@ -1070,6 +1090,16 @@ class S {
     );
   }
 
+  /// `File name`
+  String get messageFileName {
+    return Intl.message(
+      'File name',
+      name: 'messageFileName',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1165,6 +1195,16 @@ class S {
     return Intl.message(
       'Share',
       name: 'iconShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename`
+  String get iconRename {
+    return Intl.message(
+      'Rename',
+      name: 'iconRename',
       desc: '',
       args: [],
     );
