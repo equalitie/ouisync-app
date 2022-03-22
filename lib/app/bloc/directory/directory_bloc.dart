@@ -264,6 +264,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
   GetContent? _curGetContentEvent;
   GetContent? _nextGetContentEvent;
+  Emitter<DirectoryState>? _nextEmit;
   List<Completer> _getContentCompleters = <Completer>[];
 
   // Trigger content update. If a content update is already in progress, it is scheduled
@@ -273,22 +274,23 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     final future = completer.future;
     _getContentCompleters.add(completer);
 
-    if (_curGetContentEvent != null) {
-      _nextGetContentEvent = event;
-      return future;
-    }
-
     _nextGetContentEvent = event;
+    _nextEmit = emit;
 
-    _runUpdateLoop(emit); // don't await
+    if (_curGetContentEvent == null) {
+      _runUpdateLoop(); // don't await
+    }
 
     return future;
   }
 
-  void _runUpdateLoop(Emitter<DirectoryState> emit) async {
+  void _runUpdateLoop() async {
     while (_nextGetContentEvent != null) {
       _curGetContentEvent = _nextGetContentEvent;
       _nextGetContentEvent = null;
+
+      final emit = _nextEmit!;
+      _nextEmit = null;
 
       final completers = _getContentCompleters;
       _getContentCompleters = <Completer>[];
@@ -297,11 +299,11 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
       _curGetContentEvent = null;
 
+      emit(state);
+
       for (var completer in completers) {
         completer.complete();
       }
-
-      emit(state);
     }
   }
 
