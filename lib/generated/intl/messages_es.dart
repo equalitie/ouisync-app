@@ -195,6 +195,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage(
                 "Por favor ingrese in nombre válido (unico, no spacios, ...)"),
+        "messageErrorLaunchingAppStore": MessageLookupByLibrary.simpleMessage(
+            "No pudimos abrir la app store"),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "No pudimos cargar los contenidos de este directorio. Por favor intente de nuevo"),
         "messageErrorPathNotEmpty": m3,
@@ -226,6 +228,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "Esta función no está disponible mientras se está moviendo una entrada"),
         "messageNewFileError": m7,
+        "messageNewVersionAvailable":
+            MessageLookupByLibrary.simpleMessage("Nueva versión disponible"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":

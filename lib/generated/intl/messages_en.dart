@@ -189,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage(
                 "Please enter a valid name (unique, no spaces)"),
+        "messageErrorLaunchingAppStore": MessageLookupByLibrary.simpleMessage(
+            "Could not launch the app store"),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "We couldn’t load this folder\'s contents. Please try again."),
         "messageErrorPathNotEmpty": m3,
@@ -220,6 +222,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
         "messageNewFileError": m7,
+        "messageNewVersionAvailable":
+            MessageLookupByLibrary.simpleMessage("New version available"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":

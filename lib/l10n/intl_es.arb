@@ -51,6 +51,7 @@
     "messageNewFileError":"Error creando archuivo {name}",
     "messageWritingFileError":"{name} - fallo durante escritura",
     "messageErrorEntryNotFound":"entrada no encontrada",
+    "messageErrorLaunchingAppStore":"No pudimos abrir la app store",
 
     "messageBlindReplicaExplanation":"Tu colega no puede escribir o leer los contenidos",
     "messageReadReplicaExplanation":"No puede ser modificado, sólo acceder sus contenidos",
@@ -111,6 +112,7 @@
     "messageAddingFileToReadRepository":"Este repositorio es sólo-lectura.",
 
     "messageProtocolVersionMismatch":"Bo fue posible crear el enlace: las versiones del protocolo no concuerdan",
+    "messageNewVersionAvailable":"Nueva versión disponible",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

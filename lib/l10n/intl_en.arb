@@ -51,6 +51,7 @@
     "messageNewFileError":"Error creating file {name}",
     "messageWritingFileError":"{name} - writing failed",
     "messageErrorEntryNotFound":"entry not found",
+    "messageErrorLaunchingAppStore":"Could not launch the app store",
 
     "messageBlindReplicaExplanation":"Your peer can not write nor read the contents",
     "messageReadReplicaExplanation":"Can not be modified, just access the contents",
@@ -111,6 +112,7 @@
     "messageAddingFileToReadRepository":"This repository is a read-only replica.",
 
     "messageProtocolVersionMismatch":"Failed to perform handshake: protocol version mismatch",
+    "messageNewVersionAvailable":"New version available",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

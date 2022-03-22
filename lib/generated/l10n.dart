@@ -530,6 +530,16 @@ class S {
     );
   }
 
+  /// `Could not launch the app store`
+  String get messageErrorLaunchingAppStore {
+    return Intl.message(
+      'Could not launch the app store',
+      name: 'messageErrorLaunchingAppStore',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Your peer can not write nor read the contents`
   String get messageBlindReplicaExplanation {
     return Intl.message(
@@ -1075,6 +1085,16 @@ class S {
     return Intl.message(
       'Failed to perform handshake: protocol version mismatch',
       name: 'messageProtocolVersionMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New version available`
+  String get messageNewVersionAvailable {
+    return Intl.message(
+      'New version available',
+      name: 'messageNewVersionAvailable',
       desc: '',
       args: [],
     );
