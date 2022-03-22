@@ -1,6 +1,8 @@
 class Strings {
   Strings._();
 
+  static const String googlePlayStoreUrlSection = 'https://play.google.com/store/apps/details?id=';
+
   static const String rootPath = '/';
   static const String atSymbol = '@';
 
