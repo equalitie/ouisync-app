@@ -26,6 +26,7 @@ class SettingsPage extends StatefulWidget {
     required this.onShareRepository,
     required this.title,
     this.dhtStatus = false,
+    required this.isProtocolVersionMismatch
   });
 
   final RepositoriesCubit repositoriesCubit;
@@ -33,6 +34,7 @@ class SettingsPage extends StatefulWidget {
   final void Function() onShareRepository;
   final String title;
   final bool dhtStatus;
+  final bool isProtocolVersionMismatch;
 
   @override
   _SettingsPageState createState() => _SettingsPageState();

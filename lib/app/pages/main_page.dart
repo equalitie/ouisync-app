@@ -357,16 +357,16 @@ class _MainPageState extends State<MainPage>
         onPressed: () async {
           bool dhtStatus = await _repositoriesService.current?.repo.isDhtEnabled() ?? false;
 
-            settingsAction(
-              BlocProvider.of<RepositoriesCubit>(context),
-              dhtStatus
-            );
-          },
-          size: Dimensions.sizeIconSmall,
-          color: Theme.of(context).colorScheme.surface
-        ),
-      )
-    ];
+          settingsAction(
+            BlocProvider.of<RepositoriesCubit>(context),
+            dhtStatus,
+            _isProtocolVersionMismatch
+          );
+        },
+        size: Dimensions.sizeIconSmall,
+        color: Theme.of(context).colorScheme.surface
+      ),
+    );
 
     StatelessWidget _buildFAB(BuildContext context,) {
       if (!_repositoriesService.hasCurrent) {
@@ -1022,7 +1022,7 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction(reposCubit, dhtStatus) {
+  void settingsAction(reposCubit, dhtStatus, isProtocolVersionMismatch) {
     final connectivityCubit = BlocProvider
     .of<ConnectivityCubit>(context);
     Navigator.push(
@@ -1036,6 +1036,7 @@ class _MainPageState extends State<MainPage>
             onShareRepository: shareRepository,
             title: S.current.titleSettings,
             dhtStatus: dhtStatus,
+            isProtocolVersionMismatch: isProtocolVersionMismatch
           )
         );
       })
