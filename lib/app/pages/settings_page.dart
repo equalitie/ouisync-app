@@ -5,10 +5,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
@@ -193,6 +195,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 _divider(),
                 _futureLabeledText(
                     S.current.labelAppVersion, info.then((info) => info.version)),
+                _versionMessage()
               ],
             )));
   }
@@ -236,6 +239,45 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
+
+  Visibility _versionMessage() {
+    return Visibility(
+      visible: widget.isProtocolVersionMismatch,
+      child: Align(
+              alignment: Alignment.centerRight,
+              child: Chip(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Fields.constrainedText(
+              S.current.messageNewVersionAvailable,
+              flex: 0,
+              fontSize: Dimensions.fontSmall,
+              textAlign: TextAlign.end,
+              color: Colors.white
+            )
+          ]
+        ),
+        deleteIcon: const Icon(Icons.upgrade),
+        deleteIconColor: Colors.white,
+        onDeleted: () async {
+          PackageInfo packageInfo = await PackageInfo.fromPlatform();
+          final appPackageName = packageInfo.packageName;
+          final url = '${Strings.googlePlayStoreUrlSection}$appPackageName';
+
+          final canLaunchAppStore = await canLaunch(url);
+          if (!canLaunchAppStore) {
+            Fluttertoast.showToast(msg: S.current.messageErrorLaunchingAppStore);
+            return;
+          }
+
+          await launch(url);
+        },
+      ))
+    );
+  }
 
   Widget _buildRepositoriesSection() {
     return Column(
