@@ -89,7 +89,7 @@ class DirectoryRepository with OuiSyncAppLogger {
 
     return readFileResult;
   }
-
+  
   Future<BasicResult> moveEntry(Repository repository, String originPath, String destinationPath) async {
     BasicResult moveEntryResult;
     String error = '';
