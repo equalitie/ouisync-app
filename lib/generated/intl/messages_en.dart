@@ -103,6 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconInformation": MessageLookupByLibrary.simpleMessage("Information"),
         "iconMove": MessageLookupByLibrary.simpleMessage("Move"),
         "iconPreview": MessageLookupByLibrary.simpleMessage("Preview"),
+        "iconRename": MessageLookupByLibrary.simpleMessage("Rename"),
         "iconShare": MessageLookupByLibrary.simpleMessage("Share"),
         "iconShareTokenWithPeer":
             MessageLookupByLibrary.simpleMessage("Share this with your peer"),
@@ -160,8 +161,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Are you sure you want to delete this repository?"),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Create a new <bold>folder</bold>, or add a <bold>file</bold>, using <icon></icon>"),
-        "messageCreateFolder":
-            MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
             "Create a new <bold>repository</bold>, or link to one from a friend using a <bold>repository token</bold>"),
         "messageCreatingToken":
@@ -205,7 +204,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
         "messageFileDeleted": m4,
+        "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
         "messageFolderDeleted": m5,
+        "messageFolderName":
+            MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Initializing..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
@@ -228,6 +230,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Can not be modified, just access the contents"),
+        "messageRenameFile":
+            MessageLookupByLibrary.simpleMessage("Rename file"),
+        "messageRenameFolder":
+            MessageLookupByLibrary.simpleMessage("Rename folder"),
         "messageRenameRepository":
             MessageLookupByLibrary.simpleMessage("Rename repository"),
         "messageRepositoryAccessMode": m8,

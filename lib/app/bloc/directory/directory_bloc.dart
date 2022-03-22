@@ -16,6 +16,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     on<CreateFolder>(_onCreateFolder);
     on<DeleteFolder>(_onDeleteFolder);
     on<SaveFile>(_onSaveFile);
+    on<RenameEntry>(_onRenameEntry);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
     on<NavigateTo>(_onNavigateTo);
@@ -172,7 +173,27 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     );
   }
 
- Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {
+  Future<void> _onRenameEntry(RenameEntry event, Emitter<DirectoryState> emit) async {
+    try {
+      final renameEntryResult = await directoryRepository.moveEntry(event.repository, event.entryPath, event.newEntryPath);
+      if (renameEntryResult.errorMessage.isNotEmpty) {
+        loggy.app('Rename entry from ${event.entryPath} to ${event.newEntryPath} failed:\n${renameEntryResult.errorMessage}');
+        emit(DirectoryLoadFailure());
+        return;
+      }  
+    } catch (e, st) {
+      loggy.app('Rename entry from ${event.entryPath} to ${event.newEntryPath} exception', e, st);
+      emit(DirectoryLoadFailure());
+      return;
+    }
+
+    await _updateContens(GetContent(
+      repository: event.repository,
+      path: event.path,
+    ), emit);
+  }
+
+  Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {
     try {
       final moveEntryResult = await directoryRepository.moveEntry(event.repository, event.entryPath, event.newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {

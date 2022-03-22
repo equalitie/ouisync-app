@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
 
-class FolderCreation extends StatelessWidget {
-  const FolderCreation({
+class Rename extends StatelessWidget {
+  Rename({
     Key? key,
     required this.context,
-    required this.bloc,
-    required this.repository,
-    required this.path,
-    required this.formKey
+    required this.entryName,
+    required this.hint,
+    required this.formKey,
   }) : super(key: key);
 
   final BuildContext context;
-  final DirectoryBloc bloc;
-  final Repository repository;
-  final String path;
+  final String entryName;
+  final String hint;
   final GlobalKey<FormState> formKey;
 
   @override
@@ -26,51 +22,43 @@ class FolderCreation extends StatelessWidget {
     return Form(
       key: this.formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: _buildCreateFolderWidget(this.context),
+      child: _buildRenameEntryWidget(this.context),
     );
   }
 
-  Widget _buildCreateFolderWidget(BuildContext context) {
+  Widget _buildRenameEntryWidget(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Fields.constrainedText(
+          '\"${this.entryName}\"',
+          flex: 0,
+          fontWeight: FontWeight.w400
+        ),
         Fields.formTextField(
           context: context,
           label: S.current.labelName,
-          hint: S.current.messageFolderName,
-          onSaved: (value) => _onSaved(bloc, value),
+          hint: this.hint,
+          onSaved: _returnNewName,
           validator: formNameValidator,
           autofocus: true
         ),
         Fields.actionsSection(
           context,
-          buttons: _actions(context)
-        ),
+          buttons: _actions(context)),
       ]
     );
   }
 
-  void _onSaved(bloc, newFolderName) async {
-    final newFolderPath = this.path == Strings.rootPath
-    ? '/$newFolderName'
-    : '${this.path}/$newFolderName';  
-
-    final exist = await EntryInfo(repository).exist(path: newFolderPath);
-    if (exist) {
-      return;
+  void _returnNewName(String? newName) {
+    final fileExtension = extractFileTypeFromName(this.entryName);
+    if (fileExtension.isNotEmpty) {
+      newName = '$newName.$fileExtension';
     }
 
-    bloc.add(
-      CreateFolder(
-        repository: this.repository,
-        parentPath: this.path,
-        newFolderPath: newFolderPath
-      )
-    );
-
-    Navigator.of(this.context).pop(newFolderPath);
+    Navigator.of(this.context).pop(newName);
   }
 
   List<Widget> _actions(context) => [
@@ -80,7 +68,7 @@ class FolderCreation extends StatelessWidget {
             this.formKey.currentState!.save();
           }
       },
-      child: Text(S.current.actionCreate)
+      child: Text(S.current.actionRename)
     ),
     Dimensions.spacingActionsHorizontal,
     OutlinedButton(
@@ -88,5 +76,4 @@ class FolderCreation extends StatelessWidget {
       child: Text(S.current.actionCancel)
     ),
   ];
-
 }

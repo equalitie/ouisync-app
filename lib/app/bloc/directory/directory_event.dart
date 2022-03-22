@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import 'directory_state.dart';
-
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
 }
@@ -117,6 +115,31 @@ class SaveFile extends DirectoryEvent {
     fileName,
     length,
     fileByteStream
+  ];
+}
+
+class RenameEntry extends DirectoryEvent {
+  const RenameEntry({
+    required this.repository,
+    required this.path,
+    required this.entryPath,
+    required this.newEntryPath,
+  }) :
+  assert (path != ''),
+  assert (entryPath != ''),
+  assert (newEntryPath != '');
+
+  final Repository repository;
+  final String path;
+  final String entryPath;
+  final String newEntryPath;
+
+  @override
+  List<Object?> get props => [
+    repository,
+    path,
+    entryPath,
+    newEntryPath
   ];
 }
 

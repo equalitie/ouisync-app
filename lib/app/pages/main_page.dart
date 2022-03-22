@@ -609,9 +609,7 @@ class _MainPageState extends State<MainPage>
                 repository: repository,
                 directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                 scaffoldKey: _scaffoldKey,
-                name: item.name,
-                path: item.path,
-                size: item.size
+                data: item
               );
             }
             : () {
@@ -650,8 +648,7 @@ class _MainPageState extends State<MainPage>
                   repository: repository,
                   directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                   scaffoldKey: _scaffoldKey,
-                  name: removeParentFromPath(item.path),
-                  path: item.path
+                  data: item
                 );
               },
             );
@@ -716,9 +713,7 @@ class _MainPageState extends State<MainPage>
       required Repository repository,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
-      required String name,
-      required String path,
-      required int size
+      required BaseItem data
     }) => showModalBottomSheet(
       isScrollControlled: true,
       context: context, 
@@ -735,10 +730,7 @@ class _MainPageState extends State<MainPage>
           context: context,
           bloc: directoryBloc,
           repository: repository,
-          name: name,
-          path: path,
-          parent: extractParentFromPath(path),
-          size: size,
+          data: data as FileItem,
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
           onMoveEntry: moveEntry
@@ -750,8 +742,7 @@ class _MainPageState extends State<MainPage>
       required Repository repository,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
-      required String name,
-      required String path
+      required BaseItem data
     }) => showModalBottomSheet(
       isScrollControlled: true,
       context: context, 
@@ -768,9 +759,7 @@ class _MainPageState extends State<MainPage>
           context: context,
           bloc: directoryBloc,
           repository: repository,
-          name: name,
-          path: path,
-          parent: extractParentFromPath(path),
+          data: data as FolderItem,
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
           onMoveEntry: moveEntry
