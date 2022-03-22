@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:badges/badges.dart';
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -336,11 +337,25 @@ class _MainPageState extends State<MainPage>
     }
 
     List<Widget> _buildActionList() => [
-      Container(
-        child: Fields.actionIcon(
-          const Icon(Icons.settings_outlined),
-          onPressed: () async {
-            bool dhtStatus = await _repositoriesService.current?.repo.isDhtEnabled() ?? false;
+      _badgedSettingsIcon()
+    ];
+
+    Widget _badgedSettingsIcon() => Badge(
+      showBadge: _isProtocolVersionMismatch,
+      ignorePointer: true,
+      badgeContent: Icon(
+        Icons.upgrade,
+        size: Dimensions.sizeIconBadge,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      badgeColor: Colors.white,
+      position: Dimensions.paddingBadge,
+      padding: EdgeInsets.all(0.0),
+      shape: BadgeShape.circle,
+      child: Fields.actionIcon(
+        const Icon(Icons.settings_outlined),
+        onPressed: () async {
+          bool dhtStatus = await _repositoriesService.current?.repo.isDhtEnabled() ?? false;
 
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
