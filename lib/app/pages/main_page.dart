@@ -51,6 +51,9 @@ class _MainPageState extends State<MainPage>
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
+    Subscription? _networkSubscription;
+    bool _isProtocolVersionMismatch = false;
+
     String _currentFolder = Strings.rootPath; // Initial value: /
   
     List<BaseItem> _folderContents = <BaseItem>[];
@@ -76,6 +79,8 @@ class _MainPageState extends State<MainPage>
       super.initState();
       
       _repositoriesService.setSubscriptionCallback(_syncCurrentFolder);
+      
+      _subscribeToNetworkNotifications();
 
       _initRepositories()
       .then((_) {
@@ -97,7 +102,22 @@ class _MainPageState extends State<MainPage>
     void dispose() {
       _repositoriesService.close();
       _connectivitySubscription?.cancel();
+      
+      _networkSubscription?.cancel();
+
       super.dispose();
+    }
+
+    void _subscribeToNetworkNotifications() {
+      _networkSubscription = widget.session.subscribeToNetworkEvents(_notifyNetworkEvent);
+    }
+
+    void _notifyNetworkEvent(NetworkEvent event) {
+      switch (event) {
+        case NetworkEvent.protocolVersionMismatch:
+          setState(() { _isProtocolVersionMismatch = true; });
+          break;
+      }
     }
 
     Future<void> _initRepositories() async {
