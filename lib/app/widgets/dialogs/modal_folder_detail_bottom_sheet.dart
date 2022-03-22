@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
+import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -13,9 +14,7 @@ class FolderDetail extends StatefulWidget {
     required this.context,
     required this.bloc,
     required this.repository,
-    required this.name,
-    required this.path,
-    required this.parent,
+    required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry
@@ -24,9 +23,7 @@ class FolderDetail extends StatefulWidget {
   final BuildContext context;
   final DirectoryBloc bloc;
   final Repository repository;
-  final String name;
-  final String path;
-  final String parent;
+  final FolderItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
@@ -48,10 +45,16 @@ class _FolderDetailState extends State<FolderDetail> {
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFolderDetails),
           Fields.actionText(
+            S.current.iconRename,
+            onTap: () => _showNewNameDialog(
+              widget.data.path,
+            ),
+            icon: Icons.edit
+          ),
+          Fields.actionText(
             S.current.iconMove,
             onTap: () => _showMoveEntryBottomSheet(
-              widget.parent,
-              widget.path,
+              widget.data.path,
               EntryType.directory,
               widget.onMoveEntry,
               widget.onBottomSheetOpen
@@ -69,14 +72,13 @@ class _FolderDetailState extends State<FolderDetail> {
                     context,
                     widget.bloc,
                     widget.repository,
-                    widget.parent,
-                    widget.path,
+                    widget.data.path,
                   );
                 },
               ).then((result) {
                 if (result ?? false) {
                   Navigator.of(context).pop(result);
-                  Fluttertoast.showToast(msg: S.current.messageFolderDeleted(widget.name));
+                  Fluttertoast.showToast(msg: S.current.messageFolderDeleted(widget.data.name));
                 }
               })
             },
@@ -97,14 +99,14 @@ class _FolderDetailState extends State<FolderDetail> {
           Fields.labeledText(
             label: S.current.labelName,
             labelFontSize: Dimensions.fontAverage,
-            text: widget.name,
+            text: widget.data.name,
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
             label: S.current.labelLocation, 
             labelFontSize: Dimensions.fontAverage,
-            text: widget.path
-            .replaceAll(widget.name, '')
+            text: widget.data.path
+            .replaceAll(widget.data.name, '')
             .trimRight(),
             textAlign: TextAlign.start,
           ),
@@ -113,7 +115,8 @@ class _FolderDetailState extends State<FolderDetail> {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, parentPath, path) {
+  AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, path) {
+    final parentPath = extractParentFromPath(path);
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -201,7 +204,6 @@ class _FolderDetailState extends State<FolderDetail> {
   }
 
   _showMoveEntryBottomSheet(
-    String origin,
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
@@ -209,6 +211,7 @@ class _FolderDetailState extends State<FolderDetail> {
   ) {
     Navigator.of(context).pop();
     
+    final origin = extractParentFromPath(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
         origin: origin,
@@ -228,5 +231,43 @@ class _FolderDetailState extends State<FolderDetail> {
     );
 
     widget.onBottomSheetOpen.call(controller!, path);
+  }
+
+  void _showNewNameDialog(String path) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+        final name = removeParentFromPath(path);
+
+        return ActionsDialog(
+          title: S.current.messageRenameFolder,
+          body: Rename(
+            context: context,
+            entryName:  name,
+            hint: S.current.messageFolderName,
+            formKey: formKey,
+          ),
+        );
+      }
+    ).then((newName) {
+      if (newName.isNotEmpty) { // The new name provided by the user.
+        final parent = extractParentFromPath(path);
+        final newEntryPath = parent == Strings.rootPath
+        ? '/$newName'
+        : '$parent/$newName';  
+
+        widget.bloc
+        .add(RenameEntry(
+          repository: widget.repository,
+          path: parent,
+          entryPath: path,
+          newEntryPath: newEntryPath
+        ));
+
+        Navigator.of(context).pop();
+      }
+    });
   }
 }
