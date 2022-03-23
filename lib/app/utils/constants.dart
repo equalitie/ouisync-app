@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
@@ -24,4 +25,7 @@ class Constants{
   // Hero tags
 
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
+
+  static const IconData iconVisibilityOn = Icons.visibility;
+  static const IconData iconVisibilityOff = Icons.visibility_off;
 }
