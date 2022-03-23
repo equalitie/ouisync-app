@@ -17,6 +17,8 @@ class UnlockRepository extends StatelessWidget {
 
   final TextEditingController _passwordController = new TextEditingController(text: null);
 
+  final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -37,18 +39,34 @@ class UnlockRepository extends StatelessWidget {
           flex: 0,
           fontWeight: FontWeight.w400
         ),
-        Fields.formTextField(
-          context: context,
-          textEditingController: _passwordController,
-          obscureText: true,
-          label: S.current.labelTypePassword,
-          hint: S.current.messageRepositoryPassword,
-          onSaved: _returnPassword,
-          validator: (
-            password,
-            { error = Strings.messageErrorRepositoryPasswordValidation }
-          ) => formNameValidator(password, error: error),
-          autofocus: true
+        ValueListenableBuilder(
+          valueListenable: _obscurePassword,
+          builder:(context, value, child) {
+            final obscure = value as bool;
+            return Row(
+              children: [
+                Expanded(
+                  child: Fields.formTextField(
+                    context: context,
+                    textEditingController: _passwordController,
+                    obscureText: obscure,
+                    label: S.current.labelTypePassword,
+                    hint: S.current.messageRepositoryPassword,
+                    onSaved: _returnPassword,
+                    validator: (
+                      password,
+                      { error = Strings.messageErrorRepositoryPasswordValidation }
+                    ) => formNameValidator(password, error: error),
+                    autofocus: true
+                  )
+                ),
+                Fields.actionIcon(
+                  Icon(obscure ? Constants.iconVisibilityOff : Constants.iconVisibilityOn),
+                  onPressed: () { _obscurePassword.value = !_obscurePassword.value; }
+                )
+              ]
+            );
+          }
         ),
         Fields.actionsSection(
           context,
