@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_loggy/flutter_loggy.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,9 +13,7 @@ import 'generated/l10n.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Loggy.initLoggy(
-    logPrinter: kDebugMode ? const PrettyDeveloperPrinter() : const PrettyPrinter(),
-  );
+  Loggy.initLoggy();
 
   final appDir = (await getApplicationSupportDirectory()).path;
   final repositoriesDir = '$appDir/${Constants.folderRepositoriesName}';
