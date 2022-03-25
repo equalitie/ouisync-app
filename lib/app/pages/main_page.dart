@@ -111,9 +111,10 @@ class _MainPageState extends State<MainPage>
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
         _repositoriesService.put(
-            repoName,
-            repo!,
-            setCurrent: (repoName == widget.defaultRepositoryName));
+          repoName,
+          repo!,
+          setCurrent: (repoName == widget.defaultRepositoryName)
+        );
       }).toList();
 
       await Future.wait(initRepos);

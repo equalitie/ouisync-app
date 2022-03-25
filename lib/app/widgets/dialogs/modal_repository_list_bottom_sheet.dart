@@ -127,12 +127,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           ),
         );
       }
-    ).then((newRepository) {
-      if (newRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
-        updateDefaultRepositorySetting(newRepository);
-        Navigator.of(this.context).pop();
-      }
-    });
+    ).then((newRepository) async => await updateSettingsAndPop(newRepository));
   }
 
   void addRepoWithTokenDialog(cubit) async {
@@ -151,11 +146,16 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           ),
         );
       }
-    ).then((addedRepository) {
-      if (addedRepository.isNotEmpty) { // If a repository is successfuly created, the new repository name is returned; otherwise, empty string.
-        updateDefaultRepositorySetting(addedRepository);
-        Navigator.of(this.context).pop();
-      }
-    });
+    ).then((addedRepository) async => await updateSettingsAndPop(addedRepository));
+  }
+
+  Future<void> updateSettingsAndPop(String repositoryName) async {
+    // If a repository is successfuly created/added, the repository name is returned; otherwise, empty string.
+    if (repositoryName.isEmpty) {
+      return;
+    }
+
+    await updateDefaultRepositorySetting(repositoryName);
+    Navigator.of(this.context).pop();
   }
 }
