@@ -36,6 +36,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
         shareToken: null,
         exist: storeExist
       );
+
+      await RepositoryHelper.setRepoBitTorrentDHTStatus(blindRepository, name);
     } catch (e, st) {
       loggy.app('Init the repository $name exception', e, st);
     }
@@ -62,6 +64,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
         exist: storeExist
       );
 
+      await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
+
       emit(RepositoryPickerUnlocked(
         repository: repository,
         repositoryName: name,
@@ -87,6 +91,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
         exist: storeExist
       );
 
+      await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
+
       emit(RepositoryPickerSelection(NamedRepo(name, repository)));
     } catch (e, st) {
       loggy.app('Open repository $name exception', e, st);
@@ -94,11 +100,11 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     }
   }
 
-  void selectRepository(NamedRepo? named_repo) async {
-    if (named_repo == null) {
+  void selectRepository(NamedRepo? namedRepo) async {
+    if (namedRepo == null) {
       emit(RepositoryPickerInitial());
     } else {
-      emit(RepositoryPickerSelection(named_repo));
+      emit(RepositoryPickerSelection(namedRepo));
     }
   }
 
