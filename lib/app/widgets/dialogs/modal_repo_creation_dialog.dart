@@ -80,7 +80,7 @@ class RepositoryCreation extends StatelessWidget {
                 ),
                 Fields.actionIcon(
                   Icon(
-                    obscure ? Constants.iconVisibilityOff : Constants.iconVisibilityOn,
+                    obscure ? Constants.iconVisibilityOn : Constants.iconVisibilityOff,
                     size: Dimensions.sizeIconSmall,
                   ),
                   onPressed: () { _obscurePassword.value = !_obscurePassword.value; }
@@ -116,7 +116,7 @@ class RepositoryCreation extends StatelessWidget {
                 ),
                 Fields.actionIcon(
                   Icon(
-                    obscure ? Constants.iconVisibilityOff : Constants.iconVisibilityOn,
+                    obscure ? Constants.iconVisibilityOn : Constants.iconVisibilityOff,
                     size: Dimensions.sizeIconSmall,
                   ),
                   onPressed: () { _obscurePasswordConfirm.value = !_obscurePasswordConfirm.value; }
