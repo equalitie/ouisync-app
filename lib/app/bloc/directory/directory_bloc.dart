@@ -16,6 +16,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     on<CreateFolder>(_onCreateFolder);
     on<DeleteFolder>(_onDeleteFolder);
     on<SaveFile>(_onSaveFile);
+    on<CancelSaveFile>(_onCancelSaveFile);
     on<RenameEntry>(_onRenameEntry);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
@@ -97,11 +98,13 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         emit
       );
 
-      final file = await File.open(event.repository, event.newFilePath);
+      final file = fileCreationResult.file;
       int offset = 0;
-
       try {
-        await for (final buffer in event.fileByteStream) {
+        final stream = event.fileByteStream
+        .takeWhile((element) => _cancelFileWriting != event.newFilePath);
+        
+        await for (final buffer in stream) {
           await file.write(offset, buffer);
           offset += buffer.length;
 
@@ -115,7 +118,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       } catch (e, st) {
         loggy.app('Writing to file ${event.newFilePath} exception', e, st);
         emit(WriteToFileFailure(
-          filePath: event.newFilePath,
+          path: event.newFilePath,
           fileName: event.fileName,
           length: event.length,
           error: e.toString()
@@ -126,12 +129,29 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         await file.close();
       }
 
+      if (_cancelFileWriting == event.newFilePath) {
+        loggy.app('${event.newFilePath} writing canceled by the user');
+        
+        emit(WriteToFileCanceled(
+          path: event.newFilePath,
+          fileName: event.fileName,
+        ));
+
+        return;
+      }
+
       emit(WriteToFileDone(
-        filePath: event.newFilePath,
+        path: event.newFilePath,
         fileName: event.fileName,
         length: event.length
       ));
     }
+  }
+
+  String _cancelFileWriting = '';
+  void _onCancelSaveFile(CancelSaveFile event, Emitter<DirectoryState> emit) {
+    loggy.app('Canceling ${event.filePath}');
+    _cancelFileWriting = event.filePath;
   }
 
   Future<DirectoryState> _createFile(
@@ -140,14 +160,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     String fileName,
     int length
   ) async {
-    var createFileResult;
+    CreateFileResult? createFileResult;
     try {
-      createFileResult = await directoryRepository.createFile(repository, newFilePath);
-      if (createFileResult.errorMessage.isNotEmpty) {
+      createFileResult = (await directoryRepository.createFile(repository, newFilePath)) as CreateFileResult?;
+      if (createFileResult!.errorMessage.isNotEmpty) {
         loggy.app('Create file $newFilePath failed:\n${createFileResult.errorMessage}');
         
         return CreateFileFailure(
-          filePath: newFilePath,
+          path: newFilePath,
           fileName: fileName,
           length: length,
           error: createFileResult.errorMessage
@@ -157,7 +177,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Create file $newFilePath exception', e, st);
       
       return CreateFileFailure(
-        filePath: newFilePath,
+        path: newFilePath,
         fileName: fileName,
         length: length,
         error: e.toString()
@@ -167,6 +187,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     final name = removeParentFromPath(newFilePath);
     final extension = extractFileTypeFromName(newFilePath);
     return CreateFileDone(
+      file: createFileResult.result!,
       fileName: name,
       path: newFilePath,
       extension: extension
