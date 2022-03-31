@@ -100,13 +100,13 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       return null;
     }
 
-    final nullable_internal = await RGetIp.internalIP;
+    final nullableInternal = await RGetIp.internalIP;
 
-    if (nullable_internal == null) {
+    if (nullableInternal == null) {
       return endpoint;
     }
 
-    InternetAddress? internal = InternetAddress.tryParse(nullable_internal);
+    InternetAddress? internal = InternetAddress.tryParse(nullableInternal);
 
     if (internal == null) {
       return endpoint;
@@ -143,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   @override
   Widget build(BuildContext context) {
-    _titlesColor = Theme.of(context).colorScheme.secondaryVariant;
+    _titlesColor = Theme.of(context).colorScheme.secondary;
 
     final info = PackageInfo.fromPlatform();
 
@@ -279,9 +279,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   isExpanded: true,
                   value: _persistedRepository,
                   underline: SizedBox(),
-                  items: _repositoriesSession.repos.map((NamedRepo named_repo) {
+                  items: _repositoriesSession.repos.map((NamedRepo namedRepo) {
                     return DropdownMenuItem(
-                      value: named_repo,
+                      value: namedRepo,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,7 +293,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           Dimensions.spacingVerticalHalf,
                           Row(
                             children: [
-                              Fields.constrainedText(named_repo.name,
+                              Fields.constrainedText(namedRepo.name,
                                   fontWeight: FontWeight.normal),
                             ],
                           ),
@@ -301,10 +301,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       ),
                     );
                   }).toList(),
-                  onChanged: (named_repo) async {
-                    loggy.app('Selected repository: ${named_repo?.name}');
+                  onChanged: (namedRepo) async {
+                    loggy.app('Selected repository: ${namedRepo?.name}');
                     setState(() {
-                      _persistedRepository = named_repo;
+                      _persistedRepository = namedRepo;
                     });
                     _repositoriesSession.setCurrent(_persistedRepository!.name);
                   },
@@ -457,6 +457,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
+
+    RepositoryHelper.updateBitTorrentDHTForRepoStatus(_repositoriesSession.current!.name, isEnabled);
 
     String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
     if (enable != isEnabled) {

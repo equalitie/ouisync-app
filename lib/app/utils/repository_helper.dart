@@ -1,9 +1,14 @@
+import 'dart:convert';
 import 'dart:io' as io;
+
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
 
 class RepositoryHelper {
   RepositoryHelper._();
+
+  static Map<String, bool>? _dhtStatus;
 
   static List<dynamic> localRepositoriesFiles(String location, {
     bool justNames = true
@@ -99,5 +104,44 @@ class RepositoryHelper {
     .forEach((element) => element.deleteSync());
 
     return true;
+  }
+
+  static Future<void> setRepoBitTorrentDHTStatus(Repository repository, String name) async {
+    if (_dhtStatus == null) {
+      await _getDhtStatus();
+    }
+
+    if (_dhtStatus!.containsKey(name)) {
+      _dhtStatus![name]! ? repository.enableDht() : repository.disableDht();
+
+      print('DHT status: $_dhtStatus');
+      return;  
+    }
+
+    final status = await repository.isDhtEnabled();
+    _dhtStatus!.addAll({ name: status});
+
+    final encodedDhtStatus = json.encode(_dhtStatus);
+    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
+
+    print('DHT status: $_dhtStatus');
+  }
+
+  static Future<void> updateBitTorrentDHTForRepoStatus(String name, bool status) async {
+    if (_dhtStatus == null) {
+      await _getDhtStatus();
+    }
+
+    _dhtStatus!.update(name, (value) => status, ifAbsent: () => status);
+
+    final encodedDhtStatus = json.encode(_dhtStatus);
+    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
+  }
+
+  static Future<void> _getDhtStatus() async {
+    final encodedDhtStatus = await Settings.readSetting(Constants.bitTorrentDHTStatusKey);
+    _dhtStatus = encodedDhtStatus == null 
+    ? Map<String, bool>()
+    : Map<String, bool>.from(json.decode(encodedDhtStatus));
   }
 }
