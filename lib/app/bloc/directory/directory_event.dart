@@ -118,6 +118,17 @@ class SaveFile extends DirectoryEvent {
   ];
 }
 
+class CancelSaveFile extends DirectoryEvent {
+  const CancelSaveFile({
+    required this.filePath
+  });
+
+  final String filePath;
+
+  @override
+  List<Object?> get props => [filePath];
+}
+
 class RenameEntry extends DirectoryEvent {
   const RenameEntry({
     required this.repository,
