@@ -174,7 +174,7 @@ class DirectoryRepository with OuiSyncAppLogger {
   }
 
   Future<List<BaseItem>> getFolderContents(Repository repository, String path) async {
-    String? error = null;
+    String? error;
 
     final content = <BaseItem>[];
 
