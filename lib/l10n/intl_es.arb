@@ -76,6 +76,8 @@
     "messageRenameFile":"Cambiar nombre de archivo",
     "messageRenameFolder":"Cambiar nombre de directorio",
     "messageWritingFileDone":"{name} - guardado exitosamente",
+    "messageWritingFileCanceled":"{name} escritura canelada",
+    "messageCancelingFileWriting":"Cancelando escritura de {name}",
 
     "messageMovingEntry":"Esta función no está disponible mientras se está moviendo una entrada",
     "messageRepositoryToken":"Pegue el token aquí",

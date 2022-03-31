@@ -76,6 +76,8 @@
     "messageRenameFile":"Rename file",
     "messageRenameFolder":"Rename folder",
     "messageWritingFileDone":"{name} - saved successfully",
+    "messageWritingFileCanceled":"{name} writing canceled",
+    "messageCancelingFileWriting":"Canceling {name} writing...",
 
     "messageMovingEntry":"This function is not available when moving an entry.",
     "messageRepositoryToken":"Paste the token here",
