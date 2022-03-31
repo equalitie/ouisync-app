@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Constants{
   Constants._();
 
@@ -21,4 +23,7 @@ class Constants{
   // Hero tags
 
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
+
+  static const IconData iconVisibilityOn = Icons.visibility;
+  static const IconData iconVisibilityOff = Icons.visibility_off;
 }
