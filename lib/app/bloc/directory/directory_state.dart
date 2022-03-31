@@ -14,39 +14,42 @@ class DirectoryInitial extends DirectoryState {}
 
 class CreateFileDone extends DirectoryState {
   const CreateFileDone({
-    required this.fileName,
+    required this.file,
     required this.path,
+    required this.fileName,
     required this.extension
   });
 
-  final String fileName;
+  final File file;
   final String path;
+  final String fileName;
   final String extension;
 
   @override
   List<Object> get props => [
-    fileName,
+    file,
     path,
+    fileName,
     extension
   ];
 }
 
 class CreateFileFailure extends DirectoryState {
   const CreateFileFailure({
-    required this.filePath,
+    required this.path,
     required this.fileName,
     required this.length,
     required this.error
   });
 
-  final String filePath;
+  final String path;
   final String fileName;
   final int length;
   final String error;
 
   @override
   List<Object> get props => [
-    filePath,
+    path,
     fileName,
     length,
     error
@@ -77,39 +80,55 @@ class WriteToFileInProgress extends DirectoryState {
 
 class WriteToFileDone extends DirectoryState {
   const WriteToFileDone({
-    required this.filePath,
+    required this.path,
     required this.fileName,
     required this.length
   });
 
-  final String filePath;
+  final String path;
   final String fileName;
   final int length;
 
   @override
   List<Object> get props => [
-    filePath,
+    path,
     fileName,
     length
   ];
 }
 
+class WriteToFileCanceled extends DirectoryState {
+  const WriteToFileCanceled({
+    required this.path,
+    required this.fileName
+  });
+
+  final String path;
+  final String fileName;
+
+  @override
+  List<Object> get props => [
+    path,
+    fileName,
+  ];
+}
+
 class WriteToFileFailure extends DirectoryState {
   const WriteToFileFailure({
-    required this.filePath,
+    required this.path,
     required this.fileName,
     required this.length,
     required this.error
   });
 
-  final String filePath;
+  final String path;
   final String error;
   final String fileName;
   final int length;
 
   @override
   List<Object> get props => [
-    filePath,
+    path,
     fileName,
     length,
     error

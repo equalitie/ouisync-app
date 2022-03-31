@@ -10,21 +10,16 @@ class DirectoryRepository with OuiSyncAppLogger {
     String error = '';
 
     File? newFile;
-    int? handle;
-
     try {
       loggy.app('Creating file $newFilePath');
 
       newFile = await File.create(repository, newFilePath);
-      handle = newFile.handle;
     } catch (e, st) {
       loggy.app('Creating file $newFilePath exception', e, st);
       error = e.toString();
-    } finally {
-      await newFile?.close();
     }
 
-    createFileResult = CreateFileResult(functionName: 'createFile', result: handle);
+    createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
     if (error.isNotEmpty) {
       createFileResult.errorMessage = error;
     }
@@ -179,7 +174,7 @@ class DirectoryRepository with OuiSyncAppLogger {
   }
 
   Future<List<BaseItem>> getFolderContents(Repository repository, String path) async {
-    String? error = null;
+    String? error;
 
     final content = <BaseItem>[];
 

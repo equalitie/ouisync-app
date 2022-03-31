@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class BasicResult<T> {
   BasicResult({
@@ -36,7 +36,7 @@ class CreateFileResult extends BasicResult {
   );
 
   final String functionName;
-  final int? result; // File.handle
+  final File? result;
 }
 
 class WriteFileResult extends BasicResult {

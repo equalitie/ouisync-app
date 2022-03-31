@@ -750,6 +750,26 @@ class S {
     );
   }
 
+  /// `{name} writing canceled`
+  String messageWritingFileCanceled(Object name) {
+    return Intl.message(
+      '$name writing canceled',
+      name: 'messageWritingFileCanceled',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Canceling {name} writing...`
+  String messageCancelingFileWriting(Object name) {
+    return Intl.message(
+      'Canceling $name writing...',
+      name: 'messageCancelingFileWriting',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `This function is not available when moving an entry.`
   String get messageMovingEntry {
     return Intl.message(

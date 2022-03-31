@@ -350,7 +350,7 @@ class _MainPageState extends State<MainPage>
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
           context, 
-          bloc: BlocProvider.of<DirectoryBloc>(context), 
+          bloc: BlocProvider.of<DirectoryBloc>(context),
           repository: _repositoriesService.current!.repo, 
           parent: _currentFolder
         ),
@@ -399,6 +399,7 @@ class _MainPageState extends State<MainPage>
         state is CreateFileFailure ||
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
+        state is WriteToFileCanceled ||
         state is WriteToFileFailure);
       },
       builder: (context, state) {
@@ -511,15 +512,19 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is CreateFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageNewFileError(state.filePath));
+          Fluttertoast.showToast(msg: S.current.messageNewFileError(state.path));
         }
 
         if (state is WriteToFileDone) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.filePath));
+          Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.path));
+        }
+
+        if (state is WriteToFileCanceled) {
+          Fluttertoast.showToast(msg: S.current.messageWritingFileCanceled(state.path));
         }
 
         if (state is WriteToFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.filePath));
+          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.path));
         }
       }
     );

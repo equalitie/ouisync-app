@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
+import '../../bloc/blocs.dart';
 import '../../models/models.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
-class FileDescription extends StatelessWidget {
+class FileDescription extends StatelessWidget with OuiSyncAppLogger {
   FileDescription({
     required this.repository,
     required this.fileData
@@ -45,11 +48,12 @@ class FileDescription extends StatelessWidget {
           ),
           Dimensions.spacingVerticalHalf,
           BlocConsumer<DirectoryBloc, DirectoryState>(
-            buildWhen: (previousState, state) {// (context, state) {
+            buildWhen: (previousState, state) {
               if (state is WriteToFileInProgress ||
               state is WriteToFileDone ||
+              state is WriteToFileCanceled ||
               state is WriteToFileFailure){
-                if ((state as dynamic).fileName == this.fileData.name) {
+                if ((state as dynamic).path == this.fileData.path) {
                   return true;
                 }
               }
@@ -58,9 +62,28 @@ class FileDescription extends StatelessWidget {
             },
             builder: (context, state) {
               if (state is WriteToFileInProgress) {
-                if (state.fileName == this.fileData.name) {
+                if (state.path == this.fileData.path) {
                   final progress = state.progress / state.length;
-                  return LinearProgressIndicator(value: progress);
+                  return Row(
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Expanded(child: LinearProgressIndicator(value: progress)),
+                      TextButton(
+                        onPressed: () async {
+                          if (state.path == this.fileData.path) {
+                            Fluttertoast.showToast(msg: S.current.messageCancelingFileWriting(state.fileName));
+                            BlocProvider.of<DirectoryBloc>(context).add(CancelSaveFile(filePath: this.fileData.path));
+                          }
+                        },
+                        child: Text(
+                          S.current.actionCancelCapital,
+                          style: TextStyle(
+                            fontSize: Dimensions.fontSmall
+                          ),
+                        )
+                      ),
+                    ],
+                  );
                 }
               }
 
@@ -68,7 +91,7 @@ class FileDescription extends StatelessWidget {
             },
             listenWhen: (previousState, state) {
               if (state is WriteToFileInProgress) {
-                if (state.fileName == this.fileData.name) {
+                if ((state as dynamic).path == this.fileData.path) {
                   return true;
                 }
               }
@@ -76,7 +99,7 @@ class FileDescription extends StatelessWidget {
             },
             listener: (context, state) {
               if (state is WriteToFileInProgress) {
-                if (state.fileName == this.fileData.name) {
+                if (state.path == this.fileData.path) {
                   _length.value = state.progress;
                 }
               }
