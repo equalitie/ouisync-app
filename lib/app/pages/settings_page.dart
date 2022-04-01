@@ -18,6 +18,7 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
+import 'peer_list.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
@@ -170,22 +171,24 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   onChanged: updateDhtSetting,
                 ),
                 BlocConsumer<ConnectivityCubit, ConnectivityState>(
-                    builder: (context, state) {
-                  return Column(
-                    children: [
-                      _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
-                      _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
-                      _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
-                    ]
-                    .whereType<Widget>()
-                    .toList()
-                  );
-                }, listener: (context, state) {
-                  if (state is ConnectivityChanged) {
-                    _updateLocalEndpoints(
-                        connectivityResult: state.connectivityResult);
-                  }
-                }),
+                  builder: (context, state) {
+                    return Column(
+                      children: [
+                        _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
+                        _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
+                        _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
+                      ]
+                      .whereType<Widget>()
+                      .toList()
+                    );
+                  },
+                  listener: (context, state) {
+                    if (state is ConnectivityChanged) {
+                      _updateLocalEndpoints(
+                          connectivityResult: state.connectivityResult);
+                    }
+                  }),
+                _buildConnectedPeerListRow(),
                 _divider(),
                 _buildLogsSection(),
                 _divider(),
@@ -196,6 +199,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
+
     if (value == null) {
       return null;
     }
@@ -414,6 +418,28 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             ],
           ),
         ]);
+  }
+
+  Widget _buildConnectedPeerListRow() {
+    final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
+
+    return BlocConsumer<PeerSetCubit, PeerSetChanged>(
+      builder: (context, state) =>
+        Fields.labeledButton(
+          label: "Connected peers:",
+          buttonText: state.peers.length.toString(),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) =>
+                BlocProvider.value(
+                  value: peerSetCubit,
+                  child: PeerList()
+                )));
+          })
+      ,
+      listener: (context, state) {
+      });
   }
 
   Widget _buildLogsSection() => Column(

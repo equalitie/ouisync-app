@@ -97,6 +97,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
           ),
           BlocProvider<ConnectivityCubit>(
             create: (BuildContext context) => ConnectivityCubit()
+          ),
+          BlocProvider<PeerSetCubit>(
+            create: (BuildContext context) => PeerSetCubit()
           )
         ],
         child: MainPage(

@@ -75,6 +75,19 @@ class _MainPageState extends State<MainPage>
     void initState() {
       super.initState();
       
+      widget.session.subscribeToNetworkEvents((event) {
+        switch (event) {
+          case NetworkEvent.peerSetChange: {
+            BlocProvider.of<PeerSetCubit>(context).onPeerSetChanged(widget.session);
+          }
+          break;
+          case NetworkEvent.protocolVersionMismatch: {
+            // TODO
+          }
+          break;
+        }
+      });
+
       _repositoriesService.setSubscriptionCallback(_syncCurrentFolder);
 
       _initRepositories()
@@ -983,13 +996,17 @@ class _MainPageState extends State<MainPage>
   }
 
   void settingsAction(reposCubit, dhtStatus) {
-    final connectivityCubit = BlocProvider
-    .of<ConnectivityCubit>(context);
+    final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
+    final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return BlocProvider.value(
-          value: connectivityCubit,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: connectivityCubit),
+            BlocProvider.value(value: peerSetCubit),
+          ],
           child: SettingsPage(
             repositoriesCubit: reposCubit,
             onRepositorySelect: switchRepository,

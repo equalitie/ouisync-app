@@ -220,6 +220,45 @@ class Fields {
     )
   );
 
+  static Widget labeledButton({
+    required String label,
+    required String buttonText,
+    required Function() onPressed,
+    TextAlign labelTextAlign = TextAlign.center,
+    TextOverflow labelTextOverflow = TextOverflow.ellipsis,
+    bool labelSoftWrap = false,
+    double labelFontSize = Dimensions.fontAverage,
+    FontWeight labelFontWeight = FontWeight.bold,
+    Color labelColor = Colors.black,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.clip,
+    EdgeInsets padding: Dimensions.paddingBox,
+    Widget space = Dimensions.spacingHorizontal
+  }) => Padding(
+    padding: padding,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        idLabel(
+          label,
+          textAlign: labelTextAlign,
+          textOverflow: labelTextOverflow,
+          softWrap: labelSoftWrap,
+          fontSize: labelFontSize,
+          fontWeight: labelFontWeight,
+          color: labelColor
+        ),
+        space,
+        RaisedButton(
+          child: Text(buttonText),
+          onPressed: onPressed,
+        )
+      ],
+    )
+  );
+
   static Widget iconLabel({
     required IconData icon,
     required String text,
