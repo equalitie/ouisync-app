@@ -17,15 +17,17 @@ class PeerList extends StatelessWidget {
 
   Widget buildList() =>
     BlocConsumer<PeerSetCubit, PeerSetChanged>(
-      builder: (context, state) =>
-        ListView.builder(
+      builder: (context, state) {
+        return ListView.builder(
           itemCount: state.peers.length,
           itemBuilder: (context, index) => buildRow(state.peers[index])
-        ),
+        );},
       listener: (context, state) {
       });
 
   Widget buildRow(oui.ConnectedPeer peer) {
-    return ListTile(title: Text(peer.endpoint));
+    return ListTile(
+      title: Text("${peer.ip} : ${peer.port}  ${peer.direction}"),
+      trailing: Text("${peer.state}"));
   }
 }
