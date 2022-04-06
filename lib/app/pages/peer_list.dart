@@ -17,7 +17,7 @@ class PeerList extends StatelessWidget {
     BlocConsumer<PeerSetCubit, PeerSetChanged>(
       builder: (context, state) =>
         SingleChildScrollView(
-          // FittexBox to prevent table overflowing the screen.
+          // FittedBox to prevent table overflowing the screen.
           child: FittedBox(
             fit: BoxFit.fitWidth,
             child: DataTable(
