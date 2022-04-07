@@ -78,9 +78,18 @@ fi
 
 input_bundle=./build/app/outputs/bundle/release/app-release.aab
 
+# I noticed that when the apk/aab is created, the process adds libraries for platforms that were not
+# specified below (created while debugging), so better clean the build first.
+# TODO: Consider doing this in a clean container.
+flutter clean
+
+## These are the default targets/platforms, uncomment and edit if needed.
+#platforms_flag="--target-platform android-arm,android-arm64,android-x64"
+
 NO_SIGN="true" \
     flutter build appbundle \
     --release \
+    $platforms_flag \
     --build-number=$build_number \
     --build-name=$build_name-$git_commit
 
