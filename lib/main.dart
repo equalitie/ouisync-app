@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'app/bloc/simpleblocobserver.dart';
@@ -15,14 +14,16 @@ Future<void> main() async {
 
   Loggy.initLoggy();
 
-  final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = '$appDir/${Constants.folderRepositoriesName}';
-  final configDir = '$appDir/${Constants.configuratiosDirName}';
+  final storageType = await Constants.storageType;
+  await Settings.saveSetting(Constants.storageTypeKey, storageType);
 
-  await Settings.initSettings(
-    appDir,
-    repositoriesDir,
-  );
+  print('Storage type: $storageType');
+
+  final configDir = await Constants.configPath;
+  final repositoriesDir = await Constants.reposPath;
+
+  print('Configuration file path: $configDir');
+  print('Repositories path: $repositoriesDir');
 
   final localRepositoriesList = RepositoryHelper
   .localRepositoriesFiles(repositoriesDir) as List<String>;
@@ -44,12 +45,7 @@ Future<void> main() async {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: OuiSyncApp(
-        session: session,
-        appStorageLocation: appDir,
-        repositoriesLocation: repositoriesDir,
-        defaultRepositoryName: latestRepositoryOrDefaultName,
-      )
+      home: OuiSyncApp(session: session)
     )),
     //blocObserver: SimpleBlocObserver(),
   );

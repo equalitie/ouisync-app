@@ -95,7 +95,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   );
 
   Future<List<String>> loadLocalRepositories() async {
-    final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
+    final repositoriesDir = await Constants.reposPath;//await Settings.readSetting(Constants.repositoriesDirKey);
     final repositoryFiles = <String>[];
     if (io.Directory(repositoriesDir).existsSync()) {
       repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => removeParentFromPath(e.path)).toList());

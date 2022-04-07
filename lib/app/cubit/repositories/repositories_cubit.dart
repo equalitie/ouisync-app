@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path/path.dart';
 
 import '../../models/models.dart';
 import '../../services/services.dart';
@@ -12,25 +13,20 @@ import '../../utils/utils.dart';
 part 'repositories_state.dart';
 
 class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogger {
-  RepositoriesCubit({
-    required this.session,
-    required this.appDir,
-    required this.repositoriesDir
-  }) : super(RepositoryPickerInitial());
+  RepositoriesCubit({required this.session}) : super(RepositoryPickerInitial());
 
   final Session session;
-  final String appDir;
-  final String repositoriesDir;
 
   /// Opens a repository in blind mode to allow synchronization, even before the
   /// user unlocks it.
   Future<Repository?> initRepository(String name) async {
-    final store = _buildStoreString(name);
+    final store = await _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
     Repository? blindRepository;
     try {
       blindRepository = await _getRepository(
+        session: this.session,
         store: store,
         password: '',
         shareToken: null,
@@ -48,7 +44,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   void unlockRepository({required String name, required String password}) async {
     emit(RepositoryPickerLoading());
     
-    final store = _buildStoreString(name);
+    final store = await _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
     if (!storeExist) {
@@ -58,6 +54,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     try {
       final repository = await _getRepository(
+        session: this.session,
         store: store,
         password: password,
         shareToken: null,
@@ -80,11 +77,12 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   void openRepository({required String name, String? password, ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
 
-    final store = _buildStoreString(name);
+    final store = await _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
     try {
       final repository = await _getRepository(
+        session: this.session,
         store: store,
         password: password,
         shareToken: shareToken,
@@ -123,7 +121,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
 
-    RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
+    final reposDir = await Constants.reposPath;
+    RepositoryHelper.renameRepositoryFiles(reposDir, 
       oldName: oldName,
       newName: newName
     ); // 3
@@ -148,8 +147,9 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
 
+    final reposDir = await Constants.reposPath;
     RepositoryHelper.deleteRepositoryFiles(
-      repositoriesDir,
+      reposDir,
       repositoryName: repositoryName
     ); // 3
 
@@ -178,10 +178,14 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       NamedRepo(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
   }
 
-  _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';
+  Future<String> _buildStoreString(repositoryName) async {
+    final reposDir = await Constants.reposPath;
+    return join(reposDir, '$repositoryName.db');
+    //  '${this.repositoriesDir}/$repositoryName.db';
+  }
 
-  Future<Repository> _getRepository({required String store, String? password, ShareToken?  shareToken, required bool exist}) => 
+  Future<Repository> _getRepository({required Session session, required String store, String? password, ShareToken?  shareToken, required bool exist}) => 
     exist 
-    ? Repository.open(this.session, store: store, password: password)
-    : Repository.create(this.session, store: store, password: password!, shareToken: shareToken);
+    ? Repository.open(session, store: store, password: password)
+    : Repository.create(session, store: store, password: password!, shareToken: shareToken);
 }

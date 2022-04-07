@@ -34,31 +34,28 @@ class LabeledSwitch extends StatelessWidget {
       onTap: () {
         onChanged(!value);
       },
-      child: Padding(
-        padding: padding,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.clip,
-                softWrap: true,
-                style: TextStyle(
-                  fontSize: Dimensions.fontAverage,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black
-                )
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              label,
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.clip,
+              softWrap: true,
+              style: TextStyle(
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.w600,
+                color: Colors.black
               )
-            ),
-            Switch(
-              value: value,
-              onChanged: (bool newValue) {
-                onChanged(newValue);
-              },
-            ),
-          ],
-        ),
+            )
+          ),
+          Switch(
+            value: value,
+            onChanged: (bool newValue) {
+              onChanged(newValue);
+            },
+          ),
+        ],
       ),
     );
   }

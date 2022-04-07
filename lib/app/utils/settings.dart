@@ -11,16 +11,24 @@ class Settings {
     }
   }
 
-  static Future<void> initSettings(
-    String appDir,
-    String repositoriesDir,
-  ) async {
+  // static Future<void> initSettings(
+  //   String storageType,
+  //   String repositoriesDir,
+  // ) async {
+  //   if (_preferences == null) {
+  //     await _init();
+  //   }
+
+  //   await _preferences!.setString(Constants.storageTypeKey, storageType);
+  //   await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+  // }
+
+  static Future<bool> containsSetting(String key) async {
     if (_preferences == null) {
       await _init();
     }
 
-    await _preferences!.setString(Constants.appDirKey, appDir);
-    await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+    return _preferences!.containsKey(key);
   }
 
   static dynamic readSetting(String key) async {

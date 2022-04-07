@@ -12,17 +12,9 @@ import 'pages/pages.dart';
 import 'utils/loggers/ouisync_app_logger.dart';
 
 class OuiSyncApp extends StatefulWidget {
-  const OuiSyncApp({
-    required this.session,
-    required this.appStorageLocation,
-    required this.repositoriesLocation,
-    required this.defaultRepositoryName,
-  });
+  const OuiSyncApp({required this.session});
 
   final Session session;
-  final String appStorageLocation;
-  final String repositoriesLocation;
-  final String defaultRepositoryName;
 
   @override
   _OuiSyncAppState createState() => _OuiSyncAppState();
@@ -89,20 +81,13 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
             create: (BuildContext context) => DirectoryBloc(directoryRepository: DirectoryRepository()),
           ),
           BlocProvider<RepositoriesCubit>(
-            create: (BuildContext context) => RepositoriesCubit(  
-              session: widget.session,
-              appDir: widget.appStorageLocation,
-              repositoriesDir: widget.repositoriesLocation
-            )
+            create: (BuildContext context) => RepositoriesCubit(session: widget.session)
           ),
           BlocProvider<ConnectivityCubit>(
             create: (BuildContext context) => ConnectivityCubit()
           )
         ],
         child: MainPage(
-          session: widget.session,
-          repositoriesLocation: widget.repositoriesLocation,
-          defaultRepositoryName: widget.defaultRepositoryName,
           intentStream: _sharedMediaStreamController.stream,
         )
       )

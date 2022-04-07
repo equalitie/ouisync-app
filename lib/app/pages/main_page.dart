@@ -25,18 +25,13 @@ typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
 typedef SaveFileCallback = void Function();
+typedef ResetRepositoriesCallback = void Function();
 
 class MainPage extends StatefulWidget {
   const MainPage({
-    required this.session,
-    required this.repositoriesLocation,
-    required this.defaultRepositoryName,
     required this.intentStream
   });
 
-  final Session session;
-  final String repositoriesLocation;
-  final String defaultRepositoryName;
   final Stream<List<SharedMediaFile>> intentStream;
   
   @override
@@ -101,19 +96,26 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> _initRepositories() async {
+      final repositoriesLocation = await Constants.reposPath;
+
+      final localRepositoriesList = RepositoryHelper
+      .localRepositoriesFiles(repositoriesLocation) as List<String>;
+      final latestRepositoryOrDefaultName = await RepositoryHelper
+      .latestRepositoryOrDefault(localRepositoriesList);
+
       final repositoriesCubit = BlocProvider
       .of<RepositoriesCubit>(context);
 
       final initRepos = RepositoryHelper
       .localRepositoriesFiles(
-        widget.repositoriesLocation,
+        repositoriesLocation,
         justNames: true
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
         _repositoriesService.put(
           repoName,
           repo!,
-          setCurrent: (repoName == widget.defaultRepositoryName)
+          setCurrent: (repoName == latestRepositoryOrDefaultName)
         );
       }).toList();
 
@@ -994,11 +996,37 @@ class _MainPageState extends State<MainPage>
             repositoriesCubit: reposCubit,
             onRepositorySelect: switchRepository,
             onShareRepository: shareRepository,
+            resetReposCallback: resetRepositoriesService,
             title: S.current.titleSettings,
             dhtStatus: dhtStatus,
           )
         );
       })
     );
+  }
+
+  void resetRepositoriesService() async {
+    _repositoriesService.setSubscriptionCallback(_syncCurrentFolder);
+
+    // final configDir = await Constants.configDir;  
+    // final hashCode = Global.session!.hashCode;
+    // // try {
+    // //   Global.session.close();  
+    // // } catch (e, st) {
+    // //   loggy.app('Exception closing the session ($hashCode)', e, st);
+    // // }
+    // loggy.app('Old session object: $hashCode');
+
+    // Global.session!.close(); 
+    // final session = await Session.open(configDir);
+    // loggy.app('New session object: ${session.hashCode}');
+
+    // Global.session = session;
+    // loggy.app('Global session object: ${Global.session.hashCode}');
+
+    _initRepositories()
+    .then((_) {
+      initMainPage();
+    });
   }
 }

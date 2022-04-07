@@ -33,7 +33,7 @@ class RepositoryHelper {
 
   static Future<String> latestRepositoryOrDefault(List<String>? localRepositories) async {
     if (localRepositories == null) {
-      final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
+      final repositoriesDir = await Constants.reposPath; //await Settings.readSetting(Constants.repositoriesDirKey);
       localRepositories = localRepositoriesFiles(repositoriesDir) as List<String>;
     }
 
