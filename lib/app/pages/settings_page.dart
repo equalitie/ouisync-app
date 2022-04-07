@@ -622,7 +622,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     Settings.saveSetting(Constants.storageTypeKey, Constants.externalStorage);
 
     // loggy.app('Removing old files on $from');
-    // await Directory(from).delete(recursive: true);
+    await Directory(from).delete(recursive: true);
 
     // loggy.app('Done!');
     // // await _removeDirectoryRecursive(from);
