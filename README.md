@@ -108,6 +108,12 @@ flutter clean
 This will delete the `dart-tools` folder, `android` folder, and `ios` folder.
 
 
+## Run linter
+
+```
+flutter analyze
+```
+
 ## How to build for specific ABIs in Android
 
 In cases in which we only want to build for specifics ABIs on **Android**, we make use of the `local.properties` file.
