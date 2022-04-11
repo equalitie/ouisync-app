@@ -3,38 +3,32 @@ import 'package:ouisync_app/app/utils/utils.dart';
 
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({
-    required this.leadingAppBranding,
-    required this.titleCentralWidget,
+    required this.repoList,
     required this.actionList,
     required this.bottomWidget,
-    required this.bottomPreferredSize,
-    required this.toolbarHeight,
   });
 
-  final Widget? leadingAppBranding;
-  final Widget? titleCentralWidget;
+  final Widget repoList;
   final List<Widget> actionList;
-  final Widget bottomWidget;
-  final Size bottomPreferredSize;
-  final double toolbarHeight;
+  final PreferredSizeWidget bottomWidget;
+  // TODO: Can we get this from the `repoList` widget?
+  final double toolbarHeight = 60;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false,
       toolbarHeight: toolbarHeight,
       shadowColor: Colors.black26,
-      leading: leadingAppBranding,
-      title: titleCentralWidget,
-      titleSpacing: Dimensions.spacingAppBarTitle,
+      title: repoList,
+      // Make the `repoList` have no spacing on the horizontal axis.
+      titleSpacing: 0.0,
       actions: actionList,
-      bottom: PreferredSize(
-        preferredSize: bottomPreferredSize,
-        child: bottomWidget,
-      ),
+      bottom: bottomWidget,
     );
   }
 
   @override
-  Size get preferredSize => bottomPreferredSize;
+  Size get preferredSize => Size(
+      bottomWidget.preferredSize.width,
+      bottomWidget.preferredSize.height + toolbarHeight);
 }

@@ -47,7 +47,6 @@ class Dimensions {
 
   static const AlignmentGeometry alignmentIconButton = Alignment.center;
 
-  static const double spacingAppBarTitle = 0.0;
   static const Widget spacingVerticalHalf = SizedBox(height: 5.0);
   static const Widget spacingVertical = SizedBox(height: 10.0);
   static const Widget spacingVerticalDouble = SizedBox(height: 20.0);
