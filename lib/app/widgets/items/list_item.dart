@@ -54,7 +54,7 @@ class ListItem extends StatelessWidget {
         Expanded(
           flex: 9,
           child: Padding(
-            padding: Dimensions.paddingFileItem,
+            padding: Dimensions.paddingItem,
             child: FileDescription(
               repository: repository,
               fileData: itemData))),
@@ -72,7 +72,7 @@ class ListItem extends StatelessWidget {
         Expanded(
           flex: 9,
           child: Padding(
-            padding: Dimensions.paddingFolderItem,
+            padding: Dimensions.paddingItem,
             child: FolderDescription(folderData: itemData))),
         _getFolderAction(),
       ],
