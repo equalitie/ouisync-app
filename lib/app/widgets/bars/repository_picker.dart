@@ -114,7 +114,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       : name)!;
     });
 
-    if (repository == null && (name?.isEmpty ?? true)) {  
+    if (repository == null && (name?.isEmpty ?? true)) {
       widget.onRepositorySelect.call(null, '', null);
       return;
     }
@@ -137,13 +137,12 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
       border: Border.all(
         color: borderColor,
-        width: 1.0,
         style: BorderStyle.solid
       ),
       color: Colors.white,
     ),
     child: Row(
-      mainAxisSize: MainAxisSize.min,
+      //mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.cloud_outlined,
@@ -157,12 +156,16 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           textOverflow: TextOverflow.fade,
           color: textColor
         ),
-        Fields.actionIcon(
-          const Icon(Icons.keyboard_arrow_down_outlined),
-          onPressed: () async { 
-            await _showRepositorySelector(_repositoryName); 
-          },
-          size: Dimensions.sizeIconSmall,
+        // The icon seems to dictate the height of this whole widget, so trim its height a little.
+        SizedBox(
+          height: 44,
+          child: Fields.actionIcon(
+            const Icon(Icons.keyboard_arrow_down_outlined),
+            onPressed: () async {
+              await _showRepositorySelector(_repositoryName);
+            },
+            size: Dimensions.sizeIconSmall,
+          ),
         )
       ],
     )
@@ -170,7 +173,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
 
   Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
     isScrollControlled: true,
-    context: context, 
+    context: context,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(Dimensions.radiusSmall),

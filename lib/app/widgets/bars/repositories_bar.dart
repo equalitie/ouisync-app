@@ -5,7 +5,7 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoriesBar extends StatelessWidget {
+class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar({
     required this.repositoriesCubit,
     required this.onRepositorySelect,
@@ -44,5 +44,11 @@ class RepositoriesBar extends StatelessWidget {
         ],
       )
     );
+  }
+
+  @override
+  Size get preferredSize {
+    // TODO: This value was found experimentally, can it be done programmatically?
+    return Size.fromHeight(58);
   }
 }

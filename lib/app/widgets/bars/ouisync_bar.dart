@@ -8,16 +8,13 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
     required this.bottomWidget,
   });
 
-  final Widget repoList;
+  final PreferredSizeWidget repoList;
   final List<Widget> actionList;
   final PreferredSizeWidget bottomWidget;
-  // TODO: Can we get this from the `repoList` widget?
-  final double toolbarHeight = 60;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: toolbarHeight,
       shadowColor: Colors.black26,
       title: repoList,
       // Make the `repoList` have no spacing on the horizontal axis.
@@ -29,6 +26,6 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size(
-      bottomWidget.preferredSize.width,
-      bottomWidget.preferredSize.height + toolbarHeight);
+      bottomWidget.preferredSize.width  + repoList.preferredSize.width,
+      bottomWidget.preferredSize.height + repoList.preferredSize.height);
 }
