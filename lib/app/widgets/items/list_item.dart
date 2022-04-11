@@ -11,23 +11,15 @@ class ListItem extends StatelessWidget {
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    required this.secondaryAction,
     required this.filePopupMenu,
     required this.folderDotsAction,
-    this.isEncrypted = false,
-    this.isLocal = true,
-    this.isOwn = true,
   });
 
   final Repository repository;
   final BaseItem itemData;
   final Function mainAction;
-  final Function secondaryAction;
   final PopupMenuButton<dynamic>? filePopupMenu;
   final Function? folderDotsAction;
-  final bool isEncrypted;
-  final bool isLocal;
-  final bool isOwn;
 
   @override
   Widget build(BuildContext context) {

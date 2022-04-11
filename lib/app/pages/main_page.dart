@@ -649,7 +649,6 @@ class _MainPageState extends State<MainPage>
               repository: repository,
               itemData: item,
               mainAction: actionByType,
-              secondaryAction: () => {},
               filePopupMenu: _popupMenu(repository: repository, data: item),
               folderDotsAction: () async {
                 if (_persistentBottomSheetController != null) {
