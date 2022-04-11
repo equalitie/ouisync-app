@@ -426,7 +426,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return BlocConsumer<PeerSetCubit, PeerSetChanged>(
       builder: (context, state) =>
         Fields.labeledButton(
-          label: "Connected peers:",
+          label: S.current.labelConnectedPeers,
           buttonText: state.peers.length.toString(),
           onPressed: () {
             Navigator.push(

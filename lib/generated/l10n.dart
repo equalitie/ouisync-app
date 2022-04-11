@@ -420,6 +420,16 @@ class S {
     );
   }
 
+  /// `Connected peers`
+  String get labelConnectedPeers {
+    return Intl.message(
+      'Connected peers',
+      name: 'labelConnectedPeers',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(

@@ -38,6 +38,7 @@
     "labelRenameRepository":"Ingrese el nuevo nombre",
     "labelEndpoint":"Endpoint: ",
     "labelAppVersion":"Versión de la App: ",
+    "labelConnectedPeers":"Compañeras conectadas: ",
 
     "messageLoadingDefault":"Cargando…",
     "messageLoadingContents":"Cargando los contenidos del directorio…",
