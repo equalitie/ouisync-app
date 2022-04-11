@@ -156,17 +156,14 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           textOverflow: TextOverflow.fade,
           color: textColor
         ),
-        // The icon seems to dictate the height of this whole widget, so trim its height a little.
-        SizedBox(
-          height: 44,
-          child: Fields.actionIcon(
-            const Icon(Icons.keyboard_arrow_down_outlined),
-            onPressed: () async {
-              await _showRepositorySelector(_repositoryName);
-            },
-            size: Dimensions.sizeIconSmall,
-          ),
-        )
+        Fields.actionIcon(
+          const Icon(Icons.keyboard_arrow_down_outlined),
+          onPressed: () async {
+            await _showRepositorySelector(_repositoryName);
+          },
+          size: Dimensions.sizeIconSmall,
+          constraints: BoxConstraints(minWidth: 44, minHeight: 44)
+        ),
       ],
     )
   );
