@@ -15,6 +15,18 @@ class PeerSetChanged extends Equatable {
 
   final List<oui.ConnectedPeer> peers;
 
+  String stats() {
+    final active = peers.fold<int>(0, (prev, peer) {
+      if (peer.state == "Active") {
+        return prev + 1;
+      } else {
+        return prev;
+      }
+    });
+
+    return active.toString() + " / " + peers.length.toString();
+  }
+
   @override
   List<Object> get props => [
     peers,

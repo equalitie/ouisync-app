@@ -425,7 +425,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       builder: (context, state) =>
         Fields.labeledButton(
           label: S.current.labelConnectedPeers,
-          buttonText: state.peers.length.toString(),
+          buttonText: state.stats(),
           onPressed: () {
             Navigator.push(
               context,
