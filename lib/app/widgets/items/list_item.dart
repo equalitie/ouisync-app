@@ -54,10 +54,13 @@ class ListItem extends StatelessWidget {
 
   Widget _buildFileItem() =>
     Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Icon(Icons.insert_drive_file_outlined, size: Dimensions.sizeIconAverage),
         Expanded(
+          flex: 1,
+          child: Icon(Icons.insert_drive_file_outlined, size: Dimensions.sizeIconAverage)),
+        Expanded(
+          flex: 9,
           child: Padding(
             padding: Dimensions.paddingFileItem,
             child: FileDescription(
@@ -71,8 +74,11 @@ class ListItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Icon(Icons.folder_outlined, size: Dimensions.sizeIconBig),
         Expanded(
+          flex: 1,
+          child: Icon(Icons.folder_outlined, size: Dimensions.sizeIconAverage)),
+        Expanded(
+          flex: 9,
           child: Padding(
             padding: Dimensions.paddingFolderItem,
             child: FolderDescription(folderData: itemData))),
@@ -87,9 +93,7 @@ class ListItem extends StatelessWidget {
 
   Widget _getFolderAction() {
     return IconButton(
-      icon: const Icon(
-        Icons.more_vert_rounded,
-        size: Dimensions.sizeIconAverage),
+      icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
       onPressed: () async => await folderDotsAction!.call());
   }
 
