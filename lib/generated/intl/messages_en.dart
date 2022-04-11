@@ -116,7 +116,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
         "labelConnectedPeers":
-            MessageLookupByLibrary.simpleMessage("Connected peers"),
+            MessageLookupByLibrary.simpleMessage("Connected peers: "),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),

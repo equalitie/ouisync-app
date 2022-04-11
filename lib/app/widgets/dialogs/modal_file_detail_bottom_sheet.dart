@@ -44,7 +44,7 @@ class _FileDetailState extends State<FileDetail> {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFileDetails),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconPreview,
             onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
             icon: Icons.preview_rounded,
@@ -54,14 +54,14 @@ class _FileDetailState extends State<FileDetail> {
             onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
             icon: Icons.share_rounded,
           ),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconRename,
             onTap: () => _showNewNameDialog(
               widget.data.path,
             ),
             icon: Icons.edit
           ),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconMove,
             onTap: () => _showMoveEntryBottomSheet(
               widget.data.path,
@@ -71,7 +71,7 @@ class _FileDetailState extends State<FileDetail> {
             ),
             icon: Icons.drive_file_move_outlined,
           ),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconDelete,
             onTap: () async => {
               showDialog<String>(

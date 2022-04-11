@@ -224,39 +224,19 @@ class Fields {
     required String label,
     required String buttonText,
     required Function() onPressed,
-    TextAlign labelTextAlign = TextAlign.center,
-    TextOverflow labelTextOverflow = TextOverflow.ellipsis,
-    bool labelSoftWrap = false,
-    double labelFontSize = Dimensions.fontAverage,
-    FontWeight labelFontWeight = FontWeight.bold,
-    Color labelColor = Colors.black,
-    TextAlign textAlign = TextAlign.start,
-    TextOverflow textOverflow = TextOverflow.clip,
-    EdgeInsets padding: Dimensions.paddingBox,
-    Widget space = Dimensions.spacingHorizontal
-  }) => Padding(
-    padding: padding,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+  }) => Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         idLabel(
           label,
-          textAlign: labelTextAlign,
-          textOverflow: labelTextOverflow,
-          softWrap: labelSoftWrap,
-          fontSize: labelFontSize,
-          fontWeight: labelFontWeight,
-          color: labelColor
+          textAlign: TextAlign.start,
+          fontSize: Dimensions.fontAverage,
         ),
-        space,
-        RaisedButton(
+        OutlineButton(
           child: Text(buttonText),
           onPressed: onPressed,
         )
       ],
-    )
   );
 
   static Widget iconLabel({
@@ -361,34 +341,44 @@ class Fields {
     IconData? icon,
     double iconSize = Dimensions.sizeIconBig,
     Color iconColor = Colors.black,
-    EdgeInsets padding = Dimensions.paddingActionButton,
-    Widget spacing = Dimensions.spacingHorizontal
   }) => GestureDetector(
     onTap: onTap,
-    child: Padding(
-      padding: padding,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+    child: Row(
         children: [
           if (icon != null) _iconBase(
             icon,
             size: iconSize,
             color: iconColor
           ),
-          spacing,
-          constrainedText(text,
+          Dimensions.spacingHorizontal,
+          Text(text,
             textAlign: textAlign,
-            textOverflow: textOverflow,
             softWrap: textSoftWrap,
-            fontSize: textFontSize,
-            fontWeight: textFontWeight,
-            color: textColor
+            overflow: textOverflow,
+            style: TextStyle(
+              fontSize: textFontSize,
+              fontWeight: textFontWeight,
+              color: textColor
+            )
           )
         ],
       )
-    )
   );
+
+  static Widget paddedActionText(String text, {
+    required void Function()? onTap,
+    FontWeight textFontWeight = FontWeight.normal,
+    Color textColor = Colors.black,
+    IconData? icon,
+    Color iconColor = Colors.black,
+  }) => Padding(
+    padding: Dimensions.paddingActionButton,
+    child: actionText(
+      text,
+      onTap: onTap,
+      textFontWeight: textFontWeight,
+      textColor: textColor,
+      icon: icon));
 
   static Widget _textFormFieldBase({
     required BuildContext context,

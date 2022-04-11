@@ -420,10 +420,10 @@ class S {
     );
   }
 
-  /// `Connected peers`
+  /// `Connected peers: `
   String get labelConnectedPeers {
     return Intl.message(
-      'Connected peers',
+      'Connected peers: ',
       name: 'labelConnectedPeers',
       desc: '',
       args: [],

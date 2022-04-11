@@ -44,14 +44,14 @@ class _FolderDetailState extends State<FolderDetail> {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFolderDetails),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconRename,
             onTap: () => _showNewNameDialog(
               widget.data.path,
             ),
             icon: Icons.edit
           ),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconMove,
             onTap: () => _showMoveEntryBottomSheet(
               widget.data.path,
@@ -61,7 +61,7 @@ class _FolderDetailState extends State<FolderDetail> {
             ),
             icon: Icons.drive_file_move_outlined,
           ),
-          Fields.actionText(
+          Fields.paddedActionText(
             S.current.iconDelete,
             onTap: () async => {
               await showDialog<bool>(

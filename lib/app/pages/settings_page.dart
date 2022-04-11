@@ -317,14 +317,15 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             ),
           ),
           Dimensions.spacingVertical,
+          Dimensions.spacingVertical,
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(
-                child: Fields.actionText(S.current.actionRename,
+                Fields.actionText(S.current.actionRename,
                     textFontSize: Dimensions.fontAverage,
                     icon: Icons.edit,
                     iconSize: Dimensions.sizeIconSmall,
-                    spacing: Dimensions.spacingHorizontalHalf, onTap: () async {
+                    onTap: () async {
                   if (_persistedRepository == null) {
                     return;
                   }
@@ -355,27 +356,23 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     }
                   });
                 }),
-              ),
-              Expanded(
-                  child: Fields.actionText(S.current.actionShare,
+              Fields.actionText(S.current.actionShare,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
-                      spacing: Dimensions.spacingHorizontalHalf, onTap: () {
+                      onTap: () {
                 if (_persistedRepository == null) {
                   return;
                 }
 
                 widget.onShareRepository.call();
-              })),
-              Expanded(
-                  child: Fields.actionText(S.current.actionDelete,
+              }),
+              Fields.actionText(S.current.actionDelete,
                       textFontSize: Dimensions.fontAverage,
                       textColor: Colors.red,
                       icon: Icons.delete,
                       iconSize: Dimensions.sizeIconSmall,
                       iconColor: Colors.red,
-                      spacing: Dimensions.spacingHorizontalHalf,
                       onTap: () async {
                 if (_persistedRepository == null) {
                   return;
@@ -414,9 +411,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     widget.repositoriesCubit.deleteRepository(repositoryName);
                   }
                 });
-              }))
+              })
             ],
           ),
+          Dimensions.spacingVertical,
         ]);
   }
 
@@ -450,22 +448,21 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.normal,
                 color: _titlesColor!),
-            Row(children: [
-              Expanded(
-                  child: Fields.actionText(S.current.actionSave,
+            Padding(
+              padding: Dimensions.paddingActionButton,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Fields.actionText(S.current.actionSave,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.save,
                       iconSize: Dimensions.sizeIconSmall,
-                      spacing: Dimensions.spacingHorizontalHalf,
-                      onTap: _saveLogs)),
-              Expanded(
-                  child: Fields.actionText(S.current.actionShare,
+                      onTap: _saveLogs),
+                  Fields.actionText(S.current.actionShare,
                       textFontSize: Dimensions.fontAverage,
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
-                      spacing: Dimensions.spacingHorizontalHalf,
-                      onTap: _shareLogs))
-            ]),
+                      onTap: _shareLogs)])),
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {

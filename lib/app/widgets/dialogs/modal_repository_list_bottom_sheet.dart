@@ -42,15 +42,15 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
                 Fields.bottomSheetTitle(S.current.titleRepositoriesList),
                 _buildRepositoryList(snapshot.data as List<String>, current),
                 Dimensions.spacingActionsVertical,
-                Fields.actionText(
+                Fields.paddedActionText(
                   S.current.iconCreateRepository,
-                  onTap: () => createRepoDialog(this.cubit),
                   icon: Icons.add_circle_outline_rounded,
+                  onTap: () => createRepoDialog(this.cubit),
                 ),
-                Fields.actionText(
+                Fields.paddedActionText(
                   S.current.iconAddRepositoryWithToken,
-                  onTap: () => addRepoWithTokenDialog(this.cubit),
                   icon: Icons.insert_link_rounded,
+                  onTap: () => addRepoWithTokenDialog(this.cubit),
                 ),
               ]
             ),
@@ -69,7 +69,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     itemBuilder: (context, index) {
 
       final repositoryName = repositories[index];
-      return Fields.actionText(
+      return Fields.paddedActionText(
         repositoryName,
         onTap: () { 
           this.cubit.selectRepository(
@@ -78,19 +78,19 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           updateDefaultRepositorySetting(repositoryName);
           Navigator.of(context).pop();
         },
+        // TODO: This doesn't actually say whether the repo is locked or not.
         icon: repositoryName == current
-        ? Icons.lock_open_rounded
-        : Icons.lock,
+          ? Icons.lock_open_rounded
+          : Icons.lock,
         textColor: repositoryName == current
-        ? Colors.black
-        : Colors.black54,
+          ? Colors.black
+          : Colors.black54,
         textFontWeight: repositoryName == current
-        ? FontWeight.bold
-        : FontWeight.normal,
+          ? FontWeight.bold
+          : FontWeight.normal,
         iconColor: repositoryName == current
-        ? Colors.black
-        : Colors.black54
-      );
+          ? Colors.black
+          : Colors.black54);
     }
   );
 
