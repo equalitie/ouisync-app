@@ -71,6 +71,10 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   intl: ^0.17.0
+  # Use this command to generate internationalization files if you're not using
+  # the vscode plugin:
+  # # flutter pub run intl_utils:generate
+  intl_utils:  ^2.6.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
