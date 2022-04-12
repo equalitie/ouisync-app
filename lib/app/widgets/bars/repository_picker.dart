@@ -141,30 +141,33 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       ),
       color: Colors.white,
     ),
-    child: Row(
-      //mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.cloud_outlined,
-          size: Dimensions.sizeIconSmall,
-          color: iconColor,
-        ),
-        Dimensions.spacingHorizontal,
-        Fields.constrainedText(
-          _repositoryName,
-          softWrap: false,
-          textOverflow: TextOverflow.fade,
-          color: textColor
-        ),
-        Fields.actionIcon(
-          const Icon(Icons.keyboard_arrow_down_outlined),
-          onPressed: () async {
-            await _showRepositorySelector(_repositoryName);
-          },
-          size: Dimensions.sizeIconSmall,
-          constraints: BoxConstraints(minWidth: 44, minHeight: 44)
-        ),
-      ],
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async { await _showRepositorySelector(_repositoryName); },
+      child: Row(
+        children: [
+          Icon(
+            Icons.cloud_outlined,
+            size: Dimensions.sizeIconSmall,
+            color: iconColor,
+          ),
+          Dimensions.spacingHorizontal,
+          Fields.constrainedText(
+            _repositoryName,
+            softWrap: false,
+            textOverflow: TextOverflow.fade,
+            color: textColor
+          ),
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(
+              Icons.keyboard_arrow_down_outlined,
+              color: iconColor
+            )
+          ),
+        ]
+      )
     )
   );
 
