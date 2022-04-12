@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
 
-class FolderNavigationBar extends StatelessWidget {
+class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
   final String? _path;
   final Function _action;
 
@@ -17,18 +17,17 @@ class FolderNavigationBar extends StatelessWidget {
     if (path != null) {
       return _routeBar(route: _currentLocationBar(path, _action));
     } else {
-      return _routeBar(
-        route: Row(
-          children: [
-            const Icon(
-              Icons.lock_rounded,
-              color: Colors.black26,
-              size: Dimensions.sizeIconAverage,
-            )
-          ]
-        )
-      );
+      return SizedBox.shrink();
     }
+  }
+
+  @override
+  Size get preferredSize {
+    if (_path == null) {
+      return Size(0.0, 0.0);
+    }
+    // TODO: This value was found experimentally, can it be done programmatically?
+    return Size.fromHeight(51);
   }
 
   static Container _routeBar({ required Widget route })

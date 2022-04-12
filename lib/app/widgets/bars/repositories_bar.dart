@@ -5,7 +5,7 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoriesBar extends StatefulWidget {
+class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar({
     required this.repositoriesCubit,
     required this.onRepositorySelect,
@@ -15,12 +15,6 @@ class RepositoriesBar extends StatefulWidget {
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final ShareRepositoryCallback shareRepositoryOnTap;
-
-  @override
-  State<RepositoriesBar> createState() => _RepositoriesBarState();
-}
-
-class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
@@ -36,19 +30,25 @@ class _RepositoriesBarState extends State<RepositoriesBar> with TickerProviderSt
         children: [
           Expanded(
             child: RepositoryPicker(
-              repositoriesCubit: widget.repositoriesCubit,
-              onRepositorySelect: widget.onRepositorySelect,
+              repositoriesCubit: repositoriesCubit,
+              onRepositorySelect: onRepositorySelect,
               borderColor: Colors.white,
             ),
           ),
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
-            onPressed: widget.shareRepositoryOnTap,
+            onPressed: shareRepositoryOnTap,
             size: Dimensions.sizeIconSmall,
             color: Colors.white,            
           )
         ],
       )
     );
+  }
+
+  @override
+  Size get preferredSize {
+    // TODO: This value was found experimentally, can it be done programmatically?
+    return Size.fromHeight(58);
   }
 }

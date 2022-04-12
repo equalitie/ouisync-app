@@ -11,25 +11,15 @@ class ListItem extends StatelessWidget {
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    required this.secondaryAction,
     required this.filePopupMenu,
     required this.folderDotsAction,
-    this.isDestination = false,
-    this.isEncrypted = false,
-    this.isLocal = true,
-    this.isOwn = true,
   });
 
   final Repository repository;
   final BaseItem itemData;
   final Function mainAction;
-  final Function secondaryAction;
   final PopupMenuButton<dynamic>? filePopupMenu;
   final Function? folderDotsAction;
-  final bool isDestination;
-  final bool isEncrypted;
-  final bool isLocal;
-  final bool isOwn;
 
   @override
   Widget build(BuildContext context) {
@@ -39,60 +29,64 @@ class ListItem extends StatelessWidget {
         splashColor: Colors.blue,
         child: Container(
           padding: Dimensions.paddingListItem,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _getIconByType(),
-              _getExpandedDescriptionByType(),
-              _getActionByType(secondaryAction, filePopupMenu, folderDotsAction, isDestination),
-            ],
-          ),
+          child: _buildItem(),
         )
       ),
       color: Colors.white,
     );
   }
 
-  Widget _getIconByType() {
-    return itemData.type == ItemType.folder
-      ? Icon(
-        Icons.folder_outlined,
-        size: Dimensions.sizeIconBig
-      )
-      : Icon(
-        Icons.insert_drive_file_outlined,
-        size: Dimensions.sizeIconAverage
-      );
+  Widget _buildItem() {
+    if (itemData.type == ItemType.file) {
+      return _buildFileItem();
+    } else {
+      return _buildFolderItem();
+    }
   }
 
-  Expanded _getExpandedDescriptionByType() {
-    return Expanded(
-      flex: 1,
-      child: itemData.type == ItemType.folder
-        ? Padding(
-          padding: Dimensions.paddingFolderItem,
-          child: FolderDescription(folderData: itemData)
-        )
-        : Padding(
-          padding: Dimensions.paddingFileItem,
-          child: FileDescription(
-            repository: repository,
-            fileData: itemData,
-          )
-        )
+  Widget _buildFileItem() =>
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Icon(Icons.insert_drive_file_outlined, size: Dimensions.sizeIconAverage)),
+        Expanded(
+          flex: 9,
+          child: Padding(
+            padding: Dimensions.paddingItem,
+            child: FileDescription(
+              repository: repository,
+              fileData: itemData))),
+        _getFileAction(),
+      ],
+    );
+
+  Widget _buildFolderItem() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Icon(Icons.folder_outlined, size: Dimensions.sizeIconAverage)),
+        Expanded(
+          flex: 9,
+          child: Padding(
+            padding: Dimensions.paddingItem,
+            child: FolderDescription(folderData: itemData))),
+        _getFolderAction(),
+      ],
     );
   }
 
-  Widget _getActionByType(Function secondaryAction, PopupMenuButton<dynamic>? filePopupMenu, Function? folderDotsAction, bool isDestination) {
-    if (isDestination) {
-      return itemData.type == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.arrow_circle_down, size: Dimensions.sizeIconAverage,), onPressed: () => secondaryAction.call())
-        : IconButton(onPressed: null, icon: Container());
-    }
+  Widget _getFileAction() {
+    return filePopupMenu!;
+  }
 
-    return itemData.type == ItemType.folder
-        ? IconButton(icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconAverage,), onPressed: () async => await folderDotsAction!.call())
-        : filePopupMenu!;
+  Widget _getFolderAction() {
+    return IconButton(
+      icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
+      onPressed: () async => await folderDotsAction!.call());
   }
 
 }

@@ -36,8 +36,7 @@ class Dimensions {
   static const EdgeInsets paddingActionsSection = const EdgeInsets.only(top: 20.0);
   static const EdgeInsets paddingActionBox = const EdgeInsets.all(5.0);
   static const EdgeInsets paddingListItem = const EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0) ;
-  static const EdgeInsets paddingFolderItem = const EdgeInsets.only(left: 4.0);
-  static const EdgeInsets paddingFileItem = const EdgeInsets.only(left: 10.0);
+  static const EdgeInsets paddingItem = const EdgeInsets.only(left: 10.0);
   
   static const double actionsDialogPadding = 20.0;
   static const double actionsDialogAvatarRadius = 10.0;
@@ -47,7 +46,6 @@ class Dimensions {
 
   static const AlignmentGeometry alignmentIconButton = Alignment.center;
 
-  static const double spacingAppBarTitle = 0.0;
   static const Widget spacingVerticalHalf = SizedBox(height: 5.0);
   static const Widget spacingVertical = SizedBox(height: 10.0);
   static const Widget spacingVerticalDouble = SizedBox(height: 20.0);

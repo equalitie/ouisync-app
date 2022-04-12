@@ -319,6 +319,7 @@ class Fields {
     Color color = Colors.black,
     bool autofocus = false,
     String? tooltip,
+    BoxConstraints? constraints,
   }) => IconButton(
     icon: icon,
     iconSize: size,
@@ -328,6 +329,7 @@ class Fields {
     autofocus: autofocus,
     tooltip: tooltip,
     onPressed: onPressed,
+    constraints: constraints,
   );
 
   static Widget actionText(String text, {

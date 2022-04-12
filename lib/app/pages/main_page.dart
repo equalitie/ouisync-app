@@ -203,7 +203,7 @@ class _MainPageState extends State<MainPage>
       )); 
     }
 
-    Widget _buildNavigationBar() {
+    PreferredSizeWidget _buildNavigationBar() {
       final current = _repositoriesService.current;
 
       if (current == null || current.repo.accessMode == AccessMode.blind) {
@@ -313,12 +313,9 @@ class _MainPageState extends State<MainPage>
     }
 
     _buildOuiSyncBar() => OuiSyncBar(
-      leadingAppBranding: null,
-      titleCentralWidget: _buildRepositoriesBar(),
+      repoList: _buildRepositoriesBar(),
       actionList: _buildActionList(),
       bottomWidget: _buildNavigationBar(),
-      bottomPreferredSize: Size.fromHeight(120.0),
-      toolbarHeight: 90.0,
     );
 
     RepositoriesBar _buildRepositoriesBar() {
@@ -649,7 +646,6 @@ class _MainPageState extends State<MainPage>
               repository: repository,
               itemData: item,
               mainAction: actionByType,
-              secondaryAction: () => {},
               filePopupMenu: _popupMenu(repository: repository, data: item),
               folderDotsAction: () async {
                 if (_persistentBottomSheetController != null) {
