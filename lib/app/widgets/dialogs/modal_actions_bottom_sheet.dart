@@ -51,6 +51,7 @@ class DirectoryActions extends StatelessWidget {
   Widget _buildAction({name, icon, action}) => Padding(
     padding: Dimensions.paddingBottomSheetActions,
     child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: action,
       child: Column(
         children: [

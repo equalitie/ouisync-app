@@ -344,6 +344,7 @@ class Fields {
     double iconSize = Dimensions.sizeIconBig,
     Color iconColor = Colors.black,
   }) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Row(
         children: [
