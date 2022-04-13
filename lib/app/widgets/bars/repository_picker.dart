@@ -141,8 +141,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       ),
       color: Colors.white,
     ),
-    child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    child: InkWell(
       onTap: () async { await _showRepositorySelector(_repositoryName); },
       child: Row(
         children: [
