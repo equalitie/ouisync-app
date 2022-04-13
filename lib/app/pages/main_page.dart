@@ -197,7 +197,7 @@ class _MainPageState extends State<MainPage>
     PreferredSizeWidget _buildNavigationBar() {
       final current = _repositoriesService.current;
 
-      if (current == null || current.repo.accessMode == AccessMode.blind) {
+      if (current == null || current.accessMode == AccessMode.blind) {
         return FolderNavigationBar(null, () {});
       }
 
@@ -229,17 +229,19 @@ class _MainPageState extends State<MainPage>
     );
 
     void _syncCurrentFolder(String repositoryName) { 
-      if (!_repositoriesService.hasCurrent) {
+      final current = _repositoriesService.current;
+
+      if (current == null) {
         return;
       }
 
-      if (_repositoriesService.current!.name != repositoryName) {
+      if (current.name != repositoryName) {
         return;
       }
 
-      if (_repositoriesService.current!.repo.accessMode != AccessMode.blind) {
+      if (current.accessMode != AccessMode.blind) {
         getContents(
-          repository: _repositoriesService.current!,
+          repository: current,
           path: _currentFolder,
         ); 
       }
@@ -301,13 +303,15 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      if (_repositoriesService.hasCurrent) {
+      final current = _repositoriesService.current;
+
+      if (current != null) {
         final parent = getParentSection(_currentFolder);
 
         BlocProvider
         .of<DirectoryBloc>(context)
         .add(NavigateTo(
-          repository: _repositoriesService.current!,
+          repository: current,
           origin: _currentFolder,
           destination: parent,
           withProgress: true
