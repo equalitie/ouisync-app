@@ -1,7 +1,13 @@
+import 'dart:io';
+
 class Strings {
   Strings._();
 
-  static const String rootPath = '/';
+
+  static String get rootPath {
+    return Platform.isWindows ? '\\' : '/';
+  }
+  //static const String rootPath = '/';
   static const String atSymbol = '@';
 
   // Dialogs
