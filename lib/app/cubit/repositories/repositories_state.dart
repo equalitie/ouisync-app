@@ -14,30 +14,26 @@ class RepositoryPickerLoading extends RepositoryPickerState {}
 class RepositoryPickerSelection extends RepositoryPickerState {
   const RepositoryPickerSelection(this.named_repo);
 
-  final NamedRepo? named_repo;
+  final NamedRepo named_repo;
 
   @override
   List<Object?> get props => [
-    named_repo?.repo,
-    named_repo?.name
+    named_repo,
   ];
 }
 
 class RepositoryPickerUnlocked extends RepositoryPickerState {
   const RepositoryPickerUnlocked({
-    required this.repository,
-    required this.repositoryName,
+    required this.named_repo,
     required this.previousAccessMode
   });
 
-  final Repository repository;
-  final String repositoryName;
+  final NamedRepo named_repo;
   final AccessMode previousAccessMode;
 
   @override
   List<Object?> get props => [
-    repository,
-    repositoryName,
+    named_repo,
     previousAccessMode
   ];
 }

@@ -9,14 +9,12 @@ import '../widgets.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
-    required this.repository,
     required this.itemData,
     required this.mainAction,
     required this.filePopupMenu,
     required this.folderDotsAction,
   });
 
-  final NamedRepo repository;
   final BaseItem itemData;
   final Function mainAction;
   final PopupMenuButton<dynamic>? filePopupMenu;

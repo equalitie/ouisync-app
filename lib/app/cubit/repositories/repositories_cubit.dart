@@ -67,8 +67,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
       emit(RepositoryPickerUnlocked(
-        repository: repository,
-        repositoryName: name,
+        named_repo: NamedRepo(name, repository),
         previousAccessMode: repository.accessMode
       ));
     } catch (e, st) {
