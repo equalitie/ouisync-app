@@ -102,7 +102,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       int offset = 0;
       try {
         final stream = event.fileByteStream
-        .takeWhile((element) => _cancelFileWriting != event.newFilePath);
+        .takeWhile((element) { 
+          if (_cancelFileWriting.isEmpty) { return true; }
+          return _cancelFileWriting != event.newFilePath;
+        });
         
         await for (final buffer in stream) {
           await file.write(offset, buffer);
@@ -129,6 +132,16 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         await file.close();
       }
 
+      if (_cancelFileWriting.isEmpty) {
+        emit(WriteToFileDone(
+          path: event.newFilePath,
+          fileName: event.fileName,
+          length: event.length
+        ));
+
+        return;
+      }
+
       if (_cancelFileWriting == event.newFilePath) {
         loggy.app('${event.newFilePath} writing canceled by the user');
         
@@ -136,15 +149,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
           path: event.newFilePath,
           fileName: event.fileName,
         ));
-
-        return;
       }
-
-      emit(WriteToFileDone(
-        path: event.newFilePath,
-        fileName: event.fileName,
-        length: event.length
-      ));
     }
   }
 
