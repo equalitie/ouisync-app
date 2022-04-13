@@ -3,12 +3,14 @@ import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cross_file/src/types/interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -260,7 +262,24 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: _mainState,
+          child: DropTarget(
+            onDragDone: (detail) {
+              loggy.app('onDropDone: ${detail.files.first.path}');
+              
+              final xFile = detail.files.firstOrNull;
+              if (xFile != null) {
+                final file = io.File(xFile.path);
+                saveMedia(droppedMediaFile: file);
+              }
+            },
+            onDragEntered: (detail) {
+              loggy.app('onDropEntered: ${detail.localPosition}');
+            },
+            onDragExited: (detail) {
+              loggy.app('onDropExited: ${detail.localPosition}');
+            },
+            child: _mainState
+          ),
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),
@@ -275,10 +294,7 @@ class _MainPageState extends State<MainPage>
 
         if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
           lastExitAttempt = now;
-          Fluttertoast.showToast(
-            msg: S.current.messageExitOuiSync,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER);
+          showSnackBar(context, content: Text(S.current.messageExitOuiSync));
 
           // Don't pop => don't exit
           return false;
@@ -475,7 +491,8 @@ class _MainPageState extends State<MainPage>
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
           loggy.app(errorMessage);
-          Fluttertoast.showToast(msg: errorMessage);
+          //Fluttertoast.showToast(msg: errorMessage);
+          showSnackBar(context, content: Text(errorMessage));
 
           updateCurrentFolder(path: destination);
           navigateToPath(
@@ -525,19 +542,22 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is CreateFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageNewFileError(state.path));
+          showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
         }
 
         if (state is WriteToFileDone) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.path));
+          //Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.path));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileDone(state.path))));
         }
 
         if (state is WriteToFileCanceled) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileCanceled(state.path));
+          //Fluttertoast.showToast(msg: S.current.messageWritingFileCanceled(state.path));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileCanceled(state.path))));
         }
 
         if (state is WriteToFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.path));
+          //Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.path));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileError(state.path))));
         }
       }
     );
@@ -832,6 +852,82 @@ class _MainPageState extends State<MainPage>
         newDestinationPath: newDestinationPath
       )
     );
+  }
+
+  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
+    if (!_repositoriesService.hasCurrent) {
+      //Fluttertoast.showToast(msg: S.current.messageNoRepo);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageNoRepo)));
+      return;
+    }
+
+    if (mobileSharedMediaFile == null &&
+    droppedMediaFile == null) {
+      //Fluttertoast.showToast(msg: S.current.mesageNoMediaPresent);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.mesageNoMediaPresent)));
+      return;
+    }
+
+    String? accessModeMessage = _repositoriesService.current!.repo.accessMode == AccessMode.blind
+    ? S.current.messageAddingFileToLockedRepository
+    : _repositoriesService.current!.repo.accessMode == AccessMode.read
+    ? S.current.messageAddingFileToReadRepository
+    : null;
+
+    if (accessModeMessage != null) {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (context) {
+          return AlertDialog(
+            title: Text(S.current.titleAddFile),
+            content: SingleChildScrollView(
+              child: ListBody(children: [
+                Text(accessModeMessage)
+              ]),
+            ),
+            actions: [
+              TextButton(
+                child: Text(S.current.actionCloseCapital),
+                onPressed: () => 
+                Navigator.of(context).pop(),
+              )
+            ],
+          );
+      });
+
+      return;
+    }
+
+    final String? path = mobileSharedMediaFile?.path ?? droppedMediaFile?.path;
+    if (path == null) {
+      return;
+    }
+
+    loggy.app('Media path: $path');
+    saveFileToOuiSync(path);
+  }
+
+  void saveFileToOuiSync(String path) {
+    final fileName = getPathFromFileName(path);
+    final length = io.File(path).statSync().size;
+    final filePath = _currentFolder == Strings.rootPath
+    ? '/$fileName'
+    : '$_currentFolder/$fileName';
+    final fileByteStream = io.File(path).openRead();
+        
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      SaveFile(
+        repository: _repositoriesService.current!.repo,
+        newFilePath: filePath,
+        fileName: fileName,
+        length: length,
+        fileByteStream: fileByteStream
+      )
+    );
+
+    Navigator.of(context).pop();
   }
 
   void saveSharedMedia() async {

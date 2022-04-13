@@ -71,7 +71,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
                       TextButton(
                         onPressed: () async {
                           if (state.path == this.fileData.path) {
-                            Fluttertoast.showToast(msg: S.current.messageCancelingFileWriting(state.fileName));
+                            showSnackBar(context, content: Text(S.current.messageCancelingFileWriting(state.fileName)));
                             BlocProvider.of<DirectoryBloc>(context).add(CancelSaveFile(filePath: this.fileData.path));
                           }
                         },
