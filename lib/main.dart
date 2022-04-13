@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import 'app/app.dart';
 import 'app/bloc/simpleblocobserver.dart';
@@ -16,8 +17,12 @@ Future<void> main() async {
   Loggy.initLoggy();
 
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = '$appDir/${Constants.folderRepositoriesName}';
-  final configDir = '$appDir/${Constants.configuratiosDirName}';
+  final repositoriesDir = p.join(appDir, Constants.folderRepositoriesName);
+  final configDir = p.join(appDir, Constants.configuratiosDirName);
+
+  print(appDir);
+  print(repositoriesDir);
+  print(configDir);
 
   await Settings.initSettings(
     appDir,
