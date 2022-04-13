@@ -10,13 +10,11 @@ import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with OuiSyncAppLogger {
   FileDescription({
-    required this.repository,
     required this.fileData
   }) {
     _length.value = fileData.size;
   }
 
-  final Repository repository;
   final BaseItem fileData;
 
   final ValueNotifier<int> _length = ValueNotifier<int>(0);

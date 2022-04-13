@@ -3,6 +3,7 @@ import 'package:ouisync_app/app/bloc/blocs.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
+import '../../models/named_repo.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -15,7 +16,7 @@ class ListItem extends StatelessWidget {
     required this.folderDotsAction,
   });
 
-  final Repository repository;
+  final NamedRepo repository;
   final BaseItem itemData;
   final Function mainAction;
   final PopupMenuButton<dynamic>? filePopupMenu;
@@ -55,9 +56,7 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(
-              repository: repository,
-              fileData: itemData))),
+            child: FileDescription(fileData: itemData))),
         _getFileAction(),
       ],
     );

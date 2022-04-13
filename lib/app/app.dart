@@ -86,7 +86,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<DirectoryBloc>(
-            create: (BuildContext context) => DirectoryBloc(directoryRepository: DirectoryRepository()),
+            create: (BuildContext context) => DirectoryBloc(),
           ),
           BlocProvider<RepositoriesCubit>(
             create: (BuildContext context) => RepositoriesCubit(  

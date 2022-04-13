@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import '../../models/named_repo.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -13,7 +14,7 @@ class CreateFolder extends DirectoryEvent {
   }) : 
   assert(newFolderPath != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final String parentPath;
   final String newFolderPath;
 
@@ -31,7 +32,7 @@ class GetContent extends DirectoryEvent {
     required this.path,
   });
 
-  final Repository repository;
+  final NamedRepo repository;
   final String path;
 
   @override
@@ -51,7 +52,7 @@ class DeleteFolder extends DirectoryEvent {
   }) :
   assert (path != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final String parentPath;
   final String path;
   final bool recursive;
@@ -77,7 +78,7 @@ class NavigateTo extends DirectoryEvent {
   assert (origin != ''),
   assert (destination != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final AccessMode? previousAccessMode;
   final String origin;
   final String destination;
@@ -102,7 +103,7 @@ class SaveFile extends DirectoryEvent {
     required this.fileByteStream
   });
 
-  final Repository repository;
+  final NamedRepo repository;
   final String newFilePath;
   final String fileName;
   final int length;
@@ -140,7 +141,7 @@ class RenameEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newEntryPath != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final String path;
   final String entryPath;
   final String newEntryPath;
@@ -167,7 +168,7 @@ class MoveEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newDestinationPath != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final String origin;
   final String destination;
   final String entryPath;
@@ -192,7 +193,7 @@ class DeleteFile extends DirectoryEvent {
   }) :
   assert (filePath != '');
 
-  final Repository repository;
+  final NamedRepo repository;
   final String parentPath;
   final String filePath;
 

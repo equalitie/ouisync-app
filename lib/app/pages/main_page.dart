@@ -174,7 +174,7 @@ class _MainPageState extends State<MainPage>
     updateCurrentFolder({required String path}) => setState(() { _currentFolder = path; });
 
     getContents({
-      required Repository repository,
+      required NamedRepo repository,
       required String path,
     }) { 
       BlocProvider
@@ -186,7 +186,7 @@ class _MainPageState extends State<MainPage>
     }
 
     navigateToPath({
-      required Repository repository,
+      required NamedRepo repository,
       AccessMode? previousAccessMode,
       required String origin,
       required String destination,
@@ -210,7 +210,7 @@ class _MainPageState extends State<MainPage>
         return FolderNavigationBar(null, () {});
       }
 
-      final repository = current.repo;
+      final repository = current;
       final destination = _currentFolder;
 
       return FolderNavigationBar(destination,
@@ -230,7 +230,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> refreshCurrent({
-      required Repository repository,
+      required NamedRepo repository,
       required String path
     }) async => getContents(
       repository: repository,
@@ -248,7 +248,7 @@ class _MainPageState extends State<MainPage>
 
       if (_repositoriesService.current!.repo.accessMode != AccessMode.blind) {
         getContents(
-          repository: _repositoriesService.current!.repo,
+          repository: _repositoriesService.current!,
           path: _currentFolder,
         ); 
       }
@@ -316,7 +316,7 @@ class _MainPageState extends State<MainPage>
         BlocProvider
         .of<DirectoryBloc>(context)
         .add(NavigateTo(
-          repository: _repositoriesService.current!.repo,
+          repository: _repositoriesService.current!,
           origin: _currentFolder,
           destination: parent,
           withProgress: true
@@ -400,7 +400,7 @@ class _MainPageState extends State<MainPage>
       switchMainState(newState: _repositoryContentBuilder());
 
       navigateToPath(
-        repository: _repositoriesService.current!.repo,
+        repository: _repositoriesService.current!,
         previousAccessMode: previousAccessMode,
         origin: Strings.root,
         destination: Strings.root,
@@ -447,7 +447,7 @@ class _MainPageState extends State<MainPage>
           if (state.error == Strings.errorEntryNotFound) {
             final parent = getParentSection(_currentFolder);
             return _contentsList(
-              repository: _repositoriesService.current!.repo,
+              repository: _repositoriesService.current!,
               path: parent,
             );
           }
@@ -455,7 +455,7 @@ class _MainPageState extends State<MainPage>
           return _errorState(
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
-              repository: _repositoriesService.current!.repo,
+              repository: _repositoriesService.current!,
               path: _currentFolder
             )
           );
@@ -465,7 +465,7 @@ class _MainPageState extends State<MainPage>
           return _errorState(
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
-              repository: _repositoriesService.current!.repo,
+              repository: _repositoriesService.current!,
               path: _currentFolder
             )
           );
@@ -474,7 +474,7 @@ class _MainPageState extends State<MainPage>
         return _errorState(
           message: S.current.messageErrorLoadingContents,
           actionReload: () => refreshCurrent(
-            repository: _repositoriesService.current!.repo,
+            repository: _repositoriesService.current!,
             path: _currentFolder
           )
         );
@@ -490,7 +490,7 @@ class _MainPageState extends State<MainPage>
 
           updateCurrentFolder(path: destination);
           navigateToPath(
-            repository: _repositoriesService.current!.repo,
+            repository: _repositoriesService.current!,
             origin: parent,
             destination: destination,
             withProgress: true
@@ -564,7 +564,7 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      if (current.repo.accessMode == AccessMode.blind) {
+      if (current.accessMode == AccessMode.blind) {
         return LockedRepositoryState(
           repositoryName: current.name,
           onUnlockPressed: unlockRepositoryDialog,
@@ -579,7 +579,7 @@ class _MainPageState extends State<MainPage>
       }
 
       return _contentsList(
-        repository: current.repo,
+        repository: current,
         path: _currentFolder
       );
     }
@@ -609,7 +609,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _contentsList({
-      required Repository repository,
+      required NamedRepo repository,
       required String path
     }) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
@@ -689,7 +689,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _popupMenu({
-      required Repository repository,
+      required NamedRepo repository,
       required BaseItem data
     }) { 
       final availableActions = repository.accessMode == AccessMode.write
@@ -705,7 +705,7 @@ class _MainPageState extends State<MainPage>
       return Dialogs
       .filePopupMenu(
         context,
-        repository,
+        repository.repo,
         BlocProvider. of<DirectoryBloc>(context),
         availableActions
       );
@@ -739,7 +739,7 @@ class _MainPageState extends State<MainPage>
     );
 
     Future<dynamic> _showFileDetails({
-      required Repository repository,
+      required NamedRepo repository,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
@@ -768,7 +768,7 @@ class _MainPageState extends State<MainPage>
     );
 
     Future<dynamic> _showFolderDetails({
-      required Repository repository,
+      required NamedRepo repository,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
@@ -833,7 +833,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       MoveEntry(
-        repository: _repositoriesService.current!.repo,
+        repository: _repositoriesService.current!,
         origin: origin,
         destination: _currentFolder,
         entryPath: path,
@@ -903,7 +903,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       SaveFile(
-        repository: _repositoriesService.current!.repo,
+        repository: _repositoriesService.current!,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
@@ -965,7 +965,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       SaveFile(
-        repository: _repositoriesService.current!.repo,
+        repository: _repositoriesService.current!,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
