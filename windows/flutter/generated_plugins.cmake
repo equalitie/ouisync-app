@@ -4,7 +4,9 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus_windows
+  desktop_drop
   network_info_plus_windows
+  ouisync_plugin
   r_get_ip
   url_launcher_windows
 )
