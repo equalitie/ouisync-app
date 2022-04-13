@@ -35,7 +35,7 @@ class PeerList extends StatelessWidget {
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(peer.ip)),
-        DataCell(Text(peer.port)),
+        DataCell(Text(peer.port.toString())),
         DataCell(Text(peer.direction)),
         DataCell(Align(alignment: Alignment.centerRight, child: Text(peer.state))),
       ],

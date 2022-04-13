@@ -505,6 +505,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.3"
+  messagepack:
+    dependency: transitive
+    description:
+      name: messagepack
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   meta:
     dependency: transitive
     description:
