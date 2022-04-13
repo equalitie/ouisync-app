@@ -149,15 +149,6 @@ class _MainPageState extends State<MainPage>
       .selectRepository(_repositoriesService.current);
     }
 
-    Future<void> unlockRepository(String repositoryName, String password) async {
-      BlocProvider
-      .of<RepositoriesCubit>(context)
-      .openRepository(
-        name: repositoryName,
-        password: password
-      );
-    }
-
     void handleShareIntentPayload(
       List<SharedMediaFile> payload
     ) {
