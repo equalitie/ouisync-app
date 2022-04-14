@@ -4,11 +4,11 @@ import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 
-class NamedRepo with OuiSyncAppLogger {
+class RepoState with OuiSyncAppLogger {
   String name;
   Repository repo;
 
-  NamedRepo(this.name, this.repo);
+  RepoState(this.name, this.repo);
 
   AccessMode get accessMode => repo.accessMode;
 
@@ -18,7 +18,7 @@ class NamedRepo with OuiSyncAppLogger {
   bool operator==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is NamedRepo &&
+    return other is RepoState &&
       other.repo == repo &&
       other.name == name;
   }

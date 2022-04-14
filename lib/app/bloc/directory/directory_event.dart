@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import '../../models/named_repo.dart';
+import '../../models/repo_state.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -14,7 +14,7 @@ class CreateFolder extends DirectoryEvent {
   }) : 
   assert(newFolderPath != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String parentPath;
   final String newFolderPath;
 
@@ -32,7 +32,7 @@ class GetContent extends DirectoryEvent {
     required this.path,
   });
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String path;
 
   @override
@@ -52,7 +52,7 @@ class DeleteFolder extends DirectoryEvent {
   }) :
   assert (path != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String parentPath;
   final String path;
   final bool recursive;
@@ -78,7 +78,7 @@ class NavigateTo extends DirectoryEvent {
   assert (origin != ''),
   assert (destination != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final AccessMode? previousAccessMode;
   final String origin;
   final String destination;
@@ -103,7 +103,7 @@ class SaveFile extends DirectoryEvent {
     required this.fileByteStream
   });
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String newFilePath;
   final String fileName;
   final int length;
@@ -141,7 +141,7 @@ class RenameEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newEntryPath != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String path;
   final String entryPath;
   final String newEntryPath;
@@ -168,7 +168,7 @@ class MoveEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newDestinationPath != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String origin;
   final String destination;
   final String entryPath;
@@ -193,7 +193,7 @@ class DeleteFile extends DirectoryEvent {
   }) :
   assert (filePath != '');
 
-  final NamedRepo repository;
+  final RepoState repository;
   final String parentPath;
   final String filePath;
 

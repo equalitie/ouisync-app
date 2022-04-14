@@ -49,9 +49,9 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerSelection) {
-          final color = state.named_repo == null
+          final color = state.repo == null
             ? colorLockedRepo
-            : state.named_repo.accessMode != AccessMode.blind
+            : state.repo.accessMode != AccessMode.blind
               ? colorUnlockedRepo
               : colorLockedRepo;
 
@@ -63,7 +63,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerUnlocked) {
-          final color = state.named_repo.accessMode != AccessMode.blind
+          final color = state.repo.accessMode != AccessMode.blind
           ? colorUnlockedRepo
           : colorLockedRepo;
 
@@ -87,14 +87,14 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
           _updateCurrentRepository(
-            repository: state.named_repo.repo,
-            name: state.named_repo.name
+            repository: state.repo.repo,
+            name: state.repo.name
           );
         }
         if (state is RepositoryPickerUnlocked) {
           _updateCurrentRepository(
-            repository: state.named_repo.repo,
-            name: state.named_repo.name,
+            repository: state.repo.repo,
+            name: state.repo.name,
             previousAccessMode: state.previousAccessMode);
         }
         if (state is RepositoryPickerInitial) {

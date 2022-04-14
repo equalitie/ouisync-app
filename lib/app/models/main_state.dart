@@ -1,7 +1,7 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
-import '../models/named_repo.dart';
+import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
 class MainState with OuiSyncAppLogger {
@@ -14,7 +14,7 @@ class MainState with OuiSyncAppLogger {
   
   String? _currentRepoName;
 
-  NamedRepo? get current {
+  RepoState? get current {
     if (_currentRepoName == null) {
       return null;
     } else {
@@ -22,8 +22,8 @@ class MainState with OuiSyncAppLogger {
     }
   }
 
-  Iterable<NamedRepo> get repos
-    => _repos.entries.map((entry) => NamedRepo(entry.key, entry.value));
+  Iterable<RepoState> get repos
+    => _repos.entries.map((entry) => RepoState(entry.key, entry.value));
 
   setCurrent(String name) {
     _updateCurrentRepository(name, _repos[name]);
@@ -57,10 +57,10 @@ class MainState with OuiSyncAppLogger {
     return _repos[name];
   }
 
-  NamedRepo? getNamed(String name) {
+  RepoState? getNamed(String name) {
     final repo = _repos[name];
     if (repo == null) return null;
-    return NamedRepo(name, repo);
+    return RepoState(name, repo);
   }
 
   void put(String name, Repository newRepo, { bool setCurrent = false }) {

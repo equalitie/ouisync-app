@@ -4,8 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../models/models.dart';
 import '../../models/main_state.dart';
+import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
@@ -67,7 +67,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
       emit(RepositoryPickerUnlocked(
-        named_repo: NamedRepo(name, repository),
+        repo: RepoState(name, repository),
         previousAccessMode: repository.accessMode
       ));
     } catch (e, st) {
@@ -92,18 +92,18 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
-      emit(RepositoryPickerSelection(NamedRepo(name, repository)));
+      emit(RepositoryPickerSelection(RepoState(name, repository)));
     } catch (e, st) {
       loggy.app('Open repository $name exception', e, st);
       emit(RepositoriesFailure());
     }
   }
 
-  void selectRepository(NamedRepo? namedRepo) async {
-    if (namedRepo == null) {
+  void selectRepository(RepoState? repo) async {
+    if (repo == null) {
       emit(RepositoryPickerInitial());
     } else {
-      emit(RepositoryPickerSelection(namedRepo));
+      emit(RepositoryPickerSelection(repo));
     }
   }
 
@@ -142,7 +142,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     final repository = await initRepository(newName);
 
-    emit(RepositoryPickerSelection(NamedRepo(newName, repository!))); // 6
+    emit(RepositoryPickerSelection(RepoState(newName, repository!))); // 6
   }
 
   /// Deletes a repository
@@ -201,7 +201,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     );
 
     emit(RepositoryPickerSelection(
-      NamedRepo(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
+      RepoState(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
   }
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';

@@ -12,8 +12,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
-import '../models/models.dart';
 import '../models/main_state.dart';
+import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -42,7 +42,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   MainState _mainState = MainState();
 
-  NamedRepo? _persistedRepository;
+  RepoState? _currentRepo;
 
   String? _listenerEndpoint;
   String? _dhtEndpointV4;
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _persistedRepository = _mainState.current;
+      _currentRepo = _mainState.current;
     });
   }
 
@@ -275,17 +275,17 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _persistedRepository = _mainState.current!;
+                      _currentRepo = _mainState.current!;
                     });
                   }
                 },
-                child: DropdownButton<NamedRepo?>(
+                child: DropdownButton<RepoState?>(
                   isExpanded: true,
-                  value: _persistedRepository,
+                  value: _currentRepo,
                   underline: SizedBox(),
-                  items: _mainState.repos.map((NamedRepo namedRepo) {
+                  items: _mainState.repos.map((RepoState repo) {
                     return DropdownMenuItem(
-                      value: namedRepo,
+                      value: repo,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           Dimensions.spacingVerticalHalf,
                           Row(
                             children: [
-                              Fields.constrainedText(namedRepo.name,
+                              Fields.constrainedText(repo.name,
                                   fontWeight: FontWeight.normal),
                             ],
                           ),
@@ -305,12 +305,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       ),
                     );
                   }).toList(),
-                  onChanged: (namedRepo) async {
-                    loggy.app('Selected repository: ${namedRepo?.name}');
+                  onChanged: (repo) async {
+                    loggy.app('Selected repository: ${repo?.name}');
                     setState(() {
-                      _persistedRepository = namedRepo;
+                      _currentRepo = repo;
                     });
-                    _mainState.setCurrent(_persistedRepository!.name);
+                    _mainState.setCurrent(_currentRepo!.name);
                   },
                 ),
               ),
@@ -326,7 +326,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     icon: Icons.edit,
                     iconSize: Dimensions.sizeIconSmall,
                     onTap: () async {
-                  if (_persistedRepository == null) {
+                  if (_currentRepo == null) {
                     return;
                   }
 
@@ -345,9 +345,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
-                      final oldName = _persistedRepository!.name;
+                      final oldName = _currentRepo!.name;
                       setState(() {
-                        _persistedRepository = null;
+                        _currentRepo = null;
                       });
 
                       widget.repositoriesCubit
@@ -360,7 +360,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: () {
-                if (_persistedRepository == null) {
+                if (_currentRepo == null) {
                   return;
                 }
 
@@ -373,7 +373,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       iconSize: Dimensions.sizeIconSmall,
                       iconColor: Colors.red,
                       onTap: () async {
-                if (_persistedRepository == null) {
+                if (_currentRepo == null) {
                   return;
                 }
                 await showDialog<bool>(
@@ -401,9 +401,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       );
                     }).then((delete) {
                   if (delete ?? false) {
-                    final repositoryName = _persistedRepository!.name;
+                    final repositoryName = _currentRepo!.name;
                     setState(() {
-                      _persistedRepository = null;
+                      _currentRepo = null;
                       _bittorrentDhtStatus = false;
                     });
 

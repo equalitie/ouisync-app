@@ -5,7 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-export '../../models/named_repo.dart';
+export '../../models/repo_state.dart';
 import '../blocs.dart';
 
 
@@ -156,7 +156,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
   }
 
   Future<DirectoryState> _createFile(
-    NamedRepo repository,
+    RepoState repository,
     String newFilePath,
     String fileName,
     int length

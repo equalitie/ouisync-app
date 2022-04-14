@@ -165,7 +165,7 @@ class _MainPageState extends State<MainPage>
     updateCurrentFolder({required String path}) => setState(() { _currentFolder = path; });
 
     getContents({
-      required NamedRepo repository,
+      required RepoState repository,
       required String path,
     }) {
       BlocProvider
@@ -177,7 +177,7 @@ class _MainPageState extends State<MainPage>
     }
 
     navigateToPath({
-      required NamedRepo repository,
+      required RepoState repository,
       AccessMode? previousAccessMode,
       required String origin,
       required String destination,
@@ -221,7 +221,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> refreshCurrent({
-      required NamedRepo repository,
+      required RepoState repository,
       required String path
     }) async => getContents(
       repository: repository,
@@ -606,7 +606,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _contentsList({
-      required NamedRepo repository,
+      required RepoState repository,
       required String path
     }) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
@@ -633,7 +633,7 @@ class _MainPageState extends State<MainPage>
               }
 
               _showFileDetails(
-                repository: repository,
+                repo: repository,
                 directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                 scaffoldKey: _scaffoldKey,
                 data: item
@@ -670,7 +670,7 @@ class _MainPageState extends State<MainPage>
                 }
 
                 await _showFolderDetails(
-                  repository: repository,
+                  repo: repository,
                   directoryBloc: BlocProvider.of<DirectoryBloc>(context),
                   scaffoldKey: _scaffoldKey,
                   data: item
@@ -685,7 +685,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _popupMenu({
-      required NamedRepo repository,
+      required RepoState repository,
       required BaseItem data
     }) {
       final availableActions = repository.accessMode == AccessMode.write
@@ -707,7 +707,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    Future<dynamic> _showShareRepository(context, NamedRepo named)
+    Future<dynamic> _showShareRepository(context, RepoState repo_state)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -720,22 +720,22 @@ class _MainPageState extends State<MainPage>
         ),
       ),
       builder: (context) {
-        final accessModes = named.repo.accessMode == AccessMode.write
-        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-        : named.repo.accessMode == AccessMode.read
-        ? [AccessMode.blind, AccessMode.read]
-        : [AccessMode.blind];
+        final accessModes = repo_state.accessMode == AccessMode.write
+          ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+          : repo_state.accessMode == AccessMode.read
+            ? [AccessMode.blind, AccessMode.read]
+            : [AccessMode.blind];
 
         return ShareRepository(
-          repository: named.repo,
-          repositoryName: named.name,
+          repository: repo_state.repo,
+          repositoryName: repo_state.name,
           availableAccessModes: accessModes,
         );
       }
     );
 
     Future<dynamic> _showFileDetails({
-      required NamedRepo repository,
+      required RepoState repo,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
@@ -754,7 +754,7 @@ class _MainPageState extends State<MainPage>
         return FileDetail(
           context: context,
           bloc: directoryBloc,
-          repository: repository,
+          repository: repo,
           data: data as FileItem,
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
@@ -764,7 +764,7 @@ class _MainPageState extends State<MainPage>
     );
 
     Future<dynamic> _showFolderDetails({
-      required NamedRepo repository,
+      required RepoState repo,
       required DirectoryBloc directoryBloc,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
@@ -783,7 +783,7 @@ class _MainPageState extends State<MainPage>
         return FolderDetail(
           context: context,
           bloc: directoryBloc,
-          repository: repository,
+          repository: repo,
           data: data as FolderItem,
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
