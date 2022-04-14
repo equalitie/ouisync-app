@@ -28,8 +28,6 @@ class MainState with OuiSyncAppLogger {
     _updateCurrentRepository(_repos[name]);
   }
 
-  bool get hasCurrent => _currentRepoName != null;
-
   void _updateCurrentRepository(RepoState? repo) {
     if (repo == null) {
       loggy.app("Can't set current repository to null");

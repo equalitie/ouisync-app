@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../../models/repo_state.dart';
 
 class NoContentsState extends StatelessWidget {
   const NoContentsState({
@@ -11,7 +12,7 @@ class NoContentsState extends StatelessWidget {
     required this.path,
   }) : super(key: key);
 
-  final Repository repository;
+  final RepoState repository;
   final String path;
 
   @override
@@ -27,17 +28,17 @@ class NoContentsState extends StatelessWidget {
               alignment: Alignment.center,
               child: Fields.inPageMainMessage(
                 path.isEmpty
-                ? S.current.messageEmptyRepo
-                : S.current.messageEmptyFolder,
+                  ? S.current.messageEmptyRepo
+                  : S.current.messageEmptyFolder,
               ),
             ),
             Dimensions.spacingVertical,
             Align(
               alignment: Alignment.center,
               child: Fields.inPageSecondaryMessage(
-                repository.accessMode == AccessMode.write
-                ? S.current.messageCreateAddNewItem
-                : S.current.messageReadOnlyContents,
+                repository.accessMode == oui.AccessMode.write
+                  ? S.current.messageCreateAddNewItem
+                  : S.current.messageReadOnlyContents,
                 tags: {
                   Constants.inlineTextBold: InlineTextStyles.bold,
                   Constants.inlineTextIcon: InlineTextStyles.icon(

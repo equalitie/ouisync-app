@@ -569,7 +569,7 @@ class _MainPageState extends State<MainPage>
 
       if (_folderContents.isEmpty) {
         return NoContentsState(
-          repository: current.repo,
+          repository: current,
           path: _currentFolder
         );
       }
@@ -639,8 +639,7 @@ class _MainPageState extends State<MainPage>
               );
             }
             : () {
-              if (_persistentBottomSheetController != null &&
-              _pathEntryToMove == item.path) {
+              if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {
                 return;
               }
 
@@ -814,7 +813,6 @@ class _MainPageState extends State<MainPage>
   void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
-
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
   }
 
