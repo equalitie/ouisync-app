@@ -4,11 +4,11 @@ import '../models/models.dart';
 import '../models/named_repo.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
-class RepositoriesService with OuiSyncAppLogger {
-  static final RepositoriesService _instance = RepositoriesService._internal();
+class MainState with OuiSyncAppLogger {
+  static final MainState _instance = MainState._internal();
 
-  RepositoriesService._internal();
-  factory RepositoriesService() => _instance;
+  MainState._internal();
+  factory MainState() => _instance;
 
   static final Map<String, Repository> _repos = Map();
   

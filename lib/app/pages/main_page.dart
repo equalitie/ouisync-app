@@ -14,7 +14,7 @@ import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
 import '../models/models.dart';
-import '../services/services.dart';
+import '../models/main_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -38,15 +38,15 @@ class MainPage extends StatefulWidget {
   final String repositoriesLocation;
   final String defaultRepositoryName;
   final Stream<List<SharedMediaFile>> intentStream;
-  
+
   @override
-  State<StatefulWidget> createState() => _MainPageState(); 
+  State<StatefulWidget> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin, OuiSyncAppLogger {
 
-    RepositoriesService _repositoriesService = RepositoriesService();
+    MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
@@ -54,13 +54,13 @@ class _MainPageState extends State<MainPage>
     String _currentFolder = Strings.root; // Default root directory: /
   
     List<BaseItem> _folderContents = <BaseItem>[];
-    
+
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     String _pathEntryToMove = '';
     PersistentBottomSheetController? _persistentBottomSheetController;
 
-    Widget _mainState = LoadingMainPageState();
+    Widget _mainWidget = LoadingMainPageState();
 
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
@@ -74,7 +74,7 @@ class _MainPageState extends State<MainPage>
     @override
     void initState() {
       super.initState();
-      
+
       widget.session.subscribeToNetworkEvents((event) {
         switch (event) {
           case NetworkEvent.peerSetChange: {
@@ -88,7 +88,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _repositoriesService.setSubscriptionCallback(_syncCurrentFolder);
+      _mainState.setSubscriptionCallback(_syncCurrentFolder);
 
       _initRepositories()
       .then((_) {
@@ -108,7 +108,7 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() {
-      _repositoriesService.close();
+      _mainState.close();
       _connectivitySubscription?.cancel();
       super.dispose();
     }
@@ -123,7 +123,7 @@ class _MainPageState extends State<MainPage>
         justNames: true
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
-        _repositoriesService.put(
+        _mainState.put(
           repoName,
           repo!,
           setCurrent: (repoName == widget.defaultRepositoryName)
@@ -135,7 +135,7 @@ class _MainPageState extends State<MainPage>
 
     void _connectivityChange(ConnectivityResult result) {
       loggy.app('Connectivity event: ${result.name}');
-      
+
       BlocProvider
       .of<ConnectivityCubit>(context)
       .connectivityEvent(result);
@@ -143,10 +143,10 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-      
+
       BlocProvider
       .of<RepositoriesCubit>(context)
-      .selectRepository(_repositoriesService.current);
+      .selectRepository(_mainState.current);
     }
 
     void handleShareIntentPayload(
@@ -160,14 +160,14 @@ class _MainPageState extends State<MainPage>
       _showSaveSharedMedia(sharedMedia: _intentPayload);
     }
 
-    switchMainState({newState}) => setState(() { _mainState = newState; });
+    switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     updateCurrentFolder({required String path}) => setState(() { _currentFolder = path; });
 
     getContents({
       required NamedRepo repository,
       required String path,
-    }) { 
+    }) {
       BlocProvider
       .of<DirectoryBloc>(context)
       .add(GetContent(
@@ -191,11 +191,11 @@ class _MainPageState extends State<MainPage>
         origin: origin,
         destination: destination,
         withProgress: withProgress
-      )); 
+      ));
     }
 
     PreferredSizeWidget _buildNavigationBar() {
-      final current = _repositoriesService.current;
+      final current = _mainState.current;
 
       if (current == null || current.accessMode == AccessMode.blind) {
         return FolderNavigationBar(null, () {});
@@ -228,8 +228,8 @@ class _MainPageState extends State<MainPage>
       path: path,
     );
 
-    void _syncCurrentFolder(String repositoryName) { 
-      final current = _repositoriesService.current;
+    void _syncCurrentFolder(String repositoryName) {
+      final current = _mainState.current;
 
       if (current == null) {
         return;
@@ -243,7 +243,7 @@ class _MainPageState extends State<MainPage>
         getContents(
           repository: current,
           path: _currentFolder,
-        ); 
+        );
       }
     }
 
@@ -269,7 +269,7 @@ class _MainPageState extends State<MainPage>
             onDragExited: (detail) {
               loggy.app('onDropExited: ${detail.localPosition}');
             },
-            child: _mainState
+            child: _mainWidget
           ),
           onWillPop: _onBackPressed
         ),
@@ -303,7 +303,7 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      final current = _repositoriesService.current;
+      final current = _mainState.current;
 
       if (current != null) {
         final parent = getParentSection(_currentFolder);
@@ -340,7 +340,7 @@ class _MainPageState extends State<MainPage>
         child: Fields.actionIcon(
           const Icon(Icons.settings_outlined),
           onPressed: () async {
-            bool dhtStatus = await _repositoriesService.current?.repo.isDhtEnabled() ?? false;
+            bool dhtStatus = await _mainState.current?.repo.isDhtEnabled() ?? false;
 
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
@@ -354,13 +354,13 @@ class _MainPageState extends State<MainPage>
     ];
 
     StatelessWidget _buildFAB(BuildContext context,) {
-      if (!_repositoriesService.hasCurrent) {
+      final current = _mainState.current;
+
+      if (current == null) {
         return Container();
       }
 
-      if ([AccessMode.blind, AccessMode.read]
-      .contains(_repositoriesService.current!.repo.accessMode)
-      ) {
+      if ([AccessMode.blind, AccessMode.read].contains(current.accessMode)) {
         return Container();
       }
 
@@ -368,20 +368,20 @@ class _MainPageState extends State<MainPage>
         heroTag: Constants.heroTagMainPageActions,
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
-          context, 
+          context,
           bloc: BlocProvider.of<DirectoryBloc>(context),
-          repository: _repositoriesService.current!.repo, 
+          repository: current.repo,
           parent: _currentFolder
         ),
       );
     }
 
     void switchRepository(Repository? repository, String name, AccessMode? previousAccessMode) {
-      NativeChannels.setRepository(repository); 
+      NativeChannels.setRepository(repository);
 
       if (repository == null) {
-        switchMainState(
-          newState: NoRepositoriesState(
+        switchMainWidget(
+          NoRepositoriesState(
             repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
@@ -390,12 +390,12 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      _repositoriesService.put(name, repository, setCurrent: true);
-    
-      switchMainState(newState: _repositoryContentBuilder());
+      _mainState.put(name, repository, setCurrent: true);
+
+      switchMainWidget(_repositoryContentBuilder());
 
       navigateToPath(
-        repository: _repositoriesService.current!,
+        repository: _mainState.current!,
         previousAccessMode: previousAccessMode,
         origin: Strings.root,
         destination: Strings.root,
@@ -404,11 +404,13 @@ class _MainPageState extends State<MainPage>
     }
 
     void shareRepository() async {
-      if (!_repositoriesService.hasCurrent) {
+      final current = _mainState.current;
+
+      if (current == null) {
         return;
       }
-      
-      await _showShareRepository(context, _repositoriesService.current!);
+
+      await _showShareRepository(context, current);
     }
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
@@ -437,12 +439,12 @@ class _MainPageState extends State<MainPage>
             state is NavigationLoadBlind) {
           return _selectLayoutWidget();
         }
-        
+
         if (state is DirectoryLoadFailure) {
           if (state.error == Strings.errorEntryNotFound) {
             final parent = getParentSection(_currentFolder);
             return _contentsList(
-              repository: _repositoriesService.current!,
+              repository: _mainState.current!,
               path: parent,
             );
           }
@@ -450,7 +452,7 @@ class _MainPageState extends State<MainPage>
           return _errorState(
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
-              repository: _repositoriesService.current!,
+              repository: _mainState.current!,
               path: _currentFolder
             )
           );
@@ -460,7 +462,7 @@ class _MainPageState extends State<MainPage>
           return _errorState(
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
-              repository: _repositoriesService.current!,
+              repository: _mainState.current!,
               path: _currentFolder
             )
           );
@@ -469,7 +471,7 @@ class _MainPageState extends State<MainPage>
         return _errorState(
           message: S.current.messageErrorLoadingContents,
           actionReload: () => refreshCurrent(
-            repository: _repositoriesService.current!,
+            repository: _mainState.current!,
             path: _currentFolder
           )
         );
@@ -485,7 +487,7 @@ class _MainPageState extends State<MainPage>
 
           updateCurrentFolder(path: destination);
           navigateToPath(
-            repository: _repositoriesService.current!,
+            repository: _mainState.current!,
             origin: parent,
             destination: destination,
             withProgress: true
@@ -549,7 +551,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _selectLayoutWidget() {
-      final current = _repositoriesService.current;
+      final current = _mainState.current;
 
       if (current == null) {
         return NoRepositoriesState(
@@ -565,7 +567,7 @@ class _MainPageState extends State<MainPage>
           onUnlockPressed: unlockRepositoryDialog,
         );
       }
-      
+
       if (_folderContents.isEmpty) {
         return NoContentsState(
           repository: current.repo,
@@ -582,14 +584,14 @@ class _MainPageState extends State<MainPage>
     void updateFolderContents({required List<BaseItem> newContent}) {
       if (newContent.isEmpty) {
         if (_folderContents.isNotEmpty) {
-          setState(() { _folderContents.clear(); }); 
+          setState(() { _folderContents.clear(); });
         }
         return;
       }
 
       final orderedContent = newContent;
       orderedContent.sort((a, b) => a.type.index.compareTo(b.type.index));
-      
+
       if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
         setState(() { _folderContents = orderedContent; });
       }
@@ -666,7 +668,7 @@ class _MainPageState extends State<MainPage>
 
                   return;
                 }
-                
+
                 await _showFolderDetails(
                   repository: repository,
                   directoryBloc: BlocProvider.of<DirectoryBloc>(context),
@@ -685,15 +687,15 @@ class _MainPageState extends State<MainPage>
     _popupMenu({
       required NamedRepo repository,
       required BaseItem data
-    }) { 
+    }) {
       final availableActions = repository.accessMode == AccessMode.write
       ? {
         S.current.actionPreviewFile: data,
         S.current.actionShareFile: data,
-        S.current.actionDeleteFile: data 
-      } : { 
+        S.current.actionDeleteFile: data
+      } : {
         S.current.actionPreviewFile: data,
-        S.current.actionShareFile: data, 
+        S.current.actionShareFile: data,
       };
 
       return Dialogs
@@ -708,7 +710,7 @@ class _MainPageState extends State<MainPage>
     Future<dynamic> _showShareRepository(context, NamedRepo named)
         => showModalBottomSheet(
       isScrollControlled: true,
-      context: context, 
+      context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(Dimensions.radiusSmall),
@@ -723,7 +725,7 @@ class _MainPageState extends State<MainPage>
         : named.repo.accessMode == AccessMode.read
         ? [AccessMode.blind, AccessMode.read]
         : [AccessMode.blind];
-  
+
         return ShareRepository(
           repository: named.repo,
           repositoryName: named.name,
@@ -739,7 +741,7 @@ class _MainPageState extends State<MainPage>
       required BaseItem data
     }) => showModalBottomSheet(
       isScrollControlled: true,
-      context: context, 
+      context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(Dimensions.radiusSmall),
@@ -768,7 +770,7 @@ class _MainPageState extends State<MainPage>
       required BaseItem data
     }) => showModalBottomSheet(
       isScrollControlled: true,
-      context: context, 
+      context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(Dimensions.radiusSmall),
@@ -827,7 +829,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       MoveEntry(
-        repository: _repositoriesService.current!,
+        repository: _mainState.current!,
         origin: origin,
         destination: _currentFolder,
         entryPath: path,
@@ -837,7 +839,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
-    if (!_repositoriesService.hasCurrent) {
+    if (!_mainState.hasCurrent) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
@@ -848,9 +850,9 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    String? accessModeMessage = _repositoriesService.current!.repo.accessMode == AccessMode.blind
+    String? accessModeMessage = _mainState.current!.accessMode == AccessMode.blind
     ? S.current.messageAddingFileToLockedRepository
-    : _repositoriesService.current!.repo.accessMode == AccessMode.read
+    : _mainState.current!.accessMode == AccessMode.read
     ? S.current.messageAddingFileToReadRepository
     : null;
 
@@ -897,7 +899,7 @@ class _MainPageState extends State<MainPage>
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       SaveFile(
-        repository: _repositoriesService.current!,
+        repository: _mainState.current!,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
@@ -909,7 +911,9 @@ class _MainPageState extends State<MainPage>
   }
 
   void saveSharedMedia() async {
-    if (!_repositoriesService.hasCurrent) {
+    final current = _mainState.current;
+
+    if (current == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
@@ -920,11 +924,11 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    String? accessModeMessage = _repositoriesService.current!.repo.accessMode == AccessMode.blind
-    ? S.current.messageAddingFileToLockedRepository
-    : _repositoriesService.current!.repo.accessMode == AccessMode.read
-    ? S.current.messageAddingFileToReadRepository
-    : null;
+    String? accessModeMessage = current.accessMode == AccessMode.blind
+      ? S.current.messageAddingFileToLockedRepository
+      : current.accessMode == AccessMode.read
+        ? S.current.messageAddingFileToReadRepository
+        : null;
 
     if (accessModeMessage != null) {
       await showDialog<bool>(
@@ -941,8 +945,7 @@ class _MainPageState extends State<MainPage>
             actions: [
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () => 
-                Navigator.of(context).pop(),
+                onPressed: () => Navigator.of(context).pop(),
               )
             ],
           );
@@ -955,11 +958,11 @@ class _MainPageState extends State<MainPage>
     final length = io.File(_intentPayload.first.path).statSync().size;
     final filePath = buildDestinationPath(_currentFolder, fileName);
     final fileByteStream = io.File(_intentPayload.first.path).openRead();
-        
+
     BlocProvider.of<DirectoryBloc>(context)
     .add(
       SaveFile(
-        repository: _repositoriesService.current!,
+        repository: current,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
@@ -976,7 +979,7 @@ class _MainPageState extends State<MainPage>
     required String parent
   }) => showModalBottomSheet(
     isScrollControlled: true,
-    context: context, 
+    context: context,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(Dimensions.radiusSmall),
@@ -1032,7 +1035,7 @@ class _MainPageState extends State<MainPage>
       }
     ).then((addedRepository) {
       if (addedRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
-        switchMainState(newState: _repositoryContentBuilder());
+        switchMainWidget(_repositoryContentBuilder());
       }
     });
   }
@@ -1055,8 +1058,8 @@ class _MainPageState extends State<MainPage>
       }
     ).then((password) {
       if (password.isNotEmpty) { // The password provided by the user.
-        final name = _repositoriesService.current!.name;
-        _repositoriesService.remove(name);
+        final name = _mainState.current!.name;
+        _mainState.remove(name);
 
         BlocProvider.of<RepositoriesCubit>(context)
         .unlockRepository(

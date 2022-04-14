@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
-import '../../services/services.dart';
+import '../../models/main_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -23,7 +23,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   final String current;
   final RepositoryCallback onRepositorySelect;
 
-  final RepositoriesService repositoriesSession = RepositoriesService();
+  final MainState _mainState = MainState();
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +72,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
       return Fields.paddedActionText(
         repositoryName,
         onTap: () { 
-          this.cubit.selectRepository(
-            repositoriesSession.getNamed(repositoryName));
+          this.cubit.selectRepository(_mainState.getNamed(repositoryName));
           
           updateDefaultRepositorySetting(repositoryName);
           Navigator.of(context).pop();

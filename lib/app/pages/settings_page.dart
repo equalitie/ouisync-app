@@ -13,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
 import '../models/models.dart';
-import '../services/services.dart';
+import '../models/main_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -40,7 +40,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
-  RepositoriesService _repositoriesSession = RepositoriesService();
+  MainState _mainState = MainState();
 
   NamedRepo? _persistedRepository;
 
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _persistedRepository = _repositoriesSession.current;
+      _persistedRepository = _mainState.current;
     });
   }
 
@@ -275,7 +275,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _persistedRepository = _repositoriesSession.current!;
+                      _persistedRepository = _mainState.current!;
                     });
                   }
                 },
@@ -283,7 +283,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   isExpanded: true,
                   value: _persistedRepository,
                   underline: SizedBox(),
-                  items: _repositoriesSession.repos.map((NamedRepo namedRepo) {
+                  items: _mainState.repos.map((NamedRepo namedRepo) {
                     return DropdownMenuItem(
                       value: namedRepo,
                       child: Column(
@@ -310,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     setState(() {
                       _persistedRepository = namedRepo;
                     });
-                    _repositoriesSession.setCurrent(_persistedRepository!.name);
+                    _mainState.setCurrent(_persistedRepository!.name);
                   },
                 ),
               ),
@@ -341,8 +341,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName:
-                                  _repositoriesSession.current!.name),
+                              repositoryName: _mainState.current!.name),
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
@@ -466,22 +465,24 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    if (!_repositoriesSession.hasCurrent) {
+    final current = _mainState.current;
+
+    if (current == null) {
       return;
     }
 
     loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
     enable
-        ? await _repositoriesSession.current!.repo.enableDht()
-        : await _repositoriesSession.current!.repo.disableDht();
+        ? await current.repo.enableDht()
+        : await current.repo.disableDht();
 
-    final isEnabled = await _repositoriesSession.current!.repo.isDhtEnabled();
+    final isEnabled = await current.repo.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    RepositoryHelper.updateBitTorrentDHTForRepoStatus(_repositoriesSession.current!.name, isEnabled);
+    RepositoryHelper.updateBitTorrentDHTForRepoStatus(current.name, isEnabled);
 
     String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
     if (enable != isEnabled) {

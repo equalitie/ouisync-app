@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
-import '../../services/services.dart';
+import '../../models/main_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
@@ -117,8 +117,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
-    final repositoriesService = RepositoriesService();
-    repositoriesService.remove(oldName); // 1
+    final mainState = MainState();
+    mainState.remove(oldName); // 1
 
     final renamed = await RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
       oldName: oldName,
@@ -155,8 +155,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void deleteRepository(String repositoryName) async {
-    final repositoriesService = RepositoriesService();
-    repositoriesService.remove(repositoryName); // 1
+    final mainState = MainState();
+    mainState.remove(repositoryName); // 1
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
       repositoriesDir,
@@ -187,7 +187,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       return;
     }
 
-    Repository? newDefaultRepository = repositoriesService
+    Repository? newDefaultRepository = mainState
     .get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
@@ -195,7 +195,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       newDefaultRepository = repository!;
     }
 
-    repositoriesService.put(
+    mainState.put(
       latestRepositoryOrDefaultName,
       newDefaultRepository
     );
