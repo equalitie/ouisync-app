@@ -1,4 +1,4 @@
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
@@ -12,16 +12,15 @@ class EntryInfo with OuiSyncAppLogger {
 
   final Repository _repository;
 
-  Future<bool> exist({
-    required String path,
-    Toast? length
+  Future<bool> exist(BuildContext context, {
+    required String path
   }) async {
     final exist = await _repository.exists(path);
     if (exist) {
       final type = await _repository.type(path);
       final typeNameForMessage = _getTypeNameForMessage(type);
       
-      showToast(S.current.messageEntryAlreadyExist(typeNameForMessage), length: Toast.LENGTH_LONG);
+      showSnackBar(context, content: Text(S.current.messageEntryAlreadyExist(typeNameForMessage)));
     }
 
     return exist;
@@ -60,9 +59,8 @@ class EntryInfo with OuiSyncAppLogger {
     return length;
   }
 
-  Future<bool> isDirectoryEmpty({
-    required String path,
-    Toast? length
+  Future<bool> isDirectoryEmpty(BuildContext context, {
+    required String path
   }) async {
     final type = await _repository.type(path);
     if (type != EntryType.directory) {
@@ -73,7 +71,7 @@ class EntryInfo with OuiSyncAppLogger {
     final Directory directory = await Directory.open(_repository, path);
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);
-      showToast(message, length: Toast.LENGTH_LONG);
+      showSnackBar(context, content: Text(message));
     }
     return directory.isEmpty;
   }

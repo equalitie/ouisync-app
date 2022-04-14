@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
@@ -228,7 +227,7 @@ abstract class Dialogs {
   
           Navigator.of(context).pop(fileName);
 
-          Fluttertoast.showToast(msg: S.current.messageFileDeleted(fileName));
+          showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
       ),
       TextButton(

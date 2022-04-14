@@ -494,7 +494,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     }
 
     loggy.app(dhtStatusMessage);
-    showToast(dhtStatusMessage);
+    showSnackBar(context, content: Text(dhtStatusMessage));
   }
 
   Future<void> _saveLogs() async {

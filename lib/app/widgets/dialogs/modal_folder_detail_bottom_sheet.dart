@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -78,7 +77,7 @@ class _FolderDetailState extends State<FolderDetail> {
               ).then((result) {
                 if (result ?? false) {
                   Navigator.of(context).pop(result);
-                  Fluttertoast.showToast(msg: S.current.messageFolderDeleted(widget.data.name));
+                  showSnackBar(context, content: Text(S.current.messageFolderDeleted(widget.data.name)));
                 }
               })
             },
@@ -153,7 +152,7 @@ class _FolderDetailState extends State<FolderDetail> {
 
   void deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context) async {
     bool recursive = false;
-    final isEmpty = await EntryInfo(repository).isDirectoryEmpty(path: path);
+    final isEmpty = await EntryInfo(repository).isDirectoryEmpty(context, path: path);
     if (!isEmpty) {
       recursive = await Dialogs
       .alertDialogWithActions(

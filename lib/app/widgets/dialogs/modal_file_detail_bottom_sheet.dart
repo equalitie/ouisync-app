@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -93,7 +92,7 @@ class _FileDetailState extends State<FileDetail> {
                 },
               ).then((fileName) {
                 Navigator.of(context).pop();
-                Fluttertoast.showToast(msg: S.current.messageFileDeleted(fileName ?? ''));
+                showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName ?? '')));
               })
             },
             icon: Icons.delete_outlined,

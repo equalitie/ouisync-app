@@ -57,7 +57,7 @@ class FolderCreation extends StatelessWidget {
     ? '/$newFolderName'
     : '${this.path}/$newFolderName';  
 
-    final exist = await EntryInfo(repository).exist(path: newFolderPath);
+    final exist = await EntryInfo(repository).exist(context, path: newFolderPath);
     if (exist) {
       return;
     }

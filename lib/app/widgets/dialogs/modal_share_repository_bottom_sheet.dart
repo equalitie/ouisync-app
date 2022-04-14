@@ -192,7 +192,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
           const Icon(Icons.content_copy_rounded),
           onPressed: () async {
             await copyStringToClipboard(_shareToken.value);
-            showToast(S.current.messageTokenCopiedToClipboard);
+            showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
           },
         ),
         Fields.actionIcon(

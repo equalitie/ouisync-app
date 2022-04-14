@@ -6,7 +6,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cross_file/src/types/interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -491,7 +490,6 @@ class _MainPageState extends State<MainPage>
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
           loggy.app(errorMessage);
-          //Fluttertoast.showToast(msg: errorMessage);
           showSnackBar(context, content: Text(errorMessage));
 
           updateCurrentFolder(path: destination);
@@ -546,18 +544,15 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is WriteToFileDone) {
-          //Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.path));
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileDone(state.path))));
+          showSnackBar(context, content: Text(S.current.messageWritingFileDone(state.path)));
         }
 
         if (state is WriteToFileCanceled) {
-          //Fluttertoast.showToast(msg: S.current.messageWritingFileCanceled(state.path));
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileCanceled(state.path))));
+          showSnackBar(context, content: Text(S.current.messageWritingFileCanceled(state.path)));
         }
 
         if (state is WriteToFileFailure) {
-          //Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.path));
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageWritingFileError(state.path))));
+          showSnackBar(context, content: Text(S.current.messageWritingFileError(state.path)));
         }
       }
     );
@@ -856,15 +851,13 @@ class _MainPageState extends State<MainPage>
 
   Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
     if (!_repositoriesService.hasCurrent) {
-      //Fluttertoast.showToast(msg: S.current.messageNoRepo);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.messageNoRepo)));
+      showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
 
     if (mobileSharedMediaFile == null &&
     droppedMediaFile == null) {
-      //Fluttertoast.showToast(msg: S.current.mesageNoMediaPresent);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.current.mesageNoMediaPresent)));
+      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
 
@@ -932,13 +925,13 @@ class _MainPageState extends State<MainPage>
 
   void saveSharedMedia() async {
     if (!_repositoriesService.hasCurrent) {
-      Fluttertoast.showToast(msg: S.current.messageNoRepo);
+      showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
 
     SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
     if (mediaInfo == null) {
-      Fluttertoast.showToast(msg: S.current.mesageNoMediaPresent);
+      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
 

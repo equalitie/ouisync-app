@@ -249,7 +249,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
       _shareToken = ShareToken(this.widget.cubit.session, token);
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);                
-      showToast(S.current.messageErrorTokenInvalid);
+      showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
 
       cleanupFormOnEmptyToken();
     }
