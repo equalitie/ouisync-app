@@ -10,7 +10,7 @@ class MainState with OuiSyncAppLogger {
   MainState._internal();
   factory MainState() => _instance;
 
-  static final Map<String, Repository> _repos = Map();
+  static final Map<String, RepoState> _repos = Map();
   
   String? _currentRepoName;
 
@@ -18,20 +18,19 @@ class MainState with OuiSyncAppLogger {
     if (_currentRepoName == null) {
       return null;
     } else {
-      return getNamed(_currentRepoName!);
+      return _repos[_currentRepoName!];
     }
   }
 
-  Iterable<RepoState> get repos
-    => _repos.entries.map((entry) => RepoState(entry.key, entry.value));
+  Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);
 
   setCurrent(String name) {
-    _updateCurrentRepository(name, _repos[name]);
+    _updateCurrentRepository(_repos[name]);
   }
 
   bool get hasCurrent => _currentRepoName != null;
 
-  void _updateCurrentRepository(String name, Repository? repo) {
+  void _updateCurrentRepository(RepoState? repo) {
     if (repo == null) {
       loggy.app("Can't set current repository to null");
       _currentRepoName = null;
@@ -39,41 +38,35 @@ class MainState with OuiSyncAppLogger {
     }
 
     if (_subscriptionCallback == null) {
-      throw Exception('There is not callback for sincronization');
+      throw Exception('There is not callback for synchronization');
     }
 
     _subscription?.cancel();
     _subscription = null;
 
-    _currentRepoName = name;
+    _currentRepoName = repo.name;
     
-    _subscription = repo.subscribe(() => 
+    _subscription = repo.repo.subscribe(() => 
       _subscriptionCallback!.call(_currentRepoName!)
     );
-    loggy.app('Subscribed to notifications: $name (${repo.accessMode.name})');
+    loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
   }
 
-  Repository? get(String name) {
+  RepoState? get(String name) {
     return _repos[name];
   }
 
-  RepoState? getNamed(String name) {
-    final repo = _repos[name];
-    if (repo == null) return null;
-    return RepoState(name, repo);
-  }
-
-  void put(String name, Repository newRepo, { bool setCurrent = false }) {
-    Repository? oldRepo = _repos.remove(name);
+  void put(RepoState newRepo, { bool setCurrent = false }) {
+    RepoState? oldRepo = _repos.remove(newRepo.name);
 
     if (oldRepo != null && oldRepo != newRepo) {
       oldRepo.close();
     }
 
-    _repos[name] = newRepo;
+    _repos[newRepo.name] = newRepo;
 
-    if (setCurrent && name != _currentRepoName) {
-      _updateCurrentRepository(name, newRepo);
+    if (setCurrent && newRepo.name != _currentRepoName) {
+      _updateCurrentRepository(newRepo);
     }
   }
 

@@ -24,7 +24,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
   /// Opens a repository in blind mode to allow synchronization, even before the
   /// user unlocks it.
-  Future<Repository?> initRepository(String name) async {
+  Future<RepoState?> initRepository(String name) async {
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
@@ -38,11 +38,12 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       );
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(blindRepository, name);
+      return RepoState(name, blindRepository);
     } catch (e, st) {
       loggy.app('Init the repository $name exception', e, st);
     }
 
-    return blindRepository;
+    return null;
   }
 
   void unlockRepository({required String name, required String password}) async {
@@ -142,7 +143,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     final repository = await initRepository(newName);
 
-    emit(RepositoryPickerSelection(RepoState(newName, repository!))); // 6
+    emit(RepositoryPickerSelection(repository!)); // 6
   }
 
   /// Deletes a repository
@@ -187,21 +188,15 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       return;
     }
 
-    Repository? newDefaultRepository = mainState
-    .get(latestRepositoryOrDefaultName); // 5
+    RepoState? newDefaultRepository = mainState.get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
-      final repository = await initRepository(latestRepositoryOrDefaultName);
-      newDefaultRepository = repository!;
+      newDefaultRepository = await initRepository(latestRepositoryOrDefaultName);
     }
 
-    mainState.put(
-      latestRepositoryOrDefaultName,
-      newDefaultRepository
-    );
+    mainState.put(newDefaultRepository!);
 
-    emit(RepositoryPickerSelection(
-      RepoState(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
+    emit(RepositoryPickerSelection(newDefaultRepository)); // 6
   }
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';

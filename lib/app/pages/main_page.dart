@@ -20,7 +20,7 @@ import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
-typedef RepositoryCallback = void Function(Repository? repository, String name, AccessMode? previousAccessMode);
+typedef RepositoryCallback = void Function(RepoState? repository, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -124,7 +124,6 @@ class _MainPageState extends State<MainPage>
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
         _mainState.put(
-          repoName,
           repo!,
           setCurrent: (repoName == widget.defaultRepositoryName)
         );
@@ -376,8 +375,8 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    void switchRepository(Repository? repository, String name, AccessMode? previousAccessMode) {
-      NativeChannels.setRepository(repository);
+    void switchRepository(RepoState? repository, AccessMode? previousAccessMode) {
+      NativeChannels.setRepository(repository?.repo);
 
       if (repository == null) {
         switchMainWidget(
@@ -390,7 +389,7 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      _mainState.put(name, repository, setCurrent: true);
+      _mainState.put(repository, setCurrent: true);
 
       switchMainWidget(_repositoryContentBuilder());
 

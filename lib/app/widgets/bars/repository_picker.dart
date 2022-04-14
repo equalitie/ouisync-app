@@ -5,6 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
+import '../../models/repo_state.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -86,45 +87,30 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
-          _updateCurrentRepository(
-            repository: state.repo.repo,
-            name: state.repo.name
-          );
+          _updateCurrentRepository(state.repo);
         }
         if (state is RepositoryPickerUnlocked) {
           _updateCurrentRepository(
-            repository: state.repo.repo,
-            name: state.repo.name,
+            state.repo,
             previousAccessMode: state.previousAccessMode);
         }
         if (state is RepositoryPickerInitial) {
-          _updateCurrentRepository(
-            repository: null,
-            name: ''
-          );
+          _updateCurrentRepository(null);
         }
       },
     );
   }
 
-  _updateCurrentRepository({Repository? repository, String? name, AccessMode? previousAccessMode}) async {
+  _updateCurrentRepository(RepoState? repo, {AccessMode? previousAccessMode}) async {
     setState(() {
-      _repositoryName = (name?.isEmpty ?? true
-      ? S.current.messageNoRepos
-      : name)!;
+      if (repo != null) {
+        _repositoryName = repo.name;
+      } else {
+        _repositoryName = S.current.messageNoRepos;
+      }
     });
 
-    if (repository == null && (name?.isEmpty ?? true)) {
-      widget.onRepositorySelect.call(null, '', null);
-      return;
-    }
-
-    if (repository == null && (name?.isNotEmpty ?? false)) { /// Every repository is initialized as a blind replica
-      repository = await widget.repositoriesCubit
-      .initRepository(name!);
-    }
-
-    widget.onRepositorySelect.call(repository, name!, previousAccessMode);
+    widget.onRepositorySelect.call(repo, previousAccessMode);
   }
 
   _buildState({

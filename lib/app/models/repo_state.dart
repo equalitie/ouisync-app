@@ -258,4 +258,8 @@ class RepoState with OuiSyncAppLogger {
 
     return deleteFolderResult;
   }
+
+  void close() {
+    repo.close();
+  }
 }
