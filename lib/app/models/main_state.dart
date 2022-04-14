@@ -5,11 +5,6 @@ import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
 class MainState with OuiSyncAppLogger {
-  static final MainState _instance = MainState._internal();
-
-  MainState._internal();
-  factory MainState() => _instance;
-
   static final Map<String, RepoState> _repos = Map();
   
   String? _currentRepoName;

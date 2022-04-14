@@ -6,16 +6,19 @@ import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../models/repo_state.dart';
+import '../../models/main_state.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
+    required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.borderColor
   });
 
+  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final Color borderColor;
@@ -169,6 +172,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     ),
     builder: (context) {
       return RepositoryList(
+        mainState: widget.mainState,
         context: context,
         cubit: widget.repositoriesCubit,
         current: _repositoryName,

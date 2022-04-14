@@ -40,7 +40,6 @@ class GetContent extends DirectoryEvent {
     repository,
     path,
   ];
-
 }
 
 class DeleteFolder extends DirectoryEvent {

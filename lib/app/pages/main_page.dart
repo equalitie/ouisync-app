@@ -328,6 +328,7 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
+        mainState: _mainState,
         repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
         onRepositorySelect: switchRepository,
         shareRepositoryOnTap: shareRepository,
@@ -1080,6 +1081,7 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: peerSetCubit),
           ],
           child: SettingsPage(
+            mainState: _mainState,
             repositoriesCubit: reposCubit,
             onRepositorySelect: switchRepository,
             onShareRepository: shareRepository,

@@ -22,6 +22,7 @@ import 'peer_list.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
+    required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.onShareRepository,
@@ -29,6 +30,7 @@ class SettingsPage extends StatefulWidget {
     this.dhtStatus = false,
   });
 
+  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
@@ -40,8 +42,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
-  MainState _mainState = MainState();
-
   RepoState? _currentRepo;
 
   String? _listenerEndpoint;
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _currentRepo = _mainState.current;
+      _currentRepo = widget.mainState.current;
     });
   }
 
@@ -275,7 +275,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _currentRepo = _mainState.current!;
+                      _currentRepo = widget.mainState.current!;
                     });
                   }
                 },
@@ -283,7 +283,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   isExpanded: true,
                   value: _currentRepo,
                   underline: SizedBox(),
-                  items: _mainState.repos.map((RepoState repo) {
+                  items: widget.mainState.repos.map((RepoState repo) {
                     return DropdownMenuItem(
                       value: repo,
                       child: Column(
@@ -310,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     setState(() {
                       _currentRepo = repo;
                     });
-                    _mainState.setCurrent(_currentRepo!.name);
+                    widget.mainState.setCurrent(_currentRepo!.name);
                   },
                 ),
               ),
@@ -341,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: _mainState.current!.name),
+                              repositoryName: widget.mainState.current!.name),
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
@@ -465,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = _mainState.current;
+    final current = widget.mainState.current;
 
     if (current == null) {
       return;
