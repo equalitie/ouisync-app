@@ -700,7 +700,7 @@ class _MainPageState extends State<MainPage>
       .filePopupMenu(
         context,
         repository.repo,
-        BlocProvider. of<DirectoryBloc>(context),
+        BlocProvider.of<DirectoryBloc>(context),
         availableActions
       );
     }

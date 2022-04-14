@@ -37,22 +37,13 @@ class CreateFileDone extends DirectoryState {
 class CreateFileFailure extends DirectoryState {
   const CreateFileFailure({
     required this.path,
-    required this.fileName,
-    required this.length,
-    required this.error
   });
 
   final String path;
-  final String fileName;
-  final int length;
-  final String error;
 
   @override
   List<Object> get props => [
     path,
-    fileName,
-    length,
-    error
   ];
 }
 

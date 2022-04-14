@@ -169,9 +169,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         
         return CreateFileFailure(
           path: newFilePath,
-          fileName: fileName,
-          length: length,
-          error: createFileResult.errorMessage
         );
       }
     } catch (e, st) {
@@ -179,9 +176,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       
       return CreateFileFailure(
         path: newFilePath,
-        fileName: fileName,
-        length: length,
-        error: e.toString()
       );
     }
 
