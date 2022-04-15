@@ -35,7 +35,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Directory ${event.newFolderPath} creation exception', e, st);
     }
 
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onDeleteFolder(DeleteFolder event, Emitter<DirectoryState> emit) async {
@@ -50,7 +50,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Directory ${event.path} deletion exception', e, st);
     }
 
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onSaveFile(SaveFile event, Emitter<DirectoryState> emit) async {
@@ -64,7 +64,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     emit(fileCreationResult);
 
     if (fileCreationResult is CreateFileDone) {
-      await _refreshFolder(event.repository, emit);
+      emit(await _refreshFolder(event.repository));
 
       final file = fileCreationResult.file;
       int offset = 0;
@@ -171,7 +171,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Rename entry from ${event.entryPath} to ${event.newEntryPath} exception', e, st);
     }
 
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {
@@ -184,7 +184,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Move entry from ${event.entryPath} to ${event.newDestinationPath} exception', e, st);
     }
 
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onDeleteFile(DeleteFile event, Emitter<DirectoryState> emit) async {
@@ -200,59 +200,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Delete file ${event.filePath} exception', e, st);
     }
 
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
-    await _refreshFolder(event.repository, emit);
+    emit(await _refreshFolder(event.repository));
   }
 
-  RepoState? _curRefreshRepo;
-  RepoState? _nextRefreshRepo;
-  Emitter<DirectoryState>? _nextEmit;
-  List<Completer> _getContentCompleters = <Completer>[];
-
-  // Trigger content update. If a content update is already in progress, it is scheduled
-  // to be done afterwards.
-  Future<void> _refreshFolder(RepoState repo, Emitter<DirectoryState> emit) async {
-    final completer = Completer<void>();
-    final future = completer.future;
-    _getContentCompleters.add(completer);
-
-    _nextRefreshRepo = repo;
-    _nextEmit = emit;
-
-    if (_curRefreshRepo == null) {
-      _runUpdateLoop(); // don't await
-    }
-
-    return future;
-  }
-
-  void _runUpdateLoop() async {
-    while (_nextRefreshRepo != null) {
-      _curRefreshRepo = _nextRefreshRepo;
-      _nextRefreshRepo = null;
-
-      final emit = _nextEmit!;
-      _nextEmit = null;
-
-      final completers = _getContentCompleters;
-      _getContentCompleters = <Completer>[];
-
-      final state = await _getContents(_curRefreshRepo!);
-
-      _curRefreshRepo = null;
-
-      emit(state);
-
-      for (var completer in completers) {
-        completer.complete();
-      }
-    }
-  }
-
-  Future<DirectoryState> _getContents(RepoState repo) async {
+  Future<DirectoryState> _refreshFolder(RepoState repo) async {
     try {
       if (repo.accessMode == AccessMode.blind) {
         return DirectoryLoadFailure();
@@ -266,5 +221,4 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return DirectoryLoadFailure(error: e.toString());
     }
   }
-
 }
