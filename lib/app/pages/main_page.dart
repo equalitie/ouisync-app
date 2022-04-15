@@ -169,8 +169,6 @@ class _MainPageState extends State<MainPage>
 
     navigateToPath({
       required RepoState repository,
-      AccessMode? previousAccessMode,
-      required String origin,
       required String destination,
       bool withProgress = false
     }) {
@@ -180,7 +178,13 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      currentRepo.currentFolder.path = destination;
+      final currentFolder = currentRepo.currentFolder;
+
+      if (currentFolder.path != destination) {
+        setState(() {
+          currentFolder.path = destination;
+        });
+      }
 
       getContent(currentRepo);
     }
@@ -192,11 +196,12 @@ class _MainPageState extends State<MainPage>
         return FolderNavigationBar(null, () {});
       }
 
-      return FolderNavigationBar(currentRepo.currentFolder.path,
-          () {
-            currentRepo.currentFolder.goUp();
-            getContent(currentRepo);
-          });
+      return FolderNavigationBar(currentRepo.currentFolder.path, () {
+        setState(() {
+          currentRepo.currentFolder.goUp();
+        });
+        getContent(currentRepo);
+      });
     }
 
     @override
@@ -344,8 +349,6 @@ class _MainPageState extends State<MainPage>
 
       navigateToPath(
         repository: _mainState.current!,
-        previousAccessMode: previousAccessMode,
-        origin: Strings.root,
         destination: Strings.root,
         withProgress: true
       );
@@ -406,7 +409,6 @@ class _MainPageState extends State<MainPage>
 
           navigateToPath(
             repository: _mainState.current!,
-            origin: parent,
             destination: destination,
             withProgress: true
           );
@@ -510,7 +512,6 @@ class _MainPageState extends State<MainPage>
 
               navigateToPath(
                 repository: repository,
-                origin: path,
                 destination: item.path,
                 withProgress: true
               );
