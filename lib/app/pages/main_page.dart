@@ -387,24 +387,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadFailure) {
-          final currentRepo = _mainState.current;
-
-          if (currentRepo == null || currentRepo.accessMode == AccessMode.blind) {
-            _selectLayoutWidget();
-          }
-
-          if (state.error == Strings.errorEntryNotFound) {
-            final parent = getParentSection(currentFolder!.path);
-            return _contentsList(
-              repository: _mainState.current!,
-              path: parent,
-            );
-          }
-
-          return _errorState(
-            message: S.current.messageErrorDefault,
-            actionReload: () => getContent(_mainState.current!)
-          );
+          return _selectLayoutWidget();
         }
 
         return _errorState(

@@ -29,13 +29,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       if (!createFileResult.result) 
       {
         loggy.app('Directory ${event.newFolderPath} creation failed');
-        emit(DirectoryLoadFailure());
-        return;
       }
     } catch (e, st) {
       loggy.app('Directory ${event.newFolderPath} creation exception', e, st);
-      emit(DirectoryLoadFailure());
-      return;
     }
     
     event.repository.currentFolder.path = event.newFolderPath;
@@ -52,13 +48,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       if (deleteFolderResult.errorMessage.isNotEmpty) 
       {
         loggy.app('Delete directory ${event.path} failed');
-        emit(DirectoryLoadFailure());
-        return;
       }
     } catch (e, st) {
       loggy.app('Directory ${event.path} deletion exception', e, st);
-      emit(DirectoryLoadFailure());
-      return;
     }
 
     await _refreshFolder(event.repository, emit);
@@ -177,13 +169,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       final renameEntryResult = await event.repository.moveEntry(event.entryPath, event.newEntryPath);
       if (renameEntryResult.errorMessage.isNotEmpty) {
         loggy.app('Rename entry from ${event.entryPath} to ${event.newEntryPath} failed:\n${renameEntryResult.errorMessage}');
-        emit(DirectoryLoadFailure());
-        return;
       }  
     } catch (e, st) {
       loggy.app('Rename entry from ${event.entryPath} to ${event.newEntryPath} exception', e, st);
-      emit(DirectoryLoadFailure());
-      return;
     }
 
     await _refreshFolder(event.repository, emit);
@@ -194,13 +182,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       final moveEntryResult = await event.repository.moveEntry(event.entryPath, event.newDestinationPath);
       if (moveEntryResult.errorMessage.isNotEmpty) {
         loggy.app('Move entry from ${event.entryPath} to ${event.newDestinationPath} failed:\n${moveEntryResult.errorMessage}');
-        emit(DirectoryLoadFailure());
-        return;
       }  
     } catch (e, st) {
       loggy.app('Move entry from ${event.entryPath} to ${event.newDestinationPath} exception', e, st);
-      emit(DirectoryLoadFailure());
-      return;
     }
 
     await _refreshFolder(event.repository, emit);
@@ -214,13 +198,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       if (deleteFileResult.errorMessage.isNotEmpty) 
       {
         loggy.app('Delete file ${event.filePath} failed');
-        emit(DirectoryLoadFailure());
-        return;
       }
     } catch (e, st) {
       loggy.app('Delete file ${event.filePath} exception', e, st);
-      emit(DirectoryLoadFailure());
-      return;
     }
 
     await _refreshFolder(event.repository, emit);
@@ -277,6 +257,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
   Future<DirectoryState> _getContents(RepoState repo) async {
     try {
+      if (repo.accessMode == AccessMode.blind) {
+        return DirectoryLoadFailure();
+      }
       final path = repo.currentFolder.path;
       final entries = await repo.getFolderContents(path);
       return DirectoryLoadSuccess(path: path, contents: entries);
