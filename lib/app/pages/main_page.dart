@@ -174,48 +174,28 @@ class _MainPageState extends State<MainPage>
       required String destination,
       bool withProgress = false
     }) {
-      final currentFolder = this.currentFolder;
+      final currentRepo = _mainState.current;
 
-      if (currentFolder == null) {
+      if (currentRepo == null) {
         return;
       }
 
-      currentFolder.path = destination;
+      currentRepo.currentFolder.path = destination;
 
-      BlocProvider
-      .of<DirectoryBloc>(context)
-      .add(NavigateTo(
-        repository: repository,
-        previousAccessMode: previousAccessMode,
-        origin: origin,
-        destination: destination,
-        withProgress: withProgress
-      ));
+      getContent(currentRepo);
     }
 
     PreferredSizeWidget _buildNavigationBar() {
-      final current = _mainState.current;
+      final currentRepo = _mainState.current;
 
-      if (current == null || current.accessMode == AccessMode.blind) {
+      if (currentRepo == null || currentRepo.accessMode == AccessMode.blind) {
         return FolderNavigationBar(null, () {});
       }
 
-      final repository = current;
-      final destination = currentFolder!.path;
-
-      return FolderNavigationBar(destination,
+      return FolderNavigationBar(currentRepo.currentFolder.path,
           () {
-            final from = destination;
-            final backTo = getParentSection(from);
-
-            BlocProvider
-            .of<DirectoryBloc>(context)
-            .add(NavigateTo(
-              repository: repository,
-              origin: from,
-              destination: backTo,
-              withProgress: true
-            ));
+            currentRepo.currentFolder.goUp();
+            getContent(currentRepo);
           });
     }
 
@@ -250,11 +230,13 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      final currentFolder = this.currentFolder;
+      final currentRepo = _mainState.current;
 
-      if (currentFolder == null) {
+      if (currentRepo == null) {
         return false;
       }
+
+      final currentFolder = currentRepo.currentFolder;
 
       if (currentFolder.isRoot()) {
         // If the user clicks twice the back button within
@@ -281,17 +263,8 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      final origin = currentFolder.path;
       currentFolder.goUp();
-
-      BlocProvider
-      .of<DirectoryBloc>(context)
-      .add(NavigateTo(
-        repository: currentFolder.repo,
-        origin: origin,
-        destination: currentFolder.path,
-        withProgress: true
-      ));
+      getContent(currentRepo);
 
       return false;
     }
@@ -409,13 +382,17 @@ class _MainPageState extends State<MainPage>
           return Center(child: CircularProgressIndicator());
         }
 
-        if (state is DirectoryLoadSuccess ||
-            state is NavigationLoadSuccess ||
-            state is NavigationLoadBlind) {
+        if (state is DirectoryLoadSuccess) {
           return _selectLayoutWidget();
         }
 
         if (state is DirectoryLoadFailure) {
+          final currentRepo = _mainState.current;
+
+          if (currentRepo == null || currentRepo.accessMode == AccessMode.blind) {
+            _selectLayoutWidget();
+          }
+
           if (state.error == Strings.errorEntryNotFound) {
             final parent = getParentSection(currentFolder!.path);
             return _contentsList(
@@ -424,13 +401,6 @@ class _MainPageState extends State<MainPage>
             );
           }
 
-          return _errorState(
-            message: S.current.messageErrorDefault,
-            actionReload: () => getContent(_mainState.current!)
-          );
-        }
-
-        if (state is NavigationLoadFailure) {
           return _errorState(
             message: S.current.messageErrorDefault,
             actionReload: () => getContent(_mainState.current!)
@@ -462,39 +432,6 @@ class _MainPageState extends State<MainPage>
         if (state is DirectoryLoadSuccess) {
           updateFolderContents(newContent: state.contents);
           return;
-        }
-
-        if (state is NavigationLoadSuccess) {
-          //updateCurrentFolder(path: state.destination);
-          updateFolderContents(newContent: state.contents);
-          return;
-        }
-
-        if (state is NavigationLoadBlind) {
-          if (state.previousAccessMode == AccessMode.blind) {
-            showDialog<bool>(
-              context: context,
-              barrierDismissible: false, // user must tap button!
-              builder: (context) {
-                return AlertDialog(
-                  title: Text('Unlock repository'),
-                  content: SingleChildScrollView(
-                    child: ListBody(children: [
-                      Text('Unlocking the repository failed'
-                        '\n\n'
-                        'Check the password and try again'
-                      )
-                    ]),
-                  ),
-                  actions: [
-                    TextButton(
-                      child: Text(S.current.actionCloseCapital),
-                      onPressed: () => Navigator.of(context).pop(),
-                    )
-                  ],
-                );
-              });
-          }
         }
 
         if (state is CreateFileFailure) {

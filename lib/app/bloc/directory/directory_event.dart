@@ -62,33 +62,6 @@ class DeleteFolder extends DirectoryEvent {
 
 }
 
-class NavigateTo extends DirectoryEvent {
-  const NavigateTo({
-    required this.repository,
-    this.previousAccessMode,
-    required this.origin,
-    required this.destination,
-    required this.withProgress
-  }) :
-  assert (origin != ''),
-  assert (destination != '');
-
-  final RepoState repository;
-  final AccessMode? previousAccessMode;
-  final String origin;
-  final String destination;
-  final bool withProgress;
-
-  @override
-  List<Object?> get props => [
-    repository,
-    previousAccessMode,
-    origin,
-    destination,
-    withProgress
-  ];
-} 
-
 class SaveFile extends DirectoryEvent {
   const SaveFile({
     required this.repository,

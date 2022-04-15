@@ -181,8 +181,7 @@ class _FolderDetailState extends State<FolderDetail> {
   }
 
   void deleteAction(context, bloc, repository, parentPath, path, recursive) {
-    bloc
-    .add(
+    bloc.add(
       DeleteFolder(
         repository: repository,
         parentPath: parentPath,
@@ -191,15 +190,6 @@ class _FolderDetailState extends State<FolderDetail> {
       )
     );
     
-    bloc.add(
-      NavigateTo(
-        repository: repository,
-        origin: getParentSection(parentPath),
-        destination: parentPath,
-        withProgress: true
-      )
-    );
-        
     Navigator.of(context).pop(true);
   }
 

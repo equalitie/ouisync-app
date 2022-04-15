@@ -60,12 +60,8 @@ class MoveEntryDialog extends StatelessWidget {
       builder: (context, state) {
         
         bool canMove = false;
-        if (state is NavigationLoadSuccess) {
-          if (state.destination != origin &&
-          state.destination != path) {
-            canMove = true;
-          }
-        }
+
+        assert(false); //todo
 
         return Fields.actionsSection(context,
           buttons: _actions(context, canMove),

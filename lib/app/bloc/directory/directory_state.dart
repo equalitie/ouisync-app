@@ -161,40 +161,6 @@ class DirectoryLoadSuccess extends DirectoryState {
   ];
 }
 
-class NavigationLoadSuccess extends DirectoryState {
-  const NavigationLoadSuccess({
-    required this.origin,
-    required this.destination,
-    required this.contents,
-  }) :
-  assert (origin != ''),
-  assert (destination != '');
-
-  final String origin;
-  final String destination;
-  final List<BaseItem> contents;
-
-  @override
-  List<Object> get props => [
-    origin,
-    destination,
-    contents,
-  ];
-}
-
-class NavigationLoadBlind extends DirectoryState {
-  NavigationLoadBlind({
-    this.previousAccessMode
-  });
-
-  final AccessMode? previousAccessMode;
-
-  @override
-  List<Object?> get props => [
-    previousAccessMode
-  ];
-}
-
 class DirectoryLoadFailure extends DirectoryState {
   const DirectoryLoadFailure({
     this.error,
@@ -207,5 +173,3 @@ class DirectoryLoadFailure extends DirectoryState {
     error,
   ];
 }
-
-class NavigationLoadFailure extends DirectoryState {}

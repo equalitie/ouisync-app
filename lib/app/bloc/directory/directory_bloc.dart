@@ -18,7 +18,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     on<RenameEntry>(_onRenameEntry);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
-    on<NavigateTo>(_onNavigateTo);
     on<GetContent>(_onGetContents);
   }
 
@@ -227,28 +226,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     await _refreshFolder(event.repository, emit);
   }
   
-  Future<void> _onNavigateTo(NavigateTo event, Emitter<DirectoryState> emit) async {
-    if (event.withProgress) {
-      emit(DirectoryLoadInProgress());
-    }
-
-    if (event.repository.accessMode == AccessMode.blind) {
-      emit(NavigationLoadBlind(previousAccessMode: event.previousAccessMode));
-      return;
-    }
-
-    try {
-      emit(NavigationLoadSuccess(
-        origin: event.origin,
-        destination: event.destination,
-        contents: await event.repository.getFolderContents(event.destination)
-      ));
-    } catch (e,st) {
-      loggy.app('Navigate to ${event.destination} exception', e, st);
-      emit(NavigationLoadFailure());
-    }
-  }
-
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
     await _refreshFolder(event.repository, emit);
   }
