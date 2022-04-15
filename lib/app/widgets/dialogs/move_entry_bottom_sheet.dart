@@ -58,10 +58,13 @@ class MoveEntryDialog extends StatelessWidget {
     return BlocBuilder(
       bloc: BlocProvider.of<DirectoryBloc>(context),
       builder: (context, state) {
-        
         bool canMove = false;
 
-        assert(false); //todo
+        if (state is DirectoryLoadSuccess) {
+          if (state.path != origin && state.path != path) {
+            canMove = true;
+          }
+        }
 
         return Fields.actionsSection(context,
           buttons: _actions(context, canMove),
