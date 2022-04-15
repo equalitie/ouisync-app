@@ -44,9 +44,8 @@ class MainState with OuiSyncAppLogger {
 
     _currentRepoName = repo.name;
     
-    _subscription = repo.repo.subscribe(() => 
-      _subscriptionCallback!.call(_currentRepoName!)
-    );
+    _subscription = repo.repo.subscribe(() => _subscriptionCallback!.call(repo));
+
     loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
   }
 
@@ -104,8 +103,9 @@ class MainState with OuiSyncAppLogger {
   Subscription? _subscription;
   Subscription? get subscription => _subscription;
 
-  void Function(String)? _subscriptionCallback;
-  setSubscriptionCallback(void Function(String) callback) => {
+  void Function(RepoState)? _subscriptionCallback;
+
+  setSubscriptionCallback(void Function(RepoState) callback) => {
     _subscriptionCallback = callback
   };
 }

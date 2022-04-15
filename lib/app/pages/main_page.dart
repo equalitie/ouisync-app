@@ -88,7 +88,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _mainState.setSubscriptionCallback(_syncCurrentFolder);
+      _mainState.setSubscriptionCallback(getContent);
 
       _initRepositories()
       .then((_) {
@@ -161,7 +161,7 @@ class _MainPageState extends State<MainPage>
 
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
-    getContents(RepoState repository) {
+    getContent(RepoState repository) {
       BlocProvider
       .of<DirectoryBloc>(context)
       .add(GetContent(repository: repository));
@@ -209,26 +209,6 @@ class _MainPageState extends State<MainPage>
               withProgress: true
             ));
           });
-    }
-
-    Future<void> refreshCurrent({
-      required RepoState repository,
-    }) async => getContents(repository);
-
-    void _syncCurrentFolder(String repositoryName) {
-      final current = _mainState.current;
-
-      if (current == null) {
-        return;
-      }
-
-      if (current.name != repositoryName) {
-        return;
-      }
-
-      if (current.accessMode != AccessMode.blind) {
-        getContents(current);
-      }
     }
 
     @override
@@ -435,26 +415,20 @@ class _MainPageState extends State<MainPage>
 
           return _errorState(
             message: S.current.messageErrorDefault,
-            actionReload: () => refreshCurrent(
-              repository: _mainState.current!,
-            )
+            actionReload: () => getContent(_mainState.current!)
           );
         }
 
         if (state is NavigationLoadFailure) {
           return _errorState(
             message: S.current.messageErrorDefault,
-            actionReload: () => refreshCurrent(
-              repository: _mainState.current!,
-            )
+            actionReload: () => getContent(_mainState.current!)
           );
         }
 
         return _errorState(
           message: S.current.messageErrorLoadingContents,
-          actionReload: () => refreshCurrent(
-            repository: _mainState.current!,
-          )
+          actionReload: () => getContent(_mainState.current!)
         );
       },
       listener: (context, state) {
@@ -591,7 +565,7 @@ class _MainPageState extends State<MainPage>
     }) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
-        onRefresh: () => refreshCurrent(repository: repository),
+        onRefresh: () => getContent(repository),
         child: ListView.separated(
           padding: EdgeInsets.only(bottom: value as double),
           separatorBuilder: (context, index) => Divider(
