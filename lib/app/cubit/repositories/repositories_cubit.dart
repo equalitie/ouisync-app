@@ -132,7 +132,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(oldName);
 
       loggy.app('Selecting $oldName...');
-      selectRepository(NamedRepo(oldName, repo!));
+      selectRepository(repo);
 
       loggy.app('Repository renaming canceled');
       return;
@@ -171,7 +171,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(repositoryName);
 
       loggy.app('Selecting $repositoryName...');
-      selectRepository(NamedRepo(repositoryName, repo!));
+      selectRepository(repo!);
 
       loggy.app('Repository deletion canceled');
       return;

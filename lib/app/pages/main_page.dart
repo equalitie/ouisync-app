@@ -15,8 +15,10 @@ import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
 import '../models/models.dart';
 import '../models/main_state.dart';
+import '../models/folder_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
+import '../utils/actions.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -51,10 +53,6 @@ class _MainPageState extends State<MainPage>
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
-    String _currentFolder = Strings.root; // Default root directory: /
-  
-    List<BaseItem> _folderContents = <BaseItem>[];
-
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     String _pathEntryToMove = '';
@@ -70,6 +68,8 @@ class _MainPageState extends State<MainPage>
     // exitBackButtonTimeoutMs duration, then the app will exit.
     int lastExitAttempt = 0;
     final int exitBackButtonTimeoutMs = 3000;
+
+    FolderState? get currentFolder => _mainState.currentFolder;
 
     @override
     void initState() {
@@ -161,8 +161,6 @@ class _MainPageState extends State<MainPage>
 
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
-    updateCurrentFolder({required String path}) => setState(() { _currentFolder = path; });
-
     getContents({
       required RepoState repository,
       required String path,
@@ -201,7 +199,7 @@ class _MainPageState extends State<MainPage>
       }
 
       final repository = current;
-      final destination = _currentFolder;
+      final destination = currentFolder!.path;
 
       return FolderNavigationBar(destination,
           () {
@@ -241,7 +239,7 @@ class _MainPageState extends State<MainPage>
       if (current.accessMode != AccessMode.blind) {
         getContents(
           repository: current,
-          path: _currentFolder,
+          path: currentFolder!.path,
         );
       }
     }
@@ -277,7 +275,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      if (_currentFolder == Strings.root) {
+      if (currentFolder?.path == Strings.root) {
         // If the user clicks twice the back button within
         // exitBackButtonTimeoutMs timeout, then exit the app.
         int now = DateTime.now().millisecondsSinceEpoch;
@@ -305,13 +303,13 @@ class _MainPageState extends State<MainPage>
       final current = _mainState.current;
 
       if (current != null) {
-        final parent = getParentSection(_currentFolder);
+        final parent = getParentSection(currentFolder!.path);
 
         BlocProvider
         .of<DirectoryBloc>(context)
         .add(NavigateTo(
           repository: current,
-          origin: _currentFolder,
+          origin: currentFolder!.path,
           destination: parent,
           withProgress: true
         ));
@@ -371,7 +369,7 @@ class _MainPageState extends State<MainPage>
           context,
           bloc: BlocProvider.of<DirectoryBloc>(context),
           repository: current.repo,
-          parent: _currentFolder
+          parent: currentFolder!.path
         ),
       );
     }
@@ -442,7 +440,7 @@ class _MainPageState extends State<MainPage>
 
         if (state is DirectoryLoadFailure) {
           if (state.error == Strings.errorEntryNotFound) {
-            final parent = getParentSection(_currentFolder);
+            final parent = getParentSection(currentFolder!.path);
             return _contentsList(
               repository: _mainState.current!,
               path: parent,
@@ -453,7 +451,7 @@ class _MainPageState extends State<MainPage>
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _mainState.current!,
-              path: _currentFolder
+              path: currentFolder!.path
             )
           );
         }
@@ -463,7 +461,7 @@ class _MainPageState extends State<MainPage>
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _mainState.current!,
-              path: _currentFolder
+              path: currentFolder!.path
             )
           );
         }
@@ -472,20 +470,19 @@ class _MainPageState extends State<MainPage>
           message: S.current.messageErrorLoadingContents,
           actionReload: () => refreshCurrent(
             repository: _mainState.current!,
-            path: _currentFolder
+            path: currentFolder!.path
           )
         );
       },
       listener: (context, state) {
         if (state is DirectoryLoadFailure) {
-          final destination = getParentSection(_currentFolder);
+          final destination = getParentSection(currentFolder!.path);
           final parent = getParentSection(destination);
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
           loggy.app(errorMessage);
           showSnackBar(context, content: Text(errorMessage));
 
-          updateCurrentFolder(path: destination);
           navigateToPath(
             repository: _mainState.current!,
             origin: parent,
@@ -500,7 +497,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is NavigationLoadSuccess) {
-          updateCurrentFolder(path: state.destination);
+          //updateCurrentFolder(path: state.destination);
           updateFolderContents(newContent: state.contents);
           return;
         }
@@ -568,23 +565,23 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      if (_folderContents.isEmpty) {
+      if (currentFolder!.content.isEmpty) {
         return NoContentsState(
           repository: current,
-          path: _currentFolder
+          path: currentFolder!.path
         );
       }
 
       return _contentsList(
         repository: current,
-        path: _currentFolder
+        path: currentFolder!.path
       );
     }
 
     void updateFolderContents({required List<BaseItem> newContent}) {
       if (newContent.isEmpty) {
-        if (_folderContents.isNotEmpty) {
-          setState(() { _folderContents.clear(); });
+        if (currentFolder!.content.isNotEmpty) {
+          setState(() { currentFolder!.content.clear(); });
         }
         return;
       }
@@ -592,8 +589,8 @@ class _MainPageState extends State<MainPage>
       final orderedContent = newContent;
       orderedContent.sort((a, b) => a.type.index.compareTo(b.type.index));
 
-      if (!DeepCollectionEquality.unordered().equals(orderedContent, _folderContents)) {
-        setState(() { _folderContents = orderedContent; });
+      if (!DeepCollectionEquality.unordered().equals(orderedContent, currentFolder!.content)) {
+        setState(() { currentFolder!.content = orderedContent; });
       }
     }
 
@@ -618,9 +615,9 @@ class _MainPageState extends State<MainPage>
               height: 1,
               color: Colors.transparent
           ),
-          itemCount: _folderContents.length,
+          itemCount: currentFolder!.content.length,
           itemBuilder: (context, index) {
-            final item = _folderContents[index];
+            final item = currentFolder!.content[index];
             final actionByType = item.type == ItemType.file
             ? () async {
               if (_persistentBottomSheetController != null) {
@@ -819,7 +816,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(origin, path, type) async {
     final entryName = getBasename(path);
-    final newDestinationPath = buildDestinationPath(_currentFolder, entryName);
+    final newDestinationPath = buildDestinationPath(currentFolder!.path, entryName);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -829,7 +826,7 @@ class _MainPageState extends State<MainPage>
       MoveEntry(
         repository: _mainState.current!,
         origin: origin,
-        destination: _currentFolder,
+        destination: currentFolder!.path,
         entryPath: path,
         newDestinationPath: newDestinationPath
       )
@@ -837,7 +834,9 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
-    if (!_mainState.hasCurrent) {
+    final currentRepo = _mainState.current;
+
+    if (currentRepo == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
@@ -848,11 +847,11 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    String? accessModeMessage = _mainState.current!.accessMode == AccessMode.blind
-    ? S.current.messageAddingFileToLockedRepository
-    : _mainState.current!.accessMode == AccessMode.read
-    ? S.current.messageAddingFileToReadRepository
-    : null;
+    String? accessModeMessage = currentRepo.accessMode == AccessMode.blind
+      ? S.current.messageAddingFileToLockedRepository
+      : currentRepo.accessMode == AccessMode.read
+        ? S.current.messageAddingFileToReadRepository
+        : null;
 
     if (accessModeMessage != null) {
       await showDialog<bool>(
@@ -891,7 +890,7 @@ class _MainPageState extends State<MainPage>
   void saveFileToOuiSync(String path) {
     final fileName = getBasename(path);
     final length = io.File(path).statSync().size;
-    final filePath = buildDestinationPath(_currentFolder, fileName);
+    final filePath = buildDestinationPath(currentFolder!.path, fileName);
     final fileByteStream = io.File(path).openRead();
         
     BlocProvider.of<DirectoryBloc>(context)
@@ -954,7 +953,8 @@ class _MainPageState extends State<MainPage>
 
     final fileName = getBasename(_intentPayload.first.path);
     final length = io.File(_intentPayload.first.path).statSync().size;
-    final filePath = buildDestinationPath(_currentFolder, fileName);
+    final filePath = buildDestinationPath(currentFolder!.path, fileName);
+
     final fileByteStream = io.File(_intentPayload.first.path).openRead();
 
     BlocProvider.of<DirectoryBloc>(context)

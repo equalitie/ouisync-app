@@ -1,14 +1,20 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
+import '../models/folder_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 
 class RepoState with OuiSyncAppLogger {
   String name;
   Repository repo;
+  FolderState currentFolder;
 
-  RepoState(this.name, this.repo);
+  RepoState(this.name, this.repo) :
+    currentFolder = FolderState()
+  {
+    currentFolder.repo = this;
+  }
 
   AccessMode get accessMode => repo.accessMode;
 

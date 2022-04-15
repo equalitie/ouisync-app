@@ -2,6 +2,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
 import '../models/repo_state.dart';
+import '../models/folder_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
 class MainState with OuiSyncAppLogger {
@@ -15,6 +16,10 @@ class MainState with OuiSyncAppLogger {
     } else {
       return _repos[_currentRepoName!];
     }
+  }
+
+  FolderState? get currentFolder {
+    return current?.currentFolder;
   }
 
   Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);
