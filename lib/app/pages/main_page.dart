@@ -174,6 +174,14 @@ class _MainPageState extends State<MainPage>
       required String destination,
       bool withProgress = false
     }) {
+      final currentFolder = this.currentFolder;
+
+      if (currentFolder == null) {
+        return;
+      }
+
+      currentFolder.path = destination;
+
       BlocProvider
       .of<DirectoryBloc>(context)
       .add(NavigateTo(
@@ -242,7 +250,13 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      if (currentFolder?.path == Strings.root) {
+      final currentFolder = this.currentFolder;
+
+      if (currentFolder == null) {
+        return false;
+      }
+
+      if (currentFolder.isRoot()) {
         // If the user clicks twice the back button within
         // exitBackButtonTimeoutMs timeout, then exit the app.
         int now = DateTime.now().millisecondsSinceEpoch;
@@ -267,20 +281,17 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      final current = _mainState.current;
+      final origin = currentFolder.path;
+      currentFolder.goUp();
 
-      if (current != null) {
-        final parent = getParentSection(currentFolder!.path);
-
-        BlocProvider
-        .of<DirectoryBloc>(context)
-        .add(NavigateTo(
-          repository: current,
-          origin: currentFolder!.path,
-          destination: parent,
-          withProgress: true
-        ));
-      }
+      BlocProvider
+      .of<DirectoryBloc>(context)
+      .add(NavigateTo(
+        repository: currentFolder.repo,
+        origin: origin,
+        destination: currentFolder.path,
+        withProgress: true
+      ));
 
       return false;
     }

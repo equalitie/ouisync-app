@@ -39,12 +39,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
     
-    await _onNavigateTo(NavigateTo(
-      repository: event.repository,
-      origin: event.parentPath,
-      destination: event.newFolderPath,
-      withProgress: true
-    ), emit);
+    event.repository.currentFolder.path = event.newFolderPath;
+
+    await _refreshFolder(event.repository, emit);
   }
 
   Future<void> _onDeleteFolder(DeleteFolder event, Emitter<DirectoryState> emit) async {
@@ -65,10 +62,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(
-      GetContent(repository: event.repository),
-      emit
-    );
+    await _refreshFolder(event.repository, emit);
   }
 
   Future<void> _onSaveFile(SaveFile event, Emitter<DirectoryState> emit) async {
@@ -82,10 +76,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     emit(fileCreationResult); 
 
     if (fileCreationResult is CreateFileDone) {
-      await _updateContens(
-        GetContent(repository: event.repository),
-        emit
-      );
+      await _refreshFolder(event.repository, emit);
 
       final file = fileCreationResult.file;
       int offset = 0;
@@ -196,7 +187,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(repository: event.repository), emit);
+    await _refreshFolder(event.repository, emit);
   }
 
   Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {
@@ -213,7 +204,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(repository: event.repository), emit);
+    await _refreshFolder(event.repository, emit);
   }
 
   Future<void> _onDeleteFile(DeleteFile event, Emitter<DirectoryState> emit) async {
@@ -233,7 +224,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(repository: event.repository), emit);
+    await _refreshFolder(event.repository, emit);
   }
   
   Future<void> _onNavigateTo(NavigateTo event, Emitter<DirectoryState> emit) async {
@@ -259,25 +250,25 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
   }
 
   Future<void> _onGetContents(GetContent event, Emitter<DirectoryState> emit) async {
-    await _updateContens(event, emit);
+    await _refreshFolder(event.repository, emit);
   }
 
-  GetContent? _curGetContentEvent;
-  GetContent? _nextGetContentEvent;
+  RepoState? _curRefreshRepo;
+  RepoState? _nextRefreshRepo;
   Emitter<DirectoryState>? _nextEmit;
   List<Completer> _getContentCompleters = <Completer>[];
 
   // Trigger content update. If a content update is already in progress, it is scheduled
   // to be done afterwards.
-  Future<void> _updateContens(GetContent event, Emitter<DirectoryState> emit) async {
+  Future<void> _refreshFolder(RepoState repo, Emitter<DirectoryState> emit) async {
     final completer = Completer<void>();
     final future = completer.future;
     _getContentCompleters.add(completer);
 
-    _nextGetContentEvent = event;
+    _nextRefreshRepo = repo;
     _nextEmit = emit;
 
-    if (_curGetContentEvent == null) {
+    if (_curRefreshRepo == null) {
       _runUpdateLoop(); // don't await
     }
 
@@ -285,9 +276,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
   }
 
   void _runUpdateLoop() async {
-    while (_nextGetContentEvent != null) {
-      _curGetContentEvent = _nextGetContentEvent;
-      _nextGetContentEvent = null;
+    while (_nextRefreshRepo != null) {
+      _curRefreshRepo = _nextRefreshRepo;
+      _nextRefreshRepo = null;
 
       final emit = _nextEmit!;
       _nextEmit = null;
@@ -295,9 +286,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       final completers = _getContentCompleters;
       _getContentCompleters = <Completer>[];
 
-      final state = await _getContents(_curGetContentEvent!);
+      final state = await _getContents(_curRefreshRepo!);
 
-      _curGetContentEvent = null;
+      _curRefreshRepo = null;
 
       emit(state);
 
@@ -307,10 +298,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     }
   }
 
-  Future<DirectoryState> _getContents(GetContent event) async {
+  Future<DirectoryState> _getContents(RepoState repo) async {
     try {
-      final path = event.repository.currentFolder.path;
-      final entries = await event.repository.getFolderContents(path);
+      final path = repo.currentFolder.path;
+      final entries = await repo.getFolderContents(path);
       return DirectoryLoadSuccess(path: path, contents: entries);
     } catch (e) {
       return DirectoryLoadFailure(error: e.toString());

@@ -11,7 +11,15 @@ class FolderState {
 
   FolderState();
 
+  bool isRoot() {
+    return path == Strings.root;
+  }
+
   void goUp() {
     path = getParentSection(path);
+  }
+
+  void goTo(String path) {
+    this.path = path;
   }
 }
