@@ -134,37 +134,21 @@ class DirectoryLoadInProgress extends DirectoryState {
   ];
 }
 
-class SyncingDone extends DirectoryState {
-  const SyncingDone();
-
-  @override
-  List<Object> get props => [
-  ];
-}
-
 class DirectoryLoadSuccess extends DirectoryState {
   const DirectoryLoadSuccess({
     required this.path,
-    required this.contents,
-    this.action = '',
   });
 
   final String path;
-  final List<BaseItem> contents;
-  final String action;
 
   @override
   List<Object> get props => [
     path,
-    contents,
-    action,
   ];
 }
 
 class DirectoryLoadFailure extends DirectoryState {
-  const DirectoryLoadFailure({
-    this.error,
-  });
+  const DirectoryLoadFailure({ this.error });
 
   final String? error;
 

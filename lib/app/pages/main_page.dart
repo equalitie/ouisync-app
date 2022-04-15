@@ -412,11 +412,6 @@ class _MainPageState extends State<MainPage>
           );
         }
 
-        if (state is DirectoryLoadSuccess) {
-          updateFolderContents(newContent: state.contents);
-          return;
-        }
-
         if (state is CreateFileFailure) {
           showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
         }
@@ -464,22 +459,6 @@ class _MainPageState extends State<MainPage>
         repository: current,
         path: currentFolder!.path
       );
-    }
-
-    void updateFolderContents({required List<BaseItem> newContent}) {
-      if (newContent.isEmpty) {
-        if (currentFolder!.content.isNotEmpty) {
-          setState(() { currentFolder!.content.clear(); });
-        }
-        return;
-      }
-
-      final orderedContent = newContent;
-      orderedContent.sort((a, b) => a.type.index.compareTo(b.type.index));
-
-      if (!DeepCollectionEquality.unordered().equals(orderedContent, currentFolder!.content)) {
-        setState(() { currentFolder!.content = orderedContent; });
-      }
     }
 
     _errorState({

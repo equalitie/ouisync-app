@@ -260,11 +260,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       if (repo.accessMode == AccessMode.blind) {
         return DirectoryLoadFailure();
       }
-      final path = repo.currentFolder.path;
-      final entries = await repo.getFolderContents(path);
-      return DirectoryLoadSuccess(path: path, contents: entries);
-    } catch (e) {
+
+      await repo.currentFolder.refresh();
+
+      return DirectoryLoadSuccess(path: repo.currentFolder.path);
+    }
+    catch (e) {
       return DirectoryLoadFailure(error: e.toString());
     }
   }
+
 }
