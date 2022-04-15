@@ -18,6 +18,10 @@ class RepoState with OuiSyncAppLogger {
 
   AccessMode get accessMode => repo.accessMode;
 
+  Future<bool> exists(String path) async {
+    return await repo.exists(path);
+  }
+
   // NOTE: This operator is required for the DropdownMenuButton to show
   // entries properly.
   @override

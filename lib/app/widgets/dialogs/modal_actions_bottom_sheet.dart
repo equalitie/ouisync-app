@@ -5,20 +5,19 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
+import '../../models/folder_state.dart';
 import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget {
   const DirectoryActions({
     required this.context,
     required this.bloc,
-    required this.repository,
     required this.parent,
   });
 
   final BuildContext context;
   final DirectoryBloc bloc;
-  final Repository repository;
-  final String parent;
+  final FolderState parent;
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +34,12 @@ class DirectoryActions extends StatelessWidget {
             _buildAction(
               name: S.current.actionNewFolder,
               icon: Icons.folder_outlined,
-              action: () => createFolderDialog(context, bloc, repository, parent)
+              action: () => createFolderDialog(context, bloc, parent)
             ),
             _buildAction(
               name: S.current.actionNewFile,
               icon: Icons.insert_drive_file_outlined,
-              action: () async => await addFile(context, bloc, repository, parent)
+              action: () async => await addFile(context, bloc, parent)
             )
           ]
         ),
@@ -71,7 +70,7 @@ class DirectoryActions extends StatelessWidget {
     ),
   ); 
 
-  void createFolderDialog(context, bloc, repository, parent) async {
+  void createFolderDialog(context, bloc, FolderState parent) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -83,8 +82,8 @@ class DirectoryActions extends StatelessWidget {
           body: FolderCreation(
             context: context,
             bloc: bloc,
-            repository: repository,
-            path: parent,
+            repository: parent.repo,
+            path: parent.path,
             formKey: formKey,
           ),
         );
@@ -96,7 +95,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, bloc, repository, parent) async {
+  Future<void> addFile(context, bloc, parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -106,18 +105,18 @@ class DirectoryActions extends StatelessWidget {
 
     if(result != null) {
       final file = result.files.single;
-      final newFilePath = parent == '/'
-      ? '/${file.name}'
-      : '$parent/${file.name}';
+      final newFilePath = parent.path == '/'
+        ? '/${file.name}'
+        : '$parent/${file.name}';
       
-      final exist = await EntryInfo(repository).exist(context, path: newFilePath);
+      final exist = await EntryInfo(parent.repo.repo).exist(context, path: newFilePath);
       if (exist) {
         return;
       }
 
       bloc.add(
         SaveFile(
-          repository: repository,
+          repository: parent.repo,
           newFilePath: newFilePath,
           fileName: file.name,
           length: file.size,

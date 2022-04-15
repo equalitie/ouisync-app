@@ -55,9 +55,8 @@ class FolderCreation extends StatelessWidget {
 
   void _onSaved(bloc, newFolderName) async {
     final newFolderPath = buildDestinationPath(this.path, newFolderName);
-    final exist = await EntryInfo(repository.repo).exist(context, path: newFolderPath);
 
-    if (exist) {
+    if (await repository.exists(newFolderPath)) {
       return;
     }
 

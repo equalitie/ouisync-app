@@ -66,10 +66,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     }
 
     await _updateContens(
-      GetContent(
-        repository: event.repository,
-        path: event.parentPath,
-      ),
+      GetContent(repository: event.repository),
       emit
     );
   }
@@ -85,12 +82,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     emit(fileCreationResult); 
 
     if (fileCreationResult is CreateFileDone) {
-      final parentPath = getParentSection(event.newFilePath);
       await _updateContens(
-        GetContent(
-          repository: event.repository,
-          path: parentPath,
-        ),
+        GetContent(repository: event.repository),
         emit
       );
 
@@ -203,10 +196,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(
-      repository: event.repository,
-      path: event.path,
-    ), emit);
+    await _updateContens(GetContent(repository: event.repository), emit);
   }
 
   Future<void> _onMoveEntry(MoveEntry event, Emitter<DirectoryState> emit) async {
@@ -223,10 +213,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(
-      repository: event.repository,
-      path: event.destination,
-    ), emit);
+    await _updateContens(GetContent(repository: event.repository), emit);
   }
 
   Future<void> _onDeleteFile(DeleteFile event, Emitter<DirectoryState> emit) async {
@@ -246,10 +233,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       return;
     }
 
-    await _updateContens(GetContent(
-      repository: event.repository,
-      path: event.parentPath,
-    ), emit);
+    await _updateContens(GetContent(repository: event.repository), emit);
   }
   
   Future<void> _onNavigateTo(NavigateTo event, Emitter<DirectoryState> emit) async {
@@ -325,8 +309,9 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
   Future<DirectoryState> _getContents(GetContent event) async {
     try {
-      final entries = await event.repository.getFolderContents(event.path);
-      return DirectoryLoadSuccess(path: event.path, contents: entries);
+      final path = event.repository.currentFolder.path;
+      final entries = await event.repository.getFolderContents(path);
+      return DirectoryLoadSuccess(path: path, contents: entries);
     } catch (e) {
       return DirectoryLoadFailure(error: e.toString());
     }

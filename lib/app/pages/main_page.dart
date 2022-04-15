@@ -161,16 +161,10 @@ class _MainPageState extends State<MainPage>
 
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
-    getContents({
-      required RepoState repository,
-      required String path,
-    }) {
+    getContents(RepoState repository) {
       BlocProvider
       .of<DirectoryBloc>(context)
-      .add(GetContent(
-        repository: repository,
-        path: path,
-      ));
+      .add(GetContent(repository: repository));
     }
 
     navigateToPath({
@@ -219,11 +213,7 @@ class _MainPageState extends State<MainPage>
 
     Future<void> refreshCurrent({
       required RepoState repository,
-      required String path
-    }) async => getContents(
-      repository: repository,
-      path: path,
-    );
+    }) async => getContents(repository);
 
     void _syncCurrentFolder(String repositoryName) {
       final current = _mainState.current;
@@ -237,10 +227,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current.accessMode != AccessMode.blind) {
-        getContents(
-          repository: current,
-          path: currentFolder!.path,
-        );
+        getContents(current);
       }
     }
 
@@ -368,8 +355,7 @@ class _MainPageState extends State<MainPage>
         onPressed: () => _showDirectoryActions(
           context,
           bloc: BlocProvider.of<DirectoryBloc>(context),
-          repository: current.repo,
-          parent: currentFolder!.path
+          folder: currentFolder!
         ),
       );
     }
@@ -451,7 +437,6 @@ class _MainPageState extends State<MainPage>
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _mainState.current!,
-              path: currentFolder!.path
             )
           );
         }
@@ -461,7 +446,6 @@ class _MainPageState extends State<MainPage>
             message: S.current.messageErrorDefault,
             actionReload: () => refreshCurrent(
               repository: _mainState.current!,
-              path: currentFolder!.path
             )
           );
         }
@@ -470,7 +454,6 @@ class _MainPageState extends State<MainPage>
           message: S.current.messageErrorLoadingContents,
           actionReload: () => refreshCurrent(
             repository: _mainState.current!,
-            path: currentFolder!.path
           )
         );
       },
@@ -608,7 +591,7 @@ class _MainPageState extends State<MainPage>
     }) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
-        onRefresh: () => refreshCurrent(repository: repository, path: path),
+        onRefresh: () => refreshCurrent(repository: repository),
         child: ListView.separated(
           padding: EdgeInsets.only(bottom: value as double),
           separatorBuilder: (context, index) => Divider(
@@ -973,8 +956,7 @@ class _MainPageState extends State<MainPage>
 
   Future<dynamic> _showDirectoryActions(BuildContext context,{
     required DirectoryBloc bloc,
-    required Repository repository,
-    required String parent
+    required FolderState folder
   }) => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
@@ -990,8 +972,7 @@ class _MainPageState extends State<MainPage>
       return DirectoryActions(
         context: context,
         bloc: bloc,
-        repository: repository,
-        parent: parent,
+        parent: folder,
       );
     }
   );

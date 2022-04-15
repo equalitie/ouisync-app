@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../models/repo_state.dart';
+import '../../models/folder_state.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -27,18 +28,13 @@ class CreateFolder extends DirectoryEvent {
 }
 
 class GetContent extends DirectoryEvent {
-  const GetContent({
-    required this.repository,
-    required this.path,
-  });
+  const GetContent({required this.repository});
 
   final RepoState repository;
-  final String path;
 
   @override
   List<Object> get props => [
     repository,
-    path,
   ];
 }
 
