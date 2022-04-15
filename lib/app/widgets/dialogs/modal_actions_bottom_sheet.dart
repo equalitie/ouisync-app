@@ -95,7 +95,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, bloc, parent) async {
+  Future<void> addFile(context, bloc, FolderState parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
