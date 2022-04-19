@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -78,8 +77,8 @@ class _FileDetailState extends State<FileDetail> {
                 context: widget.context,
                 barrierDismissible: false, // user must tap button!
                 builder: (BuildContext context) {
-                  final fileName = getPathFromFileName(widget.data.path);
-                  final parent = extractParentFromPath(widget.data.path);
+                  final fileName = getBasename(widget.data.path);
+                  final parent = getParentSection(widget.data.path);
 
                   return Dialogs
                   .buildDeleteFileAlertDialog(
@@ -93,7 +92,7 @@ class _FileDetailState extends State<FileDetail> {
                 },
               ).then((fileName) {
                 Navigator.of(context).pop();
-                Fluttertoast.showToast(msg: S.current.messageFileDeleted(fileName ?? ''));
+                showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName ?? '')));
               })
             },
             icon: Icons.delete_outlined,
@@ -135,7 +134,7 @@ class _FileDetailState extends State<FileDetail> {
   ) {
     Navigator.of(context).pop();
 
-    final origin = extractParentFromPath(path);
+    final origin = getParentSection(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
         origin: origin,
@@ -163,7 +162,7 @@ class _FileDetailState extends State<FileDetail> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         final formKey = GlobalKey<FormState>();
-        final name = removeParentFromPath(path);
+        final name = getBasename(path);
 
         return ActionsDialog(
           title: S.current.messageRenameFile,
@@ -177,10 +176,8 @@ class _FileDetailState extends State<FileDetail> {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = extractParentFromPath(path);
-        final newEntryPath = parent == Strings.rootPath
-        ? '/$newName'
-        : '$parent/$newName';  
+        final parent = getParentSection(path);
+        final newEntryPath = buildDestinationPath(parent, newName); 
 
         widget.bloc
         .add(RenameEntry(

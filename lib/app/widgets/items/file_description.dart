@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -71,7 +70,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
                       TextButton(
                         onPressed: () async {
                           if (state.path == this.fileData.path) {
-                            Fluttertoast.showToast(msg: S.current.messageCancelingFileWriting(state.fileName));
+                            showSnackBar(context, content: Text(S.current.messageCancelingFileWriting(state.fileName)));
                             BlocProvider.of<DirectoryBloc>(context).add(CancelSaveFile(filePath: this.fileData.path));
                           }
                         },

@@ -1,7 +1,9 @@
+import 'dart:io';
+
 class Strings {
   Strings._();
 
-  static const String rootPath = '/';
+  static const String root = '/';
   static const String atSymbol = '@';
 
   // Dialogs

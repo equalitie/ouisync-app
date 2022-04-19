@@ -53,9 +53,11 @@ class Rename extends StatelessWidget {
   }
 
   void _returnNewName(String? newName) {
-    final fileExtension = extractFileTypeFromName(this.entryName);
+    // final fileExtension = extractFileTypeFromName(this.entryName);
+    final fileExtension = getFileExtension(this.entryName);
     if (fileExtension.isNotEmpty) {
-      newName = '$newName.$fileExtension';
+      // newName = '$newName.$fileExtension';
+      newName = '$newName$fileExtension';
     }
 
     Navigator.of(this.context).pop(newName);

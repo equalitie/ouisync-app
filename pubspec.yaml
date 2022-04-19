@@ -27,6 +27,7 @@ dependencies:
   collection: ^1.15.0
   connectivity_plus: ^2.2.1
   cupertino_icons: ^1.0.4
+  desktop_drop: ^0.3.3
   equatable: ^2.0.3
   ffi: ^1.0.0
   file: ^6.1.2
@@ -38,7 +39,6 @@ dependencies:
   flutter_hooks: ^0.18.2+1
   flutter_launcher_icons: ^0.9.2
   flutter_loggy: ^2.0.1
-  fluttertoast: ^8.0.9
   mockito: ^5.1.0
   move_to_background: ^1.0.2
   network_info_plus: ^2.1.3

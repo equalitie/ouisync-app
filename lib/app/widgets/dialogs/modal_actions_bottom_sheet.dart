@@ -110,7 +110,7 @@ class DirectoryActions extends StatelessWidget {
       ? '/${file.name}'
       : '$parent/${file.name}';
       
-      final exist = await EntryInfo(repository).exist(path: newFilePath);
+      final exist = await EntryInfo(repository).exist(context, path: newFilePath);
       if (exist) {
         return;
       }

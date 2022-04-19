@@ -3,9 +3,9 @@ import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -51,7 +51,7 @@ class _MainPageState extends State<MainPage>
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
-    String _currentFolder = Strings.rootPath; // Initial value: /
+    String _currentFolder = Strings.root; // Default root directory: /
   
     List<BaseItem> _folderContents = <BaseItem>[];
     
@@ -216,7 +216,7 @@ class _MainPageState extends State<MainPage>
       return FolderNavigationBar(destination,
           () {
             final from = destination;
-            final backTo = extractParentFromPath(from);
+            final backTo = getParentSection(from);
 
             BlocProvider
             .of<DirectoryBloc>(context)
@@ -260,7 +260,24 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: _mainState,
+          child: DropTarget(
+            onDragDone: (detail) {
+              loggy.app('onDropDone: ${detail.files.first.path}');
+              
+              final xFile = detail.files.firstOrNull;
+              if (xFile != null) {
+                final file = io.File(xFile.path);
+                saveMedia(droppedMediaFile: file);
+              }
+            },
+            onDragEntered: (detail) {
+              loggy.app('onDropEntered: ${detail.localPosition}');
+            },
+            onDragExited: (detail) {
+              loggy.app('onDropExited: ${detail.localPosition}');
+            },
+            child: _mainState
+          ),
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),
@@ -268,17 +285,14 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      if (_currentFolder == Strings.rootPath) {
+      if (_currentFolder == Strings.root) {
         // If the user clicks twice the back button within
         // exitBackButtonTimeoutMs timeout, then exit the app.
         int now = DateTime.now().millisecondsSinceEpoch;
 
         if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
           lastExitAttempt = now;
-          Fluttertoast.showToast(
-            msg: S.current.messageExitOuiSync,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER);
+          showSnackBar(context, content: Text(S.current.messageExitOuiSync));
 
           // Don't pop => don't exit
           return false;
@@ -297,7 +311,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (_repositoriesService.hasCurrent) {
-        final parent = extractParentFromPath(_currentFolder);
+        final parent = getParentSection(_currentFolder);
 
         BlocProvider
         .of<DirectoryBloc>(context)
@@ -388,8 +402,8 @@ class _MainPageState extends State<MainPage>
       navigateToPath(
         repository: _repositoriesService.current!.repo,
         previousAccessMode: previousAccessMode,
-        origin: Strings.rootPath,
-        destination: Strings.rootPath,
+        origin: Strings.root,
+        destination: Strings.root,
         withProgress: true
       );
     }
@@ -431,7 +445,7 @@ class _MainPageState extends State<MainPage>
         
         if (state is DirectoryLoadFailure) {
           if (state.error == Strings.errorEntryNotFound) {
-            final parent = extractParentFromPath(_currentFolder);
+            final parent = getParentSection(_currentFolder);
             return _contentsList(
               repository: _repositoriesService.current!.repo,
               path: parent,
@@ -467,12 +481,12 @@ class _MainPageState extends State<MainPage>
       },
       listener: (context, state) {
         if (state is DirectoryLoadFailure) {
-          final destination = extractParentFromPath(_currentFolder);
-          final parent = extractParentFromPath(destination);
+          final destination = getParentSection(_currentFolder);
+          final parent = getParentSection(destination);
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
           loggy.app(errorMessage);
-          Fluttertoast.showToast(msg: errorMessage);
+          showSnackBar(context, content: Text(errorMessage));
 
           updateCurrentFolder(path: destination);
           navigateToPath(
@@ -522,19 +536,19 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is CreateFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageNewFileError(state.path));
+          showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
         }
 
         if (state is WriteToFileDone) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileDone(state.path));
+          showSnackBar(context, content: Text(S.current.messageWritingFileDone(state.path)));
         }
 
         if (state is WriteToFileCanceled) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileCanceled(state.path));
+          showSnackBar(context, content: Text(S.current.messageWritingFileCanceled(state.path)));
         }
 
         if (state is WriteToFileFailure) {
-          Fluttertoast.showToast(msg: S.current.messageWritingFileError(state.path));
+          showSnackBar(context, content: Text(S.current.messageWritingFileError(state.path)));
         }
       }
     );
@@ -810,10 +824,8 @@ class _MainPageState extends State<MainPage>
   }
 
   void moveEntry(origin, path, type) async {
-    final entryName = removeParentFromPath(path);
-    final newDestinationPath = _currentFolder == Strings.rootPath
-    ? '/$entryName'
-    : '$_currentFolder/$entryName';
+    final entryName = getBasename(path);
+    final newDestinationPath = buildDestinationPath(_currentFolder, entryName);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -830,15 +842,15 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void saveSharedMedia() async {
+  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
     if (!_repositoriesService.hasCurrent) {
-      Fluttertoast.showToast(msg: S.current.messageNoRepo);
+      showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
 
-    SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
-    if (mediaInfo == null) {
-      Fluttertoast.showToast(msg: S.current.mesageNoMediaPresent);
+    if (mobileSharedMediaFile == null &&
+    droppedMediaFile == null) {
+      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
 
@@ -873,11 +885,81 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final fileName = getPathFromFileName(_intentPayload.first.path);
+    final String? path = mobileSharedMediaFile?.path ?? droppedMediaFile?.path;
+    if (path == null) {
+      return;
+    }
+
+    loggy.app('Media path: $path');
+    saveFileToOuiSync(path);
+  }
+
+  void saveFileToOuiSync(String path) {
+    final fileName = getBasename(path);
+    final length = io.File(path).statSync().size;
+    final filePath = buildDestinationPath(_currentFolder, fileName);
+    final fileByteStream = io.File(path).openRead();
+        
+    BlocProvider.of<DirectoryBloc>(context)
+    .add(
+      SaveFile(
+        repository: _repositoriesService.current!.repo,
+        newFilePath: filePath,
+        fileName: fileName,
+        length: length,
+        fileByteStream: fileByteStream
+      )
+    );
+
+    Navigator.of(context).pop();
+  }
+
+  void saveSharedMedia() async {
+    if (!_repositoriesService.hasCurrent) {
+      showSnackBar(context, content: Text(S.current.messageNoRepo));
+      return;
+    }
+
+    SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
+    if (mediaInfo == null) {
+      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
+      return;
+    }
+
+    String? accessModeMessage = _repositoriesService.current!.repo.accessMode == AccessMode.blind
+    ? S.current.messageAddingFileToLockedRepository
+    : _repositoriesService.current!.repo.accessMode == AccessMode.read
+    ? S.current.messageAddingFileToReadRepository
+    : null;
+
+    if (accessModeMessage != null) {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (context) {
+          return AlertDialog(
+            title: Text(S.current.titleAddFile),
+            content: SingleChildScrollView(
+              child: ListBody(children: [
+                Text(accessModeMessage)
+              ]),
+            ),
+            actions: [
+              TextButton(
+                child: Text(S.current.actionCloseCapital),
+                onPressed: () => 
+                Navigator.of(context).pop(),
+              )
+            ],
+          );
+      });
+
+      return;
+    }
+
+    final fileName = getBasename(_intentPayload.first.path);
     final length = io.File(_intentPayload.first.path).statSync().size;
-    final filePath = _currentFolder == Strings.rootPath
-    ? '/$fileName'
-    : '$_currentFolder/$fileName';
+    final filePath = buildDestinationPath(_currentFolder, fileName);
     final fileByteStream = io.File(_intentPayload.first.path).openRead();
         
     BlocProvider.of<DirectoryBloc>(context)

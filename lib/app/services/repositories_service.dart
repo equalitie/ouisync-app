@@ -86,12 +86,12 @@ class RepositoriesService with OuiSyncAppLogger {
       loggy.app('Cleaning current selection for repository $name');
       _currentRepoName = null;
     }
-
-    final repo = _repos.remove(name);
-
-    if (repo != null) {
+    if (_repos.containsKey(name)) {
       loggy.app('Closing repository $name');
-      repo.close();
+      _repos[name]?.close();
+
+      loggy.app('Removing repository $name from the service');
+      _repos.remove(name);
     }
   }
 

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
 
 class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
@@ -58,13 +56,13 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
       ),
     );
 
-  Widget _currentLocationBar(String path, Function action) {
-    final current = removeParentFromPath(path);
+  Widget _currentLocationBar(String path, Function action, { String separator = Strings.root}) {
+    final current = getBasename(path);
     return Row(
       children: [
         _navigation(path, action),
         SizedBox(
-          width: path == Strings.rootPath
+          width: path == separator
           ? 5.0
           : 0.0
         ),
@@ -88,7 +86,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
   }
 
   GestureDetector _navigation(String path, Function action) {
-    final target = extractParentFromPath(path);
+    final target = getParentSection(path);
 
     return GestureDetector(
       onTap: () {
@@ -96,7 +94,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
           action.call();
         }
       },
-      child: path == Strings.rootPath
+      child: path == Strings.root
       ? const Icon(
           Icons.lock_rounded,
           size: Dimensions.sizeIconAverage,

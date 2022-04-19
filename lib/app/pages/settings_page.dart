@@ -491,7 +491,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     }
 
     loggy.app(dhtStatusMessage);
-    showToast(dhtStatusMessage);
+    showSnackBar(context, content: Text(dhtStatusMessage));
   }
 
   Future<void> _saveLogs() async {
@@ -509,7 +509,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     final dir = await getTemporaryDirectory();
     final info = await PackageInfo.fromPlatform();
     final name = info.appName.toLowerCase();
-    final path = '${dir.path}/$name.log';
+    final path = buildDestinationPath(dir.path, '$name.log');
 
     await dumpLogs(path);
 
