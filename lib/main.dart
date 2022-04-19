@@ -21,8 +21,9 @@ Future<void> main() async {
   final configDir = p.join(appDir, Constants.configuratiosDirName);
 
   print(appDir);
-  print(repositoriesDir);
+
   print(configDir);
+  print(repositoriesDir);
 
   await Settings.initSettings(
     appDir,

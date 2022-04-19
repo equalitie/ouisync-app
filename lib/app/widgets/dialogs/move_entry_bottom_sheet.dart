@@ -42,10 +42,10 @@ class MoveEntryDialog extends StatelessWidget {
         children: [
           Fields.iconLabel(
             icon: Icons.drive_file_move_outlined,
-            text: '${removeParentFromPath(path)}'
+            text: '${getBasename(path)}'
           ),
           Fields.constrainedText(
-            S.current.messageMoveEntryOrigin(extractParentFromPath(path)),
+            S.current.messageMoveEntryOrigin(getParentSection(path)),
             fontWeight: FontWeight.w800
           ),
           _selectActions(context)

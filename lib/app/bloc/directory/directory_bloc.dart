@@ -89,7 +89,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     emit(fileCreationResult); 
 
     if (fileCreationResult is CreateFileDone) {
-      final parentPath = extractParentFromPath(event.newFilePath);
+      final parentPath = getParentSection(event.newFilePath);
       await _updateContens(
         GetContent(
           repository: event.repository,
@@ -189,8 +189,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       );
     }
 
-    final name = removeParentFromPath(newFilePath);
-    final extension = extractFileTypeFromName(newFilePath);
+    final name = getBasename(newFilePath);
+    final extension = getFileExtension(newFilePath);
     return CreateFileDone(
       file: createFileResult.result!,
       fileName: name,

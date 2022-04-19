@@ -512,7 +512,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     final dir = await getTemporaryDirectory();
     final info = await PackageInfo.fromPlatform();
     final name = info.appName.toLowerCase();
-    final path = '${dir.path}/$name.log';
+    final path = buildDestinationPath(dir.path, '$name.log');
 
     await dumpLogs(path);
 

@@ -39,7 +39,7 @@ class SaveSharedMedia extends StatelessWidget {
             text: S.current.titleAddFile,
           ),
           Fields.constrainedText(
-            getPathFromFileName(this.sharedMedia.first.path),
+            getBasename(this.sharedMedia.first.path),
             softWrap: true,
             textOverflow: TextOverflow.ellipsis,
             fontWeight: FontWeight.w800

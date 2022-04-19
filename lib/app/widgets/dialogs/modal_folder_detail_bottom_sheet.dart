@@ -115,7 +115,7 @@ class _FolderDetailState extends State<FolderDetail> {
   }
 
   AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, path) {
-    final parentPath = extractParentFromPath(path);
+    final parentPath = getParentSection(path);
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -193,7 +193,7 @@ class _FolderDetailState extends State<FolderDetail> {
     bloc.add(
       NavigateTo(
         repository: repository,
-        origin: extractParentFromPath(parentPath),
+        origin: getParentSection(parentPath),
         destination: parentPath,
         withProgress: true
       )
@@ -210,7 +210,7 @@ class _FolderDetailState extends State<FolderDetail> {
   ) {
     Navigator.of(context).pop();
     
-    final origin = extractParentFromPath(path);
+    final origin = getParentSection(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
         origin: origin,
@@ -238,7 +238,7 @@ class _FolderDetailState extends State<FolderDetail> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         final formKey = GlobalKey<FormState>();
-        final name = removeParentFromPath(path);
+        final name = getBasename(path);
 
         return ActionsDialog(
           title: S.current.messageRenameFolder,
@@ -252,10 +252,8 @@ class _FolderDetailState extends State<FolderDetail> {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = extractParentFromPath(path);
-        final newEntryPath = parent == Strings.rootPath
-        ? '/$newName'
-        : '$parent/$newName';  
+        final parent = getParentSection(path);
+        final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.bloc
         .add(RenameEntry(

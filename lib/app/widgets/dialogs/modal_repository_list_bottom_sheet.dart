@@ -98,7 +98,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
     final repositoryFiles = <String>[];
     if (io.Directory(repositoriesDir).existsSync()) {
-      repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => removeParentFromPath(e.path)).toList());
+      repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => getBasename(e.path)).toList());
       repositoryFiles.removeWhere((e) => !e.endsWith('db'));
     }
 

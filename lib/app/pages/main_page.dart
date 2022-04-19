@@ -3,13 +3,12 @@ import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:cross_file/src/types/interface.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -52,7 +51,7 @@ class _MainPageState extends State<MainPage>
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
     List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
-    String _currentFolder = Strings.rootPath; // Initial value: /
+    String _currentFolder = Strings.root; // Default root directory: /
   
     List<BaseItem> _folderContents = <BaseItem>[];
     
@@ -217,7 +216,7 @@ class _MainPageState extends State<MainPage>
       return FolderNavigationBar(destination,
           () {
             final from = destination;
-            final backTo = extractParentFromPath(from);
+            final backTo = getParentSection(from);
 
             BlocProvider
             .of<DirectoryBloc>(context)
@@ -286,7 +285,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      if (_currentFolder == Strings.rootPath) {
+      if (_currentFolder == Strings.root) {
         // If the user clicks twice the back button within
         // exitBackButtonTimeoutMs timeout, then exit the app.
         int now = DateTime.now().millisecondsSinceEpoch;
@@ -312,7 +311,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (_repositoriesService.hasCurrent) {
-        final parent = extractParentFromPath(_currentFolder);
+        final parent = getParentSection(_currentFolder);
 
         BlocProvider
         .of<DirectoryBloc>(context)
@@ -406,8 +405,8 @@ class _MainPageState extends State<MainPage>
       navigateToPath(
         repository: _repositoriesService.current!.repo,
         previousAccessMode: previousAccessMode,
-        origin: Strings.rootPath,
-        destination: Strings.rootPath,
+        origin: Strings.root,
+        destination: Strings.root,
         withProgress: true
       );
     }
@@ -449,7 +448,7 @@ class _MainPageState extends State<MainPage>
         
         if (state is DirectoryLoadFailure) {
           if (state.error == Strings.errorEntryNotFound) {
-            final parent = extractParentFromPath(_currentFolder);
+            final parent = getParentSection(_currentFolder);
             return _contentsList(
               repository: _repositoriesService.current!.repo,
               path: parent,
@@ -485,8 +484,8 @@ class _MainPageState extends State<MainPage>
       },
       listener: (context, state) {
         if (state is DirectoryLoadFailure) {
-          final destination = extractParentFromPath(_currentFolder);
-          final parent = extractParentFromPath(destination);
+          final destination = getParentSection(_currentFolder);
+          final parent = getParentSection(destination);
 
           final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
           loggy.app(errorMessage);
@@ -829,10 +828,8 @@ class _MainPageState extends State<MainPage>
   }
 
   void moveEntry(origin, path, type) async {
-    final entryName = removeParentFromPath(path);
-    final newDestinationPath = _currentFolder == Strings.rootPath
-    ? '/$entryName'
-    : '$_currentFolder/$entryName';
+    final entryName = getBasename(path);
+    final newDestinationPath = buildDestinationPath(_currentFolder, entryName);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -902,11 +899,9 @@ class _MainPageState extends State<MainPage>
   }
 
   void saveFileToOuiSync(String path) {
-    final fileName = getPathFromFileName(path);
+    final fileName = getBasename(path);
     final length = io.File(path).statSync().size;
-    final filePath = _currentFolder == Strings.rootPath
-    ? '/$fileName'
-    : '$_currentFolder/$fileName';
+    final filePath = buildDestinationPath(_currentFolder, fileName);
     final fileByteStream = io.File(path).openRead();
         
     BlocProvider.of<DirectoryBloc>(context)
@@ -966,11 +961,9 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final fileName = getPathFromFileName(_intentPayload.first.path);
+    final fileName = getBasename(_intentPayload.first.path);
     final length = io.File(_intentPayload.first.path).statSync().size;
-    final filePath = _currentFolder == Strings.rootPath
-    ? '/$fileName'
-    : '$_currentFolder/$fileName';
+    final filePath = buildDestinationPath(_currentFolder, fileName);
     final fileByteStream = io.File(_intentPayload.first.path).openRead();
         
     BlocProvider.of<DirectoryBloc>(context)

@@ -185,7 +185,7 @@ class DirectoryRepository with OuiSyncAppLogger {
       while (iterator.moveNext()) {
         var size = 0;
         if (iterator.current.type == EntryType.file) {
-          size = await getFileSize(repository, path + '/' + iterator.current.name);
+          size = await getFileSize(repository, buildDestinationPath(path, iterator.current.name));
         }
         final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
@@ -206,7 +206,7 @@ class DirectoryRepository with OuiSyncAppLogger {
   }
 
   Future<BaseItem> _castToBaseItem(String path, String name, EntryType type, int size) async {
-    final itemPath = path == '/' ? '/$name' : '$path/$name';
+    final itemPath = buildDestinationPath(path, name);
 
     if (type == EntryType.directory) {
       return FolderItem(

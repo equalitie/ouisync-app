@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ouisync_app/generated/l10n.dart';
+import 'package:path/path.dart' as p;
 
-import 'utils.dart';
+import '../../generated/l10n.dart';
 
 showSnackBar(BuildContext context, { required Widget content, SnackBarAction? action }) =>
   ScaffoldMessenger
@@ -21,66 +21,11 @@ hideSnackBar(context) =>
       ScaffoldMessenger.of(context).hideCurrentSnackBar()
   );
 
-String getPathFromFileName(String path) => path.split(Strings.rootPath).last;
+String getBasename(String path) => p.basename(path);
 
-String extractParentFromPath(String path) {
-  if (path.isEmpty) return Strings.rootPath;
-  if (path == Strings.rootPath) return Strings.rootPath;
+String getParentSection (String path) => p.dirname(path);
 
-  final section = path.substring(0, path.lastIndexOf(Strings.rootPath)); 
-  return section.isEmpty
-  ? Strings.rootPath
-  : section;
-}
-
-String removeParentFromPath(String path) {
-  if (path == Strings.rootPath) {
-    return path;
-  }
-
-  final index = path.lastIndexOf(Strings.rootPath);
-  final section = path.substring(index + 1);
-  
-  return section;
-}
-
-String extractFileTypeFromName(String fileName) {
-  if (!fileName.contains('.')) {
-    return '';
-  }
-
-  if (fileName.lastIndexOf('.') > fileName.length - 2) {
-    return '';
-  }
-
-  return fileName.substring(fileName.lastIndexOf('.') + 1);
-}
-
-getPathMap(String path) {
-  final pathMap = new Map();
-
-  var slashCount = path.split(Strings.rootPath).length - 1;
-  var offset = 1;
-
-  while (slashCount > 0) {
-    var firstIndex = path.indexOf(Strings.rootPath, offset);
-    var section = firstIndex > 0 
-    ? path.substring(0, firstIndex) 
-    : path;
-    
-    if (section.endsWith(Strings.rootPath)) {
-      section = section.substring(0, section.length -1);
-    }
-
-    final parent = extractParentFromPath(section);
-    pathMap[parent] = section;
-
-    offset = firstIndex + 1;
-    slashCount--;
-  }
-
-  return pathMap;
-}
+String getFileExtension(String fileName) => p.extension(fileName);
 
 Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
