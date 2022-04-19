@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import '../../models/repo_state.dart';
+import '../../models/folder_state.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -13,7 +15,7 @@ class CreateFolder extends DirectoryEvent {
   }) : 
   assert(newFolderPath != '');
 
-  final Repository repository;
+  final RepoState repository;
   final String parentPath;
   final String newFolderPath;
 
@@ -26,20 +28,14 @@ class CreateFolder extends DirectoryEvent {
 }
 
 class GetContent extends DirectoryEvent {
-  const GetContent({
-    required this.repository,
-    required this.path,
-  });
+  const GetContent({required this.repository});
 
-  final Repository repository;
-  final String path;
+  final RepoState repository;
 
   @override
   List<Object> get props => [
     repository,
-    path,
   ];
-
 }
 
 class DeleteFolder extends DirectoryEvent {
@@ -51,7 +47,7 @@ class DeleteFolder extends DirectoryEvent {
   }) :
   assert (path != '');
 
-  final Repository repository;
+  final RepoState repository;
   final String parentPath;
   final String path;
   final bool recursive;
@@ -66,33 +62,6 @@ class DeleteFolder extends DirectoryEvent {
 
 }
 
-class NavigateTo extends DirectoryEvent {
-  const NavigateTo({
-    required this.repository,
-    this.previousAccessMode,
-    required this.origin,
-    required this.destination,
-    required this.withProgress
-  }) :
-  assert (origin != ''),
-  assert (destination != '');
-
-  final Repository repository;
-  final AccessMode? previousAccessMode;
-  final String origin;
-  final String destination;
-  final bool withProgress;
-
-  @override
-  List<Object?> get props => [
-    repository,
-    previousAccessMode,
-    origin,
-    destination,
-    withProgress
-  ];
-} 
-
 class SaveFile extends DirectoryEvent {
   const SaveFile({
     required this.repository,
@@ -102,7 +71,7 @@ class SaveFile extends DirectoryEvent {
     required this.fileByteStream
   });
 
-  final Repository repository;
+  final RepoState repository;
   final String newFilePath;
   final String fileName;
   final int length;
@@ -140,7 +109,7 @@ class RenameEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newEntryPath != '');
 
-  final Repository repository;
+  final RepoState repository;
   final String path;
   final String entryPath;
   final String newEntryPath;
@@ -167,7 +136,7 @@ class MoveEntry extends DirectoryEvent {
   assert (entryPath != ''),
   assert (newDestinationPath != '');
 
-  final Repository repository;
+  final RepoState repository;
   final String origin;
   final String destination;
   final String entryPath;
@@ -192,7 +161,7 @@ class DeleteFile extends DirectoryEvent {
   }) :
   assert (filePath != '');
 
-  final Repository repository;
+  final RepoState repository;
   final String parentPath;
   final String filePath;
 

@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
+import '../../models/repo_state.dart';
 
 class FolderCreation extends StatelessWidget {
   const FolderCreation({
@@ -17,7 +18,7 @@ class FolderCreation extends StatelessWidget {
 
   final BuildContext context;
   final DirectoryBloc bloc;
-  final Repository repository;
+  final RepoState repository;
   final String path;
   final GlobalKey<FormState> formKey;
 
@@ -54,8 +55,8 @@ class FolderCreation extends StatelessWidget {
 
   void _onSaved(bloc, newFolderName) async {
     final newFolderPath = buildDestinationPath(this.path, newFolderName);
-    final exist = await EntryInfo(repository).exist(context, path: newFolderPath);
-    if (exist) {
+
+    if (await repository.exists(newFolderPath)) {
       return;
     }
 

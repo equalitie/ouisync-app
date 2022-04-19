@@ -12,8 +12,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
-import '../models/models.dart';
-import '../services/services.dart';
+import '../models/main_state.dart';
+import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -22,6 +22,7 @@ import 'peer_list.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
+    required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.onShareRepository,
@@ -29,6 +30,7 @@ class SettingsPage extends StatefulWidget {
     this.dhtStatus = false,
   });
 
+  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
@@ -40,9 +42,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
-  RepositoriesService _repositoriesSession = RepositoriesService();
-
-  NamedRepo? _persistedRepository;
+  RepoState? _currentRepo;
 
   String? _listenerEndpoint;
   String? _dhtEndpointV4;
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _persistedRepository = _repositoriesSession.current;
+      _currentRepo = widget.mainState.current;
     });
   }
 
@@ -275,17 +275,17 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _persistedRepository = _repositoriesSession.current!;
+                      _currentRepo = widget.mainState.current!;
                     });
                   }
                 },
-                child: DropdownButton<NamedRepo?>(
+                child: DropdownButton<RepoState?>(
                   isExpanded: true,
-                  value: _persistedRepository,
+                  value: _currentRepo,
                   underline: SizedBox(),
-                  items: _repositoriesSession.repos.map((NamedRepo namedRepo) {
+                  items: widget.mainState.repos.map((RepoState repo) {
                     return DropdownMenuItem(
-                      value: namedRepo,
+                      value: repo,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           Dimensions.spacingVerticalHalf,
                           Row(
                             children: [
-                              Fields.constrainedText(namedRepo.name,
+                              Fields.constrainedText(repo.name,
                                   fontWeight: FontWeight.normal),
                             ],
                           ),
@@ -305,12 +305,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       ),
                     );
                   }).toList(),
-                  onChanged: (namedRepo) async {
-                    loggy.app('Selected repository: ${namedRepo?.name}');
+                  onChanged: (repo) async {
+                    loggy.app('Selected repository: ${repo?.name}');
                     setState(() {
-                      _persistedRepository = namedRepo;
+                      _currentRepo = repo;
                     });
-                    _repositoriesSession.setCurrent(_persistedRepository!.name);
+                    widget.mainState.setCurrent(_currentRepo!.name);
                   },
                 ),
               ),
@@ -326,7 +326,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     icon: Icons.edit,
                     iconSize: Dimensions.sizeIconSmall,
                     onTap: () async {
-                  if (_persistedRepository == null) {
+                  if (_currentRepo == null) {
                     return;
                   }
 
@@ -341,14 +341,13 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName:
-                                  _repositoriesSession.current!.name),
+                              repositoryName: widget.mainState.current!.name),
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
-                      final oldName = _persistedRepository!.name;
+                      final oldName = _currentRepo!.name;
                       setState(() {
-                        _persistedRepository = null;
+                        _currentRepo = null;
                       });
 
                       widget.repositoriesCubit
@@ -361,7 +360,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: () {
-                if (_persistedRepository == null) {
+                if (_currentRepo == null) {
                   return;
                 }
 
@@ -374,7 +373,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       iconSize: Dimensions.sizeIconSmall,
                       iconColor: Colors.red,
                       onTap: () async {
-                if (_persistedRepository == null) {
+                if (_currentRepo == null) {
                   return;
                 }
                 await showDialog<bool>(
@@ -402,9 +401,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       );
                     }).then((delete) {
                   if (delete ?? false) {
-                    final repositoryName = _persistedRepository!.name;
+                    final repositoryName = _currentRepo!.name;
                     setState(() {
-                      _persistedRepository = null;
+                      _currentRepo = null;
                       _bittorrentDhtStatus = false;
                     });
 
@@ -466,22 +465,24 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    if (!_repositoriesSession.hasCurrent) {
+    final current = widget.mainState.current;
+
+    if (current == null) {
       return;
     }
 
     loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
     enable
-        ? await _repositoriesSession.current!.repo.enableDht()
-        : await _repositoriesSession.current!.repo.disableDht();
+        ? await current.repo.enableDht()
+        : await current.repo.disableDht();
 
-    final isEnabled = await _repositoriesSession.current!.repo.isDhtEnabled();
+    final isEnabled = await current.repo.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    RepositoryHelper.updateBitTorrentDHTForRepoStatus(_repositoriesSession.current!.name, isEnabled);
+    RepositoryHelper.updateBitTorrentDHTForRepoStatus(current.name, isEnabled);
 
     String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
     if (enable != isEnabled) {

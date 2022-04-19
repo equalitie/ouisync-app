@@ -1,37 +1,34 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
-import '../models/named_repo.dart';
+import '../models/repo_state.dart';
+import '../models/folder_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
-class RepositoriesService with OuiSyncAppLogger {
-  static final RepositoriesService _instance = RepositoriesService._internal();
-
-  RepositoriesService._internal();
-  factory RepositoriesService() => _instance;
-
-  static final Map<String, Repository> _repos = Map();
+class MainState with OuiSyncAppLogger {
+  static final Map<String, RepoState> _repos = Map();
   
   String? _currentRepoName;
 
-  NamedRepo? get current {
+  RepoState? get current {
     if (_currentRepoName == null) {
       return null;
     } else {
-      return getNamed(_currentRepoName!);
+      return _repos[_currentRepoName!];
     }
   }
 
-  Iterable<NamedRepo> get repos
-    => _repos.entries.map((entry) => NamedRepo(entry.key, entry.value));
-
-  setCurrent(String name) {
-    _updateCurrentRepository(name, _repos[name]);
+  FolderState? get currentFolder {
+    return current?.currentFolder;
   }
 
-  bool get hasCurrent => _currentRepoName != null;
+  Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);
 
-  void _updateCurrentRepository(String name, Repository? repo) {
+  setCurrent(String name) {
+    _updateCurrentRepository(_repos[name]);
+  }
+
+  void _updateCurrentRepository(RepoState? repo) {
     if (repo == null) {
       loggy.app("Can't set current repository to null");
       _currentRepoName = null;
@@ -39,41 +36,34 @@ class RepositoriesService with OuiSyncAppLogger {
     }
 
     if (_subscriptionCallback == null) {
-      throw Exception('There is not callback for sincronization');
+      throw Exception('There is not callback for synchronization');
     }
 
     _subscription?.cancel();
     _subscription = null;
 
-    _currentRepoName = name;
+    _currentRepoName = repo.name;
     
-    _subscription = repo.subscribe(() => 
-      _subscriptionCallback!.call(_currentRepoName!)
-    );
-    loggy.app('Subscribed to notifications: $name (${repo.accessMode.name})');
+    _subscription = repo.repo.subscribe(() => _subscriptionCallback!.call(repo));
+
+    loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
   }
 
-  Repository? get(String name) {
+  RepoState? get(String name) {
     return _repos[name];
   }
 
-  NamedRepo? getNamed(String name) {
-    final repo = _repos[name];
-    if (repo == null) return null;
-    return NamedRepo(name, repo);
-  }
-
-  void put(String name, Repository newRepo, { bool setCurrent = false }) {
-    Repository? oldRepo = _repos.remove(name);
+  void put(RepoState newRepo, { bool setCurrent = false }) {
+    RepoState? oldRepo = _repos.remove(newRepo.name);
 
     if (oldRepo != null && oldRepo != newRepo) {
       oldRepo.close();
     }
 
-    _repos[name] = newRepo;
+    _repos[newRepo.name] = newRepo;
 
-    if (setCurrent && name != _currentRepoName) {
-      _updateCurrentRepository(name, newRepo);
+    if (setCurrent && newRepo.name != _currentRepoName) {
+      _updateCurrentRepository(newRepo);
     }
   }
 
@@ -113,8 +103,9 @@ class RepositoriesService with OuiSyncAppLogger {
   Subscription? _subscription;
   Subscription? get subscription => _subscription;
 
-  void Function(String)? _subscriptionCallback;
-  setSubscriptionCallback(void Function(String) callback) => {
+  void Function(RepoState)? _subscriptionCallback;
+
+  setSubscriptionCallback(void Function(RepoState) callback) => {
     _subscriptionCallback = callback
   };
 }

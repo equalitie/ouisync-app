@@ -5,16 +5,20 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
+import '../../models/repo_state.dart';
+import '../../models/main_state.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
+    required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.borderColor
   });
 
+  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final Color borderColor;
@@ -49,11 +53,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerSelection) {
-          final color = state.named_repo == null
-          ? colorLockedRepo
-          : state.named_repo!.repo.accessMode != AccessMode.blind
-          ? colorUnlockedRepo
-          : colorLockedRepo;
+          final color = state.repo == null
+            ? colorLockedRepo
+            : state.repo.accessMode != AccessMode.blind
+              ? colorUnlockedRepo
+              : colorLockedRepo;
 
           return _buildState(
             borderColor: widget.borderColor,
@@ -63,7 +67,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerUnlocked) {
-          final color = state.repository.accessMode != AccessMode.blind
+          final color = state.repo.accessMode != AccessMode.blind
           ? colorUnlockedRepo
           : colorLockedRepo;
 
@@ -86,45 +90,30 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
-          _updateCurrentRepository(
-            repository: state.named_repo?.repo,
-            name: state.named_repo?.name
-          );
+          _updateCurrentRepository(state.repo);
         }
         if (state is RepositoryPickerUnlocked) {
           _updateCurrentRepository(
-            repository: state.repository,
-            name: state.repositoryName,
+            state.repo,
             previousAccessMode: state.previousAccessMode);
         }
         if (state is RepositoryPickerInitial) {
-          _updateCurrentRepository(
-            repository: null,
-            name: ''
-          );
+          _updateCurrentRepository(null);
         }
       },
     );
   }
 
-  _updateCurrentRepository({Repository? repository, String? name, AccessMode? previousAccessMode}) async {
+  _updateCurrentRepository(RepoState? repo, {AccessMode? previousAccessMode}) async {
     setState(() {
-      _repositoryName = (name?.isEmpty ?? true
-      ? S.current.messageNoRepos
-      : name)!;
+      if (repo != null) {
+        _repositoryName = repo.name;
+      } else {
+        _repositoryName = S.current.messageNoRepos;
+      }
     });
 
-    if (repository == null && (name?.isEmpty ?? true)) {
-      widget.onRepositorySelect.call(null, '', null);
-      return;
-    }
-
-    if (repository == null && (name?.isNotEmpty ?? false)) { /// Every repository is initialized as a blind replica
-      repository = await widget.repositoriesCubit
-      .initRepository(name!);
-    }
-
-    widget.onRepositorySelect.call(repository, name!, previousAccessMode);
+    widget.onRepositorySelect.call(repo, previousAccessMode);
   }
 
   _buildState({
@@ -141,8 +130,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       ),
       color: Colors.white,
     ),
-    child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    child: InkWell(
       onTap: () async { await _showRepositorySelector(_repositoryName); },
       child: Row(
         children: [
@@ -184,6 +172,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     ),
     builder: (context) {
       return RepositoryList(
+        mainState: widget.mainState,
         context: context,
         cubit: widget.repositoriesCubit,
         current: _repositoryName,

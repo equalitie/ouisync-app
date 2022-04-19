@@ -37,22 +37,13 @@ class CreateFileDone extends DirectoryState {
 class CreateFileFailure extends DirectoryState {
   const CreateFileFailure({
     required this.path,
-    required this.fileName,
-    required this.length,
-    required this.error
   });
 
   final String path;
-  final String fileName;
-  final int length;
-  final String error;
 
   @override
   List<Object> get props => [
     path,
-    fileName,
-    length,
-    error
   ];
 }
 
@@ -143,71 +134,21 @@ class DirectoryLoadInProgress extends DirectoryState {
   ];
 }
 
-class SyncingDone extends DirectoryState {
-  const SyncingDone();
-
-  @override
-  List<Object> get props => [
-  ];
-}
-
 class DirectoryLoadSuccess extends DirectoryState {
   const DirectoryLoadSuccess({
     required this.path,
-    required this.contents,
-    this.action = '',
   });
 
   final String path;
-  final List<BaseItem> contents;
-  final String action;
 
   @override
   List<Object> get props => [
     path,
-    contents,
-    action,
-  ];
-}
-
-class NavigationLoadSuccess extends DirectoryState {
-  const NavigationLoadSuccess({
-    required this.origin,
-    required this.destination,
-    required this.contents,
-  }) :
-  assert (origin != ''),
-  assert (destination != '');
-
-  final String origin;
-  final String destination;
-  final List<BaseItem> contents;
-
-  @override
-  List<Object> get props => [
-    origin,
-    destination,
-    contents,
-  ];
-}
-
-class NavigationLoadBlind extends DirectoryState {
-  NavigationLoadBlind({
-    this.previousAccessMode
-  });
-
-  final AccessMode? previousAccessMode;
-
-  @override
-  List<Object?> get props => [
-    previousAccessMode
   ];
 }
 
 class DirectoryLoadFailure extends DirectoryState {
-  const DirectoryLoadFailure({
-    this.error,
-  });
+  const DirectoryLoadFailure({ this.error });
 
   final String? error;
 
@@ -216,5 +157,3 @@ class DirectoryLoadFailure extends DirectoryState {
     error,
   ];
 }
-
-class NavigationLoadFailure extends DirectoryState {}

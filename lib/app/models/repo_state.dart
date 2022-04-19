@@ -1,11 +1,39 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../models/models.dart';
+import '../models/folder_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 
-class DirectoryRepository with OuiSyncAppLogger {
-  Future<BasicResult> createFile(Repository repository, String newFilePath) async {
+class RepoState with OuiSyncAppLogger {
+  String name;
+  Repository repo;
+  FolderState currentFolder;
+
+  RepoState(this.name, this.repo) :
+    currentFolder = FolderState()
+  {
+    currentFolder.repo = this;
+  }
+
+  AccessMode get accessMode => repo.accessMode;
+
+  Future<bool> exists(String path) async {
+    return await repo.exists(path);
+  }
+
+  // NOTE: This operator is required for the DropdownMenuButton to show
+  // entries properly.
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is RepoState &&
+      other.repo == repo &&
+      other.name == name;
+  }
+
+  Future<BasicResult> createFile(String newFilePath) async {
     BasicResult createFileResult;
     String error = '';
 
@@ -13,7 +41,7 @@ class DirectoryRepository with OuiSyncAppLogger {
     try {
       loggy.app('Creating file $newFilePath');
 
-      newFile = await File.create(repository, newFilePath);
+      newFile = await File.create(repo, newFilePath);
     } catch (e, st) {
       loggy.app('Creating file $newFilePath exception', e, st);
       error = e.toString();
@@ -27,13 +55,13 @@ class DirectoryRepository with OuiSyncAppLogger {
     return createFileResult;
   }
 
-  Future<BasicResult> writeFile(Repository repository, String filePath, Stream<List<int>> fileStream) async {
+  Future<BasicResult> writeFile(String filePath, Stream<List<int>> fileStream) async {
     loggy.app('Writing file $filePath');
 
     BasicResult writeFileResult;
     String error = '';
 
-    final file = await File.open(repository, filePath);
+    final file = await File.open(repo, filePath);
     int offset = 0;
 
     try {
@@ -58,12 +86,12 @@ class DirectoryRepository with OuiSyncAppLogger {
     return writeFileResult;
   }
 
-  Future<BasicResult> readFile(Repository repository, String filePath, {String action = ''}) async {
+  Future<BasicResult> readFile(String filePath, {String action = ''}) async {
     BasicResult readFileResult;
     String error = '';
 
     final content = <int>[];
-    final file = await File.open(repository, filePath);
+    final file = await File.open(repo, filePath);
 
     try {
       final length = await file.length;
@@ -85,14 +113,14 @@ class DirectoryRepository with OuiSyncAppLogger {
     return readFileResult;
   }
   
-  Future<BasicResult> moveEntry(Repository repository, String originPath, String destinationPath) async {
+  Future<BasicResult> moveEntry(String originPath, String destinationPath) async {
     BasicResult moveEntryResult;
     String error = '';
 
     try {
       loggy.app('Move entry from $originPath to $destinationPath');
 
-      await repository.move(originPath, destinationPath);
+      await repo.move(originPath, destinationPath);
     } catch (e, st) {
       loggy.app('Move entry from $originPath to $destinationPath exception', e, st);
       error = e.toString();
@@ -106,12 +134,12 @@ class DirectoryRepository with OuiSyncAppLogger {
     return moveEntryResult;
   }
 
-  Future<BasicResult> deleteFile(Repository repository, String filePath) async {
+  Future<BasicResult> deleteFile(String filePath) async {
     BasicResult deleteFileResult;
     String error = '';
 
     try {
-      await File.remove(repository, filePath);
+      await File.remove(repo, filePath);
     } catch (e, st) {
       loggy.app('Delete file $filePath exception', e, st);
       error = 'Delete file $filePath failed';
@@ -125,7 +153,7 @@ class DirectoryRepository with OuiSyncAppLogger {
     return deleteFileResult;
   }
 
-  Future<BasicResult> createFolder(Repository repository, String path) async {
+  Future<BasicResult> createFolder(String path) async {
     BasicResult createFolderResult;
     String error = '';
 
@@ -134,7 +162,7 @@ class DirectoryRepository with OuiSyncAppLogger {
     try {
       loggy.app('Create folder $path');
 
-      await Directory.create(repository, path);
+      await Directory.create(repo, path);
       created = true;
     } catch (e, st) {
       loggy.app('Create folder $path exception', e, st);
@@ -151,12 +179,12 @@ class DirectoryRepository with OuiSyncAppLogger {
     return createFolderResult;
   }
 
-  Future<int> getFileSize(Repository repository, String path) async {
+  Future<int> getFileSize(String path) async {
     var file;
     var length = 0;
 
     try {
-      file = await File.open(repository, path);
+      file = await File.open(repo, path);
     } catch (e, st) {
       loggy.app("Open file $path exception (getFileSize)", e, st);
       return length;
@@ -173,19 +201,19 @@ class DirectoryRepository with OuiSyncAppLogger {
     return length;
   }
 
-  Future<List<BaseItem>> getFolderContents(Repository repository, String path) async {
+  Future<List<BaseItem>> getFolderContents(String path) async {
     String? error;
 
     final content = <BaseItem>[];
 
-    final directory = await Directory.open(repository, path);
+    final directory = await Directory.open(repo, path);
     final iterator = directory.iterator;
 
     try {
       while (iterator.moveNext()) {
         var size = 0;
         if (iterator.current.type == EntryType.file) {
-          size = await getFileSize(repository, buildDestinationPath(path, iterator.current.name));
+          size = await getFileSize(buildDestinationPath(path, iterator.current.name));
         }
         final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
 
@@ -222,12 +250,12 @@ class DirectoryRepository with OuiSyncAppLogger {
     return <BaseItem>[].single;
   }
 
-  Future<BasicResult> deleteFolder(Repository repository, String path, bool recursive) async {
+  Future<BasicResult> deleteFolder(String path, bool recursive) async {
     BasicResult deleteFolderResult;
     String error = '';
 
     try {
-      await Directory.remove(repository, path, recursive: recursive);
+      await Directory.remove(repo, path, recursive: recursive);
     } catch (e, st) {
       loggy.app('Delete folder $path exception', e, st);
       error = 'Delete folder $path failed';
@@ -239,5 +267,9 @@ class DirectoryRepository with OuiSyncAppLogger {
     }
 
     return deleteFolderResult;
+  }
+
+  void close() {
+    repo.close();
   }
 }

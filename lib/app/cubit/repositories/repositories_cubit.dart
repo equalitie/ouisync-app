@@ -4,8 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../models/models.dart';
-import '../../services/services.dart';
+import '../../models/main_state.dart';
+import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
@@ -24,7 +24,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
   /// Opens a repository in blind mode to allow synchronization, even before the
   /// user unlocks it.
-  Future<Repository?> initRepository(String name) async {
+  Future<RepoState?> initRepository(String name) async {
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
@@ -38,11 +38,12 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       );
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(blindRepository, name);
+      return RepoState(name, blindRepository);
     } catch (e, st) {
       loggy.app('Init the repository $name exception', e, st);
     }
 
-    return blindRepository;
+    return null;
   }
 
   void unlockRepository({required String name, required String password}) async {
@@ -67,8 +68,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
       emit(RepositoryPickerUnlocked(
-        repository: repository,
-        repositoryName: name,
+        repo: RepoState(name, repository),
         previousAccessMode: repository.accessMode
       ));
     } catch (e, st) {
@@ -93,18 +93,18 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
-      emit(RepositoryPickerSelection(NamedRepo(name, repository)));
+      emit(RepositoryPickerSelection(RepoState(name, repository)));
     } catch (e, st) {
       loggy.app('Open repository $name exception', e, st);
       emit(RepositoriesFailure());
     }
   }
 
-  void selectRepository(NamedRepo? namedRepo) async {
-    if (namedRepo == null) {
+  void selectRepository(RepoState? repo) async {
+    if (repo == null) {
       emit(RepositoryPickerInitial());
     } else {
-      emit(RepositoryPickerSelection(namedRepo));
+      emit(RepositoryPickerSelection(repo));
     }
   }
 
@@ -118,8 +118,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
-    final repositoriesService = RepositoriesService();
-    repositoriesService.remove(oldName); // 1
+    final mainState = MainState();
+    mainState.remove(oldName); // 1
 
     final renamed = await RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
       oldName: oldName,
@@ -132,7 +132,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(oldName);
 
       loggy.app('Selecting $oldName...');
-      selectRepository(NamedRepo(oldName, repo!));
+      selectRepository(repo);
 
       loggy.app('Repository renaming canceled');
       return;
@@ -143,7 +143,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
     final repository = await initRepository(newName);
 
-    emit(RepositoryPickerSelection(NamedRepo(newName, repository!))); // 6
+    emit(RepositoryPickerSelection(repository!)); // 6
   }
 
   /// Deletes a repository
@@ -156,8 +156,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void deleteRepository(String repositoryName) async {
-    final repositoriesService = RepositoriesService();
-    repositoriesService.remove(repositoryName); // 1
+    final mainState = MainState();
+    mainState.remove(repositoryName); // 1
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
       repositoriesDir,
@@ -171,7 +171,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(repositoryName);
 
       loggy.app('Selecting $repositoryName...');
-      selectRepository(NamedRepo(repositoryName, repo!));
+      selectRepository(repo!);
 
       loggy.app('Repository deletion canceled');
       return;
@@ -188,21 +188,15 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       return;
     }
 
-    Repository? newDefaultRepository = repositoriesService
-    .get(latestRepositoryOrDefaultName); // 5
+    RepoState? newDefaultRepository = mainState.get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
-      final repository = await initRepository(latestRepositoryOrDefaultName);
-      newDefaultRepository = repository!;
+      newDefaultRepository = await initRepository(latestRepositoryOrDefaultName);
     }
 
-    repositoriesService.put(
-      latestRepositoryOrDefaultName,
-      newDefaultRepository
-    );
+    mainState.put(newDefaultRepository!);
 
-    emit(RepositoryPickerSelection(
-      NamedRepo(latestRepositoryOrDefaultName, newDefaultRepository))); // 6
+    emit(RepositoryPickerSelection(newDefaultRepository)); // 6
   }
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';

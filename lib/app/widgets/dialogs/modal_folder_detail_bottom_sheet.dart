@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../models/models.dart';
+import '../../models/repo_state.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -21,7 +22,7 @@ class FolderDetail extends StatefulWidget {
 
   final BuildContext context;
   final DirectoryBloc bloc;
-  final Repository repository;
+  final RepoState repository;
   final FolderItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -180,8 +181,7 @@ class _FolderDetailState extends State<FolderDetail> {
   }
 
   void deleteAction(context, bloc, repository, parentPath, path, recursive) {
-    bloc
-    .add(
+    bloc.add(
       DeleteFolder(
         repository: repository,
         parentPath: parentPath,
@@ -190,15 +190,6 @@ class _FolderDetailState extends State<FolderDetail> {
       )
     );
     
-    bloc.add(
-      NavigateTo(
-        repository: repository,
-        origin: getParentSection(parentPath),
-        destination: parentPath,
-        withProgress: true
-      )
-    );
-        
     Navigator.of(context).pop(true);
   }
 

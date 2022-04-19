@@ -5,20 +5,18 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_app/app/data/directory_repository.dart';
 import 'package:ouisync_app/app/models/models.dart';
+import 'package:ouisync_app/app/models/repo_state.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 class FakeFile extends Fake implements File {}
 class FakeFileStream extends Fake implements Stream<List<int>> {}
 
-@GenerateMocks([DirectoryRepository])
 void main() {
   group('DirectoryBloc', () {
     late Session session;
-    late Repository repository;
+    late RepoState repository;
 
-    late DirectoryRepository directoryRepository;
     late DirectoryBloc directoryBloc;
 
     late FileItem dummyFileItem;
@@ -29,10 +27,12 @@ void main() {
     setUp(() async {
       final dir = await io.Directory.systemTemp.createTemp();
       session = await Session.open(dir.path);
-      repository = await Repository.create(session, store: "${dir.path}/store.db", password: '1a2b3c');
+      repository = RepoState(
+        "dummy_name",
+        await Repository.create(session, store: "${dir.path}/store.db", password: '1a2b3c')
+      );
 
-      directoryRepository = new DirectoryRepository();
-      directoryBloc = DirectoryBloc(directoryRepository: directoryRepository);
+      directoryBloc = DirectoryBloc();
 
       dummyFileItem = FileItem(
         name: 'testFile.txt',
@@ -47,36 +47,39 @@ void main() {
       session.close();
     });
 
-    group('CreateFolder', () {
-        blocTest('emits [DirectoryLoadInProgress, NavigationLoadSuccess] when CreateFolder is added and createFolder succeeds',
-        build: () => directoryBloc,
-        act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
-        wait: Duration(seconds: 1),
-        expect: () => [
-          DirectoryLoadInProgress(),
-          NavigationLoadSuccess(origin: '/', destination: '/test', contents: <BaseItem>[])
-        ]);
-        // TODO: find out what is the expected behaviour in the library for this: create directory '//' .
-        // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when CreateFolder is added '
-        // 'and createFolder fails',
-        // build: () => directoryBloc,
-        // act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '//')),
-        // expect: () => [
-        //   DirectoryLoadInProgress(),
-        //   DirectoryLoadFailure()
-        // ]);
-    });
+    //group('CreateFolder', () {
+    //    blocTest('emits [DirectoryLoadInProgress, NavigationLoadSuccess] when CreateFolder is added and createFolder succeeds',
+    //    build: () => directoryBloc,
+    //    act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
+    //    wait: Duration(seconds: 1),
+    //    expect: () => [
+    //      DirectoryLoadInProgress(),
+    //      NavigationLoadSuccess(origin: '/', destination: '/test', contents: <BaseItem>[])
+    //    ]);
+    //    // TODO: find out what is the expected behaviour in the library for this: create directory '//' .
+    //    // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when CreateFolder is added '
+    //    // 'and createFolder fails',
+    //    // build: () => directoryBloc,
+    //    // act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '//')),
+    //    // expect: () => [
+    //    //   DirectoryLoadInProgress(),
+    //    //   DirectoryLoadFailure()
+    //    // ]);
+    //});
 
     group('DeleteFolder', () {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFolder is added and deleteFolder succeeds', 
-      setUp: () async { await Directory.create(repository, '/testFolder'); },
+      setUp: () async { await repository.createFolder('/testFolder'); },
       build: () => directoryBloc,
       act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
-      ]);
+        DirectoryLoadSuccess(path: '/')
+      ],
+      verify: (_) {
+        assert(repository.currentFolder.content.isEmpty);
+      });
 
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] when DeleteFolder is added and deleteFolder fails'
       ' because the folder do not exist',
@@ -85,8 +88,11 @@ void main() {
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadFailure()
-      ]);
+        DirectoryLoadSuccess(path: '/')
+      ],
+      verify: (_) {
+        assert(repository.currentFolder.path == '/');
+      });
     });
 
     // TODO: the library is not loading
@@ -137,7 +143,7 @@ void main() {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFile is added,'
       'deleteFile is called and if successful, then getContentFolder is called and succeeds ',
       setUp: () async {
-        final file = await File.create(repository, '/testFile.txt');
+        final file = await File.create(repository.repo, '/testFile.txt');
         await file.write(0, utf8.encode(loremIpsum));
         await file.close();
       },
@@ -151,8 +157,11 @@ void main() {
         )),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', contents: <BaseItem>[])
-      ]);
+        DirectoryLoadSuccess(path: '/')
+      ],
+      verify: (_) {
+        assert(repository.currentFolder.content.isEmpty);
+      });
     });
 
   });

@@ -8,14 +8,12 @@ import '../widgets.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
-    required this.repository,
     required this.itemData,
     required this.mainAction,
     required this.filePopupMenu,
     required this.folderDotsAction,
   });
 
-  final Repository repository;
   final BaseItem itemData;
   final Function mainAction;
   final PopupMenuButton<dynamic>? filePopupMenu;
@@ -55,9 +53,7 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(
-              repository: repository,
-              fileData: itemData))),
+            child: FileDescription(fileData: itemData))),
         _getFileAction(),
       ],
     );

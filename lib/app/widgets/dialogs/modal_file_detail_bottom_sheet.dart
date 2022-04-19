@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../models/models.dart';
+import '../../models/repo_state.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -21,7 +22,7 @@ class FileDetail extends StatefulWidget {
 
   final BuildContext context;
   final DirectoryBloc bloc;
-  final Repository repository;
+  final RepoState repository;
   final FileItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;

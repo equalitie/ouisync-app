@@ -343,8 +343,7 @@ class Fields {
     IconData? icon,
     double iconSize = Dimensions.sizeIconBig,
     Color iconColor = Colors.black,
-  }) => GestureDetector(
-    behavior: HitTestBehavior.opaque,
+  }) => InkWell(
     onTap: onTap,
     child: Row(
         children: [
