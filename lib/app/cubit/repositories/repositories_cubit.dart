@@ -121,12 +121,25 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     final repositoriesService = RepositoriesService();
     repositoriesService.remove(oldName); // 1
 
-    await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
-
-    RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
+    final renamed = await RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
       oldName: oldName,
       newName: newName
     ); // 3
+    if (!renamed) {
+      loggy.app('The repository $oldName renaming failed');
+
+      loggy.app('Initializing $oldName again...');
+      final repo = await initRepository(oldName);
+
+      loggy.app('Selecting $oldName...');
+      selectRepository(NamedRepo(oldName, repo!));
+
+      loggy.app('Repository renaming canceled');
+      return;
+    }
+
+    await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
+    await RepositoryHelper.removeBitTorrentDHTStatusForRepo(oldName);
 
     final repository = await initRepository(newName);
 
@@ -146,12 +159,26 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     final repositoriesService = RepositoriesService();
     repositoriesService.remove(repositoryName); // 1
 
-    await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
-
-    RepositoryHelper.deleteRepositoryFiles(
+    final deleted = await RepositoryHelper.deleteRepositoryFiles(
       repositoriesDir,
       repositoryName: repositoryName
     ); // 3
+
+    if (!deleted) {
+      loggy.app('The repository $repositoryName deletion failed');
+
+      loggy.app('Initializing $repositoryName again...');
+      final repo = await initRepository(repositoryName);
+
+      loggy.app('Selecting $repositoryName...');
+      selectRepository(NamedRepo(repositoryName, repo!));
+
+      loggy.app('Repository deletion canceled');
+      return;
+    }
+
+    await Settings.saveSetting(Constants.currentRepositoryKey, ''); // 2
+    await RepositoryHelper.removeBitTorrentDHTStatusForRepo(repositoryName);
 
     final latestRepositoryOrDefaultName = await RepositoryHelper
     .latestRepositoryOrDefault(null); // 4

@@ -78,4 +78,16 @@ class Settings {
 
     return true;
   }
+
+  static dynamic deleteSetting(String key) async {
+    if (_preferences == null) {
+      await _init();
+    }
+
+    if (_preferences!.containsKey(key)) {
+      return _preferences!.remove(key);
+    }
+
+    return null;
+  }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'package:ouisync_app/app/utils/loggers/ouisync_app_logger.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -9,6 +11,8 @@ class RepositoryHelper {
   RepositoryHelper._();
 
   static Map<String, bool>? _dhtStatus;
+
+  static final loggyInstance = OuiSyncAppLogger();
 
   static List<dynamic> localRepositoriesFiles(String location, {
     bool justNames = true
@@ -26,8 +30,8 @@ class RepositoryHelper {
 
     return repositoryFiles
     .map((e) {
-      final name = removeParentFromPath(e.path);
-      return name.substring(0, name.lastIndexOf('.'));
+      loggyInstance.loggy.app('localRepositoriesFiles - basenameWithoutExtension: ${p.basenameWithoutExtension(e.path)}');
+      return p.basenameWithoutExtension(e.path);
     }).toSet().toList();
   }
 
@@ -63,9 +67,9 @@ class RepositoryHelper {
     }
 
     final repositoryFiles = [
-      '$repositoriesDir/$oldName.db',
-      '$repositoriesDir/$oldName.db-wal',
-      '$repositoriesDir/$oldName.db-shm'
+      p.join(repositoriesDir, '$oldName.db'),
+      p.join(repositoriesDir, '$oldName.db-wal'),
+      p.join(repositoriesDir, '$oldName.db-shm'),
     ];
 
     final repositoryFilesIterator = io.Directory(repositoriesDir)
@@ -74,12 +78,20 @@ class RepositoryHelper {
       repositoryFiles.contains(element.path)
     );
 
-    for (var entity in repositoryFilesIterator) {
-      entity.path.endsWith('.db-shm')
-      ? entity.rename('$repositoriesDir/$newName.db-shm')
-      : entity.path.endsWith('.db-wal')
-      ? entity.rename('$repositoriesDir/$newName.db-wal')
-      : entity.rename('$repositoriesDir/$newName.db');
+    try {
+      for (var entity in repositoryFilesIterator) {
+        final oldPath = entity.path;
+        final renamed = p.extension(entity.path) == '.db-shm'
+        ? await entity.rename(p.join(repositoriesDir, '$newName.db-shm'))
+        : p.extension(entity.path) == '.db-wal'
+        ? await entity.rename(p.join(repositoriesDir, '$newName.db-wal'))
+        : await entity.rename(p.join(repositoriesDir, '$newName.db'));
+
+        loggyInstance.loggy.app('File renamed: ${renamed.path} ($oldPath)');
+      }  
+    } catch (e, st) {
+      loggyInstance.loggy.app('Exception when renaming repo $oldName files ($newName)', e, st);
+      return false;
     }
 
     return true;
@@ -93,16 +105,26 @@ class RepositoryHelper {
     }
 
     final repositoryFiles = [
-      '$repositoriesDir/$repositoryName.db',
-      '$repositoriesDir/$repositoryName.db-wal',
-      '$repositoriesDir/$repositoryName.db-shm'
+      p.join(repositoriesDir, '$repositoryName.db'),
+      p.join(repositoriesDir, '$repositoryName.db-wal'),
+      p.join(repositoriesDir, '$repositoryName.db-shm'),
     ];
 
-    io.Directory(repositoriesDir)
-    .listSync()
-    .where((element) => repositoryFiles.contains(element.path))
-    .forEach((element) => element.deleteSync());
-
+    try {
+      io.Directory(repositoriesDir)
+      .listSync()
+      .where((element) => repositoryFiles.contains(element.path))
+      .forEach((element) {
+        final path = element.path;
+        element.deleteSync();
+        
+        loggyInstance.loggy.app('File deleted: $path');
+      });  
+    } catch (e, st) {
+      loggyInstance.loggy.app('Exception when deleting repo $repositoryName files', e, st);
+      return false;
+    }
+    
     return true;
   }
 
@@ -114,17 +136,16 @@ class RepositoryHelper {
     if (_dhtStatus!.containsKey(name)) {
       _dhtStatus![name]! ? repository.enableDht() : repository.disableDht();
 
-      print('DHT status: $_dhtStatus');
+      loggyInstance.loggy.app('DHT status: $_dhtStatus');
       return;  
     }
 
     final status = await repository.isDhtEnabled();
     _dhtStatus!.addAll({ name: status});
 
-    final encodedDhtStatus = json.encode(_dhtStatus);
-    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
+    _saveDHTStatusForRepo(_dhtStatus!);
 
-    print('DHT status: $_dhtStatus');
+    loggyInstance.loggy.app('DHT status: $_dhtStatus');
   }
 
   static Future<void> updateBitTorrentDHTForRepoStatus(String name, bool status) async {
@@ -133,9 +154,23 @@ class RepositoryHelper {
     }
 
     _dhtStatus!.update(name, (value) => status, ifAbsent: () => status);
+    _saveDHTStatusForRepo(_dhtStatus!);
+  }
 
-    final encodedDhtStatus = json.encode(_dhtStatus);
-    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
+  static Future<bool?> removeBitTorrentDHTStatusForRepo(String name) async {
+    if (_dhtStatus == null) {
+      await _getDhtStatus();
+    }
+
+    if (_dhtStatus!.containsKey(name)) {
+      final removed = _dhtStatus!.remove(name);
+      if (removed ?? false) {
+        _saveDHTStatusForRepo(_dhtStatus!); 
+       return true;
+      }
+    }
+
+    return false;
   }
 
   static Future<void> _getDhtStatus() async {
@@ -143,5 +178,12 @@ class RepositoryHelper {
     _dhtStatus = encodedDhtStatus == null 
     ? Map<String, bool>()
     : Map<String, bool>.from(json.decode(encodedDhtStatus));
+  }
+
+  static void _saveDHTStatusForRepo(Map<String, bool> dhtStatus) async {
+    final encodedDhtStatus = json.encode(dhtStatus);
+    loggyInstance.loggy.app('DHT status: $encodedDhtStatus');
+
+    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
   }
 }
