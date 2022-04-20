@@ -6,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart'; // MethodChannel
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -47,6 +48,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin, OuiSyncAppLogger {
+    final MethodChannel _channel = const MethodChannel('ouisync_native_channel');
 
     MainState _mainState = MainState();
 
@@ -85,6 +87,16 @@ class _MainPageState extends State<MainPage>
             // TODO
           }
           break;
+        }
+      });
+
+      _channel.setMethodCallHandler((MethodCall call) async {
+        switch (call.method) {
+          case 'openShareToken':
+            final uri_str = call.arguments as String;
+            final cubit = BlocProvider.of<RepositoriesCubit>(context);
+            addRepoWithTokenDialog(cubit, initialTokenValue: uri_str);
+            return;
         }
       });
 
@@ -881,7 +893,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void addRepoWithTokenDialog(cubit) async {
+  void addRepoWithTokenDialog(cubit, { String? initialTokenValue }) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -894,6 +906,7 @@ class _MainPageState extends State<MainPage>
             context: context,
             cubit: cubit,
             formKey: formKey,
+            initialTokenValue: initialTokenValue,
           ),
         );
       }

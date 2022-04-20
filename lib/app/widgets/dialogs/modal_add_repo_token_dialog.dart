@@ -11,20 +11,25 @@ class AddRepositoryWithToken extends StatefulWidget {
     Key? key,
     required this.context,
     required this.cubit,
-    required this.formKey
+    required this.formKey,
+    this.initialTokenValue
   }) : super(key: key);
 
   final BuildContext context;
   final RepositoriesCubit cubit;
   final GlobalKey<FormState> formKey;
+  final String? initialTokenValue;
 
   @override
-  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState();
+  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(initialTokenValue);
 }
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with OuiSyncAppLogger {
 
-  final TextEditingController _tokenController = TextEditingController(text: null);
+  _AddRepositoryWithTokenState(String? initialTokenValue) :
+      _tokenController = TextEditingController(text: initialTokenValue);
+
+  final TextEditingController _tokenController;
   final TextEditingController _nameController = TextEditingController(text: null);
   final TextEditingController _passwordController = new TextEditingController(text: null);
   final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
