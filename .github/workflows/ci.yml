@@ -51,7 +51,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '2.8.1'
+          flutter-version: '2.10.5'
       - run: flutter pub get
       - run: cd ouisync-plugin && flutter pub get && flutter pub run ffigen
       - run: flutter test
