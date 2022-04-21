@@ -474,10 +474,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
     enable
-        ? await current.repo.enableDht()
-        : await current.repo.disableDht();
+        ? current.repo.enableDht()
+        : current.repo.disableDht();
 
-    final isEnabled = await current.repo.isDhtEnabled();
+    final isEnabled = current.repo.isDhtEnabled();
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
