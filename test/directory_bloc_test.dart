@@ -75,7 +75,7 @@ void main() {
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/')
+        DirectoryLoadSuccess(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.content.isEmpty);
@@ -88,7 +88,7 @@ void main() {
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/')
+        DirectoryLoadSuccess(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.path == '/');
@@ -157,7 +157,7 @@ void main() {
         )),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/')
+        DirectoryLoadSuccess(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.content.isEmpty);
