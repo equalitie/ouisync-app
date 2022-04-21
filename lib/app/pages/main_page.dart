@@ -6,7 +6,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/services.dart'; // MethodChannel
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -34,13 +33,15 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-    required this.intentStream
+    required this.mediaIntentStream,
+    required this.textIntentStream
   });
 
   final Session session;
   final String repositoriesLocation;
   final String defaultRepositoryName;
-  final Stream<List<SharedMediaFile>> intentStream;
+  final Stream<List<SharedMediaFile>> mediaIntentStream;
+  final Stream<String> textIntentStream;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -48,8 +49,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin, OuiSyncAppLogger {
-    final MethodChannel _channel = const MethodChannel('ouisync_native_channel');
-
     MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
@@ -90,32 +89,22 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _channel.setMethodCallHandler((MethodCall call) async {
-        switch (call.method) {
-          case 'openShareToken':
-            final uri_str = call.arguments as String;
-            final cubit = BlocProvider.of<RepositoriesCubit>(context);
-            addRepoWithTokenDialog(cubit, initialTokenValue: uri_str);
-            return;
-        }
-      });
-
       _mainState.setSubscriptionCallback(getContent);
 
-      _initRepositories()
-      .then((_) {
-        initMainPage();
-      });
+      _initRepositories().then((_) { initMainPage(); });
 
-      widget.intentStream
-      .listen((listOfMedia) {
-        _intentPayload = listOfMedia;
+      widget.mediaIntentStream.listen((listOfMedia) {
         handleShareIntentPayload(_intentPayload);
       });
 
+      widget.textIntentStream.listen((text) {
+        final cubit = BlocProvider.of<RepositoriesCubit>(context);
+        addRepoWithTokenDialog(cubit, initialTokenValue: text);
+      });
+
       _connectivitySubscription = Connectivity()
-      .onConnectivityChanged
-      .listen(_connectivityChange);
+        .onConnectivityChanged
+        .listen(_connectivityChange);
     }
 
     @override
@@ -160,9 +149,9 @@ class _MainPageState extends State<MainPage>
       .selectRepository(_mainState.current);
     }
 
-    void handleShareIntentPayload(
-      List<SharedMediaFile> payload
-    ) {
+    void handleShareIntentPayload(List<SharedMediaFile> payload) {
+      _intentPayload = payload;
+
       if (_intentPayload.isEmpty) {
         return;
       }
