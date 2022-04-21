@@ -33,13 +33,15 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-    required this.intentStream
+    required this.mediaIntentStream,
+    required this.textIntentStream
   });
 
   final Session session;
   final String repositoriesLocation;
   final String defaultRepositoryName;
-  final Stream<List<SharedMediaFile>> intentStream;
+  final Stream<List<SharedMediaFile>> mediaIntentStream;
+  final Stream<String> textIntentStream;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -47,7 +49,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin, OuiSyncAppLogger {
-
     MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
@@ -90,20 +91,20 @@ class _MainPageState extends State<MainPage>
 
       _mainState.setSubscriptionCallback(getContent);
 
-      _initRepositories()
-      .then((_) {
-        initMainPage();
-      });
+      _initRepositories().then((_) { initMainPage(); });
 
-      widget.intentStream
-      .listen((listOfMedia) {
-        _intentPayload = listOfMedia;
+      widget.mediaIntentStream.listen((listOfMedia) {
         handleShareIntentPayload(_intentPayload);
       });
 
+      widget.textIntentStream.listen((text) {
+        final cubit = BlocProvider.of<RepositoriesCubit>(context);
+        addRepoWithTokenDialog(cubit, initialTokenValue: text);
+      });
+
       _connectivitySubscription = Connectivity()
-      .onConnectivityChanged
-      .listen(_connectivityChange);
+        .onConnectivityChanged
+        .listen(_connectivityChange);
     }
 
     @override
@@ -148,9 +149,9 @@ class _MainPageState extends State<MainPage>
       .selectRepository(_mainState.current);
     }
 
-    void handleShareIntentPayload(
-      List<SharedMediaFile> payload
-    ) {
+    void handleShareIntentPayload(List<SharedMediaFile> payload) {
+      _intentPayload = payload;
+
       if (_intentPayload.isEmpty) {
         return;
       }
@@ -881,7 +882,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void addRepoWithTokenDialog(cubit) async {
+  void addRepoWithTokenDialog(cubit, { String? initialTokenValue }) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -894,6 +895,7 @@ class _MainPageState extends State<MainPage>
             context: context,
             cubit: cubit,
             formKey: formKey,
+            initialTokenValue: initialTokenValue,
           ),
         );
       }

@@ -29,48 +29,76 @@ class OuiSyncApp extends StatefulWidget {
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
-  final StreamController<List<SharedMediaFile>> _sharedMediaStreamController = StreamController<List<SharedMediaFile>>();
-  StreamSubscription? _intentDataStreamSubscription;
+  final StreamController<List<SharedMediaFile>> _mediaIntentStreamController = StreamController<List<SharedMediaFile>>();
+  StreamSubscription? _mediaIntentSubscription;
+
+  final StreamController<String> _textIntentStreamController = StreamController<String>();
+  StreamSubscription? _textIntentSubscription;
   
   @override
   void initState() {
     super.initState();
     NativeChannels.init();
 
-    _processSharedIntent();
+    _setupReceivingMediaIntents();
+    _setupReceivingTextIntents();
   }
 
-  void _processSharedIntent() {
+  // For receiving media intents.
+  void _setupReceivingMediaIntents() {
     // For sharing images coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent
-    .getMediaStream().listen((List<SharedMediaFile> listOfMedia) {
-      if (listOfMedia.isEmpty) {
-        loggy.app('No media present (intent_listener)');
-        return;
-      }
+    _mediaIntentSubscription = ReceiveSharingIntent.getMediaStream().listen(
+      (List<SharedMediaFile> listOfMedia) {
+        if (listOfMedia.isEmpty) {
+          loggy.app('No media present (intent_listener)');
+          return;
+        }
 
-      loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent_listener)');
-      _sharedMediaStreamController.add(listOfMedia);
-    }, onError: (err) {
-      loggy.app("Error: $err (intent_listener)");
-    });
+        loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent_listener)');
+        _mediaIntentStreamController.add(listOfMedia);
+      },
+      onError: (err) {
+        loggy.app("Error: $err (intent_listener)");
+      });
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> listOfMedia) {
-      if (listOfMedia.isEmpty) {
-        loggy.app('No media present (intent)');
-        return;
-      }
+    ReceiveSharingIntent.getInitialMedia().then(
+      (List<SharedMediaFile> listOfMedia) {
+        if (listOfMedia.isEmpty) {
+          loggy.app('No media present (intent)');
+          return;
+        }
 
-      loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent)');
-      _sharedMediaStreamController.add(listOfMedia);
-    });
+        loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent)');
+        _mediaIntentStreamController.add(listOfMedia);
+      });
+  }
+
+  // For receiving share tokens intents.
+  void _setupReceivingTextIntents() {
+    // For sharing intents coming from outside the app while the app is in the memory.
+    _textIntentSubscription = ReceiveSharingIntent.getTextStream().listen(
+      (String text) { _textIntentStreamController.add(text); },
+      onError: (err) { loggy.app("Error: $err (intent_listener)"); });
+
+    // For sharing intents coming from outside the app while the app is closed.
+    ReceiveSharingIntent.getInitialText().then(
+      (String? text) {
+        if (text == null) {
+          return;
+        }
+
+        _textIntentStreamController.add(text);
+      });
   }
 
   @override
   void dispose() {
-    _sharedMediaStreamController.close();
-    _intentDataStreamSubscription?.cancel();
+    _mediaIntentStreamController.close();
+    _mediaIntentSubscription?.cancel();
+
+    _textIntentStreamController.close();
+    _textIntentSubscription?.cancel();
 
     super.dispose();
   }
@@ -106,7 +134,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
           session: widget.session,
           repositoriesLocation: widget.repositoriesLocation,
           defaultRepositoryName: widget.defaultRepositoryName,
-          intentStream: _sharedMediaStreamController.stream,
+          mediaIntentStream: _mediaIntentStreamController.stream,
+          textIntentStream: _textIntentStreamController.stream,
         )
       )
     );
