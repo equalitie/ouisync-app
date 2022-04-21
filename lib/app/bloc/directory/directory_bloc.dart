@@ -207,6 +207,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     emit(await _refreshFolder(event.repository));
   }
 
+  int next_id = 0;
   Future<DirectoryState> _refreshFolder(RepoState repo) async {
     try {
       if (repo.accessMode == AccessMode.blind) {
@@ -215,7 +216,11 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
       await repo.currentFolder.refresh();
 
-      return DirectoryLoadSuccess(path: repo.currentFolder.path);
+      // TODO: Only increment the id when the content changes.
+      int id = next_id;
+      next_id += 1;
+
+      return DirectoryLoadSuccess(id: id, path: repo.currentFolder.path);
     }
     catch (e) {
       return DirectoryLoadFailure(error: e.toString());

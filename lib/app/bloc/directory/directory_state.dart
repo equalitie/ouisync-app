@@ -136,13 +136,19 @@ class DirectoryLoadInProgress extends DirectoryState {
 
 class DirectoryLoadSuccess extends DirectoryState {
   const DirectoryLoadSuccess({
+    required this.id,
     required this.path,
   });
 
+  // NOTE: We need this id to change every time we want the bloc receiver to
+  // receive this new state. Otherwise the receiver would assume that the state
+  // hasn't changed and woul not rebuild the widget.
+  final int id;
   final String path;
 
   @override
   List<Object> get props => [
+    id,
     path,
   ];
 }
