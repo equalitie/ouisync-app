@@ -95,12 +95,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         }
       } catch (e, st) {
         loggy.app('Writing to file ${event.newFilePath} exception', e, st);
-        emit(WriteToFileFailure(
-          path: event.newFilePath,
-          fileName: event.fileName,
-          length: event.length,
-          error: e.toString()
-        ));
+        emit(WriteToFileFailure(path: event.newFilePath));
         return;
       } finally {
         loggy.app('Writing to file ${event.newFilePath} done - closing');

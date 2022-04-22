@@ -105,25 +105,12 @@ class WriteToFileCanceled extends DirectoryState {
 }
 
 class WriteToFileFailure extends DirectoryState {
-  const WriteToFileFailure({
-    required this.path,
-    required this.fileName,
-    required this.length,
-    required this.error
-  });
+  const WriteToFileFailure({ required this.path });
 
   final String path;
-  final String error;
-  final String fileName;
-  final int length;
 
   @override
-  List<Object> get props => [
-    path,
-    fileName,
-    length,
-    error
-  ];
+  List<Object> get props => [ path ];
 }
 
 class DirectoryLoadInProgress extends DirectoryState {
