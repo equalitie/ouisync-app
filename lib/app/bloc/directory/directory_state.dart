@@ -34,6 +34,15 @@ class CreateFileDone extends DirectoryState {
   ];
 }
 
+class ShowMessage extends DirectoryState {
+  const ShowMessage(this.message);
+
+  final String message;
+
+  @override
+  List<Object> get props => [ message ];
+}
+
 class CreateFileFailure extends DirectoryState {
   const CreateFileFailure({
     required this.path,
@@ -70,42 +79,7 @@ class WriteToFileInProgress extends DirectoryState {
 }
 
 class WriteToFileDone extends DirectoryState {
-  const WriteToFileDone({
-    required this.path,
-    required this.fileName,
-    required this.length
-  });
-
-  final String path;
-  final String fileName;
-  final int length;
-
-  @override
-  List<Object> get props => [
-    path,
-    fileName,
-    length
-  ];
-}
-
-class WriteToFileCanceled extends DirectoryState {
-  const WriteToFileCanceled({
-    required this.path,
-    required this.fileName
-  });
-
-  final String path;
-  final String fileName;
-
-  @override
-  List<Object> get props => [
-    path,
-    fileName,
-  ];
-}
-
-class WriteToFileFailure extends DirectoryState {
-  const WriteToFileFailure({ required this.path });
+  const WriteToFileDone({ required this.path });
 
   final String path;
 
@@ -117,12 +91,11 @@ class DirectoryLoadInProgress extends DirectoryState {
   const DirectoryLoadInProgress();
 
   @override
-  List<Object> get props => [
-  ];
+  List<Object> get props => [ ];
 }
 
-class DirectoryLoadSuccess extends DirectoryState {
-  const DirectoryLoadSuccess({
+class DirectoryReloaded extends DirectoryState {
+  const DirectoryReloaded({
     required this.id,
     required this.path,
   });

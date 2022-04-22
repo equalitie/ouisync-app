@@ -333,9 +333,7 @@ class _MainPageState extends State<MainPage>
         state is CreateFileDone ||
         state is CreateFileFailure ||
         state is WriteToFileInProgress ||
-        state is WriteToFileDone ||
-        state is WriteToFileCanceled ||
-        state is WriteToFileFailure);
+        state is WriteToFileDone);
       },
       builder: (context, state) {
         if (state is DirectoryInitial) {
@@ -348,7 +346,7 @@ class _MainPageState extends State<MainPage>
           return Center(child: CircularProgressIndicator());
         }
 
-        if (state is DirectoryLoadSuccess) {
+        if (state is DirectoryReloaded) {
           return _selectLayoutWidget();
         }
 
@@ -375,20 +373,12 @@ class _MainPageState extends State<MainPage>
           }
         }
 
+        if (state is ShowMessage) {
+          showSnackBar(context, content: Text((state as ShowMessage).message));
+        }
+
         if (state is CreateFileFailure) {
           showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
-        }
-
-        if (state is WriteToFileDone) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileDone(state.path)));
-        }
-
-        if (state is WriteToFileCanceled) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileCanceled(state.path)));
-        }
-
-        if (state is WriteToFileFailure) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileError(state.path)));
         }
       }
     );
