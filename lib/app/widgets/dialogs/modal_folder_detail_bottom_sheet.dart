@@ -116,7 +116,6 @@ class _FolderDetailState extends State<FolderDetail> {
   }
 
   AlertDialog buildDeleteFolderAlertDialog(context, bloc, RepoState repository, path) {
-    final parentPath = getParentSection(path);
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -139,7 +138,7 @@ class _FolderDetailState extends State<FolderDetail> {
       actions: <Widget>[
         TextButton(
           child: Text(S.current.actionDelete),
-          onPressed: () => deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context),
+          onPressed: () => deleteFolderWithContentsValidation(bloc, repository, path, context),
         ),
         TextButton(
           child: Text(S.current.actionCancel),
@@ -151,7 +150,7 @@ class _FolderDetailState extends State<FolderDetail> {
     );
   }
 
-  void deleteFolderWithContentsValidation(bloc, RepoState repository, parentPath, path, context) async {
+  void deleteFolderWithContentsValidation(bloc, RepoState repository, path, context) async {
     bool recursive = false;
     final isEmpty = await EntryInfo(repository.repo).isDirectoryEmpty(context, path: path);
     if (!isEmpty) {
@@ -177,14 +176,13 @@ class _FolderDetailState extends State<FolderDetail> {
       }
     }
     
-    deleteAction(context, bloc, repository, parentPath, path, recursive);
+    deleteAction(context, bloc, repository, path, recursive);
   }
 
-  void deleteAction(context, bloc, repository, parentPath, path, recursive) {
+  void deleteAction(context, bloc, repository, path, recursive) {
     bloc.add(
       DeleteFolder(
         repository: repository,
-        parentPath: parentPath,
         path: path,
         recursive: recursive
       )

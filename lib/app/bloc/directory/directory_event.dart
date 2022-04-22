@@ -54,21 +54,18 @@ class GetContent extends DirectoryEvent {
 class DeleteFolder extends DirectoryEvent {
   const DeleteFolder({
     required this.repository,
-    required this.parentPath,
     required this.path,
     this.recursive = false
   }) :
   assert (path != '');
 
   final RepoState repository;
-  final String parentPath;
   final String path;
   final bool recursive;
 
   @override
   List<Object> get props => [
     repository,
-    parentPath,
     path,
     recursive
   ];
