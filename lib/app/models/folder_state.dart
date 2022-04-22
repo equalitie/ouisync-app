@@ -27,7 +27,10 @@ class FolderState {
   }
 
   void goTo(String path) {
-    this.path = path;
+    if (path != this.path) {
+      content.clear();
+      this.path = path;
+    }
   }
 
   Future<void> refresh() => _refresher.refresh();
@@ -67,9 +70,16 @@ class _Refresher {
         final completers = _completers;
         _completers = <Completer>[];
 
-        final content = await folder.repo.getFolderContents(folder.path);
+        // Remember which path we're getting the content for to avoid claiming
+        // another folder has that content.
+        final path = folder.path;
+
+        final content = await folder.repo.getFolderContents(path);
         content.sort((a, b) => a.type.index.compareTo(b.type.index));
-        folder.content = content;
+
+        if (path == folder.path) {
+          folder.content = content;
+        }
 
         for (var completer in completers) {
           completer.complete();

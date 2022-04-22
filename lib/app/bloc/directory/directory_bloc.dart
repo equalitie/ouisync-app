@@ -27,7 +27,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     try{
       final result = await event.repository.createFolder(event.newFolderPath);
       if (result.result) {
-        event.repository.currentFolder.path = event.newFolderPath;
+        event.repository.currentFolder.goTo(event.newFolderPath);
       } else {
         loggy.app('Directory ${event.newFolderPath} creation failed');
       }
