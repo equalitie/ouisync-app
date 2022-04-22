@@ -370,7 +370,9 @@ class _MainPageState extends State<MainPage>
           loggy.app(errorMessage);
           showSnackBar(context, content: Text(errorMessage));
 
-          navigateToPath(_mainState.current!, destination);
+          if (destination != Strings.root) {
+            navigateToPath(_mainState.current!, destination);
+          }
         }
 
         if (state is CreateFileFailure) {
