@@ -68,14 +68,14 @@ void main() {
     //});
 
     group('DeleteFolder', () {
-      blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFolder is added and deleteFolder succeeds', 
+      blocTest('emits [DirectoryLoadInProgress, DirectoryReloaded] when DeleteFolder is added and deleteFolder succeeds', 
       setUp: () async { await repository.createFolder('/testFolder'); },
       build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, path: '/testFolder')),
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', id: 0)
+        DirectoryReloaded(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.content.isEmpty);
@@ -84,11 +84,11 @@ void main() {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] when DeleteFolder is added and deleteFolder fails'
       ' because the folder do not exist',
       build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, parentPath: '/', path: '/testFolder')),
+      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, path: '/testFolder')),
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', id: 0)
+        DirectoryReloaded(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.path == '/');
@@ -143,7 +143,7 @@ void main() {
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadSuccess] when DeleteFile is added,'
       'deleteFile is called and if successful, then getContentFolder is called and succeeds ',
       setUp: () async {
-        final file = await File.create(repository.repo, '/testFile.txt');
+        final file = await File.create(repository.handle, '/testFile.txt');
         await file.write(0, utf8.encode(loremIpsum));
         await file.close();
       },
@@ -157,7 +157,7 @@ void main() {
         )),
       expect: () => [
         DirectoryLoadInProgress(),
-        DirectoryLoadSuccess(path: '/', id: 0)
+        DirectoryReloaded(path: '/', id: 0)
       ],
       verify: (_) {
         assert(repository.currentFolder.content.isEmpty);

@@ -132,7 +132,7 @@ void main() {
     }
     // Create file1 inside folder2 (/folder1/folder2)
     {
-      final file = await File.create(repository.repo, file1InFolder2Path);
+      final file = await File.create(repository.handle, file1InFolder2Path);
       await file.write(0, utf8.encode(filePathContent));
       await file.close();
       
