@@ -10,7 +10,7 @@ class MainState with OuiSyncAppLogger {
   
   String? _currentRepoName;
 
-  RepoState? get current {
+  RepoState? get currentRepo {
     if (_currentRepoName == null) {
       return null;
     } else {
@@ -19,7 +19,7 @@ class MainState with OuiSyncAppLogger {
   }
 
   FolderState? get currentFolder {
-    return current?.currentFolder;
+    return currentRepo?.currentFolder;
   }
 
   Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);

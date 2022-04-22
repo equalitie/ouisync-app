@@ -147,7 +147,7 @@ class _MainPageState extends State<MainPage>
 
       BlocProvider
       .of<RepositoriesCubit>(context)
-      .selectRepository(_mainState.current);
+      .selectRepository(_mainState.currentRepo);
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {
@@ -202,7 +202,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      final currentRepo = _mainState.current;
+      final currentRepo = _mainState.currentRepo;
 
       if (currentRepo == null) {
         return false;
@@ -261,7 +261,7 @@ class _MainPageState extends State<MainPage>
         child: Fields.actionIcon(
           const Icon(Icons.settings_outlined),
           onPressed: () async {
-            bool dhtStatus = await _mainState.current?.repo.isDhtEnabled() ?? false;
+            bool dhtStatus = await _mainState.currentRepo?.isDhtEnabled() ?? false;
 
             settingsAction(
               BlocProvider.of<RepositoriesCubit>(context),
@@ -275,7 +275,7 @@ class _MainPageState extends State<MainPage>
     ];
 
     StatelessWidget _buildFAB(BuildContext context,) {
-      final current = _mainState.current;
+      final current = _mainState.currentRepo;
 
       if (current == null) {
         return Container();
@@ -314,11 +314,11 @@ class _MainPageState extends State<MainPage>
 
       switchMainWidget(_repositoryContentBuilder());
 
-      navigateToPath(_mainState.current!, Strings.root);
+      navigateToPath(_mainState.currentRepo!, Strings.root);
     }
 
     void shareRepository() async {
-      final current = _mainState.current;
+      final current = _mainState.currentRepo;
 
       if (current == null) {
         return;
@@ -358,7 +358,7 @@ class _MainPageState extends State<MainPage>
 
         return _errorState(
           message: S.current.messageErrorLoadingContents,
-          actionReload: () => getContent(_mainState.current!)
+          actionReload: () => getContent(_mainState.currentRepo!)
         );
       },
       listener: (context, state) {
@@ -371,7 +371,7 @@ class _MainPageState extends State<MainPage>
           showSnackBar(context, content: Text(errorMessage));
 
           if (destination != Strings.root) {
-            navigateToPath(_mainState.current!, destination);
+            navigateToPath(_mainState.currentRepo!, destination);
           }
         }
 
@@ -394,7 +394,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _selectLayoutWidget() {
-      final current = _mainState.current;
+      final current = _mainState.currentRepo;
 
       if (current == null) {
         return NoRepositoriesState(
@@ -648,7 +648,7 @@ class _MainPageState extends State<MainPage>
 
     _directoryBloc.add(
       MoveEntry(
-        repository: _mainState.current!,
+        repository: _mainState.currentRepo!,
         origin: origin,
         destination: currentFolder!.path,
         entryPath: path,
@@ -658,7 +658,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
-    final currentRepo = _mainState.current;
+    final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
@@ -719,7 +719,7 @@ class _MainPageState extends State<MainPage>
         
     _directoryBloc.add(
       SaveFile(
-        repository: _mainState.current!,
+        repository: _mainState.currentRepo!,
         newFilePath: filePath,
         fileName: fileName,
         length: length,
@@ -731,7 +731,7 @@ class _MainPageState extends State<MainPage>
   }
 
   void saveSharedMedia() async {
-    final current = _mainState.current;
+    final current = _mainState.currentRepo;
 
     if (current == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
@@ -877,7 +877,7 @@ class _MainPageState extends State<MainPage>
       }
     ).then((password) async {
       if (password.isNotEmpty) { // The password provided by the user.
-        final name = _mainState.current!.name;
+        final name = _mainState.currentRepo!.name;
         await _mainState.remove(name);
 
         BlocProvider.of<RepositoriesCubit>(context)

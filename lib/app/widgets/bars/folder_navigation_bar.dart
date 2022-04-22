@@ -12,7 +12,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
   FolderNavigationBar(this._mainState);
 
   String? get _path {
-    final currentRepo = _mainState.current;
+    final currentRepo = _mainState.currentRepo;
     if (currentRepo == null) return null;
     if (currentRepo.accessMode == oui.AccessMode.blind) return null;
     return currentRepo.currentFolder.path;
@@ -111,7 +111,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          final currentRepo = _mainState.current;
+          final currentRepo = _mainState.currentRepo;
 
           if (currentRepo == null) {
             return;

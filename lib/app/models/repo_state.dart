@@ -22,6 +22,10 @@ class RepoState with OuiSyncAppLogger {
     return await repo.exists(path);
   }
 
+  bool isDhtEnabled() => repo.isDhtEnabled();
+  void enableDht() { repo.enableDht(); }
+  void disableDht() { repo.disableDht(); }
+
   // NOTE: This operator is required for the DropdownMenuButton to show
   // entries properly.
   @override

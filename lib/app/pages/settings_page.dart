@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _currentRepo = widget.mainState.current;
+      _currentRepo = widget.mainState.currentRepo;
     });
   }
 
@@ -275,7 +275,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 listener: (context, state) {
                   if (state is RepositoryPickerSelection) {
                     setState(() {
-                      _currentRepo = widget.mainState.current!;
+                      _currentRepo = widget.mainState.currentRepo!;
                     });
                   }
                 },
@@ -341,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.mainState.current!.name),
+                              repositoryName: widget.mainState.currentRepo!.name),
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
@@ -465,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.mainState.current;
+    final current = widget.mainState.currentRepo;
 
     if (current == null) {
       return;
@@ -474,8 +474,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
 
     enable
-        ? current.repo.enableDht()
-        : current.repo.disableDht();
+        ? current.enableDht()
+        : current.disableDht();
 
     final isEnabled = current.repo.isDhtEnabled();
     setState(() {
