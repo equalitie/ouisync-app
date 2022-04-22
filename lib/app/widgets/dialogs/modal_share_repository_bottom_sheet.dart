@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../../models/repo_state.dart';
 
 class ShareRepository extends StatefulWidget {
   ShareRepository({
@@ -14,7 +15,7 @@ class ShareRepository extends StatefulWidget {
     required this.availableAccessModes
   });
 
-  final Repository repository;
+  final RepoState repository;
   final String repositoryName;
   final List<AccessMode> availableAccessModes;
 
@@ -92,7 +93,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
   }
 
   Future<String> createShareToken({
-    required Repository repo,
+    required RepoState repo,
     required String name,
     required AccessMode accessMode
   }) async {

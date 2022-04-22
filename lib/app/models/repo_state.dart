@@ -7,24 +7,37 @@ import '../utils/utils.dart';
 
 class RepoState with OuiSyncAppLogger {
   String name;
-  Repository repo;
+  Repository _repo;
   FolderState currentFolder;
 
-  RepoState(this.name, this.repo) :
+  // TODO: Ideally, this shouldn't be exposed.
+  Repository get handle => _repo;
+
+  RepoState(this.name, this._repo) :
     currentFolder = FolderState()
   {
     currentFolder.repo = this;
   }
 
-  AccessMode get accessMode => repo.accessMode;
-
-  Future<bool> exists(String path) async {
-    return await repo.exists(path);
+  Future<ShareToken> createShareToken({required AccessMode accessMode, required String name}) async {
+    return await _repo.createShareToken(accessMode: accessMode, name: name);
   }
 
-  bool isDhtEnabled() => repo.isDhtEnabled();
-  void enableDht() { repo.enableDht(); }
-  void disableDht() { repo.disableDht(); }
+  AccessMode get accessMode => _repo.accessMode;
+
+  Future<bool> exists(String path) async {
+    return await _repo.exists(path);
+  }
+
+  Future<EntryType?> type(String path) => _repo.type(path);
+
+  bool isDhtEnabled() => _repo.isDhtEnabled();
+  void enableDht() { _repo.enableDht(); }
+  void disableDht() { _repo.disableDht(); }
+
+  Future<Directory> openDirectory(String path) async {
+    return await Directory.open(_repo, path);
+  }
 
   // NOTE: This operator is required for the DropdownMenuButton to show
   // entries properly.
@@ -33,7 +46,7 @@ class RepoState with OuiSyncAppLogger {
     if (identical(this, other)) return true;
 
     return other is RepoState &&
-      other.repo == repo &&
+      other._repo == _repo &&
       other.name == name;
   }
 
@@ -45,7 +58,7 @@ class RepoState with OuiSyncAppLogger {
     try {
       loggy.app('Creating file $newFilePath');
 
-      newFile = await File.create(repo, newFilePath);
+      newFile = await File.create(_repo, newFilePath);
     } catch (e, st) {
       loggy.app('Creating file $newFilePath exception', e, st);
       error = e.toString();
@@ -65,7 +78,7 @@ class RepoState with OuiSyncAppLogger {
     BasicResult writeFileResult;
     String error = '';
 
-    final file = await File.open(repo, filePath);
+    final file = await File.open(_repo, filePath);
     int offset = 0;
 
     try {
@@ -95,7 +108,7 @@ class RepoState with OuiSyncAppLogger {
     String error = '';
 
     final content = <int>[];
-    final file = await File.open(repo, filePath);
+    final file = await File.open(_repo, filePath);
 
     try {
       final length = await file.length;
@@ -124,7 +137,7 @@ class RepoState with OuiSyncAppLogger {
     try {
       loggy.app('Move entry from $originPath to $destinationPath');
 
-      await repo.move(originPath, destinationPath);
+      await _repo.move(originPath, destinationPath);
     } catch (e, st) {
       loggy.app('Move entry from $originPath to $destinationPath exception', e, st);
       error = e.toString();
@@ -143,7 +156,7 @@ class RepoState with OuiSyncAppLogger {
     String error = '';
 
     try {
-      await File.remove(repo, filePath);
+      await File.remove(_repo, filePath);
     } catch (e, st) {
       loggy.app('Delete file $filePath exception', e, st);
       error = 'Delete file $filePath failed';
@@ -166,7 +179,7 @@ class RepoState with OuiSyncAppLogger {
     try {
       loggy.app('Create folder $path');
 
-      await Directory.create(repo, path);
+      await Directory.create(_repo, path);
       created = true;
     } catch (e, st) {
       loggy.app('Create folder $path exception', e, st);
@@ -188,7 +201,7 @@ class RepoState with OuiSyncAppLogger {
     var length = 0;
 
     try {
-      file = await File.open(repo, path);
+      file = await File.open(_repo, path);
     } catch (e, st) {
       loggy.app("Open file $path exception (getFileSize)", e, st);
       return length;
@@ -211,7 +224,7 @@ class RepoState with OuiSyncAppLogger {
     final content = <BaseItem>[];
 
     // If the directory does not exist, the following command will throw.
-    final directory = await Directory.open(repo, path);
+    final directory = await Directory.open(_repo, path);
     final iterator = directory.iterator;
 
     try {
@@ -260,7 +273,7 @@ class RepoState with OuiSyncAppLogger {
     String error = '';
 
     try {
-      await Directory.remove(repo, path, recursive: recursive);
+      await Directory.remove(_repo, path, recursive: recursive);
     } catch (e, st) {
       loggy.app('Delete folder $path exception', e, st);
       error = 'Delete folder $path failed';
@@ -275,6 +288,6 @@ class RepoState with OuiSyncAppLogger {
   }
 
   Future<void> close() async {
-    await repo.close();
+    await _repo.close();
   }
 }

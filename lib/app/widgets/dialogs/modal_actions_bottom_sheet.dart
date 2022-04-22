@@ -109,8 +109,13 @@ class DirectoryActions extends StatelessWidget {
         ? '/${file.name}'
         : '$parent/${file.name}';
       
-      final exist = await EntryInfo(parent.repo.repo).exist(context, path: newFilePath);
+      final repo = parent.repo;
+      final exist = await repo.exists(newFilePath);
+
       if (exist) {
+        final type = await repo.type(newFilePath);
+        final typeNameForMessage = _getTypeNameForMessage(type);
+        showSnackBar(context, content: Text(S.current.messageEntryAlreadyExist(typeNameForMessage)));
         return;
       }
 
@@ -126,5 +131,15 @@ class DirectoryActions extends StatelessWidget {
 
       Navigator.of(context).pop();
     }
+  }
+
+  String _getTypeNameForMessage(EntryType? type) {
+    if (type == null) {
+      return S.current.messageEntryTypeDefault;
+    }
+
+    return type == EntryType.directory
+      ? S.current.messageEntryTypeFolder
+      : S.current.messageEntryTypeFile;
   }
 }

@@ -24,11 +24,17 @@ class MainState with OuiSyncAppLogger {
 
   Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);
 
-  setCurrent(String name) {
-    _updateCurrentRepository(_repos[name]);
+  Future<void> setCurrent(RepoState? repo) async {
+    if (repo == null) {
+      _updateCurrentRepository(null);
+    } else {
+      await put(repo, setCurrent: true);;
+    }
   }
 
   void _updateCurrentRepository(RepoState? repo) {
+    NativeChannels.setRepository(currentRepo?.handle);
+
     if (repo == null) {
       loggy.app("Can't set current repository to null");
       _currentRepoName = null;
@@ -44,7 +50,7 @@ class MainState with OuiSyncAppLogger {
 
     _currentRepoName = repo.name;
     
-    _subscription = repo.repo.subscribe(() => _subscriptionCallback!.call(repo));
+    _subscription = repo.handle.subscribe(() => _subscriptionCallback!.call(repo));
 
     loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
   }

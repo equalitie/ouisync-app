@@ -7,6 +7,7 @@ import '../../models/models.dart';
 import '../../models/repo_state.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../widgets.dart';
 
 class FolderDetail extends StatefulWidget {
@@ -32,7 +33,7 @@ class FolderDetail extends StatefulWidget {
   State<FolderDetail> createState() => _FolderDetailState();
 }
 
-class _FolderDetailState extends State<FolderDetail> {
+class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -152,10 +153,23 @@ class _FolderDetailState extends State<FolderDetail> {
 
   void deleteFolderWithContentsValidation(bloc, RepoState repository, path, context) async {
     bool recursive = false;
-    final isEmpty = await EntryInfo(repository.repo).isDirectoryEmpty(context, path: path);
-    if (!isEmpty) {
-      recursive = await Dialogs
-      .alertDialogWithActions(
+
+    final type = await repository.type(path);
+
+    if (type != EntryType.directory) {
+      loggy.app('Is directory empty: $path is not a directory.');
+      return;
+    }
+
+    final Directory directory = await repository.openDirectory(path);
+
+    if (directory.isNotEmpty) {
+      String message = S.current.messageErrorPathNotEmpty(path);
+      showSnackBar(context, content: Text(message));
+    }
+
+    if (!directory.isEmpty) {
+      recursive = await Dialogs.alertDialogWithActions(
         context: context,
         title: S.current.titleDeleteNotEmptyFolder,
         body: [Text(S.current.messageConfirmNotEmptyFolderDeletion)],

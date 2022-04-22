@@ -297,7 +297,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> switchRepository(RepoState? repository, AccessMode? previousAccessMode) async {
-      NativeChannels.setRepository(repository?.repo);
+      await _mainState.setCurrent(repository);
 
       if (repository == null) {
         switchMainWidget(
@@ -309,8 +309,6 @@ class _MainPageState extends State<MainPage>
         );
         return;
       }
-
-      await _mainState.put(repository, setCurrent: true);
 
       switchMainWidget(_repositoryContentBuilder());
 
@@ -515,7 +513,7 @@ class _MainPageState extends State<MainPage>
             : [AccessMode.blind];
 
         return ShareRepository(
-          repository: repo_state.repo,
+          repository: repo_state,
           repositoryName: repo_state.name,
           availableAccessModes: accessModes,
         );

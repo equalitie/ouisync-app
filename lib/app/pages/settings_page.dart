@@ -310,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     setState(() {
                       _currentRepo = repo;
                     });
-                    widget.mainState.setCurrent(_currentRepo!.name);
+                    await widget.mainState.setCurrent(_currentRepo);
                   },
                 ),
               ),
@@ -477,7 +477,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ? current.enableDht()
         : current.disableDht();
 
-    final isEnabled = current.repo.isDhtEnabled();
+    final isEnabled = current.isDhtEnabled();
+
     setState(() {
       _bittorrentDhtStatus = isEnabled;
     });
