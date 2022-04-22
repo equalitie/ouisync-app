@@ -6,10 +6,9 @@ import '../../bloc/blocs.dart';
 import '../../models/main_state.dart';
 
 class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
-  final Function _action;
   final MainState _mainState;
 
-  FolderNavigationBar(this._mainState, this._action);
+  FolderNavigationBar(this._mainState);
 
   String? get _path => _mainState.current?.currentFolder.path;
 
@@ -23,7 +22,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
         final path = _path;
 
         if (path != null) {
-          return _routeBar(route: _currentLocationBar(path, _action));
+          return _routeBar(route: _currentLocationBar(path, context));
         } else {
           return SizedBox.shrink();
         }
@@ -68,11 +67,13 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
       ),
     );
 
-  Widget _currentLocationBar(String path, Function action, { String separator = Strings.root}) {
+  Widget _currentLocationBar(String path, BuildContext ctx) {
     final current = getBasename(path);
+    String separator = Strings.root;
+
     return Row(
       children: [
-        _navigation(path, action),
+        _navigation(path, ctx),
         SizedBox(
           width: path == separator
           ? 5.0
@@ -97,13 +98,21 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
     );
   }
 
-  GestureDetector _navigation(String path, Function action) {
+  GestureDetector _navigation(String path, BuildContext ctx) {
     final target = getParentSection(path);
+    final bloc = BlocProvider.of<DirectoryBloc>(ctx);
 
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          action.call();
+          final currentRepo = _mainState.current;
+
+          if (currentRepo == null) {
+            return;
+          }
+
+          final parent = currentRepo.currentFolder.parent;
+          bloc.add(NavigateTo(currentRepo, parent));
         }
       },
       child: path == Strings.root

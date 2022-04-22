@@ -71,6 +71,7 @@ class _MainPageState extends State<MainPage>
     final int exitBackButtonTimeoutMs = 3000;
 
     FolderState? get currentFolder => _mainState.currentFolder;
+    DirectoryBloc get _directoryBloc => BlocProvider.of<DirectoryBloc>(context);
 
     @override
     void initState() {
@@ -163,46 +164,11 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent(RepoState repository) {
-      BlocProvider
-      .of<DirectoryBloc>(context)
-      .add(GetContent(repository: repository));
+      _directoryBloc.add(GetContent(repository: repository));
     }
 
-    navigateToPath({
-      required RepoState repository,
-      required String destination,
-      bool withProgress = false
-    }) {
-      final currentRepo = _mainState.current;
-
-      if (currentRepo == null) {
-        return;
-      }
-
-      final currentFolder = currentRepo.currentFolder;
-
-      if (currentFolder.path != destination) {
-        setState(() {
-          currentFolder.path = destination;
-        });
-      }
-
-      getContent(currentRepo);
-    }
-
-    PreferredSizeWidget _buildNavigationBar() {
-      final currentRepo = _mainState.current;
-
-      if (currentRepo == null || currentRepo.accessMode == AccessMode.blind) {
-        return FolderNavigationBar(_mainState, () {});
-      }
-
-      return FolderNavigationBar(_mainState, () {
-        setState(() {
-          currentRepo.currentFolder.goUp();
-        });
-        getContent(currentRepo);
-      });
+    navigateToPath(RepoState repository, String destination) {
+      _directoryBloc.add(NavigateTo(repository, destination));
     }
 
     @override
@@ -278,7 +244,7 @@ class _MainPageState extends State<MainPage>
     _buildOuiSyncBar() => OuiSyncBar(
       repoList: _buildRepositoriesBar(),
       actionList: _buildActionList(),
-      bottomWidget: _buildNavigationBar(),
+      bottomWidget: FolderNavigationBar(_mainState),
     );
 
     RepositoriesBar _buildRepositoriesBar() {
@@ -324,7 +290,7 @@ class _MainPageState extends State<MainPage>
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
           context,
-          bloc: BlocProvider.of<DirectoryBloc>(context),
+          bloc: _directoryBloc,
           folder: currentFolder!
         ),
       );
@@ -348,11 +314,7 @@ class _MainPageState extends State<MainPage>
 
       switchMainWidget(_repositoryContentBuilder());
 
-      navigateToPath(
-        repository: _mainState.current!,
-        destination: Strings.root,
-        withProgress: true
-      );
+      navigateToPath(_mainState.current!, Strings.root);
     }
 
     void shareRepository() async {
@@ -408,11 +370,7 @@ class _MainPageState extends State<MainPage>
           loggy.app(errorMessage);
           showSnackBar(context, content: Text(errorMessage));
 
-          navigateToPath(
-            repository: _mainState.current!,
-            destination: destination,
-            withProgress: true
-          );
+          navigateToPath(_mainState.current!, destination);
         }
 
         if (state is CreateFileFailure) {
@@ -478,7 +436,7 @@ class _MainPageState extends State<MainPage>
     }) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
-        onRefresh: () => getContent(repository),
+        onRefresh: () async => getContent(repository),
         child: ListView.separated(
           padding: EdgeInsets.only(bottom: value as double),
           separatorBuilder: (context, index) => Divider(
@@ -501,7 +459,7 @@ class _MainPageState extends State<MainPage>
 
               _showFileDetails(
                 repo: repository,
-                directoryBloc: BlocProvider.of<DirectoryBloc>(context),
+                directoryBloc: _directoryBloc,
                 scaffoldKey: _scaffoldKey,
                 data: item
               );
@@ -511,11 +469,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              navigateToPath(
-                repository: repository,
-                destination: item.path,
-                withProgress: true
-              );
+              navigateToPath(repository, item.path);
             };
 
             final listItem = ListItem (
@@ -536,7 +490,7 @@ class _MainPageState extends State<MainPage>
 
                 await _showFolderDetails(
                   repo: repository,
-                  directoryBloc: BlocProvider.of<DirectoryBloc>(context),
+                  directoryBloc: _directoryBloc,
                   scaffoldKey: _scaffoldKey,
                   data: item
                 );
@@ -567,7 +521,7 @@ class _MainPageState extends State<MainPage>
       .filePopupMenu(
         context,
         repository.repo,
-        BlocProvider.of<DirectoryBloc>(context),
+        _directoryBloc,
         availableActions
       );
     }
@@ -690,8 +644,7 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
 
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    _directoryBloc.add(
       MoveEntry(
         repository: _mainState.current!,
         origin: origin,
@@ -762,8 +715,7 @@ class _MainPageState extends State<MainPage>
     final filePath = buildDestinationPath(currentFolder!.path, fileName);
     final fileByteStream = io.File(path).openRead();
         
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    _directoryBloc.add(
       SaveFile(
         repository: _mainState.current!,
         newFilePath: filePath,
@@ -826,8 +778,7 @@ class _MainPageState extends State<MainPage>
 
     final fileByteStream = io.File(_intentPayload.first.path).openRead();
 
-    BlocProvider.of<DirectoryBloc>(context)
-    .add(
+    _directoryBloc.add(
       SaveFile(
         repository: current,
         newFilePath: filePath,

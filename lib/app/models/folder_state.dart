@@ -22,8 +22,10 @@ class FolderState {
     return path == Strings.root;
   }
 
+  String get parent => getParentSection(path);
+
   void goUp() {
-    path = getParentSection(path);
+    path = parent;
   }
 
   void goTo(String path) {

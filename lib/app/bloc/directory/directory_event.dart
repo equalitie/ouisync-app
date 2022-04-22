@@ -27,6 +27,19 @@ class CreateFolder extends DirectoryEvent {
   ];
 }
 
+class NavigateTo extends DirectoryEvent {
+  const NavigateTo(this.repository, this.destination);
+
+  final RepoState repository;
+  final String destination;
+
+  @override
+  List<Object> get props => [
+    repository,
+    destination,
+  ];
+}
+
 class GetContent extends DirectoryEvent {
   const GetContent({required this.repository});
 

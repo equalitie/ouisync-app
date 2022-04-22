@@ -18,7 +18,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     on<RenameEntry>(_onRenameEntry);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
+    on<NavigateTo>(_onNavigateTo);
     on<GetContent>(_onGetContents);
+  }
+
+  Future<void> _onNavigateTo(NavigateTo event, Emitter<DirectoryState> emit) async {
+    emit(DirectoryLoadInProgress());
+    event.repository.currentFolder.goTo(event.destination);
+    emit(await _refreshFolder(event.repository));
   }
 
   Future<void> _onCreateFolder(CreateFolder event, Emitter<DirectoryState> emit) async {
