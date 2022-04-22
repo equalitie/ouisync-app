@@ -105,7 +105,7 @@ class CancelSaveFile extends DirectoryEvent {
   final String filePath;
 
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [ filePath ];
 }
 
 class RenameEntry extends DirectoryEvent {
@@ -160,7 +160,6 @@ class MoveEntry extends DirectoryEvent {
     entryPath,
     newDestinationPath
   ];
-
 }
 
 class DeleteFile extends DirectoryEvent {
@@ -181,5 +180,4 @@ class DeleteFile extends DirectoryEvent {
     parentPath,
     filePath,
   ];
-
 }

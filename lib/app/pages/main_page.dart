@@ -449,8 +449,7 @@ class _MainPageState extends State<MainPage>
               filePopupMenu: _popupMenu(repository: repository, data: item),
               folderDotsAction: () async {
                 if (_persistentBottomSheetController != null) {
-                  await Dialogs
-                  .simpleAlertDialog(
+                  await Dialogs.simpleAlertDialog(
                     context: context,
                     title: S.current.titleMovingEntry,
                     message: S.current.messageMovingEntry
@@ -488,10 +487,9 @@ class _MainPageState extends State<MainPage>
         S.current.actionShareFile: data,
       };
 
-      return Dialogs
-      .filePopupMenu(
+      return Dialogs.filePopupMenu(
         context,
-        repository.repo,
+        repository,
         _directoryBloc,
         availableActions
       );

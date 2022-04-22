@@ -130,7 +130,7 @@ abstract class Dialogs {
 
   static filePopupMenu(
     BuildContext context,
-    Repository repository,
+    RepoState repository,
     Bloc bloc,
     Map<String, BaseItem> fileMenuOptions
   ) => PopupMenuButton(
@@ -154,7 +154,7 @@ abstract class Dialogs {
 
   static _deleteFileWithConfirmation(
     BuildContext context,
-    repository,
+    RepoState repository,
     bloc,
     path
   ) => showDialog<void>(
@@ -169,7 +169,7 @@ abstract class Dialogs {
   );
 
   static AlertDialog buildDeleteFileAlertDialog(
-    repository,
+    RepoState repository,
     bloc,
     path,
     BuildContext context,
