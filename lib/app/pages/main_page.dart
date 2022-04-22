@@ -331,7 +331,6 @@ class _MainPageState extends State<MainPage>
       buildWhen: (context, state) {
         return !(
         state is CreateFileDone ||
-        state is CreateFileFailure ||
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
         state is ShowMessage);
@@ -359,10 +358,6 @@ class _MainPageState extends State<MainPage>
       listener: (context, state) {
         if (state is ShowMessage) {
           showSnackBar(context, content: Text((state as ShowMessage).message));
-        }
-
-        if (state is CreateFileFailure) {
-          showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
         }
       }
     );

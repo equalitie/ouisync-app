@@ -43,19 +43,6 @@ class ShowMessage extends DirectoryState {
   List<Object> get props => [ message ];
 }
 
-class CreateFileFailure extends DirectoryState {
-  const CreateFileFailure({
-    required this.path,
-  });
-
-  final String path;
-
-  @override
-  List<Object> get props => [
-    path,
-  ];
-}
-
 class WriteToFileInProgress extends DirectoryState {
   const WriteToFileInProgress({
     required this.path,
