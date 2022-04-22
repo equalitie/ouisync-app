@@ -19,8 +19,8 @@ void main() {
     );
   });
 
-  tearDown(() {
-    repository.close();
+  tearDown(() async {
+    await repository.close();
     session.close();
   });
 

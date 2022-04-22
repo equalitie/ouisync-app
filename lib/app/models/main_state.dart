@@ -53,11 +53,11 @@ class MainState with OuiSyncAppLogger {
     return _repos[name];
   }
 
-  void put(RepoState newRepo, { bool setCurrent = false }) {
+  Future<void> put(RepoState newRepo, { bool setCurrent = false }) async {
     RepoState? oldRepo = _repos.remove(newRepo.name);
 
     if (oldRepo != null && oldRepo != newRepo) {
-      oldRepo.close();
+      await oldRepo.close();
     }
 
     _repos[newRepo.name] = newRepo;
@@ -67,7 +67,7 @@ class MainState with OuiSyncAppLogger {
     }
   }
 
-  void remove(String name) {
+  Future<void> remove(String name) async {
     if (_currentRepoName == name) {
       loggy.app('Canceling subscription to $name');
       _subscription?.cancel();
@@ -78,14 +78,14 @@ class MainState with OuiSyncAppLogger {
     }
     if (_repos.containsKey(name)) {
       loggy.app('Closing repository $name');
-      _repos[name]?.close();
+      await _repos[name]?.close();
 
       loggy.app('Removing repository $name from the service');
       _repos.remove(name);
     }
   }
 
-  void close() {
+  Future<void> close() async {
     // Make sure this function is idempotent, i.e. that calling it more than once
     // one after another won't change it's meaning nor it will crash.
     _currentRepoName = null;
@@ -94,7 +94,7 @@ class MainState with OuiSyncAppLogger {
     _subscription = null;
 
     for (var repo in _repos.values) {
-      repo.close();
+      await repo.close();
     }
 
     _repos.clear();
