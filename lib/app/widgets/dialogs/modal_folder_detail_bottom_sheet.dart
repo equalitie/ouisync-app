@@ -115,7 +115,7 @@ class _FolderDetailState extends State<FolderDetail> {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(context, bloc, repository, path) {
+  AlertDialog buildDeleteFolderAlertDialog(context, bloc, RepoState repository, path) {
     final parentPath = getParentSection(path);
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
@@ -151,9 +151,9 @@ class _FolderDetailState extends State<FolderDetail> {
     );
   }
 
-  void deleteFolderWithContentsValidation(bloc, repository, parentPath, path, context) async {
+  void deleteFolderWithContentsValidation(bloc, RepoState repository, parentPath, path, context) async {
     bool recursive = false;
-    final isEmpty = await EntryInfo(repository).isDirectoryEmpty(context, path: path);
+    final isEmpty = await EntryInfo(repository.repo).isDirectoryEmpty(context, path: path);
     if (!isEmpty) {
       recursive = await Dialogs
       .alertDialogWithActions(
