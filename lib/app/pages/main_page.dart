@@ -194,10 +194,10 @@ class _MainPageState extends State<MainPage>
       final currentRepo = _mainState.current;
 
       if (currentRepo == null || currentRepo.accessMode == AccessMode.blind) {
-        return FolderNavigationBar(null, () {});
+        return FolderNavigationBar(_mainState, () {});
       }
 
-      return FolderNavigationBar(currentRepo.currentFolder.path, () {
+      return FolderNavigationBar(_mainState, () {
         setState(() {
           currentRepo.currentFolder.goUp();
         });

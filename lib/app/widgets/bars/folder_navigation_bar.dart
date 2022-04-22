@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/utils.dart';
+import '../../bloc/blocs.dart';
+import '../../models/main_state.dart';
 
 class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
-  final String? _path;
   final Function _action;
+  final MainState _mainState;
 
-  FolderNavigationBar(this._path, this._action);
+  FolderNavigationBar(this._mainState, this._action);
+
+  String? get _path => _mainState.current?.currentFolder.path;
 
   @override
-  Widget build(BuildContext context) {
-    final path = _path;
+  Widget build(BuildContext context) =>
+    BlocConsumer<DirectoryBloc, DirectoryState>(
+      buildWhen: (context, state) {
+        return state is DirectoryLoadSuccess;
+      },
+      builder: (context, state) {
+        final path = _path;
 
-    if (path != null) {
-      return _routeBar(route: _currentLocationBar(path, _action));
-    } else {
-      return SizedBox.shrink();
-    }
-  }
+        if (path != null) {
+          return _routeBar(route: _currentLocationBar(path, _action));
+        } else {
+          return SizedBox.shrink();
+        }
+      },
+      listener: (context, state) {}
+    );
 
   @override
   Size get preferredSize {
