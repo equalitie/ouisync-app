@@ -40,10 +40,10 @@ void main() {
       );
     });
 
-    tearDown(() {
+    tearDown(() async {
       directoryBloc.close();
 
-      repository.close();
+      await repository.close();
       session.close();
     });
 

@@ -113,7 +113,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       }
     });
 
-    widget.onRepositorySelect.call(repo, previousAccessMode);
+    await widget.onRepositorySelect.call(repo, previousAccessMode);
   }
 
   _buildState({

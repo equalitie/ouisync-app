@@ -22,7 +22,7 @@ import '../utils/actions.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
-typedef RepositoryCallback = void Function(RepoState? repository, AccessMode? previousAccessMode);
+typedef RepositoryCallback = Future<void> Function(RepoState? repository, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -108,8 +108,8 @@ class _MainPageState extends State<MainPage>
     }
 
     @override
-    void dispose() {
-      _mainState.close();
+    void dispose() async {
+      await _mainState.close();
       _connectivitySubscription?.cancel();
       super.dispose();
     }
@@ -124,7 +124,7 @@ class _MainPageState extends State<MainPage>
         justNames: true
       ).map((repoName) async {
         final repo = await repositoriesCubit.initRepository(repoName);
-        _mainState.put(
+        await _mainState.put(
           repo!,
           setCurrent: (repoName == widget.defaultRepositoryName)
         );
@@ -330,7 +330,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    void switchRepository(RepoState? repository, AccessMode? previousAccessMode) {
+    Future<void> switchRepository(RepoState? repository, AccessMode? previousAccessMode) async {
       NativeChannels.setRepository(repository?.repo);
 
       if (repository == null) {
@@ -344,7 +344,7 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      _mainState.put(repository, setCurrent: true);
+      await _mainState.put(repository, setCurrent: true);
 
       switchMainWidget(_repositoryContentBuilder());
 
@@ -922,10 +922,10 @@ class _MainPageState extends State<MainPage>
           ),
         );
       }
-    ).then((password) {
+    ).then((password) async {
       if (password.isNotEmpty) { // The password provided by the user.
         final name = _mainState.current!.name;
-        _mainState.remove(name);
+        await _mainState.remove(name);
 
         BlocProvider.of<RepositoriesCubit>(context)
         .unlockRepository(

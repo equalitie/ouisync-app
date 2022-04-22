@@ -119,7 +119,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
     final mainState = MainState();
-    mainState.remove(oldName); // 1
+    await mainState.remove(oldName); // 1
 
     final renamed = await RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
       oldName: oldName,
@@ -157,7 +157,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   ///    repository picker, and from there, the state in the main page. 
   void deleteRepository(String repositoryName) async {
     final mainState = MainState();
-    mainState.remove(repositoryName); // 1
+    await mainState.remove(repositoryName); // 1
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
       repositoriesDir,
@@ -194,7 +194,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       newDefaultRepository = await initRepository(latestRepositoryOrDefaultName);
     }
 
-    mainState.put(newDefaultRepository!);
+    await mainState.put(newDefaultRepository!);
 
     emit(RepositoryPickerSelection(newDefaultRepository)); // 6
   }

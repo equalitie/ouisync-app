@@ -269,7 +269,7 @@ class RepoState with OuiSyncAppLogger {
     return deleteFolderResult;
   }
 
-  void close() {
-    repo.close();
+  Future<void> close() async {
+    await repo.close();
   }
 }
