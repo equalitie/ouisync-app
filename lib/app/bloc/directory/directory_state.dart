@@ -34,17 +34,13 @@ class CreateFileDone extends DirectoryState {
   ];
 }
 
-class CreateFileFailure extends DirectoryState {
-  const CreateFileFailure({
-    required this.path,
-  });
+class ShowMessage extends DirectoryState {
+  const ShowMessage(this.message);
 
-  final String path;
+  final String message;
 
   @override
-  List<Object> get props => [
-    path,
-  ];
+  List<Object> get props => [ message ];
 }
 
 class WriteToFileInProgress extends DirectoryState {
@@ -70,42 +66,7 @@ class WriteToFileInProgress extends DirectoryState {
 }
 
 class WriteToFileDone extends DirectoryState {
-  const WriteToFileDone({
-    required this.path,
-    required this.fileName,
-    required this.length
-  });
-
-  final String path;
-  final String fileName;
-  final int length;
-
-  @override
-  List<Object> get props => [
-    path,
-    fileName,
-    length
-  ];
-}
-
-class WriteToFileCanceled extends DirectoryState {
-  const WriteToFileCanceled({
-    required this.path,
-    required this.fileName
-  });
-
-  final String path;
-  final String fileName;
-
-  @override
-  List<Object> get props => [
-    path,
-    fileName,
-  ];
-}
-
-class WriteToFileFailure extends DirectoryState {
-  const WriteToFileFailure({ required this.path });
+  const WriteToFileDone({ required this.path });
 
   final String path;
 
@@ -117,12 +78,11 @@ class DirectoryLoadInProgress extends DirectoryState {
   const DirectoryLoadInProgress();
 
   @override
-  List<Object> get props => [
-  ];
+  List<Object> get props => [ ];
 }
 
-class DirectoryLoadSuccess extends DirectoryState {
-  const DirectoryLoadSuccess({
+class DirectoryReloaded extends DirectoryState {
+  const DirectoryReloaded({
     required this.id,
     required this.path,
   });
@@ -137,16 +97,5 @@ class DirectoryLoadSuccess extends DirectoryState {
   List<Object> get props => [
     id,
     path,
-  ];
-}
-
-class DirectoryLoadFailure extends DirectoryState {
-  const DirectoryLoadFailure({ this.error });
-
-  final String? error;
-
-  @override
-  List<Object?> get props => [
-    error,
   ];
 }

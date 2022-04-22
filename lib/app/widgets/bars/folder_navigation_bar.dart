@@ -22,7 +22,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
   Widget build(BuildContext context) =>
     BlocConsumer<DirectoryBloc, DirectoryState>(
       buildWhen: (context, state) {
-        return state is DirectoryLoadSuccess;
+        return state is DirectoryReloaded;
       },
       builder: (context, state) {
         final path = _path;

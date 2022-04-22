@@ -60,7 +60,7 @@ class MoveEntryDialog extends StatelessWidget {
       builder: (context, state) {
         bool canMove = false;
 
-        if (state is DirectoryLoadSuccess) {
+        if (state is DirectoryReloaded) {
           if (state.path != origin && state.path != path) {
             canMove = true;
           }

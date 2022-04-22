@@ -47,9 +47,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
           BlocConsumer<DirectoryBloc, DirectoryState>(
             buildWhen: (previousState, state) {
               if (state is WriteToFileInProgress ||
-              state is WriteToFileDone ||
-              state is WriteToFileCanceled ||
-              state is WriteToFileFailure){
+                  state is WriteToFileDone) {
                 if ((state as dynamic).path == this.fileData.path) {
                   return true;
                 }

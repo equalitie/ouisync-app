@@ -331,11 +331,9 @@ class _MainPageState extends State<MainPage>
       buildWhen: (context, state) {
         return !(
         state is CreateFileDone ||
-        state is CreateFileFailure ||
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
-        state is WriteToFileCanceled ||
-        state is WriteToFileFailure);
+        state is ShowMessage);
       },
       builder: (context, state) {
         if (state is DirectoryInitial) {
@@ -348,11 +346,7 @@ class _MainPageState extends State<MainPage>
           return Center(child: CircularProgressIndicator());
         }
 
-        if (state is DirectoryLoadSuccess) {
-          return _selectLayoutWidget();
-        }
-
-        if (state is DirectoryLoadFailure) {
+        if (state is DirectoryReloaded) {
           return _selectLayoutWidget();
         }
 
@@ -362,33 +356,8 @@ class _MainPageState extends State<MainPage>
         );
       },
       listener: (context, state) {
-        if (state is DirectoryLoadFailure) {
-          final destination = getParentSection(currentFolder!.path);
-          final parent = getParentSection(destination);
-
-          final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
-          loggy.app(errorMessage);
-          showSnackBar(context, content: Text(errorMessage));
-
-          if (destination != Strings.root) {
-            navigateToPath(_mainState.currentRepo!, destination);
-          }
-        }
-
-        if (state is CreateFileFailure) {
-          showSnackBar(context, content: Text(S.current.messageNewFileError(state.path)));
-        }
-
-        if (state is WriteToFileDone) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileDone(state.path)));
-        }
-
-        if (state is WriteToFileCanceled) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileCanceled(state.path)));
-        }
-
-        if (state is WriteToFileFailure) {
-          showSnackBar(context, content: Text(S.current.messageWritingFileError(state.path)));
+        if (state is ShowMessage) {
+          showSnackBar(context, content: Text((state as ShowMessage).message));
         }
       }
     );
