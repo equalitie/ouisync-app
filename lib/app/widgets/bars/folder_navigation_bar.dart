@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
 import '../../bloc/blocs.dart';
@@ -10,7 +11,12 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
 
   FolderNavigationBar(this._mainState);
 
-  String? get _path => _mainState.current?.currentFolder.path;
+  String? get _path {
+    final currentRepo = _mainState.current;
+    if (currentRepo == null) return null;
+    if (currentRepo.accessMode == oui.AccessMode.blind) return null;
+    return currentRepo.currentFolder.path;
+  }
 
   @override
   Widget build(BuildContext context) =>
