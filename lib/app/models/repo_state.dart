@@ -210,6 +210,7 @@ class RepoState with OuiSyncAppLogger {
 
     final content = <BaseItem>[];
 
+    // If the directory does not exist, the following command will throw.
     final directory = await Directory.open(repo, path);
     final iterator = directory.iterator;
 

@@ -35,7 +35,8 @@ class FolderState {
     }
   }
 
-  Future<void> refresh() => _refresher.refresh();
+  // Returns true if the directory existed.
+  Future<bool> refresh() => _refresher.refresh();
 }
 
 // This class helps piling up of too many calls to refresh. It does so by first
@@ -49,8 +50,8 @@ class _Refresher {
 
   List<Completer> _completers = <Completer>[];
 
-  Future<void> refresh() async {
-    final completer = Completer<void>();
+  Future<bool> refresh() async {
+    final completer = Completer<bool>();
     final future = completer.future;
     _completers.add(completer);
 
@@ -76,15 +77,24 @@ class _Refresher {
         // another folder has that content.
         final path = folder.path;
 
-        final content = await folder.repo.getFolderContents(path);
-        content.sort((a, b) => a.type.index.compareTo(b.type.index));
+        bool success = true;
 
-        if (path == folder.path) {
-          folder.content = content;
+        try {
+          final content = await folder.repo.getFolderContents(path);
+          content.sort((a, b) => a.type.index.compareTo(b.type.index));
+
+          if (path == folder.path) {
+            folder.content = content;
+          }
+        } catch(_) {
+          if (path == folder.path) {
+            folder.content.clear();
+          }
+          success = false;
         }
 
         for (var completer in completers) {
-          completer.complete();
+          completer.complete(success);
         }
       }
     } finally {

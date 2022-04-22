@@ -333,7 +333,8 @@ class _MainPageState extends State<MainPage>
         state is CreateFileDone ||
         state is CreateFileFailure ||
         state is WriteToFileInProgress ||
-        state is WriteToFileDone);
+        state is WriteToFileDone ||
+        state is ShowMessage);
       },
       builder: (context, state) {
         if (state is DirectoryInitial) {
@@ -350,29 +351,12 @@ class _MainPageState extends State<MainPage>
           return _selectLayoutWidget();
         }
 
-        if (state is DirectoryLoadFailure) {
-          return _selectLayoutWidget();
-        }
-
         return _errorState(
           message: S.current.messageErrorLoadingContents,
           actionReload: () => getContent(_mainState.currentRepo!)
         );
       },
       listener: (context, state) {
-        if (state is DirectoryLoadFailure) {
-          final destination = getParentSection(currentFolder!.path);
-          final parent = getParentSection(destination);
-
-          final errorMessage = S.current.messageErrorCurrentPathMissing(destination);
-          loggy.app(errorMessage);
-          showSnackBar(context, content: Text(errorMessage));
-
-          if (destination != Strings.root) {
-            navigateToPath(_mainState.currentRepo!, destination);
-          }
-        }
-
         if (state is ShowMessage) {
           showSnackBar(context, content: Text((state as ShowMessage).message));
         }

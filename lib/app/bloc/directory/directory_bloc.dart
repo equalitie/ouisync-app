@@ -203,10 +203,21 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     next_id += 1;
 
     final path = repo.currentFolder.path;
+    bool errorShown = false;
 
     try {
-      if (repo.accessMode != AccessMode.blind) {
-        await repo.currentFolder.refresh();
+      while (repo.accessMode != AccessMode.blind) {
+        bool success = await repo.currentFolder.refresh();
+
+        if (success) break;
+        if (repo.currentFolder.isRoot()) break;
+
+        repo.currentFolder.goUp();
+
+        if (!errorShown) {
+          errorShown = true;
+          emit(ShowMessage(S.current.messageErrorCurrentPathMissing(path)));
+        }
       }
     }
     catch (e) {

@@ -112,14 +112,3 @@ class DirectoryReloaded extends DirectoryState {
     path,
   ];
 }
-
-class DirectoryLoadFailure extends DirectoryState {
-  const DirectoryLoadFailure({ this.error });
-
-  final String? error;
-
-  @override
-  List<Object?> get props => [
-    error,
-  ];
-}
