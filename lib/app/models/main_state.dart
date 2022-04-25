@@ -33,7 +33,7 @@ class MainState with OuiSyncAppLogger {
   }
 
   void _updateCurrentRepository(RepoState? repo) {
-    NativeChannels.setRepository(currentRepo?.handle);
+    NativeChannels.setRepository(repo?.handle);
 
     if (repo == null) {
       loggy.app("Can't set current repository to null");
