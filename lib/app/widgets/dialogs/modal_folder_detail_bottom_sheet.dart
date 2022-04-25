@@ -261,7 +261,6 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         widget.bloc
         .add(RenameEntry(
           repository: widget.repository,
-          path: parent,
           entryPath: path,
           newEntryPath: newEntryPath
         ));

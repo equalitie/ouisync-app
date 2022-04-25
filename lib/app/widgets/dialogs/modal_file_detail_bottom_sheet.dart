@@ -183,7 +183,6 @@ class _FileDetailState extends State<FileDetail> {
         widget.bloc
         .add(RenameEntry(
           repository: widget.repository,
-          path: parent,
           entryPath: path,
           newEntryPath: newEntryPath
         ));

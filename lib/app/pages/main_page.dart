@@ -610,8 +610,6 @@ class _MainPageState extends State<MainPage>
     _directoryBloc.add(
       MoveEntry(
         repository: _mainState.currentRepo!,
-        origin: origin,
-        destination: currentFolder!.path,
         entryPath: path,
         newDestinationPath: newDestinationPath
       )
