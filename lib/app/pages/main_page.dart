@@ -72,6 +72,8 @@ class _MainPageState extends State<MainPage>
 
     FolderState? get currentFolder => _mainState.currentFolder;
     DirectoryBloc get _directoryBloc => BlocProvider.of<DirectoryBloc>(context);
+    RepositoriesCubit get _reposCubit => BlocProvider.of<RepositoriesCubit>(context);
+    RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
 
     @override
     void initState() {
@@ -90,7 +92,10 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _mainState.setSubscriptionCallback(getContent);
+      _mainState.setSubscriptionCallback((repo) {
+        _repoProgressCubit.updateProgress(repo);
+        getContent(repo);
+      });
 
       _initRepositories().then((_) { initMainPage(); });
 
@@ -99,8 +104,7 @@ class _MainPageState extends State<MainPage>
       });
 
       widget.textIntentStream.listen((text) {
-        final cubit = BlocProvider.of<RepositoriesCubit>(context);
-        addRepoWithTokenDialog(cubit, initialTokenValue: text);
+        addRepoWithTokenDialog(_reposCubit, initialTokenValue: text);
       });
 
       _connectivitySubscription = Connectivity()
@@ -116,8 +120,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> _initRepositories() async {
-      final repositoriesCubit = BlocProvider
-      .of<RepositoriesCubit>(context);
+      final repositoriesCubit = _reposCubit;
 
       final initRepos = RepositoryHelper
       .localRepositoriesFiles(
@@ -144,10 +147,7 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-
-      BlocProvider
-      .of<RepositoriesCubit>(context)
-      .selectRepository(_mainState.currentRepo);
+      _reposCubit.selectRepository(_mainState.currentRepo);
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {
@@ -250,7 +250,7 @@ class _MainPageState extends State<MainPage>
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
         mainState: _mainState,
-        repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+        repositoriesCubit: _reposCubit,
         onRepositorySelect: switchRepository,
         shareRepositoryOnTap: shareRepository,
       );
@@ -262,11 +262,7 @@ class _MainPageState extends State<MainPage>
           const Icon(Icons.settings_outlined),
           onPressed: () async {
             bool dhtStatus = await _mainState.currentRepo?.isDhtEnabled() ?? false;
-
-            settingsAction(
-              BlocProvider.of<RepositoriesCubit>(context),
-              dhtStatus
-            );
+            settingsAction(dhtStatus);
           },
           size: Dimensions.sizeIconSmall,
           color: Theme.of(context).colorScheme.surface
@@ -302,7 +298,7 @@ class _MainPageState extends State<MainPage>
       if (repository == null) {
         switchMainWidget(
           NoRepositoriesState(
-            repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+            repositoriesCubit: _reposCubit,
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
           )
@@ -365,7 +361,7 @@ class _MainPageState extends State<MainPage>
 
       if (current == null) {
         return NoRepositoriesState(
-          repositoriesCubit: BlocProvider.of<RepositoriesCubit>(context),
+          repositoriesCubit: _reposCubit,
           onNewRepositoryPressed: createRepoDialog,
           onAddRepositoryPressed: addRepoWithTokenDialog
         );
@@ -845,8 +841,7 @@ class _MainPageState extends State<MainPage>
         final name = _mainState.currentRepo!.name;
         await _mainState.remove(name);
 
-        BlocProvider.of<RepositoriesCubit>(context)
-        .unlockRepository(
+        _reposCubit.unlockRepository(
           name: repositoryName,
           password: password
         );
@@ -854,9 +849,10 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  void settingsAction(reposCubit, dhtStatus) {
+  void settingsAction(dhtStatus) {
     final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
+    final reposCubit = _reposCubit;
 
     Navigator.push(
       context,

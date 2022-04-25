@@ -26,4 +26,6 @@ class Constants{
 
   static const IconData iconVisibilityOn = Icons.visibility;
   static const IconData iconVisibilityOff = Icons.visibility_off;
+
+  static Color progressBarBackgroundColor = Colors.grey.shade200;
 }

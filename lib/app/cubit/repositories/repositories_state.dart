@@ -29,7 +29,7 @@ class RepositoryPickerUnlocked extends RepositoryPickerState {
   });
 
   final RepoState repo;
-  final AccessMode previousAccessMode;
+  final oui.AccessMode previousAccessMode;
 
   @override
   List<Object?> get props => [

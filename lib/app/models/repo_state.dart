@@ -50,6 +50,10 @@ class RepoState with OuiSyncAppLogger {
       other.name == name;
   }
 
+  Future<Progress> syncProgress() async {
+    return await handle.syncProgress();
+  }
+
   Future<BasicResult> createFile(String newFilePath) async {
     BasicResult createFileResult;
     String error = '';

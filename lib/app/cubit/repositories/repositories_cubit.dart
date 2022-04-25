@@ -2,7 +2,7 @@ import 'dart:io' as io;
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../models/main_state.dart';
 import '../../models/repo_state.dart';
@@ -18,7 +18,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     required this.repositoriesDir
   }) : super(RepositoryPickerInitial());
 
-  final Session session;
+  final oui.Session session;
   final String appDir;
   final String repositoriesDir;
 
@@ -28,7 +28,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
-    Repository? blindRepository;
+    oui.Repository? blindRepository;
     try {
       blindRepository = await _getRepository(
         store: store,
@@ -77,7 +77,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     }
   }
 
-  void openRepository({required String name, String? password, ShareToken? shareToken}) async {
+  void openRepository({required String name, String? password, oui.ShareToken? shareToken}) async {
     emit(RepositoryPickerLoading());
 
     final store = _buildStoreString(name);
@@ -201,8 +201,8 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
   _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';
 
-  Future<Repository> _getRepository({required String store, String? password, ShareToken?  shareToken, required bool exist}) => 
+  Future<oui.Repository> _getRepository({required String store, String? password, oui.ShareToken?  shareToken, required bool exist}) => 
     exist 
-    ? Repository.open(this.session, store: store, password: password)
-    : Repository.create(this.session, store: store, password: password!, shareToken: shareToken);
+    ? oui.Repository.open(this.session, store: store, password: password)
+    : oui.Repository.create(this.session, store: store, password: password!, shareToken: shareToken);
 }

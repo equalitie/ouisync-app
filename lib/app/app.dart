@@ -123,6 +123,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
               repositoriesDir: widget.repositoriesLocation
             )
           ),
+          BlocProvider<RepositoryProgressCubit>(
+            create: (BuildContext context) => RepositoryProgressCubit()
+          ),
           BlocProvider<ConnectivityCubit>(
             create: (BuildContext context) => ConnectivityCubit()
           ),
