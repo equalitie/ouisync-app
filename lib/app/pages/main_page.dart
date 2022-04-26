@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:badges/badges.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -243,7 +244,7 @@ class _MainPageState extends State<MainPage>
 
     _buildOuiSyncBar() => OuiSyncBar(
       repoList: _buildRepositoriesBar(),
-      actionList: _buildActionList(),
+      settingsButton: _withUpgradeNotificationBadge(_buildSettingsIcon()),
       bottomWidget: FolderNavigationBar(_mainState),
     );
 
@@ -256,7 +257,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    List<Widget> _buildActionList() => [
+    Widget _buildSettingsIcon() =>
       Container(
         child: Fields.actionIcon(
           const Icon(Icons.settings_outlined),
@@ -267,8 +268,29 @@ class _MainPageState extends State<MainPage>
           size: Dimensions.sizeIconSmall,
           color: Theme.of(context).colorScheme.surface
         ),
-      )
-    ];
+      );
+
+    Widget _withUpgradeNotificationBadge(Widget child) {
+      return BlocConsumer<UpgradeExistsCubit, bool>(
+        builder: (context, state) {
+          return Badge(
+            showBadge: state,
+            ignorePointer: true,
+            badgeContent: Icon(
+              Icons.upgrade,
+              size: Dimensions.sizeIconBadge,
+              color: Theme.of(context).colorScheme.primary
+            ),
+            badgeColor: Colors.red,
+            position: Dimensions.paddingBadge,
+            padding: EdgeInsets.all(0.0),
+            shape: BadgeShape.circle,
+            child: child
+          );
+        },
+        listener: (context, state) { }
+      );
+    }
 
     StatelessWidget _buildFAB(BuildContext context,) {
       final current = _mainState.currentRepo;
