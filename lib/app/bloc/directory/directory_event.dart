@@ -108,45 +108,24 @@ class CancelSaveFile extends DirectoryEvent {
   List<Object?> get props => [ filePath ];
 }
 
-class RenameEntry extends DirectoryEvent {
-  const RenameEntry({
-    required this.repository,
-    required this.entryPath,
-    required this.newEntryPath,
-  }) :
-  assert (entryPath != ''),
-  assert (newEntryPath != '');
-
-  final RepoState repository;
-  final String entryPath;
-  final String newEntryPath;
-
-  @override
-  List<Object?> get props => [
-    repository,
-    entryPath,
-    newEntryPath
-  ];
-}
-
 class MoveEntry extends DirectoryEvent {
   const MoveEntry({
     required this.repository,
-    required this.entryPath,
-    required this.newDestinationPath
+    required this.source,
+    required this.destination
   }) :
-  assert (entryPath != ''),
-  assert (newDestinationPath != '');
+  assert (source != ''),
+  assert (destination != '');
 
   final RepoState repository;
-  final String entryPath;
-  final String newDestinationPath;
+  final String source;
+  final String destination;
 
   @override
   List<Object> get props => [
     repository,
-    entryPath,
-    newDestinationPath
+    source,
+    destination
   ];
 }
 

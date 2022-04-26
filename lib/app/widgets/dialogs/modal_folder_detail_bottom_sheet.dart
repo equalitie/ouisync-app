@@ -259,10 +259,10 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.bloc
-        .add(RenameEntry(
+        .add(MoveEntry(
           repository: widget.repository,
-          entryPath: path,
-          newEntryPath: newEntryPath
+          source: path,
+          destination: newEntryPath
         ));
 
         Navigator.of(context).pop();

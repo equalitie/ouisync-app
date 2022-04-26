@@ -601,8 +601,8 @@ class _MainPageState extends State<MainPage>
   }
 
   void moveEntry(origin, path, type) async {
-    final entryName = getBasename(path);
-    final newDestinationPath = buildDestinationPath(currentFolder!.path, entryName);
+    final basename = getBasename(path);
+    final destination = buildDestinationPath(currentFolder!.path, basename);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -610,8 +610,8 @@ class _MainPageState extends State<MainPage>
     _directoryBloc.add(
       MoveEntry(
         repository: _mainState.currentRepo!,
-        entryPath: path,
-        newDestinationPath: newDestinationPath
+        source: path,
+        destination: destination
       )
     );
   }
