@@ -1,9 +1,35 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:styled_text/styled_text.dart';
+import 'package:badges/badges.dart';
+
+import '../cubit/upgrade_exists.dart';
 
 class Fields {
   Fields._();
+
+  static Widget addUpgradeBadge(Widget child, { double bottom: 12, double end: 10 }) {
+    return BlocConsumer<UpgradeExistsCubit, bool>(
+      builder: (context, state) {
+        return Badge(
+          showBadge: state,
+          ignorePointer: true,
+          badgeContent: Icon(
+            Icons.upgrade,
+            size: Dimensions.sizeIconBadge,
+            color: Theme.of(context).colorScheme.primary
+          ),
+          badgeColor: Colors.red,
+          position: BadgePosition(bottom: bottom, end: end),
+          padding: EdgeInsets.all(0.0),
+          shape: BadgeShape.circle,
+          child: child
+        );
+      },
+      listener: (context, state) { }
+    );
+  }
 
   static Widget _styledTextBase(
     String message,

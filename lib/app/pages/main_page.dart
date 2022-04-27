@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:badges/badges.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -75,6 +74,7 @@ class _MainPageState extends State<MainPage>
     DirectoryBloc get _directoryBloc => BlocProvider.of<DirectoryBloc>(context);
     RepositoriesCubit get _reposCubit => BlocProvider.of<RepositoriesCubit>(context);
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
+    UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
     @override
     void initState() {
@@ -87,7 +87,8 @@ class _MainPageState extends State<MainPage>
           }
           break;
           case NetworkEvent.protocolVersionMismatch: {
-            // TODO
+            final highest = widget.session.highest_seen_protocol_version;
+            _upgradeExistsCubit.foundNewerVersion(highest);
           }
           break;
         }
@@ -244,7 +245,7 @@ class _MainPageState extends State<MainPage>
 
     _buildOuiSyncBar() => OuiSyncBar(
       repoList: _buildRepositoriesBar(),
-      settingsButton: _withUpgradeNotificationBadge(_buildSettingsIcon()),
+      settingsButton: _buildSettingsIcon(),
       bottomWidget: FolderNavigationBar(_mainState),
     );
 
@@ -257,39 +258,18 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    Widget _buildSettingsIcon() =>
-      Container(
-        child: Fields.actionIcon(
-          const Icon(Icons.settings_outlined),
-          onPressed: () async {
-            bool dhtStatus = await _mainState.currentRepo?.isDhtEnabled() ?? false;
-            settingsAction(dhtStatus);
-          },
-          size: Dimensions.sizeIconSmall,
-          color: Theme.of(context).colorScheme.surface
-        ),
-      );
-
-    Widget _withUpgradeNotificationBadge(Widget child) {
-      return BlocConsumer<UpgradeExistsCubit, bool>(
-        builder: (context, state) {
-          return Badge(
-            showBadge: state,
-            ignorePointer: true,
-            badgeContent: Icon(
-              Icons.upgrade,
-              size: Dimensions.sizeIconBadge,
-              color: Theme.of(context).colorScheme.primary
-            ),
-            badgeColor: Colors.red,
-            position: Dimensions.paddingBadge,
-            padding: EdgeInsets.all(0.0),
-            shape: BadgeShape.circle,
-            child: child
-          );
+    Widget _buildSettingsIcon() {
+      final button = Fields.actionIcon(
+        const Icon(Icons.settings_outlined),
+        onPressed: () async {
+          bool dhtStatus = await _mainState.currentRepo?.isDhtEnabled() ?? false;
+          settingsAction(dhtStatus);
         },
-        listener: (context, state) { }
+        size: Dimensions.sizeIconSmall,
+        color: Theme.of(context).colorScheme.surface
       );
+      // TODO: Add a link to where one can download a new version (if any).
+      return Container(child: Fields.addUpgradeBadge(button));
     }
 
     StatelessWidget _buildFAB(BuildContext context,) {
@@ -873,6 +853,7 @@ class _MainPageState extends State<MainPage>
     final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
     final reposCubit = _reposCubit;
+    final upgradeExistsCubit = _upgradeExistsCubit;
 
     Navigator.push(
       context,
@@ -881,6 +862,7 @@ class _MainPageState extends State<MainPage>
           providers: [
             BlocProvider.value(value: connectivityCubit),
             BlocProvider.value(value: peerSetCubit),
+            BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
             mainState: _mainState,
