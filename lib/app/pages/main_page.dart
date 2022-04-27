@@ -88,7 +88,7 @@ class _MainPageState extends State<MainPage>
           break;
           case NetworkEvent.protocolVersionMismatch: {
             final highest = widget.session.highest_seen_protocol_version;
-            _upgradeExistsCubit.foundNewerVersion(highest);
+            _upgradeExistsCubit.foundVersion(highest);
           }
           break;
         }
