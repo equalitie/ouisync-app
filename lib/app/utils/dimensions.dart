@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,6 +20,7 @@ class Dimensions {
   static const double sizeIconBig = 35.0;
   static const double sizeIconAverage = 30.0;
   static const double sizeIconSmall = 25.0;
+  static const double sizeIconBadge = 12.0;
 
   static const EdgeInsets paddingContents = const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog = const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 20.0);

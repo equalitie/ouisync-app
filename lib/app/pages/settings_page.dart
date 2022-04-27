@@ -192,7 +192,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 _divider(),
                 _buildLogsSection(),
                 _divider(),
-                _futureLabeledText(
+                _versionNumberFutureBuilder(
                     S.current.labelAppVersion, info.then((info) => info.version)),
               ],
             )));
@@ -223,17 +223,21 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     );
   }
 
-  static _futureLabeledText(String key, Future<String> value) {
+  static _versionNumberFutureBuilder(String key, Future<String> value) {
     return FutureBuilder<String>(
         future: value,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          late Widget version;
+
           if (snapshot.hasData) {
-            return _labeledText(key, snapshot.data!);
+            version = _labeledText(key, snapshot.data!);
           } else if (snapshot.hasError) {
-            return _labeledText(key, "???");
+            version = _labeledText(key, "???");
           } else {
-            return _labeledText(key, "...");
+            version = _labeledText(key, "...");
           }
+
+          return Fields.addUpgradeBadge(version, bottom: 6, end: -10);
         });
   }
 
