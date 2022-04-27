@@ -205,14 +205,9 @@ class _MainPageState extends State<MainPage>
 
     Future<bool> _onBackPressed() async {
       final currentRepo = _mainState.currentRepo;
+      final currentFolder = currentRepo?.currentFolder;
 
-      if (currentRepo == null) {
-        return false;
-      }
-
-      final currentFolder = currentRepo.currentFolder;
-
-      if (currentFolder.isRoot()) {
+      if (currentFolder == null || currentFolder.isRoot()) {
         // If the user clicks twice the back button within
         // exitBackButtonTimeoutMs timeout, then exit the app.
         int now = DateTime.now().millisecondsSinceEpoch;
@@ -235,6 +230,10 @@ class _MainPageState extends State<MainPage>
           MoveToBackground.moveTaskToBack();
           return false;
         }
+      }
+
+      if (currentRepo == null) {
+        return false;
       }
 
       currentFolder.goUp();
