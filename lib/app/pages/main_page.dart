@@ -102,7 +102,7 @@ class _MainPageState extends State<MainPage>
       _initRepositories().then((_) { initMainPage(); });
 
       widget.mediaIntentStream.listen((listOfMedia) {
-        handleShareIntentPayload(_intentPayload);
+        handleShareIntentPayload(listOfMedia);
       });
 
       widget.textIntentStream.listen((text) {
