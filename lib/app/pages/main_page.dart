@@ -26,7 +26,7 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = void Function();
+typedef SaveFileCallback = void Function(List<SharedMediaFile>);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -52,7 +52,6 @@ class _MainPageState extends State<MainPage>
     MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
-    List<SharedMediaFile> _intentPayload = <SharedMediaFile>[];
 
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -153,14 +152,12 @@ class _MainPageState extends State<MainPage>
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {
-      _intentPayload = payload;
-
-      if (_intentPayload.isEmpty) {
+      if (payload.isEmpty) {
         return;
       }
 
       _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
-      _showSaveSharedMedia(sharedMedia: _intentPayload);
+      _showSaveSharedMedia(sharedMedia: payload);
     }
 
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
@@ -690,7 +687,7 @@ class _MainPageState extends State<MainPage>
     Navigator.of(context).pop();
   }
 
-  void saveSharedMedia() async {
+  void saveSharedMedia(List<SharedMediaFile> payload) async {
     final current = _mainState.currentRepo;
 
     if (current == null) {
@@ -698,8 +695,10 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    SharedMediaFile? mediaInfo = _intentPayload.firstOrNull;
-    if (mediaInfo == null) {
+    // TODO: Save the others as well (not just the first one).
+    SharedMediaFile? media = payload.firstOrNull;
+
+    if (media == null) {
       showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
@@ -734,11 +733,11 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final fileName = getBasename(_intentPayload.first.path);
-    final length = io.File(_intentPayload.first.path).statSync().size;
+    final fileName = getBasename(media.path);
+    final length = io.File(media.path).statSync().size;
     final filePath = buildDestinationPath(currentFolder!.path, fileName);
 
-    final fileByteStream = io.File(_intentPayload.first.path).openRead();
+    final fileByteStream = io.File(media.path).openRead();
 
     _directoryBloc.add(
       SaveFile(
