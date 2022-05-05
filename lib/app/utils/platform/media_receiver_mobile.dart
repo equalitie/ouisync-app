@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../loggers/ouisync_app_logger.dart';
-import 'media_receiver.dart';
+import 'platform.dart';
 
 class MediaReceiverMobile with OuiSyncAppLogger implements MediaReceiver {
   MediaReceiverMobile() {
@@ -14,15 +14,11 @@ class MediaReceiverMobile with OuiSyncAppLogger implements MediaReceiver {
   @override
   StreamController controller = StreamController<dynamic>();
 
-  MediaReceiver getMedia() => MediaReceiverMobile();
-
   StreamSubscription? _mediaIntentSubscription;
   StreamSubscription? _textIntentSubscription;
 
   // For receiving media intents.
   void _setupReceivingMediaIntents() {
-    loggy.app('ReceiveMediaMobile._setupReceivingMediaIntents');
-
     // For sharing images coming from outside the app while the app is in the memory
     _mediaIntentSubscription = ReceiveSharingIntent.getMediaStream().listen(
         (List<SharedMediaFile> listOfMedia) {
@@ -54,8 +50,6 @@ class MediaReceiverMobile with OuiSyncAppLogger implements MediaReceiver {
 
   // For receiving share tokens intents.
   void _setupReceivingTextIntents() {
-    loggy.app('ReceiveMediaMobile._setupReceivingTextIntents');
-
     // For sharing intents coming from outside the app while the app is in the memory.
     _textIntentSubscription =
         ReceiveSharingIntent.getTextStream().listen((String text) {

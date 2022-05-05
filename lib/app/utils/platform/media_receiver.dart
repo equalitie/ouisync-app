@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 
-import 'media_receiver_stub.dart';
+import 'platform.dart';
 
 abstract class MediaReceiver {
-  factory MediaReceiver() => getMedia();
+  factory MediaReceiver(){
+    if (Platform.isWindows) {
+      return MediaReceiverWindows();
+    }
+    return MediaReceiverMobile(); 
+  }
 
   StreamController<dynamic> controller = StreamController<dynamic>();
 
