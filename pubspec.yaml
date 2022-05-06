@@ -76,6 +76,7 @@ dev_dependencies:
   # the vscode plugin:
   # # flutter pub run intl_utils:generate
   intl_utils:  ^2.6.1
+  msix: ^3.5.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -115,3 +116,21 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_intl:
   enabled: true
+
+msix_config:
+  display_name: OuiSync
+  publisher_name: eQualitie
+  certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
+  certificate_password: _ball$*watch17
+  logo_path: .\assets\OuiSync-App-Icon-1200.png
+  start_menu_icon_path: .\assets\OuiSync-App-Icon-1200.png
+  tile_icon_path: .\assets\OuiSync-App-Icon-1200.png
+  app_installer: #<-- app installer configuration
+    publish_folder_path: .\installers
+    hours_between_update_checks: 0
+    automatic_background_task: true
+    update_blocks_activation: true
+    show_prompt: true
+    force_update_from_any_version: false
+    capabilities: internetClient, internetClientServer, privateNetworkClientServer, removableStorage, documentsLibrary
+  msix_version: 1.0.0.0
