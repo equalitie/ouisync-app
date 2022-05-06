@@ -24,7 +24,7 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = void Function(List<SharedMediaFile>);
+typedef SaveFileCallback = Future<void> Function({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, bool usesModal });
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -569,7 +569,7 @@ class _MainPageState extends State<MainPage>
       return SaveSharedMedia(
         sharedMedia: sharedMedia,
         onBottomSheetOpen: retrieveBottomSheetController,
-        onSaveFile: saveSharedMedia
+        onSaveFile: saveMedia
       );
     },
     shape: RoundedRectangleBorder(
@@ -604,7 +604,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
+    Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
