@@ -656,6 +656,11 @@ class _MainPageState extends State<MainPage>
 
     loggy.app('Media path: $path');
     saveFileToOuiSync(path);
+
+    if (usesModal) {
+      Navigator.of(context).pop();
+    }
+
   }
 
   void saveFileToOuiSync(String path) {
