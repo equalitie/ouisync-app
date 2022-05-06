@@ -194,6 +194,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 _divider(),
                 _versionNumberFutureBuilder(
                     S.current.labelAppVersion, info.then((info) => info.version)),
+                _stateMonitorButton(),
               ],
             )));
   }
@@ -241,6 +242,18 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         });
   }
 
+  Widget _stateMonitorButton() {
+    final session = widget.repositoriesCubit.session;
+
+    return Fields.labeledButton(
+      label: "State Monitor",
+      buttonText: "Open",
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => StateMonitorPage(session)));
+      });
+  }
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
   Widget _buildRepositoriesSection() {
