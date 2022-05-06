@@ -1,15 +1,17 @@
-import 'dart:async';
+import 'dart:io' as io;
 
+import 'package:collection/collection.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
 import 'pages/pages.dart';
 import 'utils/loggers/ouisync_app_logger.dart';
+import 'utils/platform/platform.dart';
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
@@ -29,76 +31,17 @@ class OuiSyncApp extends StatefulWidget {
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
-  final StreamController<List<SharedMediaFile>> _mediaIntentStreamController = StreamController<List<SharedMediaFile>>();
-  StreamSubscription? _mediaIntentSubscription;
-
-  final StreamController<String> _textIntentStreamController = StreamController<String>();
-  StreamSubscription? _textIntentSubscription;
+  final _mediaReceiver = MediaReceiver();
   
   @override
   void initState() {
     super.initState();
     NativeChannels.init();
-
-    _setupReceivingMediaIntents();
-    _setupReceivingTextIntents();
   }
-
-  // For receiving media intents.
-  void _setupReceivingMediaIntents() {
-    // For sharing images coming from outside the app while the app is in the memory
-    _mediaIntentSubscription = ReceiveSharingIntent.getMediaStream().listen(
-      (List<SharedMediaFile> listOfMedia) {
-        if (listOfMedia.isEmpty) {
-          loggy.app('No media present (intent_listener)');
-          return;
-        }
-
-        loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent_listener)');
-        _mediaIntentStreamController.add(listOfMedia);
-      },
-      onError: (err) {
-        loggy.app("Error: $err (intent_listener)");
-      });
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then(
-      (List<SharedMediaFile> listOfMedia) {
-        if (listOfMedia.isEmpty) {
-          loggy.app('No media present (intent)');
-          return;
-        }
-
-        loggy.app('Media shared: ${(listOfMedia.map((f)=> f.path).join(","))} (intent)');
-        _mediaIntentStreamController.add(listOfMedia);
-      });
-  }
-
-  // For receiving share tokens intents.
-  void _setupReceivingTextIntents() {
-    // For sharing intents coming from outside the app while the app is in the memory.
-    _textIntentSubscription = ReceiveSharingIntent.getTextStream().listen(
-      (String text) { _textIntentStreamController.add(text); },
-      onError: (err) { loggy.app("Error: $err (intent_listener)"); });
-
-    // For sharing intents coming from outside the app while the app is closed.
-    ReceiveSharingIntent.getInitialText().then(
-      (String? text) {
-        if (text == null) {
-          return;
-        }
-
-        _textIntentStreamController.add(text);
-      });
-  }
-
+  
   @override
   void dispose() {
-    _mediaIntentStreamController.close();
-    _mediaIntentSubscription?.cancel();
-
-    _textIntentStreamController.close();
-    _textIntentSubscription?.cancel();
+    _mediaReceiver.dispose();
 
     super.dispose();
   }
@@ -137,12 +80,28 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
             create: (BuildContext context) => PeerSetCubit()
           )
         ],
-        child: MainPage(
-          session: widget.session,
-          repositoriesLocation: widget.repositoriesLocation,
-          defaultRepositoryName: widget.defaultRepositoryName,
-          mediaIntentStream: _mediaIntentStreamController.stream,
-          textIntentStream: _textIntentStreamController.stream,
+        child: DropTarget(
+          onDragDone: (detail) {
+            loggy.app('Drop done: ${detail.files.first.path}');
+
+            final xFile = detail.files.firstOrNull;
+            if (xFile != null) {
+              final file = io.File(xFile.path);
+              _mediaReceiver.controller.add(file);
+            }
+          },
+          onDragEntered: (detail) {
+            loggy.app('Drop entered: ${detail.localPosition}');
+          },
+          onDragExited: (detail) {
+            loggy.app('Drop exited: ${detail.localPosition}');
+          },
+          child: MainPage(
+            session: widget.session,
+            repositoriesLocation: widget.repositoriesLocation,
+            defaultRepositoryName: widget.defaultRepositoryName,
+            mediaReceiver: _mediaReceiver
+          )
         )
       )
     );

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -13,12 +11,12 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
-import '../models/models.dart';
-import '../models/main_state.dart';
 import '../models/folder_state.dart';
+import '../models/main_state.dart';
+import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../utils/actions.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -33,15 +31,13 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-    required this.mediaIntentStream,
-    required this.textIntentStream
+    required this.mediaReceiver
   });
 
   final Session session;
   final String repositoriesLocation;
   final String defaultRepositoryName;
-  final Stream<List<SharedMediaFile>> mediaIntentStream;
-  final Stream<String> textIntentStream;
+  final MediaReceiver mediaReceiver;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -100,12 +96,23 @@ class _MainPageState extends State<MainPage>
 
       _initRepositories().then((_) { initMainPage(); });
 
-      widget.mediaIntentStream.listen((listOfMedia) {
-        handleShareIntentPayload(listOfMedia);
-      });
+      /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
+      /// or the MediaReceiverWindows (DropTarget), depending on the platform.
+      widget.mediaReceiver.controller.stream.listen((media) {
+        if (media is String) {
+          loggy.app('mediaReceiver: String');
+          addRepoWithTokenDialog(_reposCubit, initialTokenValue: media);
+        }
 
-      widget.textIntentStream.listen((text) {
-        addRepoWithTokenDialog(_reposCubit, initialTokenValue: text);
+        if (media is List<SharedMediaFile>) {
+          loggy.app('mediaReceiver: List<ShareMediaFile>');
+          handleShareIntentPayload(media);
+        }
+
+        if (media is io.File) {
+          loggy.app('mediaReceiver: io.File');
+          saveMedia(droppedMediaFile: media);
+        }
       });
 
       _connectivitySubscription = Connectivity()
@@ -176,24 +183,7 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: DropTarget(
-            onDragDone: (detail) {
-              loggy.app('onDropDone: ${detail.files.first.path}');
-              
-              final xFile = detail.files.firstOrNull;
-              if (xFile != null) {
-                final file = io.File(xFile.path);
-                saveMedia(droppedMediaFile: file);
-              }
-            },
-            onDragEntered: (detail) {
-              loggy.app('onDropEntered: ${detail.localPosition}');
-            },
-            onDragExited: (detail) {
-              loggy.app('onDropExited: ${detail.localPosition}');
-            },
-            child: _mainWidget
-          ),
+          child: _mainWidget,
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),
