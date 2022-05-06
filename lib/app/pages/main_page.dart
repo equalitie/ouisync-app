@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -13,12 +11,12 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
-import '../models/models.dart';
-import '../models/main_state.dart';
 import '../models/folder_state.dart';
+import '../models/main_state.dart';
+import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../utils/actions.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -26,22 +24,20 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = void Function(List<SharedMediaFile>);
+typedef SaveFileCallback = Future<void> Function({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, bool usesModal });
 
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.session,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-    required this.mediaIntentStream,
-    required this.textIntentStream
+    required this.mediaReceiver
   });
 
   final Session session;
   final String repositoriesLocation;
   final String defaultRepositoryName;
-  final Stream<List<SharedMediaFile>> mediaIntentStream;
-  final Stream<String> textIntentStream;
+  final MediaReceiver mediaReceiver;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -100,12 +96,23 @@ class _MainPageState extends State<MainPage>
 
       _initRepositories().then((_) { initMainPage(); });
 
-      widget.mediaIntentStream.listen((listOfMedia) {
-        handleShareIntentPayload(listOfMedia);
-      });
+      /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
+      /// or the MediaReceiverWindows (DropTarget), depending on the platform.
+      widget.mediaReceiver.controller.stream.listen((media) {
+        if (media is String) {
+          loggy.app('mediaReceiver: String');
+          addRepoWithTokenDialog(_reposCubit, initialTokenValue: media);
+        }
 
-      widget.textIntentStream.listen((text) {
-        addRepoWithTokenDialog(_reposCubit, initialTokenValue: text);
+        if (media is List<SharedMediaFile>) {
+          loggy.app('mediaReceiver: List<ShareMediaFile>');
+          handleShareIntentPayload(media);
+        }
+
+        if (media is io.File) {
+          loggy.app('mediaReceiver: io.File');
+          saveMedia(droppedMediaFile: media);
+        }
       });
 
       _connectivitySubscription = Connectivity()
@@ -176,24 +183,7 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: DropTarget(
-            onDragDone: (detail) {
-              loggy.app('onDropDone: ${detail.files.first.path}');
-              
-              final xFile = detail.files.firstOrNull;
-              if (xFile != null) {
-                final file = io.File(xFile.path);
-                saveMedia(droppedMediaFile: file);
-              }
-            },
-            onDragEntered: (detail) {
-              loggy.app('onDropEntered: ${detail.localPosition}');
-            },
-            onDragExited: (detail) {
-              loggy.app('onDropExited: ${detail.localPosition}');
-            },
-            child: _mainWidget
-          ),
+          child: _mainWidget,
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),
@@ -579,7 +569,7 @@ class _MainPageState extends State<MainPage>
       return SaveSharedMedia(
         sharedMedia: sharedMedia,
         onBottomSheetOpen: retrieveBottomSheetController,
-        onSaveFile: saveSharedMedia
+        onSaveFile: saveMedia
       );
     },
     shape: RoundedRectangleBorder(
@@ -614,7 +604,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile }) async {
+    Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
@@ -666,6 +656,11 @@ class _MainPageState extends State<MainPage>
 
     loggy.app('Media path: $path');
     saveFileToOuiSync(path);
+
+    if (usesModal) {
+      Navigator.of(context).pop();
+    }
+
   }
 
   void saveFileToOuiSync(String path) {
@@ -683,73 +678,6 @@ class _MainPageState extends State<MainPage>
         fileByteStream: fileByteStream
       )
     );
-
-    Navigator.of(context).pop();
-  }
-
-  void saveSharedMedia(List<SharedMediaFile> payload) async {
-    final current = _mainState.currentRepo;
-
-    if (current == null) {
-      showSnackBar(context, content: Text(S.current.messageNoRepo));
-      return;
-    }
-
-    // TODO: Save the others as well (not just the first one).
-    SharedMediaFile? media = payload.firstOrNull;
-
-    if (media == null) {
-      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
-      return;
-    }
-
-    String? accessModeMessage = current.accessMode == AccessMode.blind
-      ? S.current.messageAddingFileToLockedRepository
-      : current.accessMode == AccessMode.read
-        ? S.current.messageAddingFileToReadRepository
-        : null;
-
-    if (accessModeMessage != null) {
-      await showDialog<bool>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (context) {
-          return AlertDialog(
-            title: Text(S.current.titleAddFile),
-            content: SingleChildScrollView(
-              child: ListBody(children: [
-                Text(accessModeMessage)
-              ]),
-            ),
-            actions: [
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () => Navigator.of(context).pop(),
-              )
-            ],
-          );
-      });
-
-      return;
-    }
-
-    final fileName = getBasename(media.path);
-    final length = io.File(media.path).statSync().size;
-    final filePath = buildDestinationPath(currentFolder!.path, fileName);
-
-    final fileByteStream = io.File(media.path).openRead();
-
-    _directoryBloc.add(
-      SaveFile(
-        repository: current,
-        newFilePath: filePath,
-        fileName: fileName,
-        length: length,
-        fileByteStream: fileByteStream
-      )
-    );
-
-    Navigator.of(context).pop();
   }
 
   Future<dynamic> _showDirectoryActions(BuildContext context,{

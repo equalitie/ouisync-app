@@ -56,7 +56,7 @@ class SaveSharedMedia extends StatelessWidget {
     List<Widget> actions = <Widget>[];
 
     actions.addAll([ElevatedButton(
-      onPressed: () => onSaveFile.call(sharedMedia),
+      onPressed: () async => await onSaveFile.call(mobileSharedMediaFile: sharedMedia.first, usesModal: true),
       child: Text(S.current.actionSave)
     ),
     SizedBox(width: 20.0,),]);
