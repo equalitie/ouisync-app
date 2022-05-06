@@ -53,3 +53,7 @@ android/log
 android/log.bck
 /ios/ouisync/build-dir/
 .vscode/settings.json
+
+# For Windows app publishing (MSIX)
+/installers/
+/certificates/
