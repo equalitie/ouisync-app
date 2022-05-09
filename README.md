@@ -59,7 +59,6 @@ Flutter application that implements the **[OuiSync Flutter plugin](https://githu
 ---
 
 <br />
-<br />
 
 # Getting the OuiSync App
 
@@ -72,7 +71,6 @@ Or you can use the official app store for each platform in your different device
   - [**Windows Apps**](https://www.microsoft.com/en-us/store/apps/windows): Coming soon.
 
 <br />
-<br />
 
 # Using this repository
 
@@ -82,7 +80,6 @@ For the first step, you can use the [Get started](https://docs.flutter.dev/get-s
 
 **NOTE:** Unless otherwise specified, we use the latest version of the Flutter SDK in the `stable` channel.
 
-<br />
 <br />
 
 ## Initialize the OuiSync plugin and OuiSync library submodules
@@ -94,13 +91,11 @@ In order for the app to properly run, you need to make sure that both submodules
 **IMPORTANT:** We use some Flutter packages for various functionalities in the app, so after initializing the submodules, please execute this command to install them: `flutter pub get`
 
 <br />
-<br />
 
 ## How to run the app from the command line
 
 You can run the app from the command line and make use of different flags to obtain more information about the building process in cases in which you want to troubleshoot any issue, or simply get the full log of the process.
 
-<br />
 <br />
 
 ### Flutter
@@ -134,7 +129,6 @@ Edge (web)        • edge    • web-javascript • Microsoft Edge 100.0.1185.3
 Then you can just use the device name from the second column, like this: `flutter run -d windows`
 
 <br />
-<br />
 
 ### Android (using Gradle)
 
@@ -157,7 +151,6 @@ Add the flag `--all` for more information:
 For a detailed explanation on the different flags and its results, please refer to the oficial documentation => <https://docs.gradle.org/current/userguide/command_line_interface.html>
 
 <br />
-<br />
 
 #### How to build for specific ABIs in Android
 
@@ -172,7 +165,6 @@ If we want to build for **_all_** the supported ABIs, this property is not neede
 
 **IMPORTANT**: **_do not_** commit `local.properties` into the repository; include it in the `.gitignore` file.
 
-<br />
 <br />
 
 # Troubleshooting
@@ -211,7 +203,6 @@ rust.cargoCommand=<path-to-user-folder>/.cargo/bin/cargo
 
 Don't forget to replace `<path-to-user-folder>` with the path to your user folder.
 
-<br />
 <br />
 
 ### Specify the path to the **NDK**
