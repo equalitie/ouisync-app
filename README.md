@@ -47,6 +47,8 @@ Flutter application that implements the **[OuiSync Flutter plugin](https://githu
 - [Getting the OuiSync App](#getting-the-ouisync-app)
 - [Using this repository](#using-this-repository)
  - [Initialize the OuiSync plugin and OuiSync library submodules](#initialize-the-ouisync-plugin-and-ouisync-library-submodules)
+   - [Build the OuiSync library](#build-the-ouisync-library)
+   - [Run the tests](#run-the-tests)
  - [How to run the app from the command line](#how-to-run-the-app-from-the-command-line)
    - [Flutter](#flutter)
    - [Android (using Gradle)](#android-using-gradle)
@@ -89,6 +91,27 @@ The **OuiSync Flutter app** includes in its dependencies the **[OuiSync Flutter 
 In order for the app to properly run, you need to make sure that both submodules are initialized and up to date. This can be achieved by executing the following command while located in the app folder: `git submodule update --init --recursive`
 
 **IMPORTANT:** We use some Flutter packages for various functionalities in the app, so after initializing the submodules, please execute this command to install them: `flutter pub get`
+
+<br />
+
+### Build the OuiSync library
+
+This app depends on the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, which provides the high level `API` for the 
+**[OuiSync library](https://github.com/equalitie/ouisync)**, therefor it is required to perform the native library build and the extra initializations described 
+in the plugin README file.
+
+- [Building the native library](https://github.com/equalitie/ouisync-plugin#building-the-native-library)
+- [Before using/building this plugin](https://github.com/equalitie/ouisync-plugin#before-usingbuilding-this-plugin)
+
+<br />
+
+### Run the tests
+
+Before running the tests, please copy/symlink the native library to:
+
+- Linux: `build/test/libouisync.so`
+- macOS: `build/test/libouisync.dylb`
+- Windows: `build/test/ouisync.dll`
 
 <br />
 
