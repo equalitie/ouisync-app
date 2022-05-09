@@ -1,67 +1,145 @@
 [![CI](https://github.com/equalitie/ouisync-app/actions/workflows/ci.yml/badge.svg)](https://github.com/equalitie/ouisync-app/actions/workflows/ci.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=flat-squarte&logo=android&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-squarte&logo=windows&logoColor=white)
 
-# ouisync-app
+# OuiSync Flutter app
 
-OuiSync Flutter application.
+**Secure file-sharing and real-time sync, with or without internet.**
 
-# How to run the code
+Flutter application that implements the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**.
 
+<br />
+<br />
 
+![OuiSync](https://ouisync.net/assets/img/logo.png)
 
-## Make sure the Flutter environment is ready
+<br />
 
-Once you have cloned the repository, first execute the following command from the terminal, while inside the project folder:
+**OuiSync** is a free and open source tool enabling file sync and backups between devices, peer-to-peer.
 
-```
-flutter doctor 
-```
-Read the report and confirm that there are not problems with the Flutter installation, as well as the development tools (SDKs, emulators, IDE, etc.).
-Please check the oficial Flutter documentation for any issues or doubts => <https://flutter.dev/docs>
+**Features:**
+- 😻 Easy to use: Simply install and quickly create files and folders to sync and share with trusted devices, contacts and/or groups.
+- 💸 Free for everyone: no in-app purchases, no subscriptions, no ads, and no tracking!
+- 🔆 Offline-first: OuiSync uses an innovative, synchronous, peer-to-peer design that allows users to access and share files and folders whether or not your device can connect to the internet.
+- 🔒 Secure: End-to-end encrypted files and folders - both in transit and at rest - secured by established, state-of-the art protocols.
+- 🗝 Access Controls: Create repositories that can be shared as read-write, read-only, or blind (you store files for others, but cannot access them).
 
+<br />
+<br />
 
-## Get Flutter up to date
+**Operating systems currently supported:**
 
-If you already have a Flutter installation, execute this command in the terminal to upgrade Flutter to the latest version:
+| OS | Supported | Notes |
+|:--- |:---:|:---|
+| Android | :white_check_mark: | Early access |
+| iOS | :x: |
+| Linux | :x: |
+| macOS | :x: |
+| Windows | :ballot_box_with_check: | Available soon |
 
-```
-flutter upgrade
-```
-**NOTE**: Make sure that you are in the `stable` channel.
+:ballot_box_with_check:: Some functionalities are not yet available.
 
+<br />
 
-## Update the **OuiSync** plugin and **OuiSync** (**Rust**) library submodules 
+**Table of contents**
 
-The **`OuiSync`** app includes in its dependencies the **`OuiSync`** plugin repository as a submodule; at the same time, the **`OuiSync`** plugin depends on the **`OuiSync`** library, also contained as a submodule in the plugin repository.
+- [Getting the OuiSync App](#getting-the-ouisync-app)
+- [Using this repository](#using-this-repository)
+ - [Initialize the OuiSync plugin and OuiSync library submodules](#initialize-the-ouisync-plugin-and-ouisync-library-submodules)
+ - [How to run the app from the command line](#how-to-run-the-app-from-the-command-line)
+   - [Flutter](#flutter)
+   - [Android (using Gradle)](#android-using-gradle)
+     - [How to build for specific ABIs in Android](#how-to-build-for-specific-abis-in-android)
+- [Troubleshooting](#troubleshooting)
+   - [Specify paths to sub-commands: **`rustc`** and **`cargo`**](#specify-paths-to-sub-commands-rustc-and-cargo)
+   - [Specify the path to the **Android NDK**](#specify-the-path-to-the-ndk)
+- [License](https://github.com/equalitie/ouisync-app/blob/master/LICENSE)
 
-In order for the **`OuiSync`** app to properly run, you need to make sure that both submodules are updated. This can be achieved by executing the following command while located in the app folder:
+---
 
-```
-git submodule update --init --recursive
-```
+<br />
+<br />
 
+# Getting the OuiSync App
 
-## Get the libraries included in pubspec.yaml
+You can get the app installers for the supported platforms directly from our website at https://ouisync.net/
 
-OuiSync uses some Flutter packages for various functionalities, so please execute this command to install them:
+Or you can use the official app store for each platform in your different devices:
+- **Android:**
+  - **Google Play Store**: [OuiSync Peer-to-Peer File Sync](https://play.google.com/store/apps/details?id=org.equalitie.ouisync) (currently in early access)
+- **Windows**
+  - [**Windows Apps**](https://www.microsoft.com/en-us/store/apps/windows): Coming soon.
 
-```
-flutter pub get
-```
+<br />
+<br />
 
+# Using this repository
+
+If you are a developer and want to checkout the code, there are two things that you need to do before being able to run the code: Get [Flutter](https://flutter.dev/) installed in your computer, and clone this repository (this includes initializing its submodules).
+
+For the first step, you can use the [Get started](https://docs.flutter.dev/get-started/install) guides provided by Flutter for each operating system: [Windows](https://docs.flutter.dev/get-started/install/windows), [macOS](https://docs.flutter.dev/get-started/install/macos), [Linux](https://docs.flutter.dev/get-started/install/linux), or [ChromeOS](https://docs.flutter.dev/get-started/install/chromeos).
+
+**NOTE:** Unless otherwise specified, we use the latest version of the Flutter SDK in the `stable` channel.
+
+<br />
+<br />
+
+## Initialize the OuiSync plugin and OuiSync library submodules
+
+The **OuiSync Flutter app** includes in its dependencies the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** repository as a submodule; at the same time, the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** depends on the **[OuiSync library](https://github.com/equalitie/ouisync)**, also contained as a submodule in the plugin repository.
+
+In order for the app to properly run, you need to make sure that both submodules are initialized and up to date. This can be achieved by executing the following command while located in the app folder: `git submodule update --init --recursive`
+
+**IMPORTANT:** We use some Flutter packages for various functionalities in the app, so after initializing the submodules, please execute this command to install them: `flutter pub get`
+
+<br />
+<br />
 
 ## How to run the app from the command line
 
 You can run the app from the command line and make use of different flags to obtain more information about the building process in cases in which you want to troubleshoot any issue, or simply get the full log of the process.
 
+<br />
+<br />
 
-### Running the Android app from the command line with Gradle
+### Flutter
 
-Inside the `android` folder, you can execute this command:
+Inside the project folder, you can execute `flutter run` for running the app in the default device. 
+
+There are some other useful flags you should checkout (You can find all the available flags in the SDK help: `flutter --help`):
 
 ```
-./gradlew assembleDebug
+flutter run --release // Run the app in release mode
+
+flutter run --verbose // Noisy logging, including all shell commands executed. It can be abbreviate as -v
+
+flutter clean // Delete the build/ and .dart_tool/ directories. Don't forget to run <flutter pub get> right after, to get the packages.
+
+flutter test // Run Flutter unit tests for the current project.
+
+flutter build // Build the default executable or install bundle, in debug mode. Use <flutter build --release> to get a release version.
 ```
-This will build the app in debug mode. 
+
+You can also select the device in which you want to run the app, by using the command `flutter devices` to get the list of connected devices:
+
+```
+3 connected devices:
+
+Windows (desktop) • windows • windows-x64    • Microsoft Windows [Version 10.0.19044.1645]
+Chrome (web)      • chrome  • web-javascript • Google Chrome 100.0.4896.127
+Edge (web)        • edge    • web-javascript • Microsoft Edge 100.0.1185.36
+```
+
+Then you can just use the device name from the second column, like this: `flutter run -d windows`
+
+<br />
+<br />
+
+### Android (using Gradle)
+
+Inside the `android` folder, you can execute this command `./gradlew assembleDebug` to tun the app in your Android device or emulator (This will build the app in debug mode)
+
 Maybe add some flags, in order to get more information during the process:
 
 ```
@@ -69,11 +147,7 @@ Maybe add some flags, in order to get more information during the process:
 ```
 You can use one, all, or a combination of them for different results.
 
-**NOTE**: For a list of the default Gradle tasks available for the project, you can use this command:
-
-```
-./gradlew tasks 
-```
+**NOTE**: For a list of the default Gradle tasks available for the project, you can use this command: `./gradlew tasks`
 
 Add the flag `--all` for more information:
 
@@ -82,39 +156,10 @@ Add the flag `--all` for more information:
 ```
 For a detailed explanation on the different flags and its results, please refer to the oficial documentation => <https://docs.gradle.org/current/userguide/command_line_interface.html>
 
+<br />
+<br />
 
-## Running the app from the command line with Flutter
-
-Inside the project folder, you can execute this command:
-
-```
-flutter run
-```
-This will build the app in debug mode.
-
-You can also add the flag `--verbose` to get more information during the process:
-
-```
-flutter run --verbose
-```
-For more information about the command line interface in Flutter, please refer to the oficial documentation => 
-<https://flutter.dev/docs/reference/flutter-cli>
-
-**NOTE**: If you ever need to clean the build cache, you can use this command:
-
-```
-flutter clean
-```
-This will delete the `dart-tools` folder, `android` folder, and `ios` folder.
-
-
-## Run linter
-
-```
-flutter analyze
-```
-
-## How to build for specific ABIs in Android
+#### How to build for specific ABIs in Android
 
 In cases in which we only want to build for specifics ABIs on **Android**, we make use of the `local.properties` file.
 
@@ -127,10 +172,16 @@ If we want to build for **_all_** the supported ABIs, this property is not neede
 
 **IMPORTANT**: **_do not_** commit `local.properties` into the repository; include it in the `.gitignore` file.
 
+<br />
+<br />
 
-## Specify paths to sub-commands: **`rustc`** and **`cargo`**
+# Troubleshooting
 
-The **`OuiSync`** plugin, that provides the API for using the **`OuiSync`** library that is written in **`Rust`**, uses **`Cargo`** for building it.
+<br />
+
+### Specify paths to sub-commands: **`rustc`** and **`cargo`**
+
+The **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, that provides the API for using the **[OuiSync library](https://github.com/equalitie/ouisync)** that is written in **`Rust`**, uses **`Cargo`** for building it.
 
 If building the app in your computer you encounter this error:
 
@@ -147,9 +198,9 @@ Run with --stacktrace option to get the stack trace. Run with --info or --debug 
 * Get more help at https://help.gradle.org
 
 BUILD FAILED in 2s
-``` 
+```
 
-It means that **`Gradle`** can't find **`rustc`** when trying to run the command to build the plugin. 
+It means that **`Gradle`** can't find **`rustc`** when trying to run the command to build the plugin.
 
 To fix this, add the following to the `local.properties` file located in the `android` folder of the app project (`~/android/local.properties`):
 
@@ -160,9 +211,12 @@ rust.cargoCommand=<path-to-user-folder>/.cargo/bin/cargo
 
 Don't forget to replace `<path-to-user-folder>` with the path to your user folder.
 
-## Specify the path to the **NDK**
+<br />
+<br />
 
-**Rust** needs the Android toolsets in orden to compile properly. 
+### Specify the path to the **NDK**
+
+**Rust** needs the Android toolsets in orden to compile properly.
 
 For this add the path to the `NDK` installation to the `local.properties` file:
 
