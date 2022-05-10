@@ -17,6 +17,7 @@ import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../utils/click_counter.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -59,11 +60,7 @@ class _MainPageState extends State<MainPage>
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
 
-    // A timestamp (ms since epoch) when was the last time the user hit the
-    // back button from the directory root. If the user hits it twice within
-    // exitBackButtonTimeoutMs duration, then the app will exit.
-    int lastExitAttempt = 0;
-    final int exitBackButtonTimeoutMs = 3000;
+    final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
     FolderState? get currentFolder => _mainState.currentFolder;
     DirectoryBloc get _directoryBloc => BlocProvider.of<DirectoryBloc>(context);
@@ -195,17 +192,15 @@ class _MainPageState extends State<MainPage>
       final currentFolder = currentRepo?.currentFolder;
 
       if (currentFolder == null || currentFolder.isRoot()) {
-        // If the user clicks twice the back button within
-        // exitBackButtonTimeoutMs timeout, then exit the app.
-        int now = DateTime.now().millisecondsSinceEpoch;
+        int clickCount = exitClickCounter.registerClick();
 
-        if (now - lastExitAttempt > exitBackButtonTimeoutMs) {
-          lastExitAttempt = now;
+        if (clickCount <= 1) {
           showSnackBar(context, content: Text(S.current.messageExitOuiSync));
 
           // Don't pop => don't exit
           return false;
         } else {
+          exitClickCounter.reset();
           // We still don't want to do the pop because that would destroy the
           // current Isolate's execution context and we would lose track of
           // open OuiSync objects (i.e. repositories, files, directories,
