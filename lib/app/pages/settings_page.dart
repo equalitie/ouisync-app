@@ -16,6 +16,7 @@ import '../models/main_state.dart';
 import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
+import '../utils/click_counter.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 import 'peer_list.dart';
@@ -51,6 +52,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   bool _bittorrentDhtStatus = false;
 
   Color? _titlesColor = Colors.black;
+
+  // Clicking on the version number three times shall show the state monitor page.
+  final _versionNumberClickCounter = ClickCounter(timeoutMs: 2000);
 
   @override
   void initState() {
@@ -194,7 +198,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 _divider(),
                 _versionNumberFutureBuilder(
                     S.current.labelAppVersion, info.then((info) => info.version)),
-                _stateMonitorButton(),
               ],
             )));
   }
@@ -224,7 +227,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     );
   }
 
-  static _versionNumberFutureBuilder(String key, Future<String> value) {
+  Widget _versionNumberFutureBuilder(String key, Future<String> value) {
     return FutureBuilder<String>(
         future: value,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -238,22 +241,26 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             version = _labeledText(key, "...");
           }
 
-          return Fields.addUpgradeBadge(version, bottom: 6, end: -10);
+          return GestureDetector(
+            onTap: () {
+              if (_versionNumberClickCounter.registerClick() >= 3) {
+                _versionNumberClickCounter.reset();
+
+                final session = widget.repositoriesCubit.session;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StateMonitorPage(session)
+                  )
+                );
+              }
+            },
+            child: Fields.addUpgradeBadge(version, bottom: 6, end: -10)
+          );
         });
   }
 
-  Widget _stateMonitorButton() {
-    final session = widget.repositoriesCubit.session;
-
-    return Fields.labeledButton(
-      label: "State Monitor",
-      buttonText: "Open",
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => StateMonitorPage(session)));
-      });
-  }
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
   Widget _buildRepositoriesSection() {
