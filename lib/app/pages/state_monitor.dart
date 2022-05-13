@@ -32,7 +32,7 @@ class _State extends State<StateMonitorPage> {
     return Scaffold(
       appBar: AppBar(title: Text("State Monitor")),
       body: StreamBuilder<Null>(
-          stream: subscription.stream,
+          stream: subscription.broadcastStream,
           builder: (BuildContext ctx, AsyncSnapshot<Null> snapshot) {
             root.monitor.refresh();
             return Container(child: root.build());
@@ -54,7 +54,7 @@ class _Node {
       return ListView(children: buildValuesAndChildren());
     } else {
       return Padding(
-        padding: EdgeInsets.fromLTRB(monitor.path.length * 20, 0, 0, 0),
+        padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
         child: Column(children: buildValuesAndChildren()));
     }
   }
@@ -66,22 +66,23 @@ class _Node {
 
   Widget buildValue(String key, String value) {
     return Card(child: ListTile(
+      dense: true,
       title: Text("$key: $value")
     ));
   }
 
-  Widget buildChild(String name, int changeId) {
+  Widget buildChild(String name, int version) {
     final expandedChild = expandedChildren[name];
-
 
     if (expandedChild == null) {
       return Card(child: ListTile(
         trailing: Icon(Icons.add),
+        dense: true,
         title: Text(name),
         onTap: () => expandChild(name)));
     }
     else {
-      if (expandedChild.monitor.changeId != changeId) {
+      if (expandedChild.monitor.version < version) {
         expandedChild.monitor.refresh();
       }
 
@@ -89,6 +90,7 @@ class _Node {
         children: <Widget>[
           Card(child: ListTile(
             trailing: Icon(Icons.remove),
+            dense: true,
             title: Text(name),
             onTap: () => collapseChild(name))),
           expandedChild.build(),
