@@ -12,7 +12,7 @@ on:
 
 jobs:
   build_and_test:
-    name: OuiSync Flutter App
+    name: OuiSync Flutter App - Android
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
@@ -21,21 +21,26 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: rustup target add armv7-linux-androideabi
-      - run: rustup target add aarch64-linux-android
-      - run: rustup target add i686-linux-android
-      - run: rustup target add x86_64-linux-android
-      - name: Building ouisync library  
-        run: cd ouisync-plugin/ouisync && cargo build --release --lib --verbose
-      - name: Generate bindings headers
-        run: cd ouisync-plugin/ouisync && cargo run --bin bindgen
-      - name: Release directory contents 
-        run: ls /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/
-      - name: Creating directories for the library binary for tests
-        run: mkdir -p /Users/runner/work/ouisync-app/ouisync-app/build/test
-      - name: Creating symlink to the library binary for the Flutter tests
-        run: ln -s /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.dylib /Users/runner/work/ouisync-app/ouisync-app/build/test
-      - uses: nttld/setup-ndk@v1
+      - name: Adding Android Platform target
+        run: |
+         echo "Adding target: x86_64-linux-android"
+         rustup target add x86_64-linux-android
+        # For each additional platform supported, you can add the `target` by using the corresponding target triple.
+        # To get a list of all available triples, run `rust target list`
+      - name: Building OuiSync library  
+        run: |
+         cd ouisync-plugin/ouisync
+         cargo build --release --lib
+      - name: Generating Rust FFI bindings for the library, to be used in the OuiSync plugin.
+        run: |
+         cd ouisync-plugin/ouisync
+         cargo run --bin bindgen
+      - name: Creating a symlink to the library binary for the Flutter tests
+        run: |
+         mkdir -p /Users/runner/work/ouisync-app/ouisync-app/build/test
+         ln -s /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.dylib /Users/runner/work/ouisync-app/ouisync-app/build/test
+      - name: Setting up the Android NDK environment 
+        uses: nttld/setup-ndk@v1
         with:
             ndk-version: r21e
         # Note: we should be able to get the NDK directory value from
@@ -47,16 +52,19 @@ jobs:
         # https://github.com/marketplace/actions/setup-android-ndk
         #
         # but that doesn't seem to work.
-      - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
+      - name:  Setting the directory for the Android NDK in `android/local.properties`
+        run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '2.10.5'
-      - run: flutter pub get
-      - run: cd ouisync-plugin && flutter pub get && flutter pub run ffigen
+      - name: Getting Flutter packages (App)
+        run: flutter pub get
+      - name: Getting Flutter packages (Plugin) and generating the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
+        run: |
+         cd ouisync-plugin
+         flutter pub get
+         flutter pub run ffigen
       - run: flutter test
-      - run: flutter build apk
-      - uses: actions/upload-artifact@v1
-        with:
-         name: release-apk
-         path: build/app/outputs/apk/release/app-release.apk
+      - name: Building APK
+        run: flutter build apk
