@@ -52,8 +52,10 @@ jobs:
         # https://github.com/marketplace/actions/setup-android-ndk
         #
         # but that doesn't seem to work.
-      - name:  Setting the directory for the Android NDK in `android/local.properties`
+      - name: Setting the directory for the Android NDK in `android/local.properties`
         run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
+      - name: Setting the ABI filter for building only for x86_64 architecture in `android/local.properties`
+        run: echo "ndk.abiFilters=x86_64" >> android/local.properties
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
