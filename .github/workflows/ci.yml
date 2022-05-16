@@ -26,7 +26,7 @@ jobs:
          echo "Adding target: x86_64-linux-android"
          rustup target add x86_64-linux-android
         # For each additional platform supported, you can add the `target` by using the corresponding target triple.
-        # To get a list of all available triples, run `rust target list`
+        # To get a list of all available triples, run `rustup target list`
       - name: Building OuiSync library  
         run: |
          cd ouisync-plugin/ouisync
@@ -68,5 +68,5 @@ jobs:
          flutter pub get
          flutter pub run ffigen
       - run: flutter test
-      - name: Building APK
-        run: flutter build apk
+      - name: Building APK (android-x64)
+        run: flutter build apk --target-platform android-x64
