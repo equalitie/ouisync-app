@@ -258,7 +258,7 @@ class Fields {
           textAlign: TextAlign.start,
           fontSize: Dimensions.fontAverage,
         ),
-        OutlineButton(
+        OutlinedButton(
           child: Text(buttonText),
           onPressed: onPressed,
         )
