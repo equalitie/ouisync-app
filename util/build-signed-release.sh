@@ -84,7 +84,7 @@ input_bundle=./build/app/outputs/bundle/release/app-release.aab
 flutter clean
 
 ## These are the default targets/platforms, uncomment and edit if needed.
-platforms_flag="--target-platform android-x64"
+#platforms_flag="--target-platform android-arm,android-arm64,android-x64"
 
 NO_SIGN="true" \
     flutter build appbundle \
