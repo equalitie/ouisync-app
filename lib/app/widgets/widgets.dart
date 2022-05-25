@@ -1,3 +1,5 @@
+export 'animated/file_icon_animated.dart';
+
 export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repository_picker.dart';
@@ -15,6 +17,7 @@ export 'dialogs/modal_folder_detail_bottom_sheet.dart';
 export 'dialogs/modal_rename_dialog.dart';
 export 'dialogs/modal_rename_repository_dialog.dart';
 export 'dialogs/modal_repo_creation_dialog.dart';
+export 'dialogs/modal_save_to_device_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/repository_list.dart';
