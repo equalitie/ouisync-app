@@ -24,42 +24,48 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m1(name) => "Canceling ${name} writing...";
 
-  static String m2(entry) => "${entry} already exists.";
+  static String m2(name) => "${name} - downloading canceled";
 
-  static String m3(path) =>
+  static String m3(name) => "${name} - downloaded successfully";
+
+  static String m4(name) => "${name} - download failed";
+
+  static String m5(entry) => "${entry} already exists.";
+
+  static String m6(path) =>
       "The current folder is missing, navigating to its parent: ${path}";
 
-  static String m4(path) => "${path} is not empty";
+  static String m7(path) => "${path} is not empty";
 
-  static String m5(name) => "File deleted successfully: ${name}";
+  static String m8(name) => "File deleted successfully: ${name}";
 
-  static String m6(name) => "Folder deleted successfully: ${name}";
+  static String m9(name) => "Folder deleted successfully: ${name}";
 
-  static String m7(path) => "from ${path}";
+  static String m10(path) => "from ${path}";
 
-  static String m8(name) => "Error creating file ${name}";
+  static String m11(name) => "Error creating file ${name}";
 
-  static String m9(access) => "Access mode granted: ${access}";
+  static String m12(access) => "Access mode granted: ${access}";
 
-  static String m10(name) => "Suggested: ${name}\n(tap here to use this name)";
+  static String m13(name) => "Suggested: ${name}\n(tap here to use this name)";
 
-  static String m11(name) => "${name} writing canceled";
+  static String m14(name) => "${name} writing canceled";
 
-  static String m12(name) => "${name} - saved successfully";
+  static String m15(name) => "${name} - saved successfully";
 
-  static String m13(name) => "${name} - writing failed";
+  static String m16(name) => "${name} - writing failed";
 
-  static String m14(access) => "${access}";
+  static String m17(access) => "${access}";
 
-  static String m15(entry) => "${entry}";
+  static String m18(entry) => "${entry}";
 
-  static String m16(name) => "${name}";
+  static String m19(name) => "${name}";
 
-  static String m17(path) => "${path}";
+  static String m20(path) => "${path}";
 
-  static String m18(status) => "${status}";
+  static String m21(status) => "${status}";
 
-  static String m19(name) => "Share repository \"${name}\"";
+  static String m22(name) => "Share repository \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -104,6 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconCreateRepository":
             MessageLookupByLibrary.simpleMessage("Create a new repository"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Delete"),
+        "iconDownload": MessageLookupByLibrary.simpleMessage("Download"),
         "iconInformation": MessageLookupByLibrary.simpleMessage("Information"),
         "iconMove": MessageLookupByLibrary.simpleMessage("Move"),
         "iconPreview": MessageLookupByLibrary.simpleMessage("Preview"),
@@ -117,6 +124,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
         "labelConnectedPeers":
             MessageLookupByLibrary.simpleMessage("Connected peers: "),
+        "labelDestination": MessageLookupByLibrary.simpleMessage("Destination"),
+        "labelDownloadedTo":
+            MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
@@ -134,6 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
         "labelTypePassword":
             MessageLookupByLibrary.simpleMessage("Type password: "),
+        "labelUseExternalStorage":
+            MessageLookupByLibrary.simpleMessage("Use external storage"),
         "mesageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("There is no media present."),
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
@@ -172,11 +184,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Create a new <bold>repository</bold>, or link to one from a friend using a <bold>repository token</bold>"),
         "messageCreatingToken":
             MessageLookupByLibrary.simpleMessage("Creating the share token..."),
+        "messageDownloadingFileCanceled": m2,
+        "messageDownloadingFileDone": m3,
+        "messageDownloadingFileError": m4,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
             "This <bold>folder</bold> is empty"),
         "messageEmptyRepo": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is empty"),
-        "messageEntryAlreadyExist": m2,
+        "messageEntryAlreadyExist": m5,
         "messageEntryTypeDefault":
             MessageLookupByLibrary.simpleMessage("An entry"),
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("A file"),
@@ -185,7 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Error creating the share token."),
-        "messageErrorCurrentPathMissing": m3,
+        "messageErrorCurrentPathMissing": m6,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
             "Something went wrong. Please try again."),
         "messageErrorDefaultShort":
@@ -197,7 +212,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Please enter a valid name (unique, no spaces)"),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "We couldn’t load this folder\'s contents. Please try again."),
-        "messageErrorPathNotEmpty": m4,
+        "messageErrorPathNotEmpty": m7,
         "messageErrorRepositoryPasswordValidation":
             MessageLookupByLibrary.simpleMessage("Please enter a password."),
         "messageErrorRetypePassword":
@@ -210,9 +225,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a valid token."),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
-        "messageFileDeleted": m5,
+        "messageFileDeleted": m8,
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
-        "messageFolderDeleted": m6,
+        "messageFolderDeleted": m9,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageInitializing":
@@ -225,10 +240,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is locked."),
-        "messageMoveEntryOrigin": m7,
+        "messageMoveEntryOrigin": m10,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
-        "messageNewFileError": m8,
+        "messageNewFileError": m11,
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":
@@ -243,30 +258,34 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Rename folder"),
         "messageRenameRepository":
             MessageLookupByLibrary.simpleMessage("Rename repository"),
-        "messageRepositoryAccessMode": m9,
+        "messageRepositoryAccessMode": m12,
         "messageRepositoryName":
             MessageLookupByLibrary.simpleMessage("Give the repository a name"),
         "messageRepositoryNewName":
             MessageLookupByLibrary.simpleMessage("Repository new name"),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Repository password"),
-        "messageRepositorySuggestedName": m10,
+        "messageRepositorySuggestedName": m13,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the token here"),
+        "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
+            "Save the file to this folder"),
+        "messageSelectLocation":
+            MessageLookupByLibrary.simpleMessage("Select the location"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
-        "messageWritingFileCanceled": m11,
-        "messageWritingFileDone": m12,
-        "messageWritingFileError": m13,
-        "replacementAccess": m14,
-        "replacementEntry": m15,
-        "replacementName": m16,
-        "replacementPath": m17,
-        "replacementStatus": m18,
+        "messageWritingFileCanceled": m14,
+        "messageWritingFileDone": m15,
+        "messageWritingFileError": m16,
+        "replacementAccess": m17,
+        "replacementEntry": m18,
+        "replacementName": m19,
+        "replacementPath": m20,
+        "replacementStatus": m21,
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),
@@ -286,6 +305,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete non-empty folder"),
         "titleDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
+        "titleDownloadLocation":
+            MessageLookupByLibrary.simpleMessage("Download location"),
+        "titleDownloadToDevice":
+            MessageLookupByLibrary.simpleMessage("Download to device"),
         "titleEditRepository":
             MessageLookupByLibrary.simpleMessage("Edit repository"),
         "titleFileDetails":
@@ -301,7 +324,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Your repositories"),
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "titleShareRepository": m19,
+        "titleShareRepository": m22,
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Unlock repository"),
         "typeFile": MessageLookupByLibrary.simpleMessage("File"),

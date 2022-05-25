@@ -20,6 +20,8 @@
     "titleNetwork":"Conectividad",
     "titleLogs":"Logs",
     "titleDeleteRepository":"Borrar repositorio",
+    "titleDownloadToDevice":"Descargar al dispositivo",
+    "titleDownloadLocation":"Ubicación de descarga",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -39,6 +41,9 @@
     "labelEndpoint":"Endpoint: ",
     "labelAppVersion":"Versión de la App: ",
     "labelConnectedPeers":"Compañeras conectadas: ",
+    "labelDestination":"Destino",
+    "labelUseExternalStorage":"Usar almacenamiento externo",
+    "labelDownloadedTo":"Descargado en:",
 
     "messageLoadingDefault":"Cargando…",
     "messageLoadingContents":"Cargando los contenidos del directorio…",
@@ -51,6 +56,7 @@
     "messageErrorCurrentPathMissing":"Este directorio no existe más, navegando al ancestro: {path}",
     "messageNewFileError":"Error creando archuivo {name}",
     "messageWritingFileError":"{name} - fallo durante escritura",
+    "messageDownloadingFileError":"{name} - fallo durante descarga",
     "messageErrorEntryNotFound":"entrada no encontrada",
 
     "messageBlindReplicaExplanation":"Tu colega no puede escribir o leer los contenidos",
@@ -77,8 +83,10 @@
     "messageRenameFile":"Cambiar nombre de archivo",
     "messageRenameFolder":"Cambiar nombre de directorio",
     "messageWritingFileDone":"{name} - guardado exitosamente",
-    "messageWritingFileCanceled":"{name} escritura canelada",
+    "messageDownloadingFileDone":"{name} - descargado exitosamente",
+    "messageWritingFileCanceled":"{name} escritura cancelada",
     "messageCancelingFileWriting":"Cancelando escritura de {name}",
+    "messageDownloadingFileCanceled":"{name} - descarga cancelada",
 
     "messageMovingEntry":"Esta función no está disponible mientras se está moviendo una entrada",
     "messageRepositoryToken":"Pegue el token aquí",
@@ -115,6 +123,9 @@
     "messageAddingFileToLockedRepository":"Este repositorio está cerrado o es una copia ciega.\n\nSi usted tiene la clave, abralo e intente de nuevo.",
     "messageAddingFileToReadRepository":"Este repositorio es sólo-lectura.",
     "messageFileName":"Nombre de archivo",
+    
+    "messageSelectLocation":"Seleccione el lugar",
+    "messageSaveToLocation":"Guardar el archivo en este directorio",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
@@ -126,6 +137,7 @@
     "statusUnspecified":"No especificado",
 
     "iconInformation":"Información",
+    "iconDownload":"Descargar",
     "iconPreview":"Vista previa",
     "iconShare":"Compartir",
     "iconRename":"Renombrar",

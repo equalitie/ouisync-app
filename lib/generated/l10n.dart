@@ -260,6 +260,26 @@ class S {
     );
   }
 
+  /// `Download to device`
+  String get titleDownloadToDevice {
+    return Intl.message(
+      'Download to device',
+      name: 'titleDownloadToDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download location`
+  String get titleDownloadLocation {
+    return Intl.message(
+      'Download location',
+      name: 'titleDownloadLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -430,6 +450,36 @@ class S {
     );
   }
 
+  /// `Destination`
+  String get labelDestination {
+    return Intl.message(
+      'Destination',
+      name: 'labelDestination',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use external storage`
+  String get labelUseExternalStorage {
+    return Intl.message(
+      'Use external storage',
+      name: 'labelUseExternalStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloaded to:`
+  String get labelDownloadedTo {
+    return Intl.message(
+      'Downloaded to:',
+      name: 'labelDownloadedTo',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(
@@ -525,6 +575,16 @@ class S {
     return Intl.message(
       '$name - writing failed',
       name: 'messageWritingFileError',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} - download failed`
+  String messageDownloadingFileError(Object name) {
+    return Intl.message(
+      '$name - download failed',
+      name: 'messageDownloadingFileError',
       desc: '',
       args: [name],
     );
@@ -760,6 +820,16 @@ class S {
     );
   }
 
+  /// `{name} - downloaded successfully`
+  String messageDownloadingFileDone(Object name) {
+    return Intl.message(
+      '$name - downloaded successfully',
+      name: 'messageDownloadingFileDone',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `{name} writing canceled`
   String messageWritingFileCanceled(Object name) {
     return Intl.message(
@@ -775,6 +845,16 @@ class S {
     return Intl.message(
       'Canceling $name writing...',
       name: 'messageCancelingFileWriting',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} - downloading canceled`
+  String messageDownloadingFileCanceled(Object name) {
+    return Intl.message(
+      '$name - downloading canceled',
+      name: 'messageDownloadingFileCanceled',
       desc: '',
       args: [name],
     );
@@ -1130,6 +1210,26 @@ class S {
     );
   }
 
+  /// `Select the location`
+  String get messageSelectLocation {
+    return Intl.message(
+      'Select the location',
+      name: 'messageSelectLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save the file to this folder`
+  String get messageSaveToLocation {
+    return Intl.message(
+      'Save the file to this folder',
+      name: 'messageSaveToLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1205,6 +1305,16 @@ class S {
     return Intl.message(
       'Information',
       name: 'iconInformation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get iconDownload {
+    return Intl.message(
+      'Download',
+      name: 'iconDownload',
       desc: '',
       args: [],
     );
