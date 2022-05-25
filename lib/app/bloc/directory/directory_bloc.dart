@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../../generated/l10n.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-export '../../models/repo_state.dart';
 import '../blocs.dart';
-import '../../../generated/l10n.dart';
 
+export '../../models/repo_state.dart';
 
 class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncAppLogger {
   DirectoryBloc() : super(DirectoryInitial()) {
@@ -16,6 +17,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     on<DeleteFolder>(_onDeleteFolder);
     on<SaveFile>(_onSaveFile);
     on<CancelSaveFile>(_onCancelSaveFile);
+    on<DownloadFile>(_onDownloadFile);
+    on<CancelDownloadFile>(_onCancelDownloadFile);
     on<MoveEntry>(_onMoveEntry);
     on<DeleteFile>(_onDeleteFile);
     on<NavigateTo>(_onNavigateTo);
@@ -110,6 +113,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
       if (_cancelFileWriting == event.newFilePath) {
         loggy.app('${event.newFilePath} writing canceled by the user');
+        _cancelFileWriting = '';
+
         emit(ShowMessage(S.current.messageWritingFileCanceled(event.newFilePath)));
         emit(WriteToFileDone(path: event.newFilePath));
       }
@@ -120,6 +125,74 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
   void _onCancelSaveFile(CancelSaveFile event, Emitter<DirectoryState> emit) {
     loggy.app('Canceling ${event.filePath}');
     _cancelFileWriting = event.filePath;
+  }
+
+  Future<void> _onDownloadFile(DownloadFile event, Emitter<DirectoryState> emit) async {
+    final ouisyncFile = await File.open(event.repository.handle, event.originFilePath);
+    final length = await ouisyncFile.length;
+
+    final newFile = io.File(event.destinationPath);
+    int offset = 0;
+
+    emit(DownloadFileInProgress(
+      path: event.destinationPath,
+      fileName: event.originFilePath,
+      length: length,
+      progress: offset
+    ));
+    
+    try {
+      while (_cancelFileDownload != event.originFilePath) {
+        final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
+        offset += chunk.length;
+  
+        await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
+  
+        emit(DownloadFileInProgress(
+          path: event.destinationPath,
+          fileName: event.originFilePath,
+          length: length,
+          progress: offset
+        ));
+
+        if (chunk.length < Constants.bufferSize) {
+          emit(DownloadFileDone(
+            path: event.originFilePath,
+            devicePath: event.destinationPath));
+          break;
+        }
+      }
+    } catch (e, st) {
+      loggy.app('Download file ${event.originFilePath} exception', e, st);
+
+      emit(ShowMessage(S.current.messageDownloadingFileError(event.originFilePath)));
+      emit(DownloadFileFail(path: event.originFilePath));
+
+      return;
+    } finally {
+      loggy.app('Download file ${event.originFilePath} done - closing');
+      await ouisyncFile.close();
+    }
+
+    if (_cancelFileDownload.isEmpty) {
+      emit(ShowMessage(S.current.messageDownloadingFileDone(event.originFilePath)));
+      return;
+    }
+
+    if (_cancelFileDownload == event.originFilePath) {
+      _cancelFileDownload = '';
+      
+      loggy.app('${event.originFilePath} download canceled by the user');
+      emit(ShowMessage(S.current.messageDownloadingFileCanceled(event.originFilePath)));
+
+      emit(DownloadFileCancel(path: event.originFilePath));
+    }
+  }
+
+  String _cancelFileDownload = '';
+  void _onCancelDownloadFile(CancelDownloadFile event, Emitter<DirectoryState> emit) {
+    loggy.app('Canceling ${event.filePath} download');
+    _cancelFileDownload = event.filePath;
   }
 
   Future<DirectoryState> _createFile(
