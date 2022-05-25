@@ -1,10 +1,11 @@
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../models/models.dart';
-import '../../models/repo_state.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -44,16 +45,39 @@ class _FileDetailState extends State<FileDetail> {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFileDetails),
-          Fields.paddedActionText(
-            S.current.iconPreview,
-            onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
-            icon: Icons.preview_rounded,
+          Fields.paddedActionText(S.current.iconDownload,
+            onTap: () async {
+              Navigator.of(context, rootNavigator: false).pop();
+
+              await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return ActionsDialog(
+                    title: S.current.titleDownloadToDevice,
+                    body: SaveToDevice(
+                      repository: widget.repository,
+                      data: widget.data,
+                      bloc: widget.bloc
+                    ),
+                  );
+                }
+              );
+            },
+            icon: Icons.download
           ),
-          Fields.actionText(
-            S.current.iconShare,
-            onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
-            icon: Icons.share_rounded,
-          ),
+          if (!io.Platform.isWindows)
+            Fields.paddedActionText(
+              S.current.iconPreview,
+              onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
+              icon: Icons.preview_rounded,
+            ),
+          if (!io.Platform.isWindows)  
+            Fields.actionText(
+              S.current.iconShare,
+              onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
+              icon: Icons.share_rounded,
+            ),
           Fields.paddedActionText(
             S.current.iconRename,
             onTap: () => _showNewNameDialog(
