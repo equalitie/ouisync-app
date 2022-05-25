@@ -30,6 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.3.3
   equatable: ^2.0.3
+  external_path: ^1.0.1
   ffi: ^1.0.0
   file: ^6.1.2
   file_picker: ^4.5.1
@@ -49,6 +50,8 @@ dependencies:
     path: ./ouisync-plugin
   package_info_plus: ^1.4.2
   path_provider: ^2.0.9
+  percent_indicator: ^4.2.2
+  permission_handler: ^9.2.0
   r_get_ip: ^0.1.1
   receive_sharing_intent: ^1.4.5
   share_plus: ^4.0.4
