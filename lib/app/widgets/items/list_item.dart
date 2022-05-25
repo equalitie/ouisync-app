@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../models/models.dart';
 import '../../utils/utils.dart';
@@ -48,7 +46,7 @@ class ListItem extends StatelessWidget {
       children: <Widget>[
         Expanded(
           flex: 1,
-          child: Icon(Icons.insert_drive_file_outlined, size: Dimensions.sizeIconAverage)),
+          child: FileIconAnimated(path: itemData.path)),
         Expanded(
           flex: 9,
           child: Padding(
