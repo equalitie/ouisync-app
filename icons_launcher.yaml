@@ -1,4 +1,8 @@
 flutter_icons:
   image_path: 'assets/OuiSync-App-Icon-1200.png'
+  image_path_android: 'assets/ouisync-app-launcher.png'
+  adaptive_icon_background: 'assets/ouisync-app-launcher_adaptive_back.png'
+  adaptive_icon_foreground: 'assets/ouisync-app-launcher_adaptive_fore.png'
+  adaptive_icon_round: 'assets/ouisync-app-launcher-round.png'
   android: true
   windows: true
