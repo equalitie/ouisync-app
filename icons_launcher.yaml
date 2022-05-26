@@ -1,0 +1,4 @@
+flutter_icons:
+  image_path: 'assets/OuiSync-App-Icon-1200.png'
+  android: true
+  windows: true
