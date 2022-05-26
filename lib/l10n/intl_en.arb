@@ -20,6 +20,8 @@
     "titleNetwork":"Network",
     "titleLogs":"Logs",
     "titleDeleteRepository":"Delete repository",
+    "titleDownloadToDevice":"Download to device",
+    "titleDownloadLocation":"Download location",
 
     "typeFolder":"Folder",
     "typeFile":"File",
@@ -39,6 +41,9 @@
     "labelEndpoint":"Endpoint: ",
     "labelAppVersion":"App version: ",
     "labelConnectedPeers":"Connected peers: ",
+    "labelDestination":"Destination",
+    "labelUseExternalStorage":"Use external storage",
+    "labelDownloadedTo":"Downloaded to:",
 
     "messageLoadingDefault":"Loading…",
     "messageLoadingContents":"Loading the folder contents…",
@@ -51,6 +56,7 @@
     "messageErrorCurrentPathMissing":"The current folder is missing, navigating to its parent: {path}",
     "messageNewFileError":"Error creating file {name}",
     "messageWritingFileError":"{name} - writing failed",
+    "messageDownloadingFileError":"{name} - download failed",
     "messageErrorEntryNotFound":"entry not found",
 
     "messageBlindReplicaExplanation":"Your peer can not write nor read the contents",
@@ -77,8 +83,10 @@
     "messageRenameFile":"Rename file",
     "messageRenameFolder":"Rename folder",
     "messageWritingFileDone":"{name} - saved successfully",
+    "messageDownloadingFileDone":"{name} - downloaded successfully",
     "messageWritingFileCanceled":"{name} writing canceled",
     "messageCancelingFileWriting":"Canceling {name} writing...",
+    "messageDownloadingFileCanceled":"{name} - downloading canceled",
 
     "messageMovingEntry":"This function is not available when moving an entry.",
     "messageRepositoryToken":"Paste the token here",
@@ -116,6 +124,9 @@
     "messageAddingFileToReadRepository":"This repository is a read-only replica.",
     "messageFileName":"File name",
 
+    "messageSelectLocation":"Select the location",
+    "messageSaveToLocation":"Save the file to this folder",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
@@ -126,6 +137,7 @@
     "statusUnspecified":"Unspecified",
 
     "iconInformation":"Information",
+    "iconDownload":"Download",
     "iconPreview":"Preview",
     "iconShare":"Share",
     "iconRename":"Rename",

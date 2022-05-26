@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+
 import '../../models/repo_state.dart';
-import '../../models/folder_state.dart';
 
 abstract class DirectoryEvent extends Equatable {
   const DirectoryEvent();
@@ -99,6 +98,36 @@ class SaveFile extends DirectoryEvent {
 
 class CancelSaveFile extends DirectoryEvent {
   const CancelSaveFile({
+    required this.filePath
+  });
+
+  final String filePath;
+
+  @override
+  List<Object?> get props => [ filePath ];
+}
+
+class DownloadFile extends DirectoryEvent {
+  const DownloadFile({
+    required this.repository,
+    required this.originFilePath,
+    required this.destinationPath
+  });
+
+  final RepoState repository;
+  final String originFilePath;
+  final String destinationPath;
+
+  @override
+  List<Object?> get props => [
+    repository,
+    originFilePath,
+    destinationPath
+  ];
+}
+
+class CancelDownloadFile extends DirectoryEvent {
+  const CancelDownloadFile({
     required this.filePath
   });
 

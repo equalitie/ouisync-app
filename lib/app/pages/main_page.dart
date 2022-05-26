@@ -14,10 +14,10 @@ import '../cubit/cubits.dart';
 import '../models/folder_state.dart';
 import '../models/main_state.dart';
 import '../models/models.dart';
+import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../utils/click_counter.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -310,6 +310,10 @@ class _MainPageState extends State<MainPage>
         state is CreateFileDone ||
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
+        state is DownloadFileInProgress ||
+        state is DownloadFileDone ||
+        state is DownloadFileCancel ||
+        state is DownloadFileFail ||
         state is ShowMessage);
       },
       builder: (context, state) {
