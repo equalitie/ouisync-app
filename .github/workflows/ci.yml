@@ -59,7 +59,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '2.10.5'
+          flutter-version: '2.17.0'
       - name: Getting Flutter packages (App)
         run: flutter pub get
       - name: Getting Flutter packages (Plugin) and generating the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
