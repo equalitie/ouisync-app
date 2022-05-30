@@ -8,6 +8,12 @@ abstract class DirectoryState extends Equatable {
   List<Object?> get props => [];
 }
 
+enum DownloadFileResult {
+  done,
+  canceled,
+  failed
+}
+
 class DirectoryInitial extends DirectoryState {}
 
 class CreateFileDone extends DirectoryState {
@@ -98,31 +104,15 @@ class DownloadFileDone extends DirectoryState {
   const DownloadFileDone({ 
     required this.path,
     required this.devicePath,
+    required this.result
   });
 
   final String path;
   final String devicePath;
+  final DownloadFileResult result;
 
   @override
-  List<Object> get props => [ path, devicePath ];
-}
-
-class DownloadFileCancel extends DirectoryState {
-  const DownloadFileCancel({ required this.path });
-
-  final String path;
-
-  @override
-  List<Object> get props => [ path ];
-}
-
-class DownloadFileFail extends DirectoryState {
-  const DownloadFileFail({ required this.path });
-
-  final String path;
-
-  @override
-  List<Object> get props => [ path ];
+  List<Object> get props => [ path, devicePath, result ];
 }
 
 class DirectoryLoadInProgress extends DirectoryState {

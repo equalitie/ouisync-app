@@ -312,8 +312,6 @@ class _MainPageState extends State<MainPage>
         state is WriteToFileDone ||
         state is DownloadFileInProgress ||
         state is DownloadFileDone ||
-        state is DownloadFileCancel ||
-        state is DownloadFileFail ||
         state is ShowMessage);
       },
       builder: (context, state) {

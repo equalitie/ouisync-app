@@ -158,7 +158,8 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         if (chunk.length < Constants.bufferSize) {
           emit(DownloadFileDone(
             path: event.originFilePath,
-            devicePath: event.destinationPath));
+            devicePath: event.destinationPath,
+            result: DownloadFileResult.done));
           break;
         }
       }
@@ -166,7 +167,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Download file ${event.originFilePath} exception', e, st);
 
       emit(ShowMessage(S.current.messageDownloadingFileError(event.originFilePath)));
-      emit(DownloadFileFail(path: event.originFilePath));
+      emit(DownloadFileDone(
+        path: event.originFilePath,
+        devicePath: event.destinationPath,
+        result: DownloadFileResult.failed));
 
       return;
     } finally {
@@ -185,7 +189,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('${event.originFilePath} download canceled by the user');
       emit(ShowMessage(S.current.messageDownloadingFileCanceled(event.originFilePath)));
 
-      emit(DownloadFileCancel(path: event.originFilePath));
+      emit(DownloadFileDone(
+        path: event.originFilePath,
+        devicePath: event.destinationPath,
+        result: DownloadFileResult.canceled));
     }
   }
 

@@ -25,9 +25,7 @@ class FileIconAnimated
     return BlocBuilder<DirectoryBloc, DirectoryState>(
       buildWhen: (previous, current) {
         if (current is DownloadFileInProgress ||
-            current is DownloadFileDone ||
-            current is DownloadFileFail ||
-            current is DownloadFileCancel) {
+            current is DownloadFileDone) {
               return _isCurrentFile(current);}
 
         return false;
@@ -96,23 +94,21 @@ class FileIconAnimated
       }
 
       if (state is DownloadFileDone) {
-        _destinationPath = state.devicePath;
+        IconData iconData;
+        switch (state.result) {
+          case DownloadFileResult.done:
+            _destinationPath = state.devicePath;
+            iconData = Icons.download_done_rounded;
+            break;
+          case DownloadFileResult.canceled:
+            iconData = Icons.file_download_off;
+            break;
+          case DownloadFileResult.failed:
+            iconData = Icons.cancel;
+            break;
+        }
 
-        return const Icon(
-          Icons.download_done_rounded,
-          size: Dimensions.sizeIconAverage);
-      }
-
-      if (state is DownloadFileCancel) {
-        return const Icon(
-          Icons.file_download_off,
-          size: Dimensions.sizeIconAverage);
-      }
-
-      if (state is DownloadFileFail) {
-        return const Icon(
-          Icons.cancel,
-          size: Dimensions.sizeIconAverage);
+        return Icon(iconData);
       }
     }
 
@@ -132,14 +128,6 @@ class FileIconAnimated
     }
 
     if (state is DownloadFileDone) {
-      return state.path;
-    }
-
-    if (state is DownloadFileCancel) {
-      return state.path;
-    }
-
-    if (state is DownloadFileFail) {
       return state.path;
     }
 
