@@ -71,7 +71,7 @@ class UnlockRepository extends StatelessWidget {
             );
           }
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)),
       ]

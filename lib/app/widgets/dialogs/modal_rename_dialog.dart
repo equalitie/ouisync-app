@@ -45,7 +45,7 @@ class Rename extends StatelessWidget {
           validator: formNameValidator,
           autofocus: true
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)),
       ]

@@ -66,7 +66,7 @@ class MoveEntryDialog extends StatelessWidget {
           }
         }
 
-        return Fields.actionsSection(context,
+        return Fields.dialogActions(context,
           buttons: _actions(context, canMove),
           padding: EdgeInsets.only(top: 0.0)
         );

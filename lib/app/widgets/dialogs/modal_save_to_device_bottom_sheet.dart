@@ -61,7 +61,7 @@ class _SaveToDeviceState extends State<SaveToDevice> {
         _buildDestinationSelection(),
         if (io.Platform.isAndroid)
           _buildExternalStorageSelection(),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)
         ),

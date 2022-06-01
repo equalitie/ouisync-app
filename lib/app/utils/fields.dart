@@ -492,7 +492,7 @@ class Fields {
     )
   );  
 
-  static Widget actionsSection(BuildContext context,
+  static Widget dialogActions(BuildContext context,
   {
     required List<Widget> buttons,
     EdgeInsets padding = Dimensions.paddingActionsSection

@@ -219,7 +219,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
             }
           ),
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)
         ),

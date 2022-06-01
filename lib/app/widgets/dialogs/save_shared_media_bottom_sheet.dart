@@ -44,7 +44,7 @@ class SaveSharedMedia extends StatelessWidget {
             textOverflow: TextOverflow.ellipsis,
             fontWeight: FontWeight.w800
           ),
-          Fields.actionsSection(context,
+          Fields.dialogActions(context,
             buttons: _actions(context),
           )
         ],
