@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class RepositoryCreation extends StatelessWidget {
   RepositoryCreation({
@@ -55,7 +56,7 @@ class RepositoryCreation extends StatelessWidget {
           hint: S.current.messageRepositoryName,
           onSaved: (_) {},
           validator: formNameValidator,
-          autofocus: true
+          autofocus: true,
         ),
         ValueListenableBuilder(
           valueListenable: _obscurePassword,
@@ -125,7 +126,7 @@ class RepositoryCreation extends StatelessWidget {
             );
           }
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)),
       ]
@@ -144,31 +145,30 @@ class RepositoryCreation extends StatelessWidget {
     return null;
   }
 
+  List<Widget> _actions(context) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionCreate,
+      onPressed: _createRepo)
+  ];
+
+  void _createRepo() {
+    final newRepositoryName = _nameController.text;
+    final password = _passwordController.text;
+    
+    _onSaved(cubit, newRepositoryName, password);
+  }
+
   void _onSaved(RepositoriesCubit cubit, String name, String password) {
-    if (!this.formKey.currentState!.validate()) {
+    if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
 
-    this.formKey.currentState!.save();
+    formKey.currentState!.save();
 
     cubit.openRepository(name: name, password: password);
-    Navigator.of(this.context).pop(name);
+    Navigator.of(context).pop(name);
   }
-
-  List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        final newRepositoryName = _nameController.text;
-        final password = _passwordController.text;
-        
-        _onSaved(cubit, newRepositoryName, password);
-      },
-      child: Text(S.current.actionCreate)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
-  ];
 }
