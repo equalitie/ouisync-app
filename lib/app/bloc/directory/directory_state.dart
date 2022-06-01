@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../models/repo_state.dart';
+
 abstract class DirectoryState extends Equatable {
   const DirectoryState();
 
@@ -80,12 +82,14 @@ class WriteToFileDone extends DirectoryState {
 
 class DownloadFileInProgress extends DirectoryState {
   const DownloadFileInProgress({
+    required this.repository,
     required this.path,
     required this.fileName,
     required this.length,
     required this.progress
   });
 
+  final RepoState repository;
   final String path;
   final String fileName;
   final int length;
@@ -93,6 +97,7 @@ class DownloadFileInProgress extends DirectoryState {
 
   @override
   List<Object> get props => [
+    repository,
     path,
     fileName,
     length,
@@ -102,17 +107,19 @@ class DownloadFileInProgress extends DirectoryState {
 
 class DownloadFileDone extends DirectoryState {
   const DownloadFileDone({ 
+    required this.repository,
     required this.path,
     required this.devicePath,
     required this.result
   });
 
+  final RepoState repository;
   final String path;
   final String devicePath;
   final DownloadFileResult result;
 
   @override
-  List<Object> get props => [ path, devicePath, result ];
+  List<Object> get props => [ repository, path, devicePath, result ];
 }
 
 class DirectoryLoadInProgress extends DirectoryState {
