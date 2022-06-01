@@ -1,5 +1,8 @@
 export 'animated/file_icon_animated.dart';
 
+export 'buttons/dialog_negative_button.dart';
+export 'buttons/dialog_positive_button.dart';
+
 export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repository_picker.dart';

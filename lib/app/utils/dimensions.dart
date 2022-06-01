@@ -62,4 +62,13 @@ class Dimensions {
   static const double radiusAverage = 16.0;
   static const double radiusSmall = 5.0;
   static const double radiusMicro = 2.0;
+
+  static const BoxConstraints sizeConstrainsDialogAction = BoxConstraints(minWidth: 98, minHeight: 46.0);
+  static const double elevationDialogAction = 0.0;
+  
+  static const TextStyle textStyleDialogNegativeButton = TextStyle(color: Color.fromARGB(255, 97, 97, 97), fontWeight: FontWeight.w500);
+  static const EdgeInsets marginDialogNegativeButton = EdgeInsets.only(right: 10.0);
+
+  static const BorderRadius borderRadiusDialogPositiveButton = BorderRadius.all(Radius.circular(5.0));
+  static const EdgeInsets marginDialogPositiveButton = EdgeInsets.only(left: 10.0);
 }
