@@ -69,35 +69,6 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     );
   }
 
-  List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () async {
-        if (_destinationPath?.isEmpty ?? true) {
-          return;
-        }
-
-        if (await Permission.storage.request().isGranted) {
-          final destinationPath = p.join(_destinationPath!, widget.data.name);
-          widget.bloc.add(
-            DownloadFile(
-              repository: widget.repository,
-              originFilePath: widget.data.path,
-              destinationPath: destinationPath
-            )
-          );
-
-          Navigator.of(context, rootNavigator: false).pop();
-        }
-      },
-      child: Text(S.current.actionSave)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context, rootNavigator: false).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
-  ];
-
   Widget _buildDestinationSelection() {
     return Container(
       padding: Dimensions.paddingGreyBox,
@@ -198,5 +169,33 @@ class _SaveToDeviceState extends State<SaveToDevice> {
 
     downloadsPath ??= await getApplicationDocumentsDirectory();
     return downloadsPath.path;
+  }
+
+  List<Widget> _actions(context) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context, rootNavigator: false).pop('')),
+    PositiveButton(
+      text: S.current.actionSave,
+      onPressed: () async { await _downloadFile(); })
+  ];
+
+  Future<void> _downloadFile() async {
+    if (_destinationPath?.isEmpty ?? true) {
+      return;
+    }
+
+    if (await Permission.storage.request().isGranted) {
+      final destinationPath = p.join(_destinationPath!, widget.data.name);
+      widget.bloc.add(
+        DownloadFile(
+          repository: widget.repository,
+          originFilePath: widget.data.path,
+          destinationPath: destinationPath
+        )
+      );
+
+      Navigator.of(context, rootNavigator: false).pop();
+    }
   }
 }
