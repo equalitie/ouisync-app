@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class Rename extends StatelessWidget {
-  Rename({
+  const Rename({
     Key? key,
     required this.context,
     required this.entryName,
@@ -20,7 +21,7 @@ class Rename extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: _buildRenameEntryWidget(this.context),
     );
@@ -33,14 +34,14 @@ class Rename extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.constrainedText(
-          '\"${this.entryName}\"',
+          '"$entryName"',
           flex: 0,
           fontWeight: FontWeight.w400
         ),
         Fields.formTextField(
           context: context,
           label: S.current.labelName,
-          hint: this.hint,
+          hint: hint,
           onSaved: _returnNewName,
           validator: formNameValidator,
           autofocus: true
@@ -53,29 +54,26 @@ class Rename extends StatelessWidget {
   }
 
   void _returnNewName(String? newName) {
-    // final fileExtension = extractFileTypeFromName(this.entryName);
-    final fileExtension = getFileExtension(this.entryName);
+    final fileExtension = getFileExtension(entryName);
     if (fileExtension.isNotEmpty) {
-      // newName = '$newName.$fileExtension';
       newName = '$newName$fileExtension';
     }
 
-    Navigator.of(this.context).pop(newName);
+    Navigator.of(context).pop(newName);
   }
 
   List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        if (this.formKey.currentState!.validate()) {
-            this.formKey.currentState!.save();
-          }
-      },
-      child: Text(S.current.actionRename)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionRename,
+      onPressed: _validateNewName)
   ];
+
+  void _validateNewName() {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+    }
+  }
 }
