@@ -423,6 +423,7 @@ class _MainPageState extends State<MainPage>
             };
 
             final listItem = ListItem (
+              repository: _mainState.currentRepo!,
               itemData: item,
               mainAction: actionByType,
               filePopupMenu: _popupMenu(repository: repository, data: item),

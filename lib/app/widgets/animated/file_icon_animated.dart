@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../generated/l10n.dart';
@@ -11,10 +12,12 @@ class FileIconAnimated
   extends StatelessWidget
   with OuiSyncAppLogger {
   FileIconAnimated({
+    required this.repository,
+    required this.path,
     Key? key,
-    required this.path
   }) : super(key: key);
 
+  final RepoState repository;
   final String path;
 
   String? _destinationPath;
@@ -46,7 +49,9 @@ class FileIconAnimated
 
     if (_downloading) {
       BlocProvider.of<DirectoryBloc>(context).add(
-        CancelDownloadFile(filePath: _getPathFromState(state)));
+        CancelDownloadFile(
+          repository: repository,
+          filePath: _getPathFromState(state)));
     }
   }
 
@@ -118,8 +123,25 @@ class FileIconAnimated
   }
 
   bool _isCurrentFile (DirectoryState state) {
+    final originRepository = _getRepositoryFromState(state);
+    if (originRepository != repository.handle) {
+      return false;
+    }
+
     final originPath = _getPathFromState(state);
     return originPath == path;
+  }
+
+  Repository? _getRepositoryFromState(DirectoryState state) {
+    if (state is DownloadFileInProgress) {
+      return state.repository.handle;
+    }
+
+    if (state is DownloadFileDone) {
+      return state.repository.handle;
+    }
+
+    return null;
   }
 
   String _getPathFromState(DirectoryState state) {
