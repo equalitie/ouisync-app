@@ -135,6 +135,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     int offset = 0;
 
     emit(DownloadFileInProgress(
+      repository: event.repository,
       path: event.destinationPath,
       fileName: event.originFilePath,
       length: length,
@@ -142,13 +143,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     ));
     
     try {
-      while (_cancelFileDownload != event.originFilePath) {
+        while (_takeWhile(event.repository.handle, event.originFilePath, _repositoryDownload, _cancelFileDownload)) {
         final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
         offset += chunk.length;
   
         await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
   
         emit(DownloadFileInProgress(
+          repository: event.repository,
           path: event.destinationPath,
           fileName: event.originFilePath,
           length: length,
@@ -157,6 +159,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
         if (chunk.length < Constants.bufferSize) {
           emit(DownloadFileDone(
+            repository: event.repository,
             path: event.originFilePath,
             devicePath: event.destinationPath,
             result: DownloadFileResult.done));
@@ -168,6 +171,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
       emit(ShowMessage(S.current.messageDownloadingFileError(event.originFilePath)));
       emit(DownloadFileDone(
+        repository: event.repository,
         path: event.originFilePath,
         devicePath: event.destinationPath,
         result: DownloadFileResult.failed));
@@ -190,16 +194,34 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       emit(ShowMessage(S.current.messageDownloadingFileCanceled(event.originFilePath)));
 
       emit(DownloadFileDone(
+        repository: event.repository,
         path: event.originFilePath,
         devicePath: event.destinationPath,
         result: DownloadFileResult.canceled));
     }
   }
 
+  bool _takeWhile(
+    Repository repository, String filePath,
+    Repository? cancelRepository, String cancelFilePath) {
+      loggy.app('Take while: handle=${repository.handle} file=$filePath cancel-repo=${cancelRepository?.handle} cancel-file=$cancelFilePath');
+
+      if (repository != cancelRepository) {
+        return true;
+      }
+
+      return filePath != cancelFilePath;
+  }  
+
   String _cancelFileDownload = '';
+  Repository? _repositoryDownload;
   void _onCancelDownloadFile(CancelDownloadFile event, Emitter<DirectoryState> emit) {
     loggy.app('Canceling ${event.filePath} download');
+
+    _repositoryDownload = event.repository.handle;
     _cancelFileDownload = event.filePath;
+
+    loggy.app('Cancel downloading: repository=${event.repository.name} handle=${event.repository.handle.handle} file=${event.filePath}');
   }
 
   Future<DirectoryState> _createFile(
