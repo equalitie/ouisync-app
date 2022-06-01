@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class RenameRepository extends StatelessWidget {
-  RenameRepository({
+  const RenameRepository({
     Key? key,
     required this.context,
     required this.formKey,
@@ -18,7 +19,7 @@ class RenameRepository extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: _buildUnlockRepositoryWidget(this.context),
     );
@@ -31,7 +32,7 @@ class RenameRepository extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.constrainedText(
-          '\"${this.repositoryName}\"',
+          '"$repositoryName"',
           flex: 0,
           fontWeight: FontWeight.w400
         ),
@@ -51,22 +52,21 @@ class RenameRepository extends StatelessWidget {
   }
 
   void _returnName(String? newName) {
-    Navigator.of(this.context).pop(newName);
+    Navigator.of(context).pop(newName);
   }
 
   List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        if (this.formKey.currentState!.validate()) {
-          this.formKey.currentState!.save();
-        }
-      },
-      child: Text(S.current.actionRename)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionRename,
+      onPressed: _validateNewName)
   ];
+
+  void _validateNewName() {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+    }
+  }
 }
