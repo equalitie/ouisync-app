@@ -98,13 +98,15 @@ class SaveFile extends DirectoryEvent {
 
 class CancelSaveFile extends DirectoryEvent {
   const CancelSaveFile({
+    required this.repository,
     required this.filePath
   });
 
+  final RepoState repository;
   final String filePath;
 
   @override
-  List<Object?> get props => [ filePath ];
+  List<Object?> get props => [ repository, filePath ];
 }
 
 class DownloadFile extends DirectoryEvent {
