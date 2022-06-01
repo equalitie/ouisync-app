@@ -499,7 +499,7 @@ class Fields {
   }) =>  Padding(
     padding: padding,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: buttons
     )
