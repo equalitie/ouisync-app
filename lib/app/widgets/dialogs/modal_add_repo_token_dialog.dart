@@ -5,6 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class AddRepositoryWithToken extends StatefulWidget {
   const AddRepositoryWithToken({
@@ -31,13 +32,13 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
   final TextEditingController _tokenController;
   final TextEditingController _nameController = TextEditingController(text: null);
-  final TextEditingController _passwordController = new TextEditingController(text: null);
-  final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
+  final TextEditingController _passwordController = TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController = TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _obscurePasswordConfirm = ValueNotifier<bool>(true);
 
-  ValueNotifier _accessModeNotifier = ValueNotifier<String>('');
+  final ValueNotifier _accessModeNotifier = ValueNotifier<String>('');
   bool _showAccessModeMessage = false;
 
   String _suggestedName = '';
@@ -64,9 +65,9 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.widget.formKey,
+      key: widget.formKey,
       autovalidateMode: AutovalidateMode.disabled,
-      child: _buildAddRepoWithTokenWidget(this.widget.context),
+      child: _buildAddRepoWithTokenWidget(widget.context),
     );
   }
 
@@ -251,7 +252,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
     final token = _tokenController.text;
     try {
-      _shareToken = ShareToken(this.widget.cubit.session, token);
+      _shareToken = ShareToken(widget.cubit.session, token);
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);                
       showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
@@ -298,7 +299,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     }
 
     try {
-      final shareToken = ShareToken(this.widget.cubit.session, value!);
+      final shareToken = ShareToken(widget.cubit.session, value!);
       
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
@@ -312,6 +313,22 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     return null;
   }
 
+  List<Widget> _actions(context) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionCreate,
+      onPressed: _createRepo)
+  ];
+
+  void _createRepo() {
+    final newRepositoryName = _nameController.text;
+    final password = _passwordController.text;
+
+    _onSaved(widget.cubit, newRepositoryName, password);
+  }
+
   void _onSaved(RepositoriesCubit cubit, String name, String password) async {
     if (!widget.formKey.currentState!.validate()) {
       return;
@@ -320,23 +337,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     widget.formKey.currentState!.save();
     cubit.openRepository(name: name, password: password, shareToken: _shareToken);
 
-    Navigator.of(this.widget.context).pop(name);
+    Navigator.of(widget.context).pop(name);
   }
-
-  List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        final newRepositoryName = _nameController.text;
-        final password = _passwordController.text;
-
-        _onSaved(widget.cubit, newRepositoryName, password);
-      },
-      child: Text(S.current.actionCreate)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
-  ];
 }
