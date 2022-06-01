@@ -54,7 +54,7 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(fileData: itemData))),
+            child: FileDescription(repository: repository, fileData: itemData))),
         _getFileAction(),
       ],
     );
