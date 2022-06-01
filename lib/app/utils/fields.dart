@@ -437,6 +437,9 @@ class Fields {
       icon: icon,
       hintText: hint,
       labelText: label,
+      labelStyle: TextStyle(
+        color: Colors.grey.shade600
+      ) 
     ),
     validator: validator,
     onSaved: onSaved,
