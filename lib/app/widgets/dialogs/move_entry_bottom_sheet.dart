@@ -35,7 +35,7 @@ class MoveEntryDialog extends StatelessWidget {
           width: 1.0,
           style: BorderStyle.solid
         ),
-        color: const Color(0xFFEAEEFF)
+        color: Constants.modalBottomSheetBackgroundColor
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

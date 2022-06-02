@@ -27,5 +27,6 @@ class Constants{
   static const IconData iconVisibilityOn = Icons.visibility;
   static const IconData iconVisibilityOff = Icons.visibility_off;
 
-  static Color progressBarBackgroundColor = Colors.grey.shade200;
+  static const Color progressBarBackgroundColor = Color.fromRGBO(238, 238, 238, 1);
+  static const Color modalBottomSheetBackgroundColor = Color(0xFFEAEEFF);
 }
