@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../generated/l10n.dart';
@@ -11,10 +12,12 @@ class FileIconAnimated
   extends StatelessWidget
   with OuiSyncAppLogger {
   FileIconAnimated({
+    required this.repository,
+    required this.path,
     Key? key,
-    required this.path
   }) : super(key: key);
 
+  final RepoState repository;
   final String path;
 
   String? _destinationPath;
@@ -25,9 +28,7 @@ class FileIconAnimated
     return BlocBuilder<DirectoryBloc, DirectoryState>(
       buildWhen: (previous, current) {
         if (current is DownloadFileInProgress ||
-            current is DownloadFileDone ||
-            current is DownloadFileFail ||
-            current is DownloadFileCancel) {
+            current is DownloadFileDone) {
               return _isCurrentFile(current);}
 
         return false;
@@ -48,7 +49,9 @@ class FileIconAnimated
 
     if (_downloading) {
       BlocProvider.of<DirectoryBloc>(context).add(
-        CancelDownloadFile(filePath: _getPathFromState(state)));
+        CancelDownloadFile(
+          repository: repository,
+          filePath: _getPathFromState(state)));
     }
   }
 
@@ -96,23 +99,21 @@ class FileIconAnimated
       }
 
       if (state is DownloadFileDone) {
-        _destinationPath = state.devicePath;
+        IconData iconData;
+        switch (state.result) {
+          case DownloadFileResult.done:
+            _destinationPath = state.devicePath;
+            iconData = Icons.download_done_rounded;
+            break;
+          case DownloadFileResult.canceled:
+            iconData = Icons.file_download_off;
+            break;
+          case DownloadFileResult.failed:
+            iconData = Icons.cancel;
+            break;
+        }
 
-        return const Icon(
-          Icons.download_done_rounded,
-          size: Dimensions.sizeIconAverage);
-      }
-
-      if (state is DownloadFileCancel) {
-        return const Icon(
-          Icons.file_download_off,
-          size: Dimensions.sizeIconAverage);
-      }
-
-      if (state is DownloadFileFail) {
-        return const Icon(
-          Icons.cancel,
-          size: Dimensions.sizeIconAverage);
+        return Icon(iconData);
       }
     }
 
@@ -122,8 +123,25 @@ class FileIconAnimated
   }
 
   bool _isCurrentFile (DirectoryState state) {
+    final originRepository = _getRepositoryFromState(state);
+    if (originRepository != repository.handle) {
+      return false;
+    }
+
     final originPath = _getPathFromState(state);
     return originPath == path;
+  }
+
+  Repository? _getRepositoryFromState(DirectoryState state) {
+    if (state is DownloadFileInProgress) {
+      return state.repository.handle;
+    }
+
+    if (state is DownloadFileDone) {
+      return state.repository.handle;
+    }
+
+    return null;
   }
 
   String _getPathFromState(DirectoryState state) {
@@ -132,14 +150,6 @@ class FileIconAnimated
     }
 
     if (state is DownloadFileDone) {
-      return state.path;
-    }
-
-    if (state is DownloadFileCancel) {
-      return state.path;
-    }
-
-    if (state is DownloadFileFail) {
       return state.path;
     }
 

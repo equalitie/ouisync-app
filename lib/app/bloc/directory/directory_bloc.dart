@@ -79,9 +79,12 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       int offset = 0;
       try {
         final stream = event.fileByteStream
-        .takeWhile((element) { 
-          if (_cancelFileWriting.isEmpty) { return true; }
-          return _cancelFileWriting != event.newFilePath;
+        .takeWhile((element) {
+          return _takeWhile(
+            event.repository.handle,
+            event.newFilePath,
+            _repositorySave,
+            _cancelFileWriting);
         });
         
         await for (final buffer in stream) {
@@ -89,6 +92,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
           offset += buffer.length;
 
           emit(WriteToFileInProgress(
+            repository: event.repository,
             path: event.newFilePath,
             fileName: event.fileName,
             length: event.length,
@@ -98,7 +102,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       } catch (e, st) {
         loggy.app('Writing to file ${event.newFilePath} exception', e, st);
         emit(ShowMessage(S.current.messageWritingFileError(event.newFilePath)));
-        emit(WriteToFileDone(path: event.newFilePath));
+        emit(WriteToFileDone(repository: event.repository, path: event.newFilePath));
         return;
       } finally {
         loggy.app('Writing to file ${event.newFilePath} done - closing');
@@ -107,7 +111,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
       if (_cancelFileWriting.isEmpty) {
         emit(ShowMessage(S.current.messageWritingFileDone(event.newFilePath)));
-        emit(WriteToFileDone(path: event.newFilePath));
+        emit(WriteToFileDone(repository: event.repository, path: event.newFilePath));
         return;
       }
 
@@ -116,15 +120,20 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
         _cancelFileWriting = '';
 
         emit(ShowMessage(S.current.messageWritingFileCanceled(event.newFilePath)));
-        emit(WriteToFileDone(path: event.newFilePath));
+        emit(WriteToFileDone(repository: event.repository, path: event.newFilePath));
       }
     }
   }
 
   String _cancelFileWriting = '';
+  Repository? _repositorySave;
   void _onCancelSaveFile(CancelSaveFile event, Emitter<DirectoryState> emit) {
-    loggy.app('Canceling ${event.filePath}');
+    loggy.app('Canceling ${event.filePath} creation');
+
+    _repositorySave = event.repository.handle;
     _cancelFileWriting = event.filePath;
+
+    loggy.app('Cancel creation: repository=${event.repository.name} handle=${event.repository.handle.handle} file=${event.filePath}');
   }
 
   Future<void> _onDownloadFile(DownloadFile event, Emitter<DirectoryState> emit) async {
@@ -135,6 +144,7 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     int offset = 0;
 
     emit(DownloadFileInProgress(
+      repository: event.repository,
       path: event.destinationPath,
       fileName: event.originFilePath,
       length: length,
@@ -142,13 +152,14 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
     ));
     
     try {
-      while (_cancelFileDownload != event.originFilePath) {
+        while (_takeWhile(event.repository.handle, event.originFilePath, _repositoryDownload, _cancelFileDownload)) {
         final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
         offset += chunk.length;
   
         await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
   
         emit(DownloadFileInProgress(
+          repository: event.repository,
           path: event.destinationPath,
           fileName: event.originFilePath,
           length: length,
@@ -157,8 +168,10 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
 
         if (chunk.length < Constants.bufferSize) {
           emit(DownloadFileDone(
+            repository: event.repository,
             path: event.originFilePath,
-            devicePath: event.destinationPath));
+            devicePath: event.destinationPath,
+            result: DownloadFileResult.done));
           break;
         }
       }
@@ -166,7 +179,11 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('Download file ${event.originFilePath} exception', e, st);
 
       emit(ShowMessage(S.current.messageDownloadingFileError(event.originFilePath)));
-      emit(DownloadFileFail(path: event.originFilePath));
+      emit(DownloadFileDone(
+        repository: event.repository,
+        path: event.originFilePath,
+        devicePath: event.destinationPath,
+        result: DownloadFileResult.failed));
 
       return;
     } finally {
@@ -185,14 +202,37 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
       loggy.app('${event.originFilePath} download canceled by the user');
       emit(ShowMessage(S.current.messageDownloadingFileCanceled(event.originFilePath)));
 
-      emit(DownloadFileCancel(path: event.originFilePath));
+      emit(DownloadFileDone(
+        repository: event.repository,
+        path: event.originFilePath,
+        devicePath: event.destinationPath,
+        result: DownloadFileResult.canceled));
     }
   }
 
   String _cancelFileDownload = '';
+  Repository? _repositoryDownload;
   void _onCancelDownloadFile(CancelDownloadFile event, Emitter<DirectoryState> emit) {
     loggy.app('Canceling ${event.filePath} download');
+
+    _repositoryDownload = event.repository.handle;
     _cancelFileDownload = event.filePath;
+
+    loggy.app('Cancel downloading: repository=${event.repository.name} handle=${event.repository.handle.handle} file=${event.filePath}');
+  }
+
+  bool _takeWhile(
+    Repository repository,
+    String filePath,
+    Repository? cancelRepository,
+    String cancelFilePath) {
+      loggy.app('Take while: handle=${repository.handle} file=$filePath cancel-repo=${cancelRepository?.handle} cancel-file=$cancelFilePath');
+
+      if (repository != cancelRepository) {
+        return true;
+      }
+
+      return filePath != cancelFilePath;
   }
 
   Future<DirectoryState> _createFile(
