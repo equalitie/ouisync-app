@@ -168,6 +168,7 @@ class _FileDetailState extends State<FileDetail> {
         onBottomSheetOpen: bottomSheetControllerCallback,
         onMoveEntry: moveEntryCallback
       ),
+      enableDrag: false,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(Dimensions.radiusBig),
