@@ -98,8 +98,6 @@ class DirectoryBloc extends Bloc<DirectoryEvent, DirectoryState> with OuiSyncApp
             length: event.length,
             progress: offset
           ));
-
-          await Future.delayed(const Duration(seconds: 2));
         }
       } catch (e, st) {
         loggy.app('Writing to file ${event.newFilePath} exception', e, st);
