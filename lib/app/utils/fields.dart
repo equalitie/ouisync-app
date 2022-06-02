@@ -495,11 +495,12 @@ class Fields {
   static Widget dialogActions(BuildContext context,
   {
     required List<Widget> buttons,
-    EdgeInsets padding = Dimensions.paddingActionsSection
+    EdgeInsets padding = Dimensions.paddingActionsSection,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center
   }) =>  Padding(
     padding: padding,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: MainAxisSize.max,
       children: buttons
     )
