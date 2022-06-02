@@ -6,15 +6,17 @@ import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class MoveEntryDialog extends StatelessWidget {
-  MoveEntryDialog({
+  const MoveEntryDialog({
     required this.origin,
     required this.path,
     required this.type,
     required this.onBottomSheetOpen,
-    required this.onMoveEntry
-  });
+    required this.onMoveEntry,
+    Key? key,
+  }) : super(key: key);
 
   final String origin;
   final String path;
@@ -33,7 +35,7 @@ class MoveEntryDialog extends StatelessWidget {
           width: 1.0,
           style: BorderStyle.solid
         ),
-        color: Colors.white
+        color: const Color(0xFFEAEEFF)
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -42,7 +44,7 @@ class MoveEntryDialog extends StatelessWidget {
         children: [
           Fields.iconLabel(
             icon: Icons.drive_file_move_outlined,
-            text: '${getBasename(path)}'
+            text: getBasename(path)
           ),
           Fields.constrainedText(
             S.current.messageMoveEntryOrigin(getParentSection(path)),
@@ -68,31 +70,26 @@ class MoveEntryDialog extends StatelessWidget {
 
         return Fields.dialogActions(context,
           buttons: _actions(context, canMove),
-          padding: EdgeInsets.only(top: 0.0)
+          padding: const EdgeInsets.only(top: 0.0),
+          mainAxisAlignment: MainAxisAlignment.end
         );
       }
     );
   }
 
-  List<Widget> _actions(context, canMove) {
-    List<Widget> actions = <Widget>[];
+  List<Widget> _actions(context, canMove) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => _cancelMoving(context)),
+    PositiveButton(
+      text: S.current.actionMove,
+      onPressed: canMove ? () => onMoveEntry.call(origin, path, type) : null)
+      /// If the entry can't be moved (the user selected the same entry/path, for example)
+      /// Then null is used instead of the function, which disable the button.
+  ];
 
-    if (canMove) {
-      actions.addAll([ElevatedButton(
-        onPressed: () => onMoveEntry.call(origin, path, type),
-        child: Text(S.current.actionMove)
-      ),
-      SizedBox(width: 20.0,),]);
-    }
-
-    actions.add(OutlinedButton(
-      onPressed: () {
-        onBottomSheetOpen.call(null, '');
-        Navigator.of(context).pop('');
-      },
-      child: Text(S.current.actionCancel)
-    ));
-
-    return actions;
+  void _cancelMoving(context) {
+    onBottomSheetOpen.call(null, '');
+    Navigator.of(context).pop('');
   }
 }
