@@ -20,12 +20,18 @@ class PositiveButton extends StatelessWidget {
         child: Text((text ?? '').toUpperCase()),
         constraints: Dimensions.sizeConstrainsDialogAction,
         elevation: Dimensions.elevationDialogAction,
-        fillColor: Theme.of(context).colorScheme.primary, 
+        fillColor: _fillColorStatus(context), 
         shape: const RoundedRectangleBorder(
           borderRadius: Dimensions.borderRadiusDialogPositiveButton),
         textStyle: TextStyle(
           color: Theme.of(context).dialogBackgroundColor,
           fontWeight: FontWeight.w500)
       ));
+  }
+
+  Color _fillColorStatus(context) {
+    return onPressed == null 
+    ? Colors.grey
+    : Theme.of(context).colorScheme.primary;
   }
 }
