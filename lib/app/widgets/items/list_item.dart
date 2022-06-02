@@ -10,7 +10,8 @@ class ListItem extends StatelessWidget {
     required this.mainAction,
     required this.filePopupMenu,
     required this.folderDotsAction,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final BaseItem itemData;
   final Function mainAction;
@@ -60,9 +61,12 @@ class ListItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Expanded(
+        const Expanded(
           flex: 1,
-          child: Icon(Icons.folder_outlined, size: Dimensions.sizeIconAverage)),
+          child: Icon(
+            Icons.folder_rounded,
+            size: Dimensions.sizeIconAverage,
+            color: Constants.folderIconColor)),
         Expanded(
           flex: 9,
           child: Padding(
