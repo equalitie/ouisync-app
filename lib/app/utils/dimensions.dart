@@ -7,7 +7,7 @@ class Dimensions {
   static const double fontBig = 22.0;
   static const double fontAverage = 18.0;
   static const double fontSmall = 14.0;
-  static const double fontMicro = 10.0;
+  static const double fontMicro = 12.0;
 
   static const Size sizeInPageButtonRegular = Size(150.0, 60.0);
   static const Size sizeInPageButtonLong = Size(250.0, 60.0);
@@ -55,6 +55,7 @@ class Dimensions {
   static const Widget spacingVerticalDouble = SizedBox(height: 20.0);
   static const Widget spacingHorizontalHalf = SizedBox(width: 5.0);
   static const Widget spacingHorizontal = SizedBox(width: 10.0);
+  static const Widget spacingHorizontalDouble = SizedBox(width: 20.0);
   static const Widget spacingActionsVertical = SizedBox(height: 20.0);
   static const Widget spacingActionsHorizontal = SizedBox(width: 20.0);
 
