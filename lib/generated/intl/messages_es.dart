@@ -145,6 +145,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Repita la clave: "),
         "labelSelectRepository":
             MessageLookupByLibrary.simpleMessage("seleccione el repositorio"),
+        "labelSetPermission":
+            MessageLookupByLibrary.simpleMessage("Determine el accesso"),
         "labelSize": MessageLookupByLibrary.simpleMessage("Tamaño: "),
         "labelSyncStatus": MessageLookupByLibrary.simpleMessage(
             "Estado de la sincronización: "),

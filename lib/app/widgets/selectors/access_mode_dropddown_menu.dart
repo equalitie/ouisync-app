@@ -99,7 +99,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(child:Fields.constrainedText(
-              'Set permission',
+              S.current.labelSetPermission,
               fontSize: Dimensions.fontMicro,
               fontWeight: FontWeight.normal,
               color: Constants.inputLabelForeColor),color: Colors.transparent,),

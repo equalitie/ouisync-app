@@ -480,6 +480,16 @@ class S {
     );
   }
 
+  /// `Set permission`
+  String get labelSetPermission {
+    return Intl.message(
+      'Set permission',
+      name: 'labelSetPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(

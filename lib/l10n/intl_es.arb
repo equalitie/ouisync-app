@@ -45,6 +45,8 @@
     "labelUseExternalStorage":"Usar almacenamiento externo",
     "labelDownloadedTo":"Descargado en:",
 
+    "labelSetPermission":"Determine el accesso",
+
     "messageLoadingDefault":"Cargando…",
     "messageLoadingContents":"Cargando los contenidos del directorio…",
 

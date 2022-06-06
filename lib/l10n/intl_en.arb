@@ -45,6 +45,8 @@
     "labelUseExternalStorage":"Use external storage",
     "labelDownloadedTo":"Downloaded to:",
 
+    "labelSetPermission":"Set permission",
+
     "messageLoadingDefault":"Loading…",
     "messageLoadingContents":"Loading the folder contents…",
 
