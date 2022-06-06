@@ -480,10 +480,10 @@ class _MainPageState extends State<MainPage>
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusSmall),
-          topRight: Radius.circular(Dimensions.radiusSmall),
+          topLeft: Radius.circular(Dimensions.radiusAverage),
+          topRight: Radius.circular(Dimensions.radiusAverage),
           bottomLeft: Radius.zero,
           bottomRight: Radius.zero
         ),
