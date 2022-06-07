@@ -391,10 +391,10 @@ class _MainPageState extends State<MainPage>
         onRefresh: () async => getContent(repository),
         child: ListView.separated(
           padding: EdgeInsets.only(bottom: value as double),
-          separatorBuilder: (context, index) => Divider(
+          separatorBuilder: (context, index) =>
+            const Divider(
               height: 1,
-              color: Colors.transparent
-          ),
+              color: Colors.transparent),
           itemCount: currentFolder!.content.length,
           itemBuilder: (context, index) {
             final item = currentFolder!.content[index];
@@ -409,7 +409,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              _showFileDetails(
+              await _showFileDetails(
                 repo: repository,
                 directoryBloc: _directoryBloc,
                 scaffoldKey: _scaffoldKey,
@@ -427,7 +427,6 @@ class _MainPageState extends State<MainPage>
             final listItem = ListItem (
               itemData: item,
               mainAction: actionByType,
-              filePopupMenu: _popupMenu(repository: repository, data: item),
               folderDotsAction: () async {
                 if (_persistentBottomSheetController != null) {
                   await Dialogs.simpleAlertDialog(
@@ -439,12 +438,17 @@ class _MainPageState extends State<MainPage>
                   return;
                 }
 
-                await _showFolderDetails(
+                item.type == ItemType.file
+                ? await _showFileDetails(
                   repo: repository,
                   directoryBloc: _directoryBloc,
                   scaffoldKey: _scaffoldKey,
-                  data: item
-                );
+                  data: item)
+                : await _showFolderDetails(
+                  repo: repository,
+                  directoryBloc: _directoryBloc,
+                  scaffoldKey: _scaffoldKey,
+                  data: item);
               },
             );
 
@@ -453,28 +457,6 @@ class _MainPageState extends State<MainPage>
         )
       )
     );
-
-    _popupMenu({
-      required RepoState repository,
-      required BaseItem data
-    }) {
-      final availableActions = repository.accessMode == AccessMode.write
-      ? {
-        S.current.actionPreviewFile: data,
-        S.current.actionShareFile: data,
-        S.current.actionDeleteFile: data
-      } : {
-        S.current.actionPreviewFile: data,
-        S.current.actionShareFile: data,
-      };
-
-      return Dialogs.filePopupMenu(
-        context,
-        repository,
-        _directoryBloc,
-        availableActions
-      );
-    }
 
     Future<dynamic> _showShareRepository(context, RepoState repo_state)
         => showModalBottomSheet(

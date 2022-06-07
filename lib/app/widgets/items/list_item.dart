@@ -8,14 +8,14 @@ class ListItem extends StatelessWidget {
   const ListItem({
     required this.itemData,
     required this.mainAction,
-    required this.filePopupMenu,
+    // required this.filePopupMenu,
     required this.folderDotsAction,
     Key? key,
   }) : super(key: key);
 
   final BaseItem itemData;
   final Function mainAction;
-  final PopupMenuButton<dynamic>? filePopupMenu;
+  // final PopupMenuButton<dynamic>? filePopupMenu;
   final Function? folderDotsAction;
 
   @override
@@ -53,7 +53,7 @@ class ListItem extends StatelessWidget {
           child: Padding(
             padding: Dimensions.paddingItem,
             child: FileDescription(fileData: itemData))),
-        _getFileAction(),
+        _getVerticalMenuAction(),
       ],
     );
 
@@ -72,16 +72,12 @@ class ListItem extends StatelessWidget {
           child: Padding(
             padding: Dimensions.paddingItem,
             child: FolderDescription(folderData: itemData))),
-        _getFolderAction(),
+        _getVerticalMenuAction(),
       ],
     );
   }
 
-  Widget _getFileAction() {
-    return filePopupMenu!;
-  }
-
-  Widget _getFolderAction() {
+  Widget _getVerticalMenuAction() {
     return IconButton(
       icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
       onPressed: () async => await folderDotsAction!.call());
