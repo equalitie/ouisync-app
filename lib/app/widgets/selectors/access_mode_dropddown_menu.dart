@@ -88,20 +88,20 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
   Widget _buildAccessModeItem(AccessMode accessMode) => 
     Padding(
       padding: Dimensions.paddingItem,
-      child: Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(child:Fields.constrainedText(
-              S.current.labelSetPermission,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Constants.inputLabelForeColor),color: Colors.transparent,),
-            Container(child:Fields.constrainedText(
-              accessMode.name.capitalize(),
-              fontWeight: FontWeight.normal), color: Colors.transparent),
-          ])));
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [Fields.constrainedText(
+            S.current.labelSetPermission,
+            fontSize: Dimensions.fontMicro,
+            fontWeight: FontWeight.normal,
+            color: Constants.inputLabelForeColor)]),
+          Row(children: [Fields.constrainedText(
+            accessMode.name.capitalize(),
+            fontWeight: FontWeight.normal)])
+        ],
+      ));
 
   String _tokenDescription(AccessMode accessMode) {
     return accessModeDescriptions.values.elementAt(accessMode.index);
