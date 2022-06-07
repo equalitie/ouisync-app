@@ -18,8 +18,9 @@ class FileDetail extends StatefulWidget {
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
-    required this.onMoveEntry
-  });
+    required this.onMoveEntry,
+    Key? key,
+  }) : super(key: key);
 
   final BuildContext context;
   final DirectoryBloc bloc;
@@ -124,7 +125,7 @@ class _FileDetailState extends State<FileDetail> {
             },
             icon: Icons.delete_outlined,
           ),
-          Divider(
+          const Divider(
             height: 10.0,
             thickness: 2.0,
             indent: 20.0,

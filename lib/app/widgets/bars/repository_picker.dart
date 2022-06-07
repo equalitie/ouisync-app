@@ -4,9 +4,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
-import '../../pages/pages.dart';
-import '../../models/repo_state.dart';
 import '../../models/main_state.dart';
+import '../../models/repo_state.dart';
+import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -15,8 +15,9 @@ class RepositoryPicker extends StatefulWidget {
     required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
-    required this.borderColor
-  });
+    required this.borderColor,
+    Key? key,
+  }) : super(key: key);
 
   final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
@@ -30,10 +31,10 @@ class RepositoryPicker extends StatefulWidget {
 class _RepositoryPickerState extends State<RepositoryPicker> {
   String _repositoryName = S.current.messageNoRepos;
 
-  static final Color colorNoRepo = Colors.grey;
-  static final Color colorLockedRepo = Colors.grey;
-  static final Color colorUnlockedRepo = Colors.black;
-  static final Color colorError = Colors.red;
+  static const Color colorNoRepo = Colors.grey;
+  static const Color colorLockedRepo = Colors.grey;
+  static const Color colorUnlockedRepo = Colors.black;
+  static const Color colorError = Colors.red;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         }
 
         if (state is RepositoryPickerLoading) {
-          return Column(children: [CircularProgressIndicator(color: Colors.white)],);
+          return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
         }
 
         if (state is RepositoryPickerSelection) {
@@ -123,7 +124,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   }) => Container(
     padding: Dimensions.paddingepositoryPicker,
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+      borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
       border: Border.all(
         color: borderColor,
         style: BorderStyle.solid
