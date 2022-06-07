@@ -135,40 +135,54 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
     accessModeDescriptions.values.elementAt(accessMode.index);
 
   Widget _buildShareBox() => Container(
-    padding: Dimensions.paddingActionBox,
-    decoration: BoxDecoration(
-      borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-      border: Border.all(
-        color: Colors.black45,
-        width: 1.0,
-        style: BorderStyle.solid
-      ),
-      color: Colors.white,
+    padding: Dimensions.paddingItemBox,
+    decoration: const BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+      color: Constants.inputBackgroundColor
     ),
     child: Row(
+      mainAxisSize: MainAxisSize.max,
       children: [
-        ValueListenableBuilder(
-          valueListenable: _shareToken,
-          builder:(context, value, child) =>
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Fields.constrainedText(
-              value as String,
-              softWrap: false,
-              textOverflow: TextOverflow.ellipsis,
-              color: Colors.black
-            )
-        ),
-        Fields.actionIcon(
-          const Icon(Icons.content_copy_rounded),
-          onPressed: () async {
-            await copyStringToClipboard(_shareToken.value);
-            showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
-          },
-        ),
-        Fields.actionIcon(
-          const Icon(Icons.share_outlined),
-          onPressed: () => Share.share(_shareToken.value),
-        ),
+              S.current.labelShareLink,
+              flex:0,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor),
+            ValueListenableBuilder(
+              valueListenable: _shareToken,
+              builder:(context, value, child) =>
+                LimitedBox(
+                  maxWidth: 220.0, //We need to limit the size to prevent a overflow; try to find a way to do it automatically.
+                  child: Row(
+                    children: [
+                      Fields.constrainedText(
+                        value as String,
+                        softWrap: false,
+                        textOverflow: TextOverflow.fade,
+                        color: Colors.black
+                      )])))
+          ]),
+          Fields.actionIcon(
+            const Icon(Icons.content_copy_rounded),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: () async {
+              await copyStringToClipboard(_shareToken.value);
+              showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
+            },
+          ),
+          Fields.actionIcon(
+            const Icon(Icons.share_outlined),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: () => Share.share(_shareToken.value),
+          )
       ],
-    )
-  );
+    ));
 }
