@@ -122,13 +122,13 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
       builder:(context, accessMode, child) =>
         Padding(
           padding: Dimensions.paddingItem,
-          child: Fields.constrainedText(
+          child: Row(children: [Fields.constrainedText(
             _tokenDescription(accessMode as AccessMode),
             flex: 0,
             fontSize: Dimensions.fontMicro,
             fontWeight: FontWeight.normal,
             color: Colors.black54
-          ))
+          )]))
     );
   
   String _tokenDescription(AccessMode accessMode) => 
