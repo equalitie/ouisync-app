@@ -222,6 +222,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         onBottomSheetOpen: bottomSheetControllerCallback,
         onMoveEntry: moveEntryCallback
       ),
+      enableDrag: false,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(Dimensions.radiusSmall),

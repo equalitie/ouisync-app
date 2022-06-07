@@ -1,19 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../generated/l10n.dart';
+import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../models/repo_state.dart';
+import '../selectors/access_mode_dropddown_menu.dart';
+import '../widgets.dart';
 
 class ShareRepository extends StatefulWidget {
-  ShareRepository({
+  const ShareRepository({ 
     required this.repository,
     required this.repositoryName,
-    required this.availableAccessModes
-  });
+    required this.availableAccessModes,
+    Key? key,
+  }) : super(key: key);
 
   final RepoState repository;
   final String repositoryName;
@@ -24,7 +27,7 @@ class ShareRepository extends StatefulWidget {
 }
 
 class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger {
-  ValueNotifier<AccessMode> _accessMode =
+  final ValueNotifier<AccessMode> _accessMode =
     ValueNotifier<AccessMode>(AccessMode.blind);
 
   final ValueNotifier<String> _shareToken =
@@ -62,19 +65,15 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Fields.bottomSheetHandle(context),
-                Fields.bottomSheetTitle(S.current.titleShareRepository(widget.repositoryName)),
-                Fields.iconLabel(
-                  icon: Icons.lock_rounded,
-                  text: S.current.iconAccessMode,
-                ),
-                _buildAccessModeDropdown(),
-                Dimensions.spacingVertical,
+                Fields.bottomSheetTitle(widget.repositoryName),
+                Dimensions.spacingVerticalDouble,
+                AccessModeDropDownMenu(
+                  repository: widget.repository,
+                  accessModes: widget.availableAccessModes,
+                  onChanged: _onChanged),
+                Dimensions.spacingVerticalHalf,
                 _buildAccessModeDescription(),
-                Dimensions.spacingVertical,
-                Fields.iconLabel(
-                  icon: Icons.supervisor_account_rounded,
-                  text: S.current.iconShareTokenWithPeer,
-                ),
+                Dimensions.spacingVerticalDouble,
                 _buildShareBox()
               ]
             ),
@@ -83,10 +82,10 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
 
         _shareToken.value = S.current.messageCreatingToken;
 
-        return Container(
+        return SizedBox(
           height: Dimensions.sizeCircularProgressIndicatorAverage.height,
           width: Dimensions.sizeCircularProgressIndicatorAverage.width,
-          child: CircularProgressIndicator(strokeWidth: Dimensions.strokeCircularProgressIndicatorSmall,)
+          child: const CircularProgressIndicator(strokeWidth: Dimensions.strokeCircularProgressIndicatorSmall,)
         );
       }
     );
@@ -106,105 +105,84 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
     return shareToken.token;
   }
 
-  Widget _buildAccessModeDropdown() {
-    return Container(
-      padding: Dimensions.paddingActionBox,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-        border: Border.all(
-          color: Colors.black45,
-          width: 1.0,
-          style: BorderStyle.solid
-        ),
-        color: Colors.white,
-      ),
-      child: ValueListenableBuilder(
-        valueListenable: _accessMode,
-        builder:(context, value, child) =>
-          DropdownButton(
-            isExpanded: true,
-            value: value,
-            underline: SizedBox(),
-            items: widget.availableAccessModes.map((AccessMode element) {
-              return DropdownMenuItem(
-                value: element,
-                child: Text(
-                  element.name,
-                  style: TextStyle(
-                    fontSize: Dimensions.fontAverage
-                  ),
-                )
-              );
-            }).toList(),
-            onChanged: (accessMode) async {
-              loggy.app('Access mode: $accessMode');
-              _accessMode.value = accessMode as AccessMode;
-
-              final token = await createShareToken(
-                repo: widget.repository,
-                name: widget.repositoryName,
-                accessMode: accessMode
-              );
-
-              _shareToken.value = token;
-            },
-          )
-      )
+  Future<void> _onChanged(AccessMode accessMode) async {
+    _accessMode.value = accessMode;
+    
+    final token = await createShareToken(
+      repo: widget.repository,
+      name: widget.repositoryName,
+      accessMode: accessMode
     );
+    _shareToken.value = token;
   }
 
   Widget _buildAccessModeDescription() =>
     ValueListenableBuilder(
       valueListenable: _accessMode,
       builder:(context, accessMode, child) =>
-        Fields.constrainedText(
-          _tokenDescription(accessMode as AccessMode),
-          flex: 0,
-          fontSize: Dimensions.fontSmall,
-          fontWeight: FontWeight.normal,
-          color: Colors.black54
-        )
+        Padding(
+          padding: Dimensions.paddingItem,
+          child: Row(children: [Fields.constrainedText(
+            _tokenDescription(accessMode as AccessMode),
+            flex: 0,
+            fontSize: Dimensions.fontMicro,
+            fontWeight: FontWeight.normal,
+            color: Colors.black54
+          )]))
     );
+  
+  String _tokenDescription(AccessMode accessMode) => 
+    accessModeDescriptions.values.elementAt(accessMode.index);
 
   Widget _buildShareBox() => Container(
-    padding: Dimensions.paddingActionBox,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-      border: Border.all(
-        color: Colors.black45,
-        width: 1.0,
-        style: BorderStyle.solid
-      ),
-      color: Colors.white,
+    padding: Dimensions.paddingItemBox,
+    decoration: const BoxDecoration(
+      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+      color: Constants.inputBackgroundColor
     ),
     child: Row(
+      mainAxisSize: MainAxisSize.max,
       children: [
-        ValueListenableBuilder(
-          valueListenable: _shareToken,
-          builder:(context, value, child) =>
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Fields.constrainedText(
-              value as String,
-              softWrap: false,
-              textOverflow: TextOverflow.ellipsis,
-              color: Colors.black
-            )
-        ),
-        Fields.actionIcon(
-          const Icon(Icons.content_copy_rounded),
-          onPressed: () async {
-            await copyStringToClipboard(_shareToken.value);
-            showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
-          },
-        ),
-        Fields.actionIcon(
-          const Icon(Icons.share_outlined),
-          onPressed: () => Share.share(_shareToken.value),
-        ),
+              S.current.labelShareLink,
+              flex:0,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor),
+            ValueListenableBuilder(
+              valueListenable: _shareToken,
+              builder:(context, value, child) =>
+                LimitedBox(
+                  maxWidth: 220.0, //We need to limit the size to prevent a overflow; try to find a way to do it automatically.
+                  child: Row(
+                    children: [
+                      Fields.constrainedText(
+                        value as String,
+                        softWrap: false,
+                        textOverflow: TextOverflow.fade,
+                        color: Colors.black
+                      )])))
+          ]),
+          Fields.actionIcon(
+            const Icon(Icons.content_copy_rounded),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: () async {
+              await copyStringToClipboard(_shareToken.value);
+              showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
+            },
+          ),
+          Fields.actionIcon(
+            const Icon(Icons.share_outlined),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: () => Share.share(_shareToken.value),
+          )
       ],
-    )
-  );
-
-  String _tokenDescription(AccessMode accessMode) {
-    return accessModeDescriptions.values.elementAt(accessMode.index);
-  }
+    ));
 }

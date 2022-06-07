@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -128,46 +127,6 @@ abstract class Dialogs {
     actions: actions,
   );
 
-  static filePopupMenu(
-    BuildContext context,
-    RepoState repository,
-    Bloc bloc,
-    Map<String, BaseItem> fileMenuOptions
-  ) => PopupMenuButton(
-    itemBuilder: (context) {
-      return fileMenuOptions.entries.map((e) => 
-        PopupMenuItem(
-            child: Text(e.key),
-            value: e,
-        ) 
-      ).toList();
-    },
-    onSelected: (value) {
-      final data = (value as MapEntry<String, BaseItem>).value;
-      switch (value.key) {
-        case Strings.actionDeleteFile:
-          _deleteFileWithConfirmation(context, repository, bloc, data.path);
-          break;
-      }
-    }
-  );
-
-  static _deleteFileWithConfirmation(
-    BuildContext context,
-    RepoState repository,
-    bloc,
-    path
-  ) => showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      final fileName = getBasename(path);
-      final parent = getParentSection(path);
-
-      return buildDeleteFileAlertDialog(repository, bloc, path, context, fileName, parent);
-    },
-  );
-
   static AlertDialog buildDeleteFileAlertDialog(
     RepoState repository,
     bloc,
@@ -182,14 +141,14 @@ abstract class Dialogs {
         children: <Widget>[
           Text(
             fileName,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: Dimensions.fontAverage,
               fontWeight: FontWeight.bold
             ),
           ),
           Row(
             children: [
-              Text(
+              const Text(
                 Strings.atSymbol,
                 style: TextStyle(
                   fontSize: Dimensions.fontAverage,
@@ -198,7 +157,7 @@ abstract class Dialogs {
               ),
               Text(
                 parent,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: Dimensions.fontAverage,
                   fontWeight: FontWeight.w700
                 ),

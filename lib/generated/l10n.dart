@@ -480,6 +480,26 @@ class S {
     );
   }
 
+  /// `Set permission`
+  String get labelSetPermission {
+    return Intl.message(
+      'Set permission',
+      name: 'labelSetPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share link`
+  String get labelShareLink {
+    return Intl.message(
+      'Share link',
+      name: 'labelShareLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(

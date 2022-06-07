@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_app/app/widgets/widgets.dart';
 
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../utils/utils.dart';
-import '../../models/repo_state.dart';
 
 class FolderCreation extends StatelessWidget {
   const FolderCreation({
@@ -25,7 +24,7 @@ class FolderCreation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: _buildCreateFolderWidget(this.context),
     );
@@ -45,7 +44,7 @@ class FolderCreation extends StatelessWidget {
           validator: formNameValidator,
           autofocus: true
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)
         ),
@@ -54,7 +53,7 @@ class FolderCreation extends StatelessWidget {
   }
 
   void _onSaved(bloc, newFolderName) async {
-    final newFolderPath = buildDestinationPath(this.path, newFolderName);
+    final newFolderPath = buildDestinationPath(path, newFolderName);
 
     if (await repository.exists(newFolderPath)) {
       return;
@@ -62,29 +61,28 @@ class FolderCreation extends StatelessWidget {
 
     bloc.add(
       CreateFolder(
-        repository: this.repository,
-        parentPath: this.path,
+        repository: repository,
+        parentPath: path,
         newFolderPath: newFolderPath
       )
     );
 
-    Navigator.of(this.context).pop(newFolderPath);
+    Navigator.of(context).pop(newFolderPath);
   }
 
   List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        if (this.formKey.currentState!.validate()) {
-            this.formKey.currentState!.save();
-          }
-      },
-      child: Text(S.current.actionCreate)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionCreate,
+      onPressed: _validateFolderName)
   ];
+
+  void _validateFolderName() {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+    }
+  }
 
 }

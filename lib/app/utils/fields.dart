@@ -437,6 +437,9 @@ class Fields {
       icon: icon,
       hintText: hint,
       labelText: label,
+      labelStyle: TextStyle(
+        color: Colors.grey.shade600
+      ) 
     ),
     validator: validator,
     onSaved: onSaved,
@@ -489,14 +492,15 @@ class Fields {
     )
   );  
 
-  static Widget actionsSection(BuildContext context,
+  static Widget dialogActions(BuildContext context,
   {
     required List<Widget> buttons,
-    EdgeInsets padding = Dimensions.paddingActionsSection
+    EdgeInsets padding = Dimensions.paddingActionsSection,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center
   }) =>  Padding(
     padding: padding,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: MainAxisSize.max,
       children: buttons
     )

@@ -10,14 +10,15 @@ class ListItem extends StatelessWidget {
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    required this.filePopupMenu,
+    // required this.filePopupMenu,
     required this.folderDotsAction,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final RepoState repository;
   final BaseItem itemData;
   final Function mainAction;
-  final PopupMenuButton<dynamic>? filePopupMenu;
+  // final PopupMenuButton<dynamic>? filePopupMenu;
   final Function? folderDotsAction;
 
   @override
@@ -54,8 +55,8 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(repository: repository, fileData: itemData))),
-        _getFileAction(),
+            child: FileDescription(fileData: itemData))),
+        _getVerticalMenuAction(),
       ],
     );
 
@@ -63,24 +64,23 @@ class ListItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Expanded(
+        const Expanded(
           flex: 1,
-          child: Icon(Icons.folder_outlined, size: Dimensions.sizeIconAverage)),
+          child: Icon(
+            Icons.folder_rounded,
+            size: Dimensions.sizeIconAverage,
+            color: Constants.folderIconColor)),
         Expanded(
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
             child: FolderDescription(folderData: itemData))),
-        _getFolderAction(),
+        _getVerticalMenuAction(),
       ],
     );
   }
 
-  Widget _getFileAction() {
-    return filePopupMenu!;
-  }
-
-  Widget _getFolderAction() {
+  Widget _getVerticalMenuAction() {
     return IconButton(
       icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
       onPressed: () async => await folderDotsAction!.call());

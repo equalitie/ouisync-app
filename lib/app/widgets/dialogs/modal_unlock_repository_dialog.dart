@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget {
   UnlockRepository({
@@ -15,14 +16,14 @@ class UnlockRepository extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final String repositoryName;
 
-  final TextEditingController _passwordController = new TextEditingController(text: null);
+  final TextEditingController _passwordController = TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: _buildUnlockRepositoryWidget(this.context),
     );
@@ -35,7 +36,7 @@ class UnlockRepository extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.constrainedText(
-          '\"${this.repositoryName}\"',
+          '"$repositoryName"',
           flex: 0,
           fontWeight: FontWeight.w400
         ),
@@ -71,7 +72,7 @@ class UnlockRepository extends StatelessWidget {
             );
           }
         ),
-        Fields.actionsSection(
+        Fields.dialogActions(
           context,
           buttons: _actions(context)),
       ]
@@ -79,22 +80,21 @@ class UnlockRepository extends StatelessWidget {
   }
 
   void _returnPassword(String? password) {
-    Navigator.of(this.context).pop(password);
+    Navigator.of(context).pop(password);
   }
 
   List<Widget> _actions(context) => [
-    ElevatedButton(
-      onPressed: () {
-        if (this.formKey.currentState!.validate()) {
-          this.formKey.currentState!.save();
-        }
-      },
-      child: Text(S.current.actionUnlock)
-    ),
-    Dimensions.spacingActionsHorizontal,
-    OutlinedButton(
-      onPressed: () => Navigator.of(context).pop(''),
-      child: Text(S.current.actionCancel)
-    ),
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context).pop('')),
+    PositiveButton(
+      text: S.current.actionUnlock,
+      onPressed: _validatePassword)
   ];
+
+  void _validatePassword() {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+    }
+  }
 }

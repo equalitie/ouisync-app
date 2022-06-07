@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/generated/l10n.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+import '../../../generated/l10n.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class SaveSharedMedia extends StatelessWidget {
   const SaveSharedMedia({
     required this.sharedMedia,
     required this.onBottomSheetOpen,
     required this.onSaveFile,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final List<SharedMediaFile> sharedMedia;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -27,7 +29,7 @@ class SaveSharedMedia extends StatelessWidget {
           width: 1.0,
           style: BorderStyle.solid
         ),
-        color: Colors.white
+        color: Constants.modalBottomSheetBackgroundColor
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -39,35 +41,34 @@ class SaveSharedMedia extends StatelessWidget {
             text: S.current.titleAddFile,
           ),
           Fields.constrainedText(
-            getBasename(this.sharedMedia.first.path),
+            getBasename(sharedMedia.first.path),
             softWrap: true,
             textOverflow: TextOverflow.ellipsis,
             fontWeight: FontWeight.w800
           ),
-          Fields.actionsSection(context,
+          Fields.dialogActions(context,
             buttons: _actions(context),
+            padding: const EdgeInsets.only(top: 0.0),
+            mainAxisAlignment: MainAxisAlignment.end
           )
         ],
       ),
     );
   }
 
-  List<Widget> _actions(BuildContext context) {
-    List<Widget> actions = <Widget>[];
-
-    actions.addAll([ElevatedButton(
-      onPressed: () async => await onSaveFile.call(mobileSharedMediaFile: sharedMedia.first, usesModal: true),
-      child: Text(S.current.actionSave)
-    ),
-    SizedBox(width: 20.0,),]);
-    actions.add(OutlinedButton(
-      onPressed: () {
-        onBottomSheetOpen.call(null, '');
-        Navigator.of(context).pop('');
-      },
-      child: Text(S.current.actionCancel)
-    ));
-
-    return actions;
+  List<Widget> _actions(BuildContext context) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => _cancelSaveFile(context)),
+    PositiveButton(
+      text: S.current.actionSave,
+      onPressed: () async => await onSaveFile.call(
+        mobileSharedMediaFile: sharedMedia.first,
+        usesModal: true))
+  ];
+  
+  void _cancelSaveFile(context) {
+    onBottomSheetOpen.call(null, '');
+    Navigator.of(context).pop('');
   }
 }
