@@ -10,7 +10,6 @@ class ListItem extends StatelessWidget {
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    // required this.filePopupMenu,
     required this.folderDotsAction,
     Key? key,
   }) : super(key: key);
@@ -18,7 +17,6 @@ class ListItem extends StatelessWidget {
   final RepoState repository;
   final BaseItem itemData;
   final Function mainAction;
-  // final PopupMenuButton<dynamic>? filePopupMenu;
   final Function? folderDotsAction;
 
   @override
@@ -55,7 +53,7 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(fileData: itemData))),
+            child: FileDescription(repository: repository, fileData: itemData))),
         _getVerticalMenuAction(),
       ],
     );
