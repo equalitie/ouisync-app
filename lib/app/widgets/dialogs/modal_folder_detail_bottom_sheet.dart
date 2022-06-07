@@ -4,10 +4,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../bloc/blocs.dart';
 import '../../models/models.dart';
-import '../../models/repo_state.dart';
 import '../../pages/pages.dart';
-import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
+import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class FolderDetail extends StatefulWidget {
@@ -18,8 +17,9 @@ class FolderDetail extends StatefulWidget {
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
-    required this.onMoveEntry
-  });
+    required this.onMoveEntry,
+    Key? key,
+  }) : super(key: key);
 
   final BuildContext context;
   final DirectoryBloc bloc;
@@ -85,7 +85,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
             },
             icon: Icons.delete_outlined,
           ),
-          Divider(
+          const Divider(
             height: 10.0,
             thickness: 2.0,
             indent: 20.0,
@@ -124,7 +124,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
           children: <Widget>[
             Text(
               path,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.bold
               ),
@@ -138,11 +138,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(S.current.actionDelete),
+          child: Text(S.current.actionDeleteCapital),
           onPressed: () => deleteFolderWithContentsValidation(bloc, repository, path, context),
         ),
         TextButton(
-          child: Text(S.current.actionCancel),
+          child: Text(S.current.actionCancelCapital),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
@@ -168,18 +168,18 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       showSnackBar(context, content: Text(message));
     }
 
-    if (!directory.isEmpty) {
+    if (directory.isNotEmpty) {
       recursive = await Dialogs.alertDialogWithActions(
         context: context,
         title: S.current.titleDeleteNotEmptyFolder,
         body: [Text(S.current.messageConfirmNotEmptyFolderDeletion)],
         actions: [
           TextButton(
-            child: Text(S.current.actionDelete),
+            child: Text(S.current.actionDeleteCapital),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
-            child: Text(S.current.actionCancel),
+            child: Text(S.current.actionCancelCapital),
             onPressed: () => Navigator.of(context).pop(false),
           )
         ]

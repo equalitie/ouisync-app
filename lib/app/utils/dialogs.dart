@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
-import '../models/models.dart';
 import '../widgets/widgets.dart';
 import 'utils.dart';
 
@@ -34,11 +32,11 @@ abstract class Dialogs {
     Widget? widget
   }) {
     final alert = AlertDialog(
-      content: new Row(
+      content: Row(
         children: [
-          CircularProgressIndicator(),
+          const CircularProgressIndicator(),
           Container(
-            margin: EdgeInsets.only(left: 7),
+            margin: const EdgeInsets.only(left: 7),
             child:widget ?? Text(S.current.messageLoadingDefault)
             ),
         ],
@@ -80,12 +78,10 @@ abstract class Dialogs {
     required String message,
     List<Widget>? actions
   }) {
-    if (actions == null) {
-      actions = [TextButton(
+    actions ??= [TextButton(
         child: Text(S.current.actionCloseCapital),
         onPressed: () => Navigator.of(context).pop(false),
-      )];
-    }  
+      )];  
 
     return showDialog(
       context: context,
@@ -173,7 +169,7 @@ abstract class Dialogs {
     ),
     actions: <Widget>[
       TextButton(
-        child: Text(S.current.actionDelete),
+        child: Text(S.current.actionDeleteCapital),
         onPressed: () {
           bloc
           .add(
@@ -190,10 +186,8 @@ abstract class Dialogs {
         },
       ),
       TextButton(
-        child: Text(S.current.actionCancel),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
+        child: Text(S.current.actionCancelCapital),
+        onPressed: () => Navigator.of(context).pop(),
       ),
     ],
   );
