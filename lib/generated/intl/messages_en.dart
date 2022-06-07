@@ -141,6 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select repository "),
         "labelSetPermission":
             MessageLookupByLibrary.simpleMessage("Set permission"),
+        "labelShareLink": MessageLookupByLibrary.simpleMessage("Share link"),
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),

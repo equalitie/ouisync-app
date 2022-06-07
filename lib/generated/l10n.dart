@@ -490,6 +490,16 @@ class S {
     );
   }
 
+  /// `Share link`
+  String get labelShareLink {
+    return Intl.message(
+      'Share link',
+      name: 'labelShareLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(
