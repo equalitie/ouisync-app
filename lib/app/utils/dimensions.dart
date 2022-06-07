@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
+
 class Dimensions {
   Dimensions._();
 
@@ -73,4 +75,22 @@ class Dimensions {
 
   static const BorderRadius borderRadiusDialogPositiveButton = BorderRadius.all(Radius.circular(5.0));
   static const EdgeInsets marginDialogPositiveButton = EdgeInsets.only(left: 10.0);
+
+  static const RoundedRectangleBorder borderBottomSheetTop = RoundedRectangleBorder(
+    borderRadius: boderRadiusBottomSheetTop);
+
+  static const RoundedRectangleBorder borderBottomSheetAlternate = RoundedRectangleBorder(
+    borderRadius: boderRadiusBottomSheetTop);
+
+  static const BorderRadius boderRadiusBottomSheetTop = BorderRadius.only(
+    topLeft: Radius.circular(Dimensions.radiusAverage),
+    topRight: Radius.circular(Dimensions.radiusAverage),
+    bottomLeft: Radius.zero,
+    bottomRight: Radius.zero
+  );
+
+  static const BoxDecoration decorationBottomSheetAlternative = BoxDecoration(
+    borderRadius: Dimensions.boderRadiusBottomSheetTop,
+    color: Constants.modalBottomSheetBackgroundColor
+  );
 }

@@ -169,14 +169,6 @@ class _FileDetailState extends State<FileDetail> {
         onMoveEntry: moveEntryCallback
       ),
       enableDrag: false,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusBig),
-          topRight: Radius.circular(Dimensions.radiusBig),
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero
-        ),
-      ),
     );
 
     widget.onBottomSheetOpen.call(controller!, path);

@@ -29,14 +29,7 @@ class MoveEntryDialog extends StatelessWidget {
     return Container(
       padding: Dimensions.paddingBottomSheet,
       height: 160.0,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black26,
-          width: 1.0,
-          style: BorderStyle.solid
-        ),
-        color: Constants.modalBottomSheetBackgroundColor
-      ),
+      decoration: Dimensions.decorationBottomSheetAlternative,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,

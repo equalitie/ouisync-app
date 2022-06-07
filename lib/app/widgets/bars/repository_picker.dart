@@ -162,14 +162,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
   Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(Dimensions.radiusSmall),
-        topRight: Radius.circular(Dimensions.radiusSmall),
-        bottomLeft: Radius.zero,
-        bottomRight: Radius.zero
-      ),
-    ),
+    shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
       return RepositoryList(
         mainState: widget.mainState,

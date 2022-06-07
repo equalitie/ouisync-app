@@ -461,14 +461,7 @@ class _MainPageState extends State<MainPage>
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusAverage),
-          topRight: Radius.circular(Dimensions.radiusAverage),
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero
-        ),
-      ),
+      shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
         final accessModes = repo_state.accessMode == AccessMode.write
           ? [AccessMode.blind, AccessMode.read, AccessMode.write]
@@ -492,14 +485,7 @@ class _MainPageState extends State<MainPage>
     }) => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusSmall),
-          topRight: Radius.circular(Dimensions.radiusSmall),
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero
-        ),
-      ),
+      shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
         return FileDetail(
           context: context,
@@ -521,14 +507,7 @@ class _MainPageState extends State<MainPage>
     }) => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(Dimensions.radiusSmall),
-          topRight: Radius.circular(Dimensions.radiusSmall),
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero
-        ),
-      ),
+      shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
         return FolderDetail(
           context: context,
@@ -552,14 +531,6 @@ class _MainPageState extends State<MainPage>
         onSaveFile: saveMedia
       );
     },
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20.0),
-        topRight: Radius.circular(20.0),
-        bottomLeft: Radius.zero,
-        bottomRight: Radius.zero
-      ),
-    )
   );
 
   void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
@@ -666,14 +637,7 @@ class _MainPageState extends State<MainPage>
   }) => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(Dimensions.radiusSmall),
-        topRight: Radius.circular(Dimensions.radiusSmall),
-        bottomLeft: Radius.zero,
-        bottomRight: Radius.zero
-      ),
-    ),
+    shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
       return DirectoryActions(
         context: context,
