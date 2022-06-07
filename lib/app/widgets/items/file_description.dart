@@ -9,12 +9,14 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with OuiSyncAppLogger {
-  FileDescription({
-    required this.fileData
-  }) {
+  FileDescription({Key? key, 
+    required this.repository,
+    required this.fileData,
+  }) : super(key: key) {
     _length.value = fileData.size;
   }
 
+  final RepoState repository;
   final BaseItem fileData;
 
   final ValueNotifier<int> _length = ValueNotifier<int>(0);
@@ -48,7 +50,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             buildWhen: (previousState, state) {
               if (state is WriteToFileInProgress ||
                   state is WriteToFileDone) {
-                if ((state as dynamic).path == this.fileData.path) {
+                if (_isCurrentFile(state)) {
                   return true;
                 }
               }
@@ -57,7 +59,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             },
             builder: (context, state) {
               if (state is WriteToFileInProgress) {
-                if (state.path == this.fileData.path) {
+                if (_isCurrentFile(state)) {
                   final progress = state.progress / state.length;
                   return Row(
                     textBaseline: TextBaseline.alphabetic,
@@ -65,14 +67,16 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
                       Expanded(child: LinearProgressIndicator(value: progress)),
                       TextButton(
                         onPressed: () async {
-                          if (state.path == this.fileData.path) {
-                            showSnackBar(context, content: Text(S.current.messageCancelingFileWriting(state.fileName)));
-                            BlocProvider.of<DirectoryBloc>(context).add(CancelSaveFile(filePath: this.fileData.path));
-                          }
+                          BlocProvider.of<DirectoryBloc>(context)
+                          .add(CancelSaveFile(
+                            repository: repository,
+                            filePath: fileData.path));
+
+                          showSnackBar(context, content: Text(S.current.messageCancelingFileWriting(state.fileName)));
                         },
                         child: Text(
                           S.current.actionCancelCapital,
-                          style: TextStyle(
+                          style:const  TextStyle(
                             fontSize: Dimensions.fontSmall
                           ),
                         )
@@ -86,7 +90,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             },
             listenWhen: (previousState, state) {
               if (state is WriteToFileInProgress) {
-                if ((state as dynamic).path == this.fileData.path) {
+                if (_isCurrentFile(state)) {
                   return true;
                 }
               }
@@ -94,7 +98,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             },
             listener: (context, state) {
               if (state is WriteToFileInProgress) {
-                if (state.path == this.fileData.path) {
+                if (_isCurrentFile(state)) {
                   _length.value = state.progress;
                 }
               }
@@ -103,5 +107,32 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
         ],
       ),
     );
+  }
+
+  bool _isCurrentFile (DirectoryState state) {
+    final originRepository = _getRepositoryFromState(state);
+    if (originRepository != repository.handle) {
+      return false;
+    }
+
+    final originPath = _getPathFromState(state);
+    return originPath == fileData.path;
+  }
+
+  Repository? _getRepositoryFromState(DirectoryState state) {
+    if (state is WriteToFileInProgress ||
+    state is WriteToFileDone) {
+      return (state as dynamic).repository.handle;
+    }
+    return null;
+  }
+
+  String _getPathFromState(DirectoryState state) {
+    if (state is WriteToFileInProgress ||
+    state is WriteToFileDone) {
+      return (state as dynamic).path;
+    }
+
+    return '';
   }
 }

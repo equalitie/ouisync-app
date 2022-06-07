@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../models/models.dart';
+import '../../models/repo_state.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem({
+    required this.repository,
     required this.itemData,
     required this.mainAction,
     // required this.filePopupMenu,
@@ -13,6 +15,7 @@ class ListItem extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  final RepoState repository;
   final BaseItem itemData;
   final Function mainAction;
   // final PopupMenuButton<dynamic>? filePopupMenu;
@@ -47,7 +50,7 @@ class ListItem extends StatelessWidget {
       children: <Widget>[
         Expanded(
           flex: 1,
-          child: FileIconAnimated(path: itemData.path)),
+          child: FileIconAnimated(repository: repository, path: itemData.path)),
         Expanded(
           flex: 9,
           child: Padding(

@@ -1,11 +1,19 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../models/repo_state.dart';
+
 abstract class DirectoryState extends Equatable {
   const DirectoryState();
 
   @override
   List<Object?> get props => [];
+}
+
+enum DownloadFileResult {
+  done,
+  canceled,
+  failed
 }
 
 class DirectoryInitial extends DirectoryState {}
@@ -43,12 +51,14 @@ class ShowMessage extends DirectoryState {
 
 class WriteToFileInProgress extends DirectoryState {
   const WriteToFileInProgress({
+    required this.repository,
     required this.path,
     required this.fileName,
     required this.length,
     required this.progress
   });
 
+  final RepoState repository;
   final String path;
   final String fileName;
   final int length;
@@ -56,6 +66,7 @@ class WriteToFileInProgress extends DirectoryState {
 
   @override
   List<Object> get props => [
+    repository,
     path,
     fileName,
     length,
@@ -64,22 +75,28 @@ class WriteToFileInProgress extends DirectoryState {
 }
 
 class WriteToFileDone extends DirectoryState {
-  const WriteToFileDone({ required this.path });
+  const WriteToFileDone({
+    required this.repository,
+    required this.path
+  });
 
+  final RepoState repository;
   final String path;
 
   @override
-  List<Object> get props => [ path ];
+  List<Object> get props => [ repository, path ];
 }
 
 class DownloadFileInProgress extends DirectoryState {
   const DownloadFileInProgress({
+    required this.repository,
     required this.path,
     required this.fileName,
     required this.length,
     required this.progress
   });
 
+  final RepoState repository;
   final String path;
   final String fileName;
   final int length;
@@ -87,6 +104,7 @@ class DownloadFileInProgress extends DirectoryState {
 
   @override
   List<Object> get props => [
+    repository,
     path,
     fileName,
     length,
@@ -96,33 +114,19 @@ class DownloadFileInProgress extends DirectoryState {
 
 class DownloadFileDone extends DirectoryState {
   const DownloadFileDone({ 
+    required this.repository,
     required this.path,
     required this.devicePath,
+    required this.result
   });
 
+  final RepoState repository;
   final String path;
   final String devicePath;
+  final DownloadFileResult result;
 
   @override
-  List<Object> get props => [ path, devicePath ];
-}
-
-class DownloadFileCancel extends DirectoryState {
-  const DownloadFileCancel({ required this.path });
-
-  final String path;
-
-  @override
-  List<Object> get props => [ path ];
-}
-
-class DownloadFileFail extends DirectoryState {
-  const DownloadFileFail({ required this.path });
-
-  final String path;
-
-  @override
-  List<Object> get props => [ path ];
+  List<Object> get props => [ repository, path, devicePath, result ];
 }
 
 class DirectoryLoadInProgress extends DirectoryState {

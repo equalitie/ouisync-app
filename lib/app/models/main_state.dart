@@ -1,8 +1,7 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../models/models.dart';
-import '../models/repo_state.dart';
 import '../models/folder_state.dart';
+import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 
 class MainState with OuiSyncAppLogger {
