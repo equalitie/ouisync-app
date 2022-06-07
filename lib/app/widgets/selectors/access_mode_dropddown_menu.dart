@@ -36,13 +36,8 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
   Widget build(BuildContext context) {
     return Container(
       padding: Dimensions.paddingActionBox,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-        border: Border.all(
-          color: Colors.black45,
-          width: 1.0,
-          style: BorderStyle.solid
-        ),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
         color: Constants.inputBackgroundColor
       ),
       child: DropdownButton(
