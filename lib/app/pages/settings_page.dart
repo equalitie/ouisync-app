@@ -156,50 +156,52 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Container(
-            padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRepositoriesSection(),
-                _divider(),
-                Fields.idLabel(S.current.titleNetwork,
-                    fontSize: Dimensions.fontAverage,
-                    fontWeight: FontWeight.normal,
-                    color: _titlesColor!),
-                LabeledSwitch(
-                  label: S.current.labelBitTorrentDHT,
-                  padding: const EdgeInsets.all(0.0),
-                  value: _bittorrentDhtStatus,
-                  onChanged: updateDhtSetting,
-                ),
-                BlocConsumer<ConnectivityCubit, ConnectivityState>(
-                  builder: (context, state) {
-                    return Column(
-                      children: [
-                        _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
-                        _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
-                        _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
-                      ]
-                      .whereType<Widget>()
-                      .toList()
-                    );
-                  },
-                  listener: (context, state) {
-                    if (state is ConnectivityChanged) {
-                      _updateLocalEndpoints(
-                          connectivityResult: state.connectivityResult);
-                    }
-                  }),
-                _buildConnectedPeerListRow(),
-                _divider(),
-                _buildLogsSection(),
-                _divider(),
-                _versionNumberFutureBuilder(
-                    S.current.labelAppVersion, info.then((info) => info.version)),
-              ],
-            )));
+        body: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+            child:  SingleChildScrollView(
+              child:Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildRepositoriesSection(),
+                  _divider(),
+                  Fields.idLabel(S.current.titleNetwork,
+                      fontSize: Dimensions.fontAverage,
+                      fontWeight: FontWeight.normal,
+                      color: _titlesColor!),
+                  LabeledSwitch(
+                    label: S.current.labelBitTorrentDHT,
+                    padding: const EdgeInsets.all(0.0),
+                    value: _bittorrentDhtStatus,
+                    onChanged: updateDhtSetting,
+                  ),
+                  BlocConsumer<ConnectivityCubit, ConnectivityState>(
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
+                          _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
+                          _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
+                        ]
+                        .whereType<Widget>()
+                        .toList()
+                      );
+                    },
+                    listener: (context, state) {
+                      if (state is ConnectivityChanged) {
+                        _updateLocalEndpoints(
+                            connectivityResult: state.connectivityResult);
+                      }
+                    }),
+                  _buildConnectedPeerListRow(),
+                  _divider(),
+                  _buildLogsSection(),
+                  _divider(),
+                  _versionNumberFutureBuilder(
+                      S.current.labelAppVersion, info.then((info) => info.version)),
+                ],
+              ))));
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
@@ -274,69 +276,74 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               color: _titlesColor!),
           Dimensions.spacingVertical,
           Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(4),
-                bottomLeft: Radius.circular(0),
-                bottomRight: Radius.circular(0),
-              ),
-              color: Color.fromRGBO(33, 33, 33, 0.07999999821186066),
+            padding: Dimensions.paddingActionBox,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+              color: Constants.inputBackgroundColor
             ),
-            child: Container(
-              padding: Dimensions.paddingActionBox,
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-                border: Border.all(
-                    color: Colors.black45,
-                    width: 1.0,
-                    style: BorderStyle.solid),
-                color: Colors.grey.shade300,
-              ),
-              child: BlocListener(
-                bloc: widget.repositoriesCubit,
-                listener: (context, state) {
-                  if (state is RepositoryPickerSelection) {
-                    setState(() {
-                      _currentRepo = widget.mainState.currentRepo!;
-                    });
-                  }
-                },
-                child: DropdownButton<RepoState?>(
-                  isExpanded: true,
-                  value: _currentRepo,
-                  underline: SizedBox(),
-                  items: widget.mainState.repos.map((RepoState repo) {
-                    return DropdownMenuItem(
-                      value: repo,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Fields.idLabel(S.current.labelSelectRepository,
-                              textAlign: TextAlign.start,
+            child: BlocListener(
+              bloc: widget.repositoriesCubit,
+              listener: (context, state) {
+                if (state is RepositoryPickerSelection) {
+                  setState(() {
+                    _currentRepo = widget.mainState.currentRepo!;
+                  });
+                }
+              },
+              child: DropdownButton<RepoState?>(
+                isExpanded: true,
+                value: _currentRepo,
+                underline: const SizedBox(),
+                selectedItemBuilder: (context) => widget.mainState.repos.map<Widget>((RepoState repo) {
+                  return Padding(
+                    padding: Dimensions.paddingItem,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Fields.idLabel(
+                              S.current.labelSelectRepository,
+                              fontSize: Dimensions.fontMicro,
                               fontWeight: FontWeight.normal,
-                              color: Colors.grey.shade600),
-                          Dimensions.spacingVerticalHalf,
-                          Row(
-                            children: [
-                              Fields.constrainedText(repo.name,
-                                  fontWeight: FontWeight.normal),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (repo) async {
-                    loggy.app('Selected repository: ${repo?.name}');
-                    setState(() {
-                      _currentRepo = repo;
-                    });
-                    await widget.mainState.setCurrent(_currentRepo);
-                  },
-                ),
+                              color: Constants.inputLabelForeColor)
+                          ]),
+                        Row(
+                          children: [
+                            Fields.constrainedText(repo.name,
+                                fontWeight: FontWeight.normal),
+                          ],
+                        ),
+                      ],
+                    ));
+                }).toList(),
+                items: widget.mainState.repos.map((RepoState repo) {
+                  return DropdownMenuItem(
+                    value: repo,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Icon(repo == _currentRepo ? Icons.check : null,
+                          size: Dimensions.sizeIconSmall,
+                          color: Theme.of(context).primaryColor),
+                        Dimensions.spacingHorizontalDouble,
+                        Fields.constrainedText(
+                          repo.name,
+                          fontWeight: FontWeight.normal),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (repo) async {
+                  loggy.app('Selected repository: ${repo?.name}');
+                  setState(() {
+                    _currentRepo = repo;
+                  });
+                  await widget.mainState.setCurrent(_currentRepo);
+                },
               ),
             ),
           ),
