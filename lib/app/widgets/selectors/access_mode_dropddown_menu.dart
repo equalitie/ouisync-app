@@ -55,7 +55,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
           loggy.app('Access mode: $accessMode');
           setState(() { _accessMode = accessMode as AccessMode; });
 
-          widget.onChanged(accessMode as AccessMode);
+          await widget.onChanged(accessMode as AccessMode);
         },
       ));
   }
