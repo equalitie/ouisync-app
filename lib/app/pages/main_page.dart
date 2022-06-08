@@ -407,12 +407,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              await _showFileDetails(
-                repo: repository,
-                directoryBloc: _directoryBloc,
-                scaffoldKey: _scaffoldKey,
-                data: item
-              );
+              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true);
             }
             : () {
               if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {
