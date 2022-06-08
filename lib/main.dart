@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'app/bloc/simpleblocobserver.dart';
@@ -20,10 +21,12 @@ Future<void> main() async {
   final repositoriesDir = p.join(appDir, Constants.folderRepositoriesName);
   final configDir = p.join(appDir, Constants.configuratiosDirName);
 
-  print(appDir);
+  if (kDebugMode) {
+    print(appDir);
 
-  print(configDir);
-  print(repositoriesDir);
+    print(configDir);
+    print(repositoriesDir);
+  }
 
   await Settings.initSettings(
     appDir,
