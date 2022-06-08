@@ -205,7 +205,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
-
     if (value == null) {
       return null;
     }

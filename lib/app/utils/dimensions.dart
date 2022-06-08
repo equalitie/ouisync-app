@@ -6,8 +6,8 @@ import 'constants.dart';
 class Dimensions {
   Dimensions._();
 
-  static const double fontBig = 22.0;
-  static const double fontAverage = 18.0;
+  static const double fontBig = 20.0;
+  static const double fontAverage = 16.0;
   static const double fontSmall = 14.0;
   static const double fontMicro = 12.0;
 
