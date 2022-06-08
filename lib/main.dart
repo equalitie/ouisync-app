@@ -6,14 +6,16 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'app/app.dart';
-import 'app/bloc/simpleblocobserver.dart';
 import 'app/utils/utils.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
 
   Loggy.initLoggy();
 
@@ -33,13 +35,26 @@ Future<void> main() async {
     repositoriesDir,
   );
 
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   final localRepositoriesList = RepositoryHelper
   .localRepositoriesFiles(repositoriesDir) as List<String>;
   
   final latestRepositoryOrDefaultName = await RepositoryHelper
   .latestRepositoryOrDefault(localRepositoriesList);
   
-  await Settings.saveSetting(Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
+  await Settings.saveSetting(
+      Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
 
   final session = await Session.open(configDir);
   
@@ -59,6 +74,5 @@ Future<void> main() async {
           repositoriesLocation: repositoriesDir,
           defaultRepositoryName: latestRepositoryOrDefaultName,
         ))),
-    //blocObserver: SimpleBlocObserver(),
   );
 }
