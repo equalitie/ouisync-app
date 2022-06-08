@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:system_tray/system_tray.dart' as stray;
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -69,6 +70,9 @@ class _MainPageState extends State<MainPage>
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
+    final stray.SystemTray _systemTray = stray.SystemTray();
+    final stray.AppWindow _appWindow = stray.AppWindow();
+
     @override
     void initState() {
       super.initState();
@@ -116,6 +120,8 @@ class _MainPageState extends State<MainPage>
       _connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen(_connectivityChange);
+
+      initSystemTray();
     }
 
     @override
@@ -150,6 +156,43 @@ class _MainPageState extends State<MainPage>
       .of<ConnectivityCubit>(context)
       .connectivityEvent(result);
     }
+
+    Future<void> initSystemTray() async {
+      String path = io.Platform.isWindows 
+      ? './assets/Ouisync-icon-blue.ico' 
+      : './assets/OuiSync-App-Icon-1200.png';
+
+      final menu = [
+        stray.MenuItem(label: 'Show', onClicked: _appWindow.show),
+        stray.MenuItem(label: 'Hide', onClicked: _appWindow.hide),
+        stray.MenuSeparator(),
+        stray.MenuItem(
+          label: 'Exit',
+          onClicked: _appWindow.close,
+        ),
+      ];
+
+      // We first init the systray menu and then add the menu entries
+      await _systemTray.initSystemTray(
+        title: "system tray",
+        iconPath: path,
+        toolTip: 'OuiSync',
+      );
+
+      await _systemTray.setContextMenu(menu);
+
+      // handle system tray event
+      _systemTray.registerSystemTrayEventHandler((eventName) {
+        debugPrint("eventName: $eventName");
+        if (eventName == "leftMouseDown") {
+        } else if (eventName == "leftMouseUp") {
+          _appWindow.show();
+        } else if (eventName == "rightMouseDown") {
+        } else if (eventName == "rightMouseUp") {
+          _systemTray.popUpContextMenu();
+        }
+      });
+  }
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
