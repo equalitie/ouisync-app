@@ -45,21 +45,20 @@ Future<void> main() async {
   
   BlocOverrides.runZoned(
     () => runApp(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: OuiSyncApp(
-        session: session,
-        appStorageLocation: appDir,
-        repositoriesLocation: repositoriesDir,
-        defaultRepositoryName: latestRepositoryOrDefaultName,
-      )
-    )),
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: OuiSyncApp(
+          session: session,
+          appStorageLocation: appDir,
+          repositoriesLocation: repositoriesDir,
+          defaultRepositoryName: latestRepositoryOrDefaultName,
+        ))),
     //blocObserver: SimpleBlocObserver(),
   );
 }
