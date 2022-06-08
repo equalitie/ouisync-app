@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
@@ -45,7 +46,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   RepoState? _currentRepo;
 
-  String? _listenerEndpoint;
+  String? _connectionType;
+  String? _externalIP;
+  String? _localIPv4;
+  String? _localIPv6;
+  String? _listenerEndpointV4;
+  String? _listenerEndpointV6;
   String? _dhtEndpointV4;
   String? _dhtEndpointV6;
 
@@ -71,79 +77,63 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   void _updateLocalEndpoints({ConnectivityResult? connectivityResult}) async {
+    // TODO: Some of these awaits takes a while to complete, it would be better
+    // to do them all individually.
+
     final connectivity =
         connectivityResult ?? await Connectivity().checkConnectivity();
 
-    final isConnected = [
-      ConnectivityResult.ethernet,
-      ConnectivityResult.mobile,
-      ConnectivityResult.wifi
-    ].contains(connectivity);
+    switch (connectivity) {
+        case ConnectivityResult.wifi: _connectionType = "WiFi"; break;
+        case ConnectivityResult.mobile: _connectionType = "Mobile"; break;
+        case ConnectivityResult.ethernet: _connectionType = "Ethernet"; break;
+        case ConnectivityResult.none: _connectionType = "None"; break;
+        default: _connectionType = "???"; break;
+    };
 
     final session = widget.repositoriesCubit.session;
 
-    String? listenerEndpoint = session.listenerLocalAddress;
-    var dhtEndpointV4 = session.dhtLocalAddressV4;
-    var dhtEndpointV6 = session.dhtLocalAddressV6;
+    String? listenerEndpointV4 = session.listenerLocalAddressV4;
+    String? listenerEndpointV6 = session.listenerLocalAddressV6;
 
-    if (isConnected) {
-      loggy.app('Network unavailable');
-      listenerEndpoint = await _replaceIfUndeterminedIP(listenerEndpoint);
-      dhtEndpointV4 = await _replaceIfUndeterminedIP(dhtEndpointV4);
-      dhtEndpointV6 = await _replaceIfUndeterminedIP(dhtEndpointV6);
+    final dhtEndpointV4 = session.dhtLocalAddressV4;
+    final dhtEndpointV6 = session.dhtLocalAddressV6;
+
+    final info = NetworkInfo();
+
+    // This really works only when connected using WiFi.
+    var localIPv4  = await info.getWifiIP();
+    var localIPv6  = await info.getWifiIPv6();
+
+    // This works also when on mobile network, but doesn't show IPv6 address if
+    // IPv4 is used as primary.
+    final internalIpStr = await RGetIp.internalIP;
+
+    if (internalIpStr != null) {
+        final internalIp = InternetAddress.tryParse(internalIpStr);
+
+        if (internalIp != null) {
+            if (localIPv4 == null && internalIp.type == InternetAddressType.IPv4) {
+                localIPv4 = internalIp.toString();
+            }
+
+            if (localIPv6 == null && internalIp.type == InternetAddressType.IPv6) {
+                localIPv6 = internalIp.toString();
+            }
+        }
     }
 
+    final externalIP = await RGetIp.externalIP;
+
     setState(() {
-      _listenerEndpoint = listenerEndpoint;
+      _externalIP = externalIP;
+      _localIPv4 = localIPv4;
+      _localIPv6 = localIPv6;
+      _listenerEndpointV4 = listenerEndpointV4;
+      _listenerEndpointV6 = listenerEndpointV6;
       _dhtEndpointV4 = dhtEndpointV4;
       _dhtEndpointV6 = dhtEndpointV6;
     });
-  }
-
-  Future<String?> _replaceIfUndeterminedIP(String? endpoint) async {
-    if (endpoint == null) {
-      return null;
-    }
-
-    final nullableInternal = await RGetIp.internalIP;
-
-    if (nullableInternal == null) {
-      return endpoint;
-    }
-
-    InternetAddress? internal = InternetAddress.tryParse(nullableInternal);
-
-    if (internal == null) {
-      return endpoint;
-    }
-
-    var replace = false;
-
-    if (endpoint.contains(Strings.emptyIPv4)) {
-      if (internal.type != InternetAddressType.IPv4) {
-        return null;
-      }
-      replace = true;
-    }
-
-    if (endpoint.contains(Strings.undeterminedIPv6)) {
-      if (internal.type != InternetAddressType.IPv6) {
-        return null;
-      }
-      replace = true;
-    }
-
-    if (replace) {
-      final indexFirstSemicolon = endpoint.indexOf(':');
-      final indexLastSemicolon = endpoint.lastIndexOf(':');
-
-      final protocol = endpoint.substring(0, indexFirstSemicolon);
-      final port = endpoint.substring(indexLastSemicolon + 1);
-
-      return '$protocol:${internal.address}:$port';
-    }
-
-    return endpoint;
   }
 
   @override
@@ -180,7 +170,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     builder: (context, state) {
                       return Column(
                         children: [
-                          _labeledNullableText(Strings.labelListenerEndpoint, _listenerEndpoint),
+                          _labeledNullableText(Strings.connectionType, _connectionType),
+                          _labeledNullableText(Strings.labelExternalIP, _externalIP),
+                          _labeledNullableText(Strings.labelLocalIPv4, _localIPv4),
+                          _labeledNullableText(Strings.labelLocalIPv6, _localIPv6),
+                          _labeledNullableText(Strings.labelListenerEndpointV4, _listenerEndpointV4),
+                          _labeledNullableText(Strings.labelListenerEndpointV6, _listenerEndpointV6),
                           _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
                           _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
                         ]

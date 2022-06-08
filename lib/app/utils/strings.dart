@@ -8,7 +8,19 @@ class Strings {
 
   // Dialogs
 
-  static const String labelListenerEndpoint = 'Endpoint:'; // TODO:  Translate?
+  // TODO: Translate these:
+
+  static const String connectionType = 'Connection type:';
+
+  static const String labelInternalIP = 'Internal IP:';
+  static const String labelExternalIP = 'External IP:';
+
+  static const String labelLocalIPv4 = 'Local IPv4:';
+  static const String labelLocalIPv6 = 'Local IPv6:';
+
+  static const String labelListenerEndpointV4 = 'Listening on IPv4:';
+  static const String labelListenerEndpointV6 = 'Listening on IPv6:';
+
   static const String labelDHTv4Endpoint = 'DHT IPv4:';
   static const String labelDHTv6Endpoint = 'DHT IPv6:';
   
