@@ -12,6 +12,7 @@
 #include <ouisync_plugin/ouisync_plugin.h>
 #include <permission_handler_windows/permission_handler_windows_plugin.h>
 #include <r_get_ip/r_get_ip_plugin.h>
+#include <system_tray/system_tray_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
@@ -27,6 +28,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("PermissionHandlerWindowsPlugin"));
   RGetIpPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("RGetIpPlugin"));
+  SystemTrayPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("SystemTrayPlugin"));
   UrlLauncherWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
 }

@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   ouisync_plugin
   permission_handler_windows
   r_get_ip
+  system_tray
   url_launcher_windows
 )
 
