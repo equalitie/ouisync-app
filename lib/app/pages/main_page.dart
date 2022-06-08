@@ -32,8 +32,9 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-    required this.mediaReceiver
-  });
+    required this.mediaReceiver,
+    Key? key
+  }) : super(key: key);
 
   final Session session;
   final String repositoriesLocation;
@@ -46,7 +47,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
   with TickerProviderStateMixin, OuiSyncAppLogger {
-    MainState _mainState = MainState();
+    final MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -55,7 +56,7 @@ class _MainPageState extends State<MainPage>
     String _pathEntryToMove = '';
     PersistentBottomSheetController? _persistentBottomSheetController;
 
-    Widget _mainWidget = LoadingMainPageState();
+    Widget _mainWidget = const LoadingMainPageState();
 
     final double defaultBottomPadding = kFloatingActionButtonMargin + Dimensions.paddingBottomWithFloatingButtonExtra;
     ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
@@ -243,7 +244,7 @@ class _MainPageState extends State<MainPage>
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
         onPressed: () async {
-          bool dhtStatus = await _mainState.currentRepo?.isDhtEnabled() ?? false;
+          bool dhtStatus = _mainState.currentRepo?.isDhtEnabled() ?? false;
           settingsAction(dhtStatus);
         },
         size: Dimensions.sizeIconSmall,
@@ -264,7 +265,7 @@ class _MainPageState extends State<MainPage>
         return Container();
       }
 
-      return new FloatingActionButton(
+      return FloatingActionButton(
         heroTag: Constants.heroTagMainPageActions,
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
@@ -322,7 +323,7 @@ class _MainPageState extends State<MainPage>
         }
 
         if (state is DirectoryLoadInProgress) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (state is DirectoryReloaded) {
@@ -336,7 +337,7 @@ class _MainPageState extends State<MainPage>
       },
       listener: (context, state) {
         if (state is ShowMessage) {
-          showSnackBar(context, content: Text((state as ShowMessage).message));
+          showSnackBar(context, content: Text(state.message));
         }
       }
     );
@@ -452,21 +453,21 @@ class _MainPageState extends State<MainPage>
       )
     );
 
-    Future<dynamic> _showShareRepository(context, RepoState repo_state)
+    Future<dynamic> _showShareRepository(context, RepoState currentRepoState)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
-        final accessModes = repo_state.accessMode == AccessMode.write
+        final accessModes = currentRepoState.accessMode == AccessMode.write
           ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-          : repo_state.accessMode == AccessMode.read
+          : currentRepoState.accessMode == AccessMode.read
             ? [AccessMode.blind, AccessMode.read]
             : [AccessMode.blind];
 
         return ShareRepository(
-          repository: repo_state,
-          repositoryName: repo_state.name,
+          repository: currentRepoState,
+          repositoryName: currentRepoState.name,
           availableAccessModes: accessModes,
         );
       }
