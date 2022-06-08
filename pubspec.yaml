@@ -56,7 +56,11 @@ dependencies:
   share_plus: ^4.0.4
   shared_preferences: ^2.0.13
   styled_text: ^5.0.0+1
-  system_tray: ^0.1.0
+  # system_tray: ^0.1.0
+  system_tray:
+    git:
+      url: https://github.com/antler119/system_tray.git
+      ref: main
   url_launcher: ^6.0.20
 
 dev_dependencies:
