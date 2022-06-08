@@ -62,6 +62,7 @@ dependencies:
       url: https://github.com/antler119/system_tray.git
       ref: main
   url_launcher: ^6.0.20
+  window_manager: ^0.2.5
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
