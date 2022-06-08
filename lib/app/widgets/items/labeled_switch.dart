@@ -11,7 +11,7 @@ class LabeledSwitch extends StatelessWidget {
     this.textOverflow = TextOverflow.clip,
     this.softWrap = true,
     this.fontSize = Dimensions.fontAverage,
-    this.fontWeight = FontWeight.w600,
+    this.fontWeight = FontWeight.w400,
     this.color = Colors.black,
     required this.padding,
     required this.onChanged,
@@ -46,7 +46,7 @@ class LabeledSwitch extends StatelessWidget {
                 softWrap: true,
                 style: TextStyle(
                   fontSize: Dimensions.fontAverage,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: Colors.black
                 )
               )

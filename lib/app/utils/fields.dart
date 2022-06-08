@@ -186,7 +186,7 @@ class Fields {
     TextOverflow textOverflow = TextOverflow.ellipsis,
     bool softWrap = true,
     double fontSize = Dimensions.fontSmall,
-    FontWeight fontWeight = FontWeight.bold,
+    FontWeight fontWeight = FontWeight.w500,
     Color color = Colors.black
   }) => Text(
     text,
@@ -207,13 +207,13 @@ class Fields {
     TextOverflow labelTextOverflow = TextOverflow.ellipsis,
     bool labelSoftWrap = false,
     double labelFontSize = Dimensions.fontAverage,
-    FontWeight labelFontWeight = FontWeight.bold,
+    FontWeight labelFontWeight = FontWeight.w500,
     Color labelColor = Colors.black,
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
     double textFontSize = Dimensions.fontAverage,
-    FontWeight textFontWeight = FontWeight.w600,
+    FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
     EdgeInsets padding: Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
@@ -274,7 +274,7 @@ class Fields {
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
     double textFontSize = Dimensions.fontBig,
-    FontWeight textFontWeight = FontWeight.w600,
+    FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
     EdgeInsets padding: Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
@@ -310,7 +310,7 @@ class Fields {
     TextOverflow textOverflow = TextOverflow.clip,
     bool softWrap = true,
     double fontSize = Dimensions.fontAverage,
-    FontWeight fontWeight = FontWeight.w600,
+    FontWeight fontWeight = FontWeight.normal,
     Color color = Colors.black
   })  => Expanded(
     flex: flex,
