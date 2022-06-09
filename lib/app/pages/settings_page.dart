@@ -114,11 +114,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
         if (internalIp != null) {
             if (localIPv4 == null && internalIp.type == InternetAddressType.IPv4) {
-                localIPv4 = internalIp.toString();
+                localIPv4 = internalIpStr;
             }
 
             if (localIPv6 == null && internalIp.type == InternetAddressType.IPv6) {
-                localIPv6 = internalIp.toString();
+                localIPv6 = internalIpStr;
             }
         }
     }
