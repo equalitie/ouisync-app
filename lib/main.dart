@@ -36,10 +36,10 @@ Future<void> main() async {
   );
 
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(800, 600),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
+    title: 'OuiSync - Secure file-sharing and real-time sync, with or without internet',
     titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
