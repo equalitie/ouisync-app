@@ -8,6 +8,7 @@ import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:system_tray/system_tray.dart' as stray;
+import 'package:window_manager/window_manager.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -47,8 +48,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-  with TickerProviderStateMixin, OuiSyncAppLogger {
-    final MainState _mainState = MainState();
+    with TickerProviderStateMixin, OuiSyncAppLogger, WindowListener {
+  final MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -76,6 +77,9 @@ class _MainPageState extends State<MainPage>
     @override
     void initState() {
       super.initState();
+
+    windowManager.addListener(this);
+    _initWindowManager();
 
       widget.session.subscribeToNetworkEvents((event) {
         switch (event) {
@@ -121,13 +125,16 @@ class _MainPageState extends State<MainPage>
         .onConnectivityChanged
         .listen(_connectivityChange);
 
-      initSystemTray();
-    }
+    _initSystemTray();
+  }
 
     @override
     void dispose() async {
       await _mainState.close();
+
       _connectivitySubscription?.cancel();
+    windowManager.removeListener(this);
+
       super.dispose();
     }
 
@@ -157,8 +164,44 @@ class _MainPageState extends State<MainPage>
       .connectivityEvent(result);
     }
 
-    Future<void> initSystemTray() async {
-      String path = io.Platform.isWindows 
+  Future<void> _initWindowManager() async {
+    await windowManager.setPreventClose(true);
+    setState(() {});
+  }
+
+  @override
+  void onWindowClose() async {
+    bool _isPreventClose = await windowManager.isPreventClose();
+    if (_isPreventClose) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text('Are you sure you want to close this window?'),
+            actions: [
+              TextButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: false).pop();
+                  _appWindow.hide();
+                },
+              ),
+              TextButton(
+                child: Text('Yes'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await windowManager.destroy();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _initSystemTray() async {
+    String path = io.Platform.isWindows
       ? './assets/Ouisync-icon-blue.ico' 
       : './assets/OuiSync-App-Icon-1200.png';
 
