@@ -61,6 +61,7 @@ dependencies:
     git:
       url: https://github.com/antler119/system_tray.git
       ref: main
+  tray_manager: ^0.1.8
   url_launcher: ^6.0.20
   window_manager: ^0.2.5
 

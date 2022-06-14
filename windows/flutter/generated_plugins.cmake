@@ -11,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   r_get_ip
   screen_retriever
   system_tray
+  tray_manager
   url_launcher_windows
   window_manager
 )
