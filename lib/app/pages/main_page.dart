@@ -164,39 +164,14 @@ class _MainPageState extends State<MainPage>
       .connectivityEvent(result);
     }
 
-  Future<void> _initWindowManager() async {
-    await windowManager.setPreventClose(true);
-    setState(() {});
-  }
+  Future<void> _initWindowManager() async =>
+      await windowManager.setPreventClose(true);
 
   @override
   void onWindowClose() async {
     bool _isPreventClose = await windowManager.isPreventClose();
     if (_isPreventClose) {
-      showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text('Are you sure you want to close this window?'),
-            actions: [
-              TextButton(
-                child: Text('No'),
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: false).pop();
-                  _appWindow.hide();
-                },
-              ),
-              TextButton(
-                child: Text('Yes'),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await windowManager.destroy();
-                },
-              ),
-            ],
-          );
-        },
-      );
+      _appWindow.hide();
     }
   }
 
@@ -204,36 +179,45 @@ class _MainPageState extends State<MainPage>
     String path =
         io.Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
-      final menu = [
-        stray.MenuItem(label: 'Show', onClicked: _appWindow.show),
-        stray.MenuItem(label: 'Hide', onClicked: _appWindow.hide),
-        stray.MenuSeparator(),
-        stray.MenuItem(
-          label: 'Exit',
-          onClicked: _appWindow.close,
-        ),
-      ];
+    List<stray.MenuItemBase> menu = [
+      stray.MenuItem(
+        label: '${S.current.actionHide}/${S.current.actionShow}',
+        onClicked: () async => await windowManager.isVisible()
+          ? await _appWindow.hide()
+          : await _appWindow.show()),
+      stray.MenuSeparator(),
+      stray.MenuItem(
+        label: S.current.actionExit,
+        onClicked: () async {
+          await windowManager.setPreventClose(false);
+          await windowManager.close();
+        }),
+    ];
 
-      // We first init the systray menu and then add the menu entries
-      await _systemTray.initSystemTray(
-        title: "system tray",
-        iconPath: path,
-        toolTip: 'OuiSync',
-      );
+    await _systemTray.initSystemTray(
+      title: S.current.titleAppTitle,
+      iconPath: path,
+      toolTip: S.current.messageOuiSyncDesktopTitle,
+    );
 
-      await _systemTray.setContextMenu(menu);
+    await _systemTray.setContextMenu(menu);
 
-      // handle system tray event
-      _systemTray.registerSystemTrayEventHandler((eventName) {
-        debugPrint("eventName: $eventName");
-        if (eventName == "leftMouseDown") {
-        } else if (eventName == "leftMouseUp") {
-          _appWindow.show();
-        } else if (eventName == "rightMouseDown") {
-        } else if (eventName == "rightMouseUp") {
+    _systemTray.registerSystemTrayEventHandler((eventName) async {
+      switch (eventName) {
+        case Constants.eventLeftMouseUp:
+          await windowManager.isVisible()
+          ? _appWindow.hide()
+          : _appWindow.show();
+
+          break;
+        case Constants.eventRightMouseUp:
           _systemTray.popUpContextMenu();
-        }
-      });
+
+          break;
+        
+        default:
+      }
+    });
   }
 
     void initMainPage() async {
@@ -692,7 +676,6 @@ class _MainPageState extends State<MainPage>
     if (usesModal) {
       Navigator.of(context).pop();
     }
-
   }
 
   void saveFileToOuiSync(String path) {

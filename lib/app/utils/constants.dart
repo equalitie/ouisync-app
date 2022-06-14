@@ -35,4 +35,7 @@ class Constants{
 
   static const String appIcon = './assets/Ouisync-icon-blue.png';
   static const String windowsAppIcon = './assets/Ouisync-icon-blue.ico';
+
+  static const String eventLeftMouseUp = 'leftMouseUp';
+  static const String eventRightMouseUp = 'rightMouseUp';
 }
