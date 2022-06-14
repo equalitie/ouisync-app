@@ -32,4 +32,7 @@ class Constants{
   static const Color folderIconColor = Color.fromARGB(255, 86, 86, 86);
   static const Color inputBackgroundColor = Color.fromARGB(255, 224, 224, 224);
   static const Color inputLabelForeColor = Color.fromARGB(255,117,117,117);
+
+  static const String appIcon = './assets/Ouisync-icon-blue.png';
+  static const String windowsAppIcon = './assets/Ouisync-icon-blue.ico';
 }

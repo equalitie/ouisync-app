@@ -201,9 +201,8 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _initSystemTray() async {
-    String path = io.Platform.isWindows
-      ? './assets/Ouisync-icon-blue.ico' 
-      : './assets/OuiSync-App-Icon-1200.png';
+    String path =
+        io.Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
       final menu = [
         stray.MenuItem(label: 'Show', onClicked: _appWindow.show),
