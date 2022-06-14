@@ -35,11 +35,16 @@ Future<void> main() async {
     repositoriesDir,
   );
 
+  /// For some reason, if we use a constant value for the title in the
+  /// WindowsOptions, the app hangs. This is true for the localized strings,
+  /// or a regular constant value in Constants.
+  /// So we use a harcoded string to start, then we use the localized string
+  /// in app.dart -for now.
   WindowOptions windowOptions = const WindowOptions(
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
-    title: 'OuiSync - Secure file-sharing and real-time sync, with or without internet',
+    title: 'OuiSync',
     titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -47,17 +52,17 @@ Future<void> main() async {
     await windowManager.focus();
   });
 
-  final localRepositoriesList = RepositoryHelper
-  .localRepositoriesFiles(repositoriesDir) as List<String>;
-  
-  final latestRepositoryOrDefaultName = await RepositoryHelper
-  .latestRepositoryOrDefault(localRepositoriesList);
-  
+  final localRepositoriesList =
+      RepositoryHelper.localRepositoriesFiles(repositoriesDir) as List<String>;
+
+  final latestRepositoryOrDefaultName =
+      await RepositoryHelper.latestRepositoryOrDefault(localRepositoriesList);
+
   await Settings.saveSetting(
       Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
 
   final session = await Session.open(configDir);
-  
+
   BlocOverrides.runZoned(
     () => runApp(MaterialApp(
         debugShowCheckedModeBanner: false,

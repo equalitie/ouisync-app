@@ -5,6 +5,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
@@ -36,7 +37,12 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   @override
   void initState() {
     super.initState();
+
     NativeChannels.init();
+
+    WindowOptions windowOptions = WindowOptions(
+      title: S.current.messageOuiSyncDesktopTitle);
+    windowManager.waitUntilReadyToShow(windowOptions, () {});
   }
   
   @override
