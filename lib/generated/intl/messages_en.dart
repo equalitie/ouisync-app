@@ -88,6 +88,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete repository"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
+        "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
+        "actionHide": MessageLookupByLibrary.simpleMessage("Hide"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("Add file"),
@@ -103,6 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
         "actionShare": MessageLookupByLibrary.simpleMessage("Share"),
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
+        "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddRepositoryWithToken":
@@ -251,6 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No repositories found"),
+        "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
+            "OuiSync - Secure file-sharing and real-time sync, with or without internet"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

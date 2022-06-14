@@ -91,6 +91,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Cambiar nombre"),
+        "actionExit": MessageLookupByLibrary.simpleMessage("Salir"),
+        "actionHide": MessageLookupByLibrary.simpleMessage("Ocultar"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("OCULTAR"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Mover"),
         "actionNewFile":
@@ -109,6 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShare": MessageLookupByLibrary.simpleMessage("Compartir"),
         "actionShareFile":
             MessageLookupByLibrary.simpleMessage("Compartir archivo"),
+        "actionShow": MessageLookupByLibrary.simpleMessage("Mostrar"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Abrir"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Modo de aceso"),
         "iconAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
@@ -259,6 +262,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
+        "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
+            "OuiSync - Compartir archivos y sincronización en tiempo real, con o sin internet"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "Este repositorio es de <bold>solo lectura</bold>"),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

@@ -1250,6 +1250,16 @@ class S {
     );
   }
 
+  /// `OuiSync - Secure file-sharing and real-time sync, with or without internet`
+  String get messageOuiSyncDesktopTitle {
+    return Intl.message(
+      'OuiSync - Secure file-sharing and real-time sync, with or without internet',
+      name: 'messageOuiSyncDesktopTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1645,6 +1655,36 @@ class S {
     return Intl.message(
       'Delete repository',
       name: 'actionDeleteRepository',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show`
+  String get actionShow {
+    return Intl.message(
+      'Show',
+      name: 'actionShow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide`
+  String get actionHide {
+    return Intl.message(
+      'Hide',
+      name: 'actionHide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit`
+  String get actionExit {
+    return Intl.message(
+      'Exit',
+      name: 'actionExit',
       desc: '',
       args: [],
     );
