@@ -32,7 +32,7 @@ jobs:
         shell: cmd
         run: |
          mkdir D:\a\ouisync-app\ouisync-app\build\test
-         mklink D:\a\ouisync-app\ouisync-app\build\test\ouisync_ffi.dll D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync.dll
+         mklink D:\a\ouisync-app\ouisync-app\build\test\ouisync_ffi.dll D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
