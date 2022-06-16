@@ -1,12 +1,12 @@
 name: Windows CI
 
-on: 
+on:
  push:
    paths-ignore:
      - '**/README.md'
  pull_request:
    branches: [master]
-   
+
 jobs:
   build_and_test:
     name: OuiSync Flutter App - Windows
@@ -20,7 +20,7 @@ jobs:
           toolchain: stable
       - name: Adding windows target (x86_64-pc-windows-gnu)
         run: rustup target add x86_64-pc-windows-gnu
-      - name: Building OuiSync library  
+      - name: Building OuiSync library
         run: |
          cd ouisync-plugin\ouisync
          cargo build --release --lib
@@ -32,7 +32,7 @@ jobs:
         shell: cmd
         run: |
          mkdir D:\a\ouisync-app\ouisync-app\build\test
-         mklink D:\a\ouisync-app\ouisync-app\build\test\ouisync.dll D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync.dll
+         mklink D:\a\ouisync-app\ouisync-app\build\test\ouisync_ffi.dll D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync.dll
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'

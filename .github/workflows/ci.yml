@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   push:
     #branches: [master]
     paths-ignore:
@@ -27,7 +27,7 @@ jobs:
          rustup target add x86_64-linux-android
         # For each additional platform supported, you can add the `target` by using the corresponding target triple.
         # To get a list of all available triples, run `rustup target list`
-      - name: Building OuiSync library  
+      - name: Building OuiSync library
         run: |
          cd ouisync-plugin/ouisync
          cargo build --release --lib
@@ -38,8 +38,8 @@ jobs:
       - name: Creating a symlink to the library binary for the Flutter tests
         run: |
          mkdir -p /Users/runner/work/ouisync-app/ouisync-app/build/test
-         ln -s /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync.dylib /Users/runner/work/ouisync-app/ouisync-app/build/test
-      - name: Setting up the Android NDK environment 
+         ln -s /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync_ffi.dylib /Users/runner/work/ouisync-app/ouisync-app/build/test
+      - name: Setting up the Android NDK environment
         uses: nttld/setup-ndk@v1
         with:
             ndk-version: r21e
