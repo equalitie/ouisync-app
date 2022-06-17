@@ -50,8 +50,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   String? _externalIP;
   String? _localIPv4;
   String? _localIPv6;
-  String? _listenerEndpointV4;
-  String? _listenerEndpointV6;
+  String? _tcpListenerEndpointV4;
+  String? _tcpListenerEndpointV6;
+  String? _quicListenerEndpointV4;
+  String? _quicListenerEndpointV6;
   String? _dhtEndpointV4;
   String? _dhtEndpointV6;
 
@@ -93,8 +95,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     final session = widget.repositoriesCubit.session;
 
-    String? listenerEndpointV4 = session.listenerLocalAddressV4;
-    String? listenerEndpointV6 = session.listenerLocalAddressV6;
+    String? tcpListenerEndpointV4 = session.tcpListenerLocalAddressV4;
+    String? tcpListenerEndpointV6 = session.tcpListenerLocalAddressV6;
+    String? quicListenerEndpointV4 = session.quicListenerLocalAddressV4;
+    String? quicListenerEndpointV6 = session.quicListenerLocalAddressV6;
 
     final dhtEndpointV4 = session.dhtLocalAddressV4;
     final dhtEndpointV6 = session.dhtLocalAddressV6;
@@ -129,8 +133,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _externalIP = externalIP;
       _localIPv4 = localIPv4;
       _localIPv6 = localIPv6;
-      _listenerEndpointV4 = listenerEndpointV4;
-      _listenerEndpointV6 = listenerEndpointV6;
+      _tcpListenerEndpointV4 = tcpListenerEndpointV4;
+      _tcpListenerEndpointV6 = tcpListenerEndpointV6;
+      _quicListenerEndpointV4 = quicListenerEndpointV4;
+      _quicListenerEndpointV6 = quicListenerEndpointV6;
       _dhtEndpointV4 = dhtEndpointV4;
       _dhtEndpointV6 = dhtEndpointV6;
     });
@@ -174,8 +180,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           _labeledNullableText(Strings.labelExternalIP, _externalIP),
                           _labeledNullableText(Strings.labelLocalIPv4, _localIPv4),
                           _labeledNullableText(Strings.labelLocalIPv6, _localIPv6),
-                          _labeledNullableText(Strings.labelListenerEndpointV4, _listenerEndpointV4),
-                          _labeledNullableText(Strings.labelListenerEndpointV6, _listenerEndpointV6),
+                          _labeledNullableText(Strings.labelTcpListenerEndpointV4, _tcpListenerEndpointV4),
+                          _labeledNullableText(Strings.labelTcpListenerEndpointV6, _tcpListenerEndpointV6),
+                          _labeledNullableText(Strings.labelQuicListenerEndpointV4, _quicListenerEndpointV4),
+                          _labeledNullableText(Strings.labelQuicListenerEndpointV6, _quicListenerEndpointV6),
                           _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
                           _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
                         ]

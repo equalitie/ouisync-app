@@ -18,8 +18,11 @@ class Strings {
   static const String labelLocalIPv4 = 'Local IPv4:';
   static const String labelLocalIPv6 = 'Local IPv6:';
 
-  static const String labelListenerEndpointV4 = 'Listening on IPv4:';
-  static const String labelListenerEndpointV6 = 'Listening on IPv6:';
+  static const String labelTcpListenerEndpointV4 = 'Listening on TCP IPv4:';
+  static const String labelTcpListenerEndpointV6 = 'Listening on TCP IPv6:';
+
+  static const String labelQuicListenerEndpointV4 = 'Listening on QUIC/UDP IPv4:';
+  static const String labelQuicListenerEndpointV6 = 'Listening on QUIC/UDP IPv6:';
 
   static const String labelDHTv4Endpoint = 'DHT IPv4:';
   static const String labelDHTv6Endpoint = 'DHT IPv6:';
