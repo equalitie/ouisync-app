@@ -262,8 +262,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
-        "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
-            "OuiSync - Compartir archivos y sincronización en tiempo real, con o sin internet"),
+        "messageOuiSyncDesktopTitle":
+            MessageLookupByLibrary.simpleMessage("OuiSync"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "Este repositorio es de <bold>solo lectura</bold>"),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

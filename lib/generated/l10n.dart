@@ -1250,10 +1250,10 @@ class S {
     );
   }
 
-  /// `OuiSync - Secure file-sharing and real-time sync, with or without internet`
+  /// `OuiSync`
   String get messageOuiSyncDesktopTitle {
     return Intl.message(
-      'OuiSync - Secure file-sharing and real-time sync, with or without internet',
+      'OuiSync',
       name: 'messageOuiSyncDesktopTitle',
       desc: '',
       args: [],

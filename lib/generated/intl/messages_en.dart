@@ -254,8 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No repositories found"),
-        "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
-            "OuiSync - Secure file-sharing and real-time sync, with or without internet"),
+        "messageOuiSyncDesktopTitle":
+            MessageLookupByLibrary.simpleMessage("OuiSync"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(

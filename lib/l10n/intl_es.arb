@@ -130,7 +130,7 @@
     "messageSelectLocation":"Seleccione el lugar",
     "messageSaveToLocation":"Guardar el archivo en este directorio",
 
-    "messageOuiSyncDesktopTitle":"OuiSync - Compartir archivos y sincronización en tiempo real, con o sin internet",
+    "messageOuiSyncDesktopTitle":"OuiSync",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
