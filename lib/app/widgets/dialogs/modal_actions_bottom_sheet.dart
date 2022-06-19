@@ -105,9 +105,7 @@ class DirectoryActions extends StatelessWidget {
 
     if(result != null) {
       final file = result.files.single;
-      final newFilePath = parent.path == '/'
-        ? '/${file.name}'
-        : '$parent/${file.name}';
+      final newFilePath = buildDestinationPath(parent.path, file.name);
       
       final repo = parent.repo;
       final exist = await repo.exists(newFilePath);
