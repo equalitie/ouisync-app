@@ -181,12 +181,6 @@ class _MainPageState extends State<MainPage>
 
     List<stray.MenuItemBase> menu = [
       stray.MenuItem(
-        label: '${S.current.actionHide}/${S.current.actionShow}',
-        onClicked: () async => await windowManager.isVisible()
-          ? await _appWindow.hide()
-          : await _appWindow.show()),
-      stray.MenuSeparator(),
-      stray.MenuItem(
         label: S.current.actionExit,
         onClicked: () async {
           await windowManager.setPreventClose(false);
