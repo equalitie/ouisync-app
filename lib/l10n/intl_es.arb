@@ -132,6 +132,8 @@
 
     "messageOuiSyncDesktopTitle":"OuiSync",
 
+    "messageFilePreviewNotAvailable":"La vista previa de archivo no está disponible todavía",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

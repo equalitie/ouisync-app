@@ -1260,6 +1260,16 @@ class S {
     );
   }
 
+  /// `File preview is not yet available`
+  String get messageFilePreviewNotAvailable {
+    return Intl.message(
+      'File preview is not yet available',
+      name: 'messageFilePreviewNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(

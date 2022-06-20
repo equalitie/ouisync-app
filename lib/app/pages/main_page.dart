@@ -471,7 +471,13 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true);
+              /// For now, only Android can preview files.
+              if (!io.Platform.isAndroid) {
+                showSnackBar(context, content: Text(S.current.messageFilePreviewNotAvailable));
+                return;
+              }
+
+              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true); 
             }
             : () {
               if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {

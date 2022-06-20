@@ -241,6 +241,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFileDeleted": m8,
         "messageFileName":
             MessageLookupByLibrary.simpleMessage("Nombre de archivo"),
+        "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
+            "La vista previa de archivo no está disponible todavía"),
         "messageFolderDeleted": m9,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),

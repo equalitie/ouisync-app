@@ -233,6 +233,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
         "messageFileDeleted": m8,
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
+        "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
+            "File preview is not yet available"),
         "messageFolderDeleted": m9,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Folder name"),
