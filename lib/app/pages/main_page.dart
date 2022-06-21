@@ -7,8 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:system_tray/system_tray.dart' as stray;
-import 'package:window_manager/window_manager.dart';
 
 import '../../generated/l10n.dart';
 import '../bloc/blocs.dart';
@@ -35,7 +33,8 @@ class MainPage extends StatefulWidget {
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
     required this.mediaReceiver,
-    Key? key
+    Key? key,
+
   }) : super(key: key);
 
   final Session session;
@@ -48,7 +47,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, OuiSyncAppLogger, WindowListener {
+    with TickerProviderStateMixin, OuiSyncAppLogger {
   final MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
@@ -71,15 +70,9 @@ class _MainPageState extends State<MainPage>
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
-    final stray.SystemTray _systemTray = stray.SystemTray();
-    final stray.AppWindow _appWindow = stray.AppWindow();
-
     @override
     void initState() {
       super.initState();
-
-    windowManager.addListener(this);
-    _initWindowManager();
 
       widget.session.subscribeToNetworkEvents((event) {
         switch (event) {
@@ -124,16 +117,12 @@ class _MainPageState extends State<MainPage>
       _connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen(_connectivityChange);
-
-    _initSystemTray();
   }
 
     @override
     void dispose() async {
       await _mainState.close();
-
       _connectivitySubscription?.cancel();
-    windowManager.removeListener(this);
 
       super.dispose();
     }
@@ -163,56 +152,6 @@ class _MainPageState extends State<MainPage>
       .of<ConnectivityCubit>(context)
       .connectivityEvent(result);
     }
-
-  Future<void> _initWindowManager() async =>
-      await windowManager.setPreventClose(true);
-
-  @override
-  void onWindowClose() async {
-    bool _isPreventClose = await windowManager.isPreventClose();
-    if (_isPreventClose) {
-      _appWindow.hide();
-    }
-  }
-
-  Future<void> _initSystemTray() async {
-    String path =
-        io.Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
-
-    List<stray.MenuItemBase> menu = [
-      stray.MenuItem(
-        label: S.current.actionExit,
-        onClicked: () async {
-          await windowManager.setPreventClose(false);
-          await windowManager.close();
-        }),
-    ];
-
-    await _systemTray.initSystemTray(
-      title: S.current.titleAppTitle,
-      iconPath: path,
-      toolTip: S.current.messageOuiSyncDesktopTitle,
-    );
-
-    await _systemTray.setContextMenu(menu);
-
-    _systemTray.registerSystemTrayEventHandler((eventName) async {
-      switch (eventName) {
-        case Constants.eventLeftMouseUp:
-          await windowManager.isVisible()
-          ? _appWindow.hide()
-          : _appWindow.show();
-
-          break;
-        case Constants.eventRightMouseUp:
-          _systemTray.popUpContextMenu();
-
-          break;
-        
-        default:
-      }
-    });
-  }
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);

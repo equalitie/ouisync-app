@@ -5,7 +5,6 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
@@ -20,12 +19,15 @@ class OuiSyncApp extends StatefulWidget {
     required this.appStorageLocation,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
-  });
+    required this.windowManager,
+    Key? key,
+  }) : super(key: key);
 
   final Session session;
   final String appStorageLocation;
   final String repositoriesLocation;
   final String defaultRepositoryName;
+  final PlatformWindowManager windowManager;
 
   @override
   _OuiSyncAppState createState() => _OuiSyncAppState();
@@ -33,21 +35,26 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   final _mediaReceiver = MediaReceiver();
-  
+
   @override
   void initState() {
     super.initState();
 
     NativeChannels.init();
 
-    WindowOptions windowOptions = WindowOptions(
-      title: S.current.messageOuiSyncDesktopTitle);
-    windowManager.waitUntilReadyToShow(windowOptions, () {});
+    initWindowManager();
   }
-  
+
+  Future<void> initWindowManager() async {
+    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
+    await widget.windowManager.initSystemTray();
+  }
+
   @override
   void dispose() {
     _mediaReceiver.dispose();
+
+    widget.windowManager.dispose();
 
     super.dispose();
   }
@@ -55,61 +62,51 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: S.of(context).titleAppTitle,
-      theme: ThemeData(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<DirectoryBloc>(
-            create: (BuildContext context) => DirectoryBloc(),
-          ),
-          BlocProvider<UpgradeExistsCubit>(
-            create: (BuildContext context) =>
-              UpgradeExistsCubit(widget.session.current_protocol_version)
-          ),
-          BlocProvider<RepositoriesCubit>(
-            create: (BuildContext context) => RepositoriesCubit(  
-              session: widget.session,
-              appDir: widget.appStorageLocation,
-              repositoriesDir: widget.repositoriesLocation
-            )
-          ),
-          BlocProvider<RepositoryProgressCubit>(
-            create: (BuildContext context) => RepositoryProgressCubit()
-          ),
-          BlocProvider<ConnectivityCubit>(
-            create: (BuildContext context) => ConnectivityCubit()
-          ),
-          BlocProvider<PeerSetCubit>(
-            create: (BuildContext context) => PeerSetCubit()
-          )
-        ],
-        child: DropTarget(
-          onDragDone: (detail) {
-            loggy.app('Drop done: ${detail.files.first.path}');
+        debugShowCheckedModeBanner: false,
+        title: S.of(context).titleAppTitle,
+        theme: ThemeData(
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: MultiBlocProvider(
+            providers: [
+              BlocProvider<DirectoryBloc>(
+                create: (BuildContext context) => DirectoryBloc(),
+              ),
+              BlocProvider<UpgradeExistsCubit>(
+                  create: (BuildContext context) => UpgradeExistsCubit(
+                      widget.session.current_protocol_version)),
+              BlocProvider<RepositoriesCubit>(
+                  create: (BuildContext context) => RepositoriesCubit(
+                      session: widget.session,
+                      appDir: widget.appStorageLocation,
+                      repositoriesDir: widget.repositoriesLocation)),
+              BlocProvider<RepositoryProgressCubit>(
+                  create: (BuildContext context) => RepositoryProgressCubit()),
+              BlocProvider<ConnectivityCubit>(
+                  create: (BuildContext context) => ConnectivityCubit()),
+              BlocProvider<PeerSetCubit>(
+                  create: (BuildContext context) => PeerSetCubit())
+            ],
+            child: DropTarget(
+                onDragDone: (detail) {
+                  loggy.app('Drop done: ${detail.files.first.path}');
 
-            final xFile = detail.files.firstOrNull;
-            if (xFile != null) {
-              final file = io.File(xFile.path);
-              _mediaReceiver.controller.add(file);
-            }
-          },
-          onDragEntered: (detail) {
-            loggy.app('Drop entered: ${detail.localPosition}');
-          },
-          onDragExited: (detail) {
-            loggy.app('Drop exited: ${detail.localPosition}');
-          },
-          child: MainPage(
-            session: widget.session,
-            repositoriesLocation: widget.repositoriesLocation,
-            defaultRepositoryName: widget.defaultRepositoryName,
-            mediaReceiver: _mediaReceiver
-          )
-        )
-      )
-    );
+                  final xFile = detail.files.firstOrNull;
+                  if (xFile != null) {
+                    final file = io.File(xFile.path);
+                    _mediaReceiver.controller.add(file);
+                  }
+                },
+                onDragEntered: (detail) {
+                  loggy.app('Drop entered: ${detail.localPosition}');
+                },
+                onDragExited: (detail) {
+                  loggy.app('Drop exited: ${detail.localPosition}');
+                },
+                child: MainPage(
+                    session: widget.session,
+                    repositoriesLocation: widget.repositoriesLocation,
+                    defaultRepositoryName: widget.defaultRepositoryName,
+                    mediaReceiver: _mediaReceiver,))));
   }
 }

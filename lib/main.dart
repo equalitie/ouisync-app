@@ -6,16 +6,16 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'app/app.dart';
+import 'app/utils/platform/platform.dart';
 import 'app/utils/utils.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
+  final windowManager = PlatformWindowManager();
 
   Loggy.initLoggy();
 
@@ -34,23 +34,6 @@ Future<void> main() async {
     appDir,
     repositoriesDir,
   );
-
-  /// For some reason, if we use a constant value for the title in the
-  /// WindowsOptions, the app hangs. This is true for the localized strings,
-  /// or a regular constant value in Constants.
-  /// So we use a harcoded string to start, then we use the localized string
-  /// in app.dart -for now.
-  WindowOptions windowOptions = const WindowOptions(
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    title: 'OuiSync',
-    titleBarStyle: TitleBarStyle.normal,
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
 
   final localRepositoriesList =
       RepositoryHelper.localRepositoriesFiles(repositoriesDir) as List<String>;
@@ -78,6 +61,7 @@ Future<void> main() async {
           appStorageLocation: appDir,
           repositoriesLocation: repositoriesDir,
           defaultRepositoryName: latestRepositoryOrDefaultName,
+          windowManager: windowManager
         ))),
   );
 }
