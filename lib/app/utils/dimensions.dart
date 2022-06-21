@@ -25,6 +25,8 @@ class Dimensions {
   static const double sizeIconMicro = 20.0;
   static const double sizeIconBadge = 12.0;
 
+  static const double sizeModalDialogWidthDesktop = 400.0;
+
   static const EdgeInsets paddingContents = EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog = EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 20.0);
   static const EdgeInsets paddingBottomSheet = EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0);

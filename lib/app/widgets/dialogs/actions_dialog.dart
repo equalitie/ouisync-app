@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
@@ -22,6 +24,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
       child: Stack(
         children: <Widget>[
           Container(
+            width: Platform.isAndroid ? null : Dimensions.sizeModalDialogWidthDesktop,
             padding: Dimensions.paddingDialog,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
