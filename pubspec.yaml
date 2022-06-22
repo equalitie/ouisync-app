@@ -56,7 +56,14 @@ dependencies:
   share_plus: ^4.0.4
   shared_preferences: ^2.0.13
   styled_text: ^5.0.0+1
+  # system_tray: ^0.1.0
+  system_tray:
+    git:
+      url: https://github.com/antler119/system_tray.git
+      ref: main
+  tray_manager: ^0.1.8
   url_launcher: ^6.0.20
+  window_manager: ^0.2.5
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -89,8 +96,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/Ouisync-icon-blue.ico
+    # - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

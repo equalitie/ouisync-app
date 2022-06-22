@@ -129,6 +129,10 @@
 
     "messageSelectLocation":"Select the location",
     "messageSaveToLocation":"Save the file to this folder",
+    
+    "messageOuiSyncDesktopTitle":"OuiSync",
+
+    "messageFilePreviewNotAvailable":"File preview is not yet available",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
@@ -173,6 +177,9 @@
     "actionDeleteFile":"Delete file",
     "actionEditRepositoryName":"Edit name",
     "actionDeleteRepository":"Delete repository",
+    "actionShow":"Show",
+    "actionHide":"Hide",
+    "actionExit":"Exit",
     "actionAcceptCapital":"ACCEPT",
     "actionCancelCapital":"CANCEL",
     "actionHideCapital":"HIDE",

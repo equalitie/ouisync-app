@@ -561,6 +561,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.4"
+  menu_base:
+    dependency: transitive
+    description:
+      name: menu_base
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
   messagepack:
     dependency: transitive
     description:
@@ -904,6 +911,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.27.3"
+  screen_retriever:
+    dependency: transitive
+    description:
+      name: screen_retriever
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   share_plus:
     dependency: "direct main"
     description:
@@ -1030,6 +1044,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  shortid:
+    dependency: transitive
+    description:
+      name: shortid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1105,6 +1126,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  system_tray:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "576d7cc17fbab10bcdb40468a0db012d2365462e"
+      url: "https://github.com/antler119/system_tray.git"
+    source: git
+    version: "0.1.0"
   term_glyph:
     dependency: transitive
     description:
@@ -1140,6 +1170,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  tray_manager:
+    dependency: "direct main"
+    description:
+      name: tray_manager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.8"
   typed_data:
     dependency: transitive
     description:
@@ -1259,6 +1296,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.1"
+  window_manager:
+    dependency: "direct main"
+    description:
+      name: window_manager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.5"
   xdg_directories:
     dependency: transitive
     description:

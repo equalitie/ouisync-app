@@ -130,6 +130,10 @@
     "messageSelectLocation":"Seleccione el lugar",
     "messageSaveToLocation":"Guardar el archivo en este directorio",
 
+    "messageOuiSyncDesktopTitle":"OuiSync",
+
+    "messageFilePreviewNotAvailable":"La vista previa de archivo no está disponible todavía",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
@@ -173,6 +177,9 @@
     "actionDeleteFile":"Borrar archivo",
     "actionEditRepositoryName":"Cambiar nombre",
     "actionDeleteRepository":"Borrar repositorio",
+    "actionShow":"Mostrar",
+    "actionHide":"Ocultar",
+    "actionExit":"Salir",
     "actionAcceptCapital":"ACEPTAR",
     "actionCancelCapital":"CANCELAR",
     "actionHideCapital":"OCULTAR",
