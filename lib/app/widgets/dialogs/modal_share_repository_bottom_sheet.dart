@@ -143,46 +143,56 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
     child: Row(
       mainAxisSize: MainAxisSize.max,
       children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Fields.constrainedText(
-              S.current.labelShareLink,
-              flex:0,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Constants.inputLabelForeColor),
-            ValueListenableBuilder(
-              valueListenable: _shareToken,
-              builder:(context, value, child) =>
-                LimitedBox(
-                  maxWidth: 220.0, //We need to limit the size to prevent a overflow; try to find a way to do it automatically.
-                  child: Row(
-                    children: [
-                      Fields.constrainedText(
-                        value as String,
-                        softWrap: false,
-                        textOverflow: TextOverflow.fade,
-                        color: Colors.black
-                      )])))
-          ]),
-          Fields.actionIcon(
-            const Icon(Icons.content_copy_rounded),
-            size: Dimensions.sizeIconSmall,
-            color: Theme.of(context).primaryColor,
-            onPressed: () async {
-              await copyStringToClipboard(_shareToken.value);
-              showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
-            },
-          ),
-          Fields.actionIcon(
-            const Icon(Icons.share_outlined),
-            size: Dimensions.sizeIconSmall,
-            color: Theme.of(context).primaryColor,
-            onPressed: () => Share.share(_shareToken.value),
-          )
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Fields.constrainedText(
+                    S.current.labelShareLink,
+                    flex:0,
+                    fontSize: Dimensions.fontMicro,
+                    fontWeight: FontWeight.normal,
+                    color: Constants.inputLabelForeColor),
+                  ValueListenableBuilder(
+                      valueListenable: _shareToken,
+                      builder:(context, value, child) =>
+                        LimitedBox(
+                          maxWidth: 190.0, // TODO: Find how to do it without a fixed value
+                          child: Row(
+                            children: [
+                              Fields.constrainedText(
+                                value as String,
+                                softWrap: false,
+                                textOverflow: TextOverflow.fade,
+                                color: Colors.black)
+                            ],
+                          )))
+                  
+                ])
+            ])),
+        Expanded(
+          flex: 0,
+          child: Row(
+            children: [
+              Fields.actionIcon(
+                const Icon(Icons.content_copy_rounded),
+                size: Dimensions.sizeIconSmall,
+                color: Theme.of(context).primaryColor,
+                onPressed: () async {
+                  await copyStringToClipboard(_shareToken.value);
+                  showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
+                },),
+              Fields.actionIcon(
+                const Icon(Icons.share_outlined),
+                size: Dimensions.sizeIconSmall,
+                color: Theme.of(context).primaryColor,
+                onPressed: () => Share.share(_shareToken.value),)
+            ]))
       ],
     ));
 }
