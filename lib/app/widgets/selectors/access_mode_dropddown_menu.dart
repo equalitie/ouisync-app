@@ -64,24 +64,32 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(accessMode == _accessMode ? Icons.check : null,
           size: Dimensions.sizeIconSmall,
           color: Theme.of(context).primaryColor),
         Dimensions.spacingHorizontalDouble,
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Fields.constrainedText(
-                accessMode.name.capitalize(),
-                fontWeight: FontWeight.normal),
-              Fields.constrainedText(
-                _tokenDescription(accessMode),
-                fontSize: Dimensions.fontSmall,
-                fontWeight: FontWeight.normal)
-            ]))
+        Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Fields.constrainedText(
+                    accessMode.name.capitalize(),
+                    fontWeight: FontWeight.normal)])),
+            Container(
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 95.0),
+              child: Row(
+                children: [
+                  Fields.constrainedText(
+                    _tokenDescription(accessMode),
+                    fontSize: Dimensions.fontMicro,
+                    fontWeight: FontWeight.normal)])),
+            Dimensions.spacingVerticalHalf
+          ])
       ]);
   }
 
