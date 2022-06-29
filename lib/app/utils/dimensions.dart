@@ -95,4 +95,6 @@ class Dimensions {
     borderRadius: Dimensions.boderRadiusBottomSheetTop,
     color: Constants.modalBottomSheetBackgroundColor
   );
+
+  static const double aspectRatioModalDialogButton = 11 / 5;
 }
