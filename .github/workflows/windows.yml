@@ -42,6 +42,12 @@ jobs:
          cd ouisync-plugin
          flutter pub get
          flutter pub run ffigen
-      - run: OUISYNC_LIB=D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll flutter test
+
+      - name: Run tests
+        env:
+          OUISYNC_LIB: 'D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll'
+        run: |
+          flutter test
+
       - name: Building EXE (x86_64-pc-windows-gnu)
         run: flutter build
