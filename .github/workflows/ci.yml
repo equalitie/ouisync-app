@@ -13,7 +13,7 @@ on:
 jobs:
   build_and_test:
     name: OuiSync Flutter App - Android
-    runs-on: macos-11
+    runs-on: ubuntu-latest
     steps:
       - name: Installing llvm
         run: sudo apt-get install libclang-dev
