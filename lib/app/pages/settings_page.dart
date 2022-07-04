@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
@@ -545,18 +546,19 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     final info = await PackageInfo.fromPlatform();
     final name = info.appName.toLowerCase();
 
-    final path = buildDestinationPath(dir.path, '$name.log');
+    final now = DateTime.now();
+    // TODO: Add time zone, at time of this writing, time zones have not yet
+    // been implemented by DateFormat.
+    final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
+    final path = buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
     final out_file = File(path);
 
     final sink = out_file.openWrite();
 
     await dumpAll(sink, widget.repositoriesCubit.session.getRootStateMonitor());
 
-    print("closing sink start");
     await sink.close();
-    print("closing sink done");
 
     return path;
   }
-
 }
