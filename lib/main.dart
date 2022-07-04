@@ -13,6 +13,11 @@ import 'app/utils/utils.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
+  // When dumping log from logcat, we get logs from past ouisync runs as well,
+  // so add a line on each start of the app to know which part of the log
+  // belongs to the last app instance.
+  print("------------------------ OuiSync Start ------------------------");
+
   WidgetsFlutterBinding.ensureInitialized();
 
   final windowManager = PlatformWindowManager();
