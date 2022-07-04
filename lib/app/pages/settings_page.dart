@@ -128,10 +128,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         }
     }
 
-    final externalIP = await RGetIp.externalIP;
-
     setState(() {
-      _externalIP = externalIP;
+      _externalIP = "...";
       _localIPv4 = localIPv4;
       _localIPv6 = localIPv6;
       _tcpListenerEndpointV4 = tcpListenerEndpointV4;
@@ -141,6 +139,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _dhtEndpointV4 = dhtEndpointV4;
       _dhtEndpointV6 = dhtEndpointV6;
     });
+
+    // This one takes longer, so do it separately.
+    RGetIp.externalIP.then((ip) => setState(() { _externalIP = ip; }));
   }
 
   @override
