@@ -63,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   Color? _titlesColor = Colors.black;
 
   // Clicking on the version number three times shall show the state monitor page.
-  final _versionNumberClickCounter = ClickCounter(timeoutMs: 2000);
+  final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
 
   @override
   void initState() {
