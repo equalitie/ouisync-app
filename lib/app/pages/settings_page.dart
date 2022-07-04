@@ -555,6 +555,23 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     final sink = out_file.openWrite();
 
+    sink.writeln("appName: ${info.appName}");
+    sink.writeln("packageName: ${info.packageName}");
+    sink.writeln("version: ${info.version}");
+    sink.writeln("buildNumber: ${info.buildNumber}");
+
+    sink.writeln("_connectionType: ${_connectionType}");
+    sink.writeln("_externalIP: ${_externalIP}");
+    sink.writeln("_localIPv4: ${_localIPv4}");
+    sink.writeln("_localIPv6: ${_localIPv6}");
+    sink.writeln("_tcpListenerEndpointV4: ${_tcpListenerEndpointV4}");
+    sink.writeln("_tcpListenerEndpointV6: ${_tcpListenerEndpointV6}");
+    sink.writeln("_quicListenerEndpointV4: ${_quicListenerEndpointV4}");
+    sink.writeln("_quicListenerEndpointV6: ${_quicListenerEndpointV6}");
+    sink.writeln("_dhtEndpointV4: ${_dhtEndpointV4}");
+    sink.writeln("_dhtEndpointV6: ${_dhtEndpointV6}");
+    sink.writeln("\n");
+
     await dumpAll(sink, widget.repositoriesCubit.session.getRootStateMonitor());
 
     await sink.close();
