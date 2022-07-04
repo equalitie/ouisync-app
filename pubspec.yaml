@@ -34,7 +34,7 @@ dependencies:
   ffi: ^1.0.0
   file: ^6.1.2
   file_picker: ^4.5.1
-  filesystem_picker: ^2.0.0
+  filesystem_picker: ^2.0.1
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1

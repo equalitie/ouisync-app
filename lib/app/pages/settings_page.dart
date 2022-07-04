@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubit/cubits.dart';
@@ -62,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   Color? _titlesColor = Colors.black;
 
   // Clicking on the version number three times shall show the state monitor page.
-  final _versionNumberClickCounter = ClickCounter(timeoutMs: 2000);
+  final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
 
   @override
   void initState() {
@@ -530,23 +531,50 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Future<void> _saveLogs() async {
-    final tempPath = await _dumpLogs();
+    final tempPath = await _dumpInfo();
     final params = SaveFileDialogParams(sourceFilePath: tempPath);
     await FlutterFileDialog.saveFile(params: params);
   }
 
   Future<void> _shareLogs() async {
-    final tempPath = await _dumpLogs();
+    final tempPath = await _dumpInfo();
     await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
   }
 
-  Future<String> _dumpLogs() async {
+  Future<String> _dumpInfo() async {
     final dir = await getTemporaryDirectory();
     final info = await PackageInfo.fromPlatform();
     final name = info.appName.toLowerCase();
-    final path = buildDestinationPath(dir.path, '$name.log');
 
-    await dumpLogs(path);
+    final now = DateTime.now();
+    // TODO: Add time zone, at time of this writing, time zones have not yet
+    // been implemented by DateFormat.
+    final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
+    final path = buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
+    final out_file = File(path);
+
+    final sink = out_file.openWrite();
+
+    sink.writeln("appName: ${info.appName}");
+    sink.writeln("packageName: ${info.packageName}");
+    sink.writeln("version: ${info.version}");
+    sink.writeln("buildNumber: ${info.buildNumber}");
+
+    sink.writeln("_connectionType: ${_connectionType}");
+    sink.writeln("_externalIP: ${_externalIP}");
+    sink.writeln("_localIPv4: ${_localIPv4}");
+    sink.writeln("_localIPv6: ${_localIPv6}");
+    sink.writeln("_tcpListenerEndpointV4: ${_tcpListenerEndpointV4}");
+    sink.writeln("_tcpListenerEndpointV6: ${_tcpListenerEndpointV6}");
+    sink.writeln("_quicListenerEndpointV4: ${_quicListenerEndpointV4}");
+    sink.writeln("_quicListenerEndpointV6: ${_quicListenerEndpointV6}");
+    sink.writeln("_dhtEndpointV4: ${_dhtEndpointV4}");
+    sink.writeln("_dhtEndpointV6: ${_dhtEndpointV6}");
+    sink.writeln("\n");
+
+    await dumpAll(sink, widget.repositoriesCubit.session.getRootStateMonitor());
+
+    await sink.close();
 
     return path;
   }
