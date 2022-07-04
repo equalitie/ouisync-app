@@ -28,22 +28,26 @@ jobs:
         run: |
          cd ouisync-plugin\ouisync
          cargo run --bin bindgen
-      - name: Creating a symlink to the library binary for the Flutter tests (using cmd as the shell to have access to mklink)
-        shell: cmd
-        run: |
-         mkdir D:\a\ouisync-app\ouisync-app\build\test
-         mklink D:\a\ouisync-app\ouisync-app\build\test\ouisync_ffi.dll D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll
+
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '3.0.0'
+
       - name: Getting Flutter packages (App)
         run: flutter pub get
+
       - name: Getting Flutter packages (Plugin) and generating the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
         run: |
          cd ouisync-plugin
          flutter pub get
          flutter pub run ffigen
-      - run: flutter test
+
+      - name: Run tests
+        env:
+          OUISYNC_LIB: 'D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll'
+        run: |
+          flutter test
+
       - name: Building EXE (x86_64-pc-windows-gnu)
         run: flutter build

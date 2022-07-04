@@ -13,36 +13,33 @@ on:
 jobs:
   build_and_test:
     name: OuiSync Flutter App - Android
-    runs-on: macos-11
+    runs-on: ubuntu-latest
     steps:
+      - name: Installing llvm
+        run: sudo apt-get install libclang-dev
+
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+
       - name: Adding Android Platform target
-        run: |
-         echo "Adding target: x86_64-linux-android"
-         rustup target add x86_64-linux-android
-        # For each additional platform supported, you can add the `target` by using the corresponding target triple.
-        # To get a list of all available triples, run `rustup target list`
-      - name: Building OuiSync library
-        run: |
-         cd ouisync-plugin/ouisync
-         cargo build --release --lib
-      - name: Generating Rust FFI bindings for the library, to be used in the OuiSync plugin.
+        run: rustup target add x86_64-linux-android # armv7-linux-androideabi aarch64-linux-android i686-linux-android
+
+      - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
         run: |
          cd ouisync-plugin/ouisync
          cargo run --bin bindgen
-      - name: Creating a symlink to the library binary for the Flutter tests
-        run: |
-         mkdir -p /Users/runner/work/ouisync-app/ouisync-app/build/test
-         ln -s /Users/runner/work/ouisync-app/ouisync-app/ouisync-plugin/ouisync/target/release/libouisync_ffi.dylib /Users/runner/work/ouisync-app/ouisync-app/build/test
+
       - name: Setting up the Android NDK environment
         uses: nttld/setup-ndk@v1
         with:
             ndk-version: r21e
+
+      - name: Setting the directory for the Android NDK, and the ABI filter for x86_64 in `android/local.properties`
         # Note: we should be able to get the NDK directory value from
         #
         # ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -52,21 +49,36 @@ jobs:
         # https://github.com/marketplace/actions/setup-android-ndk
         #
         # but that doesn't seem to work.
-      - name: Setting the directory for the Android NDK, and the ABI filter for x86_64 in `android/local.properties`
-        run: |
-         echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
-         echo "ndk.abiFilters=x86_64" >> android/local.properties
+        run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
+
+      - name: Set the ABI filter for x86_64
+        run: echo "ndk.abiFilters=x86_64" >> android/local.properties
+
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '3.0.0'
+
       - name: Getting Flutter packages (App)
         run: flutter pub get
-      - name: Getting Flutter packages (Plugin) and generating the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
+
+      - name: Get Flutter packages (Plugin)
         run: |
          cd ouisync-plugin
          flutter pub get
+
+      - name: Generate the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
+        run: |
+         cd ouisync-plugin
          flutter pub run ffigen
-      - run: flutter test
+
+      - name: Build OuiSync library for tests
+        run: |
+         cd ouisync-plugin/ouisync
+         cargo build --release --lib
+
+      - name: Run tests
+        run: OUISYNC_LIB=`pwd`/ouisync-plugin/ouisync/target/release/libouisync_ffi.so flutter test
+
       - name: Building APK (android-x64)
         run: flutter build apk --target-platform android-x64
