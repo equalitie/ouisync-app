@@ -530,24 +530,33 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Future<void> _saveLogs() async {
-    final tempPath = await _dumpLogs();
+    final tempPath = await _dumpInfo();
     final params = SaveFileDialogParams(sourceFilePath: tempPath);
     await FlutterFileDialog.saveFile(params: params);
   }
 
   Future<void> _shareLogs() async {
-    final tempPath = await _dumpLogs();
+    final tempPath = await _dumpInfo();
     await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
   }
 
-  Future<String> _dumpLogs() async {
+  Future<String> _dumpInfo() async {
     final dir = await getTemporaryDirectory();
     final info = await PackageInfo.fromPlatform();
     final name = info.appName.toLowerCase();
-    final path = buildDestinationPath(dir.path, '$name.log');
 
-    await dumpLogs(path);
+    final path = buildDestinationPath(dir.path, '$name.log');
+    final out_file = File(path);
+
+    final sink = out_file.openWrite();
+
+    await dumpAll(sink, widget.repositoriesCubit.session.getRootStateMonitor());
+
+    print("closing sink start");
+    await sink.close();
+    print("closing sink done");
 
     return path;
   }
+
 }

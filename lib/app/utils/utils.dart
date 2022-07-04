@@ -7,7 +7,7 @@ export 'extensions.dart';
 export 'fields.dart';
 export 'format.dart';
 export 'inline_text_styles.dart';
-export 'log.dart';
+export 'dump.dart';
 export 'repository_helper.dart';
 export 'settings.dart';
 export 'spinning_icon.dart';
