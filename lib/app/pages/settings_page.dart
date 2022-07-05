@@ -156,11 +156,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-            child:  SingleChildScrollView(
-              child:Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: ListView(
+                // The badge over the version number is shown outside of the row boundary, so we
+                // need to set clipBehaior to Clip.none.
+                clipBehavior: Clip.none,
                 children: [
                   _buildRepositoriesSection(),
                   _divider(),
@@ -206,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   _versionNumberFutureBuilder(
                       S.current.labelAppVersion, info.then((info) => info.version)),
                 ],
-              ))));
+              )));
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
