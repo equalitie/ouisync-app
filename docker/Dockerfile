@@ -11,13 +11,10 @@ RUN apt-get install -y --no-install-recommends cmake ninja-build clang build-ess
 
 RUN flutter config --enable-linux-desktop
 
-# The flutter SDK in the image is old (2.1x), and we need a recent version for the app packages (3.x), so we delete it and clone the stable channel
-RUN rm -r /sdks/flutter
-RUN cd /sdks && git clone https://github.com/flutter/flutter.git -b stable --depth 1 --no-single-branch
-
-RUN flutter doctor
-
+#Installing Android NDK version 22.0.7026061
 RUN cd opt/android-sdk-linux/cmdline-tools/latest/bin/ && sdkmanager --install "ndk;22.0.7026061"
+
+#Symlink to current python version
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 #Installing rustup and cargo; adding targets for Android
