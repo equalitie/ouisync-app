@@ -93,7 +93,6 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
         return state.repo == _mainState.currentRepo;
       },
       builder: (context, state) {
-        //return ConstrainedBox(constraints: BoxConstraints.tight(Size.square(25)), child: CircularProgressIndicator());
         if (!(state is RepositoryProgressUpdate)) {
           return SizedBox.shrink();
         }
