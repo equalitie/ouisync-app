@@ -1,4 +1,5 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../models/models.dart';
 import '../models/folder_state.dart';
@@ -47,6 +48,12 @@ class RepoState with OuiSyncAppLogger {
     return other is RepoState &&
       other.handle == handle &&
       other.name == name;
+  }
+
+  // Get the state monitor of this particular repository. That is 'root >
+  // Repositories > this repository ID'.
+  StateMonitor stateMonitor() {
+    return handle.stateMonitor()!;
   }
 
   Future<Progress> syncProgress() async {
