@@ -1,13 +1,23 @@
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'dart:async';
 
 import '../models/folder_state.dart';
 import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
+import '../cubit/watch.dart';
 
 class MainState with OuiSyncAppLogger {
   static final Map<String, RepoState> _repos = Map();
   
   String? _currentRepoName;
+
+  final _currentRepoCubit = Watch<RepoState?>(null);
+
+  Watch<RepoState?> get currentRepoCubit => _currentRepoCubit;
+
+  MainState() {
+    _currentRepoCubit.emit(null);
+  }
 
   RepoState? get currentRepo {
     if (_currentRepoName == null) {
@@ -37,6 +47,7 @@ class MainState with OuiSyncAppLogger {
     if (repo == null) {
       loggy.app("Can't set current repository to null");
       _currentRepoName = null;
+      _currentRepoCubit.emit(null);
       return;
     }
 
@@ -48,6 +59,7 @@ class MainState with OuiSyncAppLogger {
     _subscription = null;
 
     _currentRepoName = repo.name;
+    _currentRepoCubit.emit(repo);
     
     _subscription = repo.handle.subscribe(() => _subscriptionCallback!.call(repo));
 
@@ -94,6 +106,7 @@ class MainState with OuiSyncAppLogger {
     // Make sure this function is idempotent, i.e. that calling it more than once
     // one after another won't change it's meaning nor it will crash.
     _currentRepoName = null;
+    _currentRepoCubit.emit(null);
 
     _subscription?.cancel();
     _subscription = null;

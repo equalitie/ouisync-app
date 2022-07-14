@@ -72,7 +72,7 @@ class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
               ],
             )
           ),
-          RepositoryProgress(_mainState.currentRepo),
+          RepositoryProgress(_mainState),
         ],
       ),
     );

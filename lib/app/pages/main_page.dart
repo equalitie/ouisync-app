@@ -47,8 +47,9 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, OuiSyncAppLogger {
-  final MainState _mainState = MainState();
+    with TickerProviderStateMixin, OuiSyncAppLogger
+{
+    final MainState _mainState = MainState();
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
