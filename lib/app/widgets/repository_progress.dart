@@ -29,14 +29,11 @@ class RepositoryProgress extends StatelessWidget {
 
       _monitor = repo.stateMonitor();
       final monitor = _monitor;
-
       if (monitor == null) return SizedBox.shrink();
 
       _subscription?.close();
       _subscription = monitor.subscribe();
-
       final subscription = _subscription;
-
       if (subscription == null) return SizedBox.shrink();
 
       return StreamBuilder<Null>(
@@ -56,12 +53,18 @@ class RepositoryProgress extends StatelessWidget {
               return SizedBox.shrink();
           }
 
+          Color? color = null;
+
+          if (block_inflight == 0) {
+            color = Colors.grey;
+          }
+
           // TODO: Try to also get the number of missing blocks and if
           // `block_inflight` is != 0 then set `value` of the progress indicator.
           return ConstrainedBox(
               constraints: BoxConstraints.tight(Size.square(Dimensions.sizeIconSmall)),
               child: CircularProgressIndicator(
-                backgroundColor: Constants.progressBarBackgroundColor
+                color: color,
               )
           );
         }
