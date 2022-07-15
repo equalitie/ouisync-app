@@ -20,6 +20,7 @@ import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
+import '../widgets/repository_progress.dart';
 
 typedef RepositoryCallback = Future<void> Function(RepoState? repository, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
@@ -184,7 +185,12 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: _mainWidget,
+          child: Column(
+            children: <Widget>[
+              RepositoryProgress(_mainState.currentRepo),
+              Expanded(child: _mainWidget),
+            ]
+          ),
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),
@@ -231,7 +237,6 @@ class _MainPageState extends State<MainPage>
     _buildOuiSyncBar() => OuiSyncBar(
       repoList: _buildRepositoriesBar(),
       settingsButton: _buildSettingsIcon(),
-      bottomWidget: FolderNavigationBar(_mainState),
     );
 
     RepositoriesBar _buildRepositoriesBar() {
@@ -363,16 +368,8 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      if (currentFolder!.content.isEmpty) {
-        return NoContentsState(
-          repository: current,
-          path: currentFolder!.path
-        );
-      }
-
-      return _contentsList(
-        repository: current,
-        path: currentFolder!.path
+      return _contentBrowser(
+        folder: currentFolder!
       );
     }
 
@@ -384,13 +381,32 @@ class _MainPageState extends State<MainPage>
       onReload: actionReload
     );
 
-    _contentsList({
-      required RepoState repository,
-      required String path
-    }) => ValueListenableBuilder(
+    _contentBrowser({
+      required FolderState folder,
+    }) {
+      var child;
+
+      if (folder.content.isEmpty) {
+          child = NoContentsState(repository: folder.repo, path: folder.path);
+      } else {
+          child = _contentsList(folder);
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          FolderNavigationBar(_mainState),
+          // TODO: A shadow would be nicer.
+          Divider(height: 3),
+          Expanded(child: child),
+        ],
+      );
+    }
+
+    _contentsList(FolderState folder) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
-        onRefresh: () async => getContent(repository),
+        onRefresh: () async => getContent(folder.repo),
         child: ListView.separated(
           padding: EdgeInsets.only(bottom: value as double),
           separatorBuilder: (context, index) =>
@@ -424,7 +440,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              navigateToPath(repository, item.path);
+              navigateToPath(folder.repo, item.path);
             };
 
             final listItem = ListItem (
@@ -444,12 +460,12 @@ class _MainPageState extends State<MainPage>
 
                 item.type == ItemType.file
                 ? await _showFileDetails(
-                  repo: repository,
+                  repo: folder.repo,
                   directoryBloc: _directoryBloc,
                   scaffoldKey: _scaffoldKey,
                   data: item)
                 : await _showFolderDetails(
-                  repo: repository,
+                  repo: folder.repo,
                   directoryBloc: _directoryBloc,
                   scaffoldKey: _scaffoldKey,
                   data: item);
