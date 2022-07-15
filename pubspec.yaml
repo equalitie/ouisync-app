@@ -37,6 +37,7 @@ dependencies:
   filesystem_picker: ^2.0.1
   flutter:
     sdk: flutter
+  flutter_background: ^1.1.0
   flutter_bloc: ^8.0.1
   flutter_file_dialog: ^2.3.0
   flutter_hooks: ^0.18.2+1

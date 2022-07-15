@@ -5,6 +5,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 import '../generated/l10n.dart';
 import 'bloc/blocs.dart';
@@ -42,7 +43,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
 
     NativeChannels.init();
 
-    initWindowManager();
+    initWindowManager().then((_) {enableBackgroundExecution();});
   }
 
   Future<void> initWindowManager() async {
@@ -108,5 +109,53 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
                     repositoriesLocation: widget.repositoriesLocation,
                     defaultRepositoryName: widget.defaultRepositoryName,
                     mediaReceiver: _mediaReceiver,))));
+  }
+
+  void enableBackgroundExecution() async {
+    final config = FlutterBackgroundAndroidConfig(
+      notificationTitle: 'OuiSync',
+      notificationText:
+          'Background notification for keeping the example app running in the background',
+      notificationIcon: AndroidResource(name: 'background_icon'),
+      notificationImportance: AndroidNotificationImportance.Default,
+      enableWifiLock: true,
+    );
+
+    var hasPermissions = await FlutterBackground.hasPermissions;
+
+    if (!hasPermissions) {
+      await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+                title: Text('Permissions needed'),
+                content: Text(
+                    '''Shortly the OS will ask you for permission to execute
+                    this app in the background. This is required in order to
+                    keep syncing while the app is not in the foreground.'''
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('OK'),
+                  ),
+                ]);
+          });
+    }
+
+    hasPermissions = await FlutterBackground.initialize(androidConfig: config);
+
+    if (hasPermissions) {
+      final backgroundExecution =
+          await FlutterBackground.enableBackgroundExecution();
+
+      if (backgroundExecution) {
+          print("Background execution enabled");
+      } else {
+          print("Background execution NOT enabled");
+      }
+    } else {
+      print("No permissions to enable background execution");
+    }
   }
 }
