@@ -7,46 +7,14 @@ import '../../bloc/blocs.dart';
 import '../../models/main_state.dart';
 import '../../widgets/repository_progress.dart';
 
-class FolderNavigationBar extends StatelessWidget with PreferredSizeWidget {
+class FolderNavigationBar extends StatelessWidget {
   final MainState _mainState;
 
   FolderNavigationBar(this._mainState);
 
-  String? get _path {
-    final currentRepo = _mainState.currentRepo;
-    if (currentRepo == null) return null;
-    if (currentRepo.accessMode == oui.AccessMode.blind) return null;
-    return currentRepo.currentFolder.path;
-  }
-
   @override
-  Widget build(BuildContext context) =>
-    BlocConsumer<DirectoryBloc, DirectoryState>(
-      buildWhen: (context, state) {
-        return state is DirectoryReloaded;
-      },
-      builder: (context, state) {
-        final path = _path;
-
-        if (path != null) {
-          return _routeBar(path, context);
-        } else {
-          return SizedBox.shrink();
-        }
-      },
-      listener: (context, state) {}
-    );
-
-  @override
-  Size get preferredSize {
-    if (_path == null) {
-      return Size(0.0, 0.0);
-    }
-    // TODO: This value was found experimentally, can it be done programmatically?
-    return Size.fromHeight(51);
-  }
-
-  Container _routeBar(String path, BuildContext context) {
+  Widget build(BuildContext context) {
+    final path = _mainState.currentFolder!.path;
     final route = _currentLocationBar(path, context);
 
     return Container(
