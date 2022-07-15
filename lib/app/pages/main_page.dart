@@ -20,6 +20,7 @@ import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
+import '../widgets/repository_progress.dart';
 
 typedef RepositoryCallback = Future<void> Function(RepoState? repository, AccessMode? previousAccessMode);
 typedef ShareRepositoryCallback = void Function();
@@ -184,7 +185,12 @@ class _MainPageState extends State<MainPage>
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
-          child: _mainWidget,
+          child: Column(
+            children: <Widget>[
+              RepositoryProgress(_mainState.currentRepo),
+              Expanded(child: _mainWidget),
+            ]
+          ),
           onWillPop: _onBackPressed
         ),
         floatingActionButton: _buildFAB(context),

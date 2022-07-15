@@ -5,7 +5,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import '../../utils/utils.dart';
 import '../../bloc/blocs.dart';
 import '../../models/main_state.dart';
-import '../../widgets/repository_progress.dart';
 
 class FolderNavigationBar extends StatelessWidget {
   final MainState _mainState;
@@ -40,7 +39,6 @@ class FolderNavigationBar extends StatelessWidget {
               ],
             )
           ),
-          RepositoryProgress(_mainState),
         ],
       ),
     );
