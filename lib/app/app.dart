@@ -130,9 +130,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
             return AlertDialog(
                 title: Text('Permissions needed'),
                 content: Text(
-                    '''Shortly the OS will ask you for permission to execute
-                    this app in the background. This is required in order to
-                    keep syncing while the app is not in the foreground.'''
+                    "Shortly the OS will ask you for permission to execute "
+                    "this app in the background. This is required in order to "
+                    "keep syncing while the app is not in the foreground."
                 ),
                 actions: [
                   TextButton(
