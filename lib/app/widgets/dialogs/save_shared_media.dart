@@ -55,7 +55,10 @@ class SaveSharedMedia extends StatelessWidget {
       onPressed: () => _cancelSaveFile(context)),
     PositiveButton(
       text: S.current.actionSave,
-      onPressed: () async => await onSaveFile.call(sharedMedia.first.path, usesModal: true))
+      onPressed: () async {
+        await onSaveFile.call(sharedMedia.first.path);
+        Navigator.of(context).pop();
+      })
   ];
   
   void _cancelSaveFile(context) {

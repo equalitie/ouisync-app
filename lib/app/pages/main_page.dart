@@ -26,7 +26,7 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = Future<void> Function(String sourceFilePath, { bool usesModal });
+typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -576,7 +576,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia(String sourceFilePath, { usesModal = false }) async {
+  Future<void> saveMedia(String sourceFilePath) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
@@ -622,10 +622,6 @@ class _MainPageState extends State<MainPage>
 
     loggy.app('Media path: $sourceFilePath');
     saveFileToOuiSync(sourceFilePath);
-
-    if (usesModal) {
-      Navigator.of(context).pop();
-    }
   }
 
   void saveFileToOuiSync(String path) {
