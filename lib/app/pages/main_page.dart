@@ -576,7 +576,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-    Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
+  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
