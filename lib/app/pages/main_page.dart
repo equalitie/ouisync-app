@@ -26,7 +26,7 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = Future<void> Function({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, bool usesModal });
+typedef SaveFileCallback = Future<void> Function(String sourceFilePath, { bool usesModal });
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -112,7 +112,7 @@ class _MainPageState extends State<MainPage>
 
         if (media is io.File) {
           loggy.app('mediaReceiver: io.File');
-          saveMedia(droppedMediaFile: media);
+          saveMedia(media.path);
         }
       });
 
@@ -576,7 +576,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
+  Future<void> saveMedia(String sourceFilePath, { usesModal = false }) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
@@ -584,8 +584,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    if (mobileSharedMediaFile == null &&
-    droppedMediaFile == null) {
+    if (sourceFilePath == null) {
       showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
@@ -621,13 +620,8 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final String? path = mobileSharedMediaFile?.path ?? droppedMediaFile?.path;
-    if (path == null) {
-      return;
-    }
-
-    loggy.app('Media path: $path');
-    saveFileToOuiSync(path);
+    loggy.app('Media path: $sourceFilePath');
+    saveFileToOuiSync(sourceFilePath);
 
     if (usesModal) {
       Navigator.of(context).pop();
