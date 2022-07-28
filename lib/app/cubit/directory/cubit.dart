@@ -268,17 +268,17 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
     await _refreshFolder(repo);
   }
 
-  Future<void> deleteFile(RepoState repo, { required String parentPath, required String filePath }) async {
+  Future<void> deleteFile(RepoState repo, String filePath) async {
     emit(DirectoryLoadInProgress());
 
     try{
       final deleteFileResult = await repo.deleteFile(filePath);
       if (deleteFileResult.errorMessage.isNotEmpty)
       {
-        loggy.app('Delete file ${filePath} failed');
+        loggy.app('Delete file $filePath failed');
       }
     } catch (e, st) {
-      loggy.app('Delete file ${filePath} exception', e, st);
+      loggy.app('Delete file $filePath exception', e, st);
     }
 
     await _refreshFolder(repo);

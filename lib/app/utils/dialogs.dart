@@ -172,14 +172,8 @@ abstract class Dialogs {
       TextButton(
         child: Text(S.current.actionDeleteCapital),
         onPressed: () {
-          cubit.deleteFile(
-            repository,
-            parentPath: parent,
-            filePath: path
-          );
-  
+          cubit.deleteFile(repository, path);
           Navigator.of(context).pop(fileName);
-
           showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
       ),

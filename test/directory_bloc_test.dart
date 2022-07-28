@@ -4,7 +4,7 @@ import 'dart:io' as io;
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:ouisync_app/app/bloc/blocs.dart';
+import 'package:ouisync_app/app/cubit/cubits.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/models/repo_state.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -13,11 +13,11 @@ class FakeFile extends Fake implements File {}
 class FakeFileStream extends Fake implements Stream<List<int>> {}
 
 void main() {
-  group('DirectoryBloc', () {
+  group('DirectoryCubit', () {
     late Session session;
     late RepoState repository;
 
-    late DirectoryBloc directoryBloc;
+    late DirectoryCubit directoryCubit;
 
     late FileItem dummyFileItem;
 
@@ -32,7 +32,7 @@ void main() {
         await Repository.create(session, store: "${dir.path}/store.db", password: '1a2b3c')
       );
 
-      directoryBloc = DirectoryBloc();
+      directoryCubit = DirectoryCubit();
 
       dummyFileItem = FileItem(
         name: 'testFile.txt',
@@ -41,7 +41,7 @@ void main() {
     });
 
     tearDown(() async {
-      directoryBloc.close();
+      directoryCubit.close();
 
       await repository.close();
       session.close();
@@ -49,8 +49,8 @@ void main() {
 
     //group('CreateFolder', () {
     //    blocTest('emits [DirectoryLoadInProgress, NavigationLoadSuccess] when CreateFolder is added and createFolder succeeds',
-    //    build: () => directoryBloc,
-    //    act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
+    //    build: () => directoryCubit,
+    //    act: (DirectoryCubit dir) => dir.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '/test')),
     //    wait: Duration(seconds: 1),
     //    expect: () => [
     //      DirectoryLoadInProgress(),
@@ -59,8 +59,8 @@ void main() {
     //    // TODO: find out what is the expected behaviour in the library for this: create directory '//' .
     //    // blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] with message when CreateFolder is added '
     //    // 'and createFolder fails',
-    //    // build: () => directoryBloc,
-    //    // act: (DirectoryBloc bloc) => bloc.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '//')),
+    //    // build: () => directoryCubit,
+    //    // act: (DirectoryCubit dir) => dir.add(CreateFolder(repository: repository, parentPath: '/', newFolderPath: '//')),
     //    // expect: () => [
     //    //   DirectoryLoadInProgress(),
     //    //   DirectoryLoadFailure()
@@ -70,8 +70,8 @@ void main() {
     group('DeleteFolder', () {
       blocTest('emits [DirectoryLoadInProgress, DirectoryReloaded] when DeleteFolder is added and deleteFolder succeeds', 
       setUp: () async { await repository.createFolder('/testFolder'); },
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, path: '/testFolder')),
+      build: () => directoryCubit,
+      act: (DirectoryCubit dir) => dir.deleteFolder(repository, '/testFolder', false),
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
@@ -83,8 +83,8 @@ void main() {
 
       blocTest('emits [DirectoryLoadInProgress, DirectoryLoadFailure] when DeleteFolder is added and deleteFolder fails'
       ' because the folder do not exist',
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(DeleteFolder(repository: repository, path: '/testFolder')),
+      build: () => directoryCubit,
+      act: (DirectoryCubit dir) => dir.deleteFolder(repository, '/testFolder', false),
       wait: Duration(seconds: 1),
       expect: () => [
         DirectoryLoadInProgress(),
@@ -102,8 +102,8 @@ void main() {
     //   setUp: () {
     //     stream = Stream.value(utf8.encode(loremIpsum));
     //   },
-    //   build: () => directoryBloc,
-    //   act: (DirectoryBloc bloc) => bloc.add(
+    //   build: () => directoryCubit,
+    //   act: (DirectoryCubit dir) => dir.add(
     //     SaveFile(
     //       repository: repository,
     //       newFilePath: '/testFile.txt',
@@ -126,8 +126,8 @@ void main() {
     //     await file.write(0, utf8.encode(loremIpsum));
     //     await file.close();
     //   },
-    //   build: () => directoryBloc,
-    //   act: (DirectoryBloc bloc) => bloc.add(
+    //   build: () => directoryCubit,
+    //   act: (DirectoryCubit dir) => dir.add(
     //     ReadFile(
     //       repository: repository,
     //       parentPath: '/',
@@ -148,13 +148,8 @@ void main() {
         await file.close();
       },
       wait: Duration(seconds: 1),
-      build: () => directoryBloc,
-      act: (DirectoryBloc bloc) => bloc.add(
-        DeleteFile(
-          repository: repository, 
-          parentPath: '/', 
-          filePath: '/testFile.txt'
-        )),
+      build: () => directoryCubit,
+      act: (DirectoryCubit dir) => dir.deleteFile(repository, '/testFile.txt'),
       expect: () => [
         DirectoryLoadInProgress(),
         DirectoryReloaded(path: '/', id: 0)
