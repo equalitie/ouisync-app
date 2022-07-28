@@ -27,7 +27,6 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.mainState,
     required this.repositoriesCubit,
-    required this.onRepositorySelect,
     required this.onShareRepository,
     required this.title,
     this.dhtStatus = false,
@@ -35,7 +34,6 @@ class SettingsPage extends StatefulWidget {
 
   final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
-  final RepositoryCallback onRepositorySelect;
   final void Function() onShareRepository;
   final String title;
   final bool dhtStatus;

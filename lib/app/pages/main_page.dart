@@ -21,7 +21,7 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
-typedef RepositoryCallback = Future<void> Function(RepoState? repository, AccessMode? previousAccessMode);
+typedef RepositoryCallback = Future<void> Function(RepoState? repository);
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
@@ -283,7 +283,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    Future<void> switchRepository(RepoState? repository, AccessMode? previousAccessMode) async {
+    Future<void> switchRepository(RepoState? repository) async {
       await _mainState.setCurrent(repository);
 
       if (repository == null) {
@@ -741,7 +741,6 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
             mainState: _mainState,
             repositoriesCubit: reposCubit,
-            onRepositorySelect: switchRepository,
             onShareRepository: shareRepository,
             title: S.current.titleSettings,
             dhtStatus: dhtStatus,

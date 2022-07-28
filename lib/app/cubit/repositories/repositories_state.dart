@@ -23,18 +23,13 @@ class RepositoryPickerSelection extends RepositoryPickerState {
 }
 
 class RepositoryPickerUnlocked extends RepositoryPickerState {
-  const RepositoryPickerUnlocked({
-    required this.repo,
-    required this.previousAccessMode
-  });
+  const RepositoryPickerUnlocked(this.repo);
 
   final RepoState repo;
-  final oui.AccessMode previousAccessMode;
 
   @override
   List<Object?> get props => [
     repo,
-    previousAccessMode
   ];
 }
 

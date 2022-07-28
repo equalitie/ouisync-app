@@ -94,9 +94,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           _updateCurrentRepository(state.repo);
         }
         if (state is RepositoryPickerUnlocked) {
-          _updateCurrentRepository(
-            state.repo,
-            previousAccessMode: state.previousAccessMode);
+          _updateCurrentRepository(state.repo);
         }
         if (state is RepositoryPickerInitial) {
           _updateCurrentRepository(null);
@@ -105,7 +103,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     );
   }
 
-  _updateCurrentRepository(RepoState? repo, {AccessMode? previousAccessMode}) async {
+  _updateCurrentRepository(RepoState? repo) async {
     setState(() {
       if (repo != null) {
         _repositoryName = repo.name;
@@ -114,7 +112,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       }
     });
 
-    await widget.onRepositorySelect.call(repo, previousAccessMode);
+    await widget.onRepositorySelect.call(repo);
   }
 
   _buildState({
