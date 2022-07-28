@@ -32,6 +32,10 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   String get appDir => _appDir;
   MainState get mainState => _mainState;
 
+  RepoState? current() {
+    return _mainState.currentRepo;
+  }
+
   /// Opens a repository in blind mode to allow synchronization, even before the
   /// user unlocks it.
   Future<RepoState?> initRepository(String name) async {
@@ -107,7 +111,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
     }
   }
 
-  void selectRepository(RepoState? repo) async {
+  void emitSelection(RepoState? repo) async {
     if (repo == null) {
       emit(RepositoryPickerInitial());
     } else {
@@ -138,7 +142,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(oldName);
 
       loggy.app('Selecting $oldName...');
-      selectRepository(repo);
+      emitSelection(repo);
 
       loggy.app('Repository renaming canceled');
       return;
@@ -176,7 +180,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       final repo = await initRepository(repositoryName);
 
       loggy.app('Selecting $repositoryName...');
-      selectRepository(repo!);
+      emitSelection(repo!);
 
       loggy.app('Repository deletion canceled');
       return;
@@ -205,6 +209,10 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   }
 
   _buildStoreString(repositoryName) => '${_repositoriesDir}/$repositoryName.db';
+
+  Future<void> close() async {
+    await _mainState.close();
+  }
 
   Future<oui.Repository> _getRepository({required String store, String? password, oui.ShareToken?  shareToken, required bool exist}) => 
     exist 

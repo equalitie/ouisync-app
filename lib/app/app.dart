@@ -75,11 +75,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
               BlocProvider<UpgradeExistsCubit>(
                   create: (BuildContext context) => UpgradeExistsCubit(
                       widget.session.current_protocol_version)),
-              //BlocProvider<RepositoriesCubit>(
-              //    create: (BuildContext context) => RepositoriesCubit(
-              //        session: widget.session,
-              //        appDir: widget.appStorageLocation,
-              //        repositoriesDir: widget.repositoriesLocation)),
               BlocProvider<RepositoryProgressCubit>(
                   create: (BuildContext context) => RepositoryProgressCubit()),
               BlocProvider<ConnectivityCubit>(

@@ -130,7 +130,7 @@ class _MainPageState extends State<MainPage>
 
     @override
     void dispose() async {
-      await _mainState.close();
+      await _repositories.close();
       _connectivitySubscription?.cancel();
 
       super.dispose();
@@ -164,7 +164,7 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-      _repositories.selectRepository(_mainState.currentRepo);
+      _repositories.emitSelection(_repositories.current());
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {
@@ -194,7 +194,7 @@ class _MainPageState extends State<MainPage>
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              RepositoryProgress(_mainState.currentRepo),
+              RepositoryProgress(_repositories.current()),
               Expanded(child: _mainWidget),
             ]
           ),
@@ -205,7 +205,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      final currentRepo = _mainState.currentRepo;
+      final currentRepo = _repositories.current();
       final currentFolder = currentRepo?.currentFolder;
 
       if (currentFolder == null || currentFolder.isRoot()) {
@@ -258,7 +258,7 @@ class _MainPageState extends State<MainPage>
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
         onPressed: () async {
-          bool dhtStatus = _mainState.currentRepo?.isDhtEnabled() ?? false;
+          bool dhtStatus = _repositories.current()?.isDhtEnabled() ?? false;
           settingsAction(dhtStatus);
         },
         size: Dimensions.sizeIconSmall,
@@ -269,7 +269,7 @@ class _MainPageState extends State<MainPage>
     }
 
     StatelessWidget _buildFAB(BuildContext context,) {
-      final current = _mainState.currentRepo;
+      final current = _repositories.current();
 
       if (current == null) {
         return Container();
@@ -306,11 +306,11 @@ class _MainPageState extends State<MainPage>
 
       switchMainWidget(_repositoryContentBuilder());
 
-      navigateToPath(_mainState.currentRepo!, Strings.root);
+      navigateToPath(_repositories.current()!, Strings.root);
     }
 
     void shareRepository() async {
-      final current = _mainState.currentRepo;
+      final current = _repositories.current();
 
       if (current == null) {
         return;
@@ -345,7 +345,7 @@ class _MainPageState extends State<MainPage>
 
         return _errorState(
           message: S.current.messageErrorLoadingContents,
-          actionReload: () => getContent(_mainState.currentRepo!)
+          actionReload: () => getContent(_repositories.current()!)
         );
       },
       listener: (context, state) {
@@ -356,7 +356,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _selectLayoutWidget() {
-      final current = _mainState.currentRepo;
+      final current = _repositories.current();
 
       if (current == null) {
         return NoRepositoriesState(
@@ -449,7 +449,7 @@ class _MainPageState extends State<MainPage>
             };
 
             final listItem = ListItem (
-              repository: _mainState.currentRepo!,
+              repository: _repositories.current()!,
               itemData: item,
               mainAction: actionByType,
               folderDotsAction: () async {
@@ -573,14 +573,14 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController = null;
 
     _directoryCubit.moveEntry(
-      _mainState.currentRepo!,
+      _repositories.current()!,
       source: path,
       destination: destination
     );
   }
 
   Future<void> saveMedia(String sourceFilePath) async {
-    final currentRepo = _mainState.currentRepo;
+    final currentRepo = _repositories.current();
 
     if (currentRepo == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
@@ -634,7 +634,7 @@ class _MainPageState extends State<MainPage>
     final fileByteStream = io.File(path).openRead();
         
     _directoryCubit.saveFile(
-      _mainState.currentRepo!,
+      _repositories.current()!,
       newFilePath: filePath,
       fileName: fileName,
       length: length,
@@ -719,7 +719,7 @@ class _MainPageState extends State<MainPage>
       }
     ).then((password) async {
       if (password.isNotEmpty) { // The password provided by the user.
-        final name = _mainState.currentRepo!.name;
+        final name = _repositories.current()!.name;
         await _mainState.remove(name);
 
         _repositories.unlockRepository(

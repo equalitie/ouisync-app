@@ -68,7 +68,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
       return Fields.paddedActionText(
         repositoryName,
         onTap: () { 
-          this.cubit.selectRepository(this.cubit.mainState.get(repositoryName));
+          this.cubit.emitSelection(this.cubit.mainState.get(repositoryName));
           
           updateDefaultRepositorySetting(repositoryName);
           Navigator.of(context).pop();
