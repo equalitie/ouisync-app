@@ -6,15 +6,12 @@ import '../../utils/utils.dart';
 
 class NoRepositoriesState extends StatelessWidget {
   const NoRepositoriesState({
-    Key? key,
-    required this.repositoriesCubit,
     required this.onNewRepositoryPressed,
     required this.onAddRepositoryPressed
-  }) : super(key: key);
+  });
 
-  final RepositoriesCubit repositoriesCubit;
-  final Function(RepositoriesCubit) onNewRepositoryPressed;
-  final Function(RepositoriesCubit) onAddRepositoryPressed;
+  final Function() onNewRepositoryPressed;
+  final Function() onAddRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +37,14 @@ class NoRepositoriesState extends StatelessWidget {
             Dimensions.spacingVerticalDouble,
             Dimensions.spacingVertical,
             Fields.inPageButton(
-              onPressed: () => onNewRepositoryPressed.call(repositoriesCubit),
+              onPressed: () => onNewRepositoryPressed(),
               text: S.current.actionCreateRepository,
               size: Dimensions.sizeInPageButtonLong,
               autofocus: true
             ),
             Dimensions.spacingVerticalDouble,
             Fields.inPageButton(
-              onPressed: () => onAddRepositoryPressed(repositoriesCubit),
+              onPressed: () => onAddRepositoryPressed(),
               text: S.current.actionAddRepositoryWithToken,
               size: Dimensions.sizeInPageButtonLong,
             ),

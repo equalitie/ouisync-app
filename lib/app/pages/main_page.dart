@@ -109,7 +109,7 @@ class _MainPageState extends State<MainPage>
       widget.mediaReceiver.controller.stream.listen((media) {
         if (media is String) {
           loggy.app('mediaReceiver: String');
-          addRepoWithTokenDialog(_repositories, initialTokenValue: media);
+          addRepoWithTokenDialog(initialTokenValue: media);
         }
 
         if (media is List<SharedMediaFile>) {
@@ -296,7 +296,6 @@ class _MainPageState extends State<MainPage>
       if (repository == null) {
         switchMainWidget(
           NoRepositoriesState(
-            repositoriesCubit: _repositories,
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
           )
@@ -360,7 +359,6 @@ class _MainPageState extends State<MainPage>
 
       if (current == null) {
         return NoRepositoriesState(
-          repositoriesCubit: _repositories,
           onNewRepositoryPressed: createRepoDialog,
           onAddRepositoryPressed: addRepoWithTokenDialog
         );
@@ -658,7 +656,7 @@ class _MainPageState extends State<MainPage>
     }
   );
 
-  void createRepoDialog(cubit) async {
+  void createRepoDialog() async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -669,7 +667,7 @@ class _MainPageState extends State<MainPage>
           title: S.current.titleCreateRepository,
           body: RepositoryCreation(
             context: context,
-            cubit: cubit,
+            cubit: _repositories,
             formKey: formKey,
           ),
         );
@@ -677,7 +675,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void addRepoWithTokenDialog(cubit, { String? initialTokenValue }) async {
+  void addRepoWithTokenDialog({ String? initialTokenValue }) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -688,7 +686,7 @@ class _MainPageState extends State<MainPage>
           title: S.current.titleAddRepository,
           body: AddRepositoryWithToken(
             context: context,
-            cubit: cubit,
+            cubit: _repositories,
             formKey: formKey,
             initialTokenValue: initialTokenValue,
           ),
