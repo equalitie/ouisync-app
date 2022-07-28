@@ -111,7 +111,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     loggy.app('Current repository updated to $repositoryName: $result');
   }
 
-  void createRepoDialog(cubit) async {
+  void createRepoDialog(RepositoriesCubit cubit) async {
     await showDialog(
       context: context,
       barrierDismissible: false,

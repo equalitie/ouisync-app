@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -46,7 +46,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             }
           ),
           Dimensions.spacingVerticalHalf,
-          BlocConsumer<DirectoryBloc, DirectoryState>(
+          BlocConsumer<DirectoryCubit, DirectoryState>(
             buildWhen: (previousState, state) {
               if (state is WriteToFileInProgress ||
                   state is WriteToFileDone) {
@@ -66,13 +66,9 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
                     children: [
                       Expanded(child: LinearProgressIndicator(value: progress)),
                       TextButton(
-                        onPressed: () async {
-                          BlocProvider.of<DirectoryBloc>(context)
-                          .add(CancelSaveFile(
-                            repository: repository,
-                            filePath: fileData.path));
-
-                          showSnackBar(context, content: Text(S.current.messageCancelingFileWriting(state.fileName)));
+                        onPressed: () {
+                          BlocProvider.of<DirectoryCubit>(context)
+                          .cancelSaveFile(repository, fileData.path);
                         },
                         child: Text(
                           S.current.actionCancelCapital,

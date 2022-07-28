@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -13,7 +13,7 @@ import '../widgets.dart';
 class FileDetail extends StatefulWidget {
   const FileDetail({
     required this.context,
-    required this.bloc,
+    required this.cubit,
     required this.repository,
     required this.data,
     required this.scaffoldKey,
@@ -23,7 +23,7 @@ class FileDetail extends StatefulWidget {
   }) : super(key: key);
 
   final BuildContext context;
-  final DirectoryBloc bloc;
+  final DirectoryCubit cubit;
   final RepoState repository;
   final FileItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
@@ -59,7 +59,7 @@ class _FileDetailState extends State<FileDetail> {
                     body: SaveToDevice(
                       repository: widget.repository,
                       data: widget.data,
-                      bloc: widget.bloc
+                      cubit: widget.cubit
                     ),
                   );
                 }
@@ -109,7 +109,7 @@ class _FileDetailState extends State<FileDetail> {
                   return Dialogs
                   .buildDeleteFileAlertDialog(
                     widget.repository,
-                    widget.bloc,
+                    widget.cubit,
                     widget.data.path,
                     context,
                     fileName,
@@ -200,12 +200,11 @@ class _FileDetailState extends State<FileDetail> {
         final parent = getParentSection(path);
         final newEntryPath = buildDestinationPath(parent, newName); 
 
-        widget.bloc
-        .add(MoveEntry(
-          repository: widget.repository,
+        widget.cubit.moveEntry(
+          widget.repository,
           source: path,
           destination: newEntryPath
-        ));
+        );
 
         Navigator.of(context).pop();
       }

@@ -8,7 +8,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 import '../generated/l10n.dart';
-import 'bloc/blocs.dart';
 import 'cubit/cubits.dart';
 import 'pages/pages.dart';
 import 'utils/loggers/ouisync_app_logger.dart';
@@ -70,8 +69,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
         ),
         home: MultiBlocProvider(
             providers: [
-              BlocProvider<DirectoryBloc>(
-                create: (BuildContext context) => DirectoryBloc(),
+              BlocProvider<DirectoryCubit>(
+                create: (BuildContext context) => DirectoryCubit(),
               ),
               BlocProvider<UpgradeExistsCubit>(
                   create: (BuildContext context) => UpgradeExistsCubit(

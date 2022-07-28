@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
@@ -12,7 +12,7 @@ import '../widgets.dart';
 class FolderDetail extends StatefulWidget {
   const FolderDetail({
     required this.context,
-    required this.bloc,
+    required this.cubit,
     required this.repository,
     required this.data,
     required this.scaffoldKey,
@@ -22,7 +22,7 @@ class FolderDetail extends StatefulWidget {
   }) : super(key: key);
 
   final BuildContext context;
-  final DirectoryBloc bloc;
+  final DirectoryCubit cubit;
   final RepoState repository;
   final FolderItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
@@ -71,7 +71,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                 builder: (context) {
                   return buildDeleteFolderAlertDialog(
                     context,
-                    widget.bloc,
+                    widget.cubit,
                     widget.repository,
                     widget.data.path,
                   );
@@ -116,7 +116,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(context, bloc, RepoState repository, path) {
+  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, DirectoryCubit cubit, RepoState repository, String path) {
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -139,7 +139,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       actions: <Widget>[
         TextButton(
           child: Text(S.current.actionDeleteCapital),
-          onPressed: () => deleteFolderWithContentsValidation(bloc, repository, path, context),
+          onPressed: () => deleteFolderWithContentsValidation(cubit, repository, path, context),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
@@ -151,7 +151,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  void deleteFolderWithContentsValidation(bloc, RepoState repository, path, context) async {
+  void deleteFolderWithContentsValidation(DirectoryCubit cubit, RepoState repository, String path, BuildContext context) async {
     bool recursive = false;
 
     final type = await repository.type(path);
@@ -190,18 +190,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       }
     }
     
-    deleteAction(context, bloc, repository, path, recursive);
+    deleteAction(context, cubit, repository, path, recursive);
   }
 
-  void deleteAction(context, bloc, repository, path, recursive) {
-    bloc.add(
-      DeleteFolder(
-        repository: repository,
-        path: path,
-        recursive: recursive
-      )
-    );
-    
+  void deleteAction(BuildContext context, DirectoryCubit cubit, RepoState repository, String path, bool recursive) {
+    cubit.deleteFolder(repository, path, recursive);
     Navigator.of(context).pop(true);
   }
 
@@ -251,12 +244,12 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         final parent = getParentSection(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.bloc
-        .add(MoveEntry(
-          repository: widget.repository,
+        widget.cubit
+        .moveEntry(
+          widget.repository,
           source: path,
           destination: newEntryPath
-        ));
+        );
 
         Navigator.of(context).pop();
       }

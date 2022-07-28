@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/widgets/widgets.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
   const FolderCreation({
     Key? key,
     required this.context,
-    required this.bloc,
+    required this.cubit,
     required this.repository,
     required this.path,
     required this.formKey
   }) : super(key: key);
 
   final BuildContext context;
-  final DirectoryBloc bloc;
+  final DirectoryCubit cubit;
   final RepoState repository;
   final String path;
   final GlobalKey<FormState> formKey;
@@ -40,7 +40,7 @@ class FolderCreation extends StatelessWidget {
           context: context,
           label: S.current.labelName,
           hint: S.current.messageFolderName,
-          onSaved: (value) => _onSaved(bloc, value),
+          onSaved: (value) => _onSaved(cubit, value),
           validator: formNameValidator,
           autofocus: true
         ),
@@ -52,20 +52,14 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(bloc, newFolderName) async {
+  void _onSaved(DirectoryCubit cubit, newFolderName) async {
     final newFolderPath = buildDestinationPath(path, newFolderName);
 
     if (await repository.exists(newFolderPath)) {
       return;
     }
 
-    bloc.add(
-      CreateFolder(
-        repository: repository,
-        parentPath: path,
-        newFolderPath: newFolderPath
-      )
-    );
+    await cubit.createFolder(repository, newFolderPath);
 
     Navigator.of(context).pop(newFolderPath);
   }

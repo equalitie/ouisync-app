@@ -4,9 +4,10 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../../models/models.dart' as model;
 
 class FileIconAnimated 
   extends StatelessWidget
@@ -17,7 +18,7 @@ class FileIconAnimated
     Key? key,
   }) : super(key: key);
 
-  final RepoState repository;
+  final model.RepoState repository;
   final String path;
 
   String? _destinationPath;
@@ -25,7 +26,7 @@ class FileIconAnimated
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DirectoryBloc, DirectoryState>(
+    return BlocBuilder<DirectoryCubit, DirectoryState>(
       buildWhen: (previous, current) {
         if (current is DownloadFileInProgress ||
             current is DownloadFileDone) {
@@ -48,10 +49,9 @@ class FileIconAnimated
     } 
 
     if (_downloading) {
-      BlocProvider.of<DirectoryBloc>(context).add(
-        CancelDownloadFile(
-          repository: repository,
-          filePath: _getPathFromState(state)));
+      BlocProvider.of<DirectoryCubit>(context).cancelDownloadFile(
+        repository,
+        _getPathFromState(state));
     }
   }
 
