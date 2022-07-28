@@ -54,7 +54,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger
 {
-    RepositoriesCubit _reposCubit;
+    RepositoriesCubit _repositories;
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -71,11 +71,11 @@ class _MainPageState extends State<MainPage>
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
-      _reposCubit = RepositoriesCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
+      _repositories = RepositoriesCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
     FolderState? get currentFolder => _mainState.currentFolder;
     DirectoryCubit get _directoryCubit => BlocProvider.of<DirectoryCubit>(context);
-    MainState get _mainState => _reposCubit.mainState;
+    MainState get _mainState => _repositories.mainState;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
@@ -109,7 +109,7 @@ class _MainPageState extends State<MainPage>
       widget.mediaReceiver.controller.stream.listen((media) {
         if (media is String) {
           loggy.app('mediaReceiver: String');
-          addRepoWithTokenDialog(_reposCubit, initialTokenValue: media);
+          addRepoWithTokenDialog(_repositories, initialTokenValue: media);
         }
 
         if (media is List<SharedMediaFile>) {
@@ -137,14 +137,14 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> _initRepositories() async {
-      final repositoriesCubit = _reposCubit;
+      final repositories = _repositories;
 
       final initRepos = RepositoryHelper
       .localRepositoriesFiles(
         widget.repositoriesLocation,
         justNames: true
       ).map((repoName) async {
-        final repo = await repositoriesCubit.initRepository(repoName);
+        final repo = await repositories.initRepository(repoName);
         await _mainState.put(
           repo!,
           setCurrent: (repoName == widget.defaultRepositoryName)
@@ -164,7 +164,7 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-      _reposCubit.selectRepository(_mainState.currentRepo);
+      _repositories.selectRepository(_mainState.currentRepo);
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {
@@ -248,7 +248,7 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
-        repositoriesCubit: _reposCubit,
+        repositoriesCubit: _repositories,
         onRepositorySelect: switchRepository,
         shareRepositoryOnTap: shareRepository,
       );
@@ -296,7 +296,7 @@ class _MainPageState extends State<MainPage>
       if (repository == null) {
         switchMainWidget(
           NoRepositoriesState(
-            repositoriesCubit: _reposCubit,
+            repositoriesCubit: _repositories,
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
           )
@@ -360,7 +360,7 @@ class _MainPageState extends State<MainPage>
 
       if (current == null) {
         return NoRepositoriesState(
-          repositoriesCubit: _reposCubit,
+          repositoriesCubit: _repositories,
           onNewRepositoryPressed: createRepoDialog,
           onAddRepositoryPressed: addRepoWithTokenDialog
         );
@@ -722,7 +722,7 @@ class _MainPageState extends State<MainPage>
         final name = _mainState.currentRepo!.name;
         await _mainState.remove(name);
 
-        _reposCubit.unlockRepository(
+        _repositories.unlockRepository(
           name: repositoryName,
           password: password
         );
@@ -733,7 +733,7 @@ class _MainPageState extends State<MainPage>
   void settingsAction(dhtStatus) {
     final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
-    final reposCubit = _reposCubit;
+    final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 
     Navigator.push(
