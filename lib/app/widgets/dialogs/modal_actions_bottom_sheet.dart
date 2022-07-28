@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../utils/utils.dart';
 import '../../models/folder_state.dart';
 import '../widgets.dart';
@@ -11,12 +11,12 @@ import '../widgets.dart';
 class DirectoryActions extends StatelessWidget {
   const DirectoryActions({
     required this.context,
-    required this.bloc,
+    required this.cubit,
     required this.parent,
   });
 
   final BuildContext context;
-  final DirectoryBloc bloc;
+  final DirectoryCubit cubit;
   final FolderState parent;
 
   @override
@@ -34,12 +34,12 @@ class DirectoryActions extends StatelessWidget {
             _buildAction(
               name: S.current.actionNewFolder,
               icon: Icons.folder_outlined,
-              action: () => createFolderDialog(context, bloc, parent)
+              action: () => createFolderDialog(context, cubit, parent)
             ),
             _buildAction(
               name: S.current.actionNewFile,
               icon: Icons.insert_drive_file_outlined,
-              action: () async => await addFile(context, bloc, parent)
+              action: () async => await addFile(context, cubit, parent)
             )
           ]
         ),
@@ -70,7 +70,7 @@ class DirectoryActions extends StatelessWidget {
     ),
   ); 
 
-  void createFolderDialog(context, bloc, FolderState parent) async {
+  void createFolderDialog(context, DirectoryCubit cubit, FolderState parent) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -81,7 +81,7 @@ class DirectoryActions extends StatelessWidget {
           title: S.current.titleCreateFolder,
           body: FolderCreation(
             context: context,
-            bloc: bloc,
+            cubit: cubit,
             repository: parent.repo,
             path: parent.path,
             formKey: formKey,
@@ -95,7 +95,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, bloc, FolderState parent) async {
+  Future<void> addFile(context, DirectoryCubit cubit, FolderState parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -117,14 +117,12 @@ class DirectoryActions extends StatelessWidget {
         return;
       }
 
-      bloc.add(
-        SaveFile(
-          repository: parent.repo,
-          newFilePath: newFilePath,
-          fileName: file.name,
-          length: file.size,
-          fileByteStream: file.readStream!
-        )
+      cubit.saveFile(
+        parent.repo,
+        newFilePath: newFilePath,
+        fileName: file.name,
+        length: file.size,
+        fileByteStream: file.readStream!
       );
 
       Navigator.of(context).pop();

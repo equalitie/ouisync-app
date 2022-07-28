@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../../models/repo_state.dart';
 
 class AccessModeDropDownMenu extends StatefulWidget {
   const AccessModeDropDownMenu({

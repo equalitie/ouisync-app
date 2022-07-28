@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../models/main_state.dart';
 
 class FolderNavigationBar extends StatelessWidget {
@@ -77,7 +77,7 @@ class FolderNavigationBar extends StatelessWidget {
 
   GestureDetector _navigation(String path, BuildContext ctx) {
     final target = getParentSection(path);
-    final bloc = BlocProvider.of<DirectoryBloc>(ctx);
+    final cubit = BlocProvider.of<DirectoryCubit>(ctx);
 
     return GestureDetector(
       onTap: () {
@@ -89,7 +89,7 @@ class FolderNavigationBar extends StatelessWidget {
           }
 
           final parent = currentRepo.currentFolder.parent;
-          bloc.add(NavigateTo(currentRepo, parent));
+          cubit.navigateTo(currentRepo, parent);
         }
       },
       child: path == Strings.root

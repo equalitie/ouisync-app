@@ -21,9 +21,15 @@
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
+        <!--
+            Regarding `launchMode="singleTask"`: when the user wants to "share"
+            files into OuiSync, we don't want to start a new task because then
+            all the repositories would be locked then they would need to
+            re-unlock them if they unlocked them previously.
+        -->
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

@@ -88,7 +88,6 @@
     "messageWritingFileDone":"{name} - saved successfully",
     "messageDownloadingFileDone":"{name} - downloaded successfully",
     "messageWritingFileCanceled":"{name} writing canceled",
-    "messageCancelingFileWriting":"Canceling {name} writing...",
     "messageDownloadingFileCanceled":"{name} - downloading canceled",
 
     "messageMovingEntry":"This function is not available when moving an entry.",

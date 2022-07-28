@@ -9,7 +9,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
-import '../bloc/blocs.dart';
 import '../cubit/cubits.dart';
 import '../models/folder_state.dart';
 import '../models/main_state.dart';
@@ -26,7 +25,7 @@ typedef RepositoryCallback = Future<void> Function(RepoState? repository, Access
 typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = Future<void> Function({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, bool usesModal });
+typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -67,7 +66,7 @@ class _MainPageState extends State<MainPage>
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
     FolderState? get currentFolder => _mainState.currentFolder;
-    DirectoryBloc get _directoryBloc => BlocProvider.of<DirectoryBloc>(context);
+    DirectoryCubit get _directoryCubit => BlocProvider.of<DirectoryCubit>(context);
     RepositoriesCubit get _reposCubit => BlocProvider.of<RepositoriesCubit>(context);
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
@@ -112,7 +111,7 @@ class _MainPageState extends State<MainPage>
 
         if (media is io.File) {
           loggy.app('mediaReceiver: io.File');
-          saveMedia(droppedMediaFile: media);
+          saveMedia(media.path);
         }
       });
 
@@ -172,11 +171,11 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent(RepoState repository) {
-      _directoryBloc.add(GetContent(repository: repository));
+      _directoryCubit.getContent(repository);
     }
 
     navigateToPath(RepoState repository, String destination) {
-      _directoryBloc.add(NavigateTo(repository, destination));
+      _directoryCubit.navigateTo(repository, destination);
     }
 
     @override
@@ -278,7 +277,7 @@ class _MainPageState extends State<MainPage>
         child: const Icon(Icons.add_rounded),
         onPressed: () => _showDirectoryActions(
           context,
-          bloc: _directoryBloc,
+          cubit: _directoryCubit,
           folder: currentFolder!
         ),
       );
@@ -313,7 +312,7 @@ class _MainPageState extends State<MainPage>
       await _showShareRepository(context, current);
     }
 
-    _repositoryContentBuilder() => BlocConsumer<DirectoryBloc, DirectoryState>(
+    _repositoryContentBuilder() => BlocConsumer<DirectoryCubit, DirectoryState>(
       buildWhen: (context, state) {
         return !(
         state is CreateFileDone ||
@@ -461,12 +460,12 @@ class _MainPageState extends State<MainPage>
                 item.type == ItemType.file
                 ? await _showFileDetails(
                   repo: folder.repo,
-                  directoryBloc: _directoryBloc,
+                  directoryCubit: _directoryCubit,
                   scaffoldKey: _scaffoldKey,
                   data: item)
                 : await _showFolderDetails(
                   repo: folder.repo,
-                  directoryBloc: _directoryBloc,
+                  directoryCubit: _directoryCubit,
                   scaffoldKey: _scaffoldKey,
                   data: item);
               },
@@ -500,7 +499,7 @@ class _MainPageState extends State<MainPage>
 
     Future<dynamic> _showFileDetails({
       required RepoState repo,
-      required DirectoryBloc directoryBloc,
+      required DirectoryCubit directoryCubit,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
     }) => showModalBottomSheet(
@@ -510,7 +509,7 @@ class _MainPageState extends State<MainPage>
       builder: (context) {
         return FileDetail(
           context: context,
-          bloc: directoryBloc,
+          cubit: directoryCubit,
           repository: repo,
           data: data as FileItem,
           scaffoldKey: scaffoldKey,
@@ -522,7 +521,7 @@ class _MainPageState extends State<MainPage>
 
     Future<dynamic> _showFolderDetails({
       required RepoState repo,
-      required DirectoryBloc directoryBloc,
+      required DirectoryCubit directoryCubit,
       required GlobalKey<ScaffoldState> scaffoldKey,
       required BaseItem data
     }) => showModalBottomSheet(
@@ -532,7 +531,7 @@ class _MainPageState extends State<MainPage>
       builder: (context) {
         return FolderDetail(
           context: context,
-          bloc: directoryBloc,
+          cubit: directoryCubit,
           repository: repo,
           data: data as FolderItem,
           scaffoldKey: scaffoldKey,
@@ -567,16 +566,14 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
 
-    _directoryBloc.add(
-      MoveEntry(
-        repository: _mainState.currentRepo!,
-        source: path,
-        destination: destination
-      )
+    _directoryCubit.moveEntry(
+      _mainState.currentRepo!,
+      source: path,
+      destination: destination
     );
   }
 
-  Future<void> saveMedia({ SharedMediaFile? mobileSharedMediaFile, io.File? droppedMediaFile, usesModal = false }) async {
+  Future<void> saveMedia(String sourceFilePath) async {
     final currentRepo = _mainState.currentRepo;
 
     if (currentRepo == null) {
@@ -584,8 +581,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    if (mobileSharedMediaFile == null &&
-    droppedMediaFile == null) {
+    if (sourceFilePath == null) {
       showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
@@ -621,17 +617,8 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final String? path = mobileSharedMediaFile?.path ?? droppedMediaFile?.path;
-    if (path == null) {
-      return;
-    }
-
-    loggy.app('Media path: $path');
-    saveFileToOuiSync(path);
-
-    if (usesModal) {
-      Navigator.of(context).pop();
-    }
+    loggy.app('Media path: $sourceFilePath');
+    saveFileToOuiSync(sourceFilePath);
   }
 
   void saveFileToOuiSync(String path) {
@@ -640,19 +627,17 @@ class _MainPageState extends State<MainPage>
     final filePath = buildDestinationPath(currentFolder!.path, fileName);
     final fileByteStream = io.File(path).openRead();
         
-    _directoryBloc.add(
-      SaveFile(
-        repository: _mainState.currentRepo!,
-        newFilePath: filePath,
-        fileName: fileName,
-        length: length,
-        fileByteStream: fileByteStream
-      )
+    _directoryCubit.saveFile(
+      _mainState.currentRepo!,
+      newFilePath: filePath,
+      fileName: fileName,
+      length: length,
+      fileByteStream: fileByteStream
     );
   }
 
   Future<dynamic> _showDirectoryActions(BuildContext context,{
-    required DirectoryBloc bloc,
+    required DirectoryCubit cubit,
     required FolderState folder
   }) => showModalBottomSheet(
     isScrollControlled: true,
@@ -661,7 +646,7 @@ class _MainPageState extends State<MainPage>
     builder: (context) {
       return DirectoryActions(
         context: context,
-        bloc: bloc,
+        cubit: cubit,
         parent: folder,
       );
     }

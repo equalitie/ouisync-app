@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../bloc/blocs.dart';
+import '../cubit/cubits.dart';
 import '../widgets/widgets.dart';
+import '../models/models.dart' as model;
 import 'utils.dart';
 
 abstract class Dialogs {
@@ -124,9 +125,9 @@ abstract class Dialogs {
   );
 
   static AlertDialog buildDeleteFileAlertDialog(
-    RepoState repository,
-    bloc,
-    path,
+    model.RepoState repository,
+    DirectoryCubit cubit,
+    String path,
     BuildContext context,
     String fileName,
     String parent
@@ -171,13 +172,10 @@ abstract class Dialogs {
       TextButton(
         child: Text(S.current.actionDeleteCapital),
         onPressed: () {
-          bloc
-          .add(
-            DeleteFile(
-              repository: repository,
-              parentPath: parent,
-              filePath: path
-            )
+          cubit.deleteFile(
+            repository,
+            parentPath: parent,
+            filePath: path
           );
   
           Navigator.of(context).pop(fileName);

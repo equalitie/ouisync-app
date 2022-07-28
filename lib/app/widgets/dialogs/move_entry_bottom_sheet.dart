@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../bloc/blocs.dart';
+import '../../cubit/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -51,7 +51,7 @@ class MoveEntryDialog extends StatelessWidget {
 
   _selectActions(context) {
     return BlocBuilder(
-      bloc: BlocProvider.of<DirectoryBloc>(context),
+      bloc: BlocProvider.of<DirectoryCubit>(context),
       builder: (context, state) {
         bool canMove = false;
 
