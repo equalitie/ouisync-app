@@ -315,7 +315,6 @@ class _MainPageState extends State<MainPage>
     _repositoryContentBuilder() => BlocConsumer<DirectoryCubit, DirectoryState>(
       buildWhen: (context, state) {
         return !(
-        state is CreateFileDone ||
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
         state is DownloadFileInProgress ||

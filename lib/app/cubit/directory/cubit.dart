@@ -60,64 +60,63 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       required int length,
       required Stream<List<int>> fileByteStream,
   }) async {
-    final fileCreationResult = await _createFile(
+    final file = await _createFile(
       repo,
       newFilePath,
       fileName,
     );
 
-    emit(fileCreationResult);
+    if (file == null) {
+      return;
+    }
 
-    if (fileCreationResult is CreateFileDone) {
-      await _refreshFolder(repo);
+    await _refreshFolder(repo);
 
-      final file = fileCreationResult.file;
-      int offset = 0;
-      try {
-        final stream = fileByteStream
-        .takeWhile((element) {
-          return _takeWhile(
-            repo.handle,
-            newFilePath,
-            _repositorySave,
-            _cancelFileWriting);
-        });
-        
-        await for (final buffer in stream) {
-          await file.write(offset, buffer);
-          offset += buffer.length;
+    int offset = 0;
+    try {
+      final stream = fileByteStream
+      .takeWhile((element) {
+        return _takeWhile(
+          repo.handle,
+          newFilePath,
+          _repositorySave,
+          _cancelFileWriting);
+      });
 
-          emit(WriteToFileInProgress(
-            repository: repo,
-            path: newFilePath,
-            fileName: fileName,
-            length: length,
-            progress: offset
-          ));
-        }
-      } catch (e, st) {
-        loggy.app('Writing to file ${newFilePath} exception', e, st);
-        emit(ShowMessage(S.current.messageWritingFileError(newFilePath)));
-        emit(WriteToFileDone(repository: repo, path: newFilePath));
-        return;
-      } finally {
-        loggy.app('Writing to file ${newFilePath} done - closing');
-        await file.close();
+      await for (final buffer in stream) {
+        await file.write(offset, buffer);
+        offset += buffer.length;
+
+        emit(WriteToFileInProgress(
+          repository: repo,
+          path: newFilePath,
+          fileName: fileName,
+          length: length,
+          progress: offset
+        ));
       }
+    } catch (e, st) {
+      loggy.app('Writing to file ${newFilePath} exception', e, st);
+      emit(ShowMessage(S.current.messageWritingFileError(newFilePath)));
+      emit(WriteToFileDone(repository: repo, path: newFilePath));
+      return;
+    } finally {
+      loggy.app('Writing to file ${newFilePath} done - closing');
+      await file.close();
+    }
 
-      if (_cancelFileWriting.isEmpty) {
-        emit(ShowMessage(S.current.messageWritingFileDone(newFilePath)));
-        emit(WriteToFileDone(repository: repo, path: newFilePath));
-        return;
-      }
+    if (_cancelFileWriting.isEmpty) {
+      emit(ShowMessage(S.current.messageWritingFileDone(newFilePath)));
+      emit(WriteToFileDone(repository: repo, path: newFilePath));
+      return;
+    }
 
-      if (_cancelFileWriting == newFilePath) {
-        loggy.app('${newFilePath} writing canceled by the user');
-        _cancelFileWriting = '';
+    if (_cancelFileWriting == newFilePath) {
+      loggy.app('${newFilePath} writing canceled by the user');
+      _cancelFileWriting = '';
 
-        emit(ShowMessage(S.current.messageWritingFileCanceled(newFilePath)));
-        emit(WriteToFileDone(repository: repo, path: newFilePath));
-      }
+      emit(ShowMessage(S.current.messageWritingFileCanceled(newFilePath)));
+      emit(WriteToFileDone(repository: repo, path: newFilePath));
     }
   }
 
@@ -146,14 +145,14 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       length: length,
       progress: offset
     ));
-    
+
     try {
         while (_takeWhile(repo.handle, sourcePath, _repositoryDownload, _cancelFileDownload)) {
         final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
         offset += chunk.length;
-  
+
         await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
-  
+
         emit(DownloadFileInProgress(
           repository: repo,
           path: destinationPath,
@@ -194,7 +193,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
 
     if (_cancelFileDownload == sourcePath) {
       _cancelFileDownload = '';
-      
+
       loggy.app('${sourcePath} download canceled by the user');
       emit(ShowMessage(S.current.messageDownloadingFileCanceled(sourcePath)));
 
@@ -231,31 +230,27 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       return filePath != cancelFilePath;
   }
 
-  Future<DirectoryState> _createFile(
+  Future<File?> _createFile(
     RepoState repository,
     String newFilePath,
     String fileName,
   ) async {
     CreateFileResult? createFileResult;
+
     try {
       createFileResult = (await repository.createFile(newFilePath)) as CreateFileResult?;
       if (createFileResult!.errorMessage.isNotEmpty) {
         loggy.app('Create file $newFilePath failed:\n${createFileResult.errorMessage}');
-        return ShowMessage(S.current.messageNewFileError(newFilePath));
+        emit(ShowMessage(S.current.messageNewFileError(newFilePath)));
+        return null;
       }
     } catch (e, st) {
       loggy.app('Create file $newFilePath exception', e, st);
-      return ShowMessage(S.current.messageNewFileError(newFilePath));
+      emit(ShowMessage(S.current.messageNewFileError(newFilePath)));
+      return null;
     }
 
-    final name = getBasename(newFilePath);
-    final extension = getFileExtension(newFilePath);
-    return CreateFileDone(
-      file: createFileResult.result!,
-      fileName: name,
-      path: newFilePath,
-      extension: extension
-    );
+    return createFileResult.result!;
   }
 
   Future<void> moveEntry(RepoState repo, { required String source, required String destination }) async {

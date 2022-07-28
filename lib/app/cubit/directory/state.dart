@@ -18,28 +18,6 @@ enum DownloadFileResult {
 
 class DirectoryInitial extends DirectoryState {}
 
-class CreateFileDone extends DirectoryState {
-  const CreateFileDone({
-    required this.file,
-    required this.path,
-    required this.fileName,
-    required this.extension
-  });
-
-  final File file;
-  final String path;
-  final String fileName;
-  final String extension;
-
-  @override
-  List<Object> get props => [
-    file,
-    path,
-    fileName,
-    extension
-  ];
-}
-
 class ShowMessage extends DirectoryState {
   const ShowMessage(this.message);
 
