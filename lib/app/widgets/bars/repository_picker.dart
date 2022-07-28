@@ -168,7 +168,6 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
         context: context,
         cubit: widget.repositoriesCubit,
         current: _repositoryName,
-        onRepositorySelect: widget.onRepositorySelect,
       );
     }
   );

@@ -16,13 +16,11 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     required this.context,
     required this.cubit,
     required this.current,
-    required this.onRepositorySelect
   });
 
   final BuildContext context;
   final RepositoriesCubit cubit;
   final String current;
-  final RepositoryCallback onRepositorySelect;
 
   final MainState mainState;
 
