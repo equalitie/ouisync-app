@@ -7,7 +7,7 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../cubit/watch.dart';
 
 class MainState with OuiSyncAppLogger {
-  static final Map<String, RepoState> _repos = Map();
+  final Map<String, RepoState> _repos = Map();
   
   String? _currentRepoName;
 

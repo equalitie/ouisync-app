@@ -12,14 +12,12 @@ import '../widgets.dart';
 
 class RepositoryPicker extends StatefulWidget {
   const RepositoryPicker({
-    required this.mainState,
     required this.repositoriesCubit,
     required this.onRepositorySelect,
     required this.borderColor,
     Key? key,
   }) : super(key: key);
 
-  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final RepositoryCallback onRepositorySelect;
   final Color borderColor;
@@ -164,7 +162,6 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
       return RepositoryList(
-        mainState: widget.mainState,
         context: context,
         cubit: widget.repositoriesCubit,
         current: _repositoryName,

@@ -30,6 +30,7 @@ typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.session,
+    required this.appStorageLocation,
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
     required this.mediaReceiver,
@@ -38,18 +39,22 @@ class MainPage extends StatefulWidget {
   }) : super(key: key);
 
   final Session session;
+  final String appStorageLocation;
   final String repositoriesLocation;
   final String defaultRepositoryName;
   final MediaReceiver mediaReceiver;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState();
+  State<StatefulWidget> createState() => _MainPageState(
+    session,
+    appStorageLocation,
+    repositoriesLocation);
 }
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger
 {
-    final MainState _mainState = MainState();
+    RepositoriesCubit _reposCubit;
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -65,9 +70,12 @@ class _MainPageState extends State<MainPage>
 
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
+    _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
+      _reposCubit = RepositoriesCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
+
     FolderState? get currentFolder => _mainState.currentFolder;
     DirectoryCubit get _directoryCubit => BlocProvider.of<DirectoryCubit>(context);
-    RepositoriesCubit get _reposCubit => BlocProvider.of<RepositoriesCubit>(context);
+    MainState get _mainState => _reposCubit.mainState;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
@@ -240,7 +248,6 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
-        mainState: _mainState,
         repositoriesCubit: _reposCubit,
         onRepositorySelect: switchRepository,
         shareRepositoryOnTap: shareRepository,

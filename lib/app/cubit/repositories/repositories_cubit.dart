@@ -13,14 +13,24 @@ part 'repositories_state.dart';
 
 class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogger {
   RepositoriesCubit({
-    required this.session,
-    required this.appDir,
-    required this.repositoriesDir
-  }) : super(RepositoryPickerInitial());
+    required session,
+    required appDir,
+    required repositoriesDir
+  }) :
+    _session = session,
+    _appDir = appDir,
+    _repositoriesDir = repositoriesDir,
+    _mainState = MainState(),
+    super(RepositoryPickerInitial());
 
-  final oui.Session session;
-  final String appDir;
-  final String repositoriesDir;
+  final oui.Session _session;
+  final String _appDir;
+  final String _repositoriesDir;
+  final MainState _mainState;
+
+  oui.Session get session => _session;
+  String get appDir => _appDir;
+  MainState get mainState => _mainState;
 
   /// Opens a repository in blind mode to allow synchronization, even before the
   /// user unlocks it.
@@ -115,10 +125,9 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void renameRepository(String oldName, String newName) async {
-    final mainState = MainState();
-    await mainState.remove(oldName); // 1
+    await _mainState.remove(oldName); // 1
 
-    final renamed = await RepositoryHelper.renameRepositoryFiles(repositoriesDir, 
+    final renamed = await RepositoryHelper.renameRepositoryFiles(_repositoriesDir, 
       oldName: oldName,
       newName: newName
     ); // 3
@@ -153,11 +162,10 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   /// 6. Emits the event for selecting a new repository: this updates the
   ///    repository picker, and from there, the state in the main page. 
   void deleteRepository(String repositoryName) async {
-    final mainState = MainState();
-    await mainState.remove(repositoryName); // 1
+    await _mainState.remove(repositoryName); // 1
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
-      repositoriesDir,
+      _repositoriesDir,
       repositoryName: repositoryName
     ); // 3
 
@@ -185,21 +193,21 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       return;
     }
 
-    RepoState? newDefaultRepository = mainState.get(latestRepositoryOrDefaultName); // 5
+    RepoState? newDefaultRepository = _mainState.get(latestRepositoryOrDefaultName); // 5
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
       newDefaultRepository = await initRepository(latestRepositoryOrDefaultName);
     }
 
-    await mainState.put(newDefaultRepository!);
+    await _mainState.put(newDefaultRepository!);
 
     emit(RepositoryPickerSelection(newDefaultRepository)); // 6
   }
 
-  _buildStoreString(repositoryName) => '${this.repositoriesDir}/$repositoryName.db';
+  _buildStoreString(repositoryName) => '${_repositoriesDir}/$repositoryName.db';
 
   Future<oui.Repository> _getRepository({required String store, String? password, oui.ShareToken?  shareToken, required bool exist}) => 
     exist 
-    ? oui.Repository.open(this.session, store: store, password: password)
-    : oui.Repository.create(this.session, store: store, password: password!, shareToken: shareToken);
+    ? oui.Repository.open(_session, store: store, password: password)
+    : oui.Repository.create(_session, store: store, password: password!, shareToken: shareToken);
 }

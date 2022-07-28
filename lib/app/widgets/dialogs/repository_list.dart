@@ -12,7 +12,6 @@ import '../widgets.dart';
 
 class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   RepositoryList({
-    required this.mainState,
     required this.context,
     required this.cubit,
     required this.current,
@@ -21,8 +20,6 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   final BuildContext context;
   final RepositoriesCubit cubit;
   final String current;
-
-  final MainState mainState;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +68,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
       return Fields.paddedActionText(
         repositoryName,
         onTap: () { 
-          this.cubit.selectRepository(mainState.get(repositoryName));
+          this.cubit.selectRepository(this.cubit.mainState.get(repositoryName));
           
           updateDefaultRepositorySetting(repositoryName);
           Navigator.of(context).pop();
