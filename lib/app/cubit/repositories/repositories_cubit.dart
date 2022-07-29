@@ -87,9 +87,19 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
     update((state) { state.isLoading = false; });
   }
 
-  Future<void> setCurrent(String repoName) async {
-    final repo = _mainState.get(repoName);
+  Future<void> setCurrent(String? repoName) async {
+    if (repoName == _mainState.currentRepoName) {
+      return;
+    }
+
+    RepoState? repo;
+
+    if (repoName != null) {
+      repo = _mainState.get(repoName);
+    }
+
     _mainState.setCurrent(repo);
+
     emitChange();
   }
 

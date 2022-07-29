@@ -733,7 +733,6 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-            mainState: _mainState,
             repositoriesCubit: reposCubit,
             onShareRepository: shareRepository,
             title: S.current.titleSettings,
