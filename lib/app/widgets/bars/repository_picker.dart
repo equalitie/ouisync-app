@@ -121,10 +121,7 @@ class RepositoryPicker extends StatelessWidget {
     context: context,
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
-      return RepositoryList(
-        context: context,
-        cubit: repositoriesCubit,
-      );
+      return RepositoryList(repositoriesCubit);
     }
   );
 }

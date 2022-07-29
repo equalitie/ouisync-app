@@ -12,12 +12,8 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
-  RepositoryList({
-    required this.context,
-    required this.cubit,
-  });
+  RepositoryList(this.cubit);
 
-  final BuildContext context;
   final RepositoriesCubit cubit;
 
   @override
@@ -41,12 +37,12 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
               Fields.paddedActionText(
                 S.current.iconCreateRepository,
                 icon: Icons.add_circle_outline_rounded,
-                onTap: () => createRepoDialog(this.cubit),
+                onTap: () => createRepoDialog(context),
               ),
               Fields.paddedActionText(
                 S.current.iconAddRepositoryWithToken,
                 icon: Icons.insert_link_rounded,
-                onTap: () => addRepoWithTokenDialog(this.cubit),
+                onTap: () => addRepoWithTokenDialog(context),
               ),
             ]
           ),
@@ -66,8 +62,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
         repositoryName,
         onTap: () {
           this.cubit.setCurrent(repositoryName);
-          updateDefaultRepositorySetting(repositoryName);
-          Navigator.of(context).pop();
+          updateSettingsAndPop(context, repositoryName);
         },
         // TODO: This doesn't actually say whether the repo is locked or not.
         icon: repositoryName == current
@@ -85,12 +80,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     }
   );
 
-  Future<void> updateDefaultRepositorySetting(repositoryName) async {
-    final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
-    loggy.app('Current repository updated to $repositoryName: $result');
-  }
-
-  void createRepoDialog(RepositoriesCubit cubit) async {
+  void createRepoDialog(BuildContext context) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -106,10 +96,10 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           ),
         );
       }
-    ).then((newRepository) async => await updateSettingsAndPop(newRepository));
+    ).then((newRepository) async => await updateSettingsAndPop(context, newRepository));
   }
 
-  void addRepoWithTokenDialog(cubit) async {
+  void addRepoWithTokenDialog(BuildContext context) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -125,16 +115,19 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           ),
         );
       }
-    ).then((addedRepository) async => await updateSettingsAndPop(addedRepository));
+    ).then((addedRepository) async => await updateSettingsAndPop(context, addedRepository));
   }
 
-  Future<void> updateSettingsAndPop(String repositoryName) async {
-    // If a repository is successfuly created/added, the repository name is returned; otherwise, empty string.
-    if (repositoryName.isEmpty) {
-      return;
+  Future<void> updateDefaultRepositorySetting(repositoryName) async {
+    final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
+    loggy.app('Current repository updated to $repositoryName: $result');
+  }
+
+  Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
+    if (!repositoryName.isEmpty) {
+      await updateDefaultRepositorySetting(repositoryName);
     }
 
-    await updateDefaultRepositorySetting(repositoryName);
-    Navigator.of(this.context).pop();
+    Navigator.of(context).pop();
   }
 }
