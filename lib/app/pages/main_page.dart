@@ -735,7 +735,6 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
             repositoriesCubit: reposCubit,
             onShareRepository: shareRepository,
-            title: S.current.titleSettings,
             dhtStatus: dhtStatus,
           )
         );

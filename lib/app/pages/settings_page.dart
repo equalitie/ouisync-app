@@ -27,13 +27,11 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.repositoriesCubit,
     required this.onShareRepository,
-    required this.title,
     this.dhtStatus = false,
   });
 
   final RepositoriesCubit repositoriesCubit;
   final void Function() onShareRepository;
-  final String title;
   final bool dhtStatus;
 
   @override
@@ -148,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.title),
+          title: Text(S.current.titleSettings),
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
