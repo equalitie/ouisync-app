@@ -12,16 +12,16 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
-  RepositoryList(this.cubit);
+  RepositoryList(RepositoriesCubit repositories) : _repositories = repositories;
 
-  final RepositoriesCubit cubit;
+  final RepositoriesCubit _repositories;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RepositoriesCubit, RepositoriesChanged>(
-      bloc: cubit,
+      bloc: _repositories,
       builder: (context, changed) {
-        final state = cubit.mainState;
+        final state = _repositories.mainState;
 
         return Container(
           padding: Dimensions.paddingBottomSheet,
@@ -51,17 +51,16 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
     );
   }
 
-  Widget _buildRepositoryList(List<String> repositories, String? current) => ListView.builder(
+  Widget _buildRepositoryList(List<String> repoNames, String? current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    itemCount: repositories.length,
+    itemCount: repoNames.length,
     itemBuilder: (context, index) {
-
-      final repositoryName = repositories[index];
+      final repositoryName = repoNames[index];
       return Fields.paddedActionText(
         repositoryName,
         onTap: () {
-          this.cubit.setCurrent(repositoryName);
+          _repositories.setCurrent(repositoryName);
           updateSettingsAndPop(context, repositoryName);
         },
         // TODO: This doesn't actually say whether the repo is locked or not.
@@ -81,7 +80,7 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   );
 
   void createRepoDialog(BuildContext context) async {
-    await showDialog(
+    final newRepo = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -91,16 +90,17 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           title: S.current.titleCreateRepository,
           body: RepositoryCreation(
             context: context,
-            cubit: cubit,
+            cubit: _repositories,
             formKey: formKey,
           ),
         );
       }
-    ).then((newRepository) async => await updateSettingsAndPop(context, newRepository));
+    );
+    await updateSettingsAndPop(context, newRepo);
   }
 
   void addRepoWithTokenDialog(BuildContext context) async {
-    await showDialog(
+    final addedRepo = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -110,12 +110,14 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           title: S.current.titleAddRepository,
           body: AddRepositoryWithToken(
             context: context,
-            cubit: cubit,
+            cubit: _repositories,
             formKey: formKey,
           ),
         );
       }
-    ).then((addedRepository) async => await updateSettingsAndPop(context, addedRepository));
+    );
+
+    await updateSettingsAndPop(context, addedRepo);
   }
 
   Future<void> updateDefaultRepositorySetting(repositoryName) async {

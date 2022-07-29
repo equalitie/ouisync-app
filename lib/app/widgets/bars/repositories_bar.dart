@@ -37,7 +37,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             const Icon(Icons.share_outlined),
             onPressed: shareRepositoryOnTap,
             size: Dimensions.sizeIconSmall,
-            color: Colors.white,            
+            color: Colors.white,
           )
         ],
       )
