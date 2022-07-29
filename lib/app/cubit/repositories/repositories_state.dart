@@ -1,36 +1,13 @@
 part of 'repositories_cubit.dart';
 
-abstract class RepositoryPickerState extends Equatable {
-  const RepositoryPickerState();
+class RepositoriesChanged extends Equatable {
+  static int _nextChangeVersion = 0;
+  final int _version;
+
+  RepositoriesChanged() : _version = _nextChangeVersion {
+    _nextChangeVersion += 1;
+  }
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [ _version ];
 }
-
-class RepositoryPickerInitial extends RepositoryPickerState {}
-
-class RepositoryPickerLoading extends RepositoryPickerState {}
-
-class RepositoryPickerSelection extends RepositoryPickerState {
-  const RepositoryPickerSelection(this.repo);
-
-  final RepoState repo;
-
-  @override
-  List<Object?> get props => [
-    repo,
-  ];
-}
-
-class RepositoryPickerUnlocked extends RepositoryPickerState {
-  const RepositoryPickerUnlocked(this.repo);
-
-  final RepoState repo;
-
-  @override
-  List<Object?> get props => [
-    repo,
-  ];
-}
-
-class RepositoriesFailure extends RepositoryPickerState {}

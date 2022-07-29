@@ -5,6 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
 import '../../models/repo_state.dart';
+import '../../models/main_state.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -25,78 +26,44 @@ class RepositoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder(
+    return BlocBuilder<RepositoriesCubit, RepositoriesChanged>(
       bloc: repositoriesCubit,
-      builder: (context, state) {
-        if (state is RepositoryPickerInitial) {
+      builder: (BuildContext context, change) {
+        final state = repositoriesCubit.mainState;
+
+        if (state.isLoading) {
+          return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
+        }
+
+        final repo = state.currentRepo;
+        final name = _repoName(repo);
+
+        if (repo == null) {
           return _buildState(
             context,
             borderColor: borderColor,
             iconColor: colorNoRepo,
             textColor: colorNoRepo,
-            repoName: _repoName(state),
+            repoName: name,
           );
         }
 
-        if (state is RepositoryPickerLoading) {
-          return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
-        }
+        final color = repo.accessMode != AccessMode.blind
+            ? colorUnlockedRepo
+            : colorLockedRepo;
 
-        if (state is RepositoryPickerSelection) {
-          final color = state.repo == null
-            ? colorLockedRepo
-            : state.repo.accessMode != AccessMode.blind
-              ? colorUnlockedRepo
-              : colorLockedRepo;
-
-          return _buildState(
-            context,
-            borderColor: borderColor,
-            iconColor: colorUnlockedRepo,
-            textColor: color,
-            repoName: _repoName(state),
-          );
-        }
-
-        if (state is RepositoryPickerUnlocked) {
-          final color = state.repo.accessMode != AccessMode.blind
-          ? colorUnlockedRepo
-          : colorLockedRepo;
-
-          return _buildState(
-            context,
-            borderColor: borderColor,
-            iconColor: colorUnlockedRepo,
-            textColor: color,
-            repoName: _repoName(state),
-          );
-        }
-
-        if (state is RepositoriesFailure) {
-          return _buildState(
-            context,
-            borderColor: borderColor,
-            iconColor: colorError,
-            textColor: colorError,
-            repoName: _repoName(state),
-          );
-        }
-
-        return Container(child: Text(S.current.messageErrorDefaultShort),);
+        return _buildState(
+          context,
+          borderColor: borderColor,
+          iconColor: colorUnlockedRepo,
+          textColor: color,
+          repoName: name,
+        );
       },
     );
   }
 
-  String _repoName(RepositoryPickerState state) {
-    RepoState? repo = null;
-
-    if (state is RepositoryPickerSelection) {
-      repo = state.repo;
-    }
-    if (state is RepositoryPickerUnlocked) {
-      repo = state.repo;
-    }
-
+  String _repoName(RepoState? repo) {
     if (repo != null) {
       return repo.name;
     } else {

@@ -161,7 +161,6 @@ class _MainPageState extends State<MainPage>
 
     void initMainPage() async {
       _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-      _repositories.emitSelection(_repositories.current());
     }
 
     void handleShareIntentPayload(List<SharedMediaFile> payload) {

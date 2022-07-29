@@ -282,14 +282,14 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: BlocListener(
+            child: BlocListener<RepositoriesCubit, RepositoriesChanged>(
               bloc: widget.repositoriesCubit,
               listener: (context, state) {
-                if (state is RepositoryPickerSelection) {
-                  setState(() {
-                    _currentRepo = widget.mainState.currentRepo!;
-                  });
+                final nextRepo = widget.repositoriesCubit.mainState.currentRepo;
+                if (_currentRepo == nextRepo) {
+                  return;
                 }
+                setState(() { _currentRepo = nextRepo!; });
               },
               child: DropdownButton<RepoState?>(
                 isExpanded: true,

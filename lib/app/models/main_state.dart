@@ -9,6 +9,8 @@ import '../cubit/watch.dart';
 class MainState with OuiSyncAppLogger {
   final Map<String, RepoState> _repos = Map();
   
+  bool isLoading = false;
+
   String? _currentRepoName;
 
   final _currentRepoCubit = Watch<RepoState?>(null);
