@@ -10,7 +10,12 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoryPicker extends StatefulWidget {
+class RepositoryPicker extends StatelessWidget {
+  static const Color colorNoRepo = Colors.grey;
+  static const Color colorLockedRepo = Colors.grey;
+  static const Color colorUnlockedRepo = Colors.black;
+  static const Color colorError = Colors.red;
+
   const RepositoryPicker({
     required this.repositoriesCubit,
     required this.onRepositorySelect,
@@ -23,27 +28,17 @@ class RepositoryPicker extends StatefulWidget {
   final Color borderColor;
 
   @override
-  _RepositoryPickerState createState() => _RepositoryPickerState();
-}
-
-class _RepositoryPickerState extends State<RepositoryPicker> {
-  String _repositoryName = S.current.messageNoRepos;
-
-  static const Color colorNoRepo = Colors.grey;
-  static const Color colorLockedRepo = Colors.grey;
-  static const Color colorUnlockedRepo = Colors.black;
-  static const Color colorError = Colors.red;
-
-  @override
   Widget build(BuildContext context) {
     return BlocConsumer(
-      bloc: widget.repositoriesCubit,
+      bloc: repositoriesCubit,
       builder: (context, state) {
         if (state is RepositoryPickerInitial) {
           return _buildState(
-            borderColor: widget.borderColor,
+            context,
+            borderColor: borderColor,
             iconColor: colorNoRepo,
-            textColor: colorNoRepo
+            textColor: colorNoRepo,
+            repoName: _repoName(state),
           );
         }
 
@@ -59,9 +54,11 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
               : colorLockedRepo;
 
           return _buildState(
-            borderColor: widget.borderColor,
+            context,
+            borderColor: borderColor,
             iconColor: colorUnlockedRepo,
-            textColor: color
+            textColor: color,
+            repoName: _repoName(state),
           );
         }
 
@@ -71,17 +68,21 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           : colorLockedRepo;
 
           return _buildState(
-            borderColor: widget.borderColor,
+            context,
+            borderColor: borderColor,
             iconColor: colorUnlockedRepo,
-            textColor: color
+            textColor: color,
+            repoName: _repoName(state),
           );
         }
 
         if (state is RepositoriesFailure) {
           return _buildState(
-            borderColor: widget.borderColor,
+            context,
+            borderColor: borderColor,
             iconColor: colorError,
-            textColor: colorError
+            textColor: colorError,
+            repoName: _repoName(state),
           );
         }
 
@@ -89,34 +90,41 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
-          _updateCurrentRepository(state.repo);
+          onRepositorySelect(state.repo);
         }
         if (state is RepositoryPickerUnlocked) {
-          _updateCurrentRepository(state.repo);
+          onRepositorySelect(state.repo);
         }
         if (state is RepositoryPickerInitial) {
-          _updateCurrentRepository(null);
+          onRepositorySelect(null);
         }
       },
     );
   }
 
-  _updateCurrentRepository(RepoState? repo) async {
-    setState(() {
-      if (repo != null) {
-        _repositoryName = repo.name;
-      } else {
-        _repositoryName = S.current.messageNoRepos;
-      }
-    });
+  String _repoName(RepositoryPickerState state) {
+    RepoState? repo = null;
 
-    await widget.onRepositorySelect.call(repo);
+    if (state is RepositoryPickerSelection) {
+      repo = state.repo;
+    }
+    if (state is RepositoryPickerUnlocked) {
+      repo = state.repo;
+    }
+
+    if (repo != null) {
+      return repo.name;
+    } else {
+      return S.current.messageNoRepos;
+    }
   }
 
-  _buildState({
+  _buildState(
+    BuildContext context, {
     required Color borderColor,
     required Color iconColor,
-    required Color textColor
+    required Color textColor,
+    required String repoName,
   }) => Container(
     padding: Dimensions.paddingepositoryPicker,
     decoration: BoxDecoration(
@@ -128,7 +136,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
       color: Colors.white,
     ),
     child: InkWell(
-      onTap: () async { await _showRepositorySelector(_repositoryName); },
+      onTap: () async { await _showRepositorySelector(context, repoName); },
       child: Row(
         children: [
           Icon(
@@ -138,7 +146,7 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
           ),
           Dimensions.spacingHorizontal,
           Fields.constrainedText(
-            _repositoryName,
+            repoName,
             softWrap: false,
             textOverflow: TextOverflow.fade,
             color: textColor
@@ -156,15 +164,15 @@ class _RepositoryPickerState extends State<RepositoryPicker> {
     )
   );
 
-  Future<dynamic> _showRepositorySelector(current) => showModalBottomSheet(
+  Future<dynamic> _showRepositorySelector(BuildContext context, String repoName) => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
       return RepositoryList(
         context: context,
-        cubit: widget.repositoriesCubit,
-        current: _repositoryName,
+        cubit: repositoriesCubit,
+        current: repoName,
       );
     }
   );
