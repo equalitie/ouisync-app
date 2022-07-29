@@ -144,11 +144,8 @@ class _MainPageState extends State<MainPage>
         widget.repositoriesLocation,
         justNames: true
       ).map((repoName) async {
-        final repo = await repositories.initRepository(repoName);
-        await _mainState.put(
-          repo!,
-          setCurrent: (repoName == widget.defaultRepositoryName)
-        );
+        final setCurrent = repoName == widget.defaultRepositoryName;
+        await repositories.openRepository(repoName, setCurrent: setCurrent);
       }).toList();
 
       await Future.wait(initRepos);
