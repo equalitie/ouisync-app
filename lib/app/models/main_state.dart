@@ -37,7 +37,7 @@ class MainState with OuiSyncAppLogger {
     if (repo == null) {
       _updateCurrentRepository(null);
     } else {
-      await put(repo, setCurrent: true);;
+      await put(repo, setCurrent: true);
     }
   }
 

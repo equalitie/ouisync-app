@@ -713,8 +713,6 @@ class _MainPageState extends State<MainPage>
     ).then((password) async {
       if (password.isNotEmpty) { // The password provided by the user.
         final name = _repositories.current()!.name;
-        await _mainState.remove(name);
-
         _repositories.unlockRepository(
           name: repositoryName,
           password: password

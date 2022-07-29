@@ -63,6 +63,10 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
   void unlockRepository({required String name, required String password}) async {
     emit(RepositoryPickerLoading());
     
+    final wasCurrent = _mainState.currentRepo?.name == name;
+
+    await _mainState.remove(name);
+
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
     
@@ -81,6 +85,7 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
+      await _mainState.put(RepoState(name, repository), setCurrent: wasCurrent);
       emit(RepositoryPickerUnlocked(RepoState(name, repository)));
     } catch (e, st) {
       loggy.app('Unlock repository $name exception', e, st);
@@ -109,6 +114,12 @@ class RepositoriesCubit extends Cubit<RepositoryPickerState> with OuiSyncAppLogg
       loggy.app('Open repository $name exception', e, st);
       emit(RepositoriesFailure());
     }
+  }
+
+  Future<void> setCurrent(String repoName) async {
+    final repo = _mainState.get(repoName);
+    _mainState.setCurrent(repo);
+    emitSelection(repo);
   }
 
   void emitSelection(RepoState? repo) async {

@@ -25,7 +25,7 @@ class RepositoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer(
+    return BlocBuilder(
       bloc: repositoriesCubit,
       builder: (context, state) {
         if (state is RepositoryPickerInitial) {
@@ -83,17 +83,6 @@ class RepositoryPicker extends StatelessWidget {
         }
 
         return Container(child: Text(S.current.messageErrorDefaultShort),);
-      },
-      listener: (context, state) {
-        if (state is RepositoryPickerSelection) {
-          repositoriesCubit.mainState.setCurrent(state.repo);
-        }
-        if (state is RepositoryPickerUnlocked) {
-          repositoriesCubit.mainState.setCurrent(state.repo);
-        }
-        if (state is RepositoryPickerInitial) {
-          repositoriesCubit.mainState.setCurrent(null);
-        }
       },
     );
   }
