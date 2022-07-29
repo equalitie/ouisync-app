@@ -4,9 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
-import '../../models/main_state.dart';
 import '../../models/repo_state.dart';
-import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -18,13 +16,11 @@ class RepositoryPicker extends StatelessWidget {
 
   const RepositoryPicker({
     required this.repositoriesCubit,
-    required this.onRepositorySelect,
     required this.borderColor,
     Key? key,
   }) : super(key: key);
 
   final RepositoriesCubit repositoriesCubit;
-  final RepositoryCallback onRepositorySelect;
   final Color borderColor;
 
   @override
@@ -90,13 +86,13 @@ class RepositoryPicker extends StatelessWidget {
       },
       listener: (context, state) {
         if (state is RepositoryPickerSelection) {
-          onRepositorySelect(state.repo);
+          repositoriesCubit.mainState.setCurrent(state.repo);
         }
         if (state is RepositoryPickerUnlocked) {
-          onRepositorySelect(state.repo);
+          repositoriesCubit.mainState.setCurrent(state.repo);
         }
         if (state is RepositoryPickerInitial) {
-          onRepositorySelect(null);
+          repositoriesCubit.mainState.setCurrent(null);
         }
       },
     );

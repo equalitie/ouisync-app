@@ -186,6 +186,20 @@ class _MainPageState extends State<MainPage>
       _directoryCubit.navigateTo(repository, destination);
     }
 
+    Widget buildMainWidget() {
+      return _repositories.mainState.currentRepoCubit.builder((currentRepo) {
+        if (currentRepo == null) {
+          return NoRepositoriesState(
+            onNewRepositoryPressed: createRepoDialog,
+            onAddRepositoryPressed: addRepoWithTokenDialog
+          );
+        }
+
+        navigateToPath(currentRepo, Strings.root);
+        return _repositoryContentBuilder();
+      });
+    }
+
     @override
     Widget build(BuildContext context) {
       return Scaffold(
@@ -195,7 +209,7 @@ class _MainPageState extends State<MainPage>
           child: Column(
             children: <Widget>[
               RepositoryProgress(_repositories.current()),
-              Expanded(child: _mainWidget),
+              Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
@@ -249,7 +263,6 @@ class _MainPageState extends State<MainPage>
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
         repositoriesCubit: _repositories,
-        onRepositorySelect: switchRepository,
         shareRepositoryOnTap: shareRepository,
       );
     }
@@ -288,24 +301,6 @@ class _MainPageState extends State<MainPage>
           folder: currentFolder!
         ),
       );
-    }
-
-    Future<void> switchRepository(RepoState? repository) async {
-      await _mainState.setCurrent(repository);
-
-      if (repository == null) {
-        switchMainWidget(
-          NoRepositoriesState(
-            onNewRepositoryPressed: createRepoDialog,
-            onAddRepositoryPressed: addRepoWithTokenDialog
-          )
-        );
-        return;
-      }
-
-      switchMainWidget(_repositoryContentBuilder());
-
-      navigateToPath(_repositories.current()!, Strings.root);
     }
 
     void shareRepository() async {

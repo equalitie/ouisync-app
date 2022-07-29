@@ -9,12 +9,10 @@ import '../widgets.dart';
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar({
     required this.repositoriesCubit,
-    required this.onRepositorySelect,
     required this.shareRepositoryOnTap
   });
 
   final RepositoriesCubit repositoriesCubit;
-  final RepositoryCallback onRepositorySelect;
   final ShareRepositoryCallback shareRepositoryOnTap;
 
   @override
@@ -32,7 +30,6 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           Expanded(
             child: RepositoryPicker(
               repositoriesCubit: repositoriesCubit,
-              onRepositorySelect: onRepositorySelect,
               borderColor: Colors.white,
             ),
           ),
