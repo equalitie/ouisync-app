@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class Watch<State> extends Cubit<State> {
   Watch(State initial) : super(initial);
 
-  Widget build(Widget func(State)) {
+  Widget builder(Widget func(State)) {
     return BlocBuilder<Watch<State>, State>(
       bloc: this,
       builder: (BuildContext ctx, State state) {

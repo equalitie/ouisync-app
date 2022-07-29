@@ -7,8 +7,10 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../cubit/watch.dart';
 
 class MainState with OuiSyncAppLogger {
-  static final Map<String, RepoState> _repos = Map();
+  final Map<String, RepoState> _repos = Map();
   
+  bool isLoading = false;
+
   String? _currentRepoName;
 
   final _currentRepoCubit = Watch<RepoState?>(null);
@@ -18,6 +20,10 @@ class MainState with OuiSyncAppLogger {
   MainState() {
     _currentRepoCubit.emit(null);
   }
+
+  String? get currentRepoName => _currentRepoName;
+
+  Iterable<String> repositoryNames() => _repos.keys;
 
   RepoState? get currentRepo {
     if (_currentRepoName == null) {
@@ -37,7 +43,7 @@ class MainState with OuiSyncAppLogger {
     if (repo == null) {
       _updateCurrentRepository(null);
     } else {
-      await put(repo, setCurrent: true);;
+      await put(repo, setCurrent: true);
     }
   }
 

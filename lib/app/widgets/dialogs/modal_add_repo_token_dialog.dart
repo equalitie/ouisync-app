@@ -335,7 +335,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     }
 
     widget.formKey.currentState!.save();
-    cubit.openRepository(name: name, password: password, shareToken: _shareToken);
+    cubit.openRepository(name, password: password, token: _shareToken);
 
     Navigator.of(widget.context).pop(name);
   }

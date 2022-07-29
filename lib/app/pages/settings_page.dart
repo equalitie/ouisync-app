@@ -25,17 +25,13 @@ import 'peer_list.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
-    required this.mainState,
     required this.repositoriesCubit,
     required this.onShareRepository,
-    required this.title,
     this.dhtStatus = false,
   });
 
-  final MainState mainState;
   final RepositoriesCubit repositoriesCubit;
   final void Function() onShareRepository;
-  final String title;
   final bool dhtStatus;
 
   @override
@@ -73,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
 
     setState(() {
-      _currentRepo = widget.mainState.currentRepo;
+      _currentRepo = widget.repositoriesCubit.current();
     });
   }
 
@@ -150,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.title),
+          title: Text(S.current.titleSettings),
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
@@ -282,20 +278,20 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: BlocListener(
+            child: BlocListener<RepositoriesCubit, RepositoriesChanged>(
               bloc: widget.repositoriesCubit,
               listener: (context, state) {
-                if (state is RepositoryPickerSelection) {
-                  setState(() {
-                    _currentRepo = widget.mainState.currentRepo!;
-                  });
+                final nextRepo = widget.repositoriesCubit.current();
+                if (_currentRepo == nextRepo) {
+                  return;
                 }
+                setState(() { _currentRepo = nextRepo!; });
               },
               child: DropdownButton<RepoState?>(
                 isExpanded: true,
                 value: _currentRepo,
                 underline: const SizedBox(),
-                selectedItemBuilder: (context) => widget.mainState.repos.map<Widget>((RepoState repo) {
+                selectedItemBuilder: (context) => repositoryNames().map<Widget>((String repoName) {
                   return Padding(
                     padding: Dimensions.paddingItem,
                     child: Column(
@@ -312,14 +308,14 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           ]),
                         Row(
                           children: [
-                            Fields.constrainedText(repo.name,
+                            Fields.constrainedText(repoName,
                                 fontWeight: FontWeight.normal),
                           ],
                         ),
                       ],
                     ));
                 }).toList(),
-                items: widget.mainState.repos.map((RepoState repo) {
+                items: repositories().map((RepoState repo) {
                   return DropdownMenuItem(
                     value: repo,
                     child: Row(
@@ -343,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   setState(() {
                     _currentRepo = repo;
                   });
-                  await widget.mainState.setCurrent(_currentRepo);
+                  await widget.repositoriesCubit.setCurrent(repo?.name);
                 },
               ),
             ),
@@ -373,7 +369,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.mainState.currentRepo!.name),
+                              repositoryName: widget.repositoriesCubit.current()!.name),
                         );
                       }).then((newName) {
                     if (newName?.isNotEmpty ?? false) {
@@ -449,10 +445,18 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ]);
   }
 
+  Iterable<String> repositoryNames() {
+    return widget.repositoriesCubit.mainState.repositoryNames();
+  }
+
+  Iterable<RepoState> repositories() {
+    return widget.repositoriesCubit.mainState.repos;
+  }
+
   Widget _buildConnectedPeerListRow() {
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
 
-    return BlocConsumer<PeerSetCubit, PeerSetChanged>(
+    return BlocBuilder<PeerSetCubit, PeerSetChanged>(
       builder: (context, state) =>
         Fields.labeledButton(
           label: S.current.labelConnectedPeers,
@@ -465,10 +469,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   value: peerSetCubit,
                   child: PeerList()
                 )));
-          })
-      ,
-      listener: (context, state) {
-      });
+          }));
   }
 
   Widget _buildLogsSection() => Column(
@@ -497,7 +498,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.mainState.currentRepo;
+    final current = widget.repositoriesCubit.current();
 
     if (current == null) {
       return;
