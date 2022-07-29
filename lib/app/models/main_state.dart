@@ -21,6 +21,10 @@ class MainState with OuiSyncAppLogger {
     _currentRepoCubit.emit(null);
   }
 
+  String? get currentRepoName => _currentRepoName;
+
+  Iterable<String> repositoryNames() => _repos.keys;
+
   RepoState? get currentRepo {
     if (_currentRepoName == null) {
       return null;

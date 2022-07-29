@@ -88,7 +88,7 @@ class RepositoryPicker extends StatelessWidget {
       color: Colors.white,
     ),
     child: InkWell(
-      onTap: () async { await _showRepositorySelector(context, repoName); },
+      onTap: () async { await _showRepositorySelector(context); },
       child: Row(
         children: [
           Icon(
@@ -116,7 +116,7 @@ class RepositoryPicker extends StatelessWidget {
     )
   );
 
-  Future<dynamic> _showRepositorySelector(BuildContext context, String repoName) => showModalBottomSheet(
+  Future<dynamic> _showRepositorySelector(BuildContext context) => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
@@ -124,7 +124,6 @@ class RepositoryPicker extends StatelessWidget {
       return RepositoryList(
         context: context,
         cubit: repositoriesCubit,
-        current: repoName,
       );
     }
   );

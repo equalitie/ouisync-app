@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubit/cubits.dart';
@@ -14,51 +15,47 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   RepositoryList({
     required this.context,
     required this.cubit,
-    required this.current,
   });
 
   final BuildContext context;
   final RepositoriesCubit cubit;
-  final String current;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: loadLocalRepositories(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Container(
-            padding: Dimensions.paddingBottomSheet,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Fields.bottomSheetHandle(context),
-                Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-                _buildRepositoryList(snapshot.data as List<String>, current),
-                Dimensions.spacingActionsVertical,
-                Fields.paddedActionText(
-                  S.current.iconCreateRepository,
-                  icon: Icons.add_circle_outline_rounded,
-                  onTap: () => createRepoDialog(this.cubit),
-                ),
-                Fields.paddedActionText(
-                  S.current.iconAddRepositoryWithToken,
-                  icon: Icons.insert_link_rounded,
-                  onTap: () => addRepoWithTokenDialog(this.cubit),
-                ),
-              ]
-            ),
-          ); 
-        }
+    return BlocBuilder<RepositoriesCubit, RepositoriesChanged>(
+      bloc: cubit,
+      builder: (context, changed) {
+        final state = cubit.mainState;
 
-        return Container(child: Text(S.current.messageError),);
+        return Container(
+          padding: Dimensions.paddingBottomSheet,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Fields.bottomSheetHandle(context),
+              Fields.bottomSheetTitle(S.current.titleRepositoriesList),
+              _buildRepositoryList(state.repositoryNames().toList(), state.currentRepoName),
+              Dimensions.spacingActionsVertical,
+              Fields.paddedActionText(
+                S.current.iconCreateRepository,
+                icon: Icons.add_circle_outline_rounded,
+                onTap: () => createRepoDialog(this.cubit),
+              ),
+              Fields.paddedActionText(
+                S.current.iconAddRepositoryWithToken,
+                icon: Icons.insert_link_rounded,
+                onTap: () => addRepoWithTokenDialog(this.cubit),
+              ),
+            ]
+          ),
+        ); 
       }
     );
   }
 
-  Widget _buildRepositoryList(List<String> repositories, String current) => ListView.builder(
+  Widget _buildRepositoryList(List<String> repositories, String? current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     itemCount: repositories.length,
@@ -87,18 +84,6 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
           : Colors.black54);
     }
   );
-
-  Future<List<String>> loadLocalRepositories() async {
-    final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
-    final repositoryFiles = <String>[];
-    if (io.Directory(repositoriesDir).existsSync()) {
-      repositoryFiles.addAll(io.Directory(repositoriesDir).listSync().map((e) => getBasename(e.path)).toList());
-      repositoryFiles.removeWhere((e) => !e.endsWith('db'));
-    }
-
-    loggy.app('Local repositories found: $repositoryFiles');
-    return repositoryFiles.map((e) => e.substring(0, e.lastIndexOf('.'))).toList();
-  }
 
   Future<void> updateDefaultRepositorySetting(repositoryName) async {
     final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
