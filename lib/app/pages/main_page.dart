@@ -304,12 +304,6 @@ class _MainPageState extends State<MainPage>
         state is DownloadFileDone);
       },
       builder: (context, state) {
-        if (state is DirectoryInitial) {
-          return Center(
-            child: Fields.inPageSecondaryMessage(S.current.messageLoadingContents)
-          );
-        }
-
         if (state is DirectoryLoadInProgress) {
           return const Center(child: CircularProgressIndicator());
         }

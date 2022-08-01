@@ -15,7 +15,7 @@ export "state.dart";
 export '../../models/repo_state.dart';
 
 class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
-  DirectoryCubit() : super(DirectoryInitial()) {}
+  DirectoryCubit() : super(DirectoryLoadInProgress()) {}
 
   Future<void> navigateTo(BuildContext context, RepoState repo, String destination) async {
     emit(DirectoryLoadInProgress());

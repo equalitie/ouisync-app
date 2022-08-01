@@ -242,8 +242,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Initializing..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
-        "messageLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "Loading the folder contents…"),
         "messageLoadingDefault":
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(

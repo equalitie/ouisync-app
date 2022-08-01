@@ -49,7 +49,6 @@
     "labelShareLink":"Share link",
 
     "messageLoadingDefault":"Loading…",
-    "messageLoadingContents":"Loading the folder contents…",
 
     "messageErrorDefault":"Something went wrong. Please try again.",
     "messageErrorDefaultShort":"Failed.",

@@ -16,8 +16,6 @@ enum DownloadFileResult {
   failed
 }
 
-class DirectoryInitial extends DirectoryState {}
-
 class WriteToFileInProgress extends DirectoryState {
   const WriteToFileInProgress({
     required this.repository,
