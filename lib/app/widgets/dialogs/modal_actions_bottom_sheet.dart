@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../../models/folder_state.dart';
 import '../widgets.dart';

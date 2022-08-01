@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/main_state.dart';
 
 class FolderNavigationBar extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../../models/main_state.dart';

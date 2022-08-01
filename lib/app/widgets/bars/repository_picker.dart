@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/repo_state.dart';
 import '../../models/main_state.dart';
 import '../../utils/utils.dart';

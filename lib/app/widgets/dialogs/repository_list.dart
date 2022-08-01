@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../models/main_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';

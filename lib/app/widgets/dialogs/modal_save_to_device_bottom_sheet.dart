@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';

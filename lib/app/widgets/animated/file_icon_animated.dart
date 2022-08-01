@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart' as model;

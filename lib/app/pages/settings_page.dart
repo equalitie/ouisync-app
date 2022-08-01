@@ -13,7 +13,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
-import '../cubit/cubits.dart';
+import '../cubits/cubits.dart';
 import '../models/main_state.dart';
 import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../cubit/cubits.dart';
+import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 import '../models/models.dart' as model;
 import 'utils.dart';

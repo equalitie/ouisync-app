@@ -8,7 +8,7 @@ import '../../models/main_state.dart';
 import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../cubit/cubits.dart' as cubits;
+import '../cubits.dart' as cubits;
 
 class RepositoriesCubit extends cubits.Watch<MainState> with OuiSyncAppLogger {
   RepositoriesCubit({

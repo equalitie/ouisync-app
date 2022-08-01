@@ -9,7 +9,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
-import '../cubit/cubits.dart';
+import '../cubits/cubits.dart';
 import '../models/folder_state.dart';
 import '../models/main_state.dart';
 import '../models/models.dart';

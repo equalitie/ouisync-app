@@ -4,7 +4,7 @@ import 'dart:async';
 import '../models/folder_state.dart';
 import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
-import '../cubit/cubits.dart' as cubits;
+import '../cubits/cubits.dart' as cubits;
 
 class MainState with OuiSyncAppLogger {
   final Map<String, RepoState> _repos = Map();
