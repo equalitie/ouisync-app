@@ -347,6 +347,7 @@ class _MainPageState extends State<MainPage>
 
     _contentBrowser(FolderState folder) {
       late final child;
+      late final navigationBar;
 
       if (folder.content.isEmpty) {
           child = NoContentsState(repository: folder.repo, path: folder.path);
@@ -354,10 +355,16 @@ class _MainPageState extends State<MainPage>
           child = _contentsList(folder);
       }
 
+      if (folder.isRoot()) {
+        navigationBar = SizedBox.shrink();
+      } else {
+        navigationBar = FolderNavigationBar(_reposState);
+      }
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          FolderNavigationBar(_reposState),
+          navigationBar,
           // TODO: A shadow would be nicer.
           Divider(height: 3),
           Expanded(child: child),
