@@ -318,9 +318,9 @@ class _MainPageState extends State<MainPage>
           return _selectLayoutWidget();
         }
 
-        return _errorState(
+        return ErrorState(
           message: S.current.messageErrorLoadingContents,
-          actionReload: () => getContent(_repositories.current()!)
+          onReload: () => getContent(_repositories.current()!),
         );
       },
     );
@@ -342,23 +342,11 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      return _contentBrowser(
-        folder: currentFolder!
-      );
+      return _contentBrowser(currentFolder!);
     }
 
-    _errorState({
-      required String message,
-      required void Function()? actionReload
-    }) => ErrorState(
-      message: message,
-      onReload: actionReload
-    );
-
-    _contentBrowser({
-      required FolderState folder,
-    }) {
-      var child;
+    _contentBrowser(FolderState folder) {
+      late final child;
 
       if (folder.content.isEmpty) {
           child = NoContentsState(repository: folder.repo, path: folder.path);
