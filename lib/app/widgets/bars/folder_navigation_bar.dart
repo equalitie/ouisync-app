@@ -88,7 +88,7 @@ class FolderNavigationBar extends StatelessWidget {
           }
 
           final parent = currentRepo.currentFolder.parent;
-          cubit.navigateTo(currentRepo, parent);
+          cubit.navigateTo(ctx, currentRepo, parent);
         }
       },
       child: path == Strings.root

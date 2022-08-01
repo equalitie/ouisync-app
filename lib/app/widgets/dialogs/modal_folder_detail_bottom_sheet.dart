@@ -194,7 +194,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   }
 
   void deleteAction(BuildContext context, DirectoryCubit cubit, RepoState repository, String path, bool recursive) {
-    cubit.deleteFolder(repository, path, recursive);
+    cubit.deleteFolder(context, repository, path, recursive);
     Navigator.of(context).pop(true);
   }
 
@@ -246,6 +246,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
 
         widget.cubit
         .moveEntry(
+          context,
           widget.repository,
           source: path,
           destination: newEntryPath

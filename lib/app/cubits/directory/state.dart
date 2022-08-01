@@ -18,15 +18,6 @@ enum DownloadFileResult {
 
 class DirectoryInitial extends DirectoryState {}
 
-class ShowMessage extends DirectoryState {
-  const ShowMessage(this.message);
-
-  final String message;
-
-  @override
-  List<Object> get props => [ message ];
-}
-
 class WriteToFileInProgress extends DirectoryState {
   const WriteToFileInProgress({
     required this.repository,

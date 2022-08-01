@@ -201,6 +201,7 @@ class _FileDetailState extends State<FileDetail> {
         final newEntryPath = buildDestinationPath(parent, newName); 
 
         widget.cubit.moveEntry(
+          context,
           widget.repository,
           source: path,
           destination: newEntryPath
