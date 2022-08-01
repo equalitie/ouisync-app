@@ -3,17 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
-import '../../cubit/cubits.dart';
-import '../../models/main_state.dart';
+import '../../cubits/cubits.dart';
 
 class FolderNavigationBar extends StatelessWidget {
-  final MainState _mainState;
+  final ReposState _reposState;
 
-  FolderNavigationBar(this._mainState);
+  FolderNavigationBar(this._reposState);
 
   @override
   Widget build(BuildContext context) {
-    final path = _mainState.currentFolder!.path;
+    final path = _reposState.currentFolder!.path;
     final route = _currentLocationBar(path, context);
 
     return Container(
@@ -82,14 +81,14 @@ class FolderNavigationBar extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          final currentRepo = _mainState.currentRepo;
+          final currentRepo = _reposState.currentRepo;
 
           if (currentRepo == null) {
             return;
           }
 
           final parent = currentRepo.currentFolder.parent;
-          cubit.navigateTo(currentRepo, parent);
+          cubit.navigateTo(ctx, currentRepo, parent);
         }
       },
       child: path == Strings.root

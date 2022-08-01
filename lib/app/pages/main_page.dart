@@ -9,9 +9,8 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
-import '../cubit/cubits.dart';
+import '../cubits/cubits.dart';
 import '../models/folder_state.dart';
-import '../models/main_state.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -22,7 +21,6 @@ import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
 typedef RepositoryCallback = Future<void> Function(RepoState? repository);
-typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
@@ -34,9 +32,7 @@ class MainPage extends StatefulWidget {
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
     required this.mediaReceiver,
-    Key? key,
-
-  }) : super(key: key);
+  });
 
   final Session session;
   final String appStorageLocation;
@@ -54,7 +50,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger
 {
-    RepositoriesCubit _repositories;
+    ReposCubit _repositories;
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -71,11 +67,11 @@ class _MainPageState extends State<MainPage>
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
-      _repositories = RepositoriesCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
+      _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    FolderState? get currentFolder => _mainState.currentFolder;
+    FolderState? get currentFolder => _repositories.state.currentFolder;
     DirectoryCubit get _directoryCubit => BlocProvider.of<DirectoryCubit>(context);
-    MainState get _mainState => _repositories.mainState;
+    ReposState get _reposState => _repositories.state;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
@@ -97,7 +93,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _mainState.setSubscriptionCallback((repo) {
+      _reposState.setSubscriptionCallback((repo) {
         _repoProgressCubit.updateProgress(repo);
         getContent(repo);
       });
@@ -175,15 +171,15 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent(RepoState repository) {
-      _directoryCubit.getContent(repository);
+      _directoryCubit.getContent(context, repository);
     }
 
     navigateToPath(RepoState repository, String destination) {
-      _directoryCubit.navigateTo(repository, destination);
+      _directoryCubit.navigateTo(context, repository, destination);
     }
 
     Widget buildMainWidget() {
-      return _repositories.mainState.currentRepoCubit.builder((currentRepo) {
+      return _repositories.state.currentRepoCubit.builder((currentRepo) {
         if (currentRepo == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -198,19 +194,21 @@ class _MainPageState extends State<MainPage>
 
     @override
     Widget build(BuildContext context) {
+      final currentRepoCubit = _repositories.currentCubit();
+
       return Scaffold(
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              RepositoryProgress(_repositories.current()),
+              currentRepoCubit.builder((repo) => RepositoryProgress(repo)),
               Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: _buildFAB(context),
+        floatingActionButton: currentRepoCubit.builder((repo) => _buildFAB(context, repo)),
       );
     }
 
@@ -258,8 +256,8 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
-        repositoriesCubit: _repositories,
-        shareRepositoryOnTap: shareRepository,
+        reposCubit: _repositories,
+        shareRepositoryOnTap: _showShareRepository,
       );
     }
 
@@ -277,9 +275,7 @@ class _MainPageState extends State<MainPage>
       return Container(child: Fields.addUpgradeBadge(button));
     }
 
-    StatelessWidget _buildFAB(BuildContext context,) {
-      final current = _repositories.current();
-
+    StatelessWidget _buildFAB(BuildContext context, RepoState? current) {
       if (current == null) {
         return Container();
       }
@@ -299,24 +295,13 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    void shareRepository() async {
-      final current = _repositories.current();
-
-      if (current == null) {
-        return;
-      }
-
-      await _showShareRepository(context, current);
-    }
-
-    _repositoryContentBuilder() => BlocConsumer<DirectoryCubit, DirectoryState>(
+    _repositoryContentBuilder() => BlocBuilder<DirectoryCubit, DirectoryState>(
       buildWhen: (context, state) {
         return !(
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
         state is DownloadFileInProgress ||
-        state is DownloadFileDone ||
-        state is ShowMessage);
+        state is DownloadFileDone);
       },
       builder: (context, state) {
         if (state is DirectoryInitial) {
@@ -333,16 +318,11 @@ class _MainPageState extends State<MainPage>
           return _selectLayoutWidget();
         }
 
-        return _errorState(
+        return ErrorState(
           message: S.current.messageErrorLoadingContents,
-          actionReload: () => getContent(_repositories.current()!)
+          onReload: () => getContent(_repositories.current()!),
         );
       },
-      listener: (context, state) {
-        if (state is ShowMessage) {
-          showSnackBar(context, content: Text(state.message));
-        }
-      }
     );
 
     _selectLayoutWidget() {
@@ -362,23 +342,11 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      return _contentBrowser(
-        folder: currentFolder!
-      );
+      return _contentBrowser(currentFolder!);
     }
 
-    _errorState({
-      required String message,
-      required void Function()? actionReload
-    }) => ErrorState(
-      message: message,
-      onReload: actionReload
-    );
-
-    _contentBrowser({
-      required FolderState folder,
-    }) {
-      var child;
+    _contentBrowser(FolderState folder) {
+      late final child;
 
       if (folder.content.isEmpty) {
           child = NoContentsState(repository: folder.repo, path: folder.path);
@@ -389,7 +357,7 @@ class _MainPageState extends State<MainPage>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          FolderNavigationBar(_mainState),
+          FolderNavigationBar(_reposState),
           // TODO: A shadow would be nicer.
           Divider(height: 3),
           Expanded(child: child),
@@ -472,21 +440,20 @@ class _MainPageState extends State<MainPage>
       )
     );
 
-    Future<dynamic> _showShareRepository(context, RepoState currentRepoState)
+    Future<dynamic> _showShareRepository(RepoState repository)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
-        final accessModes = currentRepoState.accessMode == AccessMode.write
+        final accessModes = repository.accessMode == AccessMode.write
           ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-          : currentRepoState.accessMode == AccessMode.read
+          : repository.accessMode == AccessMode.read
             ? [AccessMode.blind, AccessMode.read]
             : [AccessMode.blind];
 
         return ShareRepository(
-          repository: currentRepoState,
-          repositoryName: currentRepoState.name,
+          repository: repository,
           availableAccessModes: accessModes,
         );
       }
@@ -562,6 +529,7 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController = null;
 
     _directoryCubit.moveEntry(
+      context,
       _repositories.current()!,
       source: path,
       destination: destination
@@ -623,6 +591,7 @@ class _MainPageState extends State<MainPage>
     final fileByteStream = io.File(path).openRead();
         
     _directoryCubit.saveFile(
+      context,
       _repositories.current()!,
       newFilePath: filePath,
       fileName: fileName,
@@ -733,8 +702,8 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-            repositoriesCubit: reposCubit,
-            onShareRepository: shareRepository,
+            reposCubit: reposCubit,
+            onShareRepository: _showShareRepository,
             dhtStatus: dhtStatus,
           )
         );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../cubit/cubits.dart';
+import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 import '../models/models.dart' as model;
 import 'utils.dart';
@@ -172,9 +172,8 @@ abstract class Dialogs {
       TextButton(
         child: Text(S.current.actionDeleteCapital),
         onPressed: () {
-          cubit.deleteFile(repository, path);
+          cubit.deleteFile(context, repository, path);
           Navigator.of(context).pop(fileName);
-          showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
       ),
       TextButton(

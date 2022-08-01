@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:badges/badges.dart';
 
-import '../cubit/upgrade_exists.dart';
+import '../cubits/upgrade_exists.dart';
 
 class Fields {
   Fields._();

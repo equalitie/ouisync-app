@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/widgets/widgets.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
@@ -59,7 +59,7 @@ class FolderCreation extends StatelessWidget {
       return;
     }
 
-    await cubit.createFolder(repository, newFolderPath);
+    await cubit.createFolder(context, repository, newFolderPath);
 
     Navigator.of(context).pop(newFolderPath);
   }

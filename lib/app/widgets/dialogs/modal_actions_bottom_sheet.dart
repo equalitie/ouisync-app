@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../../models/folder_state.dart';
 import '../widgets.dart';
@@ -95,7 +95,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, DirectoryCubit cubit, FolderState parent) async {
+  Future<void> addFile(BuildContext context, DirectoryCubit cubit, FolderState parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -118,6 +118,7 @@ class DirectoryActions extends StatelessWidget {
       }
 
       cubit.saveFile(
+        context,
         parent.repo,
         newFilePath: newFilePath,
         fileName: file.name,

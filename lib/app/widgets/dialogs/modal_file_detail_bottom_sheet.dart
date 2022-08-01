@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
@@ -19,8 +19,7 @@ class FileDetail extends StatefulWidget {
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final BuildContext context;
   final DirectoryCubit cubit;
@@ -147,7 +146,7 @@ class _FileDetailState extends State<FileDetail> {
           ),
           Fields.labeledText(
             label: S.current.labelSize,
-            text: formattSize(widget.data.size, units: true),
+            text: formatSize(widget.data.size, units: true),
           ),
         ],
       )
@@ -201,6 +200,7 @@ class _FileDetailState extends State<FileDetail> {
         final newEntryPath = buildDestinationPath(parent, newName); 
 
         widget.cubit.moveEntry(
+          context,
           widget.repository,
           source: path,
           destination: newEntryPath

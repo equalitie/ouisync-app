@@ -3,16 +3,19 @@ import 'dart:io' as io;
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'dart:async';
 
-import '../../models/main_state.dart';
 import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../cubits.dart' as cubits;
 
-part 'repositories_state.dart';
+import '../../models/folder_state.dart';
 
-class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger {
-  RepositoriesCubit({
+part 'state.dart';
+
+class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
+  ReposCubit({
     required session,
     required appDir,
     required repositoriesDir
@@ -20,45 +23,46 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
     _session = session,
     _appDir = appDir,
     _repositoriesDir = repositoriesDir,
-    _mainState = MainState(),
-    super(RepositoriesChanged())
+    super(ReposState())
   {}
 
   final oui.Session _session;
   final String _appDir;
   final String _repositoriesDir;
-  final MainState _mainState;
 
   oui.Session get session => _session;
   String get appDir => _appDir;
-  MainState get mainState => _mainState;
+
+  cubits.Value<RepoState?> currentCubit() {
+    return state.currentRepoCubit;
+  }
 
   RepoState? current() {
-    return _mainState.currentRepo;
+    return state.currentRepo;
   }
 
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
-    print("Cubit openRepository start $name");
+    print("ReposCubit openRepository start $name");
     update((state) { state.isLoading = true; });
 
     final repo = await _open(name, password: password, token: token);
 
     if (repo != null) {
-      await _mainState.put(repo, setCurrent: setCurrent);
+      await state.put(repo, setCurrent: setCurrent);
     } else {
       loggy.app('Failed to open repository $name');
     }
 
-    print("Cubit openRepository end $name");
+    print("ReposCubit openRepository end $name");
     update((state) { state.isLoading = false; });
   }
 
   void unlockRepository({required String name, required String password}) async {
     update((state) { state.isLoading = true; });
 
-    final wasCurrent = _mainState.currentRepo?.name == name;
+    final wasCurrent = state.currentRepo?.name == name;
 
-    await _mainState.remove(name);
+    await state.remove(name);
 
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
@@ -79,7 +83,7 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
-      await _mainState.put(RepoState(name, repository), setCurrent: wasCurrent);
+      await state.put(RepoState(name, repository), setCurrent: wasCurrent);
     } catch (e, st) {
       loggy.app('Unlock repository $name exception', e, st);
     }
@@ -88,25 +92,25 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
   }
 
   Future<void> setCurrent(String? repoName) async {
-    if (repoName == _mainState.currentRepoName) {
+    if (repoName == state.currentRepoName) {
       return;
     }
 
     RepoState? repo;
 
     if (repoName != null) {
-      repo = _mainState.get(repoName);
+      repo = state.get(repoName);
     }
 
-    _mainState.setCurrent(repo);
+    state.setCurrent(repo);
 
-    emitChange();
+    changed();
   }
 
   void renameRepository(String oldName, String newName) async {
-    final wasCurrent = _mainState.currentRepo?.name == oldName;
+    final wasCurrent = state.currentRepo?.name == oldName;
 
-    await _mainState.remove(oldName);
+    await state.remove(oldName);
 
     final renamed = await RepositoryHelper.renameRepositoryFiles(_repositoriesDir,
       oldName: oldName,
@@ -120,12 +124,12 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
       final repo = await _open(oldName);
 
       if (repo == null) {
-        await _mainState.setCurrent(null);
+        await state.setCurrent(null);
       } else {
-        await _mainState.put(repo, setCurrent: wasCurrent);
+        await state.put(repo, setCurrent: wasCurrent);
       }
 
-      emitChange();
+      changed();
 
       return;
     }
@@ -136,18 +140,18 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
     final repo = await _open(newName);
 
     if (repo == null) {
-      await _mainState.setCurrent(null);
+      await state.setCurrent(null);
     } else {
-      await _mainState.put(repo, setCurrent: wasCurrent);
+      await state.put(repo, setCurrent: wasCurrent);
     }
 
-    emitChange();
+    changed();
   }
 
   void deleteRepository(String repositoryName) async {
-    final wasCurrent = _mainState.currentRepo?.name == repositoryName;
+    final wasCurrent = state.currentRepo?.name == repositoryName;
 
-    await _mainState.remove(repositoryName);
+    await state.remove(repositoryName);
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
       _repositoriesDir,
@@ -161,12 +165,12 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
       final repo = await _open(repositoryName);
 
       if (repo == null) {
-        await _mainState.setCurrent(null);
+        await state.setCurrent(null);
       } else {
-        await _mainState.put(repo, setCurrent: wasCurrent);
+        await state.put(repo, setCurrent: wasCurrent);
       }
 
-      emitChange();
+      changed();
 
       return;
     }
@@ -177,25 +181,25 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
     final latestRepositoryOrDefaultName = await RepositoryHelper.latestRepositoryOrDefault(null);
 
     if (latestRepositoryOrDefaultName.isEmpty) { /// No more repositories available
-      emitChange();
+      changed();
       return;
     }
 
-    RepoState? newDefaultRepository = _mainState.get(latestRepositoryOrDefaultName);
+    RepoState? newDefaultRepository = state.get(latestRepositoryOrDefaultName);
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
       newDefaultRepository = await _open(latestRepositoryOrDefaultName);
     }
 
-    await _mainState.put(newDefaultRepository!);
+    await state.put(newDefaultRepository!);
 
-    emitChange();
+    changed();
   }
 
   _buildStoreString(repositoryName) => '${_repositoriesDir}/$repositoryName.db';
 
   Future<void> close() async {
-    await _mainState.close();
+    await state.close();
   }
 
   Future<RepoState?> _open(String name, { String? password, oui.ShareToken? token }) async {
@@ -224,13 +228,8 @@ class RepositoriesCubit extends Cubit<RepositoriesChanged> with OuiSyncAppLogger
     ? oui.Repository.open(_session, store: store, password: password)
     : oui.Repository.create(_session, store: store, password: password!, shareToken: shareToken);
 
-  void update(void Function(MainState) changeState) {
-    changeState(_mainState);
-    emitChange();
-  }
-
-
-  void emitChange() {
-    emit(RepositoriesChanged());
+  void update(void Function(ReposState) changeState) {
+    changeState(state);
+    changed();
   }
 }

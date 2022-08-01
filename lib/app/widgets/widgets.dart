@@ -3,7 +3,6 @@ export 'animated/file_icon_animated.dart';
 export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repositories_bar.dart';
-export 'bars/repository_picker.dart';
 export 'bars/search_bar.dart';
 
 export 'buttons/dialog_negative_button.dart';
@@ -23,7 +22,6 @@ export 'dialogs/modal_save_to_device_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
-export 'dialogs/repository_list.dart';
 export 'dialogs/save_shared_media.dart';
 
 export 'items/file_description.dart';

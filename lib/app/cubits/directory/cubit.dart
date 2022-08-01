@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -16,13 +17,13 @@ export '../../models/repo_state.dart';
 class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
   DirectoryCubit() : super(DirectoryInitial()) {}
 
-  Future<void> navigateTo(RepoState repo, String destination) async {
+  Future<void> navigateTo(BuildContext context, RepoState repo, String destination) async {
     emit(DirectoryLoadInProgress());
     repo.currentFolder.goTo(destination);
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
   }
 
-  Future<void> createFolder(RepoState repo, String folderPath) async {
+  Future<void> createFolder(BuildContext context, RepoState repo, String folderPath) async {
     emit(DirectoryLoadInProgress());
 
     try{
@@ -36,10 +37,10 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       loggy.app('Directory $folderPath creation exception', e, st);
     }
 
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
   }
 
-  Future<void> deleteFolder(RepoState repo, String path, bool recursive) async {
+  Future<void> deleteFolder(BuildContext context, RepoState repo, String path, bool recursive) async {
     emit(DirectoryLoadInProgress());
 
     try {
@@ -51,16 +52,19 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       loggy.app('Directory $path deletion exception', e, st);
     }
 
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
   }
 
-  Future<void> saveFile(RepoState repo, {
+  Future<void> saveFile(
+      BuildContext context,
+      RepoState repo, {
       required String newFilePath,
       required String fileName,
       required int length,
       required Stream<List<int>> fileByteStream,
   }) async {
     final file = await _createFile(
+      context,
       repo,
       newFilePath,
       fileName,
@@ -70,7 +74,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       return;
     }
 
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
 
     int offset = 0;
     try {
@@ -97,7 +101,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       }
     } catch (e, st) {
       loggy.app('Writing to file ${newFilePath} exception', e, st);
-      emit(ShowMessage(S.current.messageWritingFileError(newFilePath)));
+      showMessage(context, S.current.messageWritingFileError(newFilePath));
       emit(WriteToFileDone(repository: repo, path: newFilePath));
       return;
     } finally {
@@ -106,7 +110,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
     }
 
     if (_cancelFileWriting.isEmpty) {
-      emit(ShowMessage(S.current.messageWritingFileDone(newFilePath)));
+      showMessage(context, S.current.messageWritingFileDone(newFilePath));
       emit(WriteToFileDone(repository: repo, path: newFilePath));
       return;
     }
@@ -115,7 +119,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       loggy.app('${newFilePath} writing canceled by the user');
       _cancelFileWriting = '';
 
-      emit(ShowMessage(S.current.messageWritingFileCanceled(newFilePath)));
+      showMessage(context, S.current.messageWritingFileCanceled(newFilePath));
       emit(WriteToFileDone(repository: repo, path: newFilePath));
     }
   }
@@ -131,7 +135,11 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
     loggy.app('Cancel creation: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
   }
 
-  Future<void> downloadFile(RepoState repo, { required String sourcePath, required String destinationPath }) async {
+  Future<void> downloadFile(
+      BuildContext context,
+      RepoState repo,
+      { required String sourcePath, required String destinationPath }) async
+  {
     final ouisyncFile = await File.open(repo.handle, sourcePath);
     final length = await ouisyncFile.length;
 
@@ -173,7 +181,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
     } catch (e, st) {
       loggy.app('Download file ${sourcePath} exception', e, st);
 
-      emit(ShowMessage(S.current.messageDownloadingFileError(sourcePath)));
+      showMessage(context, S.current.messageDownloadingFileError(sourcePath));
       emit(DownloadFileDone(
         repository: repo,
         path: sourcePath,
@@ -187,7 +195,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
     }
 
     if (_cancelFileDownload.isEmpty) {
-      emit(ShowMessage(S.current.messageDownloadingFileDone(sourcePath)));
+      showMessage(context, S.current.messageDownloadingFileDone(sourcePath));
       return;
     }
 
@@ -195,7 +203,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       _cancelFileDownload = '';
 
       loggy.app('${sourcePath} download canceled by the user');
-      emit(ShowMessage(S.current.messageDownloadingFileCanceled(sourcePath)));
+      showMessage(context, S.current.messageDownloadingFileCanceled(sourcePath));
 
       emit(DownloadFileDone(
         repository: repo,
@@ -231,6 +239,7 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
   }
 
   Future<File?> _createFile(
+    BuildContext context,
     RepoState repository,
     String newFilePath,
     String fileName,
@@ -241,19 +250,23 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       createFileResult = (await repository.createFile(newFilePath)) as CreateFileResult?;
       if (createFileResult!.errorMessage.isNotEmpty) {
         loggy.app('Create file $newFilePath failed:\n${createFileResult.errorMessage}');
-        emit(ShowMessage(S.current.messageNewFileError(newFilePath)));
+        showMessage(context, S.current.messageNewFileError(newFilePath));
         return null;
       }
     } catch (e, st) {
       loggy.app('Create file $newFilePath exception', e, st);
-      emit(ShowMessage(S.current.messageNewFileError(newFilePath)));
+      showMessage(context, S.current.messageNewFileError(newFilePath));
       return null;
     }
 
     return createFileResult.result!;
   }
 
-  Future<void> moveEntry(RepoState repo, { required String source, required String destination }) async {
+  Future<void> moveEntry(
+      BuildContext context,
+      RepoState repo,
+      { required String source, required String destination }) async
+  {
     emit(DirectoryLoadInProgress());
 
     try {
@@ -265,10 +278,10 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       loggy.app('Move entry from ${source} to ${destination} exception', e, st);
     }
 
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
   }
 
-  Future<void> deleteFile(RepoState repo, String filePath) async {
+  Future<void> deleteFile(BuildContext context, RepoState repo, String filePath) async {
     emit(DirectoryLoadInProgress());
 
     try{
@@ -281,15 +294,15 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
       loggy.app('Delete file $filePath exception', e, st);
     }
 
-    await _refreshFolder(repo);
+    await _refreshFolder(context, repo);
   }
 
-  Future<void> getContent(RepoState repository) async {
-    await _refreshFolder(repository);
+  Future<void> getContent(BuildContext context, RepoState repository) async {
+    await _refreshFolder(context, repository);
   }
 
   int next_id = 0;
-  Future<void> _refreshFolder(RepoState repo) async {
+  Future<void> _refreshFolder(BuildContext context, RepoState repo) async {
     // TODO: Only increment the id when the content changes.
     int id = next_id;
     next_id += 1;
@@ -308,14 +321,18 @@ class DirectoryCubit extends Cubit<DirectoryState> with OuiSyncAppLogger {
 
         if (!errorShown) {
           errorShown = true;
-          emit(ShowMessage(S.current.messageErrorCurrentPathMissing(path)));
+          showMessage(context, S.current.messageErrorCurrentPathMissing(path));
         }
       }
     }
     catch (e) {
-      emit(ShowMessage(e.toString()));
+      showMessage(context, e.toString());
     }
 
     emit(DirectoryReloaded(id: id, path: path));
+  }
+
+  void showMessage(BuildContext context, String message) {
+    showSnackBar(context, content: Text(message));
   }
 }

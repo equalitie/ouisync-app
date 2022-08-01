@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
@@ -194,7 +194,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   }
 
   void deleteAction(BuildContext context, DirectoryCubit cubit, RepoState repository, String path, bool recursive) {
-    cubit.deleteFolder(repository, path, recursive);
+    cubit.deleteFolder(context, repository, path, recursive);
     Navigator.of(context).pop(true);
   }
 
@@ -246,6 +246,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
 
         widget.cubit
         .moveEntry(
+          context,
           widget.repository,
           source: path,
           destination: newEntryPath

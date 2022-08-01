@@ -8,7 +8,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 import '../generated/l10n.dart';
-import 'cubit/cubits.dart';
+import 'cubits/cubits.dart';
 import 'pages/pages.dart';
 import 'utils/loggers/ouisync_app_logger.dart';
 import 'utils/platform/platform.dart';

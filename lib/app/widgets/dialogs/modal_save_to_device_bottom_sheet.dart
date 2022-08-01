@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -17,11 +17,10 @@ import '../widgets.dart';
 
 class SaveToDevice extends StatefulWidget with OuiSyncAppLogger {
   const SaveToDevice({
-    Key? key,
     required this.repository,
     required this.data,
     required this.cubit
-  }) : super(key: key);
+  });
 
   final RepoState repository;
   final FileItem data;
@@ -188,6 +187,7 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     if (await Permission.storage.request().isGranted) {
       final destinationPath = p.join(_destinationPath!, widget.data.name);
       widget.cubit.downloadFile(
+        context,
         widget.repository,
         sourcePath: widget.data.path,
         destinationPath: destinationPath

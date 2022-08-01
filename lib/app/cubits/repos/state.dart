@@ -1,23 +1,17 @@
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'dart:async';
+part of 'cubit.dart';
 
-import '../models/folder_state.dart';
-import '../models/repo_state.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
-import '../cubit/watch.dart';
-
-class MainState with OuiSyncAppLogger {
+class ReposState with OuiSyncAppLogger {
   final Map<String, RepoState> _repos = Map();
-  
+
   bool isLoading = false;
 
   String? _currentRepoName;
 
-  final _currentRepoCubit = Watch<RepoState?>(null);
+  final _currentRepoCubit = cubits.Value<RepoState?>(null);
 
-  Watch<RepoState?> get currentRepoCubit => _currentRepoCubit;
+  cubits.Value<RepoState?> get currentRepoCubit => _currentRepoCubit;
 
-  MainState() {
+  ReposState() {
     _currentRepoCubit.emit(null);
   }
 
@@ -48,7 +42,7 @@ class MainState with OuiSyncAppLogger {
   }
 
   void _updateCurrentRepository(RepoState? repo) {
-    NativeChannels.setRepository(repo?.handle);
+    oui.NativeChannels.setRepository(repo?.handle);
 
     if (repo == null) {
       loggy.app("Can't set current repository to null");
@@ -66,7 +60,7 @@ class MainState with OuiSyncAppLogger {
 
     _currentRepoName = repo.name;
     _currentRepoCubit.emit(repo);
-    
+
     _subscription = repo.handle.subscribe(() => _subscriptionCallback!.call(repo));
 
     loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
@@ -124,8 +118,8 @@ class MainState with OuiSyncAppLogger {
     _repos.clear();
   }
 
-  Subscription? _subscription;
-  Subscription? get subscription => _subscription;
+  oui.Subscription? _subscription;
+  oui.Subscription? get subscription => _subscription;
 
   void Function(RepoState)? _subscriptionCallback;
 

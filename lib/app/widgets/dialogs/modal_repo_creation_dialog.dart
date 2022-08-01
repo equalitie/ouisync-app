@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubit/cubits.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -14,7 +14,7 @@ class RepositoryCreation extends StatelessWidget {
   }) : super(key: key);
 
   final BuildContext context;
-  final RepositoriesCubit cubit;
+  final ReposCubit cubit;
   final GlobalKey<FormState> formKey;
 
   final TextEditingController _nameController = new TextEditingController(text: null);
@@ -161,7 +161,7 @@ class RepositoryCreation extends StatelessWidget {
     _onSaved(cubit, newRepositoryName, password);
   }
 
-  void _onSaved(RepositoriesCubit cubit, String name, String password) {
+  void _onSaved(ReposCubit cubit, String name, String password) {
     if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
