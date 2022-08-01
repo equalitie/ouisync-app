@@ -17,39 +17,32 @@ class RepositoryList extends StatelessWidget with OuiSyncAppLogger {
   final RepositoriesCubit _repositories;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<RepositoriesCubit, RepositoriesChanged>(
-      bloc: _repositories,
-      builder: (context, changed) {
-        final state = _repositories.mainState;
-
-        return Container(
-          padding: Dimensions.paddingBottomSheet,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Fields.bottomSheetHandle(context),
-              Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-              _buildRepositoryList(state.repositoryNames().toList(), state.currentRepoName),
-              Dimensions.spacingActionsVertical,
-              Fields.paddedActionText(
-                S.current.iconCreateRepository,
-                icon: Icons.add_circle_outline_rounded,
-                onTap: () => createRepoDialog(context),
-              ),
-              Fields.paddedActionText(
-                S.current.iconAddRepositoryWithToken,
-                icon: Icons.insert_link_rounded,
-                onTap: () => addRepoWithTokenDialog(context),
-              ),
-            ]
+  Widget build(BuildContext context) => _repositories.builder((state) {
+    return Container(
+      padding: Dimensions.paddingBottomSheet,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.bottomSheetHandle(context),
+          Fields.bottomSheetTitle(S.current.titleRepositoriesList),
+          _buildRepositoryList(state.repositoryNames().toList(), state.currentRepoName),
+          Dimensions.spacingActionsVertical,
+          Fields.paddedActionText(
+            S.current.iconCreateRepository,
+            icon: Icons.add_circle_outline_rounded,
+            onTap: () => createRepoDialog(context),
           ),
-        ); 
-      }
+          Fields.paddedActionText(
+            S.current.iconAddRepositoryWithToken,
+            icon: Icons.insert_link_rounded,
+            onTap: () => addRepoWithTokenDialog(context),
+          ),
+        ]
+      ),
     );
-  }
+  });
 
   Widget _buildRepositoryList(List<String> repoNames, String? current) => ListView.builder(
     shrinkWrap: true,

@@ -25,43 +25,36 @@ class RepositoryPicker extends StatelessWidget {
   final Color borderColor;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<RepositoriesCubit, RepositoriesChanged>(
-      bloc: repositoriesCubit,
-      builder: (BuildContext context, change) {
-        final state = repositoriesCubit.mainState;
+  Widget build(BuildContext context)  => repositoriesCubit.builder((state) {
+    if (state.isLoading) {
+      return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
+    }
 
-        if (state.isLoading) {
-          return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
-        }
+    final repo = state.currentRepo;
+    final name = _repoName(repo);
 
-        final repo = state.currentRepo;
-        final name = _repoName(repo);
+    if (repo == null) {
+      return _buildState(
+        context,
+        borderColor: borderColor,
+        iconColor: colorNoRepo,
+        textColor: colorNoRepo,
+        repoName: name,
+      );
+    }
 
-        if (repo == null) {
-          return _buildState(
-            context,
-            borderColor: borderColor,
-            iconColor: colorNoRepo,
-            textColor: colorNoRepo,
-            repoName: name,
-          );
-        }
+    final color = repo.accessMode != AccessMode.blind
+        ? colorUnlockedRepo
+        : colorLockedRepo;
 
-        final color = repo.accessMode != AccessMode.blind
-            ? colorUnlockedRepo
-            : colorLockedRepo;
-
-        return _buildState(
-          context,
-          borderColor: borderColor,
-          iconColor: colorUnlockedRepo,
-          textColor: color,
-          repoName: name,
-        );
-      },
+    return _buildState(
+      context,
+      borderColor: borderColor,
+      iconColor: colorUnlockedRepo,
+      textColor: color,
+      repoName: name,
     );
-  }
+  });
 
   String _repoName(RepoState? repo) {
     if (repo != null) {
