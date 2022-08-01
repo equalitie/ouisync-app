@@ -95,7 +95,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(BuildContext context, DirectoryCubit cubit, FolderState parent) async {
+  Future<void> addFile(context, DirectoryCubit cubit, FolderState parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -118,7 +118,6 @@ class DirectoryActions extends StatelessWidget {
       }
 
       cubit.saveFile(
-        context,
         parent.repo,
         newFilePath: newFilePath,
         fileName: file.name,

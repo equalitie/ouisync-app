@@ -17,10 +17,11 @@ import '../widgets.dart';
 
 class SaveToDevice extends StatefulWidget with OuiSyncAppLogger {
   const SaveToDevice({
+    Key? key,
     required this.repository,
     required this.data,
     required this.cubit
-  });
+  }) : super(key: key);
 
   final RepoState repository;
   final FileItem data;
@@ -187,7 +188,6 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     if (await Permission.storage.request().isGranted) {
       final destinationPath = p.join(_destinationPath!, widget.data.name);
       widget.cubit.downloadFile(
-        context,
         widget.repository,
         sourcePath: widget.data.path,
         destinationPath: destinationPath

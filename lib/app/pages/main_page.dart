@@ -171,11 +171,11 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent(RepoState repository) {
-      _directoryCubit.getContent(context, repository);
+      _directoryCubit.getContent(repository);
     }
 
     navigateToPath(RepoState repository, String destination) {
-      _directoryCubit.navigateTo(context, repository, destination);
+      _directoryCubit.navigateTo(repository, destination);
     }
 
     Widget buildMainWidget() {
@@ -295,13 +295,14 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    _repositoryContentBuilder() => BlocBuilder<DirectoryCubit, DirectoryState>(
+    _repositoryContentBuilder() => BlocConsumer<DirectoryCubit, DirectoryState>(
       buildWhen: (context, state) {
         return !(
         state is WriteToFileInProgress ||
         state is WriteToFileDone ||
         state is DownloadFileInProgress ||
-        state is DownloadFileDone);
+        state is DownloadFileDone ||
+        state is ShowMessage);
       },
       builder: (context, state) {
         if (state is DirectoryLoadInProgress) {
@@ -317,6 +318,11 @@ class _MainPageState extends State<MainPage>
           onReload: () => getContent(_repositories.current()!),
         );
       },
+      listener: (context, state) {
+        if (state is ShowMessage) {
+          showSnackBar(context, content: Text(state.message));
+        }
+      }
     );
 
     _selectLayoutWidget() {
@@ -523,7 +529,6 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController = null;
 
     _directoryCubit.moveEntry(
-      context,
       _repositories.current()!,
       source: path,
       destination: destination
@@ -585,7 +590,6 @@ class _MainPageState extends State<MainPage>
     final fileByteStream = io.File(path).openRead();
         
     _directoryCubit.saveFile(
-      context,
       _repositories.current()!,
       newFilePath: filePath,
       fileName: fileName,

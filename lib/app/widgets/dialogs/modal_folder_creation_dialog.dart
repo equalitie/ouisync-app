@@ -59,7 +59,7 @@ class FolderCreation extends StatelessWidget {
       return;
     }
 
-    await cubit.createFolder(context, repository, newFolderPath);
+    await cubit.createFolder(repository, newFolderPath);
 
     Navigator.of(context).pop(newFolderPath);
   }
