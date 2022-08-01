@@ -31,7 +31,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final RepositoriesCubit repositoriesCubit;
-  final void Function() onShareRepository;
+  final void Function(RepoState) onShareRepository;
   final bool dhtStatus;
 
   @override
@@ -369,7 +369,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   return;
                 }
 
-                widget.onShareRepository();
+                widget.onShareRepository(currentRepo);
               }),
               Fields.actionText(S.current.actionDelete,
                       textFontSize: Dimensions.fontAverage,

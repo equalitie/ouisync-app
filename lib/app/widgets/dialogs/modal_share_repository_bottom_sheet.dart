@@ -13,13 +13,11 @@ import '../widgets.dart';
 class ShareRepository extends StatefulWidget {
   const ShareRepository({ 
     required this.repository,
-    required this.repositoryName,
     required this.availableAccessModes,
     Key? key,
   }) : super(key: key);
 
   final RepoState repository;
-  final String repositoryName;
   final List<AccessMode> availableAccessModes;
 
   @override
@@ -43,11 +41,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
       initialData: '',
-      future: createShareToken(
-        repo: widget.repository,
-        name: widget.repositoryName,
-        accessMode: _accessMode.value
-      ),
+      future: createShareToken(widget.repository, _accessMode.value),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           _shareToken.value = S.current.messageAck;
@@ -65,7 +59,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Fields.bottomSheetHandle(context),
-                Fields.bottomSheetTitle(widget.repositoryName),
+                Fields.bottomSheetTitle(widget.repository.name),
                 Dimensions.spacingVerticalDouble,
                 AccessModeDropDownMenu(
                   repository: widget.repository,
@@ -91,15 +85,11 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
     );
   }
 
-  Future<String> createShareToken({
-    required RepoState repo,
-    required String name,
-    required AccessMode accessMode
-  }) async {
-    final shareToken = await repo.createShareToken(accessMode: accessMode, name: name);
+  Future<String> createShareToken(RepoState repo, AccessMode accessMode) async {
+    final shareToken = await repo.createShareToken(accessMode: accessMode, name: repo.name);
     
     if (kDebugMode) { // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
-      loggy.app('Token for sharing repository $name: $shareToken (${accessMode.name})');
+      loggy.app('Token for sharing repository ${repo.name}: $shareToken (${accessMode.name})');
     }
 
     return shareToken.token;
@@ -107,12 +97,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
 
   Future<void> _onChanged(AccessMode accessMode) async {
     _accessMode.value = accessMode;
-    
-    final token = await createShareToken(
-      repo: widget.repository,
-      name: widget.repositoryName,
-      accessMode: accessMode
-    );
+    final token = await createShareToken(widget.repository, accessMode);
     _shareToken.value = token;
   }
 

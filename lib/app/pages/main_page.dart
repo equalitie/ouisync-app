@@ -22,7 +22,6 @@ import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
 typedef RepositoryCallback = Future<void> Function(RepoState? repository);
-typedef ShareRepositoryCallback = void Function();
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
@@ -259,7 +258,7 @@ class _MainPageState extends State<MainPage>
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
         repositoriesCubit: _repositories,
-        shareRepositoryOnTap: shareRepository,
+        shareRepositoryOnTap: _showShareRepository,
       );
     }
 
@@ -297,16 +296,6 @@ class _MainPageState extends State<MainPage>
           folder: currentFolder!
         ),
       );
-    }
-
-    void shareRepository() async {
-      final current = _repositories.current();
-
-      if (current == null) {
-        return;
-      }
-
-      await _showShareRepository(context, current);
     }
 
     _repositoryContentBuilder() => BlocConsumer<DirectoryCubit, DirectoryState>(
@@ -472,21 +461,20 @@ class _MainPageState extends State<MainPage>
       )
     );
 
-    Future<dynamic> _showShareRepository(context, RepoState currentRepoState)
+    Future<dynamic> _showShareRepository(RepoState repository)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       shape: Dimensions.borderBottomSheetTop,
       builder: (context) {
-        final accessModes = currentRepoState.accessMode == AccessMode.write
+        final accessModes = repository.accessMode == AccessMode.write
           ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-          : currentRepoState.accessMode == AccessMode.read
+          : repository.accessMode == AccessMode.read
             ? [AccessMode.blind, AccessMode.read]
             : [AccessMode.blind];
 
         return ShareRepository(
-          repository: currentRepoState,
-          repositoryName: currentRepoState.name,
+          repository: repository,
           availableAccessModes: accessModes,
         );
       }
@@ -734,7 +722,7 @@ class _MainPageState extends State<MainPage>
           ],
           child: SettingsPage(
             repositoriesCubit: reposCubit,
-            onShareRepository: shareRepository,
+            onShareRepository: _showShareRepository,
             dhtStatus: dhtStatus,
           )
         );
