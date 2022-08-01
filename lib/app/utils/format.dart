@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:path/path.dart' as p;
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-dynamic formattSize(int bytes, { int decimals = 2, bool units = false }) {
+dynamic formatSize(int bytes, { int decimals = 2, bool units = false }) {
   if (bytes <= 0) return "0 B";
   if (bytes < 1000) return '$bytes B';
 

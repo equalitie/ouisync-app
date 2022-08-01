@@ -9,10 +9,10 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with OuiSyncAppLogger {
-  FileDescription({Key? key, 
+  FileDescription({
     required this.repository,
     required this.fileData,
-  }) : super(key: key) {
+  }) {
     _length.value = fileData.size;
   }
 
@@ -37,7 +37,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             valueListenable: _length,
             builder: (context, size, widget) {
               return Fields.constrainedText(
-                formattSize(size as int, units: true),
+                formatSize(size as int, units: true),
                 flex: 0,
                 fontSize: Dimensions.fontSmall,
                 fontWeight: FontWeight.w400,
@@ -105,7 +105,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
     );
   }
 
-  bool _isCurrentFile (DirectoryState state) {
+  bool _isCurrentFile(DirectoryState state) {
     final originRepository = _getRepositoryFromState(state);
     if (originRepository != repository.handle) {
       return false;

@@ -19,8 +19,7 @@ class FileDetail extends StatefulWidget {
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final BuildContext context;
   final DirectoryCubit cubit;
@@ -147,7 +146,7 @@ class _FileDetailState extends State<FileDetail> {
           ),
           Fields.labeledText(
             label: S.current.labelSize,
-            text: formattSize(widget.data.size, units: true),
+            text: formatSize(widget.data.size, units: true),
           ),
         ],
       )
