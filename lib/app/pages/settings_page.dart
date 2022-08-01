@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../models/main_state.dart';
 import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
@@ -25,12 +24,12 @@ import 'peer_list.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
-    required this.repositoriesCubit,
+    required this.reposCubit,
     required this.onShareRepository,
     this.dhtStatus = false,
   });
 
-  final RepositoriesCubit repositoriesCubit;
+  final ReposCubit reposCubit;
   final void Function(RepoState) onShareRepository;
   final bool dhtStatus;
 
@@ -82,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         default: _connectionType = "???"; break;
     };
 
-    final session = widget.repositoriesCubit.session;
+    final session = widget.reposCubit.session;
 
     String? tcpListenerEndpointV4 = session.tcpListenerLocalAddressV4;
     String? tcpListenerEndpointV6 = session.tcpListenerLocalAddressV6;
@@ -144,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-              child: widget.repositoriesCubit.builder((state) => ListView(
+              child: widget.reposCubit.builder((state) => ListView(
                 // The badge over the version number is shown outside of the row boundary, so we
                 // need to set clipBehaior to Clip.none.
                 clipBehavior: Clip.none,
@@ -239,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               if (_versionNumberClickCounter.registerClick() >= 3) {
                 _versionNumberClickCounter.reset();
 
-                final session = widget.repositoriesCubit.session;
+                final session = widget.reposCubit.session;
 
                 Navigator.push(
                   context,
@@ -321,7 +320,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               }).toList(),
               onChanged: (repo) async {
                 loggy.app('Selected repository: ${repo?.name}');
-                await widget.repositoriesCubit.setCurrent(repo?.name);
+                await widget.reposCubit.setCurrent(repo?.name);
               },
             ),
           ),
@@ -350,14 +349,14 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.repositoriesCubit.current()!.name),
+                              repositoryName: widget.reposCubit.current()!.name),
                         );
                       }).then((newName) {
                     if (newName == null || newName.isEmpty) {
                       return;
                     }
                     final oldName = currentRepo.name;
-                    widget.repositoriesCubit.renameRepository(oldName, newName);
+                    widget.reposCubit.renameRepository(oldName, newName);
                   });
                 }),
               Fields.actionText(S.current.actionShare,
@@ -407,7 +406,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     }).then((delete) {
                   if (delete ?? false) {
                     final repositoryName = currentRepo.name;
-                    widget.repositoriesCubit.deleteRepository(repositoryName);
+                    widget.reposCubit.deleteRepository(repositoryName);
                   }
                 });
               })
@@ -418,11 +417,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Iterable<String> repositoryNames() {
-    return widget.repositoriesCubit.mainState.repositoryNames();
+    return widget.reposCubit.state.repositoryNames();
   }
 
   Iterable<RepoState> repositories() {
-    return widget.repositoriesCubit.mainState.repos;
+    return widget.reposCubit.state.repos;
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -470,7 +469,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.repositoriesCubit.current();
+    final current = widget.reposCubit.current();
 
     if (current == null) {
       return;
@@ -543,7 +542,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     sink.writeln("_dhtEndpointV6: ${_dhtEndpointV6}");
     sink.writeln("\n");
 
-    await dumpAll(sink, widget.repositoriesCubit.session.getRootStateMonitor());
+    await dumpAll(sink, widget.reposCubit.session.getRootStateMonitor());
 
     await sink.close();
 

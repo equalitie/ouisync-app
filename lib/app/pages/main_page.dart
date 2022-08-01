@@ -11,7 +11,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/folder_state.dart';
-import '../models/main_state.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -33,9 +32,7 @@ class MainPage extends StatefulWidget {
     required this.repositoriesLocation,
     required this.defaultRepositoryName,
     required this.mediaReceiver,
-    Key? key,
-
-  }) : super(key: key);
+  });
 
   final Session session;
   final String appStorageLocation;
@@ -53,7 +50,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger
 {
-    RepositoriesCubit _repositories;
+    ReposCubit _repositories;
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -70,11 +67,11 @@ class _MainPageState extends State<MainPage>
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
-      _repositories = RepositoriesCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
+      _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    FolderState? get currentFolder => _mainState.currentFolder;
+    FolderState? get currentFolder => _repositories.state.currentFolder;
     DirectoryCubit get _directoryCubit => BlocProvider.of<DirectoryCubit>(context);
-    MainState get _mainState => _repositories.mainState;
+    ReposState get _reposState => _repositories.state;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
@@ -96,7 +93,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _mainState.setSubscriptionCallback((repo) {
+      _reposState.setSubscriptionCallback((repo) {
         _repoProgressCubit.updateProgress(repo);
         getContent(repo);
       });
@@ -182,7 +179,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Widget buildMainWidget() {
-      return _repositories.mainState.currentRepoCubit.builder((currentRepo) {
+      return _repositories.state.currentRepoCubit.builder((currentRepo) {
         if (currentRepo == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -257,7 +254,7 @@ class _MainPageState extends State<MainPage>
 
     RepositoriesBar _buildRepositoriesBar() {
       return RepositoriesBar(
-        repositoriesCubit: _repositories,
+        reposCubit: _repositories,
         shareRepositoryOnTap: _showShareRepository,
       );
     }
@@ -378,7 +375,7 @@ class _MainPageState extends State<MainPage>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          FolderNavigationBar(_mainState),
+          FolderNavigationBar(_reposState),
           // TODO: A shadow would be nicer.
           Divider(height: 3),
           Expanded(child: child),
@@ -721,7 +718,7 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-            repositoriesCubit: reposCubit,
+            reposCubit: reposCubit,
             onShareRepository: _showShareRepository,
             dhtStatus: dhtStatus,
           )

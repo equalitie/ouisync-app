@@ -17,7 +17,7 @@ class AddRepositoryWithToken extends StatefulWidget {
   }) : super(key: key);
 
   final BuildContext context;
-  final RepositoriesCubit cubit;
+  final ReposCubit cubit;
   final GlobalKey<FormState> formKey;
   final String? initialTokenValue;
 
@@ -329,7 +329,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     _onSaved(widget.cubit, newRepositoryName, password);
   }
 
-  void _onSaved(RepositoriesCubit cubit, String name, String password) async {
+  void _onSaved(ReposCubit cubit, String name, String password) async {
     if (!widget.formKey.currentState!.validate()) {
       return;
     }

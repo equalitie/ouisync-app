@@ -1,8 +1,7 @@
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bloc/bloc.dart';
-import '../models/main_state.dart';
+//import 'package:bloc/bloc.dart';
 import '../models/repo_state.dart';
 import '../utils/utils.dart';
 

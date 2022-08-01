@@ -6,16 +6,15 @@ import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
-import '../../models/main_state.dart';
 import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar({
-    required this.repositoriesCubit,
+    required this.reposCubit,
     required this.shareRepositoryOnTap
   });
 
-  final RepositoriesCubit repositoriesCubit;
+  final ReposCubit reposCubit;
   final void Function(RepoState) shareRepositoryOnTap;
 
   @override
@@ -32,14 +31,14 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
         children: [
           Expanded(
             child: _Picker(
-              repositoriesCubit: repositoriesCubit,
+              reposCubit: reposCubit,
               borderColor: Colors.white,
             ),
           ),
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
             onPressed: () {
-              final current = repositoriesCubit.current();
+              final current = reposCubit.current();
               if (current == null) return;
               shareRepositoryOnTap(current);
             },
@@ -65,15 +64,15 @@ class _Picker extends StatelessWidget {
   static const Color colorError = Colors.red;
 
   const _Picker({
-    required this.repositoriesCubit,
+    required this.reposCubit,
     required this.borderColor,
   });
 
-  final RepositoriesCubit repositoriesCubit;
+  final ReposCubit reposCubit;
   final Color borderColor;
 
   @override
-  Widget build(BuildContext context)  => repositoriesCubit.builder((state) {
+  Widget build(BuildContext context)  => reposCubit.builder((state) {
     if (state.isLoading) {
       return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
     }
@@ -162,15 +161,15 @@ class _Picker extends StatelessWidget {
     context: context,
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
-      return _List(repositoriesCubit);
+      return _List(reposCubit);
     }
   );
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
-  _List(RepositoriesCubit repositories) : _repositories = repositories;
+  _List(ReposCubit repositories) : _repositories = repositories;
 
-  final RepositoriesCubit _repositories;
+  final ReposCubit _repositories;
 
   @override
   Widget build(BuildContext context) => _repositories.builder((state) {
