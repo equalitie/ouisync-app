@@ -194,19 +194,21 @@ class _MainPageState extends State<MainPage>
 
     @override
     Widget build(BuildContext context) {
+      final currentRepoCubit = _repositories.currentCubit();
+
       return Scaffold(
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              RepositoryProgress(_repositories.current()),
+              currentRepoCubit.builder((repo) => RepositoryProgress(repo)),
               Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: _buildFAB(context),
+        floatingActionButton: currentRepoCubit.builder((repo) => _buildFAB(context, repo)),
       );
     }
 
@@ -273,9 +275,7 @@ class _MainPageState extends State<MainPage>
       return Container(child: Fields.addUpgradeBadge(button));
     }
 
-    StatelessWidget _buildFAB(BuildContext context,) {
-      final current = _repositories.current();
-
+    StatelessWidget _buildFAB(BuildContext context, RepoState? current) {
       if (current == null) {
         return Container();
       }

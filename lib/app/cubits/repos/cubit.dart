@@ -33,6 +33,10 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
   oui.Session get session => _session;
   String get appDir => _appDir;
 
+  cubits.Value<RepoState?> currentCubit() {
+    return state.currentRepoCubit;
+  }
+
   RepoState? current() {
     return state.currentRepo;
   }
