@@ -164,17 +164,6 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
   }
 
-  //String _cancelFileDownload = '';
-  //oui.Repository? _repositoryDownload;
-  //void cancelDownloadFile(String filePath) {
-  //  loggy.app('Canceling $filePath download');
-
-  //  _repositoryDownload = repo.handle;
-  //  _cancelFileDownload = filePath;
-
-  //  loggy.app('Cancel downloading: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
-  //}
-
   Future<oui.File?> _createFile(String newFilePath) async {
     CreateFileResult? createFileResult;
 

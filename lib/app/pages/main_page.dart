@@ -174,10 +174,6 @@ class _MainPageState extends State<MainPage>
       _repoCubit?.getContent();
     }
 
-    navigateToPath(String destination) {
-      _repoCubit?.navigateTo(destination);
-    }
-
     Widget buildMainWidget() {
       return _repositories.current.builder((currentRepo) {
         if (currentRepo == null) {
@@ -187,7 +183,7 @@ class _MainPageState extends State<MainPage>
           );
         }
 
-        navigateToPath(Strings.root);
+        currentRepo.navigateTo(Strings.root);
         return _repositoryContentBuilder(currentRepo);
       });
     }
@@ -287,11 +283,7 @@ class _MainPageState extends State<MainPage>
       return FloatingActionButton(
         heroTag: Constants.heroTagMainPageActions,
         child: const Icon(Icons.add_rounded),
-        onPressed: () => _showDirectoryActions(
-          context,
-          cubit: current,
-          folder: currentFolder!
-        ),
+        onPressed: () => _showDirectoryActions(context, current),
       );
     }
 
@@ -395,7 +387,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              navigateToPath(item.path);
+              currentRepo.navigateTo(item.path);
             };
 
             final listItem = ListItem (
@@ -583,10 +575,8 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<dynamic> _showDirectoryActions(BuildContext context,{
-    required RepoCubit cubit,
-    required FolderState folder
-  }) => showModalBottomSheet(
+  Future<dynamic> _showDirectoryActions(BuildContext context, RepoCubit cubit)
+      => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
@@ -594,7 +584,6 @@ class _MainPageState extends State<MainPage>
       return DirectoryActions(
         context: context,
         cubit: cubit,
-        parent: folder,
       );
     }
   );

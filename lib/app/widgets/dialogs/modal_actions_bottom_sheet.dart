@@ -12,12 +12,10 @@ class DirectoryActions extends StatelessWidget {
   const DirectoryActions({
     required this.context,
     required this.cubit,
-    required this.parent,
   });
 
   final BuildContext context;
   final RepoCubit cubit;
-  final FolderState parent;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +32,12 @@ class DirectoryActions extends StatelessWidget {
             _buildAction(
               name: S.current.actionNewFolder,
               icon: Icons.folder_outlined,
-              action: () => createFolderDialog(context, cubit, parent)
+              action: () => createFolderDialog(context, cubit)
             ),
             _buildAction(
               name: S.current.actionNewFile,
               icon: Icons.insert_drive_file_outlined,
-              action: () async => await addFile(context, cubit, parent)
+              action: () async => await addFile(context, cubit)
             )
           ]
         ),
@@ -70,7 +68,7 @@ class DirectoryActions extends StatelessWidget {
     ),
   ); 
 
-  void createFolderDialog(context, RepoCubit cubit, FolderState parent) async {
+  void createFolderDialog(context, RepoCubit cubit) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -82,7 +80,6 @@ class DirectoryActions extends StatelessWidget {
           body: FolderCreation(
             context: context,
             cubit: cubit,
-            path: parent.path,
             formKey: formKey,
           ),
         );
@@ -94,7 +91,9 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, RepoCubit cubit, FolderState parent) async {
+  Future<void> addFile(context, RepoCubit cubit) async {
+    final path = cubit.state.currentFolder.path;
+
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -104,9 +103,9 @@ class DirectoryActions extends StatelessWidget {
 
     if(result != null) {
       final file = result.files.single;
-      final newFilePath = buildDestinationPath(parent.path, file.name);
+      final newFilePath = buildDestinationPath(path, file.name);
       
-      final repo = parent.repo;
+      final repo = cubit.state;
       final exist = await repo.exists(newFilePath);
 
       if (exist) {
