@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/models/repo_state.dart';
 import 'package:ouisync_app/app/models/models.dart';
+import 'package:ouisync_app/app/cubits/repo/cubit.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 void main() {
