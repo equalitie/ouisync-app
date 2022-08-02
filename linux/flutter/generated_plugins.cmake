@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
+  ouisync_plugin
   screen_retriever
   system_tray
   tray_manager
