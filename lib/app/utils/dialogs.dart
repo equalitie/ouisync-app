@@ -125,8 +125,7 @@ abstract class Dialogs {
   );
 
   static AlertDialog buildDeleteFileAlertDialog(
-    model.RepoState repository,
-    DirectoryCubit cubit,
+    RepoCubit cubit,
     String path,
     BuildContext context,
     String fileName,
@@ -172,7 +171,7 @@ abstract class Dialogs {
       TextButton(
         child: Text(S.current.actionDeleteCapital),
         onPressed: () {
-          cubit.deleteFile(repository, path);
+          cubit.deleteFile(path);
           Navigator.of(context).pop(fileName);
           showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },

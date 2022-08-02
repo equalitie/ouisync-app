@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/models.dart';
-import '../../models/repo_state.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -11,13 +11,12 @@ class ListItem extends StatelessWidget {
     required this.itemData,
     required this.mainAction,
     required this.folderDotsAction,
-    Key? key,
-  }) : super(key: key);
+  });
 
-  final RepoState repository;
+  final RepoCubit repository;
   final BaseItem itemData;
   final Function mainAction;
-  final Function? folderDotsAction;
+  final Function folderDotsAction;
 
   @override
   Widget build(BuildContext context) {
@@ -42,21 +41,25 @@ class ListItem extends StatelessWidget {
     }
   }
 
-  Widget _buildFileItem() =>
-    Row(
+  Widget _buildFileItem() {
+    final uploadJob = repository.state.uploads[itemData.path];
+    final downloadJob = repository.state.downloads[itemData.path];
+
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
           flex: 1,
-          child: FileIconAnimated(repository: repository, path: itemData.path)),
+          child: FileIconAnimated(downloadJob)),
         Expanded(
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(repository: repository, fileData: itemData))),
+            child: FileDescription(repository, itemData, uploadJob))),
         _getVerticalMenuAction(),
       ],
     );
+  }
 
   Widget _buildFolderItem() {
     return Row(
@@ -81,7 +84,7 @@ class ListItem extends StatelessWidget {
   Widget _getVerticalMenuAction() {
     return IconButton(
       icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-      onPressed: () async => await folderDotsAction!.call());
+      onPressed: () async => await folderDotsAction());
   }
 
 }

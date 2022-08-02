@@ -3,7 +3,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
-import '../../models/repo_state.dart';
+import '../../cubits/repo/cubit.dart';
 
 class NoContentsState extends StatelessWidget {
   const NoContentsState({

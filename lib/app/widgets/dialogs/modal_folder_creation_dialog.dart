@@ -7,17 +7,14 @@ import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
   const FolderCreation({
-    Key? key,
     required this.context,
     required this.cubit,
-    required this.repository,
     required this.path,
     required this.formKey
-  }) : super(key: key);
+  });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final RepoState repository;
+  final RepoCubit cubit;
   final String path;
   final GlobalKey<FormState> formKey;
 
@@ -52,14 +49,14 @@ class FolderCreation extends StatelessWidget {
     );
   }
 
-  void _onSaved(DirectoryCubit cubit, newFolderName) async {
+  void _onSaved(RepoCubit cubit, newFolderName) async {
     final newFolderPath = buildDestinationPath(path, newFolderName);
 
-    if (await repository.exists(newFolderPath)) {
+    if (await cubit.state.exists(newFolderPath)) {
       return;
     }
 
-    await cubit.createFolder(repository, newFolderPath);
+    await cubit.createFolder(newFolderPath);
 
     Navigator.of(context).pop(newFolderPath);
   }

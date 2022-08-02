@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../utils/click_counter.dart';
@@ -148,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 // need to set clipBehaior to Clip.none.
                 clipBehavior: Clip.none,
                 children: [
-                  _buildRepositoriesSection(state.currentRepo),
+                  _buildRepositoriesSection(state.currentRepo?.state),
                   _divider(),
                   Fields.idLabel(S.current.titleNetwork,
                       fontSize: Dimensions.fontAverage,
@@ -349,7 +348,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.reposCubit.current()!.name),
+                              repositoryName: currentRepo.name),
                         );
                       }).then((newName) {
                     if (newName == null || newName.isEmpty) {
@@ -421,7 +420,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Iterable<RepoState> repositories() {
-    return widget.reposCubit.state.repos;
+    return widget.reposCubit.state.repos.map((cubit) => cubit.state);
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -469,7 +468,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.current();
+    final current = widget.reposCubit.current.state?.state;
 
     if (current == null) {
       return;

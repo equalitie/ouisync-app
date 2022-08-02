@@ -13,17 +13,14 @@ class FolderDetail extends StatefulWidget {
   const FolderDetail({
     required this.context,
     required this.cubit,
-    required this.repository,
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final RepoState repository;
+  final RepoCubit cubit;
   final FolderItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -72,7 +69,6 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                   return buildDeleteFolderAlertDialog(
                     context,
                     widget.cubit,
-                    widget.repository,
                     widget.data.path,
                   );
                 },
@@ -116,7 +112,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, DirectoryCubit cubit, RepoState repository, String path) {
+  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, RepoCubit cubit, String path) {
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -139,7 +135,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       actions: <Widget>[
         TextButton(
           child: Text(S.current.actionDeleteCapital),
-          onPressed: () => deleteFolderWithContentsValidation(cubit, repository, path, context),
+          onPressed: () => deleteFolderWithContentsValidation(cubit, path, context),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
@@ -151,17 +147,17 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  void deleteFolderWithContentsValidation(DirectoryCubit cubit, RepoState repository, String path, BuildContext context) async {
+  void deleteFolderWithContentsValidation(RepoCubit cubit, String path, BuildContext context) async {
     bool recursive = false;
 
-    final type = await repository.type(path);
+    final type = await cubit.state.type(path);
 
     if (type != EntryType.directory) {
       loggy.app('Is directory empty: $path is not a directory.');
       return;
     }
 
-    final Directory directory = await repository.openDirectory(path);
+    final Directory directory = await cubit.state.openDirectory(path);
 
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);
@@ -190,11 +186,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       }
     }
     
-    deleteAction(context, cubit, repository, path, recursive);
+    deleteAction(context, cubit, path, recursive);
   }
 
-  void deleteAction(BuildContext context, DirectoryCubit cubit, RepoState repository, String path, bool recursive) {
-    cubit.deleteFolder(repository, path, recursive);
+  void deleteAction(BuildContext context, RepoCubit cubit, String path, bool recursive) {
+    cubit.deleteFolder(path, recursive);
     Navigator.of(context).pop(true);
   }
 
@@ -209,6 +205,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     final origin = getParentSection(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
+        widget.cubit,
         origin: origin,
         path: path,
         type: type,
@@ -244,12 +241,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         final parent = getParentSection(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.cubit
-        .moveEntry(
-          widget.repository,
-          source: path,
-          destination: newEntryPath
-        );
+        widget.cubit.moveEntry(source: path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

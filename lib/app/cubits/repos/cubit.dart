@@ -5,16 +5,15 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
-import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../cubits.dart' as cubits;
+import '../cubits.dart';
 
 import '../../models/folder_state.dart';
 
 part 'state.dart';
 
-class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
+class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
   ReposCubit({
     required session,
     required appDir,
@@ -33,12 +32,8 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
   oui.Session get session => _session;
   String get appDir => _appDir;
 
-  cubits.Value<RepoState?> currentCubit() {
+  Value<RepoCubit?> get current {
     return state.currentRepoCubit;
-  }
-
-  RepoState? current() {
-    return state.currentRepo;
   }
 
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
@@ -60,7 +55,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
   void unlockRepository({required String name, required String password}) async {
     update((state) { state.isLoading = true; });
 
-    final wasCurrent = state.currentRepo?.name == name;
+    final wasCurrent = current.state?.state.name == name;
 
     await state.remove(name);
 
@@ -83,7 +78,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
 
-      await state.put(RepoState(name, repository), setCurrent: wasCurrent);
+      await state.put(RepoCubit(RepoState(name, repository)), setCurrent: wasCurrent);
     } catch (e, st) {
       loggy.app('Unlock repository $name exception', e, st);
     }
@@ -96,7 +91,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
       return;
     }
 
-    RepoState? repo;
+    RepoCubit? repo;
 
     if (repoName != null) {
       repo = state.get(repoName);
@@ -108,7 +103,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
   }
 
   void renameRepository(String oldName, String newName) async {
-    final wasCurrent = state.currentRepo?.name == oldName;
+    final wasCurrent = current.state?.state.name == oldName;
 
     await state.remove(oldName);
 
@@ -149,7 +144,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
   }
 
   void deleteRepository(String repositoryName) async {
-    final wasCurrent = state.currentRepo?.name == repositoryName;
+    final wasCurrent = current.state?.state.name == repositoryName;
 
     await state.remove(repositoryName);
 
@@ -185,7 +180,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
       return;
     }
 
-    RepoState? newDefaultRepository = state.get(latestRepositoryOrDefaultName);
+    RepoCubit? newDefaultRepository = state.get(latestRepositoryOrDefaultName);
 
     if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
       newDefaultRepository = await _open(latestRepositoryOrDefaultName);
@@ -202,7 +197,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
     await state.close();
   }
 
-  Future<RepoState?> _open(String name, { String? password, oui.ShareToken? token }) async {
+  Future<RepoCubit?> _open(String name, { String? password, oui.ShareToken? token }) async {
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
 
@@ -215,7 +210,7 @@ class ReposCubit extends cubits.Watch<ReposState> with OuiSyncAppLogger {
       );
 
       await RepositoryHelper.setRepoBitTorrentDHTStatus(repository, name);
-      return RepoState(name, repository);
+      return RepoCubit(RepoState(name, repository));
     } catch (e, st) {
       loggy.app('Init the repository $name exception', e, st);
     }

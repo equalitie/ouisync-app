@@ -6,13 +6,13 @@ import '../../utils/utils.dart';
 import '../../cubits/cubits.dart';
 
 class FolderNavigationBar extends StatelessWidget {
-  final ReposState _reposState;
+  final RepoCubit _repo;
 
-  FolderNavigationBar(this._reposState);
+  FolderNavigationBar(this._repo);
 
   @override
   Widget build(BuildContext context) {
-    final path = _reposState.currentFolder!.path;
+    final path = _repo.state.currentFolder.path;
     final route = _currentLocationBar(path, context);
 
     return Container(
@@ -76,19 +76,12 @@ class FolderNavigationBar extends StatelessWidget {
 
   GestureDetector _navigation(String path, BuildContext ctx) {
     final target = getParentSection(path);
-    final cubit = BlocProvider.of<DirectoryCubit>(ctx);
 
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          final currentRepo = _reposState.currentRepo;
-
-          if (currentRepo == null) {
-            return;
-          }
-
-          final parent = currentRepo.currentFolder.parent;
-          cubit.navigateTo(currentRepo, parent);
+          final parent = _repo.state.currentFolder.parent;
+          _repo.navigateTo(parent);
         }
       },
       child: path == Strings.root

@@ -14,11 +14,28 @@ class Watch<State> {
     _cubit.emit(Changed());
   }
 
-  Widget builder(Widget func(State)) {
+  void update(void Function(State) f) {
+    f(_state);
+    changed();
+  }
+
+  Widget builder(Widget Function(State) builderFunc) {
     return BlocBuilder<_Cubit, Changed>(
       bloc: _cubit,
       builder: (BuildContext ctx, Changed _) {
-        return func(_state);
+        return builderFunc(_state);
+      },
+    );
+  }
+
+  Widget consumer(Widget Function(State) builderFunc, void Function(State) listenerFunc) {
+    return BlocConsumer<_Cubit, Changed>(
+      bloc: _cubit,
+      builder: (BuildContext ctx, Changed _) {
+        return builderFunc(_state);
+      },
+      listener: (BuildContext ctx, Changed _) {
+        listenerFunc(_state);
       },
     );
   }

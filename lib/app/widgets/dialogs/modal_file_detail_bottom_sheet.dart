@@ -14,7 +14,6 @@ class FileDetail extends StatefulWidget {
   const FileDetail({
     required this.context,
     required this.cubit,
-    required this.repository,
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
@@ -22,8 +21,7 @@ class FileDetail extends StatefulWidget {
   });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final RepoState repository;
+  final RepoCubit cubit;
   final FileItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -56,7 +54,6 @@ class _FileDetailState extends State<FileDetail> {
                   return ActionsDialog(
                     title: S.current.titleDownloadToDevice,
                     body: SaveToDevice(
-                      repository: widget.repository,
                       data: widget.data,
                       cubit: widget.cubit
                     ),
@@ -107,7 +104,6 @@ class _FileDetailState extends State<FileDetail> {
 
                   return Dialogs
                   .buildDeleteFileAlertDialog(
-                    widget.repository,
                     widget.cubit,
                     widget.data.path,
                     context,
@@ -164,6 +160,7 @@ class _FileDetailState extends State<FileDetail> {
     final origin = getParentSection(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
+        widget.cubit,
         origin: origin,
         path: path,
         type: type,
@@ -200,7 +197,6 @@ class _FileDetailState extends State<FileDetail> {
         final newEntryPath = buildDestinationPath(parent, newName); 
 
         widget.cubit.moveEntry(
-          widget.repository,
           source: path,
           destination: newEntryPath
         );

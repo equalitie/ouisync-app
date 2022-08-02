@@ -1,15 +1,15 @@
 part of 'cubit.dart';
 
 class ReposState with OuiSyncAppLogger {
-  final Map<String, RepoState> _repos = Map();
+  final Map<String, RepoCubit> _repos = Map();
 
   bool isLoading = false;
 
   String? _currentRepoName;
 
-  final _currentRepoCubit = cubits.Value<RepoState?>(null);
+  final _currentRepoCubit = Value<RepoCubit?>(null);
 
-  cubits.Value<RepoState?> get currentRepoCubit => _currentRepoCubit;
+  Value<RepoCubit?> get currentRepoCubit => _currentRepoCubit;
 
   ReposState() {
     _currentRepoCubit.emit(null);
@@ -19,7 +19,7 @@ class ReposState with OuiSyncAppLogger {
 
   Iterable<String> repositoryNames() => _repos.keys;
 
-  RepoState? get currentRepo {
+  RepoCubit? get currentRepo {
     if (_currentRepoName == null) {
       return null;
     } else {
@@ -28,12 +28,12 @@ class ReposState with OuiSyncAppLogger {
   }
 
   FolderState? get currentFolder {
-    return currentRepo?.currentFolder;
+    return currentRepo?.state.currentFolder;
   }
 
-  Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value);
+  Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
 
-  Future<void> setCurrent(RepoState? repo) async {
+  Future<void> setCurrent(RepoCubit? repo) async {
     if (repo == null) {
       _updateCurrentRepository(null);
     } else {
@@ -41,8 +41,8 @@ class ReposState with OuiSyncAppLogger {
     }
   }
 
-  void _updateCurrentRepository(RepoState? repo) {
-    oui.NativeChannels.setRepository(repo?.handle);
+  void _updateCurrentRepository(RepoCubit? repo) {
+    oui.NativeChannels.setRepository(repo?.state.handle);
 
     if (repo == null) {
       loggy.app("Can't set current repository to null");
@@ -58,28 +58,28 @@ class ReposState with OuiSyncAppLogger {
     _subscription?.cancel();
     _subscription = null;
 
-    _currentRepoName = repo.name;
+    _currentRepoName = repo.state.name;
     _currentRepoCubit.emit(repo);
 
-    _subscription = repo.handle.subscribe(() => _subscriptionCallback!.call(repo));
+    _subscription = repo.state.handle.subscribe(() => _subscriptionCallback!.call(repo.state));
 
-    loggy.app('Subscribed to notifications: ${repo.name} (${repo.accessMode.name})');
+    loggy.app('Subscribed to notifications: ${repo.state.name} (${repo.state.accessMode.name})');
   }
 
-  RepoState? get(String name) {
+  RepoCubit? get(String name) {
     return _repos[name];
   }
 
-  Future<void> put(RepoState newRepo, { bool setCurrent = false }) async {
-    RepoState? oldRepo = _repos.remove(newRepo.name);
+  Future<void> put(RepoCubit newRepo, { bool setCurrent = false }) async {
+    RepoCubit? oldRepo = _repos.remove(newRepo.state.name);
 
     if (oldRepo != null && oldRepo != newRepo) {
-      await oldRepo.close();
+      await oldRepo.state.close();
     }
 
-    _repos[newRepo.name] = newRepo;
+    _repos[newRepo.state.name] = newRepo;
 
-    if (setCurrent && newRepo.name != _currentRepoName) {
+    if (setCurrent && newRepo.state.name != _currentRepoName) {
       _updateCurrentRepository(newRepo);
     }
   }
@@ -95,7 +95,7 @@ class ReposState with OuiSyncAppLogger {
     }
     if (_repos.containsKey(name)) {
       loggy.app('Closing repository $name');
-      await _repos[name]?.close();
+      await _repos[name]?.state.close();
 
       loggy.app('Removing repository $name from the service');
       _repos.remove(name);
@@ -112,7 +112,7 @@ class ReposState with OuiSyncAppLogger {
     _subscription = null;
 
     for (var repo in _repos.values) {
-      await repo.close();
+      await repo.state.close();
     }
 
     _repos.clear();
