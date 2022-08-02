@@ -4,9 +4,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
-import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../../cubits/repo/cubit.dart';
 import '../selectors/access_mode_dropddown_menu.dart';
 import '../widgets.dart';
 

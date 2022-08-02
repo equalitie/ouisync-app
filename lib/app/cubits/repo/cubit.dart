@@ -1,18 +1,19 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart';
+import '../../models/folder_state.dart';
 import '../cubits.dart' as cubits;
-import 'state.dart';
 
-export "state.dart";
-export '../../models/repo_state.dart';
+part "state.dart";
 
 class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   RepoCubit(RepoState state)

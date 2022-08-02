@@ -128,38 +128,37 @@ class FileIconAnimated
       size: Dimensions.sizeIconAverage); // Default icon;
   }
 
-  bool _isCurrentFile (DirectoryState state) {
-    final originRepository = _getRepositoryFromState(state);
-    if (originRepository != repository.state.handle) {
-      return false;
-    }
+  //bool _isCurrentFile(DirectoryState state) {
+  //  final originRepository = _getRepositoryFromState(state);
+  //  if (originRepository != repository.state.handle) {
+  //    return false;
+  //  }
 
-    final originPath = _getPathFromState(state);
-    return originPath == path;
-  }
+  //  final originPath = _getPathFromState(state);
+  //  return originPath == path;
+  //}
 
-  Repository? _getRepositoryFromState(DirectoryState state) {
-    // TODO
-    //if (state is DownloadFileInProgress) {
-    //  return state.repository.handle;
-    //}
+  //Repository? _getRepositoryFromState(DirectoryState state) {
+  //  if (state is DownloadFileInProgress) {
+  //    return state.repository.handle;
+  //  }
 
-    //if (state is DownloadFileDone) {
-    //  return state.repository.handle;
-    //}
+  //  if (state is DownloadFileDone) {
+  //    return state.repository.handle;
+  //  }
 
-    return null;
-  }
+  //  return null;
+  //}
 
-  String _getPathFromState(DirectoryState state) {
-    if (state is DownloadFileInProgress) {
-      return state.fileName;
-    }
+  //String _getPathFromState(DirectoryState state) {
+  //  if (state is DownloadFileInProgress) {
+  //    return state.fileName;
+  //  }
 
-    if (state is DownloadFileDone) {
-      return state.path;
-    }
+  //  if (state is DownloadFileDone) {
+  //    return state.path;
+  //  }
 
-    return '';
-  }
+  //  return '';
+  //}
 }

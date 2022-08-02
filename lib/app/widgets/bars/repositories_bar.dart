@@ -77,7 +77,7 @@ class _Picker extends StatelessWidget {
       return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
     }
 
-    final repo = state.currentRepo;
+    final repo = state.currentRepo?.state;
     final name = _repoName(repo);
 
     if (repo == null) {

@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../utils/loggers/ouisync_app_logger.dart';
-import '../models/repo_state.dart';
+import '../cubits/repo/cubit.dart';
 
 class RepositoryProgressCubit extends Cubit<RepositoryProgressState> with OuiSyncAppLogger {
   RepositoryProgressCubit() : super(RepositoryProgressInitial());

@@ -5,7 +5,6 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
-import '../../models/repo_state.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../cubits.dart';
@@ -56,7 +55,7 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
   void unlockRepository({required String name, required String password}) async {
     update((state) { state.isLoading = true; });
 
-    final wasCurrent = state.currentRepo?.name == name;
+    final wasCurrent = current.state?.state.name == name;
 
     await state.remove(name);
 
@@ -104,7 +103,7 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
   }
 
   void renameRepository(String oldName, String newName) async {
-    final wasCurrent = state.currentRepo?.name == oldName;
+    final wasCurrent = current.state?.state.name == oldName;
 
     await state.remove(oldName);
 
@@ -145,7 +144,7 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
   }
 
   void deleteRepository(String repositoryName) async {
-    final wasCurrent = state.currentRepo?.name == repositoryName;
+    final wasCurrent = current.state?.state.name == repositoryName;
 
     await state.remove(repositoryName);
 

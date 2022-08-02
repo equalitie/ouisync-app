@@ -19,19 +19,19 @@ class ReposState with OuiSyncAppLogger {
 
   Iterable<String> repositoryNames() => _repos.keys;
 
-  RepoState? get currentRepo {
+  RepoCubit? get currentRepo {
     if (_currentRepoName == null) {
       return null;
     } else {
-      return _repos[_currentRepoName!]?.state;
+      return _repos[_currentRepoName!];
     }
   }
 
   FolderState? get currentFolder {
-    return currentRepo?.currentFolder;
+    return currentRepo?.state.currentFolder;
   }
 
-  Iterable<RepoState> get repos => _repos.entries.map((entry) => entry.value.state);
+  Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
 
   Future<void> setCurrent(RepoCubit? repo) async {
     if (repo == null) {
