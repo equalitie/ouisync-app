@@ -20,6 +20,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     : super(state);
 
   RepoState get repo => state;
+  FolderState get currentFolder => state.currentFolder;
 
   Future<void> navigateTo(String destination) async {
     update((state) { state.isLoading = true; });

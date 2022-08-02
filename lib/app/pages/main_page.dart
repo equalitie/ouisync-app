@@ -69,7 +69,7 @@ class _MainPageState extends State<MainPage>
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
       _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    RepoCubit? get _repoCubit => _repositories.current.state;
+    RepoCubit? get _currentRepo => _repositories.current.state;
     ReposState get _reposState => _repositories.state;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
@@ -179,7 +179,7 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent() {
-      _repoCubit?.getContent();
+      _currentRepo?.getContent();
     }
 
     Widget buildMainWidget() {
@@ -217,8 +217,8 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<bool> _onBackPressed() async {
-      final currentRepo = _repositories.current.state;
-      final currentFolder = currentRepo?.state.currentFolder;
+      final currentRepo = _currentRepo;
+      final currentFolder = currentRepo?.currentFolder;
 
       if (currentFolder == null || currentFolder.isRoot()) {
         int clickCount = exitClickCounter.registerClick();
@@ -269,7 +269,7 @@ class _MainPageState extends State<MainPage>
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
         onPressed: () async {
-          bool dhtStatus = _repositories.current.state?.state.isDhtEnabled() ?? false;
+          bool dhtStatus = _currentRepo?.state.isDhtEnabled() ?? false;
           settingsAction(dhtStatus);
         },
         size: Dimensions.sizeIconSmall,
@@ -311,7 +311,7 @@ class _MainPageState extends State<MainPage>
     );
 
     _selectLayoutWidget() {
-      final current = _repositories.current.state;
+      final current = _currentRepo;
 
       if (current == null) {
         return NoRepositoriesState(
@@ -333,7 +333,7 @@ class _MainPageState extends State<MainPage>
     _contentBrowser(RepoCubit currentRepo) {
       late final child;
       late final navigationBar;
-      final folder = currentRepo.state.currentFolder;
+      final folder = currentRepo.currentFolder;
 
       if (folder.content.isEmpty) {
           child = NoContentsState(repository: folder.repo, path: folder.path);
@@ -368,9 +368,9 @@ class _MainPageState extends State<MainPage>
             const Divider(
               height: 1,
               color: Colors.transparent),
-          itemCount: currentRepo.state.currentFolder.content.length,
+          itemCount: currentRepo.currentFolder.content.length,
           itemBuilder: (context, index) {
-            final item = currentRepo.state.currentFolder.content[index];
+            final item = currentRepo.currentFolder.content[index];
             final actionByType = item.type == ItemType.file
             ? () async {
               if (_persistentBottomSheetController != null) {
@@ -498,7 +498,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(RepoCubit currentRepo, origin, path, type) async {
     final basename = getBasename(path);
-    final destination = buildDestinationPath(currentRepo.state.currentFolder.path, basename);
+    final destination = buildDestinationPath(currentRepo.currentFolder.path, basename);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -510,7 +510,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> saveMedia(String sourceFilePath) async {
-    final currentRepo = _repositories.current.state;
+    final currentRepo = _currentRepo;
 
     if (currentRepo == null) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
@@ -559,7 +559,7 @@ class _MainPageState extends State<MainPage>
   void saveFileToOuiSync(RepoCubit currentRepo, String path) {
     final fileName = getBasename(path);
     final length = io.File(path).statSync().size;
-    final filePath = buildDestinationPath(currentRepo.state.currentFolder.path, fileName);
+    final filePath = buildDestinationPath(currentRepo.currentFolder.path, fileName);
     final fileByteStream = io.File(path).openRead();
         
     currentRepo.saveFile(
