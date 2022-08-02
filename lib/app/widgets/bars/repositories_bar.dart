@@ -38,9 +38,9 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
             onPressed: () {
-              final current = reposCubit.current();
+              final current = reposCubit.current.state;
               if (current == null) return;
-              shareRepositoryOnTap(current);
+              shareRepositoryOnTap(current.state);
             },
             size: Dimensions.sizeIconSmall,
             color: Colors.white,

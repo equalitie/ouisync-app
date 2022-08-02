@@ -349,7 +349,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.reposCubit.current()!.name),
+                              repositoryName: currentRepo.name),
                         );
                       }).then((newName) {
                     if (newName == null || newName.isEmpty) {
@@ -469,7 +469,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.current();
+    final current = widget.reposCubit.current.state?.state;
 
     if (current == null) {
       return;

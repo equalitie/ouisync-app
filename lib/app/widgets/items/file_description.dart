@@ -9,20 +9,24 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with OuiSyncAppLogger {
-  FileDescription({
-    required this.repository,
-    required this.fileData,
-  }) {
+  FileDescription(
+    this.repository,
+    this.fileData,
+    this._uploadJob,
+  ) {
     _length.value = fileData.size;
   }
 
-  final RepoState repository;
+  final RepoCubit repository;
   final BaseItem fileData;
+  final Watch<Job>? _uploadJob;
 
   final ValueNotifier<int> _length = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
+    final uploadJob = _uploadJob;
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,89 +50,31 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             }
           ),
           Dimensions.spacingVerticalHalf,
-          BlocConsumer<DirectoryCubit, DirectoryState>(
-            buildWhen: (previousState, state) {
-              if (state is WriteToFileInProgress ||
-                  state is WriteToFileDone) {
-                if (_isCurrentFile(state)) {
-                  return true;
-                }
-              }
-
-              return false;
-            },
-            builder: (context, state) {
-              if (state is WriteToFileInProgress) {
-                if (_isCurrentFile(state)) {
-                  final progress = state.progress / state.length;
-                  return Row(
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Expanded(child: LinearProgressIndicator(value: progress)),
-                      TextButton(
-                        onPressed: () {
-                          BlocProvider.of<DirectoryCubit>(context)
-                          .cancelSaveFile(repository, fileData.path);
-                        },
-                        child: Text(
-                          S.current.actionCancelCapital,
-                          style:const  TextStyle(
-                            fontSize: Dimensions.fontSmall
-                          ),
-                        )
-                      ),
-                    ],
-                  );
-                }
-              }
-
-              return Container();
-            },
-            listenWhen: (previousState, state) {
-              if (state is WriteToFileInProgress) {
-                if (_isCurrentFile(state)) {
-                  return true;
-                }
-              }
-              return false;
-            },
-            listener: (context, state) {
-              if (state is WriteToFileInProgress) {
-                if (_isCurrentFile(state)) {
-                  _length.value = state.progress;
-                }
-              }
-            }
-          ),
+          (uploadJob != null) ? _uploadProgressWidget(uploadJob) : Container(),
         ],
       ),
     );
   }
 
-  bool _isCurrentFile(DirectoryState state) {
-    final originRepository = _getRepositoryFromState(state);
-    if (originRepository != repository.handle) {
-      return false;
-    }
+  Widget _uploadProgressWidget(Watch<Job> cubit) => cubit.builder((job) {
+    final progress = job.soFar / job.total;
 
-    final originPath = _getPathFromState(state);
-    return originPath == fileData.path;
-  }
-
-  Repository? _getRepositoryFromState(DirectoryState state) {
-    if (state is WriteToFileInProgress ||
-    state is WriteToFileDone) {
-      return (state as dynamic).repository.handle;
-    }
-    return null;
-  }
-
-  String _getPathFromState(DirectoryState state) {
-    if (state is WriteToFileInProgress ||
-    state is WriteToFileDone) {
-      return (state as dynamic).path;
-    }
-
-    return '';
-  }
+    return Row(
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Expanded(child: LinearProgressIndicator(value: progress)),
+        TextButton(
+          onPressed: () {
+            cubit.state.cancel = true;
+          },
+          child: Text(
+            S.current.actionCancelCapital,
+            style:const  TextStyle(
+              fontSize: Dimensions.fontSmall
+            ),
+          )
+        ),
+      ],
+    );
+  });
 }

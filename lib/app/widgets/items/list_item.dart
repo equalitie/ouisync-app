@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/models.dart';
-import '../../models/repo_state.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -14,7 +14,7 @@ class ListItem extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  final RepoState repository;
+  final RepoCubit repository;
   final BaseItem itemData;
   final Function mainAction;
   final Function? folderDotsAction;
@@ -42,8 +42,10 @@ class ListItem extends StatelessWidget {
     }
   }
 
-  Widget _buildFileItem() =>
-    Row(
+  Widget _buildFileItem() {
+    final uploadJob = repository.state.uploads[itemData.path];
+
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
@@ -53,10 +55,11 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(repository: repository, fileData: itemData))),
+            child: FileDescription(repository, itemData, uploadJob))),
         _getVerticalMenuAction(),
       ],
     );
+  }
 
   Widget _buildFolderItem() {
     return Row(

@@ -18,7 +18,7 @@ class FileIconAnimated
     Key? key,
   }) : super(key: key);
 
-  final model.RepoState repository;
+  final RepoCubit repository;
   final String path;
 
   String? _destinationPath;
@@ -26,32 +26,37 @@ class FileIconAnimated
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DirectoryCubit, DirectoryState>(
-      buildWhen: (previous, current) {
-        if (current is DownloadFileInProgress ||
-            current is DownloadFileDone) {
-              return _isCurrentFile(current);}
+    return GestureDetector(
+      child: _getWidgetForState(context),
+      onTap: () => onFileIconTap(context));
 
-        return false;
-      },
-      builder: (context, state) {
-        return GestureDetector(
-          child: _getWidgetForState(context, state),
-          onTap: () => onFileIconTap(context, state),);
-      },);
-    
+    // TODO
+    //return BlocBuilder<DirectoryCubit, DirectoryState>(
+    //  buildWhen: (previous, current) {
+    //    if (current is DownloadFileInProgress ||
+    //        current is DownloadFileDone) {
+    //          return _isCurrentFile(current);}
+
+    //    return false;
+    //  },
+    //  builder: (context, state) {
+    //    return GestureDetector(
+    //      child: _getWidgetForState(context, state),
+    //      onTap: () => onFileIconTap(context, state),);
+    //  },);
   }
 
-  void onFileIconTap(BuildContext context, DirectoryState state) {
+  void onFileIconTap(BuildContext context) {
     if (_destinationPath?.isNotEmpty ?? false) {
       _showDownloadLocation(context);
       return;
     } 
 
     if (_downloading) {
-      BlocProvider.of<DirectoryCubit>(context).cancelDownloadFile(
-        repository,
-        _getPathFromState(state));
+      // TODO
+      //BlocProvider.of<DirectoryCubit>(context).cancelDownloadFile(
+      //  repository,
+      //  _getPathFromState(state));
     }
   }
 
@@ -76,46 +81,47 @@ class FileIconAnimated
     );
   }
 
-  Widget _getWidgetForState(BuildContext context, DirectoryState state) {
-    if (_isCurrentFile(state)) {
-      _destinationPath = null;
-      _downloading = false;
+  Widget _getWidgetForState(BuildContext context) {
+    // TODO
+    //if (_isCurrentFile(state)) {
+    //  _destinationPath = null;
+    //  _downloading = false;
 
-      if (state is DownloadFileInProgress) {
-        _downloading = true;
+    //  if (state is DownloadFileInProgress) {
+    //    _downloading = true;
 
-        final ratio = state.progress / state.length;
-        final percentage = (ratio * 100.0).round();
+    //    final ratio = state.progress / state.length;
+    //    final percentage = (ratio * 100.0).round();
 
-        return CircularPercentIndicator(
-          radius: Dimensions.sizeIconMicro,
-          animation: true,
-          animateFromLastPercent: true,
-          percent: ratio,
-          progressColor: Theme.of(context).colorScheme.secondary,
-          center: Text(
-            '$percentage%',
-            style: const TextStyle(fontSize: Dimensions.fontMicro)));
-      }
+    //    return CircularPercentIndicator(
+    //      radius: Dimensions.sizeIconMicro,
+    //      animation: true,
+    //      animateFromLastPercent: true,
+    //      percent: ratio,
+    //      progressColor: Theme.of(context).colorScheme.secondary,
+    //      center: Text(
+    //        '$percentage%',
+    //        style: const TextStyle(fontSize: Dimensions.fontMicro)));
+    //  }
 
-      if (state is DownloadFileDone) {
-        IconData iconData;
-        switch (state.result) {
-          case DownloadFileResult.done:
-            _destinationPath = state.devicePath;
-            iconData = Icons.download_done_rounded;
-            break;
-          case DownloadFileResult.canceled:
-            iconData = Icons.file_download_off;
-            break;
-          case DownloadFileResult.failed:
-            iconData = Icons.cancel;
-            break;
-        }
+    //  if (state is DownloadFileDone) {
+    //    IconData iconData;
+    //    switch (state.result) {
+    //      case DownloadFileResult.done:
+    //        _destinationPath = state.devicePath;
+    //        iconData = Icons.download_done_rounded;
+    //        break;
+    //      case DownloadFileResult.canceled:
+    //        iconData = Icons.file_download_off;
+    //        break;
+    //      case DownloadFileResult.failed:
+    //        iconData = Icons.cancel;
+    //        break;
+    //    }
 
-        return Icon(iconData);
-      }
-    }
+    //    return Icon(iconData);
+    //  }
+    //}
 
     return const Icon(
       Icons.insert_drive_file_outlined,
@@ -124,7 +130,7 @@ class FileIconAnimated
 
   bool _isCurrentFile (DirectoryState state) {
     final originRepository = _getRepositoryFromState(state);
-    if (originRepository != repository.handle) {
+    if (originRepository != repository.state.handle) {
       return false;
     }
 
@@ -133,13 +139,14 @@ class FileIconAnimated
   }
 
   Repository? _getRepositoryFromState(DirectoryState state) {
-    if (state is DownloadFileInProgress) {
-      return state.repository.handle;
-    }
+    // TODO
+    //if (state is DownloadFileInProgress) {
+    //  return state.repository.handle;
+    //}
 
-    if (state is DownloadFileDone) {
-      return state.repository.handle;
-    }
+    //if (state is DownloadFileDone) {
+    //  return state.repository.handle;
+    //}
 
     return null;
   }

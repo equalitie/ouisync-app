@@ -5,12 +5,21 @@ import 'package:flutter/material.dart';
 class Value<State> extends Cubit<State> {
   Value(State initial) : super(initial);
 
-  Widget builder(Widget func(State)) {
+  Widget builder(Widget Function(State) func) {
     return BlocBuilder<Value<State>, State>(
       bloc: this,
       builder: (BuildContext ctx, State state) {
         return func(state);
       },
     );
+  }
+
+  void changed() {
+    emit(state);
+  }
+
+  void update(void Function(State) f) {
+    f(state);
+    changed();
   }
 }

@@ -16,7 +16,7 @@ class DirectoryActions extends StatelessWidget {
   });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
+  final RepoCubit cubit;
   final FolderState parent;
 
   @override
@@ -70,7 +70,7 @@ class DirectoryActions extends StatelessWidget {
     ),
   ); 
 
-  void createFolderDialog(context, DirectoryCubit cubit, FolderState parent) async {
+  void createFolderDialog(context, RepoCubit cubit, FolderState parent) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -82,7 +82,6 @@ class DirectoryActions extends StatelessWidget {
           body: FolderCreation(
             context: context,
             cubit: cubit,
-            repository: parent.repo,
             path: parent.path,
             formKey: formKey,
           ),
@@ -95,7 +94,7 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, DirectoryCubit cubit, FolderState parent) async {
+  Future<void> addFile(context, RepoCubit cubit, FolderState parent) async {
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -118,7 +117,6 @@ class DirectoryActions extends StatelessWidget {
       }
 
       cubit.saveFile(
-        parent.repo,
         newFilePath: newFilePath,
         fileName: file.name,
         length: file.size,

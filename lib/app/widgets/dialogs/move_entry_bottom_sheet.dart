@@ -9,15 +9,16 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class MoveEntryDialog extends StatelessWidget {
-  const MoveEntryDialog({
+  const MoveEntryDialog(
+    this._repo, {
     required this.origin,
     required this.path,
     required this.type,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-    Key? key,
-  }) : super(key: key);
+  });
 
+  final RepoCubit _repo;
   final String origin;
   final String path;
   final EntryType type;
@@ -49,26 +50,41 @@ class MoveEntryDialog extends StatelessWidget {
     );
   }
 
-  _selectActions(context) {
-    return BlocBuilder(
-      bloc: BlocProvider.of<DirectoryCubit>(context),
-      builder: (context, state) {
-        bool canMove = false;
+  _selectActions(context) => _repo.builder((state) {
+    bool canMove = false;
+    final folder = state.currentFolder;
 
-        if (state is DirectoryReloaded) {
-          if (state.path != origin && state.path != path) {
-            canMove = true;
-          }
-        }
+    if (folder.path != origin && folder.path != path) {
+      canMove = true;
+    }
 
-        return Fields.dialogActions(context,
-          buttons: _actions(context, canMove),
-          padding: const EdgeInsets.only(top: 0.0),
-          mainAxisAlignment: MainAxisAlignment.end
-        );
-      }
+    return Fields.dialogActions(context,
+      buttons: _actions(context, canMove),
+      padding: const EdgeInsets.only(top: 0.0),
+      mainAxisAlignment: MainAxisAlignment.end
     );
-  }
+  });
+
+  //_selectActions(context) {
+  //  return BlocBuilder(
+  //    bloc: BlocProvider.of<DirectoryCubit>(context),
+  //    builder: (context, state) {
+  //      bool canMove = false;
+
+  //      if (state is DirectoryReloaded) {
+  //        if (state.path != origin && state.path != path) {
+  //          canMove = true;
+  //        }
+  //      }
+
+  //      return Fields.dialogActions(context,
+  //        buttons: _actions(context, canMove),
+  //        padding: const EdgeInsets.only(top: 0.0),
+  //        mainAxisAlignment: MainAxisAlignment.end
+  //      );
+  //    }
+  //  );
+  //}
 
   List<Widget> _actions(context, canMove) => [
     NegativeButton(
