@@ -84,14 +84,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
 
     int offset = 0;
     try {
-      final stream = fileByteStream
-      .takeWhile((element) {
-        return _takeWhile(
-          repo.handle,
-          newFilePath,
-          _repositorySave,
-          job.state);
-      });
+      final stream = fileByteStream.takeWhile((_) => job.state.cancel == false);
 
       await for (final buffer in stream) {
         await file.write(offset, buffer);
@@ -125,115 +118,62 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   }
 
   String _cancelFileWriting = '';
-  oui.Repository? _repositorySave;
   void cancelSaveFile(String filePath) {
     loggy.app('Canceling ${filePath} creation');
 
-    _repositorySave = repo.handle;
     _cancelFileWriting = filePath;
 
     loggy.app('Cancel creation: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
   }
 
-  // TODO
   Future<void> downloadFile({ required String sourcePath, required String destinationPath }) async {
-    //final ouisyncFile = await File.open(repo.handle, sourcePath);
-    //final length = await ouisyncFile.length;
+    if (repo.downloads.containsKey(sourcePath)) {
+      showMessage("File is already being downloaded");
+      return;
+    }
 
-    //final newFile = io.File(destinationPath);
-    //int offset = 0;
+    final ouisyncFile = await oui.File.open(repo.handle, sourcePath);
+    final length = await ouisyncFile.length;
 
-    //emit(DownloadFileInProgress(
-    //  repository: repo,
-    //  path: destinationPath,
-    //  fileName: sourcePath,
-    //  length: length,
-    //  progress: offset
-    //));
+    final newFile = io.File(destinationPath);
+    int offset = 0;
 
-    //try {
-    //    while (_takeWhile(repo.handle, sourcePath, _repositoryDownload, _cancelFileDownload)) {
-    //    final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
-    //    offset += chunk.length;
+    final job = cubits.Watch(Job(0, length));
+    update((repo) { repo.downloads[sourcePath] = job; });
 
-    //    await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
+    try {
+      while (job.state.cancel == false) {
+        final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
+        offset += chunk.length;
 
-    //    emit(DownloadFileInProgress(
-    //      repository: repo,
-    //      path: destinationPath,
-    //      fileName: sourcePath,
-    //      length: length,
-    //      progress: offset
-    //    ));
+        await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
 
-    //    if (chunk.length < Constants.bufferSize) {
-    //      emit(DownloadFileDone(
-    //        repository: repo,
-    //        path: sourcePath,
-    //        devicePath: destinationPath,
-    //        result: DownloadFileResult.done));
-    //      break;
-    //    }
-    //  }
-    //} catch (e, st) {
-    //  loggy.app('Download file ${sourcePath} exception', e, st);
+        if (chunk.length < Constants.bufferSize) {
+          update((repo) { repo.downloads.remove(sourcePath); });
+          break;
+        }
 
-    //  showMessage(S.current.messageDownloadingFileError(sourcePath));
-    //  emit(DownloadFileDone(
-    //    repository: repo,
-    //    path: sourcePath,
-    //    devicePath: destinationPath,
-    //    result: DownloadFileResult.failed));
-
-    //  return;
-    //} finally {
-    //  loggy.app('Download file ${sourcePath} done - closing');
-    //  await ouisyncFile.close();
-    //}
-
-    //if (_cancelFileDownload.isEmpty) {
-    //  showMessage(S.current.messageDownloadingFileDone(sourcePath));
-    //  return;
-    //}
-
-    //if (_cancelFileDownload == sourcePath) {
-    //  _cancelFileDownload = '';
-
-    //  loggy.app('${sourcePath} download canceled by the user');
-    //  showMessage(S.current.messageDownloadingFileCanceled(sourcePath));
-
-    //  emit(DownloadFileDone(
-    //    repository: repo,
-    //    path: sourcePath,
-    //    devicePath: destinationPath,
-    //    result: DownloadFileResult.canceled));
-    //}
-  }
-
-  String _cancelFileDownload = '';
-  oui.Repository? _repositoryDownload;
-  void cancelDownloadFile(String filePath) {
-    loggy.app('Canceling $filePath download');
-
-    _repositoryDownload = repo.handle;
-    _cancelFileDownload = filePath;
-
-    loggy.app('Cancel downloading: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
-  }
-
-  bool _takeWhile(
-    oui.Repository repository,
-    String filePath,
-    oui.Repository? cancelRepository,
-    Job job) {
-      loggy.app('Take while: handle=${repository.handle} file=$filePath cancel-repo=${cancelRepository?.handle}');
-
-      if (repository != cancelRepository) {
-        return true;
+        job.update((job) { job.soFar = offset; });
       }
-
-      return !job.cancel;
+    } catch (e, st) {
+      loggy.app('Download file ${sourcePath} exception', e, st);
+      showMessage(S.current.messageDownloadingFileError(sourcePath));
+    } finally {
+      update((repo) { repo.downloads.remove(sourcePath); });
+      await ouisyncFile.close();
+    }
   }
+
+  //String _cancelFileDownload = '';
+  //oui.Repository? _repositoryDownload;
+  //void cancelDownloadFile(String filePath) {
+  //  loggy.app('Canceling $filePath download');
+
+  //  _repositoryDownload = repo.handle;
+  //  _cancelFileDownload = filePath;
+
+  //  loggy.app('Cancel downloading: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
+  //}
 
   Future<oui.File?> _createFile(String newFilePath) async {
     CreateFileResult? createFileResult;
