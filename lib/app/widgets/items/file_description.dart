@@ -13,15 +13,11 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
     this.repository,
     this.fileData,
     this._uploadJob,
-  ) {
-    _length.value = fileData.size;
-  }
+  );
 
   final RepoCubit repository;
   final BaseItem fileData;
   final Watch<Job>? _uploadJob;
-
-  final ValueNotifier<int> _length = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
@@ -37,22 +33,23 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             softWrap: true
           ),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          ValueListenableBuilder(
-            valueListenable: _length,
-            builder: (context, size, widget) {
-              return Fields.constrainedText(
-                formatSize(size as int, units: true),
-                flex: 0,
-                fontSize: Dimensions.fontSmall,
-                fontWeight: FontWeight.w400,
-                softWrap: true
-              );
-            }
-          ),
+          (uploadJob == null)
+            ? _fileSize(fileData.size)
+            : uploadJob.builder((job) => _fileSize(job.soFar)),
           Dimensions.spacingVerticalHalf,
           (uploadJob != null) ? _uploadProgressWidget(uploadJob) : Container(),
         ],
       ),
+    );
+  }
+
+  Widget _fileSize(int size) {
+    return Fields.constrainedText(
+      formatSize(size as int, units: true),
+      flex: 0,
+      fontSize: Dimensions.fontSmall,
+      fontWeight: FontWeight.w400,
+      softWrap: true
     );
   }
 
