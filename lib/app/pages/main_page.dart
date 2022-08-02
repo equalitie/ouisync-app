@@ -69,7 +69,6 @@ class _MainPageState extends State<MainPage>
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
       _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    FolderState? get currentFolder => _repositories.state.currentFolder;
     RepoCubit? get _repoCubit => _repositories.current.state;
     ReposState get _reposState => _repositories.state;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
@@ -165,7 +164,16 @@ class _MainPageState extends State<MainPage>
       }
 
       _bottomPaddingWithBottomSheet.value = defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
-      _showSaveSharedMedia(sharedMedia: payload);
+
+      _scaffoldKey.currentState?.showBottomSheet(
+        (context) {
+          return SaveSharedMedia(
+            sharedMedia: payload,
+            onBottomSheetOpen: retrieveBottomSheetController,
+            onSaveFile: saveMedia
+          );
+        },
+      );
     }
 
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
@@ -360,9 +368,9 @@ class _MainPageState extends State<MainPage>
             const Divider(
               height: 1,
               color: Colors.transparent),
-          itemCount: currentFolder!.content.length,
+          itemCount: currentRepo.state.currentFolder.content.length,
           itemBuilder: (context, index) {
-            final item = currentFolder!.content[index];
+            final item = currentRepo.state.currentFolder.content[index];
             final actionByType = item.type == ItemType.file
             ? () async {
               if (_persistentBottomSheetController != null) {
@@ -482,18 +490,6 @@ class _MainPageState extends State<MainPage>
       }
     );
 
-  PersistentBottomSheetController? _showSaveSharedMedia({
-    required List<SharedMediaFile> sharedMedia
-  }) => _scaffoldKey.currentState?.showBottomSheet(
-    (context) {
-      return SaveSharedMedia(
-        sharedMedia: sharedMedia,
-        onBottomSheetOpen: retrieveBottomSheetController,
-        onSaveFile: saveMedia
-      );
-    },
-  );
-
   void retrieveBottomSheetController(PersistentBottomSheetController? controller, String entryPath) {
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
@@ -502,7 +498,7 @@ class _MainPageState extends State<MainPage>
 
   void moveEntry(RepoCubit currentRepo, origin, path, type) async {
     final basename = getBasename(path);
-    final destination = buildDestinationPath(currentFolder!.path, basename);
+    final destination = buildDestinationPath(currentRepo.state.currentFolder.path, basename);
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
@@ -547,8 +543,7 @@ class _MainPageState extends State<MainPage>
             actions: [
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () => 
-                Navigator.of(context).pop(),
+                onPressed: () => Navigator.of(context).pop(),
               )
             ],
           );
@@ -564,7 +559,7 @@ class _MainPageState extends State<MainPage>
   void saveFileToOuiSync(RepoCubit currentRepo, String path) {
     final fileName = getBasename(path);
     final length = io.File(path).statSync().size;
-    final filePath = buildDestinationPath(currentFolder!.path, fileName);
+    final filePath = buildDestinationPath(currentRepo.state.currentFolder.path, fileName);
     final fileByteStream = io.File(path).openRead();
         
     currentRepo.saveFile(

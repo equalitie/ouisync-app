@@ -11,8 +11,7 @@ class SaveSharedMedia extends StatelessWidget {
     required this.sharedMedia,
     required this.onBottomSheetOpen,
     required this.onSaveFile,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final List<SharedMediaFile> sharedMedia;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -32,19 +31,20 @@ class SaveSharedMedia extends StatelessWidget {
           Fields.iconLabel(
             icon: Icons.save_outlined,
             text: S.current.titleAddFile,
-          ),
-          Fields.constrainedText(
-            getBasename(sharedMedia.first.path),
-            softWrap: true,
-            textOverflow: TextOverflow.ellipsis,
-            fontWeight: FontWeight.w800
-          ),
+          )] +
+          sharedMedia.map((media) {
+            return Fields.constrainedText(
+              getBasename(media.path),
+              softWrap: true,
+              textOverflow: TextOverflow.ellipsis,
+              fontWeight: FontWeight.w800
+            );
+          }).toList() + [
           Fields.dialogActions(context,
             buttons: _actions(context),
             padding: const EdgeInsets.only(top: 0.0),
             mainAxisAlignment: MainAxisAlignment.end
-          )
-        ],
+          )]
       ),
     );
   }
@@ -56,7 +56,10 @@ class SaveSharedMedia extends StatelessWidget {
     PositiveButton(
       text: S.current.actionSave,
       onPressed: () async {
-        await onSaveFile.call(sharedMedia.first.path);
+        for (final media in sharedMedia) {
+          onSaveFile(media.path);
+        }
+
         Navigator.of(context).pop();
       })
   ];
