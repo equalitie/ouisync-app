@@ -241,12 +241,9 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      if (currentRepo == null) {
-        return false;
+      if (currentRepo != null) {
+        currentRepo.navigateTo(currentFolder.parent);
       }
-
-      currentFolder.goUp();
-      getContent();
 
       return false;
     }
