@@ -339,7 +339,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
                   await showDialog<String>(
                       context: context,
-                      barrierDismissible: false,
                       builder: (BuildContext context) {
                         final formKey = GlobalKey<FormState>();
 
@@ -379,35 +378,33 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 if (currentRepo == null) {
                   return;
                 }
-                await showDialog<bool>(
-                    context: context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text(S.current.titleDeleteRepository),
-                        content: SingleChildScrollView(
-                          child: ListBody(children: [
-                            Text(S.current.messageConfirmRepositoryDeletion)
-                          ]),
-                        ),
-                        actions: [
-                          TextButton(
-                              child: Text(S.current.actionDeleteCapital),
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              }),
-                          TextButton(
-                            child: Text(S.current.actionCloseCapital),
-                            onPressed: () => Navigator.of(context).pop(false),
-                          )
-                        ],
-                      );
-                    }).then((delete) {
-                  if (delete ?? false) {
-                    final repositoryName = currentRepo.name;
-                    widget.reposCubit.deleteRepository(repositoryName);
-                  }
-                });
+
+                final delete = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(S.current.titleDeleteRepository),
+                    content: SingleChildScrollView(
+                      child: ListBody(children: [
+                        Text(S.current.messageConfirmRepositoryDeletion)
+                      ]),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text(S.current.actionCloseCapital),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
+                      TextButton(
+                        child: Text(S.current.actionDeleteCapital),
+                        style: ButtonStyle(foregroundColor: MaterialStateProperty.resolveWith((_) => Colors.red)),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      ),
+                    ]
+                  )
+                );
+
+                if (delete ?? false) {
+                  widget.reposCubit.deleteRepository(currentRepo.name);
+                }
               })
             ],
           ),
