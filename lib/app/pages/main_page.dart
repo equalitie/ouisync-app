@@ -132,15 +132,13 @@ class _MainPageState extends State<MainPage>
     }
 
     Future<void> _initRepositories() async {
-      final repositories = _repositories;
-
       final initRepos = RepositoryHelper
       .localRepositoriesFiles(
         widget.repositoriesLocation,
         justNames: true
       ).map((repoName) async {
         final setCurrent = repoName == widget.defaultRepositoryName;
-        await repositories.openRepository(repoName, setCurrent: setCurrent);
+        await _repositories.openRepository(repoName, setCurrent: setCurrent);
       }).toList();
 
       await Future.wait(initRepos);
@@ -619,11 +617,7 @@ class _MainPageState extends State<MainPage>
           ),
         );
       }
-    ).then((addedRepository) {
-      if (addedRepository.isNotEmpty) { // If a repository is created, the new repository name is returned; otherwise, empty string.
-        switchMainWidget(buildMainWidget());
-      }
-    });
+    );
   }
 
   void unlockRepositoryDialog(String repositoryName) async {
