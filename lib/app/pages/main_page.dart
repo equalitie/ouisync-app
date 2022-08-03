@@ -284,7 +284,7 @@ class _MainPageState extends State<MainPage>
         return Container();
       }
 
-      if ([AccessMode.blind, AccessMode.read].contains(current.state.accessMode)) {
+      if (!current.canWrite) {
         return Container();
       }
 
@@ -320,7 +320,7 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      if (current.state.accessMode == AccessMode.blind) {
+      if (!current.canRead) {
         return LockedRepositoryState(
           repositoryName: current.state.name,
           onUnlockPressed: unlockRepositoryDialog,
@@ -522,9 +522,9 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    String? accessModeMessage = currentRepo.state.accessMode == AccessMode.blind
+    String? accessModeMessage = !currentRepo.canRead
       ? S.current.messageAddingFileToLockedRepository
-      : currentRepo.state.accessMode == AccessMode.read
+      : !currentRepo.canWrite
         ? S.current.messageAddingFileToReadRepository
         : null;
 
