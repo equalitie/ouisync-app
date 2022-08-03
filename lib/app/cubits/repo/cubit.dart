@@ -19,6 +19,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   RepoCubit(RepoState state)
     : super(state);
 
+  String get name => state.name;
   RepoState get repo => state;
   FolderState get currentFolder => state.currentFolder;
 

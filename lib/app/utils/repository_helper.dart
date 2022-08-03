@@ -35,12 +35,7 @@ class RepositoryHelper {
     }).toSet().toList();
   }
 
-  static Future<String> latestRepositoryOrDefault(List<String>? localRepositories) async {
-    if (localRepositories == null) {
-      final repositoriesDir = await Settings.readSetting(Constants.repositoriesDirKey);
-      localRepositories = localRepositoriesFiles(repositoriesDir) as List<String>;
-    }
-
+  static Future<String> latestRepositoryOrDefault(List<String> localRepositories) async {
     if (localRepositories.isEmpty) {
       return '';
     }
@@ -51,6 +46,7 @@ class RepositoryHelper {
     if (latestRepository == null) {
       return defaultRepository;
     }
+
     if (!localRepositories.contains(latestRepository)) {
       return defaultRepository;
     }

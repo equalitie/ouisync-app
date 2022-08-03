@@ -173,20 +173,9 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
     await Settings.saveSetting(Constants.currentRepositoryKey, '');
     await RepositoryHelper.removeBitTorrentDHTStatusForRepo(repositoryName);
 
-    final latestRepositoryOrDefaultName = await RepositoryHelper.latestRepositoryOrDefault(null);
+    final nextRepo = state.repos.isNotEmpty ? state.repos.first : null;
 
-    if (latestRepositoryOrDefaultName.isEmpty) { /// No more repositories available
-      changed();
-      return;
-    }
-
-    RepoCubit? newDefaultRepository = state.get(latestRepositoryOrDefaultName);
-
-    if (newDefaultRepository == null) { /// The new deafult repository has not been initialized / it's not in memory
-      newDefaultRepository = await _open(latestRepositoryOrDefaultName);
-    }
-
-    await state.put(newDefaultRepository!);
+    state.setCurrent(nextRepo);
 
     changed();
   }
