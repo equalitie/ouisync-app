@@ -70,7 +70,6 @@ class _MainPageState extends State<MainPage>
       _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
     RepoCubit? get _currentRepo => _repositories.currentRepo;
-    RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
     @override
@@ -92,7 +91,6 @@ class _MainPageState extends State<MainPage>
       });
 
       _repositories.setSubscriptionCallback((repo) {
-        _repoProgressCubit.updateProgress(repo);
         getContent();
       });
 
