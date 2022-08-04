@@ -8,6 +8,11 @@ abstract class MediaReceiver {
     if (Platform.isWindows) {
       return MediaReceiverWindows();
     }
+
+    if (Platform.isLinux) {
+      return MediaReceiverLinux();
+    }
+
     return MediaReceiverMobile(); 
   }
 
