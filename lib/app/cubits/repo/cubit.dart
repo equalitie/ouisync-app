@@ -88,8 +88,10 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
 
     await _refreshFolder();
 
-    int offset = 0;
+    // TODO: We should try to remove the file in case of exception or user cancellation.
+
     try {
+      int offset = 0;
       final stream = fileByteStream.takeWhile((_) => job.state.cancel == false);
 
       await for (final buffer in stream) {
@@ -98,38 +100,18 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
         job.update((job) { job.soFar = offset; });
       }
     } catch (e, st) {
-      loggy.app('Writing to file ${newFilePath} exception', e, st);
       showMessage(S.current.messageWritingFileError(newFilePath));
-      //emit(WriteToFileDone(repository: repo, path: newFilePath));
-      update((repo) { repo.uploads.remove(newFilePath); });
       return;
     } finally {
-      loggy.app('Writing to file ${newFilePath} done - closing');
       await file.close();
-    }
-
-    if (_cancelFileWriting.isEmpty) {
-      showMessage(S.current.messageWritingFileDone(newFilePath));
       update((repo) { repo.uploads.remove(newFilePath); });
-      return;
     }
 
-    if (_cancelFileWriting == newFilePath) {
-      loggy.app('${newFilePath} writing canceled by the user');
-      _cancelFileWriting = '';
-
+    if (job.state.cancel) {
       showMessage(S.current.messageWritingFileCanceled(newFilePath));
-      update((repo) { repo.uploads.remove(newFilePath); });
+    } else {
+      showMessage(S.current.messageWritingFileDone(newFilePath));
     }
-  }
-
-  String _cancelFileWriting = '';
-  void cancelSaveFile(String filePath) {
-    loggy.app('Canceling ${filePath} creation');
-
-    _cancelFileWriting = filePath;
-
-    loggy.app('Cancel creation: repository=${repo.name} handle=${repo.handle.handle} file=${filePath}');
   }
 
   Future<void> downloadFile({ required String sourcePath, required String destinationPath }) async {
