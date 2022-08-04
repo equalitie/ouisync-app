@@ -305,12 +305,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     await _refreshFolder();
   }
 
-  int _next_id = 0;
   Future<void> _refreshFolder() async {
-    // TODO: Only increment the id when the content changes.
-    int id = _next_id;
-    _next_id += 1;
-
     final path = _currentFolder.path;
     bool errorShown = false;
 
