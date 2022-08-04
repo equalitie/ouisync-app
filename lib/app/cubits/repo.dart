@@ -85,21 +85,24 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     update((state) { state.isLoading = false; });
   }
 
-  Future<void> createFolder(String folderPath) async {
+  Future<bool> createFolder(String folderPath) async {
     update((state) { state.isLoading = true; });
 
     try{
       final result = await _createFolder(folderPath);
       if (result.result) {
         _currentFolder.goTo(folderPath);
+        return true;
       } else {
         loggy.app('Directory $folderPath creation failed');
+        return false;
       }
     } catch (e, st) {
       loggy.app('Directory $folderPath creation exception', e, st);
+      return false;
+    } finally {
+      await _refreshFolder();
     }
-
-    await _refreshFolder();
   }
 
   Future<BasicResult> _createFolder(String path) async {
@@ -320,19 +323,22 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
   }
 
-  Future<void> moveEntry({ required String source, required String destination }) async {
+  Future<bool> moveEntry({ required String source, required String destination }) async {
     update((state) { state.isLoading = true; });
 
     try {
       final moveEntryResult = await _moveEntry(source, destination);
       if (moveEntryResult.errorMessage.isNotEmpty) {
         loggy.app('Move entry from ${source} to ${destination} failed:\n${moveEntryResult.errorMessage}');
+        return false;
       }
+      return true;
     } catch (e, st) {
       loggy.app('Move entry from ${source} to ${destination} exception', e, st);
+      return false;
+    } finally {
+      await _refreshFolder();
     }
-
-    await _refreshFolder();
   }
 
   Future<BasicResult> _moveEntry(String originPath, String destinationPath) async {
