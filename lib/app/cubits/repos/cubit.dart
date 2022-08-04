@@ -18,8 +18,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   bool isLoading = false;
 
-  String? _currentRepoName;
-
   final _currentRepoChange = Value<RepoCubit?>(null);
 
   ReposCubit({
@@ -41,15 +39,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Value<RepoCubit?> get currentRepoChange => _currentRepoChange;
 
-  String? get currentRepoName => _currentRepoName;
+  String? get currentRepoName => currentRepoChange.state?.name;
 
   Iterable<String> repositoryNames() => _repos.keys;
 
   RepoCubit? get currentRepo {
-    if (_currentRepoName == null) {
+    if (currentRepoName == null) {
       return null;
     } else {
-      return _repos[_currentRepoName!];
+      return _repos[currentRepoName!];
     }
   }
 
@@ -89,7 +87,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     if (repo == null) {
       loggy.app("Can't set current repository to null");
-      _currentRepoName = null;
       _currentRepoChange.emit(null);
       return;
     }
@@ -101,7 +98,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _subscription?.cancel();
     _subscription = null;
 
-    _currentRepoName = repo.state.name;
     _currentRepoChange.emit(repo);
 
     _subscription = repo.state.handle.subscribe(() => _subscriptionCallback!.call(repo.state));
@@ -122,35 +118,34 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     _repos[newRepo.state.name] = newRepo;
 
-    if (setCurrent && newRepo.state.name != _currentRepoName) {
+    if (setCurrent && newRepo.state.name != currentRepoName) {
       _updateCurrentRepository(newRepo);
     }
   }
 
-  Future<void> remove(String name) async {
-    if (_currentRepoName == name) {
+  Future<String?> _forget(String name) async {
+    if (currentRepoName == name) {
       loggy.app('Canceling subscription to $name');
       _subscription?.cancel();
       _subscription = null;
-
-      loggy.app('Cleaning current selection for repository $name');
-      _currentRepoName = null;
+      _currentRepoChange.emit(null);
     }
 
     final repo = _repos[name];
 
-    if (repo != null) {
-      loggy.app('Closing repository $name');
-      Settings.setDhtEnableStatus(repo.id, null);
-      await repo.state.close();
-      _repos.remove(name);
+    if (repo == null) {
+      return null;
     }
+
+    final id = repo.id;
+    await repo.state.close();
+    _repos.remove(name);
+    return id;
   }
 
   Future<void> close() async {
     // Make sure this function is idempotent, i.e. that calling it more than once
     // one after another won't change it's meaning nor it will crash.
-    _currentRepoName = null;
     _currentRepoChange.emit(null);
 
     _subscription?.cancel();
@@ -191,9 +186,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   void unlockRepository({required String name, required String password}) async {
     _update(() { isLoading = true; });
 
-    final wasCurrent = _currentRepoName == name;
+    final wasCurrent = currentRepoName == name;
 
-    await remove(name);
+    await _forget(name);
 
     final store = _buildStoreString(name);
     final storeExist = await io.File(store).exists();
@@ -221,9 +216,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   void renameRepository(String oldName, String newName) async {
-    final wasCurrent = _currentRepoName == oldName;
+    final wasCurrent = currentRepoName == oldName;
 
-    await remove(oldName);
+    await _forget(oldName);
 
     final renamed = await RepositoryHelper.renameRepositoryFiles(_repositoriesDir,
       oldName: oldName,
@@ -261,9 +256,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   void deleteRepository(String repositoryName) async {
-    final wasCurrent = _currentRepoName == repositoryName;
+    final wasCurrent = currentRepoName == repositoryName;
 
-    await remove(repositoryName);
+    final repo_id = await _forget(repositoryName);
+
+    if (repo_id != null) {
+      Settings.setDhtEnableStatus(repo_id, null);
+    }
 
     final deleted = await RepositoryHelper.deleteRepositoryFiles(
       _repositoriesDir,
