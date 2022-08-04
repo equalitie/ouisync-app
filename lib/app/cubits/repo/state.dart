@@ -48,28 +48,6 @@ class RepoState with OuiSyncAppLogger {
     return await handle.syncProgress();
   }
 
-  Future<BasicResult> createFile(String newFilePath) async {
-    BasicResult createFileResult;
-    String error = '';
-
-    oui.File? newFile;
-    try {
-      loggy.app('Creating file $newFilePath');
-
-      newFile = await oui.File.create(handle, newFilePath);
-    } catch (e, st) {
-      loggy.app('Creating file $newFilePath exception', e, st);
-      error = e.toString();
-    }
-
-    createFileResult = CreateFileResult(functionName: 'createFile', result: newFile);
-    if (error.isNotEmpty) {
-      createFileResult.errorMessage = error;
-    }
-
-    return createFileResult;
-  }
-
   Future<BasicResult> writeFile(String filePath, Stream<List<int>> fileStream) async {
     loggy.app('Writing file $filePath');
 

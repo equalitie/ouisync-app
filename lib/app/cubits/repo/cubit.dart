@@ -170,25 +170,6 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
   }
 
-  Future<oui.File?> _createFile(String newFilePath) async {
-    CreateFileResult? createFileResult;
-
-    try {
-      createFileResult = (await repo.createFile(newFilePath)) as CreateFileResult?;
-      if (createFileResult!.errorMessage.isNotEmpty) {
-        loggy.app('Create file $newFilePath failed:\n${createFileResult.errorMessage}');
-        showMessage(S.current.messageNewFileError(newFilePath));
-        return null;
-      }
-    } catch (e, st) {
-      loggy.app('Create file $newFilePath exception', e, st);
-      showMessage(S.current.messageNewFileError(newFilePath));
-      return null;
-    }
-
-    return createFileResult.result!;
-  }
-
   Future<void> moveEntry({ required String source, required String destination }) async {
     update((state) { state.isLoading = true; });
 
@@ -257,5 +238,19 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
 
   void showMessage(String message) {
     update((state) { state.messages.add(message); });
+  }
+
+  Future<oui.File?> _createFile(String newFilePath) async {
+    oui.File? newFile;
+
+    try {
+      loggy.app('Creating file $newFilePath');
+      newFile = await oui.File.create(handle, newFilePath);
+    } catch (e, st) {
+      loggy.app('Creating file $newFilePath failed', e, st);
+      showMessage(S.current.messageNewFileError(newFilePath));
+    }
+
+    return newFile;
   }
 }
