@@ -276,39 +276,14 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     update((state) { state.isLoading = true; });
 
     try {
-      final moveEntryResult = await _moveEntry(source, destination);
-      if (moveEntryResult.errorMessage.isNotEmpty) {
-        loggy.app('Move entry from ${source} to ${destination} failed:\n${moveEntryResult.errorMessage}');
-        return false;
-      }
+      await handle.move(source, destination);
       return true;
     } catch (e, st) {
-      loggy.app('Move entry from ${source} to ${destination} exception', e, st);
+      loggy.app('Move entry from ${source} to ${destination} failed', e, st);
       return false;
     } finally {
       await _refreshFolder();
     }
-  }
-
-  Future<BasicResult> _moveEntry(String originPath, String destinationPath) async {
-    BasicResult moveEntryResult;
-    String error = '';
-
-    try {
-      loggy.app('Move entry from $originPath to $destinationPath');
-
-      await handle.move(originPath, destinationPath);
-    } catch (e, st) {
-      loggy.app('Move entry from $originPath to $destinationPath exception', e, st);
-      error = e.toString();
-    }
-
-    moveEntryResult = MoveEntryResult(functionName: 'moveEntry', result: destinationPath);
-    if (error.isNotEmpty) {
-      moveEntryResult.errorMessage = error;
-    }
-
-    return moveEntryResult;
   }
 
   Future<void> deleteFile(String filePath) async {
