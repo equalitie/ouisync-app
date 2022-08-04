@@ -12,7 +12,7 @@ import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final Map<String, RepoCubit> _repos = Map();
-  bool isLoading = false;
+  bool _isLoading = false;
   RepoCubit? _currentRepo;
   final oui.Session _session;
   final String _appDir;
@@ -29,6 +29,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _repositoriesDir = repositoriesDir
   {}
 
+  bool get isLoading => _isLoading;
   oui.Session get session => _session;
   String get appDir => _appDir;
 
@@ -136,8 +137,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
-    print("ReposCubit openRepository start $name");
-    _update(() { isLoading = true; });
+    _update(() { _isLoading = true; });
 
     final repo = await _open(name, password: password, token: token);
 
@@ -147,12 +147,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('Failed to open repository $name');
     }
 
-    print("ReposCubit openRepository end $name");
-    _update(() { isLoading = false; });
+    _update(() { _isLoading = false; });
   }
 
   void unlockRepository({required String name, required String password}) async {
-    _update(() { isLoading = true; });
+    _update(() { _isLoading = true; });
 
     final wasCurrent = currentRepoName == name;
 
@@ -163,7 +162,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     if (!storeExist) {
       loggy.app('The repository store doesn\'t exist: $store');
-      _update(() { isLoading = false; });
+      _update(() { _isLoading = false; });
       return;
     }
 
@@ -180,7 +179,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('Unlocking of the repository $name failed', e, st);
     }
 
-    _update(() { isLoading = false; });
+    _update(() { _isLoading = false; });
   }
 
   void renameRepository(String oldName, String newName) async {
