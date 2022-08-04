@@ -270,9 +270,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: DropdownButton<RepoState?>(
+            child: DropdownButton<RepoCubit?>(
               isExpanded: true,
-              value: currentRepo?.state,
+              value: currentRepo,
               underline: const SizedBox(),
               selectedItemBuilder: (context) => repositoryNames().map<Widget>((String repoName) {
                 return Padding(
@@ -298,7 +298,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     ],
                   ));
               }).toList(),
-              items: repositories().map((RepoState repo) {
+              items: repositories().map((RepoCubit repo) {
                 return DropdownMenuItem(
                   value: repo,
                   child: Row(
@@ -416,8 +416,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return widget.reposCubit.repositoryNames();
   }
 
-  Iterable<RepoState> repositories() {
-    return widget.reposCubit.repos.map((cubit) => cubit.state);
+  Iterable<RepoCubit> repositories() {
+    return widget.reposCubit.repos;
   }
 
   Widget _buildConnectedPeerListRow() {

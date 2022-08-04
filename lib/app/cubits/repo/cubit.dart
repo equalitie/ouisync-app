@@ -17,14 +17,15 @@ part "state.dart";
 
 class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   FolderState _currentFolder = FolderState();
+  String _name;
+  oui.Repository _handle;
 
-  RepoCubit(RepoState state)
-    : super(state) {
+  RepoCubit(this._name, this._handle) : super(RepoState()) {
     _currentFolder.repo = this;
   }
 
-  oui.Repository get handle => state.handle;
-  String get name => state.name;
+  oui.Repository get handle => _handle;
+  String get name => _name;
   RepoState get repo => state;
   FolderState get currentFolder => _currentFolder;
 
@@ -49,7 +50,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   bool get canWrite => accessMode == oui.AccessMode.write;
 
   Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode) async {
-    return await handle.createShareToken(accessMode: accessMode, name: name);
+    return await handle.createShareToken(accessMode: accessMode, name: _name);
   }
 
   Future<bool> exists(String path) async {
@@ -432,5 +433,9 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
 
     return newFile;
+  }
+
+  Future<void> close() async {
+    await handle.close();
   }
 }

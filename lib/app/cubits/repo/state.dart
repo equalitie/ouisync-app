@@ -12,16 +12,4 @@ class RepoState with OuiSyncAppLogger {
   final Map<String, cubits.Watch<Job>> uploads = HashMap();
   final Map<String, cubits.Watch<Job>> downloads = HashMap();
   final List<String> messages = <String>[];
-
-  String name;
-
-  // TODO: Ideally, this shouldn't be exposed.
-  oui.Repository handle;
-
-  RepoState(this.name, this.handle);
-
-
-  Future<void> close() async {
-    await handle.close();
-  }
 }

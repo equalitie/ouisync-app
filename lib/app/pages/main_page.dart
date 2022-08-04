@@ -310,7 +310,7 @@ class _MainPageState extends State<MainPage>
 
       if (!current.canRead) {
         return LockedRepositoryState(
-          repositoryName: current.state.name,
+          repositoryName: current.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
       }
