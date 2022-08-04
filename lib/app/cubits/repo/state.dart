@@ -44,12 +44,6 @@ class RepoState with OuiSyncAppLogger {
     return other is RepoState && id == other.id;
   }
 
-  // Get the state monitor of this particular repository. That is 'root >
-  // Repositories > this repository ID'.
-  StateMonitor stateMonitor() {
-    return handle.stateMonitor()!;
-  }
-
   Future<oui.Progress> syncProgress() async {
     return await handle.syncProgress();
   }

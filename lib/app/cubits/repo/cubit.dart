@@ -39,6 +39,12 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
 
   Future<oui.EntryType?> type(String path) => handle.type(path);
 
+  // Get the state monitor of this particular repository. That is 'root >
+  // Repositories > this repository ID'.
+  StateMonitor stateMonitor() {
+    return handle.stateMonitor()!;
+  }
+
   Future<void> navigateTo(String destination) async {
     update((state) { state.isLoading = true; });
     repo.currentFolder.goTo(destination);

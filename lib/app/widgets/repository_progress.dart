@@ -5,7 +5,7 @@ import '../utils/utils.dart';
 import '../cubits/repo/cubit.dart';
 
 class RepositoryProgress extends StatelessWidget {
-  RepoState? _repo;
+  RepoCubit? _repo;
   StateMonitor? _monitor;
   Subscription? _subscription;
 
