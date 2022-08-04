@@ -128,6 +128,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     final file = await _createFile(newFilePath);
 
     if (file == null) {
+      showMessage(S.current.messageNewFileError(newFilePath));
       return;
     }
 
@@ -286,39 +287,18 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
   }
 
-  Future<void> deleteFile(String filePath) async {
+  Future<bool> deleteFile(String filePath) async {
     update((state) { state.isLoading = true; });
 
     try{
-      final deleteFileResult = await _deleteFile(filePath);
-      if (deleteFileResult.errorMessage.isNotEmpty)
-      {
-        loggy.app('Delete file $filePath failed');
-      }
-    } catch (e, st) {
-      loggy.app('Delete file $filePath exception', e, st);
-    }
-
-    await _refreshFolder();
-  }
-
-  Future<BasicResult> _deleteFile(String filePath) async {
-    BasicResult deleteFileResult;
-    String error = '';
-
-    try {
       await oui.File.remove(handle, filePath);
+      return true;
     } catch (e, st) {
-      loggy.app('Delete file $filePath exception', e, st);
-      error = 'Delete file $filePath failed';
+      loggy.app('Delete file $filePath failed', e, st);
+      return false;
+    } finally {
+      await _refreshFolder();
     }
-
-    deleteFileResult = DeleteFileResult(functionName: '_deleteFile', result: 'OK');
-    if (error.isNotEmpty) {
-      deleteFileResult.errorMessage = error;
-    }
-
-    return deleteFileResult;
   }
 
   Future<void> getContent() async {
@@ -364,11 +344,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     oui.File? newFile;
 
     try {
-      loggy.app('Creating file $newFilePath');
       newFile = await oui.File.create(handle, newFilePath);
     } catch (e, st) {
-      loggy.app('Creating file $newFilePath failed', e, st);
-      showMessage(S.current.messageNewFileError(newFilePath));
+      loggy.app('File creation $newFilePath failed', e, st);
     }
 
     return newFile;
