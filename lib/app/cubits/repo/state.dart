@@ -79,25 +79,6 @@ class RepoState with OuiSyncAppLogger {
     return writeFileResult;
   }
 
-  Future<BasicResult> deleteFile(String filePath) async {
-    BasicResult deleteFileResult;
-    String error = '';
-
-    try {
-      await oui.File.remove(handle, filePath);
-    } catch (e, st) {
-      loggy.app('Delete file $filePath exception', e, st);
-      error = 'Delete file $filePath failed';
-    }
-
-    deleteFileResult = DeleteFileResult(functionName: 'deleteFile', result: 'OK');
-    if (error.isNotEmpty) {
-      deleteFileResult.errorMessage = error;
-    }
-
-    return deleteFileResult;
-  }
-
   Future<BasicResult> createFolder(String path) async {
     BasicResult createFolderResult;
     String error = '';

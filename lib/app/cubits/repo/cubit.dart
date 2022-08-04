@@ -210,7 +210,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     update((state) { state.isLoading = true; });
 
     try{
-      final deleteFileResult = await repo.deleteFile(filePath);
+      final deleteFileResult = await _deleteFile(filePath);
       if (deleteFileResult.errorMessage.isNotEmpty)
       {
         loggy.app('Delete file $filePath failed');
@@ -220,6 +220,25 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
 
     await _refreshFolder();
+  }
+
+  Future<BasicResult> _deleteFile(String filePath) async {
+    BasicResult deleteFileResult;
+    String error = '';
+
+    try {
+      await oui.File.remove(handle, filePath);
+    } catch (e, st) {
+      loggy.app('Delete file $filePath exception', e, st);
+      error = 'Delete file $filePath failed';
+    }
+
+    deleteFileResult = DeleteFileResult(functionName: '_deleteFile', result: 'OK');
+    if (error.isNotEmpty) {
+      deleteFileResult.errorMessage = error;
+    }
+
+    return deleteFileResult;
   }
 
   Future<void> getContent() async {
