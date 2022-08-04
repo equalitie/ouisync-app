@@ -93,11 +93,13 @@ class ReposState with OuiSyncAppLogger {
       loggy.app('Cleaning current selection for repository $name');
       _currentRepoName = null;
     }
-    if (_repos.containsKey(name)) {
-      loggy.app('Closing repository $name');
-      await _repos[name]?.state.close();
 
-      loggy.app('Removing repository $name from the service');
+    final repo = _repos[name];
+
+    if (repo != null) {
+      loggy.app('Closing repository $name');
+      Settings.setDhtEnableStatus(repo.id, null);
+      await repo.state.close();
       _repos.remove(name);
     }
   }

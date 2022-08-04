@@ -21,18 +21,13 @@ class RepositoryHelper {
       return <String>[];
     }
 
-    final repositoryFiles = io.Directory(location)
-    .listSync();
+    final repositoryFiles = io.Directory(location).listSync();
 
     if (!justNames) {
       return repositoryFiles;
     }
 
-    return repositoryFiles
-    .map((e) {
-      loggyInstance.loggy.app('localRepositoriesFiles - basenameWithoutExtension: ${p.basenameWithoutExtension(e.path)}');
-      return p.basenameWithoutExtension(e.path);
-    }).toSet().toList();
+    return repositoryFiles.map((e) => p.basenameWithoutExtension(e.path)).toSet().toList();
   }
 
   static Future<String> latestRepositoryOrDefault(List<String> localRepositories) async {
@@ -122,50 +117,5 @@ class RepositoryHelper {
     }
     
     return true;
-  }
-
-  static Future<void> setRepoBitTorrentDHTStatus(Repository repository, String name) async {
-    if (_dhtStatus == null) {
-      _dhtStatus = await Settings.getDhtStatus();
-    }
-
-    if (_dhtStatus!.containsKey(name)) {
-      _dhtStatus![name]! ? repository.enableDht() : repository.disableDht();
-
-      loggyInstance.loggy.app('DHT status: $_dhtStatus');
-      return;  
-    }
-
-    final status = await repository.isDhtEnabled();
-    _dhtStatus!.addAll({ name: status});
-
-    Settings.setDhtStatus(_dhtStatus!);
-
-    loggyInstance.loggy.app('DHT status: $_dhtStatus');
-  }
-
-  static Future<void> updateBitTorrentDHTForRepoStatus(String name, bool status) async {
-    if (_dhtStatus == null) {
-      _dhtStatus = await Settings.getDhtStatus();
-    }
-
-    _dhtStatus!.update(name, (value) => status, ifAbsent: () => status);
-    Settings.setDhtStatus(_dhtStatus!);
-  }
-
-  static Future<bool?> removeBitTorrentDHTStatusForRepo(String name) async {
-    if (_dhtStatus == null) {
-      _dhtStatus = await Settings.getDhtStatus();
-    }
-
-    if (_dhtStatus!.containsKey(name)) {
-      final removed = _dhtStatus!.remove(name);
-      if (removed ?? false) {
-        Settings.setDhtStatus(_dhtStatus!); 
-       return true;
-      }
-    }
-
-    return false;
   }
 }

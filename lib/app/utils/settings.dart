@@ -7,7 +7,7 @@ class Settings {
   static SharedPreferences? _prefs;
 
   static const String _CURRENT_REPO_KEY = "CURRENT_REPO";
-  static const String _BT_DHT_KEY = "BT_DHT";
+  static const String _BT_DHT_KEY_PREFIX = "BT_DHT_ENABLED-";
   static const String _HIGHEST_SEEN_PROTOCOL_NUMBER_KEY = "HIGHEST_SEEN_PROTOCOL_NUMBER";
 
   static Future<SharedPreferences> _init() async {
@@ -35,7 +35,7 @@ class Settings {
     if (name != null && name.isNotEmpty) {
       await prefs.setString(_CURRENT_REPO_KEY, name);
     } else {
-      await prefs.remove(_CURRENT_REPO_KEY);
+      await _remove(prefs, _CURRENT_REPO_KEY);
     }
   }
 
@@ -43,20 +43,22 @@ class Settings {
     return await (await _init()).getString(_CURRENT_REPO_KEY);
   }
 
-  static Future<Map<String, bool>> getDhtStatus() async {
+  static Future<bool> getDhtEnableStatus(String repoId, { required bool defaultValue }) async {
     final prefs = await _init();
 
-    final encodedDhtStatus = await prefs.getString(_BT_DHT_KEY);
-
-    return encodedDhtStatus == null 
-      ? Map<String, bool>()
-      : Map<String, bool>.from(json.decode(encodedDhtStatus));
+    final status = await prefs.getBool(_BT_DHT_KEY_PREFIX + repoId);
+    return status ?? defaultValue;
   }
 
-  static Future<void> setDhtStatus(Map<String, bool> dhtStatus) async {
-    final encodedDhtStatus = json.encode(dhtStatus);
+  static Future<void> setDhtEnableStatus(String repoId, bool? status) async {
     final prefs = await _init();
-    await prefs.setString(_BT_DHT_KEY, encodedDhtStatus);
+    final key = _BT_DHT_KEY_PREFIX + repoId;
+
+    if (status != null) {
+      await prefs.setBool(key, status);
+    } else {
+      await _remove(prefs, key);
+    }
   }
 
   static Future<void> setHighestSeenProtocolNumber(int number) async {
@@ -67,5 +69,12 @@ class Settings {
   static Future<int?> getHighestSeenProtocolNumber() async {
     final prefs = await _init();
     await prefs.getInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY);
+  }
+
+  // TODO: It's not clear from the documentation whether
+  // SharedPreferences.remove throws if the key doesn't exist (it might also be
+  // platform dependent), so we check for it.
+  static Future<void> _remove(SharedPreferences prefs, String key) async {
+    try { await prefs.remove(key); } catch (_) {}
   }
 }

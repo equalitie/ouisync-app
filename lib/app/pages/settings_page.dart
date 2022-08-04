@@ -483,9 +483,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    RepositoryHelper.updateBitTorrentDHTForRepoStatus(current.name, isEnabled);
+    await Settings.setDhtEnableStatus(current.id, isEnabled);
 
     String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
+
     if (enable != isEnabled) {
       dhtStatusMessage = enable
           ? S.current.messageBitTorrentDHTEnableFailed
