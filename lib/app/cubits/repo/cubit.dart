@@ -19,13 +19,19 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   RepoCubit(RepoState state)
     : super(state);
 
+  oui.Repository get handle => state.handle;
   String get id => state.id;
   String get name => state.name;
   RepoState get repo => state;
   FolderState get currentFolder => state.currentFolder;
 
+  oui.AccessMode get accessMode => state.accessMode;
   bool get canRead => state.accessMode != oui.AccessMode.blind;
   bool get canWrite => state.accessMode == oui.AccessMode.write;
+
+  Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode) async {
+    return await handle.createShareToken(accessMode: accessMode, name: name);
+  }
 
   Future<void> navigateTo(String destination) async {
     update((state) { state.isLoading = true; });
@@ -120,7 +126,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
       return;
     }
 
-    final ouisyncFile = await oui.File.open(repo.handle, sourcePath);
+    final ouisyncFile = await oui.File.open(handle, sourcePath);
     final length = await ouisyncFile.length;
 
     final newFile = io.File(destinationPath);
@@ -206,11 +212,11 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     await _refreshFolder();
   }
 
-  int next_id = 0;
+  int _next_id = 0;
   Future<void> _refreshFolder() async {
     // TODO: Only increment the id when the content changes.
-    int id = next_id;
-    next_id += 1;
+    int id = _next_id;
+    _next_id += 1;
 
     final path = repo.currentFolder.path;
     bool errorShown = false;

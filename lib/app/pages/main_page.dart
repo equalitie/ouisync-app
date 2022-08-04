@@ -419,7 +419,7 @@ class _MainPageState extends State<MainPage>
       )
     );
 
-    Future<dynamic> _showShareRepository(RepoState repository)
+    Future<dynamic> _showShareRepository(RepoCubit repository)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,

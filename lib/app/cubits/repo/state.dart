@@ -25,10 +25,6 @@ class RepoState with OuiSyncAppLogger {
     currentFolder.repo = this;
   }
 
-  Future<oui.ShareToken> createShareToken({required oui.AccessMode accessMode, required String name}) async {
-    return await handle.createShareToken(accessMode: accessMode, name: name);
-  }
-
   oui.AccessMode get accessMode => handle.accessMode;
   String get id => handle.lowHexId();
 
@@ -51,10 +47,7 @@ class RepoState with OuiSyncAppLogger {
   @override
   bool operator==(Object other) {
     if (identical(this, other)) return true;
-
-    return other is RepoState &&
-      other.handle == handle &&
-      other.name == name;
+    return other is RepoState && id == other.id;
   }
 
   // Get the state monitor of this particular repository. That is 'root >

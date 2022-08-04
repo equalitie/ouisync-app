@@ -15,7 +15,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   });
 
   final ReposCubit reposCubit;
-  final void Function(RepoState) shareRepositoryOnTap;
+  final void Function(RepoCubit) shareRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             onPressed: () {
               final current = reposCubit.currentRepo;
               if (current == null) return;
-              shareRepositoryOnTap(current.state);
+              shareRepositoryOnTap(current);
             },
             size: Dimensions.sizeIconSmall,
             color: Colors.white,
