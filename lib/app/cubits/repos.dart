@@ -5,13 +5,10 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
-import '../../utils/loggers/ouisync_app_logger.dart';
-import '../../utils/utils.dart';
-import '../cubits.dart';
-
-import '../../models/folder_state.dart';
-
-part 'state.dart';
+import '../models/folder_state.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/utils.dart';
+import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final Map<String, RepoCubit> _repos = Map();
