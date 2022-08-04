@@ -39,32 +39,6 @@ class RepoState with OuiSyncAppLogger {
     return other is RepoState && id == other.id;
   }
 
-  Future<BasicResult> createFolder(String path) async {
-    BasicResult createFolderResult;
-    String error = '';
-
-    bool created = false;
-
-    try {
-      loggy.app('Create folder $path');
-
-      await oui.Directory.create(handle, path);
-      created = true;
-    } catch (e, st) {
-      loggy.app('Create folder $path exception', e, st);
-
-      created = false;
-      error = e.toString();
-    }
-
-    createFolderResult = CreateFolderResult(functionName: 'createFolder', result: created);
-    if (error.isNotEmpty) {
-      createFolderResult.errorMessage = error;
-    }
-
-    return createFolderResult;
-  }
-
   Future<BasicResult> deleteFolder(String path, bool recursive) async {
     BasicResult deleteFolderResult;
     String error = '';

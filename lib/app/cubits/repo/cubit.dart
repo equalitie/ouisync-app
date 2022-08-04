@@ -64,7 +64,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     update((state) { state.isLoading = true; });
 
     try{
-      final result = await repo.createFolder(folderPath);
+      final result = await _createFolder(folderPath);
       if (result.result) {
         _currentFolder.goTo(folderPath);
       } else {
@@ -75,6 +75,32 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
 
     await _refreshFolder();
+  }
+
+  Future<BasicResult> _createFolder(String path) async {
+    BasicResult createFolderResult;
+    String error = '';
+
+    bool created = false;
+
+    try {
+      loggy.app('Create folder $path');
+
+      await oui.Directory.create(handle, path);
+      created = true;
+    } catch (e, st) {
+      loggy.app('Create folder $path exception', e, st);
+
+      created = false;
+      error = e.toString();
+    }
+
+    createFolderResult = CreateFolderResult(functionName: '_createFolder', result: created);
+    if (error.isNotEmpty) {
+      createFolderResult.errorMessage = error;
+    }
+
+    return createFolderResult;
   }
 
   Future<void> deleteFolder(String path, bool recursive) async {
