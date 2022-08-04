@@ -319,7 +319,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               }).toList(),
               onChanged: (repo) async {
                 loggy.app('Selected repository: ${repo?.name}');
-                await widget.reposCubit.setCurrent(repo?.name);
+                await widget.reposCubit.setCurrentByName(repo?.name);
               },
             ),
           ),
@@ -413,11 +413,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Iterable<String> repositoryNames() {
-    return widget.reposCubit.state.repositoryNames();
+    return widget.reposCubit.repositoryNames();
   }
 
   Iterable<RepoState> repositories() {
-    return widget.reposCubit.state.repos.map((cubit) => cubit.state);
+    return widget.reposCubit.repos.map((cubit) => cubit.state);
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -465,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.current.state?.state;
+    final current = widget.reposCubit.currentRepo?.state;
 
     if (current == null) {
       return;

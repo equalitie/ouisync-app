@@ -38,7 +38,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
             onPressed: () {
-              final current = reposCubit.current.state;
+              final current = reposCubit.currentRepo;
               if (current == null) return;
               shareRepositoryOnTap(current.state);
             },
@@ -208,7 +208,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       return Fields.paddedActionText(
         repositoryName,
         onTap: () {
-          _repositories.setCurrent(repositoryName);
+          _repositories.setCurrentByName(repositoryName);
           updateSettingsAndPop(context, repositoryName);
         },
         // TODO: This doesn't actually say whether the repo is locked or not.

@@ -69,8 +69,7 @@ class _MainPageState extends State<MainPage>
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
       _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    RepoCubit? get _currentRepo => _repositories.current.state;
-    ReposState get _reposState => _repositories.state;
+    RepoCubit? get _currentRepo => _repositories.currentRepo;
     RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
@@ -92,7 +91,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _reposState.setSubscriptionCallback((repo) {
+      _repositories.setSubscriptionCallback((repo) {
         _repoProgressCubit.updateProgress(repo);
         getContent();
       });
@@ -181,7 +180,7 @@ class _MainPageState extends State<MainPage>
     }
 
     Widget buildMainWidget() {
-      return _repositories.current.builder((currentRepo) {
+      return _repositories.currentRepoChange.builder((currentRepo) {
         if (currentRepo == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -196,7 +195,7 @@ class _MainPageState extends State<MainPage>
 
     @override
     Widget build(BuildContext context) {
-      final currentRepoCubit = _repositories.current;
+      final repoChange = _repositories.currentRepoChange;
 
       return Scaffold(
         key: _scaffoldKey,
@@ -204,13 +203,13 @@ class _MainPageState extends State<MainPage>
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              currentRepoCubit.builder((RepoCubit? repo) => RepositoryProgress(repo?.state)),
+              repoChange.builder((RepoCubit? repo) => RepositoryProgress(repo?.state)),
               Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: currentRepoCubit.builder((repo) => _buildFAB(context, repo)),
+        floatingActionButton: repoChange.builder((repo) => _buildFAB(context, repo)),
       );
     }
 
