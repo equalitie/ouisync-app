@@ -20,12 +20,6 @@ class RepoState with OuiSyncAppLogger {
 
   RepoState(this.name, this.handle);
 
-  oui.AccessMode get accessMode => handle.accessMode;
-  String get id => handle.lowHexId();
-
-  bool isDhtEnabled() => handle.isDhtEnabled();
-  void enableDht() { handle.enableDht(); }
-  void disableDht() { handle.disableDht(); }
 
   Future<void> close() async {
     await handle.close();

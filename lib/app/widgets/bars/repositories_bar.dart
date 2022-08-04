@@ -77,7 +77,7 @@ class _Picker extends StatelessWidget {
       return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
     }
 
-    final repo = state.currentRepo?.state;
+    final repo = state.currentRepo;
     final name = _repoName(repo);
 
     if (repo == null) {
@@ -103,7 +103,7 @@ class _Picker extends StatelessWidget {
     );
   });
 
-  String _repoName(RepoState? repo) {
+  String _repoName(RepoCubit? repo) {
     if (repo != null) {
       return repo.name;
     } else {

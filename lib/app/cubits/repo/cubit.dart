@@ -24,10 +24,13 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   }
 
   oui.Repository get handle => state.handle;
-  String get id => state.id;
   String get name => state.name;
   RepoState get repo => state;
   FolderState get currentFolder => _currentFolder;
+
+  bool isDhtEnabled() => handle.isDhtEnabled();
+  void enableDht() => handle.enableDht();
+  void disableDht() => handle.disableDht();
 
   Future<oui.Directory> openDirectory(String path) async {
     return await oui.Directory.open(handle, path);
@@ -37,12 +40,13 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   @override
   bool operator==(Object other) {
     if (identical(this, other)) return true;
-    return other is RepoState && id == other.id;
+    return other is RepoCubit && id == other.id;
   }
 
-  oui.AccessMode get accessMode => state.accessMode;
-  bool get canRead => state.accessMode != oui.AccessMode.blind;
-  bool get canWrite => state.accessMode == oui.AccessMode.write;
+  oui.AccessMode get accessMode => handle.accessMode;
+  String get id => handle.lowHexId();
+  bool get canRead => accessMode != oui.AccessMode.blind;
+  bool get canWrite => accessMode == oui.AccessMode.write;
 
   Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode) async {
     return await handle.createShareToken(accessMode: accessMode, name: name);
@@ -391,7 +395,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     bool errorShown = false;
 
     try {
-      while (repo.accessMode != oui.AccessMode.blind) {
+      while (canRead) {
         bool success = await _currentFolder.refresh();
 
         if (success) break;

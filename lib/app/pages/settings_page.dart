@@ -465,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.currentRepo?.state;
+    final current = widget.reposCubit.currentRepo;
 
     if (current == null) {
       return;
