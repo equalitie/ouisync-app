@@ -13,20 +13,29 @@ import '../../models/models.dart';
 import '../../models/folder_state.dart';
 import '../cubits.dart' as cubits;
 
-part "state.dart";
+class Job {
+  int soFar;
+  int total;
+  bool cancel = false;
+  Job(this.soFar, this.total);
+}
 
-class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
+class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
+  bool isLoading = false;
+  final Map<String, cubits.Watch<Job>> uploads = HashMap();
+  final Map<String, cubits.Watch<Job>> downloads = HashMap();
+  final List<String> messages = <String>[];
+
   FolderState _currentFolder = FolderState();
   String _name;
   oui.Repository _handle;
 
-  RepoCubit(this._name, this._handle) : super(RepoState()) {
+  RepoCubit(this._name, this._handle) {
     _currentFolder.repo = this;
   }
 
   oui.Repository get handle => _handle;
   String get name => _name;
-  RepoState get repo => state;
   FolderState get currentFolder => _currentFolder;
 
   bool isDhtEnabled() => handle.isDhtEnabled();
@@ -159,7 +168,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
       required int length,
       required Stream<List<int>> fileByteStream,
   }) async {
-    if (repo.uploads.containsKey(newFilePath)) {
+    if (uploads.containsKey(newFilePath)) {
       showMessage("File is already being uploaded");
       return;
     }
@@ -274,7 +283,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   }
 
   Future<void> downloadFile({ required String sourcePath, required String destinationPath }) async {
-    if (repo.downloads.containsKey(sourcePath)) {
+    if (downloads.containsKey(sourcePath)) {
       showMessage("File is already being downloaded");
       return;
     }

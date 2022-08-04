@@ -20,7 +20,6 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
-typedef RepositoryCallback = Future<void> Function(RepoState? repository);
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);

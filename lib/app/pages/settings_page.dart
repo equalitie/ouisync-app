@@ -306,7 +306,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Icon(repo == currentRepo?.state ? Icons.check : null,
+                      Icon(repo == currentRepo ? Icons.check : null,
                         size: Dimensions.sizeIconSmall,
                         color: Theme.of(context).primaryColor),
                       Dimensions.spacingHorizontalDouble,

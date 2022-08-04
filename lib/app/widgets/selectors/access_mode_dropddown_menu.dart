@@ -8,14 +8,12 @@ import '../../cubits/repo/cubit.dart';
 
 class AccessModeDropDownMenu extends StatefulWidget {
   const AccessModeDropDownMenu({
-    required this.repository,
     required this.accessModes,
     required this.onChanged,
     Key? key
   }) : super(key: key);
 
 
-  final RepoState repository;
   final List<AccessMode> accessModes;
   final Future<void> Function(AccessMode) onChanged;
 

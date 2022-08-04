@@ -62,7 +62,6 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
                 Fields.bottomSheetTitle(widget.repository.name),
                 Dimensions.spacingVerticalDouble,
                 AccessModeDropDownMenu(
-                  repository: widget.repository.state,
                   accessModes: widget.availableAccessModes,
                   onChanged: _onChanged),
                 Dimensions.spacingVerticalHalf,
