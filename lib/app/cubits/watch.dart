@@ -41,6 +41,40 @@ class Watch<State> {
   }
 }
 
+class WatchSelf<Self> {
+  _Cubit _cubit = _Cubit();
+
+  void changed() {
+    _cubit.emit(Changed());
+  }
+
+  void update(void Function(Self) f) {
+    f(this as Self);
+    changed();
+  }
+
+  Widget builder(Widget Function(Self) builderFunc) {
+    return BlocBuilder<_Cubit, Changed>(
+      bloc: _cubit,
+      builder: (BuildContext ctx, Changed _) {
+        return builderFunc(this as Self);
+      },
+    );
+  }
+
+  Widget consumer(Widget Function(Self) builderFunc, void Function(Self) listenerFunc) {
+    return BlocConsumer<_Cubit, Changed>(
+      bloc: _cubit,
+      builder: (BuildContext ctx, Changed _) {
+        return builderFunc(this as Self);
+      },
+      listener: (BuildContext ctx, Changed _) {
+        listenerFunc(this as Self);
+      },
+    );
+  }
+}
+
 class Changed extends Equatable {
   static int _nextChangeVersion = 0;
   final int _version;

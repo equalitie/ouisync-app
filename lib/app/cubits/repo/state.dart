@@ -30,6 +30,7 @@ class RepoState with OuiSyncAppLogger {
   }
 
   oui.AccessMode get accessMode => handle.accessMode;
+  String get id => handle.lowHexId();
 
   Future<bool> exists(String path) async {
     return await handle.exists(path);

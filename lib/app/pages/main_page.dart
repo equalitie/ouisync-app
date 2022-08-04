@@ -69,9 +69,7 @@ class _MainPageState extends State<MainPage>
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
       _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
 
-    RepoCubit? get _currentRepo => _repositories.current.state;
-    ReposState get _reposState => _repositories.state;
-    RepositoryProgressCubit get _repoProgressCubit => BlocProvider.of<RepositoryProgressCubit>(context);
+    RepoCubit? get _currentRepo => _repositories.currentRepo;
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
     @override
@@ -90,11 +88,6 @@ class _MainPageState extends State<MainPage>
           }
           break;
         }
-      });
-
-      _reposState.setSubscriptionCallback((repo) {
-        _repoProgressCubit.updateProgress(repo);
-        getContent();
       });
 
       _initRepositories().then((_) { initMainPage(); });
@@ -181,7 +174,9 @@ class _MainPageState extends State<MainPage>
     }
 
     Widget buildMainWidget() {
-      return _repositories.current.builder((currentRepo) {
+      return _repositories.builder((repos) {
+        final currentRepo = repos.currentRepo;
+
         if (currentRepo == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -196,21 +191,19 @@ class _MainPageState extends State<MainPage>
 
     @override
     Widget build(BuildContext context) {
-      final currentRepoCubit = _repositories.current;
-
       return Scaffold(
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              currentRepoCubit.builder((RepoCubit? repo) => RepositoryProgress(repo?.state)),
+              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo?.state)),
               Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: currentRepoCubit.builder((repo) => _buildFAB(context, repo)),
+        floatingActionButton: _repositories.builder((repos) => _buildFAB(context, repos.currentRepo)),
       );
     }
 

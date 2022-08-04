@@ -46,8 +46,7 @@ Future<void> main() async {
   final defaultRepositoryName =
       await RepositoryHelper.latestRepositoryOrDefault(localRepositoriesList);
 
-  await Settings.saveSetting(
-      Constants.currentRepositoryKey, defaultRepositoryName);
+  await Settings.setDefaultRepo(defaultRepositoryName);
 
   final session = await Session.open(configDir);
 
