@@ -1,93 +1,71 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; // For json
 
 import 'utils.dart';
 
 class Settings {
-  static SharedPreferences? _preferences;
+  static SharedPreferences? _prefs;
 
-  static Future<void> _init() async {
-    if (_preferences == null) {
-      _preferences = await SharedPreferences.getInstance();
+  static const String _CURRENT_REPO_KEY = "CURRENT_REPO";
+  static const String _BT_DHT_KEY = "BT_DHT";
+  static const String _HIGHEST_SEEN_PROTOCOL_NUMBER_KEY = "HIGHEST_SEEN_PROTOCOL_NUMBER";
+
+  static Future<SharedPreferences> _init() async {
+    var prefs = _prefs;
+    if (prefs == null) {
+      prefs = await SharedPreferences.getInstance();
+      _prefs = prefs;
     }
+    return prefs;
   }
 
   static Future<void> initSettings(
     String appDir,
     String repositoriesDir,
   ) async {
-    if (_preferences == null) {
-      await _init();
-    }
+    final prefs = await _init();
 
-    await _preferences!.setString(Constants.appDirKey, appDir);
-    await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+    await prefs.setString(Constants.appDirKey, appDir);
+    await prefs.setString(Constants.repositoriesDirKey, repositoriesDir);
   }
 
-  static dynamic readSetting(String key) async {
-    if (_preferences == null) {
-      await _init();
-    }
+  static Future<void> setDefaultRepo(String? name) async {
+    final prefs = await _init();
 
-    if (_preferences!.containsKey(key)) {
-      return _preferences!.get(key);
+    if (name != null && name.isNotEmpty) {
+      await prefs.setString(_CURRENT_REPO_KEY, name);
+    } else {
+      await prefs.remove(_CURRENT_REPO_KEY);
     }
-
-    return null;
   }
 
-  static Future<bool> saveSetting(String key, value) async {
-    if (_preferences == null) {
-      await _init();
-    }
-
-    switch (value.runtimeType) {
-      case bool:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setBool(key, value);
-
-        break;
-
-      case double:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setDouble(key, value);
-        
-        break;
-
-      case int:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setInt(key, value);
-        
-        break;
-
-      case String:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setString(key, value);
-
-        break;
-
-      case List:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setStringList(key, value);
-
-        break;
-      
-      default:
-        print('No supported type for setting $key<${value.runtimeType}>: $value');
-        return false;
-    }
-
-    return true;
+  static Future<String?> getDefaultRepo() async {
+    return await (await _init()).getString(_CURRENT_REPO_KEY);
   }
 
-  static dynamic deleteSetting(String key) async {
-    if (_preferences == null) {
-      await _init();
-    }
+  static Future<Map<String, bool>> getDhtStatus() async {
+    final prefs = await _init();
 
-    if (_preferences!.containsKey(key)) {
-      return _preferences!.remove(key);
-    }
+    final encodedDhtStatus = await prefs.getString(_BT_DHT_KEY);
 
-    return null;
+    return encodedDhtStatus == null 
+      ? Map<String, bool>()
+      : Map<String, bool>.from(json.decode(encodedDhtStatus));
+  }
+
+  static Future<void> setDhtStatus(Map<String, bool> dhtStatus) async {
+    final encodedDhtStatus = json.encode(dhtStatus);
+    final prefs = await _init();
+    await prefs.setString(_BT_DHT_KEY, encodedDhtStatus);
+  }
+
+  static Future<void> setHighestSeenProtocolNumber(int number) async {
+    final prefs = await _init();
+    await prefs.setInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY, number);
+  }
+
+  static Future<int?> getHighestSeenProtocolNumber() async {
+    final prefs = await _init();
+    await prefs.getInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY);
   }
 }

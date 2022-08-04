@@ -98,6 +98,7 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
     }
 
     state.setCurrent(repo);
+    await Settings.setDefaultRepo(repo?.name);
 
     changed();
   }
@@ -129,7 +130,7 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
       return;
     }
 
-    await Settings.saveSetting(Constants.currentRepositoryKey, '');
+    await Settings.setDefaultRepo(null);
     await RepositoryHelper.removeBitTorrentDHTStatusForRepo(oldName);
 
     final repo = await _open(newName);
@@ -170,12 +171,13 @@ class ReposCubit extends Watch<ReposState> with OuiSyncAppLogger {
       return;
     }
 
-    await Settings.saveSetting(Constants.currentRepositoryKey, '');
+    await Settings.setDefaultRepo(null);
     await RepositoryHelper.removeBitTorrentDHTStatusForRepo(repositoryName);
 
     final nextRepo = state.repos.isNotEmpty ? state.repos.first : null;
 
     state.setCurrent(nextRepo);
+    await Settings.setDefaultRepo(nextRepo?.name);
 
     changed();
   }

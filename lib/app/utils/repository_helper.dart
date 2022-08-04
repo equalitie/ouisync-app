@@ -41,7 +41,7 @@ class RepositoryHelper {
     }
 
     final defaultRepository = localRepositories.first;
-    final latestRepository = await Settings.readSetting(Constants.currentRepositoryKey);
+    final latestRepository = await Settings.getDefaultRepo();
 
     if (latestRepository == null) {
       return defaultRepository;
@@ -126,7 +126,7 @@ class RepositoryHelper {
 
   static Future<void> setRepoBitTorrentDHTStatus(Repository repository, String name) async {
     if (_dhtStatus == null) {
-      await _getDhtStatus();
+      _dhtStatus = await Settings.getDhtStatus();
     }
 
     if (_dhtStatus!.containsKey(name)) {
@@ -139,47 +139,33 @@ class RepositoryHelper {
     final status = await repository.isDhtEnabled();
     _dhtStatus!.addAll({ name: status});
 
-    _saveDHTStatusForRepo(_dhtStatus!);
+    Settings.setDhtStatus(_dhtStatus!);
 
     loggyInstance.loggy.app('DHT status: $_dhtStatus');
   }
 
   static Future<void> updateBitTorrentDHTForRepoStatus(String name, bool status) async {
     if (_dhtStatus == null) {
-      await _getDhtStatus();
+      _dhtStatus = await Settings.getDhtStatus();
     }
 
     _dhtStatus!.update(name, (value) => status, ifAbsent: () => status);
-    _saveDHTStatusForRepo(_dhtStatus!);
+    Settings.setDhtStatus(_dhtStatus!);
   }
 
   static Future<bool?> removeBitTorrentDHTStatusForRepo(String name) async {
     if (_dhtStatus == null) {
-      await _getDhtStatus();
+      _dhtStatus = await Settings.getDhtStatus();
     }
 
     if (_dhtStatus!.containsKey(name)) {
       final removed = _dhtStatus!.remove(name);
       if (removed ?? false) {
-        _saveDHTStatusForRepo(_dhtStatus!); 
+        Settings.setDhtStatus(_dhtStatus!); 
        return true;
       }
     }
 
     return false;
-  }
-
-  static Future<void> _getDhtStatus() async {
-    final encodedDhtStatus = await Settings.readSetting(Constants.bitTorrentDHTStatusKey);
-    _dhtStatus = encodedDhtStatus == null 
-    ? Map<String, bool>()
-    : Map<String, bool>.from(json.decode(encodedDhtStatus));
-  }
-
-  static void _saveDHTStatusForRepo(Map<String, bool> dhtStatus) async {
-    final encodedDhtStatus = json.encode(dhtStatus);
-    loggyInstance.loggy.app('DHT status: $encodedDhtStatus');
-
-    await Settings.saveSetting(Constants.bitTorrentDHTStatusKey, encodedDhtStatus);
   }
 }

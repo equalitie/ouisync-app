@@ -268,16 +268,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     await updateSettingsAndPop(context, addedRepo);
   }
 
-  Future<void> updateDefaultRepositorySetting(repositoryName) async {
-    final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
-    loggy.app('Current repository updated to $repositoryName: $result');
-  }
-
   Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
-    if (!repositoryName.isEmpty) {
-      await updateDefaultRepositorySetting(repositoryName);
-    }
-
+    await Settings.setDefaultRepo(repositoryName);
     Navigator.of(context).pop();
   }
 }
