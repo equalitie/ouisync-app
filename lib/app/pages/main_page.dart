@@ -90,10 +90,6 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _repositories.setSubscriptionCallback((repo) {
-        getContent();
-      });
-
       _initRepositories().then((_) { initMainPage(); });
 
       /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),

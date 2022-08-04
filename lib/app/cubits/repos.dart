@@ -12,10 +12,12 @@ import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final Map<String, RepoCubit> _repos = Map();
-
   bool isLoading = false;
-
   final _currentRepoChange = Value<RepoCubit?>(null);
+  final oui.Session _session;
+  final String _appDir;
+  final String _repositoriesDir;
+  oui.Subscription? _subscription;
 
   ReposCubit({
     required session,
@@ -27,10 +29,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _repositoriesDir = repositoriesDir
   {}
 
-  final oui.Session _session;
-  final String _appDir;
-  final String _repositoriesDir;
-
   oui.Session get session => _session;
   String get appDir => _appDir;
 
@@ -41,11 +39,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Iterable<String> repositoryNames() => _repos.keys;
 
   RepoCubit? get currentRepo {
-    if (currentRepoName == null) {
-      return null;
-    } else {
-      return _repos[currentRepoName!];
-    }
+    final name = currentRepoName;
+    (name == null) ? null : _repos[name];
   }
 
   FolderState? get currentFolder {
@@ -61,18 +56,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     oui.NativeChannels.setRepository(repo?.state.handle);
 
-    if (_subscriptionCallback == null) {
-      throw Exception('There is not callback for synchronization');
-    }
-
     _subscription?.cancel();
     _subscription = null;
 
-    _currentRepoChange.emit(repo);
-
-    _subscription = repo?.state.handle.subscribe(() => _subscriptionCallback!.call(repo.state));
+    _subscription = repo?.state.handle.subscribe(() => repo.getContent());
     await Settings.setDefaultRepo(repo?.name);
 
+    _currentRepoChange.emit(repo);
     changed();
   }
 
@@ -136,15 +126,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     _repos.clear();
   }
-
-  oui.Subscription? _subscription;
-  oui.Subscription? get subscription => _subscription;
-
-  void Function(RepoState)? _subscriptionCallback;
-
-  setSubscriptionCallback(void Function(RepoState) callback) => {
-    _subscriptionCallback = callback
-  };
 
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
     print("ReposCubit openRepository start $name");
