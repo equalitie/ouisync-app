@@ -55,38 +55,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
 
   Future<void> setCurrent(RepoCubit? repo) async {
-    if (repo == null) {
-      _updateCurrentRepository(null);
-    } else {
-      await put(repo, setCurrent: true);
-    }
-  }
-
-  Future<void> setCurrentByName(String? repoName) async {
-    if (repoName == currentRepoName) {
+    if (currentRepoChange.state == repo) {
       return;
     }
 
-    RepoCubit? repo;
-
-    if (repoName != null) {
-      repo = this.get(repoName);
-    }
-
-    setCurrent(repo);
-    await Settings.setDefaultRepo(repo?.name);
-
-    changed();
-  }
-
-  void _updateCurrentRepository(RepoCubit? repo) {
     oui.NativeChannels.setRepository(repo?.state.handle);
-
-    if (repo == null) {
-      loggy.app("Can't set current repository to null");
-      _currentRepoChange.emit(null);
-      return;
-    }
 
     if (_subscriptionCallback == null) {
       throw Exception('There is not callback for synchronization');
@@ -97,9 +70,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     _currentRepoChange.emit(repo);
 
-    _subscription = repo.state.handle.subscribe(() => _subscriptionCallback!.call(repo.state));
+    _subscription = repo?.state.handle.subscribe(() => _subscriptionCallback!.call(repo.state));
+    await Settings.setDefaultRepo(repo?.name);
 
-    loggy.app('Subscribed to notifications: ${repo.state.name} (${repo.state.accessMode.name})');
+    changed();
+  }
+
+  Future<void> setCurrentByName(String? repoName) async {
+    if (repoName == currentRepoName) {
+      return;
+    }
+
+    setCurrent((repoName != null) ? this.get(repoName) : null);
   }
 
   RepoCubit? get(String name) {
@@ -115,8 +97,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     _repos[newRepo.state.name] = newRepo;
 
-    if (setCurrent && newRepo.state.name != currentRepoName) {
-      _updateCurrentRepository(newRepo);
+    if (setCurrent) {
+      this.setCurrent(newRepo);
     }
   }
 
