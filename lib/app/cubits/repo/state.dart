@@ -14,16 +14,11 @@ class RepoState with OuiSyncAppLogger {
   final List<String> messages = <String>[];
 
   String name;
-  FolderState currentFolder;
 
   // TODO: Ideally, this shouldn't be exposed.
   oui.Repository handle;
 
-  RepoState(this.name, this.handle) :
-    currentFolder = FolderState()
-  {
-    currentFolder.repo = this;
-  }
+  RepoState(this.name, this.handle);
 
   oui.AccessMode get accessMode => handle.accessMode;
   String get id => handle.lowHexId();
@@ -68,78 +63,6 @@ class RepoState with OuiSyncAppLogger {
     }
 
     return createFolderResult;
-  }
-
-  Future<int> getFileSize(String path) async {
-    var file;
-    var length = 0;
-
-    try {
-      file = await oui.File.open(handle, path);
-    } catch (e, st) {
-      loggy.app("Open file $path exception (getFileSize)", e, st);
-      return length;
-    }
-
-    try {
-      length = await file.length;
-    } catch (e, st) {
-      loggy.app("Get file size $path exception", e, st);
-    }
-
-    file.close();
-
-    return length;
-  }
-
-  Future<List<BaseItem>> getFolderContents(String path) async {
-    String? error;
-
-    final content = <BaseItem>[];
-
-    // If the directory does not exist, the following command will throw.
-    final directory = await oui.Directory.open(handle, path);
-    final iterator = directory.iterator;
-
-    try {
-      while (iterator.moveNext()) {
-        var size = 0;
-        if (iterator.current.type == oui.EntryType.file) {
-          size = await getFileSize(buildDestinationPath(path, iterator.current.name));
-        }
-        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
-
-        content.add(item);
-      }
-    } catch (e, st) {
-      loggy.app('Traversing directory $path exception', e, st);
-      error = e.toString();
-    } finally {
-      directory.close();
-    }
-
-    if (error != null) {
-      throw error;
-    }
-
-    return content;
-  }
-
-  Future<BaseItem> _castToBaseItem(String path, String name, oui.EntryType type, int size) async {
-    final itemPath = buildDestinationPath(path, name);
-
-    if (type == oui.EntryType.directory) {
-      return FolderItem(
-          name: name,
-          path: itemPath,
-          size: size);
-    }
-
-    if (type == oui.EntryType.file) {
-      return FileItem(name: name, path: itemPath, size: size);
-    }
-
-    return <BaseItem>[].single;
   }
 
   Future<BasicResult> deleteFolder(String path, bool recursive) async {

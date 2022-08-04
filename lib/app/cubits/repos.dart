@@ -40,7 +40,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   RepoCubit? get currentRepo => _currentRepo;
 
   FolderState? get currentFolder {
-    return currentRepo?.state.currentFolder;
+    return currentRepo?.currentFolder;
   }
 
   Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);

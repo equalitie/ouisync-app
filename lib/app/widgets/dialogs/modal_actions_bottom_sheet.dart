@@ -92,7 +92,7 @@ class DirectoryActions extends StatelessWidget {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    final path = repo.state.currentFolder.path;
+    final path = repo.currentFolder.path;
 
     final result = await FilePicker
     .platform

@@ -8,7 +8,7 @@ import '../cubits/repo/cubit.dart';
 import 'package:collection/collection.dart';
 
 class FolderState {
-  late final RepoState repo;
+  late final RepoCubit repo;
   String path = Strings.root;
 
   List<BaseItem> content = <BaseItem>[];

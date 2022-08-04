@@ -12,7 +12,7 @@ class NoContentsState extends StatelessWidget {
     required this.path,
   }) : super(key: key);
 
-  final RepoState repository;
+  final RepoCubit repository;
   final String path;
 
   @override

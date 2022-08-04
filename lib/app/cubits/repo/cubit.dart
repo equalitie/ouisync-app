@@ -16,14 +16,18 @@ import '../cubits.dart' as cubits;
 part "state.dart";
 
 class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
+  FolderState _currentFolder = FolderState();
+
   RepoCubit(RepoState state)
-    : super(state);
+    : super(state) {
+    _currentFolder.repo = this;
+  }
 
   oui.Repository get handle => state.handle;
   String get id => state.id;
   String get name => state.name;
   RepoState get repo => state;
-  FolderState get currentFolder => state.currentFolder;
+  FolderState get currentFolder => _currentFolder;
 
   oui.AccessMode get accessMode => state.accessMode;
   bool get canRead => state.accessMode != oui.AccessMode.blind;
@@ -51,7 +55,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
 
   Future<void> navigateTo(String destination) async {
     update((state) { state.isLoading = true; });
-    repo.currentFolder.goTo(destination);
+    _currentFolder.goTo(destination);
     await _refreshFolder();
     update((state) { state.isLoading = false; });
   }
@@ -62,7 +66,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     try{
       final result = await repo.createFolder(folderPath);
       if (result.result) {
-        repo.currentFolder.goTo(folderPath);
+        _currentFolder.goTo(folderPath);
       } else {
         loggy.app('Directory $folderPath creation failed');
       }
@@ -134,6 +138,78 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     } else {
       showMessage(S.current.messageWritingFileDone(newFilePath));
     }
+  }
+
+  Future<List<BaseItem>> getFolderContents(String path) async {
+    String? error;
+
+    final content = <BaseItem>[];
+
+    // If the directory does not exist, the following command will throw.
+    final directory = await oui.Directory.open(handle, path);
+    final iterator = directory.iterator;
+
+    try {
+      while (iterator.moveNext()) {
+        var size = 0;
+        if (iterator.current.type == oui.EntryType.file) {
+          size = await _getFileSize(buildDestinationPath(path, iterator.current.name));
+        }
+        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
+
+        content.add(item);
+      }
+    } catch (e, st) {
+      loggy.app('Traversing directory $path exception', e, st);
+      error = e.toString();
+    } finally {
+      directory.close();
+    }
+
+    if (error != null) {
+      throw error;
+    }
+
+    return content;
+  }
+
+  Future<int> _getFileSize(String path) async {
+    var file;
+    var length = 0;
+
+    try {
+      file = await oui.File.open(handle, path);
+    } catch (e, st) {
+      loggy.app("Open file $path exception (getFileSize)", e, st);
+      return length;
+    }
+
+    try {
+      length = await file.length;
+    } catch (e, st) {
+      loggy.app("Get file size $path exception", e, st);
+    }
+
+    file.close();
+
+    return length;
+  }
+
+  Future<BaseItem> _castToBaseItem(String path, String name, oui.EntryType type, int size) async {
+    final itemPath = buildDestinationPath(path, name);
+
+    if (type == oui.EntryType.directory) {
+      return FolderItem(
+          name: name,
+          path: itemPath,
+          size: size);
+    }
+
+    if (type == oui.EntryType.file) {
+      return FileItem(name: name, path: itemPath, size: size);
+    }
+
+    return <BaseItem>[].single;
   }
 
   Future<void> downloadFile({ required String sourcePath, required String destinationPath }) async {
@@ -255,17 +331,17 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     int id = _next_id;
     _next_id += 1;
 
-    final path = repo.currentFolder.path;
+    final path = _currentFolder.path;
     bool errorShown = false;
 
     try {
       while (repo.accessMode != oui.AccessMode.blind) {
-        bool success = await repo.currentFolder.refresh();
+        bool success = await _currentFolder.refresh();
 
         if (success) break;
-        if (repo.currentFolder.isRoot()) break;
+        if (_currentFolder.isRoot()) break;
 
-        repo.currentFolder.goUp();
+        _currentFolder.goUp();
 
         if (!errorShown) {
           errorShown = true;
