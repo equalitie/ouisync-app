@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
-import '../models/folder_state.dart';
+import '../models/folder.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -39,7 +39,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   RepoCubit? get currentRepo => _currentRepo;
 
-  FolderState? get currentFolder {
+  Folder? get currentFolder {
     return currentRepo?.currentFolder;
   }
 

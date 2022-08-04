@@ -5,7 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
-import '../../models/folder_state.dart';
+import '../../models/folder.dart';
 import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget {

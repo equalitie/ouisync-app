@@ -10,7 +10,7 @@ import '../../generated/l10n.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
-import '../models/folder_state.dart';
+import '../models/folder.dart';
 import 'cubits.dart' as cubits;
 
 class Job {
@@ -26,7 +26,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final Map<String, cubits.Watch<Job>> downloads = HashMap();
   final List<String> messages = <String>[];
 
-  FolderState _currentFolder = FolderState();
+  Folder _currentFolder = Folder();
   String _name;
   oui.Repository _handle;
 
@@ -36,7 +36,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   oui.Repository get handle => _handle;
   String get name => _name;
-  FolderState get currentFolder => _currentFolder;
+  Folder get currentFolder => _currentFolder;
 
   bool isDhtEnabled() => handle.isDhtEnabled();
   void enableDht() => handle.enableDht();

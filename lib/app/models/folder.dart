@@ -7,14 +7,14 @@ import '../cubits/repo.dart';
 
 import 'package:collection/collection.dart';
 
-class FolderState {
+class Folder {
   late final RepoCubit repo;
   String path = Strings.root;
 
   List<BaseItem> content = <BaseItem>[];
   _Refresher _refresher = _Refresher();
 
-  FolderState() {
+  Folder() {
     _refresher.folder = this;
   }
 
@@ -43,7 +43,7 @@ class FolderState {
 // starting a refresh operation, and if there are other N that are requested
 // before the first one finishes, only one is scheduled to be done afterwards.
 class _Refresher {
-  late final FolderState folder;
+  late final Folder folder;
 
   bool _running = false;
   bool _hasNextJob = false;
