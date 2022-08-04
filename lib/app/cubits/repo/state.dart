@@ -39,25 +39,6 @@ class RepoState with OuiSyncAppLogger {
     return other is RepoState && id == other.id;
   }
 
-  Future<BasicResult> deleteFolder(String path, bool recursive) async {
-    BasicResult deleteFolderResult;
-    String error = '';
-
-    try {
-      await oui.Directory.remove(handle, path, recursive: recursive);
-    } catch (e, st) {
-      loggy.app('Delete folder $path exception', e, st);
-      error = 'Delete folder $path failed';
-    }
-
-    deleteFolderResult = DeleteFolderResult(functionName: 'deleteFolder', result: 'OK');
-    if (error.isNotEmpty) {
-      deleteFolderResult.errorMessage = error;
-    }
-
-    return deleteFolderResult;
-  }
-
   Future<void> close() async {
     await handle.close();
   }

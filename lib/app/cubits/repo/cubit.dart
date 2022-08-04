@@ -107,7 +107,7 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     update((state) { state.isLoading = true; });
 
     try {
-      final result = await repo.deleteFolder(path, recursive);
+      final result = await _deleteFolder(path, recursive);
       if (result.errorMessage.isNotEmpty) {
         loggy.app('Delete directory $path failed');
       }
@@ -116,6 +116,25 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     }
 
     await _refreshFolder();
+  }
+
+  Future<BasicResult> _deleteFolder(String path, bool recursive) async {
+    BasicResult deleteFolderResult;
+    String error = '';
+
+    try {
+      await oui.Directory.remove(handle, path, recursive: recursive);
+    } catch (e, st) {
+      loggy.app('Delete folder $path exception', e, st);
+      error = 'Delete folder $path failed';
+    }
+
+    deleteFolderResult = DeleteFolderResult(functionName: '_deleteFolder', result: 'OK');
+    if (error.isNotEmpty) {
+      deleteFolderResult.errorMessage = error;
+    }
+
+    return deleteFolderResult;
   }
 
   Future<void> saveFile({
