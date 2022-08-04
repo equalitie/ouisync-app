@@ -6,7 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../generated/l10n.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../cubits/repo/cubit.dart';
+import '../../cubits/repo.dart';
 import '../selectors/access_mode_dropddown_menu.dart';
 import '../widgets.dart';
 
@@ -14,8 +14,7 @@ class ShareRepository extends StatefulWidget {
   const ShareRepository({ 
     required this.repository,
     required this.availableAccessModes,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;

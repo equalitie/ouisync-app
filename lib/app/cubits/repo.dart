@@ -6,12 +6,12 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
-import '../../../generated/l10n.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
-import '../../utils/utils.dart';
-import '../../models/models.dart';
-import '../../models/folder_state.dart';
-import '../cubits.dart' as cubits;
+import '../../generated/l10n.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/utils.dart';
+import '../models/models.dart';
+import '../models/folder_state.dart';
+import 'cubits.dart' as cubits;
 
 class Job {
   int soFar;
