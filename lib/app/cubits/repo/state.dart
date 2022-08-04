@@ -79,33 +79,6 @@ class RepoState with OuiSyncAppLogger {
     return writeFileResult;
   }
 
-  Future<BasicResult> readFile(String filePath, {String action = ''}) async {
-    BasicResult readFileResult;
-    String error = '';
-
-    final content = <int>[];
-    final file = await oui.File.open(handle, filePath);
-
-    try {
-      final length = await file.length;
-      content.addAll(await file.read(0, length));
-    } catch (e, st) {
-      loggy.app('Read file $filePath', e, st);
-      error = 'Read file $filePath failed';
-    } finally {
-      file.close();
-    }
-
-    readFileResult = action.isEmpty
-        ? ReadFileResult(functionName: 'readFile', result: content)
-        : ShareFileResult(functionName: 'readFile', result: content, action: action);
-    if (error.isNotEmpty) {
-      readFileResult.errorMessage = error;
-    }
-
-    return readFileResult;
-  }
-  
   Future<BasicResult> moveEntry(String originPath, String destinationPath) async {
     BasicResult moveEntryResult;
     String error = '';
