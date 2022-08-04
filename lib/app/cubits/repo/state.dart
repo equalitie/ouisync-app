@@ -79,27 +79,6 @@ class RepoState with OuiSyncAppLogger {
     return writeFileResult;
   }
 
-  Future<BasicResult> moveEntry(String originPath, String destinationPath) async {
-    BasicResult moveEntryResult;
-    String error = '';
-
-    try {
-      loggy.app('Move entry from $originPath to $destinationPath');
-
-      await handle.move(originPath, destinationPath);
-    } catch (e, st) {
-      loggy.app('Move entry from $originPath to $destinationPath exception', e, st);
-      error = e.toString();
-    }
-
-    moveEntryResult = MoveEntryResult(functionName: 'moveEntry', result: destinationPath);
-    if (error.isNotEmpty) {
-      moveEntryResult.errorMessage = error;
-    }
-
-    return moveEntryResult;
-  }
-
   Future<BasicResult> deleteFile(String filePath) async {
     BasicResult deleteFileResult;
     String error = '';
