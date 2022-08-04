@@ -29,6 +29,17 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
   RepoState get repo => state;
   FolderState get currentFolder => _currentFolder;
 
+  Future<oui.Directory> openDirectory(String path) async {
+    return await oui.Directory.open(handle, path);
+  }
+
+  // This operator is required for the DropdownMenuButton to show entries properly.
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) return true;
+    return other is RepoState && id == other.id;
+  }
+
   oui.AccessMode get accessMode => state.accessMode;
   bool get canRead => state.accessMode != oui.AccessMode.blind;
   bool get canWrite => state.accessMode == oui.AccessMode.write;

@@ -157,7 +157,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       return;
     }
 
-    final Directory directory = await repo.state.openDirectory(path);
+    final Directory directory = await repo.openDirectory(path);
 
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);

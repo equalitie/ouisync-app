@@ -27,18 +27,6 @@ class RepoState with OuiSyncAppLogger {
   void enableDht() { handle.enableDht(); }
   void disableDht() { handle.disableDht(); }
 
-  Future<oui.Directory> openDirectory(String path) async {
-    return await oui.Directory.open(handle, path);
-  }
-
-  // NOTE: This operator is required for the DropdownMenuButton to show
-  // entries properly.
-  @override
-  bool operator==(Object other) {
-    if (identical(this, other)) return true;
-    return other is RepoState && id == other.id;
-  }
-
   Future<void> close() async {
     await handle.close();
   }
