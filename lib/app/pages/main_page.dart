@@ -174,7 +174,9 @@ class _MainPageState extends State<MainPage>
     }
 
     Widget buildMainWidget() {
-      return _repositories.currentRepoChange.builder((currentRepo) {
+      return _repositories.builder((repos) {
+        final currentRepo = repos.currentRepo;
+
         if (currentRepo == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -189,21 +191,19 @@ class _MainPageState extends State<MainPage>
 
     @override
     Widget build(BuildContext context) {
-      final repoChange = _repositories.currentRepoChange;
-
       return Scaffold(
         key: _scaffoldKey,
         appBar: _buildOuiSyncBar(),
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              repoChange.builder((RepoCubit? repo) => RepositoryProgress(repo?.state)),
+              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo?.state)),
               Expanded(child: buildMainWidget()),
             ]
           ),
           onWillPop: _onBackPressed
         ),
-        floatingActionButton: repoChange.builder((repo) => _buildFAB(context, repo)),
+        floatingActionButton: _repositories.builder((repos) => _buildFAB(context, repos.currentRepo)),
       );
     }
 
