@@ -44,41 +44,6 @@ class RepoState with OuiSyncAppLogger {
     return other is RepoState && id == other.id;
   }
 
-  Future<oui.Progress> syncProgress() async {
-    return await handle.syncProgress();
-  }
-
-  Future<BasicResult> writeFile(String filePath, Stream<List<int>> fileStream) async {
-    loggy.app('Writing file $filePath');
-
-    BasicResult writeFileResult;
-    String error = '';
-
-    final file = await oui.File.open(handle, filePath);
-    int offset = 0;
-
-    try {
-      await for (final buffer in fileStream) {
-        loggy.app('Buffer size: ${buffer.length} - offset: $offset');
-        await file.write(offset, buffer);
-        offset += buffer.length;
-      }
-    } catch (e, st) {
-      loggy.app('Writing file $filePath', e, st);
-      error = 'Writing file $filePath failed';
-    } finally {
-      loggy.app('Writing file $filePath done - closing');
-      await file.close();
-    }
-
-    writeFileResult = WriteFileResult(functionName: 'writeFile', result: offset);
-    if (error.isNotEmpty) {
-      writeFileResult.errorMessage = error;
-    }
-
-    return writeFileResult;
-  }
-
   Future<BasicResult> createFolder(String path) async {
     BasicResult createFolderResult;
     String error = '';
