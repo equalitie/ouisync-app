@@ -33,6 +33,12 @@ class RepoCubit extends cubits.Watch<RepoState> with OuiSyncAppLogger {
     return await handle.createShareToken(accessMode: accessMode, name: name);
   }
 
+  Future<bool> exists(String path) async {
+    return await handle.exists(path);
+  }
+
+  Future<oui.EntryType?> type(String path) => handle.type(path);
+
   Future<void> navigateTo(String destination) async {
     update((state) { state.isLoading = true; });
     repo.currentFolder.goTo(destination);

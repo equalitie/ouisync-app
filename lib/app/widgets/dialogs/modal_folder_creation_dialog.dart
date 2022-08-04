@@ -48,10 +48,10 @@ class FolderCreation extends StatelessWidget {
   }
 
   void _onSaved(RepoCubit cubit, newFolderName) async {
-    final path = cubit.state.currentFolder.path;
+    final path = cubit.currentFolder.path;
     final newFolderPath = buildDestinationPath(path, newFolderName);
 
-    if (await cubit.state.exists(newFolderPath)) {
+    if (await cubit.exists(newFolderPath)) {
       return;
     }
 
