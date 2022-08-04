@@ -100,38 +100,18 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
   }
 
-  Future<void> deleteFolder(String path, bool recursive) async {
+  Future<bool> deleteFolder(String path, bool recursive) async {
     update((state) { state.isLoading = true; });
 
     try {
-      final result = await _deleteFolder(path, recursive);
-      if (result.errorMessage.isNotEmpty) {
-        loggy.app('Delete directory $path failed');
-      }
-    } catch (e, st) {
-      loggy.app('Directory $path deletion exception', e, st);
-    }
-
-    await _refreshFolder();
-  }
-
-  Future<BasicResult> _deleteFolder(String path, bool recursive) async {
-    BasicResult deleteFolderResult;
-    String error = '';
-
-    try {
       await oui.Directory.remove(handle, path, recursive: recursive);
+      return true;
     } catch (e, st) {
-      loggy.app('Delete folder $path exception', e, st);
-      error = 'Delete folder $path failed';
+      loggy.app('Directory $path deletion failed', e, st);
+      return false;
+    } finally {
+      await _refreshFolder();
     }
-
-    deleteFolderResult = DeleteFolderResult(functionName: '_deleteFolder', result: 'OK');
-    if (error.isNotEmpty) {
-      deleteFolderResult.errorMessage = error;
-    }
-
-    return deleteFolderResult;
   }
 
   Future<void> saveFile({
