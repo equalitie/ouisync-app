@@ -52,7 +52,7 @@ class MoveEntryDialog extends StatelessWidget {
 
   _selectActions(context) => _repo.builder((state) {
     bool canMove = false;
-    final folder = state.currentFolder;
+    final folder = _repo.currentFolder;
 
     if (folder.path != origin && folder.path != path) {
       canMove = true;

@@ -12,7 +12,7 @@ class FolderNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = _repo.state.currentFolder.path;
+    final path = _repo.currentFolder.path;
     final route = _currentLocationBar(path, context);
 
     return Container(
@@ -80,7 +80,7 @@ class FolderNavigationBar extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          final parent = _repo.state.currentFolder.parent;
+          final parent = _repo.currentFolder.parent;
           _repo.navigateTo(parent);
         }
       },

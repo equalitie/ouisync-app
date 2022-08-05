@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
-import '../models/folder_state.dart';
+import '../models/folder.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -39,8 +39,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   RepoCubit? get currentRepo => _currentRepo;
 
-  FolderState? get currentFolder {
-    return currentRepo?.state.currentFolder;
+  Folder? get currentFolder {
+    return currentRepo?.currentFolder;
   }
 
   Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
@@ -50,12 +50,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    oui.NativeChannels.setRepository(repo?.state.handle);
+    oui.NativeChannels.setRepository(repo?.handle);
 
     _subscription?.cancel();
     _subscription = null;
 
-    _subscription = repo?.state.handle.subscribe(() => repo.getContent());
+    _subscription = repo?.handle.subscribe(() => repo.getContent());
     await Settings.setDefaultRepo(repo?.name);
 
     _currentRepo = repo;
@@ -75,7 +75,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   Future<void> put(RepoCubit newRepo, { bool setCurrent = false }) async {
-    RepoCubit? oldRepo = _repos.remove(newRepo.state.name);
+    RepoCubit? oldRepo = _repos.remove(newRepo.name);
 
     var didChange = false;
 
@@ -83,12 +83,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       didChange = true;
     } else {
       if (oldRepo != newRepo) {
-        await oldRepo.state.close();
+        await oldRepo.close();
         didChange = true;
       }
     }
 
-    _repos[newRepo.state.name] = newRepo;
+    _repos[newRepo.name] = newRepo;
 
     if (didChange) {
       if (setCurrent) {
@@ -114,7 +114,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     final id = repo.id;
-    await repo.state.close();
+    await repo.close();
     _repos.remove(name);
     return id;
   }
@@ -128,7 +128,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _subscription = null;
 
     for (var repo in _repos.values) {
-      await repo.state.close();
+      await repo.close();
     }
 
     _repos.clear();
@@ -174,7 +174,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         exist: storeExist
       );
 
-      await this.put(RepoCubit(RepoState(name, repo)), setCurrent: wasCurrent);
+      await this.put(RepoCubit(name, repo), setCurrent: wasCurrent);
     } catch (e, st) {
       loggy.app('Unlocking of the repository $name failed', e, st);
     }
@@ -272,7 +272,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         exist: storeExist
       );
 
-      return RepoCubit(RepoState(name, repo));
+      return RepoCubit(name, repo);
     } catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }

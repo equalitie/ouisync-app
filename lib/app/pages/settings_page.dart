@@ -29,7 +29,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final ReposCubit reposCubit;
-  final void Function(RepoState) onShareRepository;
+  final void Function(RepoCubit) onShareRepository;
   final bool dhtStatus;
 
   @override
@@ -142,12 +142,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-              child: widget.reposCubit.builder((state) => ListView(
+              child: widget.reposCubit.builder((repos) => ListView(
                 // The badge over the version number is shown outside of the row boundary, so we
                 // need to set clipBehaior to Clip.none.
                 clipBehavior: Clip.none,
                 children: [
-                  _buildRepositoriesSection(state.currentRepo?.state),
+                  _buildRepositoriesSection(repos.currentRepo),
                   _divider(),
                   Fields.idLabel(S.current.titleNetwork,
                       fontSize: Dimensions.fontAverage,
@@ -254,7 +254,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
-  Widget _buildRepositoriesSection(RepoState? currentRepo) {
+  Widget _buildRepositoriesSection(RepoCubit? currentRepo) {
     return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +270,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: DropdownButton<RepoState?>(
+            child: DropdownButton<RepoCubit?>(
               isExpanded: true,
               value: currentRepo,
               underline: const SizedBox(),
@@ -298,7 +298,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     ],
                   ));
               }).toList(),
-              items: repositories().map((RepoState repo) {
+              items: repositories().map((RepoCubit repo) {
                 return DropdownMenuItem(
                   value: repo,
                   child: Row(
@@ -416,8 +416,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return widget.reposCubit.repositoryNames();
   }
 
-  Iterable<RepoState> repositories() {
-    return widget.reposCubit.repos.map((cubit) => cubit.state);
+  Iterable<RepoCubit> repositories() {
+    return widget.reposCubit.repos;
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -465,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.currentRepo?.state;
+    final current = widget.reposCubit.currentRepo;
 
     if (current == null) {
       return;

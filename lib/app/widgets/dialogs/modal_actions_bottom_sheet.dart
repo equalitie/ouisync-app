@@ -5,7 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
-import '../../models/folder_state.dart';
+import '../../models/folder.dart';
 import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget {
@@ -91,8 +91,8 @@ class DirectoryActions extends StatelessWidget {
     });
   }
 
-  Future<void> addFile(context, RepoCubit cubit) async {
-    final path = cubit.state.currentFolder.path;
+  Future<void> addFile(context, RepoCubit repo) async {
+    final path = repo.currentFolder.path;
 
     final result = await FilePicker
     .platform
@@ -105,7 +105,6 @@ class DirectoryActions extends StatelessWidget {
       final file = result.files.single;
       final newFilePath = buildDestinationPath(path, file.name);
       
-      final repo = cubit.state;
       final exist = await repo.exists(newFilePath);
 
       if (exist) {
@@ -115,7 +114,7 @@ class DirectoryActions extends StatelessWidget {
         return;
       }
 
-      cubit.saveFile(
+      repo.saveFile(
         newFilePath: newFilePath,
         fileName: file.name,
         length: file.size,

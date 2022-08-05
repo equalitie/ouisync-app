@@ -147,17 +147,17 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  void deleteFolderWithContentsValidation(RepoCubit cubit, String path, BuildContext context) async {
+  void deleteFolderWithContentsValidation(RepoCubit repo, String path, BuildContext context) async {
     bool recursive = false;
 
-    final type = await cubit.state.type(path);
+    final type = await repo.type(path);
 
     if (type != EntryType.directory) {
       loggy.app('Is directory empty: $path is not a directory.');
       return;
     }
 
-    final Directory directory = await cubit.state.openDirectory(path);
+    final Directory directory = await repo.openDirectory(path);
 
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);
@@ -186,11 +186,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       }
     }
     
-    deleteAction(context, cubit, path, recursive);
+    deleteAction(context, repo, path, recursive);
   }
 
-  void deleteAction(BuildContext context, RepoCubit cubit, String path, bool recursive) {
-    cubit.deleteFolder(path, recursive);
+  void deleteAction(BuildContext context, RepoCubit repo, String path, bool recursive) {
+    repo.deleteFolder(path, recursive);
     Navigator.of(context).pop(true);
   }
 

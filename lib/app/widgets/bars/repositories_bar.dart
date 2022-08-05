@@ -15,7 +15,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   });
 
   final ReposCubit reposCubit;
-  final void Function(RepoState) shareRepositoryOnTap;
+  final void Function(RepoCubit) shareRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             onPressed: () {
               final current = reposCubit.currentRepo;
               if (current == null) return;
-              shareRepositoryOnTap(current.state);
+              shareRepositoryOnTap(current);
             },
             size: Dimensions.sizeIconSmall,
             color: Colors.white,
@@ -77,7 +77,7 @@ class _Picker extends StatelessWidget {
       return Column(children: const [CircularProgressIndicator(color: Colors.white)],);
     }
 
-    final repo = state.currentRepo?.state;
+    final repo = state.currentRepo;
     final name = _repoName(repo);
 
     if (repo == null) {
@@ -103,7 +103,7 @@ class _Picker extends StatelessWidget {
     );
   });
 
-  String _repoName(RepoState? repo) {
+  String _repoName(RepoCubit? repo) {
     if (repo != null) {
       return repo.name;
     } else {

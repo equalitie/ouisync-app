@@ -10,7 +10,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../models/folder_state.dart';
+import '../models/folder.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -20,7 +20,6 @@ import '../widgets/widgets.dart';
 import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
-typedef RepositoryCallback = Future<void> Function(RepoState? repository);
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
 typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
@@ -197,7 +196,7 @@ class _MainPageState extends State<MainPage>
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo?.state)),
+              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo)),
               Expanded(child: buildMainWidget()),
             ]
           ),
@@ -257,7 +256,7 @@ class _MainPageState extends State<MainPage>
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
         onPressed: () async {
-          bool dhtStatus = _currentRepo?.state.isDhtEnabled() ?? false;
+          bool dhtStatus = _currentRepo?.isDhtEnabled() ?? false;
           settingsAction(dhtStatus);
         },
         size: Dimensions.sizeIconSmall,
@@ -310,7 +309,7 @@ class _MainPageState extends State<MainPage>
 
       if (!current.canRead) {
         return LockedRepositoryState(
-          repositoryName: current.state.name,
+          repositoryName: current.name,
           onUnlockPressed: unlockRepositoryDialog,
         );
       }
@@ -419,7 +418,7 @@ class _MainPageState extends State<MainPage>
       )
     );
 
-    Future<dynamic> _showShareRepository(RepoState repository)
+    Future<dynamic> _showShareRepository(RepoCubit repository)
         => showModalBottomSheet(
       isScrollControlled: true,
       context: context,
