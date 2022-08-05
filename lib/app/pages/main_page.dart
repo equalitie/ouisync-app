@@ -173,6 +173,13 @@ class _MainPageState extends State<MainPage>
 
     Widget buildMainWidget() {
       return _repositories.builder((repos) {
+        if (repos.isLoading) {
+          // This one is mainly for when we're unlocking the repository,
+          // because during that time the current repository is destroyed so we
+          // can't show it's content.
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final currentRepo = repos.currentRepo;
 
         if (currentRepo == null) {
@@ -282,16 +289,16 @@ class _MainPageState extends State<MainPage>
     }
 
     _repositoryContentBuilder(RepoCubit repo) => repo.consumer(
-      (state) {
-        if (state.isLoading) {
+      (repo) {
+        if (repo.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
         return _selectLayoutWidget();
       },
-      (state) {
-        while (state.messages.isNotEmpty) {
-          showSnackBar(context, content: Text(state.messages.removeAt(0)));
+      (repo) {
+        while (repo.messages.isNotEmpty) {
+          showSnackBar(context, content: Text(repo.messages.removeAt(0)));
         }
       }
     );
@@ -609,9 +616,8 @@ class _MainPageState extends State<MainPage>
   }
 
   void unlockRepositoryDialog(String repositoryName) async {
-    await showDialog(
+    final password = await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
         final formKey = GlobalKey<FormState>();
 
@@ -624,14 +630,12 @@ class _MainPageState extends State<MainPage>
           ),
         );
       }
-    ).then((password) async {
-      if (password.isNotEmpty) { // The password provided by the user.
-        _repositories.unlockRepository(
-          name: repositoryName,
-          password: password
-        );
-      }
-    });
+    );
+
+    await _repositories.unlockRepository(
+      name: repositoryName,
+      password: password
+    );
   }
 
   void settingsAction(dhtStatus) {

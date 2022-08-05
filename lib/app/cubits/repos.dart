@@ -147,7 +147,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _update(() { _isLoading = false; });
   }
 
-  void unlockRepository({required String name, required String password}) async {
+  Future<void> unlockRepository({required String name, required String password}) async {
     _update(() { _isLoading = true; });
 
     final wasCurrent = currentRepoName == name;
