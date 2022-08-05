@@ -9,7 +9,7 @@ import '../cubits/upgrade_exists.dart';
 class Fields {
   Fields._();
 
-  static Widget addUpgradeBadge(Widget child, { double bottom: 12, double end: 10 }) {
+  static Widget addUpgradeBadge(Widget child, { double bottom = 12, double end = 10 }) {
     return BlocConsumer<UpgradeExistsCubit, bool>(
       builder: (context, state) {
         return Badge(
@@ -22,7 +22,7 @@ class Fields {
           ),
           badgeColor: Colors.red,
           position: BadgePosition(bottom: bottom, end: end),
-          padding: EdgeInsets.all(0.0),
+          padding: const EdgeInsets.all(0.0),
           shape: BadgeShape.circle,
           child: child
         );
@@ -41,9 +41,7 @@ class Fields {
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding
   ) {
-    if (tags == null) {
-      tags = Map<String, StyledTextTagBase>();
-    }
+    tags ??= <String, StyledTextTagBase>{};
     
     tags.addAll({
       'font': StyledTextTag(
@@ -215,7 +213,7 @@ class Fields {
     double textFontSize = Dimensions.fontAverage,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
-    EdgeInsets padding: Dimensions.paddingBox,
+    EdgeInsets padding = Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
   }) => Padding(
     padding: padding,
@@ -276,7 +274,7 @@ class Fields {
     double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
-    EdgeInsets padding: Dimensions.paddingBox,
+    EdgeInsets padding = Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
   }) => Padding(
     padding: padding,

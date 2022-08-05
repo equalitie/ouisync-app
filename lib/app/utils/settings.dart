@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert'; // For json
+// For json
 
 import 'utils.dart';
 
@@ -40,13 +40,13 @@ class Settings {
   }
 
   static Future<String?> getDefaultRepo() async {
-    return await (await _init()).getString(_CURRENT_REPO_KEY);
+    return (await _init()).getString(_CURRENT_REPO_KEY);
   }
 
   static Future<bool> getDhtEnableStatus(String repoId, { required bool defaultValue }) async {
     final prefs = await _init();
 
-    final status = await prefs.getBool(_BT_DHT_KEY_PREFIX + repoId);
+    final status = prefs.getBool(_BT_DHT_KEY_PREFIX + repoId);
     return status ?? defaultValue;
   }
 
@@ -68,7 +68,8 @@ class Settings {
 
   static Future<int?> getHighestSeenProtocolNumber() async {
     final prefs = await _init();
-    await prefs.getInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY);
+    prefs.getInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY);
+    return null;
   }
 
   // TODO: It's not clear from the documentation whether

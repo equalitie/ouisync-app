@@ -1,11 +1,9 @@
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../utils/utils.dart';
 import '../cubits/repo.dart';
 
 class RepositoryProgress extends StatelessWidget {
-  RepoCubit? _repo;
+  final RepoCubit? _repo;
   StateMonitor? _monitor;
   Subscription? _subscription;
 
@@ -30,26 +28,26 @@ class RepositoryProgress extends StatelessWidget {
     final subscription = _subscription;
     if (subscription == null) return shrink();
 
-    return StreamBuilder<Null>(
+    return StreamBuilder<void>(
       stream: subscription.broadcastStream,
-      builder: (BuildContext ctx, AsyncSnapshot<Null> snapshot) {
+      builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
         if (!monitor.refresh()) {
           return shrink();
         }
 
-        final index_inflight_s = monitor.values['index_requests_inflight'] ?? '0';
-        final block_inflight_s = monitor.values['block_requests_inflight'] ?? '0';
+        final indexInflightS = monitor.values['index_requests_inflight'] ?? '0';
+        final blockInflightS = monitor.values['block_requests_inflight'] ?? '0';
 
-        final index_inflight = int.tryParse(index_inflight_s) ?? 0;
-        final block_inflight = int.tryParse(block_inflight_s) ?? 0;
+        final indexInflight = int.tryParse(indexInflightS) ?? 0;
+        final blockInflight = int.tryParse(blockInflightS) ?? 0;
 
-        if (index_inflight == 0 && block_inflight == 0) {
+        if (indexInflight == 0 && blockInflight == 0) {
             return shrink();
         }
 
-        Color? color = null;
+        Color? color;
 
-        if (block_inflight == 0) {
+        if (blockInflight == 0) {
           color = Colors.grey.shade400;
         }
 
@@ -64,6 +62,6 @@ class RepositoryProgress extends StatelessWidget {
   }
 
   Widget shrink() {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
   }
 }

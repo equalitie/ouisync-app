@@ -15,7 +15,7 @@ class LoadingMainPageState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CircularProgressIndicator.adaptive(),
+          const CircularProgressIndicator.adaptive(),
           Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,

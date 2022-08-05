@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 class Watch<State> {
-  _Cubit _cubit = _Cubit();
+  final _Cubit _cubit = _Cubit();
   final State _state;
 
   Watch(State state) : _state = state;
@@ -42,7 +42,7 @@ class Watch<State> {
 }
 
 class WatchSelf<Self> {
-  _Cubit _cubit = _Cubit();
+  final _Cubit _cubit = _Cubit();
 
   void changed() {
     _cubit.emit(Changed());
@@ -89,5 +89,5 @@ class Changed extends Equatable {
 
 // We can't use Cubit as it's marked as `abstract` so this is a generic one.
 class _Cubit extends Cubit<Changed> {
-  _Cubit() : super(Changed()) {}
+  _Cubit() : super(Changed());
 }

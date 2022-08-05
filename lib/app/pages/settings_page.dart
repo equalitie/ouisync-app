@@ -78,7 +78,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         case ConnectivityResult.ethernet: _connectionType = "Ethernet"; break;
         case ConnectivityResult.none: _connectionType = "None"; break;
         default: _connectionType = "???"; break;
-    };
+    }
 
     final session = widget.reposCubit.session;
 
@@ -518,25 +518,25 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     // been implemented by DateFormat.
     final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
     final path = buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
-    final out_file = File(path);
+    final outFile = File(path);
 
-    final sink = out_file.openWrite();
+    final sink = outFile.openWrite();
 
     sink.writeln("appName: ${info.appName}");
     sink.writeln("packageName: ${info.packageName}");
     sink.writeln("version: ${info.version}");
     sink.writeln("buildNumber: ${info.buildNumber}");
 
-    sink.writeln("_connectionType: ${_connectionType}");
-    sink.writeln("_externalIP: ${_externalIP}");
-    sink.writeln("_localIPv4: ${_localIPv4}");
-    sink.writeln("_localIPv6: ${_localIPv6}");
-    sink.writeln("_tcpListenerEndpointV4: ${_tcpListenerEndpointV4}");
-    sink.writeln("_tcpListenerEndpointV6: ${_tcpListenerEndpointV6}");
-    sink.writeln("_quicListenerEndpointV4: ${_quicListenerEndpointV4}");
-    sink.writeln("_quicListenerEndpointV6: ${_quicListenerEndpointV6}");
-    sink.writeln("_dhtEndpointV4: ${_dhtEndpointV4}");
-    sink.writeln("_dhtEndpointV6: ${_dhtEndpointV6}");
+    sink.writeln("_connectionType: $_connectionType");
+    sink.writeln("_externalIP: $_externalIP");
+    sink.writeln("_localIPv4: $_localIPv4");
+    sink.writeln("_localIPv6: $_localIPv6");
+    sink.writeln("_tcpListenerEndpointV4: $_tcpListenerEndpointV4");
+    sink.writeln("_tcpListenerEndpointV6: $_tcpListenerEndpointV6");
+    sink.writeln("_quicListenerEndpointV4: $_quicListenerEndpointV4");
+    sink.writeln("_quicListenerEndpointV6: $_quicListenerEndpointV6");
+    sink.writeln("_dhtEndpointV4: $_dhtEndpointV4");
+    sink.writeln("_dhtEndpointV6: $_dhtEndpointV6");
     sink.writeln("\n");
 
     await dumpAll(sink, widget.reposCubit.session.getRootStateMonitor());

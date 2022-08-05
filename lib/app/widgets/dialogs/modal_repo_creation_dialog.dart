@@ -17,9 +17,9 @@ class RepositoryCreation extends StatelessWidget {
   final ReposCubit cubit;
   final GlobalKey<FormState> formKey;
 
-  final TextEditingController _nameController = new TextEditingController(text: null);
-  final TextEditingController _passwordController = new TextEditingController(text: null);
-  final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
+  final TextEditingController _nameController = TextEditingController(text: null);
+  final TextEditingController _passwordController = TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController = TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _obscurePasswordConfirm = ValueNotifier<bool>(true);
@@ -27,7 +27,7 @@ class RepositoryCreation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         mainAxisSize: MainAxisSize.min,

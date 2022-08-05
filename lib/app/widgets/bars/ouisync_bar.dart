@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 import '../models.dart';
 
@@ -8,7 +7,7 @@ class FolderItem extends Equatable implements BaseItem {
     this.name = '',
     this.path = '',
     this.size = 0,
-  }) {}
+  });
 
   @override
   List<Object> get props => [

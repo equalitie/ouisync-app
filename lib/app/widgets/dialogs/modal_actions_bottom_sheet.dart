@@ -5,7 +5,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
-import '../../models/folder.dart';
 import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget {
@@ -59,7 +58,7 @@ class DirectoryActions extends StatelessWidget {
           Dimensions.spacingVertical,
           Text(
             name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: Dimensions.fontAverage
             )
           )

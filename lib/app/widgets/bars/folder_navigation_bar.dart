@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
 import '../../cubits/cubits.dart';
@@ -8,7 +6,7 @@ import '../../cubits/cubits.dart';
 class FolderNavigationBar extends StatelessWidget {
   final RepoCubit _repo;
 
-  FolderNavigationBar(this._repo);
+  const FolderNavigationBar(this._repo);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +14,7 @@ class FolderNavigationBar extends StatelessWidget {
     final route = _currentLocationBar(path, context);
 
     return Container(
-      padding: EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(10.0),
       decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -60,10 +58,10 @@ class FolderNavigationBar extends StatelessWidget {
           child: Padding(
             padding: Dimensions.paddingActionBox,
             child: Text(
-              '$current',
+              current,
               softWrap: false,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.w600,
               ),

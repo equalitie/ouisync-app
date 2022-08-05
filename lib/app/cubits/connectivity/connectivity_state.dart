@@ -10,7 +10,7 @@ abstract class ConnectivityState extends Equatable {
 class ConnectivityInitial extends ConnectivityState {}
 
 class ConnectivityChanged extends ConnectivityState {
-  ConnectivityChanged({
+  const ConnectivityChanged({
     required this.connectivityResult
   });
 

@@ -4,7 +4,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../cubits/repo.dart';
 
 class AccessModeDropDownMenu extends StatefulWidget {
   const AccessModeDropDownMenu({

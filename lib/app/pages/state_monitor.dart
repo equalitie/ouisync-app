@@ -30,10 +30,10 @@ class _State extends State<StateMonitorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("State Monitor")),
-      body: StreamBuilder<Null>(
+      appBar: AppBar(title: const Text("State Monitor")),
+      body: StreamBuilder<void>(
           stream: subscription.broadcastStream,
-          builder: (BuildContext ctx, AsyncSnapshot<Null> snapshot) {
+          builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
             root.monitor.refresh();
             return Container(child: root.build());
           }
@@ -47,14 +47,14 @@ class _Node {
 
   final StateMonitor monitor;
   final _State state;
-  final Map<String, _Node> expandedChildren = Map();
+  final Map<String, _Node> expandedChildren = {};
 
   Widget build() {
-    if (monitor.path.length == 0) {
+    if (monitor.path.isEmpty) {
       return ListView(children: buildValuesAndChildren());
     } else {
       return Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
         child: Column(children: buildValuesAndChildren()));
     }
   }
@@ -76,7 +76,7 @@ class _Node {
 
     if (expandedChild == null) {
       return Card(child: ListTile(
-        trailing: Icon(Icons.add),
+        trailing: const Icon(Icons.add),
         dense: true,
         title: Text(name),
         onTap: () => expandChild(name)));
@@ -89,7 +89,7 @@ class _Node {
       return Column(
         children: <Widget>[
           Card(child: ListTile(
-            trailing: Icon(Icons.remove),
+            trailing: const Icon(Icons.remove),
             dense: true,
             title: Text(name),
             onTap: () => collapseChild(name))),

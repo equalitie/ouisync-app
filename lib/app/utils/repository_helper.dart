@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io' as io;
 import 'package:ouisync_app/app/utils/loggers/ouisync_app_logger.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
 

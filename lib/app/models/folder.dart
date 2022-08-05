@@ -5,14 +5,13 @@ import '../utils/strings.dart';
 import '../utils/actions.dart';
 import '../cubits/repo.dart';
 
-import 'package:collection/collection.dart';
 
 class Folder {
   late final RepoCubit repo;
   String path = Strings.root;
 
   List<BaseItem> content = <BaseItem>[];
-  _Refresher _refresher = _Refresher();
+  final _Refresher _refresher = _Refresher();
 
   Folder() {
     _refresher.folder = this;

@@ -102,7 +102,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
   }
 
   void enableBackgroundExecution() async {
-    final config = FlutterBackgroundAndroidConfig(
+    const config = FlutterBackgroundAndroidConfig(
       notificationTitle: 'OuiSync',
       notificationText:
           'Background notification for keeping the example app running in the background',
@@ -118,8 +118,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Text('Permissions needed'),
-                content: Text(
+                title: const Text('Permissions needed'),
+                content: const Text(
                     "Shortly the OS will ask you for permission to execute "
                     "this app in the background. This is required in order to "
                     "keep syncing while the app is not in the foreground."

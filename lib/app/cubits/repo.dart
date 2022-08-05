@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
 
-import 'package:bloc/bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
@@ -10,7 +9,6 @@ import '../../generated/l10n.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
-import '../models/folder.dart';
 import 'cubits.dart' as cubits;
 
 class Job {
@@ -26,9 +24,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final Map<String, cubits.Watch<Job>> downloads = HashMap();
   final List<String> messages = <String>[];
 
-  Folder _currentFolder = Folder();
-  String _name;
-  oui.Repository _handle;
+  final Folder _currentFolder = Folder();
+  final String _name;
+  final oui.Repository _handle;
 
   RepoCubit(this._name, this._handle) {
     _currentFolder.repo = this;
@@ -148,7 +146,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
         offset += buffer.length;
         job.update((job) { job.soFar = offset; });
       }
-    } catch (e, st) {
+    } catch (e) {
       showMessage(S.current.messageWritingFileError(newFilePath));
       return;
     } finally {
@@ -197,7 +195,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   }
 
   Future<int> _getFileSize(String path) async {
-    var file;
+    oui.File file;
     var length = 0;
 
     try {
@@ -265,7 +263,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
         job.update((job) { job.soFar = offset; });
       }
     } catch (e, st) {
-      loggy.app('Download file ${sourcePath} exception', e, st);
+      loggy.app('Download file $sourcePath exception', e, st);
       showMessage(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       update((repo) { repo.downloads.remove(sourcePath); });
@@ -280,7 +278,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       await handle.move(source, destination);
       return true;
     } catch (e, st) {
-      loggy.app('Move entry from ${source} to ${destination} failed', e, st);
+      loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await _refreshFolder();
@@ -350,4 +348,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   Future<void> close() async {
     await handle.close();
   }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
+
 }

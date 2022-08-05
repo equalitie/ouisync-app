@@ -26,9 +26,9 @@ void main() {
 
   test('Move folder ok when folder to move is empty',
   () async {
-    final folder1Path = '/folder1';
-    final folder2Path = '/folder1/folder2';
-    final folder2RootPath = '/folder2';
+    const folder1Path = '/folder1';
+    const folder2Path = '/folder1/folder2';
+    const folder2RootPath = '/folder2';
     final folder1ExpectedContents = [
       FolderItem(
         name: 'folder2',
@@ -78,11 +78,11 @@ void main() {
 
   test('Move folder ok when folder to move is not empty',
   () async {
-    final folder1Path = '/folder1';
-    final folder2Path = '/folder1/folder2';
-    final folder2RootPath = '/folder2';
-    final file1InFolder2Path = '/folder1/folder2/file1.txt';
-    final filePathContent = 'hello world';
+    const folder1Path = '/folder1';
+    const folder2Path = '/folder1/folder2';
+    const folder2RootPath = '/folder2';
+    const file1InFolder2Path = '/folder1/folder2/file1.txt';
+    const filePathContent = 'hello world';
     final folder1ExpectedContents = [
       FolderItem(
         name: 'folder2',

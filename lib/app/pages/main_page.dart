@@ -10,7 +10,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../models/folder.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -49,7 +48,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger
 {
-    ReposCubit _repositories;
+    final ReposCubit _repositories;
 
     StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -319,7 +318,7 @@ class _MainPageState extends State<MainPage>
 
     _contentBrowser(RepoCubit currentRepo) {
       late final child;
-      late final navigationBar;
+      late final Widget navigationBar;
       final folder = currentRepo.currentFolder;
 
       if (folder.content.isEmpty) {
@@ -329,7 +328,7 @@ class _MainPageState extends State<MainPage>
       }
 
       if (folder.isRoot()) {
-        navigationBar = SizedBox.shrink();
+        navigationBar = const SizedBox.shrink();
       } else {
         navigationBar = FolderNavigationBar(currentRepo);
       }
@@ -339,7 +338,7 @@ class _MainPageState extends State<MainPage>
         children: <Widget>[
           navigationBar,
           // TODO: A shadow would be nicer.
-          Divider(height: 3),
+          const Divider(height: 3),
           Expanded(child: child),
         ],
       );

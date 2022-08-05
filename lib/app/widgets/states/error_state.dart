@@ -34,11 +34,11 @@ class ErrorState extends StatelessWidget {
                 }
               )
             ),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             Align(
               alignment: Alignment.center,
               child: Fields.inPageSecondaryMessage(
-                this.message,
+                message,
                 tags: {
                   Constants.inlineTextSize: InlineTextStyles.size(),
                   Constants.inlineTextBold: InlineTextStyles.bold,
@@ -48,7 +48,7 @@ class ErrorState extends StatelessWidget {
             ),
             Dimensions.spacingVerticalDouble,
             Fields.inPageButton(
-              onPressed: this.onReload,
+              onPressed: onReload,
               text: S.current.actionReloadContents,
               autofocus: true
             )

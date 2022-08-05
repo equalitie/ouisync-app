@@ -3,7 +3,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../widgets.dart';
@@ -53,7 +52,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Size get preferredSize {
     // TODO: This value was found experimentally, can it be done programmatically?
-    return Size.fromHeight(58);
+    return const Size.fromHeight(58);
   }
 }
 

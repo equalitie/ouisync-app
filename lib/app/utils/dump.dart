@@ -35,11 +35,11 @@ void _dumpStateMonitor(IOSink sink, StateMonitor? node, int depth) {
     }
 
     for (MapEntry e in node.values.entries) {
-        sink.writeln("${pad}${e.key}: ${e.value}");
+        sink.writeln("$pad${e.key}: ${e.value}");
     }
 
     for (String child in node.children.keys) {
-        sink.writeln("${pad}${child}");
+        sink.writeln("$pad$child");
         _dumpStateMonitor(sink, node.child(child), depth + 1);
     }
 }

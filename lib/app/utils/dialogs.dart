@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
-import '../models/models.dart' as model;
 import 'utils.dart';
 
 abstract class Dialogs {

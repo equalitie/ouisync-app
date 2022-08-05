@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -45,7 +43,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
 
   Widget _fileSize(int size) {
     return Fields.constrainedText(
-      formatSize(size as int, units: true),
+      formatSize(size, units: true),
       flex: 0,
       fontSize: Dimensions.fontSmall,
       fontWeight: FontWeight.w400,

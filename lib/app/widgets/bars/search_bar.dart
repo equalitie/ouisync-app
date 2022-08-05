@@ -13,7 +13,7 @@ class _SearchBarState extends State<SearchBar> {
     return Container(
       child: Row(
         children: [
-          Expanded(
+          const Expanded(
             child: Text(
               '<search>',
               textAlign: TextAlign.center,
