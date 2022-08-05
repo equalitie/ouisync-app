@@ -33,19 +33,16 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0,
       )
     ];
     final rootExpectedContentsWithFolder1AndFolder2 = [
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0,
       )
     ];
 
@@ -87,7 +84,6 @@ void main() {
       FolderItem(
         name: 'folder2',
         path: folder2Path,
-        size: 0,
       )
     ];
     final folder2WithFile1ExpectedContents = [
@@ -101,12 +97,10 @@ void main() {
       FolderItem(
         name: 'folder1',
         path: folder1Path,
-        size: 0,
       ),
       FolderItem(
         name: 'folder2',
         path: folder2RootPath,
-        size: 0,
       )
     ];
 
