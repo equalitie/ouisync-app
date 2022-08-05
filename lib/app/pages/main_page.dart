@@ -364,32 +364,38 @@ class _MainPageState extends State<MainPage>
           itemCount: currentRepo.currentFolder.content.length,
           itemBuilder: (context, index) {
             final item = currentRepo.currentFolder.content[index];
-            final actionByType = item.type == ItemType.file
-            ? () async {
+            var actionByType;
+
+            if (item is FileItem) {
+              actionByType = () async {
               if (_persistentBottomSheetController != null) {
-                await Dialogs.simpleAlertDialog(
-                  context: context,
-                  title: S.current.titleMovingEntry,
-                  message: S.current.messageMovingEntry
-                );
-                return;
-              }
+                  await Dialogs.simpleAlertDialog(
+                    context: context,
+                    title: S.current.titleMovingEntry,
+                    message: S.current.messageMovingEntry
+                  );
+                  return;
+                }
 
-              /// For now, only Android can preview files.
-              if (!io.Platform.isAndroid) {
-                showSnackBar(context, content: Text(S.current.messageFilePreviewNotAvailable));
-                return;
-              }
+                /// For now, only Android can preview files.
+                if (!io.Platform.isAndroid) {
+                  showSnackBar(context, content: Text(S.current.messageFilePreviewNotAvailable));
+                  return;
+                }
 
-              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true);
+                await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true);
+              };
             }
-            : () {
-              if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {
-                return;
-              }
 
-              currentRepo.navigateTo(item.path);
-            };
+            if (item is FolderItem) {
+              actionByType = () {
+                if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {
+                  return;
+                }
+
+                currentRepo.navigateTo(item.path);
+              };
+            }
 
             final listItem = ListItem (
               repository: currentRepo,

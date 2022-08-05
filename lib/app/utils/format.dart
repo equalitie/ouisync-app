@@ -21,10 +21,5 @@ String buildDestinationPath(String parentPath, String entryPath) {
   /// We want to maintain a POSIX style path inside the library, even when
   /// the app is running on Windows.
   final context = p.Context(style: p.Style.posix);
-
-  print('parentPath: $parentPath, entryPath: $entryPath');
-  final newPath = context.join(parentPath, entryPath);
-
-  print('New path: $newPath');
-  return newPath;
+  return context.join(parentPath, entryPath);
 }

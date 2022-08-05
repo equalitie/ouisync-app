@@ -173,12 +173,18 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     try {
       while (iterator.moveNext()) {
         var size = 0;
-        if (iterator.current.type == oui.EntryType.file) {
-          size = await _getFileSize(buildDestinationPath(path, iterator.current.name));
-        }
-        final item = await _castToBaseItem(path, iterator.current.name, iterator.current.type, size);
+        final entryName = iterator.current.name;
+        final entryType = iterator.current.type;
+        final entryPath = buildDestinationPath(path, entryName);
 
-        content.add(item);
+        if (entryType == oui.EntryType.file) {
+          size = await _getFileSize(entryPath);
+          content.add(FileItem(name: entryName, path: entryPath, size: size));
+        }
+
+        if (entryType == oui.EntryType.directory) {
+          content.add(FolderItem(name: entryName, path: entryPath));
+        }
       }
     } catch (e, st) {
       loggy.app('Traversing directory $path exception', e, st);
@@ -214,23 +220,6 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     file.close();
 
     return length;
-  }
-
-  Future<BaseItem> _castToBaseItem(String path, String name, oui.EntryType type, int size) async {
-    final itemPath = buildDestinationPath(path, name);
-
-    if (type == oui.EntryType.directory) {
-      return FolderItem(
-          name: name,
-          path: itemPath,
-          size: size);
-    }
-
-    if (type == oui.EntryType.file) {
-      return FileItem(name: name, path: itemPath, size: size);
-    }
-
-    return <BaseItem>[].single;
   }
 
   Future<void> downloadFile({ required String sourcePath, required String destinationPath }) async {

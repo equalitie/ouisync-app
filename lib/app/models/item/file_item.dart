@@ -2,27 +2,13 @@ import 'package:equatable/equatable.dart';
 
 import '../models.dart';
 
-class FileItem extends Equatable implements BaseItem {
+class FileItem extends BaseItem implements Equatable {
   FileItem({
-    this.name = '',
-    this.path = '',
-    this.size = 0,
-  });
+    required String name,
+    required String path,
+    required this.size,
+  }) : super(name, path);
 
-  @override
-  List<Object> get props => [
-    name,
-    path,
-    size,
-  ];
-
-  @override
-  String name;
-
-  @override
-  String path;
-
-  @override
   int size;
 
   @override

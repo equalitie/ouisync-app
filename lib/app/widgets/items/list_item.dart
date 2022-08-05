@@ -34,16 +34,23 @@ class ListItem extends StatelessWidget {
   }
 
   Widget _buildItem() {
-    if (itemData.type == ItemType.file) {
-      return _buildFileItem();
-    } else {
-      return _buildFolderItem();
+    final data = itemData;
+
+    if (data is FileItem) {
+      return _buildFileItem(data);
     }
+
+    if (data is FolderItem) {
+      return _buildFolderItem(data);
+    }
+
+    assert(false, "Item must be either FileItem or FolderItem");
+    return SizedBox.shrink();
   }
 
-  Widget _buildFileItem() {
-    final uploadJob = repository.uploads[itemData.path];
-    final downloadJob = repository.downloads[itemData.path];
+  Widget _buildFileItem(FileItem fileData) {
+    final uploadJob = repository.uploads[fileData.path];
+    final downloadJob = repository.downloads[fileData.path];
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -55,13 +62,13 @@ class ListItem extends StatelessWidget {
           flex: 9,
           child: Padding(
             padding: Dimensions.paddingItem,
-            child: FileDescription(repository, itemData, uploadJob))),
+            child: FileDescription(repository, fileData, uploadJob))),
         _getVerticalMenuAction(),
       ],
     );
   }
 
-  Widget _buildFolderItem() {
+  Widget _buildFolderItem(FolderItem folderItem) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

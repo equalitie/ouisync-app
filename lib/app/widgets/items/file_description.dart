@@ -14,7 +14,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
   );
 
   final RepoCubit repository;
-  final BaseItem fileData;
+  final FileItem fileData;
   final Watch<Job>? _uploadJob;
 
   @override
