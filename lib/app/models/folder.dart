@@ -80,7 +80,7 @@ class _Refresher {
 
         try {
           final content = await folder.repo.getFolderContents(path);
-          content.sort((a, b) => a.type.index.compareTo(b.type.index));
+          content.sort((a, b) => _typeId(a).compareTo(_typeId(b)));
 
           if (path == folder.path) {
             folder.content = content;
@@ -99,5 +99,12 @@ class _Refresher {
     } finally {
       _running = false;
     }
+  }
+
+  int _typeId(BaseItem item) {
+    if (item is FolderItem) return 0;
+    if (item is FileItem) return 1;
+    assert(false);
+    return -1;
   }
 }

@@ -1,10 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum ItemType {
-  folder,
-  file
-}
-
 abstract class BaseItem extends Equatable {
   BaseItem(this.name, this.path);
 
@@ -16,11 +11,9 @@ abstract class BaseItem extends Equatable {
 
   String name;
   String path;
-
-  ItemType get type;
 }
 
-class FileItem extends BaseItem implements Equatable {
+class FileItem extends BaseItem {
   FileItem({
     required String name,
     required String path,
@@ -28,17 +21,11 @@ class FileItem extends BaseItem implements Equatable {
   }) : super(name, path);
 
   int size;
-
-  @override
-  ItemType get type => ItemType.file;
 }
 
-class FolderItem extends BaseItem implements Equatable {
+class FolderItem extends BaseItem {
   FolderItem({
     required String name,
     required String path,
   }): super(name, path);
-
-  @override
-  ItemType get type => ItemType.folder;
 }

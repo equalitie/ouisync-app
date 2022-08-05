@@ -412,7 +412,7 @@ class _MainPageState extends State<MainPage>
                   return;
                 }
 
-                item.type == ItemType.file
+                item is FileItem
                 ? await _showFileDetails(
                   repoCubit: currentRepo,
                   scaffoldKey: _scaffoldKey,
