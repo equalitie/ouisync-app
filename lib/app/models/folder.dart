@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import './item/base_item.dart';
+import 'item.dart';
 import '../utils/strings.dart';
 import '../utils/actions.dart';
 import '../cubits/repo.dart';
