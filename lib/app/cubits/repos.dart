@@ -279,7 +279,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Future<oui.Repository> _getRepository({required String store, String? password, oui.ShareToken?  shareToken, required bool exist}) async {
     final oui.Repository repo;
-   
+
     if (exist) {
       repo = await oui.Repository.open(_session, store: store, password: password);
     } else {

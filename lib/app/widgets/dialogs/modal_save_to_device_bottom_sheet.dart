@@ -101,7 +101,7 @@ class _SaveToDeviceState extends State<SaveToDevice> {
             ],
           )
         ],
-      ) 
+      )
     );
   }
 
@@ -153,14 +153,14 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     io.Directory? downloadsPath;
     if (io.Platform.isWindows) {
       downloadsPath = await getDownloadsDirectory();
-    } 
-    
+    }
+
     if (io.Platform.isAndroid) {
       if (_useExternalStorage) {
         final rootPath = (await ExternalPath.getExternalStorageDirectories()).first;
         downloadsPath = io.Directory(rootPath);
       }
-        
+
       downloadsPath ??= await DownloadsPath.downloadsDirectory();
     }
 

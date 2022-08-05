@@ -11,13 +11,13 @@ showSnackBar(BuildContext context, { required Widget content, SnackBarAction? ac
     SnackBar(
       content: content,
       action: action,
-    ),  
+    ),
   );
 
-hideSnackBar(context) => 
+hideSnackBar(context) =>
   SnackBarAction(
     label: S.current.actionHideCapital,
-    onPressed: () => 
+    onPressed: () =>
       ScaffoldMessenger.of(context).hideCurrentSnackBar()
   );
 

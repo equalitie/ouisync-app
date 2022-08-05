@@ -25,7 +25,7 @@ class Strings {
 
   static const String labelDHTv4Endpoint = 'DHT IPv4:';
   static const String labelDHTv6Endpoint = 'DHT IPv6:';
-  
+
   static const String messageErrorRepositoryPasswordValidation =
       'Please enter a password'; // TODO: Find a way to pass this as default parameter
   static const String messageErrorRetypePassword =

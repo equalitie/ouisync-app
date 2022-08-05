@@ -157,7 +157,7 @@ class RepositoryCreation extends StatelessWidget {
   void _createRepo() {
     final newRepositoryName = _nameController.text;
     final password = _passwordController.text;
-    
+
     _onSaved(cubit, newRepositoryName, password);
   }
 

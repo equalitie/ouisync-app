@@ -89,7 +89,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
       ]);
   }
 
-  Widget _buildAccessModeItem(AccessMode accessMode) => 
+  Widget _buildAccessModeItem(AccessMode accessMode) =>
     Padding(
       padding: Dimensions.paddingItem,
       child: Column(

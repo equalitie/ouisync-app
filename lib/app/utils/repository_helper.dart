@@ -14,7 +14,7 @@ class RepositoryHelper {
 
   static List<dynamic> localRepositoriesFiles(String location, {
     bool justNames = true
-  }) { 
+  }) {
     if (!io.Directory(location).existsSync()) {
       return <String>[];
     }
@@ -63,7 +63,7 @@ class RepositoryHelper {
 
     final repositoryFilesIterator = io.Directory(repositoriesDir)
     .listSync()
-    .where((element) => 
+    .where((element) =>
       repositoryFiles.contains(element.path)
     );
 
@@ -77,7 +77,7 @@ class RepositoryHelper {
         : await entity.rename(p.join(repositoriesDir, '$newName.db'));
 
         loggyInstance.loggy.app('File renamed: ${renamed.path} ($oldPath)');
-      }  
+      }
     } catch (e, st) {
       loggyInstance.loggy.app('Exception when renaming repo $oldName files ($newName)', e, st);
       return false;
@@ -106,14 +106,14 @@ class RepositoryHelper {
       .forEach((element) {
         final path = element.path;
         element.deleteSync();
-        
+
         loggyInstance.loggy.app('File deleted: $path');
-      });  
+      });
     } catch (e, st) {
       loggyInstance.loggy.app('Exception when deleting repo $repositoryName files', e, st);
       return false;
     }
-    
+
     return true;
   }
 }

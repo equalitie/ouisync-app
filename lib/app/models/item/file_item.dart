@@ -15,7 +15,7 @@ class FileItem extends Equatable implements BaseItem {
     path,
     size,
   ];
-  
+
   @override
   String name;
 

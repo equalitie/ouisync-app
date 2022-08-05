@@ -42,7 +42,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
                   reverse: true,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: viewportConstraints.minHeight 
+                      minHeight: viewportConstraints.minHeight
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

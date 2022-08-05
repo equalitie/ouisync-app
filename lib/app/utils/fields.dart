@@ -42,7 +42,7 @@ class Fields {
     EdgeInsets padding
   ) {
     tags ??= <String, StyledTextTagBase>{};
-    
+
     tags.addAll({
       'font': StyledTextTag(
         style: TextStyle(
@@ -428,7 +428,7 @@ class Fields {
     autofocus: autofocus,
     focusNode: focusNode,
     initialValue: initialValue,
-    obscureText: obscureText,  
+    obscureText: obscureText,
     maxLines: maxLines,
     keyboardType: TextInputType.text,
     decoration: InputDecoration (
@@ -437,7 +437,7 @@ class Fields {
       labelText: label,
       labelStyle: TextStyle(
         color: Colors.grey.shade600
-      ) 
+      )
     ),
     validator: validator,
     onSaved: onSaved,
@@ -488,7 +488,7 @@ class Fields {
         )
       ],
     )
-  );  
+  );
 
   static Widget dialogActions(BuildContext context,
   {

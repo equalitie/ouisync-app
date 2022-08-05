@@ -20,7 +20,7 @@ class PositiveButton extends StatelessWidget {
         child: Text((text ?? '').toUpperCase()),
         constraints: Dimensions.sizeConstrainsDialogAction,
         elevation: Dimensions.elevationDialogAction,
-        fillColor: _fillColorStatus(context), 
+        fillColor: _fillColorStatus(context),
         shape: const RoundedRectangleBorder(
           borderRadius: Dimensions.borderRadiusDialogPositiveButton),
         textStyle: TextStyle(
@@ -30,7 +30,7 @@ class PositiveButton extends StatelessWidget {
   }
 
   Color _fillColorStatus(context) {
-    return onPressed == null 
+    return onPressed == null
     ? Colors.grey
     : Theme.of(context).colorScheme.primary;
   }

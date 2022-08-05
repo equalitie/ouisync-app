@@ -8,7 +8,7 @@ abstract class MediaReceiver {
     if (Platform.isWindows) {
       return MediaReceiverWindows();
     }
-    return MediaReceiverMobile(); 
+    return MediaReceiverMobile();
   }
 
   StreamController<dynamic> controller = StreamController<dynamic>();

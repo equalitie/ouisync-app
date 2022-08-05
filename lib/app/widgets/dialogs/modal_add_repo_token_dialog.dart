@@ -82,7 +82,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     _obscurePasswordConfirm.dispose();
 
     _accessModeNotifier.dispose();
-    
+
     _tokenFocus.dispose();
 
     super.dispose();
@@ -107,7 +107,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
         ),
         ValueListenableBuilder(
           valueListenable: _accessModeNotifier,
-          builder: (context, message, child) => 
+          builder: (context, message, child) =>
             Visibility(
               visible: _showAccessModeMessage,
               child: Fields.constrainedText(
@@ -254,7 +254,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     try {
       _shareToken = ShareToken(widget.cubit.session, token);
     } catch (e, st) {
-      loggy.app('Extract repository token exception', e, st);                
+      loggy.app('Extract repository token exception', e, st);
       showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
 
       cleanupFormOnEmptyToken();
@@ -264,15 +264,15 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
       return;
     }
 
-    _suggestedName = _shareToken!.suggestedName; 
+    _suggestedName = _shareToken!.suggestedName;
     _accessModeNotifier.value = _shareToken!.mode.name;
 
     if (_suggestedName.isNotEmpty) {
       _repoName = _suggestedName;
     }
 
-    setState(() { 
-      _showSuggestedName = _suggestedName.isNotEmpty; 
+    setState(() {
+      _showSuggestedName = _suggestedName.isNotEmpty;
       _showAccessModeMessage = _accessModeNotifier.value.toString().isNotEmpty;
 
       _requiresPassword = _shareToken!.mode != AccessMode.blind;
@@ -280,8 +280,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
   }
 
   void cleanupFormOnEmptyToken() {
-    setState(() { 
-        _showSuggestedName = false; 
+    setState(() {
+        _showSuggestedName = false;
         _showAccessModeMessage = false;
       });
 
@@ -300,7 +300,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
     try {
       final shareToken = ShareToken(widget.cubit.session, value!);
-      
+
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
     } catch (e) {

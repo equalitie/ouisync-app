@@ -100,7 +100,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: S.current.labelLocation, 
+            label: S.current.labelLocation,
             labelFontSize: Dimensions.fontAverage,
             text: widget.data.path
             .replaceAll(widget.data.name, '')
@@ -185,7 +185,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         return;
       }
     }
-    
+
     deleteAction(context, repo, path, recursive);
   }
 
@@ -201,7 +201,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     BottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
-    
+
     final origin = getParentSection(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(

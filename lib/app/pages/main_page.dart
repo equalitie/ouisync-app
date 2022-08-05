@@ -374,7 +374,7 @@ class _MainPageState extends State<MainPage>
                 return;
               }
 
-              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true); 
+              await NativeChannels.previewOuiSyncFile(item.path, item.size, useDefaultApp: true);
             }
             : () {
               if (_persistentBottomSheetController != null && _pathEntryToMove == item.path) {
@@ -547,7 +547,7 @@ class _MainPageState extends State<MainPage>
     final length = io.File(path).statSync().size;
     final filePath = buildDestinationPath(currentRepo.currentFolder.path, fileName);
     final fileByteStream = io.File(path).openRead();
-        
+
     currentRepo.saveFile(
       newFilePath: filePath,
       fileName: fileName,

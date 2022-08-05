@@ -46,7 +46,7 @@ class Dimensions {
   static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
   static const EdgeInsets paddingItemBox = EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0);
   static const EdgeInsets paddingGreyBox = EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0);
-  
+
   static const double actionsDialogPadding = 20.0;
   static const double actionsDialogAvatarRadius = 10.0;
 
@@ -71,7 +71,7 @@ class Dimensions {
 
   static const BoxConstraints sizeConstrainsDialogAction = BoxConstraints(minWidth: 98, minHeight: 46.0);
   static const double elevationDialogAction = 0.0;
-  
+
   static const TextStyle textStyleDialogNegativeButton = TextStyle(color: Color.fromARGB(255, 97, 97, 97), fontWeight: FontWeight.w500);
   static const EdgeInsets marginDialogNegativeButton = EdgeInsets.only(right: 10.0);
 

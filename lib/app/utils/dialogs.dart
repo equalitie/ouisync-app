@@ -47,12 +47,12 @@ abstract class Dialogs {
       context:context,
       barrierDismissible: false,
       builder:(BuildContext context){
-        return alert; 
+        return alert;
       },
     );
   }
 
-  static _hideLoadingDialog(context) => 
+  static _hideLoadingDialog(context) =>
     Navigator.pop(context);
 
   static Future<bool?> alertDialogWithActions({
@@ -81,7 +81,7 @@ abstract class Dialogs {
     actions ??= [TextButton(
         child: Text(S.current.actionCloseCapital),
         onPressed: () => Navigator.of(context).pop(false),
-      )];  
+      )];
 
     return showDialog(
       context: context,

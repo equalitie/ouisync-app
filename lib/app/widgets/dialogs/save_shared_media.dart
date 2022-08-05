@@ -63,7 +63,7 @@ class SaveSharedMedia extends StatelessWidget {
         Navigator.of(context).pop();
       })
   ];
-  
+
   void _cancelSaveFile(context) {
     onBottomSheetOpen.call(null, '');
     Navigator.of(context).pop('');

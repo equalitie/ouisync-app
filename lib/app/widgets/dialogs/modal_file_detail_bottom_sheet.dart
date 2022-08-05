@@ -69,7 +69,7 @@ class _FileDetailState extends State<FileDetail> {
               onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
               icon: Icons.preview_rounded,
             ),
-          if (!io.Platform.isWindows)  
+          if (!io.Platform.isWindows)
             Fields.actionText(
               S.current.iconShare,
               onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
@@ -194,7 +194,7 @@ class _FileDetailState extends State<FileDetail> {
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
         final parent = getParentSection(path);
-        final newEntryPath = buildDestinationPath(parent, newName); 
+        final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.cubit.moveEntry(
           source: path,

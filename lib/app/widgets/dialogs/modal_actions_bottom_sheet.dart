@@ -65,7 +65,7 @@ class DirectoryActions extends StatelessWidget {
         ],
       )
     ),
-  ); 
+  );
 
   void createFolderDialog(context, RepoCubit cubit) async {
     await showDialog(
@@ -85,7 +85,7 @@ class DirectoryActions extends StatelessWidget {
       }
     ).then((newFolder) => {
       if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
-        Navigator.of(this.context).pop() 
+        Navigator.of(this.context).pop()
       }
     });
   }
@@ -103,7 +103,7 @@ class DirectoryActions extends StatelessWidget {
     if(result != null) {
       final file = result.files.single;
       final newFilePath = buildDestinationPath(path, file.name);
-      
+
       final exist = await repo.exists(newFilePath);
 
       if (exist) {

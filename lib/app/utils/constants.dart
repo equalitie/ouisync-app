@@ -12,7 +12,7 @@ class Constants{
   static const int bufferSize = 64000;
 
   /// In-line text style names
-  
+
   static const String inlineTextBold = 'bold';
   static const String inlineTextSize = 'size';
   static const String inlineTextColor = 'color';

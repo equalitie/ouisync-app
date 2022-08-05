@@ -11,7 +11,7 @@ import '../selectors/access_mode_dropddown_menu.dart';
 import '../widgets.dart';
 
 class ShareRepository extends StatefulWidget {
-  const ShareRepository({ 
+  const ShareRepository({
     required this.repository,
     required this.availableAccessModes,
   });
@@ -85,7 +85,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
 
   Future<String> createShareToken(RepoCubit repo, AccessMode accessMode) async {
     final shareToken = await repo.createShareToken(accessMode);
-    
+
     if (kDebugMode) { // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
       loggy.app('Token for sharing repository ${repo.name}: $shareToken (${accessMode.name})');
     }
@@ -113,8 +113,8 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
             color: Colors.black54
           )]))
     );
-  
-  String _tokenDescription(AccessMode accessMode) => 
+
+  String _tokenDescription(AccessMode accessMode) =>
     accessModeDescriptions.values.elementAt(accessMode.index);
 
   Widget _buildShareBox() => Container(
@@ -155,7 +155,7 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
                                 color: Colors.black)
                             ],
                           )))
-                  
+
                 ])
             ])),
         Expanded(
