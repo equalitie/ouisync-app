@@ -1,14 +1,13 @@
 import 'dart:io';
 
-import 'platform_window_manager_desktop.dart';
-import 'platform_window_manager_mobile.dart';
+import 'platform.dart';
 
 abstract class PlatformWindowManager {
   factory PlatformWindowManager() {
-    if (Platform.isWindows) {
-      return PlatformWindowManagerDesktop();
+    if (Platform.isAndroid) {
+      return PlatformWindowManagerMobile();
     }
-    return PlatformWindowManagerMobile();
+    return PlatformWindowManagerDesktop();
   }
 
   Future<void> setTitle(String title);

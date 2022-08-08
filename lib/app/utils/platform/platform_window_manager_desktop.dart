@@ -87,7 +87,7 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
   }
 
   @override
-  Future<bool> get isVisible async { return windowManager.isVisible(); }
+  Future<bool> get isVisible async { return false;/*windowManager.isVisible();*/ }
 
   @override
   void dispose() {
