@@ -156,8 +156,6 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
     if (job.state.cancel) {
       showMessage(S.current.messageWritingFileCanceled(newFilePath));
-    } else {
-      showMessage(S.current.messageWritingFileDone(newFilePath));
     }
   }
 
