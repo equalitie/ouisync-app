@@ -22,13 +22,15 @@ class AddRepositoryWithToken extends StatefulWidget {
   final String? initialTokenValue;
 
   @override
-  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(initialTokenValue);
+  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(cubit, initialTokenValue);
 }
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with OuiSyncAppLogger {
 
-  _AddRepositoryWithTokenState(String? initialTokenValue) :
+  _AddRepositoryWithTokenState(this._repos, String? initialTokenValue) :
       _tokenController = TextEditingController(text: initialTokenValue);
+
+  final ReposCubit _repos;
 
   final TextEditingController _tokenController;
   final TextEditingController _nameController = TextEditingController(text: null);
@@ -244,7 +246,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
     final token = _tokenController.text;
     try {
-      _shareToken = ShareToken(widget.cubit.session, token);
+      _shareToken = ShareToken(_repos.session, token);
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
       showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
@@ -291,10 +293,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     }
 
     try {
-      final shareToken = ShareToken(widget.cubit.session, value!);
+      final shareToken = ShareToken(_repos.session, value!);
 
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
+
+      final existingRepo = _repos.findById(shareToken.repositoryId());
+
+      if (existingRepo != null) {
+        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
+      }
     } catch (e) {
       _suggestedName = '';
       _accessModeNotifier.value = '';
@@ -318,16 +326,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     final newRepositoryName = _nameController.text;
     final password = _passwordController.text;
 
-    _onSaved(widget.cubit, newRepositoryName, password);
+    _onSaved(newRepositoryName, password);
   }
 
-  void _onSaved(ReposCubit cubit, String name, String password) async {
+  void _onSaved(String name, String password) async {
     if (!widget.formKey.currentState!.validate()) {
       return;
     }
 
     widget.formKey.currentState!.save();
-    cubit.openRepository(name, password: password, token: _shareToken, setCurrent: true);
+    _repos.openRepository(name, password: password, token: _shareToken, setCurrent: true);
 
     Navigator.of(widget.context).pop(name);
   }

@@ -42,6 +42,19 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
 
+  oui.ShareToken createToken(String tokenString) {
+    return oui.ShareToken(session, tokenString);
+  }
+
+  RepoCubit? findById(String id) {
+    for (final r in repos) {
+      if (r.id == id) {
+        return r;
+      }
+    }
+    return null;
+  }
+
   Future<void> setCurrent(RepoCubit? repo) async {
     if (currentRepo == repo) {
       return;

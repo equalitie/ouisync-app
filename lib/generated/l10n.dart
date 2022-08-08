@@ -840,6 +840,16 @@ class S {
     );
   }
 
+  /// `This repository already exists in the app under the name "{name}".`
+  String messageRepositoryAlreadyExist(Object name) {
+    return Intl.message(
+      'This repository already exists in the app under the name "$name".',
+      name: 'messageRepositoryAlreadyExist',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `This function is not available when moving an entry.`
   String get messageMovingEntry {
     return Intl.message(
