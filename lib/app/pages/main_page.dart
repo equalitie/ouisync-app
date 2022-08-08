@@ -562,8 +562,7 @@ class _MainPageState extends State<MainPage>
     final fileByteStream = io.File(path).openRead();
 
     currentRepo.saveFile(
-      newFilePath: filePath,
-      fileName: fileName,
+      filePath: filePath,
       length: length,
       fileByteStream: fileByteStream
     );

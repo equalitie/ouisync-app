@@ -113,25 +113,24 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   }
 
   Future<void> saveFile({
-      required String newFilePath,
-      required String fileName,
+      required String filePath,
       required int length,
       required Stream<List<int>> fileByteStream,
   }) async {
-    if (uploads.containsKey(newFilePath)) {
+    if (uploads.containsKey(filePath)) {
       showMessage("File is already being uploaded");
       return;
     }
 
-    final file = await _createFile(newFilePath);
+    final file = await _createFile(filePath);
 
     if (file == null) {
-      showMessage(S.current.messageNewFileError(newFilePath));
+      showMessage(S.current.messageNewFileError(filePath));
       return;
     }
 
     final job = cubits.Watch(Job(0, length));
-    update((repo) { repo.uploads[newFilePath] = job; });
+    update((repo) { repo.uploads[filePath] = job; });
 
     await _refreshFolder();
 
@@ -147,15 +146,15 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
         job.update((job) { job.soFar = offset; });
       }
     } catch (e) {
-      showMessage(S.current.messageWritingFileError(newFilePath));
+      showMessage(S.current.messageWritingFileError(filePath));
       return;
     } finally {
       await file.close();
-      update((repo) { repo.uploads.remove(newFilePath); });
+      update((repo) { repo.uploads.remove(filePath); });
     }
 
     if (job.state.cancel) {
-      showMessage(S.current.messageWritingFileCanceled(newFilePath));
+      showMessage(S.current.messageWritingFileCanceled(filePath));
     }
   }
 

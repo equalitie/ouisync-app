@@ -114,8 +114,7 @@ class DirectoryActions extends StatelessWidget {
       }
 
       repo.saveFile(
-        newFilePath: newFilePath,
-        fileName: file.name,
+        filePath: newFilePath,
         length: file.size,
         fileByteStream: file.readStream!
       );
