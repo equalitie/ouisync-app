@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
+import '../widgets/buttons/dialog_danger_button.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
@@ -124,7 +125,7 @@ abstract class Dialogs {
   );
 
   static AlertDialog buildDeleteFileAlertDialog(
-    RepoCubit cubit,
+    RepoCubit repo,
     String path,
     BuildContext context,
     String fileName,
@@ -168,16 +169,16 @@ abstract class Dialogs {
     ),
     actions: <Widget>[
       TextButton(
-        child: Text(S.current.actionDeleteCapital),
+        child: Text(S.current.actionCancelCapital),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      DangerButton(
+        text: S.current.actionDeleteCapital,
         onPressed: () {
-          cubit.deleteFile(path);
+          repo.deleteFile(path);
           Navigator.of(context).pop(fileName);
           showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
-      ),
-      TextButton(
-        child: Text(S.current.actionCancelCapital),
-        onPressed: () => Navigator.of(context).pop(),
       ),
     ],
   );
