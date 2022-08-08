@@ -36,7 +36,7 @@ class FolderCreation extends StatelessWidget {
           label: S.current.labelName,
           hint: S.current.messageFolderName,
           onSaved: (value) => _onSaved(cubit, value),
-          validator: formNameValidator,
+          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
           autofocus: true
         ),
         Fields.dialogActions(

@@ -53,7 +53,7 @@
     "messageErrorDefault":"Something went wrong. Please try again.",
     "messageErrorDefaultShort":"Failed.",
     "messageErrorLoadingContents":"We couldn’t load this folder's contents. Please try again.",
-    "messageErrorFormValidatorNameDefault":"Please enter a valid name (unique, no spaces)",
+    "messageErrorFormValidatorNameDefault":"Please enter a valid name.",
     "messageErrorPathNotEmpty":"{path} is not empty",
     "messageErrorCurrentPathMissing":"The current folder is missing, navigating to its parent: {path}",
     "messageNewFileError":"Error creating file {name}",

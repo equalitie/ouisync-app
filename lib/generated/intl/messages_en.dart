@@ -206,8 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entry not found"),
         "messageErrorFormValidatorNameDefault":
-            MessageLookupByLibrary.simpleMessage(
-                "Please enter a valid name (unique, no spaces)"),
+            MessageLookupByLibrary.simpleMessage("Please enter a valid name."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "We couldn’t load this folder\'s contents. Please try again."),
         "messageErrorPathNotEmpty": m5,

@@ -31,6 +31,10 @@ Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? formNameValidator(String? value, { String? error }) {
-  return value!.isEmpty ? (error ?? S.current.messageErrorFormValidatorNameDefault) : null;
-}
+String? Function(String?) validateNoEmpty(String error) => (String? value) {
+  if (value == null || value.isEmpty) {
+    return error;
+  }
+
+  return null;
+};

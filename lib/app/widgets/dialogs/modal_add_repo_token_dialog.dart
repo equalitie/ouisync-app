@@ -125,7 +125,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
           label: S.current.labelName,
           hint: S.current.messageRepositoryName,
           onSaved: (_) {},
-          validator: formNameValidator,
+          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
           autovalidateMode: AutovalidateMode.disabled
         ),
         Visibility(
@@ -162,10 +162,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
                       label: S.current.labelPassword,
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
-                      validator: (
-                        password,
-                        { error = Strings.messageErrorRepositoryPasswordValidation }
-                      ) => formNameValidator(password, error: error),
+                      validator: validateNoEmpty(Strings.messageErrorRepositoryPasswordValidation),
                       autovalidateMode: AutovalidateMode.disabled
                     )
                   ),
@@ -197,14 +194,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
                       label: S.current.labelRetypePassword,
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
-                      validator: (
-                        retypedPassword,
-                        { error = Strings.messageErrorRetypePassword }
-                      ) => retypedPasswordValidator(
-                          password: _passwordController.text,
-                          retypedPassword: retypedPassword!,
-                          error: error
-                        ),
+                      validator: (retypedPassword) => retypedPasswordValidator(
+                        password: _passwordController.text,
+                        retypedPassword: retypedPassword,
+                      ),
                       autovalidateMode: AutovalidateMode.disabled
                     ),
                   ),
@@ -234,11 +227,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
   String? retypedPasswordValidator({
     required String password,
-    required String retypedPassword,
-    required String error
+    required String? retypedPassword,
   }) {
-    if (password != retypedPassword) {
-      return error;
+    if (retypedPassword == null || password != retypedPassword) {
+      return S.current.messageErrorRetypePassword;
     }
 
     return null;

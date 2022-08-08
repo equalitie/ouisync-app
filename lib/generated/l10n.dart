@@ -540,10 +540,10 @@ class S {
     );
   }
 
-  /// `Please enter a valid name (unique, no spaces)`
+  /// `Please enter a valid name.`
   String get messageErrorFormValidatorNameDefault {
     return Intl.message(
-      'Please enter a valid name (unique, no spaces)',
+      'Please enter a valid name.',
       name: 'messageErrorFormValidatorNameDefault',
       desc: '',
       args: [],

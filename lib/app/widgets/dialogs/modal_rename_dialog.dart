@@ -43,7 +43,7 @@ class Rename extends StatelessWidget {
           label: S.current.labelName,
           hint: hint,
           onSaved: _returnNewName,
-          validator: formNameValidator,
+          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
           autofocus: true
         ),
         Fields.dialogActions(
