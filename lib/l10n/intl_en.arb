@@ -84,8 +84,6 @@
     "messageRenameRepository":"Rename repository",
     "messageRenameFile":"Rename file",
     "messageRenameFolder":"Rename folder",
-    "messageWritingFileDone":"{name} - saved successfully",
-    "messageDownloadingFileDone":"{name} - downloaded successfully",
     "messageWritingFileCanceled":"{name} writing canceled",
     "messageDownloadingFileCanceled":"{name} - downloading canceled",
 

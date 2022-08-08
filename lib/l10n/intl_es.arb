@@ -85,8 +85,6 @@
     "messageRenameRepository":"Cambiar nombre de repositorio",
     "messageRenameFile":"Cambiar nombre de archivo",
     "messageRenameFolder":"Cambiar nombre de directorio",
-    "messageWritingFileDone":"{name} - guardado exitosamente",
-    "messageDownloadingFileDone":"{name} - descargado exitosamente",
     "messageWritingFileCanceled":"{name} escritura cancelada",
     "messageCancelingFileWriting":"Cancelando escritura de {name}",
     "messageDownloadingFileCanceled":"{name} - descarga cancelada",
