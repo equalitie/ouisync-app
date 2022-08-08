@@ -100,7 +100,7 @@ class _FileDetailState extends State<FileDetail> {
                 barrierDismissible: false, // user must tap button!
                 builder: (BuildContext context) {
                   final fileName = getBasename(widget.data.path);
-                  final parent = getParentSection(widget.data.path);
+                  final parent = getDirname(widget.data.path);
 
                   return Dialogs
                   .buildDeleteFileAlertDialog(
@@ -157,7 +157,7 @@ class _FileDetailState extends State<FileDetail> {
   ) {
     Navigator.of(context).pop();
 
-    final origin = getParentSection(path);
+    final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
         widget.cubit,
@@ -193,7 +193,7 @@ class _FileDetailState extends State<FileDetail> {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = getParentSection(path);
+        final parent = getDirname(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.cubit.moveEntry(

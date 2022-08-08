@@ -21,7 +21,7 @@ class Folder {
     return path == Strings.root;
   }
 
-  String get parent => getParentSection(path);
+  String get parent => getDirname(path);
 
   void goUp() {
     path = parent;

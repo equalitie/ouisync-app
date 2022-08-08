@@ -73,7 +73,7 @@ class FolderNavigationBar extends StatelessWidget {
   }
 
   GestureDetector _navigation(String path, BuildContext ctx) {
-    final target = getParentSection(path);
+    final target = getDirname(path);
 
     return GestureDetector(
       onTap: () {

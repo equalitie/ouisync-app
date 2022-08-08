@@ -40,7 +40,7 @@ class MoveEntryDialog extends StatelessWidget {
             text: getBasename(path)
           ),
           Fields.constrainedText(
-            S.current.messageMoveEntryOrigin(getParentSection(path)),
+            S.current.messageMoveEntryOrigin(getDirname(path)),
             fontWeight: FontWeight.w800
           ),
           _selectActions(context)

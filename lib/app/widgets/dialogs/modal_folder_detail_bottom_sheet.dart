@@ -202,7 +202,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   ) {
     Navigator.of(context).pop();
 
-    final origin = getParentSection(path);
+    final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
         widget.cubit,
@@ -238,7 +238,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = getParentSection(path);
+        final parent = getDirname(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.cubit.moveEntry(source: path, destination: newEntryPath);

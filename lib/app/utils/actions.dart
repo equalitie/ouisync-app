@@ -23,7 +23,7 @@ hideSnackBar(context) =>
 
 String getBasename(String path) => p.basename(path);
 
-String getParentSection (String path) => p.dirname(path);
+String getDirname(String path) => p.dirname(path);
 
 String getFileExtension(String fileName) => p.extension(fileName);
 
