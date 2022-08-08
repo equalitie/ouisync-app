@@ -393,9 +393,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         child: Text(S.current.actionCloseCapital),
                         onPressed: () => Navigator.of(context).pop(false),
                       ),
-                      TextButton(
-                        child: Text(S.current.actionDeleteCapital),
-                        style: ButtonStyle(foregroundColor: MaterialStateProperty.resolveWith((_) => Colors.red)),
+                      DangerButton(
+                        text: S.current.actionDeleteCapital,
                         onPressed: () => Navigator.of(context).pop(true),
                       ),
                     ]
