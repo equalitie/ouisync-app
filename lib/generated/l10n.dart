@@ -640,36 +640,6 @@ class S {
     );
   }
 
-  /// `BitTorrent DHT is {status}`
-  String messageBitTorrentDHTStatus(Object status) {
-    return Intl.message(
-      'BitTorrent DHT is $status',
-      name: 'messageBitTorrentDHTStatus',
-      desc: '',
-      args: [status],
-    );
-  }
-
-  /// `BitTorrent DHT could not be enabled`
-  String get messageBitTorrentDHTEnableFailed {
-    return Intl.message(
-      'BitTorrent DHT could not be enabled',
-      name: 'messageBitTorrentDHTEnableFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Disabling BitTorrent DHT failed`
-  String get messageBitTorrentDHTDisableFailed {
-    return Intl.message(
-      'Disabling BitTorrent DHT failed',
-      name: 'messageBitTorrentDHTDisableFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>`
   String get messageNoRepo {
     return Intl.message(

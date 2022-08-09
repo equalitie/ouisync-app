@@ -66,10 +66,6 @@
     "messageReadReplicaExplanation":"No puede ser modificado, sólo acceder sus contenidos",
     "messageWriteReplicaExplanation":"Aceso total. Tu colega puede leer y modificar",
 
-    "messageBitTorrentDHTStatus":"Estado del BitTorrent DHT:  {status}",
-    "messageBitTorrentDHTEnableFailed":"No fue posible habilitar BitTorrent DHT",
-    "messageBitTorrentDHTDisableFailed":"Fallo deshabilitando BitTorrent DHT",
-
     "messageNoRepo":"Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>",
     "messageCreateNewRepo":"Crea un  nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>",
     "messageNoRepos":"No se hayaron repositorios",

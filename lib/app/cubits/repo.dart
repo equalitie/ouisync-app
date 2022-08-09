@@ -37,8 +37,20 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   Folder get currentFolder => _currentFolder;
 
   bool isDhtEnabled() => handle.isDhtEnabled();
-  void enableDht() => handle.enableDht();
-  void disableDht() => handle.disableDht();
+
+  void enableDht() {
+    if (!isDhtEnabled()) {
+      handle.enableDht();
+      changed();
+    }
+  }
+
+  void disableDht() {
+    if (isDhtEnabled()) {
+      handle.disableDht();
+      changed();
+    }
+  }
 
   Future<oui.Directory> openDirectory(String path) async {
     return await oui.Directory.open(handle, path);

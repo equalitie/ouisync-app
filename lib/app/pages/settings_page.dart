@@ -25,12 +25,10 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.reposCubit,
     required this.onShareRepository,
-    this.dhtStatus = false,
   });
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) onShareRepository;
-  final bool dhtStatus;
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -48,8 +46,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   String? _dhtEndpointV4;
   String? _dhtEndpointV6;
 
-  bool _bittorrentDhtStatus = false;
-
   Color? _titlesColor = Colors.black;
 
   // Clicking on the version number three times shall show the state monitor page.
@@ -58,11 +54,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   @override
   void initState() {
     super.initState();
-
     _updateLocalEndpoints();
-
-    _bittorrentDhtStatus = widget.dhtStatus;
-    loggy.app('BitTorrent DHT status: ${widget.dhtStatus}');
   }
 
   void _updateLocalEndpoints({ConnectivityResult? connectivityResult}) async {
@@ -153,12 +145,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       fontSize: Dimensions.fontAverage,
                       fontWeight: FontWeight.normal,
                       color: _titlesColor!),
-                  LabeledSwitch(
-                    label: S.current.labelBitTorrentDHT,
-                    padding: const EdgeInsets.all(0.0),
-                    value: _bittorrentDhtStatus,
-                    onChanged: updateDhtSetting,
-                  ),
+                  _buildCurrentRepoDhtSwitch(repos.currentRepo),
                   BlocConsumer<ConnectivityCubit, ConnectivityState>(
                     builder: (context, state) {
                       return Column(
@@ -192,6 +179,27 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       S.current.labelAppVersion, info.then((info) => info.version)),
                 ],
               ))));
+  }
+
+  Widget _buildCurrentRepoDhtSwitch(RepoCubit? repo) {
+    if (repo == null) {
+      return SizedBox.shrink();
+    }
+
+    return repo.builder((repo) =>
+      LabeledSwitch(
+        label: S.current.labelBitTorrentDHT,
+        padding: const EdgeInsets.all(0.0),
+        value: repo.isDhtEnabled(),
+        onChanged: (bool enable) {
+          if (enable) {
+            repo.enableDht();
+          } else {
+            repo.disableDht();
+          }
+        },
+      )
+    );
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
@@ -462,39 +470,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: _shareLogs)])),
           ]);
-
-  Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.currentRepo;
-
-    if (current == null) {
-      return;
-    }
-
-    loggy.app('${enable ? 'Enabling' : 'Disabling'} BitTorrent DHT...');
-
-    enable
-        ? current.enableDht()
-        : current.disableDht();
-
-    final isEnabled = current.isDhtEnabled();
-
-    setState(() {
-      _bittorrentDhtStatus = isEnabled;
-    });
-
-    await Settings.setDhtEnableStatus(current.id, isEnabled);
-
-    String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
-
-    if (enable != isEnabled) {
-      dhtStatusMessage = enable
-          ? S.current.messageBitTorrentDHTEnableFailed
-          : S.current.messageBitTorrentDHTDisableFailed;
-    }
-
-    loggy.app(dhtStatusMessage);
-    showSnackBar(context, content: Text(dhtStatusMessage));
-  }
 
   Future<void> _saveLogs() async {
     final tempPath = await _dumpInfo();

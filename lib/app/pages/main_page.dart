@@ -261,10 +261,7 @@ class _MainPageState extends State<MainPage>
     Widget _buildSettingsIcon() {
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
-        onPressed: () async {
-          bool dhtStatus = _currentRepo?.isDhtEnabled() ?? false;
-          settingsAction(dhtStatus);
-        },
+        onPressed: settingsAction,
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface
       );
@@ -670,7 +667,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void settingsAction(dhtStatus) {
+  void settingsAction() {
     final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
     final reposCubit = _repositories;
@@ -688,7 +685,6 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
             reposCubit: reposCubit,
             onShareRepository: _showShareRepository,
-            dhtStatus: dhtStatus,
           )
         );
       })

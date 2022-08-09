@@ -65,10 +65,6 @@
     "messageReadReplicaExplanation":"Can not be modified, just access the contents",
     "messageWriteReplicaExplanation":"Full access. Your peer can read and write",
 
-    "messageBitTorrentDHTStatus":"BitTorrent DHT is {status}",
-    "messageBitTorrentDHTEnableFailed":"BitTorrent DHT could not be enabled",
-    "messageBitTorrentDHTDisableFailed":"Disabling BitTorrent DHT failed",
-
     "messageNoRepo":"Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>",
     "messageCreateNewRepo":"Create a new <bold>repository</bold>, or link to one from a friend using a <bold>repository token</bold>",
     "messageNoRepos":"No repositories found",
