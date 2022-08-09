@@ -1,93 +1,81 @@
 import 'package:shared_preferences/shared_preferences.dart';
+// For json
 
 import 'utils.dart';
 
 class Settings {
-  static SharedPreferences? _preferences;
+  static SharedPreferences? _prefs;
 
-  static Future<void> _init() async {
-    if (_preferences == null) {
-      _preferences = await SharedPreferences.getInstance();
+  static const String _CURRENT_REPO_KEY = "CURRENT_REPO";
+  static const String _BT_DHT_KEY_PREFIX = "BT_DHT_ENABLED-";
+  static const String _HIGHEST_SEEN_PROTOCOL_NUMBER_KEY = "HIGHEST_SEEN_PROTOCOL_NUMBER";
+
+  static Future<SharedPreferences> _init() async {
+    var prefs = _prefs;
+    if (prefs == null) {
+      prefs = await SharedPreferences.getInstance();
+      _prefs = prefs;
     }
+    return prefs;
   }
 
   static Future<void> initSettings(
     String appDir,
     String repositoriesDir,
   ) async {
-    if (_preferences == null) {
-      await _init();
-    }
+    final prefs = await _init();
 
-    await _preferences!.setString(Constants.appDirKey, appDir);
-    await _preferences!.setString(Constants.repositoriesDirKey, repositoriesDir);
+    await prefs.setString(Constants.appDirKey, appDir);
+    await prefs.setString(Constants.repositoriesDirKey, repositoriesDir);
   }
 
-  static dynamic readSetting(String key) async {
-    if (_preferences == null) {
-      await _init();
-    }
+  static Future<void> setDefaultRepo(String? name) async {
+    final prefs = await _init();
 
-    if (_preferences!.containsKey(key)) {
-      return _preferences!.get(key);
+    if (name != null && name.isNotEmpty) {
+      await prefs.setString(_CURRENT_REPO_KEY, name);
+    } else {
+      await _remove(prefs, _CURRENT_REPO_KEY);
     }
+  }
 
+  static Future<String?> getDefaultRepo() async {
+    return (await _init()).getString(_CURRENT_REPO_KEY);
+  }
+
+  static Future<bool> getDhtEnableStatus(String repoId, { required bool defaultValue }) async {
+    final prefs = await _init();
+
+    final status = prefs.getBool(_BT_DHT_KEY_PREFIX + repoId);
+    return status ?? defaultValue;
+  }
+
+  static Future<void> setDhtEnableStatus(String repoId, bool? status) async {
+    final prefs = await _init();
+    final key = _BT_DHT_KEY_PREFIX + repoId;
+
+    if (status != null) {
+      await prefs.setBool(key, status);
+    } else {
+      await _remove(prefs, key);
+    }
+  }
+
+  static Future<void> setHighestSeenProtocolNumber(int number) async {
+    final prefs = await _init();
+    await prefs.setInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY, number);
+  }
+
+  static Future<int?> getHighestSeenProtocolNumber() async {
+    final prefs = await _init();
+    prefs.getInt(_HIGHEST_SEEN_PROTOCOL_NUMBER_KEY);
     return null;
   }
 
-  static Future<bool> saveSetting(String key, value) async {
-    if (_preferences == null) {
-      await _init();
-    }
-
-    switch (value.runtimeType) {
-      case bool:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setBool(key, value);
-
-        break;
-
-      case double:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setDouble(key, value);
-        
-        break;
-
-      case int:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setInt(key, value);
-        
-        break;
-
-      case String:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setString(key, value);
-
-        break;
-
-      case List:
-        print('Saving setting $key<${value.runtimeType}>: $value');
-        await _preferences!.setStringList(key, value);
-
-        break;
-      
-      default:
-        print('No supported type for setting $key<${value.runtimeType}>: $value');
-        return false;
-    }
-
-    return true;
-  }
-
-  static dynamic deleteSetting(String key) async {
-    if (_preferences == null) {
-      await _init();
-    }
-
-    if (_preferences!.containsKey(key)) {
-      return _preferences!.remove(key);
-    }
-
-    return null;
+  // TODO: It's not clear from the documentation whether
+  // SharedPreferences.remove throws if the key doesn't exist (it might also be
+  // platform dependent), so we check for it.
+  static Future<void> _remove(SharedPreferences prefs, String key) async {
+    try { await prefs.remove(key); } catch (_) {}
   }
 }

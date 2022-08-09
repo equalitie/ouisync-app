@@ -510,16 +510,6 @@ class S {
     );
   }
 
-  /// `Loading the folder contents…`
-  String get messageLoadingContents {
-    return Intl.message(
-      'Loading the folder contents…',
-      name: 'messageLoadingContents',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Something went wrong. Please try again.`
   String get messageErrorDefault {
     return Intl.message(
@@ -550,10 +540,10 @@ class S {
     );
   }
 
-  /// `Please enter a valid name (unique, no spaces)`
+  /// `Please enter a valid name.`
   String get messageErrorFormValidatorNameDefault {
     return Intl.message(
-      'Please enter a valid name (unique, no spaces)',
+      'Please enter a valid name.',
       name: 'messageErrorFormValidatorNameDefault',
       desc: '',
       args: [],
@@ -830,26 +820,6 @@ class S {
     );
   }
 
-  /// `{name} - saved successfully`
-  String messageWritingFileDone(Object name) {
-    return Intl.message(
-      '$name - saved successfully',
-      name: 'messageWritingFileDone',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} - downloaded successfully`
-  String messageDownloadingFileDone(Object name) {
-    return Intl.message(
-      '$name - downloaded successfully',
-      name: 'messageDownloadingFileDone',
-      desc: '',
-      args: [name],
-    );
-  }
-
   /// `{name} writing canceled`
   String messageWritingFileCanceled(Object name) {
     return Intl.message(
@@ -860,21 +830,21 @@ class S {
     );
   }
 
-  /// `Canceling {name} writing...`
-  String messageCancelingFileWriting(Object name) {
-    return Intl.message(
-      'Canceling $name writing...',
-      name: 'messageCancelingFileWriting',
-      desc: '',
-      args: [name],
-    );
-  }
-
   /// `{name} - downloading canceled`
   String messageDownloadingFileCanceled(Object name) {
     return Intl.message(
       '$name - downloading canceled',
       name: 'messageDownloadingFileCanceled',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `This repository already exists in the app under the name "{name}".`
+  String messageRepositoryAlreadyExist(Object name) {
+    return Intl.message(
+      'This repository already exists in the app under the name "$name".',
+      name: 'messageRepositoryAlreadyExist',
       desc: '',
       args: [name],
     );

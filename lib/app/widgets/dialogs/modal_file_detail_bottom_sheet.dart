@@ -14,7 +14,6 @@ class FileDetail extends StatefulWidget {
   const FileDetail({
     required this.context,
     required this.cubit,
-    required this.repository,
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
@@ -22,8 +21,7 @@ class FileDetail extends StatefulWidget {
   });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final RepoState repository;
+  final RepoCubit cubit;
   final FileItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -56,7 +54,6 @@ class _FileDetailState extends State<FileDetail> {
                   return ActionsDialog(
                     title: S.current.titleDownloadToDevice,
                     body: SaveToDevice(
-                      repository: widget.repository,
                       data: widget.data,
                       cubit: widget.cubit
                     ),
@@ -72,7 +69,7 @@ class _FileDetailState extends State<FileDetail> {
               onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
               icon: Icons.preview_rounded,
             ),
-          if (!io.Platform.isWindows)  
+          if (!io.Platform.isWindows)
             Fields.actionText(
               S.current.iconShare,
               onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
@@ -103,11 +100,10 @@ class _FileDetailState extends State<FileDetail> {
                 barrierDismissible: false, // user must tap button!
                 builder: (BuildContext context) {
                   final fileName = getBasename(widget.data.path);
-                  final parent = getParentSection(widget.data.path);
+                  final parent = getDirname(widget.data.path);
 
                   return Dialogs
                   .buildDeleteFileAlertDialog(
-                    widget.repository,
                     widget.cubit,
                     widget.data.path,
                     context,
@@ -161,9 +157,10 @@ class _FileDetailState extends State<FileDetail> {
   ) {
     Navigator.of(context).pop();
 
-    final origin = getParentSection(path);
+    final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
+        widget.cubit,
         origin: origin,
         path: path,
         type: type,
@@ -196,11 +193,10 @@ class _FileDetailState extends State<FileDetail> {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = getParentSection(path);
-        final newEntryPath = buildDestinationPath(parent, newName); 
+        final parent = getDirname(path);
+        final newEntryPath = buildDestinationPath(parent, newName);
 
         widget.cubit.moveEntry(
-          widget.repository,
           source: path,
           destination: newEntryPath
         );

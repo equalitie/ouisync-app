@@ -12,6 +12,7 @@ class SpinningIcon extends AnimatedWidget {
   final Icon icon;
   final AnimationController controller;
 
+  @override
   Widget build(BuildContext context) {
     final Animation<double> _animation = CurvedAnimation(
       parent: controller,

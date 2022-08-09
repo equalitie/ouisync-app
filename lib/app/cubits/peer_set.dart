@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 class PeerSetCubit extends Cubit<PeerSetChanged> {
-  PeerSetCubit() : super(PeerSetChanged([]));
+  PeerSetCubit() : super(const PeerSetChanged([]));
 
   void onPeerSetChanged(oui.Session session) {
     emit(PeerSetChanged(session.connectedPeers));

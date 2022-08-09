@@ -1,20 +1,19 @@
 import 'dart:async';
 
-import './repo_state.dart';
-import './item/base_item.dart';
+import 'item.dart';
 import '../utils/strings.dart';
 import '../utils/actions.dart';
+import '../cubits/repo.dart';
 
-import 'package:collection/collection.dart';
 
-class FolderState {
-  late final RepoState repo;
+class Folder {
+  late final RepoCubit repo;
   String path = Strings.root;
 
   List<BaseItem> content = <BaseItem>[];
-  _Refresher _refresher = _Refresher();
+  final _Refresher _refresher = _Refresher();
 
-  FolderState() {
+  Folder() {
     _refresher.folder = this;
   }
 
@@ -22,7 +21,7 @@ class FolderState {
     return path == Strings.root;
   }
 
-  String get parent => getParentSection(path);
+  String get parent => getDirname(path);
 
   void goUp() {
     path = parent;
@@ -43,7 +42,7 @@ class FolderState {
 // starting a refresh operation, and if there are other N that are requested
 // before the first one finishes, only one is scheduled to be done afterwards.
 class _Refresher {
-  late final FolderState folder;
+  late final Folder folder;
 
   bool _running = false;
   bool _hasNextJob = false;
@@ -81,7 +80,7 @@ class _Refresher {
 
         try {
           final content = await folder.repo.getFolderContents(path);
-          content.sort((a, b) => a.type.index.compareTo(b.type.index));
+          content.sort((a, b) => _typeId(a).compareTo(_typeId(b)));
 
           if (path == folder.path) {
             folder.content = content;
@@ -100,5 +99,12 @@ class _Refresher {
     } finally {
       _running = false;
     }
+  }
+
+  int _typeId(BaseItem item) {
+    if (item is FolderItem) return 0;
+    if (item is FileItem) return 1;
+    assert(false);
+    return -1;
   }
 }

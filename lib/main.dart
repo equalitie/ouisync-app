@@ -43,11 +43,10 @@ Future<void> main() async {
   final localRepositoriesList =
       RepositoryHelper.localRepositoriesFiles(repositoriesDir) as List<String>;
 
-  final latestRepositoryOrDefaultName =
+  final defaultRepositoryName =
       await RepositoryHelper.latestRepositoryOrDefault(localRepositoriesList);
 
-  await Settings.saveSetting(
-      Constants.currentRepositoryKey, latestRepositoryOrDefaultName);
+  await Settings.setDefaultRepo(defaultRepositoryName);
 
   final session = await Session.open(configDir);
 
@@ -65,7 +64,7 @@ Future<void> main() async {
           session: session,
           appStorageLocation: appDir,
           repositoriesLocation: repositoriesDir,
-          defaultRepositoryName: latestRepositoryOrDefaultName,
+          defaultRepositoryName: defaultRepositoryName,
           windowManager: windowManager
         ))),
   );

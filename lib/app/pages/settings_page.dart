@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../models/repo_state.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../utils/click_counter.dart';
@@ -30,7 +29,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final ReposCubit reposCubit;
-  final void Function(RepoState) onShareRepository;
+  final void Function(RepoCubit) onShareRepository;
   final bool dhtStatus;
 
   @override
@@ -79,7 +78,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         case ConnectivityResult.ethernet: _connectionType = "Ethernet"; break;
         case ConnectivityResult.none: _connectionType = "None"; break;
         default: _connectionType = "???"; break;
-    };
+    }
 
     final session = widget.reposCubit.session;
 
@@ -143,12 +142,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-              child: widget.reposCubit.builder((state) => ListView(
+              child: widget.reposCubit.builder((repos) => ListView(
                 // The badge over the version number is shown outside of the row boundary, so we
                 // need to set clipBehaior to Clip.none.
                 clipBehavior: Clip.none,
                 children: [
-                  _buildRepositoriesSection(state.currentRepo),
+                  _buildRepositoriesSection(repos.currentRepo),
                   _divider(),
                   Fields.idLabel(S.current.titleNetwork,
                       fontSize: Dimensions.fontAverage,
@@ -255,7 +254,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
-  Widget _buildRepositoriesSection(RepoState? currentRepo) {
+  Widget _buildRepositoriesSection(RepoCubit? currentRepo) {
     return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,7 +270,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: DropdownButton<RepoState?>(
+            child: DropdownButton<RepoCubit?>(
               isExpanded: true,
               value: currentRepo,
               underline: const SizedBox(),
@@ -299,7 +298,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     ],
                   ));
               }).toList(),
-              items: repositories().map((RepoState repo) {
+              items: repositories().map((RepoCubit repo) {
                 return DropdownMenuItem(
                   value: repo,
                   child: Row(
@@ -320,7 +319,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               }).toList(),
               onChanged: (repo) async {
                 loggy.app('Selected repository: ${repo?.name}');
-                await widget.reposCubit.setCurrent(repo?.name);
+                await widget.reposCubit.setCurrentByName(repo?.name);
               },
             ),
           ),
@@ -340,7 +339,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
                   await showDialog<String>(
                       context: context,
-                      barrierDismissible: false,
                       builder: (BuildContext context) {
                         final formKey = GlobalKey<FormState>();
 
@@ -349,7 +347,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           body: RenameRepository(
                               context: context,
                               formKey: formKey,
-                              repositoryName: widget.reposCubit.current()!.name),
+                              repositoryName: currentRepo.name),
                         );
                       }).then((newName) {
                     if (newName == null || newName.isEmpty) {
@@ -380,35 +378,32 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 if (currentRepo == null) {
                   return;
                 }
-                await showDialog<bool>(
-                    context: context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text(S.current.titleDeleteRepository),
-                        content: SingleChildScrollView(
-                          child: ListBody(children: [
-                            Text(S.current.messageConfirmRepositoryDeletion)
-                          ]),
-                        ),
-                        actions: [
-                          TextButton(
-                              child: Text(S.current.actionDeleteCapital),
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              }),
-                          TextButton(
-                            child: Text(S.current.actionCloseCapital),
-                            onPressed: () => Navigator.of(context).pop(false),
-                          )
-                        ],
-                      );
-                    }).then((delete) {
-                  if (delete ?? false) {
-                    final repositoryName = currentRepo.name;
-                    widget.reposCubit.deleteRepository(repositoryName);
-                  }
-                });
+
+                final delete = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(S.current.titleDeleteRepository),
+                    content: SingleChildScrollView(
+                      child: ListBody(children: [
+                        Text(S.current.messageConfirmRepositoryDeletion)
+                      ]),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text(S.current.actionCloseCapital),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
+                      DangerButton(
+                        text: S.current.actionDeleteCapital,
+                        onPressed: () => Navigator.of(context).pop(true),
+                      ),
+                    ]
+                  )
+                );
+
+                if (delete ?? false) {
+                  widget.reposCubit.deleteRepository(currentRepo.name);
+                }
               })
             ],
           ),
@@ -417,11 +412,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Iterable<String> repositoryNames() {
-    return widget.reposCubit.state.repositoryNames();
+    return widget.reposCubit.repositoryNames();
   }
 
-  Iterable<RepoState> repositories() {
-    return widget.reposCubit.state.repos;
+  Iterable<RepoCubit> repositories() {
+    return widget.reposCubit.repos;
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -469,7 +464,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           ]);
 
   Future<void> updateDhtSetting(bool enable) async {
-    final current = widget.reposCubit.current();
+    final current = widget.reposCubit.currentRepo;
 
     if (current == null) {
       return;
@@ -487,9 +482,10 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _bittorrentDhtStatus = isEnabled;
     });
 
-    RepositoryHelper.updateBitTorrentDHTForRepoStatus(current.name, isEnabled);
+    await Settings.setDhtEnableStatus(current.id, isEnabled);
 
     String dhtStatusMessage = S.current.messageBitTorrentDHTStatus(isEnabled ? 'enabled' : 'disabled');
+
     if (enable != isEnabled) {
       dhtStatusMessage = enable
           ? S.current.messageBitTorrentDHTEnableFailed
@@ -521,25 +517,25 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     // been implemented by DateFormat.
     final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
     final path = buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
-    final out_file = File(path);
+    final outFile = File(path);
 
-    final sink = out_file.openWrite();
+    final sink = outFile.openWrite();
 
     sink.writeln("appName: ${info.appName}");
     sink.writeln("packageName: ${info.packageName}");
     sink.writeln("version: ${info.version}");
     sink.writeln("buildNumber: ${info.buildNumber}");
 
-    sink.writeln("_connectionType: ${_connectionType}");
-    sink.writeln("_externalIP: ${_externalIP}");
-    sink.writeln("_localIPv4: ${_localIPv4}");
-    sink.writeln("_localIPv6: ${_localIPv6}");
-    sink.writeln("_tcpListenerEndpointV4: ${_tcpListenerEndpointV4}");
-    sink.writeln("_tcpListenerEndpointV6: ${_tcpListenerEndpointV6}");
-    sink.writeln("_quicListenerEndpointV4: ${_quicListenerEndpointV4}");
-    sink.writeln("_quicListenerEndpointV6: ${_quicListenerEndpointV6}");
-    sink.writeln("_dhtEndpointV4: ${_dhtEndpointV4}");
-    sink.writeln("_dhtEndpointV6: ${_dhtEndpointV6}");
+    sink.writeln("_connectionType: $_connectionType");
+    sink.writeln("_externalIP: $_externalIP");
+    sink.writeln("_localIPv4: $_localIPv4");
+    sink.writeln("_localIPv6: $_localIPv6");
+    sink.writeln("_tcpListenerEndpointV4: $_tcpListenerEndpointV4");
+    sink.writeln("_tcpListenerEndpointV6: $_tcpListenerEndpointV6");
+    sink.writeln("_quicListenerEndpointV4: $_quicListenerEndpointV4");
+    sink.writeln("_quicListenerEndpointV6: $_quicListenerEndpointV6");
+    sink.writeln("_dhtEndpointV4: $_dhtEndpointV4");
+    sink.writeln("_dhtEndpointV6: $_dhtEndpointV6");
     sink.writeln("\n");
 
     await dumpAll(sink, widget.reposCubit.session.getRootStateMonitor());

@@ -54,10 +54,7 @@ class UnlockRepository extends StatelessWidget {
                     label: S.current.labelTypePassword,
                     hint: S.current.messageRepositoryPassword,
                     onSaved: _returnPassword,
-                    validator: (
-                      password,
-                      { error = Strings.messageErrorRepositoryPasswordValidation }
-                    ) => formNameValidator(password, error: error),
+                    validator: validateNoEmpty(Strings.messageErrorRepositoryPasswordValidation),
                     autofocus: true
                   )
                 ),

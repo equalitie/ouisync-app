@@ -4,18 +4,14 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../models/repo_state.dart';
 
 class AccessModeDropDownMenu extends StatefulWidget {
   const AccessModeDropDownMenu({
-    required this.repository,
     required this.accessModes,
     required this.onChanged,
-    Key? key
-  }) : super(key: key);
+  });
 
 
-  final RepoState repository;
   final List<AccessMode> accessModes;
   final Future<void> Function(AccessMode) onChanged;
 
@@ -93,7 +89,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>  with O
       ]);
   }
 
-  Widget _buildAccessModeItem(AccessMode accessMode) => 
+  Widget _buildAccessModeItem(AccessMode accessMode) =>
     Padding(
       padding: Dimensions.paddingItem,
       child: Column(

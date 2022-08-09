@@ -22,13 +22,15 @@ class AddRepositoryWithToken extends StatefulWidget {
   final String? initialTokenValue;
 
   @override
-  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(initialTokenValue);
+  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(cubit, initialTokenValue);
 }
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with OuiSyncAppLogger {
 
-  _AddRepositoryWithTokenState(String? initialTokenValue) :
+  _AddRepositoryWithTokenState(this._repos, String? initialTokenValue) :
       _tokenController = TextEditingController(text: initialTokenValue);
+
+  final ReposCubit _repos;
 
   final TextEditingController _tokenController;
   final TextEditingController _nameController = TextEditingController(text: null);
@@ -82,7 +84,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     _obscurePasswordConfirm.dispose();
 
     _accessModeNotifier.dispose();
-    
+
     _tokenFocus.dispose();
 
     super.dispose();
@@ -107,7 +109,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
         ),
         ValueListenableBuilder(
           valueListenable: _accessModeNotifier,
-          builder: (context, message, child) => 
+          builder: (context, message, child) =>
             Visibility(
               visible: _showAccessModeMessage,
               child: Fields.constrainedText(
@@ -125,7 +127,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
           label: S.current.labelName,
           hint: S.current.messageRepositoryName,
           onSaved: (_) {},
-          validator: formNameValidator,
+          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
           autovalidateMode: AutovalidateMode.disabled
         ),
         Visibility(
@@ -162,10 +164,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
                       label: S.current.labelPassword,
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
-                      validator: (
-                        password,
-                        { error = Strings.messageErrorRepositoryPasswordValidation }
-                      ) => formNameValidator(password, error: error),
+                      validator: validateNoEmpty(Strings.messageErrorRepositoryPasswordValidation),
                       autovalidateMode: AutovalidateMode.disabled
                     )
                   ),
@@ -197,14 +196,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
                       label: S.current.labelRetypePassword,
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
-                      validator: (
-                        retypedPassword,
-                        { error = Strings.messageErrorRetypePassword }
-                      ) => retypedPasswordValidator(
-                          password: _passwordController.text,
-                          retypedPassword: retypedPassword!,
-                          error: error
-                        ),
+                      validator: (retypedPassword) => retypedPasswordValidator(
+                        password: _passwordController.text,
+                        retypedPassword: retypedPassword,
+                      ),
                       autovalidateMode: AutovalidateMode.disabled
                     ),
                   ),
@@ -234,11 +229,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
   String? retypedPasswordValidator({
     required String password,
-    required String retypedPassword,
-    required String error
+    required String? retypedPassword,
   }) {
-    if (password != retypedPassword) {
-      return error;
+    if (retypedPassword == null || password != retypedPassword) {
+      return S.current.messageErrorRetypePassword;
     }
 
     return null;
@@ -252,9 +246,9 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
 
     final token = _tokenController.text;
     try {
-      _shareToken = ShareToken(widget.cubit.session, token);
+      _shareToken = ShareToken(_repos.session, token);
     } catch (e, st) {
-      loggy.app('Extract repository token exception', e, st);                
+      loggy.app('Extract repository token exception', e, st);
       showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
 
       cleanupFormOnEmptyToken();
@@ -264,15 +258,15 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
       return;
     }
 
-    _suggestedName = _shareToken!.suggestedName; 
+    _suggestedName = _shareToken!.suggestedName;
     _accessModeNotifier.value = _shareToken!.mode.name;
 
     if (_suggestedName.isNotEmpty) {
       _repoName = _suggestedName;
     }
 
-    setState(() { 
-      _showSuggestedName = _suggestedName.isNotEmpty; 
+    setState(() {
+      _showSuggestedName = _suggestedName.isNotEmpty;
       _showAccessModeMessage = _accessModeNotifier.value.toString().isNotEmpty;
 
       _requiresPassword = _shareToken!.mode != AccessMode.blind;
@@ -280,8 +274,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
   }
 
   void cleanupFormOnEmptyToken() {
-    setState(() { 
-        _showSuggestedName = false; 
+    setState(() {
+        _showSuggestedName = false;
         _showAccessModeMessage = false;
       });
 
@@ -299,10 +293,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     }
 
     try {
-      final shareToken = ShareToken(widget.cubit.session, value!);
-      
+      final shareToken = ShareToken(_repos.session, value!);
+
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
+
+      final existingRepo = _repos.findById(shareToken.repositoryId());
+
+      if (existingRepo != null) {
+        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
+      }
     } catch (e) {
       _suggestedName = '';
       _accessModeNotifier.value = '';
@@ -326,16 +326,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     final newRepositoryName = _nameController.text;
     final password = _passwordController.text;
 
-    _onSaved(widget.cubit, newRepositoryName, password);
+    _onSaved(newRepositoryName, password);
   }
 
-  void _onSaved(ReposCubit cubit, String name, String password) async {
+  void _onSaved(String name, String password) async {
     if (!widget.formKey.currentState!.validate()) {
       return;
     }
 
     widget.formKey.currentState!.save();
-    cubit.openRepository(name, password: password, token: _shareToken);
+    _repos.openRepository(name, password: password, token: _shareToken, setCurrent: true);
 
     Navigator.of(widget.context).pop(name);
   }

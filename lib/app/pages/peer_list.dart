@@ -7,7 +7,7 @@ class PeerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Connected Peers")),
+      appBar: AppBar(title: const Text("Connected Peers")),
       body: Container(child: _buildTable())
     );
   }
@@ -20,7 +20,7 @@ class PeerList extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.fitWidth,
             child: DataTable(
-              columns: [
+              columns: const [
                 DataColumn(label: Text("IP")),
                 DataColumn(label: Text("Port")),
                 DataColumn(label: Text("Direction")),

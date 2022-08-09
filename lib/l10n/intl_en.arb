@@ -53,7 +53,7 @@
     "messageErrorDefault":"Something went wrong. Please try again.",
     "messageErrorDefaultShort":"Failed.",
     "messageErrorLoadingContents":"We couldn’t load this folder's contents. Please try again.",
-    "messageErrorFormValidatorNameDefault":"Please enter a valid name (unique, no spaces)",
+    "messageErrorFormValidatorNameDefault":"Please enter a valid name.",
     "messageErrorPathNotEmpty":"{path} is not empty",
     "messageErrorCurrentPathMissing":"The current folder is missing, navigating to its parent: {path}",
     "messageNewFileError":"Error creating file {name}",
@@ -84,11 +84,10 @@
     "messageRenameRepository":"Rename repository",
     "messageRenameFile":"Rename file",
     "messageRenameFolder":"Rename folder",
-    "messageWritingFileDone":"{name} - saved successfully",
-    "messageDownloadingFileDone":"{name} - downloaded successfully",
     "messageWritingFileCanceled":"{name} writing canceled",
     "messageDownloadingFileCanceled":"{name} - downloading canceled",
 
+    "messageRepositoryAlreadyExist":"This repository already exists in the app under the name \"{name}\".",
     "messageMovingEntry":"This function is not available when moving an entry.",
     "messageRepositoryToken":"Paste the token here",
     "messageRepositoryName":"Give the repository a name",
@@ -127,7 +126,7 @@
 
     "messageSelectLocation":"Select the location",
     "messageSaveToLocation":"Save the file to this folder",
-    
+
     "messageOuiSyncDesktopTitle":"OuiSync",
 
     "messageFilePreviewNotAvailable":"File preview is not yet available",

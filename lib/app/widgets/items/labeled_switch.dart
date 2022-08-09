@@ -44,7 +44,7 @@ class LabeledSwitch extends StatelessWidget {
                 textAlign: TextAlign.start,
                 overflow: TextOverflow.clip,
                 softWrap: true,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: Dimensions.fontAverage,
                   fontWeight: FontWeight.w500,
                   color: Colors.black

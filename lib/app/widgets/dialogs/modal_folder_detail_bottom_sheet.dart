@@ -13,17 +13,14 @@ class FolderDetail extends StatefulWidget {
   const FolderDetail({
     required this.context,
     required this.cubit,
-    required this.repository,
     required this.data,
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final RepoState repository;
+  final RepoCubit cubit;
   final FolderItem data;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
@@ -72,7 +69,6 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                   return buildDeleteFolderAlertDialog(
                     context,
                     widget.cubit,
-                    widget.repository,
                     widget.data.path,
                   );
                 },
@@ -104,7 +100,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
             textAlign: TextAlign.start,
           ),
           Fields.labeledText(
-            label: S.current.labelLocation, 
+            label: S.current.labelLocation,
             labelFontSize: Dimensions.fontAverage,
             text: widget.data.path
             .replaceAll(widget.data.name, '')
@@ -116,7 +112,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, DirectoryCubit cubit, RepoState repository, String path) {
+  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, RepoCubit cubit, String path) {
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -139,7 +135,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       actions: <Widget>[
         TextButton(
           child: Text(S.current.actionDeleteCapital),
-          onPressed: () => deleteFolderWithContentsValidation(cubit, repository, path, context),
+          onPressed: () => deleteFolderWithContentsValidation(cubit, path, context),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
@@ -151,17 +147,17 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  void deleteFolderWithContentsValidation(DirectoryCubit cubit, RepoState repository, String path, BuildContext context) async {
+  void deleteFolderWithContentsValidation(RepoCubit repo, String path, BuildContext context) async {
     bool recursive = false;
 
-    final type = await repository.type(path);
+    final type = await repo.type(path);
 
     if (type != EntryType.directory) {
       loggy.app('Is directory empty: $path is not a directory.');
       return;
     }
 
-    final Directory directory = await repository.openDirectory(path);
+    final Directory directory = await repo.openDirectory(path);
 
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);
@@ -189,12 +185,12 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         return;
       }
     }
-    
-    deleteAction(context, cubit, repository, path, recursive);
+
+    deleteAction(context, repo, path, recursive);
   }
 
-  void deleteAction(BuildContext context, DirectoryCubit cubit, RepoState repository, String path, bool recursive) {
-    cubit.deleteFolder(repository, path, recursive);
+  void deleteAction(BuildContext context, RepoCubit repo, String path, bool recursive) {
+    repo.deleteFolder(path, recursive);
     Navigator.of(context).pop(true);
   }
 
@@ -205,10 +201,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     BottomSheetControllerCallback bottomSheetControllerCallback
   ) {
     Navigator.of(context).pop();
-    
-    final origin = getParentSection(path);
+
+    final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
       (context) => MoveEntryDialog(
+        widget.cubit,
         origin: origin,
         path: path,
         type: type,
@@ -241,15 +238,10 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       }
     ).then((newName) {
       if (newName.isNotEmpty) { // The new name provided by the user.
-        final parent = getParentSection(path);
+        final parent = getDirname(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.cubit
-        .moveEntry(
-          widget.repository,
-          source: path,
-          destination: newEntryPath
-        );
+        widget.cubit.moveEntry(source: path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

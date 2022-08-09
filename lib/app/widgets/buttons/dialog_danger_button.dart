@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
 
-class PositiveButton extends StatelessWidget {
-  const PositiveButton({
+class DangerButton extends StatelessWidget {
+  const DangerButton({
     required this.text,
     required this.onPressed,
     Key? key}) : super(key: key);
@@ -32,6 +32,6 @@ class PositiveButton extends StatelessWidget {
   Color _fillColorStatus(context) {
     return onPressed == null
     ? Colors.grey
-    : Theme.of(context).colorScheme.primary;
+    : Theme.of(context).colorScheme.error;
   }
 }

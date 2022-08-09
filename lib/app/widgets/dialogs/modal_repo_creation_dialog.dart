@@ -17,9 +17,9 @@ class RepositoryCreation extends StatelessWidget {
   final ReposCubit cubit;
   final GlobalKey<FormState> formKey;
 
-  final TextEditingController _nameController = new TextEditingController(text: null);
-  final TextEditingController _passwordController = new TextEditingController(text: null);
-  final TextEditingController _retypedPasswordController = new TextEditingController(text: null);
+  final TextEditingController _nameController = TextEditingController(text: null);
+  final TextEditingController _passwordController = TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController = TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _obscurePasswordConfirm = ValueNotifier<bool>(true);
@@ -27,7 +27,7 @@ class RepositoryCreation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: this.formKey,
+      key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -55,7 +55,7 @@ class RepositoryCreation extends StatelessWidget {
           label: S.current.labelName,
           hint: S.current.messageRepositoryName,
           onSaved: (_) {},
-          validator: formNameValidator,
+          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
           autofocus: true,
         ),
         ValueListenableBuilder(
@@ -72,10 +72,7 @@ class RepositoryCreation extends StatelessWidget {
                     label: S.current.labelPassword,
                     hint: S.current.messageRepositoryPassword,
                     onSaved: (_) {},
-                    validator: (
-                      password,
-                      { error = Strings.messageErrorRepositoryPasswordValidation }
-                    ) => formNameValidator(password, error: error),
+                    validator: validateNoEmpty(Strings.messageErrorRepositoryPasswordValidation),
                     autovalidateMode: AutovalidateMode.disabled
                   )
                 ),
@@ -104,13 +101,9 @@ class RepositoryCreation extends StatelessWidget {
                     label: S.current.labelRetypePassword,
                     hint: S.current.messageRepositoryPassword,
                     onSaved: (_) {},
-                    validator: (
-                      retypedPassword,
-                      { error = Strings.messageErrorRetypePassword }
-                    ) => retypedPasswordValidator(
+                    validator: (retypedPassword) => retypedPasswordValidator(
                       password: _passwordController.text,
-                      retypedPassword: retypedPassword!,
-                      error: error
+                      retypedPassword: retypedPassword,
                     ),
                     autovalidateMode: AutovalidateMode.disabled
                   ),
@@ -135,11 +128,10 @@ class RepositoryCreation extends StatelessWidget {
 
   String? retypedPasswordValidator({
     required String password,
-    required String retypedPassword,
-    required String error
+    required String? retypedPassword,
   }) {
-    if (password != retypedPassword) {
-      return error;
+    if (retypedPassword == null || password != retypedPassword) {
+      return S.current.messageErrorRetypePassword;
     }
 
     return null;
@@ -157,7 +149,7 @@ class RepositoryCreation extends StatelessWidget {
   void _createRepo() {
     final newRepositoryName = _nameController.text;
     final password = _passwordController.text;
-    
+
     _onSaved(cubit, newRepositoryName, password);
   }
 
@@ -168,7 +160,7 @@ class RepositoryCreation extends StatelessWidget {
 
     formKey.currentState!.save();
 
-    cubit.openRepository(name, password: password);
+    cubit.openRepository(name, password: password, setCurrent: true);
     Navigator.of(context).pop(name);
   }
 }

@@ -3,16 +3,15 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
-import '../../models/repo_state.dart';
+import '../../cubits/repo.dart';
 
 class NoContentsState extends StatelessWidget {
   const NoContentsState({
-    Key? key,
     required this.repository,
     required this.path,
-  }) : super(key: key);
+  });
 
-  final RepoState repository;
+  final RepoCubit repository;
   final String path;
 
   @override

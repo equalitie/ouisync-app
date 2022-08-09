@@ -9,7 +9,7 @@ class InlineTextStyles {
   static StyledTextTagBase size({double size = 28.0}) => StyledTextTag(style: TextStyle(fontSize: size));
 
   static StyledTextTagBase color(Color color) => StyledTextTag(style: TextStyle(color: color));
-  
+
   static StyledTextTagBase icon(IconData icon, {double? size, Color? color}) => StyledTextIconTag(
     icon,
     size: size,

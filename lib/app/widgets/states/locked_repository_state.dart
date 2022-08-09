@@ -32,7 +32,7 @@ class LockedRepositoryState extends StatelessWidget {
               }
             )
           ),
-          SizedBox(height: 10.0),
+          const SizedBox(height: 10.0),
           Align(
             alignment: Alignment.center,
             child: Fields.inPageSecondaryMessage(
@@ -43,9 +43,9 @@ class LockedRepositoryState extends StatelessWidget {
               }
             )
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           Fields.inPageButton(
-            onPressed: () { onUnlockPressed!.call(this.repositoryName); },
+            onPressed: () { onUnlockPressed!.call(repositoryName); },
             text: S.current.actionUnlock,
             autofocus: true
           )

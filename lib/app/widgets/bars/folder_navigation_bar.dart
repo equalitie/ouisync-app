@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../utils/utils.dart';
 import '../../cubits/cubits.dart';
 
 class FolderNavigationBar extends StatelessWidget {
-  final ReposState _reposState;
+  final RepoCubit _repo;
 
-  FolderNavigationBar(this._reposState);
+  const FolderNavigationBar(this._repo);
 
   @override
   Widget build(BuildContext context) {
-    final path = _reposState.currentFolder!.path;
+    final path = _repo.currentFolder.path;
     final route = _currentLocationBar(path, context);
 
     return Container(
-      padding: EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(10.0),
       decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -60,10 +58,10 @@ class FolderNavigationBar extends StatelessWidget {
           child: Padding(
             padding: Dimensions.paddingActionBox,
             child: Text(
-              '$current',
+              current,
               softWrap: false,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.w600,
               ),
@@ -75,20 +73,13 @@ class FolderNavigationBar extends StatelessWidget {
   }
 
   GestureDetector _navigation(String path, BuildContext ctx) {
-    final target = getParentSection(path);
-    final cubit = BlocProvider.of<DirectoryCubit>(ctx);
+    final target = getDirname(path);
 
     return GestureDetector(
       onTap: () {
         if (target != path) {
-          final currentRepo = _reposState.currentRepo;
-
-          if (currentRepo == null) {
-            return;
-          }
-
-          final parent = currentRepo.currentFolder.parent;
-          cubit.navigateTo(currentRepo, parent);
+          final parent = _repo.currentFolder.parent;
+          _repo.navigateTo(parent);
         }
       },
       child: path == Strings.root

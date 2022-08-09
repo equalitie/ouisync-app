@@ -80,7 +80,7 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
           _systemTray.popUpContextMenu();
 
           break;
-        
+
         default:
       }
     });
@@ -100,7 +100,7 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
   void dispose() {
     windowManager.removeListener(this);
   }
-  
+
   @override
   Future<void> setPreventClose(bool isPreventClose) async {
     return windowManager.setPreventClose(isPreventClose);
@@ -113,7 +113,7 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
       _appWindow.hide();
     }
   }
-  
+
   @override
   Future<void> close() async {
     return windowManager.close();

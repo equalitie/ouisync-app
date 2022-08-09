@@ -7,6 +7,7 @@ export 'bars/search_bar.dart';
 
 export 'buttons/dialog_negative_button.dart';
 export 'buttons/dialog_positive_button.dart';
+export 'buttons/dialog_danger_button.dart';
 
 export 'dialogs/actions_dialog.dart';
 export 'dialogs/modal_actions_bottom_sheet.dart';

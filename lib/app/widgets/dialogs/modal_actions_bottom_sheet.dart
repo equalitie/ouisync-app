@@ -5,19 +5,16 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
-import '../../models/folder_state.dart';
 import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget {
   const DirectoryActions({
     required this.context,
     required this.cubit,
-    required this.parent,
   });
 
   final BuildContext context;
-  final DirectoryCubit cubit;
-  final FolderState parent;
+  final RepoCubit cubit;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +31,12 @@ class DirectoryActions extends StatelessWidget {
             _buildAction(
               name: S.current.actionNewFolder,
               icon: Icons.folder_outlined,
-              action: () => createFolderDialog(context, cubit, parent)
+              action: () => createFolderDialog(context, cubit)
             ),
             _buildAction(
               name: S.current.actionNewFile,
               icon: Icons.insert_drive_file_outlined,
-              action: () async => await addFile(context, cubit, parent)
+              action: () async => await addFile(context, cubit)
             )
           ]
         ),
@@ -61,16 +58,16 @@ class DirectoryActions extends StatelessWidget {
           Dimensions.spacingVertical,
           Text(
             name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: Dimensions.fontAverage
             )
           )
         ],
       )
     ),
-  ); 
+  );
 
-  void createFolderDialog(context, DirectoryCubit cubit, FolderState parent) async {
+  void createFolderDialog(context, RepoCubit cubit) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -82,20 +79,20 @@ class DirectoryActions extends StatelessWidget {
           body: FolderCreation(
             context: context,
             cubit: cubit,
-            repository: parent.repo,
-            path: parent.path,
             formKey: formKey,
           ),
         );
       }
     ).then((newFolder) => {
       if (newFolder.isNotEmpty) { // If a folder is created, the new folder is returned path; otherwise, empty string.
-        Navigator.of(this.context).pop() 
+        Navigator.of(this.context).pop()
       }
     });
   }
 
-  Future<void> addFile(context, DirectoryCubit cubit, FolderState parent) async {
+  Future<void> addFile(context, RepoCubit repo) async {
+    final path = repo.currentFolder.path;
+
     final result = await FilePicker
     .platform
     .pickFiles(
@@ -105,9 +102,8 @@ class DirectoryActions extends StatelessWidget {
 
     if(result != null) {
       final file = result.files.single;
-      final newFilePath = buildDestinationPath(parent.path, file.name);
-      
-      final repo = parent.repo;
+      final newFilePath = buildDestinationPath(path, file.name);
+
       final exist = await repo.exists(newFilePath);
 
       if (exist) {
@@ -117,10 +113,8 @@ class DirectoryActions extends StatelessWidget {
         return;
       }
 
-      cubit.saveFile(
-        parent.repo,
-        newFilePath: newFilePath,
-        fileName: file.name,
+      repo.saveFile(
+        filePath: newFilePath,
         length: file.size,
         fileByteStream: file.readStream!
       );

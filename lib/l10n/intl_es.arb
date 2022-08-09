@@ -85,8 +85,6 @@
     "messageRenameRepository":"Cambiar nombre de repositorio",
     "messageRenameFile":"Cambiar nombre de archivo",
     "messageRenameFolder":"Cambiar nombre de directorio",
-    "messageWritingFileDone":"{name} - guardado exitosamente",
-    "messageDownloadingFileDone":"{name} - descargado exitosamente",
     "messageWritingFileCanceled":"{name} escritura cancelada",
     "messageCancelingFileWriting":"Cancelando escritura de {name}",
     "messageDownloadingFileCanceled":"{name} - descarga cancelada",
@@ -126,7 +124,7 @@
     "messageAddingFileToLockedRepository":"Este repositorio está cerrado o es una copia ciega.\n\nSi usted tiene la clave, abralo e intente de nuevo.",
     "messageAddingFileToReadRepository":"Este repositorio es sólo-lectura.",
     "messageFileName":"Nombre de archivo",
-    
+
     "messageSelectLocation":"Seleccione el lugar",
     "messageSaveToLocation":"Guardar el archivo en este directorio",
 

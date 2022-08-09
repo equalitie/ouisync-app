@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
-import '../models/models.dart' as model;
+import '../widgets/buttons/dialog_danger_button.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
@@ -48,12 +48,12 @@ abstract class Dialogs {
       context:context,
       barrierDismissible: false,
       builder:(BuildContext context){
-        return alert; 
+        return alert;
       },
     );
   }
 
-  static _hideLoadingDialog(context) => 
+  static _hideLoadingDialog(context) =>
     Navigator.pop(context);
 
   static Future<bool?> alertDialogWithActions({
@@ -82,7 +82,7 @@ abstract class Dialogs {
     actions ??= [TextButton(
         child: Text(S.current.actionCloseCapital),
         onPressed: () => Navigator.of(context).pop(false),
-      )];  
+      )];
 
     return showDialog(
       context: context,
@@ -125,8 +125,7 @@ abstract class Dialogs {
   );
 
   static AlertDialog buildDeleteFileAlertDialog(
-    model.RepoState repository,
-    DirectoryCubit cubit,
+    RepoCubit repo,
     String path,
     BuildContext context,
     String fileName,
@@ -170,16 +169,16 @@ abstract class Dialogs {
     ),
     actions: <Widget>[
       TextButton(
-        child: Text(S.current.actionDeleteCapital),
+        child: Text(S.current.actionCancelCapital),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      DangerButton(
+        text: S.current.actionDeleteCapital,
         onPressed: () {
-          cubit.deleteFile(repository, path);
+          repo.deleteFile(path);
           Navigator.of(context).pop(fileName);
           showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
-      ),
-      TextButton(
-        child: Text(S.current.actionCancelCapital),
-        onPressed: () => Navigator.of(context).pop(),
       ),
     ],
   );

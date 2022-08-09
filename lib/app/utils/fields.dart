@@ -9,7 +9,7 @@ import '../cubits/upgrade_exists.dart';
 class Fields {
   Fields._();
 
-  static Widget addUpgradeBadge(Widget child, { double bottom: 12, double end: 10 }) {
+  static Widget addUpgradeBadge(Widget child, { double bottom = 12, double end = 10 }) {
     return BlocConsumer<UpgradeExistsCubit, bool>(
       builder: (context, state) {
         return Badge(
@@ -22,7 +22,7 @@ class Fields {
           ),
           badgeColor: Colors.red,
           position: BadgePosition(bottom: bottom, end: end),
-          padding: EdgeInsets.all(0.0),
+          padding: const EdgeInsets.all(0.0),
           shape: BadgeShape.circle,
           child: child
         );
@@ -41,10 +41,8 @@ class Fields {
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding
   ) {
-    if (tags == null) {
-      tags = Map<String, StyledTextTagBase>();
-    }
-    
+    tags ??= <String, StyledTextTagBase>{};
+
     tags.addAll({
       'font': StyledTextTag(
         style: TextStyle(
@@ -215,7 +213,7 @@ class Fields {
     double textFontSize = Dimensions.fontAverage,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
-    EdgeInsets padding: Dimensions.paddingBox,
+    EdgeInsets padding = Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
   }) => Padding(
     padding: padding,
@@ -276,7 +274,7 @@ class Fields {
     double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
-    EdgeInsets padding: Dimensions.paddingBox,
+    EdgeInsets padding = Dimensions.paddingBox,
     Widget space = Dimensions.spacingHorizontal
   }) => Padding(
     padding: padding,
@@ -415,7 +413,7 @@ class Fields {
     required String label,
     required String hint,
     required Function(String?) onSaved,
-    required String? Function(String? value, {String error}) validator,
+    required String? Function(String? value) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     FocusNode? focusNode,
@@ -430,7 +428,7 @@ class Fields {
     autofocus: autofocus,
     focusNode: focusNode,
     initialValue: initialValue,
-    obscureText: obscureText,  
+    obscureText: obscureText,
     maxLines: maxLines,
     keyboardType: TextInputType.text,
     decoration: InputDecoration (
@@ -439,7 +437,7 @@ class Fields {
       labelText: label,
       labelStyle: TextStyle(
         color: Colors.grey.shade600
-      ) 
+      )
     ),
     validator: validator,
     onSaved: onSaved,
@@ -454,7 +452,7 @@ class Fields {
     required String label,
     required String hint,
     required Function(String?) onSaved,
-    required String? Function(String? value, {String error}) validator,
+    required String? Function(String? value) validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     FocusNode? focusNode,
@@ -490,7 +488,7 @@ class Fields {
         )
       ],
     )
-  );  
+  );
 
   static Widget dialogActions(BuildContext context,
   {

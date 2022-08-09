@@ -11,19 +11,19 @@ showSnackBar(BuildContext context, { required Widget content, SnackBarAction? ac
     SnackBar(
       content: content,
       action: action,
-    ),  
+    ),
   );
 
-hideSnackBar(context) => 
+hideSnackBar(context) =>
   SnackBarAction(
     label: S.current.actionHideCapital,
-    onPressed: () => 
+    onPressed: () =>
       ScaffoldMessenger.of(context).hideCurrentSnackBar()
   );
 
 String getBasename(String path) => p.basename(path);
 
-String getParentSection (String path) => p.dirname(path);
+String getDirname(String path) => p.dirname(path);
 
 String getFileExtension(String fileName) => p.extension(fileName);
 
@@ -31,6 +31,10 @@ Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? formNameValidator(String? value, { String? error }) {
-  return value!.isEmpty ? (error ?? S.current.messageErrorFormValidatorNameDefault) : null;
-}
+String? Function(String?) validateNoEmpty(String error) => (String? value) {
+  if (value == null || value.isEmpty) {
+    return error;
+  }
+
+  return null;
+};

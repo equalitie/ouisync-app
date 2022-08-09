@@ -3,7 +3,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../widgets.dart';
@@ -15,7 +14,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   });
 
   final ReposCubit reposCubit;
-  final void Function(RepoState) shareRepositoryOnTap;
+  final void Function(RepoCubit) shareRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           Fields.actionIcon(
             const Icon(Icons.share_outlined),
             onPressed: () {
-              final current = reposCubit.current();
+              final current = reposCubit.currentRepo;
               if (current == null) return;
               shareRepositoryOnTap(current);
             },
@@ -53,7 +52,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Size get preferredSize {
     // TODO: This value was found experimentally, can it be done programmatically?
-    return Size.fromHeight(58);
+    return const Size.fromHeight(58);
   }
 }
 
@@ -103,7 +102,7 @@ class _Picker extends StatelessWidget {
     );
   });
 
-  String _repoName(RepoState? repo) {
+  String _repoName(RepoCubit? repo) {
     if (repo != null) {
       return repo.name;
     } else {
@@ -208,7 +207,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       return Fields.paddedActionText(
         repositoryName,
         onTap: () {
-          _repositories.setCurrent(repositoryName);
+          _repositories.setCurrentByName(repositoryName);
           updateSettingsAndPop(context, repositoryName);
         },
         // TODO: This doesn't actually say whether the repo is locked or not.
@@ -268,16 +267,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     await updateSettingsAndPop(context, addedRepo);
   }
 
-  Future<void> updateDefaultRepositorySetting(repositoryName) async {
-    final result = await Settings.saveSetting(Constants.currentRepositoryKey, repositoryName);
-    loggy.app('Current repository updated to $repositoryName: $result');
-  }
-
   Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
-    if (!repositoryName.isEmpty) {
-      await updateDefaultRepositorySetting(repositoryName);
-    }
-
+    await Settings.setDefaultRepo(repositoryName);
     Navigator.of(context).pop();
   }
 }
