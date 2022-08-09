@@ -57,7 +57,6 @@ dependencies:
   share_plus: ^4.0.4
   shared_preferences: ^2.0.13
   styled_text: ^5.0.0+1
-  # system_tray: ^0.1.0
   system_tray:
     git:
       url: https://github.com/antler119/system_tray.git
@@ -67,16 +66,12 @@ dependencies:
   window_manager: ^0.2.5
 
 dev_dependencies:
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^1.0.4
   flutter_localizations:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  icons_launcher: ^1.1.8
   integration_test:
     sdk: flutter
   intl: ^0.17.0
@@ -85,7 +80,6 @@ dev_dependencies:
   # # flutter pub run intl_utils:generate
   intl_utils: ^2.6.1
   msix: ^3.5.1
-  icons_launcher: ^1.1.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
