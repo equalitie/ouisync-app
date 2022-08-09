@@ -91,36 +91,36 @@ class DirectoryActions extends StatelessWidget {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    final path = repo.currentFolder.path;
+    final dstDir = repo.currentFolder.path;
 
     final result = await FilePicker
     .platform
     .pickFiles(
       type: FileType.any,
-      withReadStream: true
+      withReadStream: true,
+      allowMultiple: true,
     );
 
     if(result != null) {
-      final file = result.files.single;
-      final newFilePath = buildDestinationPath(path, file.name);
+      for (final srcFile in result.files) {
+        final dstPath = buildDestinationPath(dstDir, srcFile.name);
 
-      final exist = await repo.exists(newFilePath);
+        if (await repo.exists(dstPath)) {
+          final type = await repo.type(dstPath);
+          final typeNameForMessage = _getTypeNameForMessage(type);
+          showSnackBar(context, content: Text(S.current.messageEntryAlreadyExist(typeNameForMessage)));
+          continue;
+        }
 
-      if (exist) {
-        final type = await repo.type(newFilePath);
-        final typeNameForMessage = _getTypeNameForMessage(type);
-        showSnackBar(context, content: Text(S.current.messageEntryAlreadyExist(typeNameForMessage)));
-        return;
+        repo.saveFile(
+          filePath: dstPath,
+          length: srcFile.size,
+          fileByteStream: srcFile.readStream!
+        );
       }
-
-      repo.saveFile(
-        filePath: newFilePath,
-        length: file.size,
-        fileByteStream: file.readStream!
-      );
-
-      Navigator.of(context).pop();
     }
+
+    Navigator.of(context).pop();
   }
 
   String _getTypeNameForMessage(EntryType? type) {
