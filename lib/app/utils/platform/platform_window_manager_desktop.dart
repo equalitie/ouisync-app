@@ -22,22 +22,29 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
   Future<void> initialize() async {
     await windowManager.ensureInitialized();
 
-    /// For some reason, if we use a constant value for the title in the
-    /// WindowsOptions, the app hangs. This is true for the localized strings,
-    /// or a regular constant value in Constants.
-    /// So we use a harcoded string to start, then we use the localized string
-    /// in app.dart -for now.
-    WindowOptions windowOptions = const WindowOptions(
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      title: 'OuiSync',
-      titleBarStyle: TitleBarStyle.normal,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+
+    /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
+    /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
+    /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
+    /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
+    if (!Platform.isLinux) {
+      /// For some reason, if we use a constant value for the title in the
+      /// WindowsOptions, the app hangs. This is true for the localized strings,
+      /// or a regular constant value in Constants.
+      /// So we use a harcoded string to start, then we use the localized string
+      /// in app.dart -for now.
+      WindowOptions windowOptions = const WindowOptions(
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        title: 'OuiSync',
+        titleBarStyle: TitleBarStyle.normal,
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
   }
 
   @override
