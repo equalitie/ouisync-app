@@ -227,6 +227,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Initializing..."),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
+        "messageLibraryPanic":
+            MessageLookupByLibrary.simpleMessage("Internal crash detected."),
         "messageLoadingDefault":
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(

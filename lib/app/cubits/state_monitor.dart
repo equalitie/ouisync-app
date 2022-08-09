@@ -6,6 +6,8 @@ class StateMonitor {
 
   StateMonitor(this._inner);
 
+  StateMonitor child(String name) => StateMonitor(_inner?.child(name));
+
   Widget builder(Widget Function(BuildContext, oui.StateMonitor?) buildFn) {
     return _Widget(_inner, buildFn);
   }

@@ -510,6 +510,16 @@ class S {
     );
   }
 
+  /// `Internal crash detected.`
+  String get messageLibraryPanic {
+    return Intl.message(
+      'Internal crash detected.',
+      name: 'messageLibraryPanic',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Something went wrong. Please try again.`
   String get messageErrorDefault {
     return Intl.message(

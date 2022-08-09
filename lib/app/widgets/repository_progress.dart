@@ -16,11 +16,8 @@ class RepositoryProgress extends StatelessWidget {
         return shrink();
       }
 
-      final indexInflightS = monitor.values['index_requests_inflight'] ?? '0';
-      final blockInflightS = monitor.values['block_requests_inflight'] ?? '0';
-
-      final indexInflight = int.tryParse(indexInflightS) ?? 0;
-      final blockInflight = int.tryParse(blockInflightS) ?? 0;
+      final indexInflight = monitor.parseIntValue('index_requests_inflight') ?? 0;
+      final blockInflight = monitor.parseIntValue('block_requests_inflight') ?? 0;
 
       if (indexInflight == 0 && blockInflight == 0) {
           return shrink();

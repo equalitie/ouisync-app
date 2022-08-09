@@ -265,7 +265,6 @@ class _MainPageState extends State<MainPage>
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface
       );
-      // TODO: Add a link to where one can download a new version (if any).
       return Container(child: Fields.addUpgradeBadge(button));
     }
 

@@ -50,6 +50,8 @@
 
     "messageLoadingDefault":"Loading…",
 
+    "messageLibraryPanic":"Internal crash detected.",
+
     "messageErrorDefault":"Something went wrong. Please try again.",
     "messageErrorDefaultShort":"Failed.",
     "messageErrorLoadingContents":"We couldn’t load this folder's contents. Please try again.",

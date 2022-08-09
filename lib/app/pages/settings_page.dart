@@ -31,10 +31,12 @@ class SettingsPage extends StatefulWidget {
   final void Function(RepoCubit) onShareRepository;
 
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  _SettingsPageState createState() => _SettingsPageState(reposCubit);
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
+  ReposCubit _repos;
+
   String? _connectionType;
   String? _externalIP;
   String? _localIPv4;
@@ -50,6 +52,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   // Clicking on the version number three times shall show the state monitor page.
   final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
+
+  _SettingsPageState(this._repos);
 
   @override
   void initState() {
@@ -72,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         default: _connectionType = "???"; break;
     }
 
-    final session = widget.reposCubit.session;
+    final session = _repos.session;
 
     String? tcpListenerEndpointV4 = session.tcpListenerLocalAddressV4;
     String? tcpListenerEndpointV6 = session.tcpListenerLocalAddressV6;
@@ -134,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-              child: widget.reposCubit.builder((repos) => ListView(
+              child: _repos.builder((repos) => ListView(
                 // The badge over the version number is shown outside of the row boundary, so we
                 // need to set clipBehaior to Clip.none.
                 clipBehavior: Clip.none,
@@ -245,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               if (_versionNumberClickCounter.registerClick() >= 3) {
                 _versionNumberClickCounter.reset();
 
-                final session = widget.reposCubit.session;
+                final session = _repos.session;
 
                 Navigator.push(
                   context,
@@ -327,7 +331,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               }).toList(),
               onChanged: (repo) async {
                 loggy.app('Selected repository: ${repo?.name}');
-                await widget.reposCubit.setCurrentByName(repo?.name);
+                await _repos.setCurrentByName(repo?.name);
               },
             ),
           ),
@@ -362,7 +366,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       return;
                     }
                     final oldName = currentRepo.name;
-                    widget.reposCubit.renameRepository(oldName, newName);
+                    _repos.renameRepository(oldName, newName);
                   });
                 }),
               Fields.actionText(S.current.actionShare,
@@ -410,7 +414,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 );
 
                 if (delete ?? false) {
-                  widget.reposCubit.deleteRepository(currentRepo.name);
+                  _repos.deleteRepository(currentRepo.name);
                 }
               })
             ],
@@ -420,11 +424,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Iterable<String> repositoryNames() {
-    return widget.reposCubit.repositoryNames();
+    return _repos.repositoryNames();
   }
 
   Iterable<RepoCubit> repositories() {
-    return widget.reposCubit.repos;
+    return _repos.repos;
   }
 
   Widget _buildConnectedPeerListRow() {
@@ -469,6 +473,22 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: _shareLogs)])),
+            _repos.rootStateMonitor().child("Session").builder((context, monitor) {
+              if (monitor == null) {
+                return SizedBox.shrink();
+              }
+
+              final panics = monitor.parseIntValue('panic_counter') ?? 0;
+
+              if (panics == 0) {
+                return SizedBox.shrink();
+              }
+
+              return Text(
+                S.current.messageLibraryPanic,
+                style: TextStyle(color: Theme.of(context).colorScheme.error)
+              );
+            }),
           ]);
 
   Future<void> _saveLogs() async {
@@ -513,7 +533,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     sink.writeln("_dhtEndpointV6: $_dhtEndpointV6");
     sink.writeln("\n");
 
-    await dumpAll(sink, widget.reposCubit.session.getRootStateMonitor());
+    await dumpAll(sink, _repos.session.getRootStateMonitor());
 
     await sink.close();
 
