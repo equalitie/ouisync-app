@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
-import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -84,8 +83,8 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  StateMonitor stateMonitor() {
-    return handle.stateMonitor()!;
+  cubits.StateMonitor stateMonitor() {
+    return cubits.StateMonitor(handle.stateMonitor());
   }
 
   Future<void> navigateTo(String destination) async {

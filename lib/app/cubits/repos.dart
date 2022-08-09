@@ -36,6 +36,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   RepoCubit? get currentRepo => _currentRepo;
 
+  StateMonitor rootStateMonitor() => StateMonitor(_session.getRootStateMonitor());
+
   Folder? get currentFolder {
     return currentRepo?.currentFolder;
   }
