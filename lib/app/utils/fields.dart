@@ -9,20 +9,18 @@ import '../cubits/upgrade_exists.dart';
 class Fields {
   Fields._();
 
-  static Widget addBadge(
-      BuildContext context,
-      Widget child,
-      { bool show = true, double bottom = 12, double end = 10 }) {
+  static Widget addBadge(BuildContext context, Widget child, { bool show = true}) {
     return Badge(
       showBadge: show,
       ignorePointer: true,
-      badgeContent: Icon(
-        Icons.upgrade,
-        size: Dimensions.sizeIconBadge,
-        color: Theme.of(context).colorScheme.primary
-      ),
+      badgeContent: SizedBox(width: 10, height: 10),
+      //badgeContent: Icon(
+      //  Icons.warning_amber,
+      //  size: Dimensions.sizeIconBadge,
+      //  color: Theme.of(context).colorScheme.primary
+      //),
       badgeColor: Colors.red,
-      position: BadgePosition(bottom: bottom, end: end),
+      position: BadgePosition(bottom: 12, end: 10),
       padding: const EdgeInsets.all(0.0),
       shape: BadgeShape.circle,
       child: child
