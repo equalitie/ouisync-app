@@ -63,9 +63,13 @@ class _MainPageState extends State<MainPage>
     ValueNotifier<double> _bottomPaddingWithBottomSheet = ValueNotifier<double>(0.0);
 
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
+    late final StateMonitorIntValue _panicCounter;
 
     _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
-      _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation);
+      _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation)
+    {
+      _panicCounter = _repositories.rootStateMonitor().child("Session").intValue("panic_counter");
+    }
 
     RepoCubit? get _currentRepo => _repositories.currentRepo;
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
@@ -267,9 +271,8 @@ class _MainPageState extends State<MainPage>
       );
       return BlocBuilder<UpgradeExistsCubit, bool>(
         builder: (context, updateExists) {
-          return _repositories.rootStateMonitor().child("Session").builder((context, monitor) {
-            final panicCount = monitor?.parseIntValue('panic_counter') ?? 0;
-            final show = updateExists || panicCount > 0;
+          return _panicCounter.builder((context, panicCount) {
+            final show = updateExists || (panicCount ?? 0) > 0;
             return Fields.addBadge(context, button, show: show);
           });
         }
@@ -692,6 +695,7 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
             reposCubit: reposCubit,
             onShareRepository: _showShareRepository,
+            panicCounter: _panicCounter,
           )
         );
       })

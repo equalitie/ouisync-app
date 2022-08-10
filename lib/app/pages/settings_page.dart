@@ -25,17 +25,20 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.reposCubit,
     required this.onShareRepository,
+    required this.panicCounter,
   });
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) onShareRepository;
+  final StateMonitorIntValue panicCounter;
 
   @override
-  _SettingsPageState createState() => _SettingsPageState(reposCubit);
+  _SettingsPageState createState() => _SettingsPageState(reposCubit, panicCounter);
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   ReposCubit _repos;
+  final StateMonitorIntValue _panicCounter;
 
   String? _connectionType;
   String? _externalIP;
@@ -53,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   // Clicking on the version number three times shall show the state monitor page.
   final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
 
-  _SettingsPageState(this._repos);
+  _SettingsPageState(this._repos, this._panicCounter);
 
   @override
   void initState() {
@@ -438,13 +441,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: _shareLogs)])),
-            _repos.rootStateMonitor().child("Session").builder((context, monitor) {
-              final panics = monitor?.parseIntValue('panic_counter') ?? 0;
-
-              if (panics == 0) {
-                return SizedBox.shrink();
-              }
-
+            _panicCounter.builder((context, panics) {
+              if ((panics ?? 0) == 0) return SizedBox.shrink();
               return _warningText(context, S.current.messageLibraryPanic);
             }),
           ]);

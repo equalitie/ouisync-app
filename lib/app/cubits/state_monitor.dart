@@ -8,8 +8,23 @@ class StateMonitor {
 
   StateMonitor child(String name) => StateMonitor(_inner?.child(name));
 
+  StateMonitorIntValue intValue(String value_name) => StateMonitorIntValue(_inner, value_name);
+
   Widget builder(Widget Function(BuildContext, oui.StateMonitor?) buildFn) {
     return _Widget(_inner, buildFn);
+  }
+}
+
+class StateMonitorIntValue {
+  oui.StateMonitor? _inner;
+  String _value_name;
+
+  StateMonitorIntValue(this._inner, this._value_name);
+
+  Widget builder(Widget Function(BuildContext, int? value) buildFn) {
+    return _Widget(_inner, (BuildContext context, oui.StateMonitor? monitor) {
+      return buildFn(context, monitor?.parseIntValue(_value_name));
+    });
   }
 }
 
