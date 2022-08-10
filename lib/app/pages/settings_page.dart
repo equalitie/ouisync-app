@@ -179,8 +179,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   _divider(),
                   _buildLogsSection(),
                   _divider(),
-                  _versionNumberFutureBuilder(
-                      S.current.labelAppVersion, info.then((info) => info.version)),
+                  _versionNumberFutureBuilder(info.then((info) => info.version)),
                 ],
               ))));
   }
@@ -228,40 +227,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       textAlign: TextAlign.end,
       space: Dimensions.spacingHorizontal,
     );
-  }
-
-  Widget _versionNumberFutureBuilder(String key, Future<String> value) {
-    return FutureBuilder<String>(
-        future: value,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          late Widget version;
-
-          if (snapshot.hasData) {
-            version = _labeledText(key, snapshot.data!);
-          } else if (snapshot.hasError) {
-            version = _labeledText(key, "???");
-          } else {
-            version = _labeledText(key, "...");
-          }
-
-          return GestureDetector(
-            onTap: () {
-              if (_versionNumberClickCounter.registerClick() >= 3) {
-                _versionNumberClickCounter.reset();
-
-                final session = _repos.session;
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StateMonitorPage(session)
-                  )
-                );
-              }
-            },
-            child: Fields.addUpgradeBadge(version, bottom: 6, end: -10)
-          );
-        });
   }
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
@@ -474,22 +439,62 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: _shareLogs)])),
             _repos.rootStateMonitor().child("Session").builder((context, monitor) {
-              if (monitor == null) {
-                return SizedBox.shrink();
-              }
-
-              final panics = monitor.parseIntValue('panic_counter') ?? 0;
+              final panics = monitor?.parseIntValue('panic_counter') ?? 0;
 
               if (panics == 0) {
                 return SizedBox.shrink();
               }
 
-              return Text(
-                S.current.messageLibraryPanic,
-                style: TextStyle(color: Theme.of(context).colorScheme.error)
-              );
+              return _warningText(context, S.current.messageLibraryPanic);
             }),
           ]);
+
+  Widget _versionNumberFutureBuilder(Future<String> value) {
+    return FutureBuilder<String>(
+      future: value,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        late Widget version;
+        final key = S.current.labelAppVersion;
+
+        if (snapshot.hasData) {
+          version = _labeledText(key, snapshot.data!);
+        } else if (snapshot.hasError) {
+          version = _labeledText(key, "???");
+        } else {
+          version = _labeledText(key, "...");
+        }
+
+        return GestureDetector(
+          onTap: () {
+            if (_versionNumberClickCounter.registerClick() >= 3) {
+              _versionNumberClickCounter.reset();
+
+              final session = _repos.session;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StateMonitorPage(session)
+                )
+              );
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              version,
+              BlocBuilder<UpgradeExistsCubit, bool>(
+                builder: (context, state) {
+                  if (state == false) return SizedBox.shrink();
+                  return _warningText(context, S.current.messageNewVersionIsAvailable);
+                }
+              ),
+            ]
+          ),
+        );
+      }
+    );
+  }
 
   Future<void> _saveLogs() async {
     final tempPath = await _dumpInfo();
@@ -539,4 +544,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     return path;
   }
+}
+
+Text _warningText(BuildContext context, String str) {
+  return Text(str, style: TextStyle(color: Theme.of(context).colorScheme.error));
 }

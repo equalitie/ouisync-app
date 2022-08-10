@@ -52,6 +52,7 @@
 
     "messageLibraryPanic":"Internal crash detected.",
 
+    "messageNewVersionIsAvailable":"A new version is available.",
     "messageErrorDefault":"Something went wrong. Please try again.",
     "messageErrorDefaultShort":"Failed.",
     "messageErrorLoadingContents":"We couldn’t load this folder's contents. Please try again.",

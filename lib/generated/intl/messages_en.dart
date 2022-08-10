@@ -237,6 +237,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
         "messageNewFileError": m8,
+        "messageNewVersionIsAvailable":
+            MessageLookupByLibrary.simpleMessage("A new version is available."),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>"),
         "messageNoRepos":

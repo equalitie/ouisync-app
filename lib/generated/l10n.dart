@@ -520,6 +520,16 @@ class S {
     );
   }
 
+  /// `A new version is available.`
+  String get messageNewVersionIsAvailable {
+    return Intl.message(
+      'A new version is available.',
+      name: 'messageNewVersionIsAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Something went wrong. Please try again.`
   String get messageErrorDefault {
     return Intl.message(
