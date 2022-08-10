@@ -9,25 +9,23 @@ import '../cubits/upgrade_exists.dart';
 class Fields {
   Fields._();
 
-  static Widget addUpgradeBadge(Widget child, { double bottom = 12, double end = 10 }) {
-    return BlocConsumer<UpgradeExistsCubit, bool>(
-      builder: (context, state) {
-        return Badge(
-          showBadge: state,
-          ignorePointer: true,
-          badgeContent: Icon(
-            Icons.upgrade,
-            size: Dimensions.sizeIconBadge,
-            color: Theme.of(context).colorScheme.primary
-          ),
-          badgeColor: Colors.red,
-          position: BadgePosition(bottom: bottom, end: end),
-          padding: const EdgeInsets.all(0.0),
-          shape: BadgeShape.circle,
-          child: child
-        );
-      },
-      listener: (context, state) { }
+  static Widget addBadge(
+      BuildContext context,
+      Widget child,
+      { bool show = true, double bottom = 12, double end = 10 }) {
+    return Badge(
+      showBadge: show,
+      ignorePointer: true,
+      badgeContent: Icon(
+        Icons.upgrade,
+        size: Dimensions.sizeIconBadge,
+        color: Theme.of(context).colorScheme.primary
+      ),
+      badgeColor: Colors.red,
+      position: BadgePosition(bottom: bottom, end: end),
+      padding: const EdgeInsets.all(0.0),
+      shape: BadgeShape.circle,
+      child: child
     );
   }
 

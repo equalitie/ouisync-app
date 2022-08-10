@@ -261,11 +261,19 @@ class _MainPageState extends State<MainPage>
     Widget _buildSettingsIcon() {
       final button = Fields.actionIcon(
         const Icon(Icons.settings_outlined),
-        onPressed: settingsAction,
+        onPressed: showSettings,
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface
       );
-      return Container(child: Fields.addUpgradeBadge(button));
+      return BlocBuilder<UpgradeExistsCubit, bool>(
+        builder: (context, updateExists) {
+          return _repositories.rootStateMonitor().child("Session").builder((context, monitor) {
+            final panicCount = monitor?.parseIntValue('panic_counter') ?? 0;
+            final show = updateExists || panicCount > 0;
+            return Fields.addBadge(context, button, show: show);
+          });
+        }
+      );
     }
 
     StatelessWidget _buildFAB(BuildContext context, RepoCubit? current) {
@@ -666,7 +674,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void settingsAction() {
+  void showSettings() {
     final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
     final reposCubit = _repositories;
