@@ -85,6 +85,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _subscription = null;
 
     _subscription = repo?.handle.subscribe(() => repo.getContent());
+
     await Settings.setDefaultRepo(repo?.name);
 
     _currentRepo = repo;
@@ -121,7 +122,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     if (didChange) {
       if (setCurrent) {
-        this.setCurrent(newRepo);
+        await this.setCurrent(newRepo);
       } else {
         changed();
       }
