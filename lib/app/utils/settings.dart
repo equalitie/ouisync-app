@@ -10,6 +10,8 @@ class Settings {
   static const String _BT_DHT_KEY_PREFIX = "BT_DHT_ENABLED-";
   static const String _HIGHEST_SEEN_PROTOCOL_NUMBER_KEY = "HIGHEST_SEEN_PROTOCOL_NUMBER";
 
+  static _CachedString _defaultRepo = _CachedString(_CURRENT_REPO_KEY);
+
   static Future<SharedPreferences> _init() async {
     var prefs = _prefs;
     if (prefs == null) {
@@ -30,17 +32,11 @@ class Settings {
   }
 
   static Future<void> setDefaultRepo(String? name) async {
-    final prefs = await _init();
-
-    if (name != null && name.isNotEmpty) {
-      await prefs.setString(_CURRENT_REPO_KEY, name);
-    } else {
-      await _remove(prefs, _CURRENT_REPO_KEY);
-    }
+    await _defaultRepo.set(name);
   }
 
   static Future<String?> getDefaultRepo() async {
-    return (await _init()).getString(_CURRENT_REPO_KEY);
+    return _defaultRepo.get();
   }
 
   static Future<bool> getDhtEnableStatus(String repoId, { required bool defaultValue }) async {
@@ -77,5 +73,40 @@ class Settings {
   // platform dependent), so we check for it.
   static Future<void> _remove(SharedPreferences prefs, String key) async {
     try { await prefs.remove(key); } catch (_) {}
+  }
+}
+
+class _CachedString {
+  String? _value = null;
+  bool _isKnown = false;
+  String _key;
+
+  _CachedString(this._key);
+
+  Future<String?> get() async {
+    if (_isKnown) {
+      return _value;
+    }
+
+    _value = (await Settings._init()).getString(_key);
+    _isKnown = true;
+    return _value;
+  }
+
+  Future<void> set(String? newValue) async {
+    if (_isKnown && _value == newValue) {
+      return;
+    }
+
+    _isKnown = true;
+    _value = newValue;
+
+    final prefs = await Settings._init();
+
+    if (newValue != null) {
+      await prefs.setString(_key, newValue);
+    } else {
+      await Settings._remove(prefs, _key);
+    }
   }
 }
