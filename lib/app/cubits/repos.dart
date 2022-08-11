@@ -26,6 +26,23 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _appDir = appDir,
     _repositoriesDir = repositoriesDir ;
 
+  Future<void> init(String defaultRepo) async {
+    _update(() { _isLoading = true; });
+
+    var futures = <Future>[];
+
+    for (final repoName in RepositoryHelper.localRepositoriesFiles(_repositoriesDir, justNames: true)) {
+      final setCurrent = repoName == defaultRepo;
+      futures.add(() async {
+        await _openRepository(repoName, setCurrent: setCurrent);
+      }());
+    }
+
+    await Future.wait(futures);
+
+    _update(() { _isLoading = false; });
+  }
+
   bool get isLoading => _isLoading;
   oui.Session get session => _session;
   String get appDir => _appDir;
@@ -150,7 +167,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
     _update(() { _isLoading = true; });
+    await _openRepository(name, password: password, token: token, setCurrent: setCurrent);
+    _update(() { _isLoading = false; });
+  }
 
+  Future<void> _openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
     final repo = await _open(name, password: password, token: token);
 
     if (repo != null) {
@@ -158,8 +179,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     } else {
       loggy.app('Failed to open repository $name');
     }
-
-    _update(() { _isLoading = false; });
   }
 
   Future<void> unlockRepository({required String name, required String password}) async {

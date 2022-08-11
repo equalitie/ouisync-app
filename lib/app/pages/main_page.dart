@@ -92,7 +92,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _initRepositories().then((_) { initMainPage(); });
+      _repositories.init(widget.defaultRepositoryName).then((_) { initMainPage(); });
 
       /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
       /// or the MediaReceiverWindows (DropTarget), depending on the platform.
@@ -124,19 +124,6 @@ class _MainPageState extends State<MainPage>
       _connectivitySubscription?.cancel();
 
       super.dispose();
-    }
-
-    Future<void> _initRepositories() async {
-      final initRepos = RepositoryHelper
-      .localRepositoriesFiles(
-        widget.repositoriesLocation,
-        justNames: true
-      ).map((repoName) async {
-        final setCurrent = repoName == widget.defaultRepositoryName;
-        await _repositories.openRepository(repoName, setCurrent: setCurrent);
-      }).toList();
-
-      await Future.wait(initRepos);
     }
 
     void _connectivityChange(ConnectivityResult result) {
