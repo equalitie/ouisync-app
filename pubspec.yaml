@@ -71,7 +71,7 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  icons_launcher: ^1.1.8
+  icons_launcher: ^2.0.3
   integration_test:
     sdk: flutter
   intl: ^0.17.0
