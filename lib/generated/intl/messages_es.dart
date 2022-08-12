@@ -93,6 +93,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Crear directorio"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Crear repositorio"),
+        "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
         "actionPreviewFile":
             MessageLookupByLibrary.simpleMessage("Vista previa de archivo"),
         "actionReloadContents":
@@ -159,6 +160,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "Este repositorio es sólo-lectura."),
+        "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
+            "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente"),
+        "messageBackgroundNotificationAndroid":
+            MessageLookupByLibrary.simpleMessage("OuiSync está corriendo"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Tu colega no puede escribir o leer los contenidos"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
@@ -292,6 +297,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Agregar un repositorio"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
+        "titleBackgroundAndroidPermissionsTitle":
+            MessageLookupByLibrary.simpleMessage("Permisos requeridos"),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Crear un directorio"),
         "titleCreateRepository":

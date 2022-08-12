@@ -22,6 +22,7 @@
     "titleDeleteRepository":"Borrar repositorio",
     "titleDownloadToDevice":"Descargar al dispositivo",
     "titleDownloadLocation":"Ubicación de descarga",
+    "titleBackgroundAndroidPermissionsTitle": "Permisos requeridos",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -128,6 +129,9 @@
 
     "messageFilePreviewNotAvailable":"La vista previa de archivo no está disponible todavía",
 
+    "messageBackgroundNotificationAndroid": "OuiSync está corriendo",
+    "messageBackgroundAndroidPermissions": "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
@@ -174,6 +178,7 @@
     "actionShow":"Mostrar",
     "actionHide":"Ocultar",
     "actionExit":"Salir",
+    "actionOK": "OK",
     "actionAcceptCapital":"ACEPTAR",
     "actionCancelCapital":"CANCELAR",
     "actionHideCapital":"OCULTAR",

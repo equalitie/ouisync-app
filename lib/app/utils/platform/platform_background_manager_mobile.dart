@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 
+import '../../../generated/l10n.dart';
 import '../loggers/ouisync_app_logger.dart';
 import 'platform.dart';
 
@@ -11,10 +12,9 @@ class PlatformBackgroundManagerMobile
   @override
   Future<void> enableBackgroundExecution(BuildContext context) async {
     final config = FlutterBackgroundAndroidConfig(
-      notificationTitle: 'OuiSync',
-      notificationText:
-          'Background notification for keeping the example app running in the background',
-      notificationIcon: AndroidResource(name: 'ic_stat_ouisync'),
+      notificationTitle: S.current.titleAppTitle,
+      notificationText: S.current.messageBackgroundNotificationAndroid,
+      notificationIcon: const AndroidResource(name: 'ic_stat_ouisync'),
       notificationImportance: AndroidNotificationImportance.Default,
       enableWifiLock: true,
     );
@@ -27,16 +27,12 @@ class PlatformBackgroundManagerMobile
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Text('Permissions needed'),
-                content: Text(
-                    "Shortly the OS will ask you for permission to execute "
-                    "this app in the background. This is required in order to "
-                    "keep syncing while the app is not in the foreground."
-                ),
+                title: Text(S.current.titleBackgroundAndroidPermissionsTitle),
+                content: Text(S.current.messageBackgroundAndroidPermissions),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, 'OK'),
-                    child: const Text('OK'),
+                    child: Text(S.current.actionOK),
                   ),
                 ]);
           });

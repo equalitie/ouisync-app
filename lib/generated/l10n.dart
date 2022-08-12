@@ -280,6 +280,16 @@ class S {
     );
   }
 
+  /// `Permissions needed`
+  String get titleBackgroundAndroidPermissionsTitle {
+    return Intl.message(
+      'Permissions needed',
+      name: 'titleBackgroundAndroidPermissionsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1230,6 +1240,26 @@ class S {
     );
   }
 
+  /// `OuiSync is running`
+  String get messageBackgroundNotificationAndroid {
+    return Intl.message(
+      'OuiSync is running',
+      name: 'messageBackgroundNotificationAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground`
+  String get messageBackgroundAndroidPermissions {
+    return Intl.message(
+      'Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground',
+      name: 'messageBackgroundAndroidPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1655,6 +1685,16 @@ class S {
     return Intl.message(
       'Exit',
       name: 'actionExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `OK`
+  String get actionOK {
+    return Intl.message(
+      'OK',
+      name: 'actionOK',
       desc: '',
       args: [],
     );

@@ -92,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Create folder"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Create repository"),
+        "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
         "actionPreviewFile":
             MessageLookupByLibrary.simpleMessage("Preview file"),
         "actionReloadContents": MessageLookupByLibrary.simpleMessage("Reload"),
@@ -155,6 +156,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "This repository is a read-only replica."),
+        "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
+            "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground"),
+        "messageBackgroundNotificationAndroid":
+            MessageLookupByLibrary.simpleMessage("OuiSync is running"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Your peer can not write nor read the contents"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
@@ -291,6 +296,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Add a repository"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
+        "titleBackgroundAndroidPermissionsTitle":
+            MessageLookupByLibrary.simpleMessage("Permissions needed"),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Create a folder"),
         "titleCreateRepository":
