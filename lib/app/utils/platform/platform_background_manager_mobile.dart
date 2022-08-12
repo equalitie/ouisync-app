@@ -14,7 +14,7 @@ class PlatformBackgroundManagerMobile
       notificationTitle: 'OuiSync',
       notificationText:
           'Background notification for keeping the example app running in the background',
-      notificationIcon: AndroidResource(name: 'background_icon'),
+      notificationIcon: AndroidResource(name: 'ic_stat_ouisync'),
       notificationImportance: AndroidNotificationImportance.Default,
       enableWifiLock: true,
     );
