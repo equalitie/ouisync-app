@@ -26,6 +26,7 @@ build_name="$1" #e.g. "0.0.1-rc1"
 build_number="$2"
 keystore="$3"
 storepass="$4"
+ignore_git_dirty="$5"
 
 if [ -z "$build_number" ]; then
     echo "The build number argument can't be an empty string"
@@ -43,7 +44,7 @@ if [ ! -f "$storepass" ]; then
 fi
 
 dirty=""
-if [[ $ignore-git-dirty == 'n']] then
+if [[ $ignore_git_dirty == 'n']] then
     if [[ $(git diff --stat) != '' ]]; then
         while true; do
             echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
