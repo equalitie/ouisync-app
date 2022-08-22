@@ -44,29 +44,29 @@ if [ ! -f "$storepass" ]; then
 fi
 
 dirty=""
-if [[ "$ignore_git_dirty" == 'n']] then
-    if [[ $(git diff --stat) != '' ]]; then
-        while true; do
-            echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
-            read answer
-            case "$answer" in
-                y)
-                    dirty="-dirty"
-                    break
-                    ;;
-                d)
-                    git diff
-                    ;;
-                s)
-                    git status
-                    ;;
-                *)
-                    exit
-                    ;;
-            esac
-        done
-    fi
-fi
+#if [[ "$ignore_git_dirty" == 'n']] then
+#    if [[ $(git diff --stat) != '' ]]; then
+#        while true; do
+#            echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
+#            read answer
+#            case "$answer" in
+#                y)
+#                    dirty="-dirty"
+#                    break
+#                    ;;
+#                d)
+#                    git diff
+#                    ;;
+#                s)
+#                    git status
+#                    ;;
+#                *)
+#                    exit
+#                    ;;
+#            esac
+#        done
+#    fi
+#fi
 
 # https://stackoverflow.com/a/1248795/273348
 date_tag=$(date -u "+%Y-%m-%d--%H-%M-%S--UTC")
