@@ -8,6 +8,7 @@ function usage {
     echo "    <build-number>  the build number (use 'flutter build appbundle -h' for more info)"
     echo "    <keystore>      path to the keystore (.jks) file"
     echo "    <storepass>     path to the containing the password for unlocking the keystore"
+    echo "    <ignore-git-dirty> don't check if git is dirty (for non-interactive docker compilation)"
 }
 
 if [ "$1" = "-h" ]; then
@@ -42,26 +43,28 @@ if [ ! -f "$storepass" ]; then
 fi
 
 dirty=""
-if [[ $(git diff --stat) != '' ]]; then
-    while true; do
-        echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
-        read answer
-        case "$answer" in
-            y)
-                dirty="-dirty"
-                break
-                ;;
-            d)
-                git diff
-                ;;
-            s)
-                git status
-                ;;
-            *)
-                exit
-                ;;
-        esac
-    done
+if [[ $ignore-git-dirty == 'n']] then
+    if [[ $(git diff --stat) != '' ]]; then
+        while true; do
+            echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
+            read answer
+            case "$answer" in
+                y)
+                    dirty="-dirty"
+                    break
+                    ;;
+                d)
+                    git diff
+                    ;;
+                s)
+                    git status
+                    ;;
+                *)
+                    exit
+                    ;;
+            esac
+        done
+    fi
 fi
 
 # https://stackoverflow.com/a/1248795/273348
