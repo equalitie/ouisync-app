@@ -44,7 +44,7 @@ if [ ! -f "$storepass" ]; then
 fi
 
 dirty=""
-if [[ $ignore_git_dirty == 'n']] then
+if [[ "$ignore_git_dirty" == 'n']] then
     if [[ $(git diff --stat) != '' ]]; then
         while true; do
             echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
