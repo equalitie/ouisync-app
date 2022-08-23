@@ -4,10 +4,11 @@ set -e
 
 function usage {
     echo "Usage: cd <ouisync-app> && ./util/$(basename $0) <build-name> <build-number> <keystore> <storepass>"
-    echo "    <build-name>    a version triple such as 0.0.1 or 0.0.1-rc1"
-    echo "    <build-number>  the build number (use 'flutter build appbundle -h' for more info)"
-    echo "    <keystore>      path to the keystore (.jks) file"
-    echo "    <storepass>     path to the containing the password for unlocking the keystore"
+    echo "    <build-name>      a version triple such as 0.0.1 or 0.0.1-rc1"
+    echo "    <build-number>    the build number (use 'flutter build appbundle -h' for more info)"
+    echo "    <keystore>        path to the keystore (.jks) file"
+    echo "    <storepass>       path to the containing the password for unlocking the keystore"
+    echo "    <skip-git-check>  flag to skip the git check (git diff --stat) (y/n)"
 }
 
 if [ "$1" = "-h" ]; then
@@ -25,6 +26,7 @@ build_name="$1" #e.g. "0.0.1-rc1"
 build_number="$2"
 keystore="$3"
 storepass="$4"
+skip_git_check="$5"
 
 if [ -z "$build_number" ]; then
     echo "The build number argument can't be an empty string"
@@ -42,29 +44,29 @@ if [ ! -f "$storepass" ]; then
 fi
 
 dirty=""
-#if [[ "$ignore_git_dirty" == 'n']] then
-#    if [[ $(git diff --stat) != '' ]]; then
-#        while true; do
-#            echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
-#            read answer
-#            case "$answer" in
-#                y)
-#                    dirty="-dirty"
-#                    break
-#                    ;;
-#                d)
-#                    git diff
-#                    ;;
-#                s)
-#                    git status
-#                    ;;
-#                *)
-#                    exit
-#                    ;;
-#            esac
-#        done
-#    fi
-#fi
+if [ "$skip_git_check" != 'y'] then
+   if [[ $(git diff --stat) != '' ]]; then
+       while true; do
+           echo "Git is dirty. Continue anyway? (y/N/d=diff/s=status)"
+           read answer
+           case "$answer" in
+               y)
+                   dirty="-dirty"
+                   break
+                   ;;
+               d)
+                   git diff
+                   ;;
+               s)
+                   git status
+                   ;;
+               *)
+                   exit
+                   ;;
+           esac
+       done
+   fi
+fi
 
 # https://stackoverflow.com/a/1248795/273348
 date_tag=$(date -u "+%Y-%m-%d--%H-%M-%S--UTC")
