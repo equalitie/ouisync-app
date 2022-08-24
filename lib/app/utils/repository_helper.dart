@@ -5,27 +5,7 @@ import 'package:path/path.dart' as p;
 import 'utils.dart';
 
 class RepositoryHelper {
-  RepositoryHelper._();
-
-  static Map<String, bool>? _dhtStatus;
-
   static final loggyInstance = OuiSyncAppLogger();
-
-  static List<dynamic> localRepositoriesFiles(String location, {
-    bool justNames = true
-  }) {
-    if (!io.Directory(location).existsSync()) {
-      return <String>[];
-    }
-
-    final repositoryFiles = io.Directory(location).listSync();
-
-    if (!justNames) {
-      return repositoryFiles;
-    }
-
-    return repositoryFiles.map((e) => p.basenameWithoutExtension(e.path)).toSet().toList();
-  }
 
   static Stream<String> localRepositoryNames(String location) async* {
     final dir = io.Directory(location);
@@ -41,25 +21,6 @@ class RepositoryHelper {
 
       yield p.basenameWithoutExtension(file.path);
     }
-  }
-
-  static Future<String> latestRepositoryOrDefault(List<String> localRepositories) async {
-    if (localRepositories.isEmpty) {
-      return '';
-    }
-
-    final defaultRepository = localRepositories.first;
-    final latestRepository = await Settings.getDefaultRepo();
-
-    if (latestRepository == null) {
-      return defaultRepository;
-    }
-
-    if (!localRepositories.contains(latestRepository)) {
-      return defaultRepository;
-    }
-
-    return latestRepository;
   }
 
   static Future<bool> renameRepositoryFiles(String repositoriesDir, {
