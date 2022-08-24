@@ -3,6 +3,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../models/repo_entry.dart';
 import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../widgets.dart';
@@ -38,8 +39,8 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             const Icon(Icons.share_outlined),
             onPressed: () {
               final current = reposCubit.currentRepo;
-              if (current == null) return;
-              shareRepositoryOnTap(current);
+              if (!(current is OpenRepoEntry)) return;
+              shareRepositoryOnTap(current.cubit);
             },
             size: Dimensions.sizeIconSmall,
             color: Colors.white,
@@ -89,9 +90,9 @@ class _Picker extends StatelessWidget {
       );
     }
 
-    final color = repo.accessMode != AccessMode.blind
-        ? colorUnlockedRepo
-        : colorLockedRepo;
+    final color = !(repo is OpenRepoEntry) || repo.cubit.accessMode == AccessMode.blind
+        ? colorLockedRepo
+        : colorUnlockedRepo;
 
     return _buildState(
       context,
@@ -102,7 +103,7 @@ class _Picker extends StatelessWidget {
     );
   });
 
-  String _repoName(RepoCubit? repo) {
+  String _repoName(RepoEntry? repo) {
     if (repo != null) {
       return repo.name;
     } else {

@@ -4,14 +4,15 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'dart:async';
 
 import '../models/folder.dart';
+import '../models/repo_entry.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
-  final Map<String, RepoCubit> _repos = {};
+  final Map<String, RepoEntry> _repos = {};
   bool _isLoading = false;
-  RepoCubit? _currentRepo;
+  RepoEntry? _currentRepo;
   final oui.Session _session;
   final String _appDir;
   final String _repositoriesDir;
@@ -51,7 +52,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<String> repositoryNames() => _repos.keys;
 
-  RepoCubit? get currentRepo => _currentRepo;
+  RepoEntry? get currentRepo => _currentRepo;
 
   StateMonitor rootStateMonitor() => StateMonitor(_session.getRootStateMonitor());
 
@@ -59,13 +60,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return currentRepo?.currentFolder;
   }
 
-  Iterable<RepoCubit> get repos => _repos.entries.map((entry) => entry.value);
+  Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
   oui.ShareToken createToken(String tokenString) {
     return oui.ShareToken(session, tokenString);
   }
 
-  RepoCubit? findById(String id) {
+  RepoEntry? findById(String id) {
     for (final r in repos) {
       if (r.id == id) {
         return r;
@@ -74,17 +75,19 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  Future<void> setCurrent(RepoCubit? repo) async {
+  Future<void> setCurrent(RepoEntry? repo) async {
     if (currentRepo == repo) {
       return;
     }
 
-    oui.NativeChannels.setRepository(repo?.handle);
+    oui.NativeChannels.setRepository(repo?.maybeHandle);
 
     _subscription?.cancel();
     _subscription = null;
 
-    _subscription = repo?.handle.subscribe(() => repo.getContent());
+    if (repo is OpenRepoEntry) {
+      _subscription = repo.handle.subscribe(() => repo.cubit.getContent());
+    }
 
     await Settings.setDefaultRepo(repo?.name);
 
@@ -100,12 +103,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     setCurrent((repoName != null) ? _repos[repoName] : null);
   }
 
-  RepoCubit? get(String name) {
+  RepoEntry? get(String name) {
     return _repos[name];
   }
 
-  Future<void> put(RepoCubit newRepo, { bool setCurrent = false }) async {
-    RepoCubit? oldRepo = _repos.remove(newRepo.name);
+  Future<void> put(RepoCubit newRepoCubit, { bool setCurrent = false }) async {
+    final newRepo = OpenRepoEntry(newRepoCubit);
+
+    RepoEntry? oldRepo = _repos.remove(newRepo.name);
 
     var didChange = false;
 

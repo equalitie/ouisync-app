@@ -18,6 +18,7 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../utils/click_counter.dart';
 import '../widgets/widgets.dart';
+import '../models/repo_entry.dart';
 import 'pages.dart';
 import 'peer_list.dart';
 
@@ -187,12 +188,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               ))));
   }
 
-  Widget _buildCurrentRepoDhtSwitch(RepoCubit? repo) {
-    if (repo == null) {
+  Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
+    if (!(repo is OpenRepoEntry)) {
       return SizedBox.shrink();
     }
 
-    return repo.builder((repo) =>
+    return repo.cubit.builder((repo) =>
       LabeledSwitch(
         label: S.current.labelBitTorrentDHT,
         padding: const EdgeInsets.all(0.0),
@@ -234,7 +235,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
 
-  Widget _buildRepositoriesSection(RepoCubit? currentRepo) {
+  Widget _buildRepositoriesSection(RepoEntry? currentRepo) {
     return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,7 +251,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
               color: Constants.inputBackgroundColor
             ),
-            child: DropdownButton<RepoCubit?>(
+            child: DropdownButton<RepoEntry?>(
               isExpanded: true,
               value: currentRepo,
               underline: const SizedBox(),
@@ -278,7 +279,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     ],
                   ));
               }).toList(),
-              items: repositories().map((RepoCubit repo) {
+              items: repositories().map((RepoEntry repo) {
                 return DropdownMenuItem(
                   value: repo,
                   child: Row(
@@ -342,11 +343,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       icon: Icons.share,
                       iconSize: Dimensions.sizeIconSmall,
                       onTap: () {
-                if (currentRepo == null) {
+                if (!(currentRepo is OpenRepoEntry)) {
                   return;
                 }
 
-                widget.onShareRepository(currentRepo);
+                widget.onShareRepository(currentRepo.cubit);
               }),
               Fields.actionText(S.current.actionDelete,
                       textFontSize: Dimensions.fontAverage,
@@ -395,7 +396,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return _repos.repositoryNames();
   }
 
-  Iterable<RepoCubit> repositories() {
+  Iterable<RepoEntry> repositories() {
     return _repos.repos;
   }
 
