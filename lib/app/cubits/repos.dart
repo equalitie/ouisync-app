@@ -27,7 +27,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _appDir = appDir,
     _repositoriesDir = repositoriesDir ;
 
-  Future<void> init(String defaultRepo) async {
+  Future<void> init(String? defaultRepo) async {
     _update(() { _isLoading = true; });
 
     var futures = <Future>[];

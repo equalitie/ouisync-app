@@ -25,7 +25,7 @@ class OuiSyncApp extends StatefulWidget {
   final Session session;
   final String appStorageLocation;
   final String repositoriesLocation;
-  final String defaultRepositoryName;
+  final String? defaultRepositoryName;
   final PlatformWindowManager windowManager;
 
   @override
