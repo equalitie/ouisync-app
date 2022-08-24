@@ -41,7 +41,7 @@ Future<void> main() async {
   );
 
   final localRepositoriesList =
-      RepositoryHelper.localRepositoriesFiles(repositoriesDir) as List<String>;
+      await RepositoryHelper.localRepositoryNames(repositoriesDir).toList();
 
   final defaultRepositoryName =
       await RepositoryHelper.latestRepositoryOrDefault(localRepositoriesList);

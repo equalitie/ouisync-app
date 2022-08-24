@@ -2,7 +2,6 @@ import 'dart:io' as io;
 import 'package:ouisync_app/app/utils/loggers/ouisync_app_logger.dart';
 import 'package:path/path.dart' as p;
 
-
 import 'utils.dart';
 
 class RepositoryHelper {
@@ -26,6 +25,22 @@ class RepositoryHelper {
     }
 
     return repositoryFiles.map((e) => p.basenameWithoutExtension(e.path)).toSet().toList();
+  }
+
+  static Stream<String> localRepositoryNames(String location) async* {
+    final dir = io.Directory(location);
+
+    if (!await dir.exists()) {
+      return;
+    }
+
+    await for (final file in dir.list()) {
+      if (!file.path.endsWith(".db")) {
+        continue;
+      }
+
+      yield p.basenameWithoutExtension(file.path);
+    }
   }
 
   static Future<String> latestRepositoryOrDefault(List<String> localRepositories) async {
