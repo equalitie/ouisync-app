@@ -254,7 +254,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       Settings.setDhtEnableStatus(repoId, null);
     }
 
-    final deleted = await RepositoryHelper.deleteRepositoryFiles(
+    final deleted = await _deleteRepositoryFiles(
       _repositoriesDir,
       repositoryName: repositoryName
     );
@@ -395,5 +395,37 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     return true;
+  }
+
+  Future<bool> _deleteRepositoryFiles(String repositoriesDir, {
+    required String repositoryName
+  }) async {
+    final dir = io.Directory(repositoriesDir);
+
+    if (!await dir.exists()) {
+      return false;
+    }
+
+    final exts = [ 'db', 'db-wal', 'db-shm' ];
+
+    var success = true;
+
+    for (final ext in exts) {
+      final path = p.join(repositoriesDir, '$repositoryName.$ext');
+      final file = io.File(path);
+
+      if (!await file.exists()) {
+        continue;
+      }
+
+      try {
+        await file.delete();
+      } catch (e, st) {
+        loggy.app('Exception when removing repo file "$path"', e, st);
+        success = false;
+      }
+    }
+
+    return success;
   }
 }
