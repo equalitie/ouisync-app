@@ -3,7 +3,7 @@ icons_launcher:
   platforms:
     android:
       enable: true
-      image_path: 'assets/ouisync-app-launcher.png'
+      image_path: 'assets/ouisync-beta-1024.png'
       adaptive_icon_background: 'assets/ic_launcher_adaptive_beta_back.png'
       adaptive_icon_foreground: 'assets/ic_launcher_adaptive_beta_fore.png'
       adaptive_icon_round: 'assets/ic_launcher_beta.png'
