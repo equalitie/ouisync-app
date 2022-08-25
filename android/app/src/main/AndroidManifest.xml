@@ -20,7 +20,7 @@
         android:label="OuiSync"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_beta">
+        android:roundIcon="@mipmap/ic_launcher_round">
         <!--
             Regarding `launchMode="singleTask"`: when the user wants to "share"
             files into OuiSync, we don't want to start a new task because then
