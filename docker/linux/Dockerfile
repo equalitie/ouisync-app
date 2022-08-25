@@ -99,16 +99,16 @@ RUN git_commit=$(git rev-parse --short HEAD) && \
     tags="$(printf '%05d' ${build_number})--v${build_name}--${date_tag}--${git_commit}" && \
     release_dir="release--${tags}" && \
     #Creating the destination folders for the binaries
-    mkdir -p /home/releases && \
-    mkdir -p /home/releases/${release_dir}/android-${tags} &&\
+    mkdir -p /home/releases/${release_dir}/android-${tags} && \
     mkdir -p /home/releases/${release_dir}/linux-cli-${tags} && \
     mkdir -p /home/releases/${release_dir}/linux-desktop-${tags} && \
     # Building Linux Desktop version
     flutter build linux --release && \
-    tar -cjf /home/releases/${release_dir}/linux-desktop-${tags}/linux-desktop-${t  ags}.tar.bz2 /home/code/ouisync-app/build/linux/x64/release/bundle/* && \
+    tar -cjf /home/releases/${release_dir}/linux-desktop-${tags}/linux-desktop-${tags}.tar.bz2 /home/code/ouisync-app/build/linux/x64/release/bundle/* && \
     # Building Linux CLI version
     cd /home/code/ouisync-app/ouisync-plugin/ouisync/ && \
     cargo build --release --bin ouisync --target x86_64-unknown-linux-gnu && \
     tar -cjf /home/releases/${release_dir}/linux-cli-${tags}/linux-cli-${tags}.tar.bz2 /home/code/ouisync-app/ouisync-plugin/ouisync/target/x86_64-unknown-linux-gnu/release/* && \
     # Copying the Android binaries to the release folder
-    # cp -r /home/code/ouisync-app/releases/${release_dir}/* /home/releases/${release_dir}/android-${tags}/
+    cd /home/code/ouisync-app/releases/release* && \
+    cp -r * /home/releases/${release_dir}/android-${tags}/
