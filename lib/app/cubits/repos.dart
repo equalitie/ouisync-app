@@ -33,7 +33,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var futures = <Future>[];
 
-    await for (final repoName in await _localRepositoryNames(_repositoriesDir)) {
+    await for (final repoName in _localRepositoryNames(_repositoriesDir)) {
       futures.add(openRepository(repoName, setCurrent: repoName == defaultRepo));
     }
 
