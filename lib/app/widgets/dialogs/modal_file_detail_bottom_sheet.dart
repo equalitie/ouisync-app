@@ -113,10 +113,7 @@ class _FileDetailState extends State<FileDetail> {
                 },
               ).then((fileName) {
                 Navigator.of(context).pop();
-
-                if (fileName != null) {
-                  showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
-                }})
+              })
             },
             icon: Icons.delete_outlined,
           ),

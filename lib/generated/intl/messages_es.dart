@@ -32,34 +32,32 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m4(path) => "${path} no está vacío";
 
-  static String m5(name) => "Archivo borrado exitosamente: ${name}";
+  static String m5(name) => "Directorio borrado exitosamente: ${name}";
 
-  static String m6(name) => "Directorio borrado exitosamente: ${name}";
+  static String m6(path) => "desde ${path}";
 
-  static String m7(path) => "desde ${path}";
+  static String m7(name) => "Error creando archuivo ${name}";
 
-  static String m8(name) => "Error creando archuivo ${name}";
+  static String m8(access) => "Modo de aceso otorgado: ${access}";
 
-  static String m9(access) => "Modo de aceso otorgado: ${access}";
-
-  static String m11(name) =>
+  static String m10(name) =>
       "Sugerido: ${name}\n(clic aquí para usar este nombre)";
 
-  static String m12(name) => "${name} escritura cancelada";
+  static String m11(name) => "${name} escritura cancelada";
 
-  static String m13(name) => "${name} - fallo durante escritura";
+  static String m12(name) => "${name} - fallo durante escritura";
 
-  static String m14(access) => "${access}";
+  static String m13(access) => "${access}";
 
-  static String m15(entry) => "${entry}";
+  static String m14(entry) => "${entry}";
 
-  static String m16(name) => "${name}";
+  static String m15(name) => "${name}";
 
-  static String m17(path) => "${path}";
+  static String m16(path) => "${path}";
 
-  static String m18(status) => "${status}";
+  static String m17(status) => "${status}";
 
-  static String m19(name) => "Compartir repositorio \"${name}\"";
+  static String m18(name) => "Compartir repositorio \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -226,12 +224,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Por favor ingrese in token válido"),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Presione de nuevo el botón para ir atrás para salir de la aplicación"),
-        "messageFileDeleted": m5,
         "messageFileName":
             MessageLookupByLibrary.simpleMessage("Nombre de archivo"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "La vista previa de archivo no está disponible todavía"),
-        "messageFolderDeleted": m6,
+        "messageFolderDeleted": m5,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageInitializing":
@@ -242,10 +239,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cargando…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "Este <bold>repositorio</bold> está cerrado"),
-        "messageMoveEntryOrigin": m7,
+        "messageMoveEntryOrigin": m6,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "Esta función no está disponible mientras se está moviendo una entrada"),
-        "messageNewFileError": m8,
+        "messageNewFileError": m7,
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":
@@ -262,14 +259,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cambiar nombre de directorio"),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(
             "Cambiar nombre de repositorio"),
-        "messageRepositoryAccessMode": m9,
+        "messageRepositoryAccessMode": m8,
         "messageRepositoryName":
             MessageLookupByLibrary.simpleMessage("De un nombre al repositorio"),
         "messageRepositoryNewName": MessageLookupByLibrary.simpleMessage(
             "Nuevo nombre del repositorio"),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Clave del repositorio"),
-        "messageRepositorySuggestedName": m11,
+        "messageRepositorySuggestedName": m10,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Pegue el token aquí"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
@@ -282,13 +279,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ingrese la clave para abrir el repositorio"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Aceso total. Tu colega puede leer y modificar"),
-        "messageWritingFileCanceled": m12,
-        "messageWritingFileError": m13,
-        "replacementAccess": m14,
-        "replacementEntry": m15,
-        "replacementName": m16,
-        "replacementPath": m17,
-        "replacementStatus": m18,
+        "messageWritingFileCanceled": m11,
+        "messageWritingFileError": m12,
+        "replacementAccess": m13,
+        "replacementEntry": m14,
+        "replacementName": m15,
+        "replacementPath": m16,
+        "replacementStatus": m17,
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),
@@ -331,7 +328,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repositorio"),
         "titleSettings":
             MessageLookupByLibrary.simpleMessage("Configuraciones"),
-        "titleShareRepository": m19,
+        "titleShareRepository": m18,
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Abrir repositorio"),
         "typeFile": MessageLookupByLibrary.simpleMessage("Archivo"),

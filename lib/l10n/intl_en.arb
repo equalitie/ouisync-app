@@ -116,7 +116,6 @@
     "messageEntryTypeFolder":"A folder",
     "messageEntryTypeFile":"A file",
     "messageEntryAlreadyExist":"{entry} already exists.",
-    "messageFileDeleted":"File deleted successfully: {name}",
     "messageFolderDeleted":"Folder deleted successfully: {name}",
     "messageExitOuiSync":"Press back again to exit.",
     "messageInitializing":"Initializing...",
