@@ -7,22 +7,6 @@ import 'utils.dart';
 class RepositoryHelper {
   static final loggyInstance = OuiSyncAppLogger();
 
-  static Stream<String> localRepositoryNames(String location) async* {
-    final dir = io.Directory(location);
-
-    if (!await dir.exists()) {
-      return;
-    }
-
-    await for (final file in dir.list()) {
-      if (!file.path.endsWith(".db")) {
-        continue;
-      }
-
-      yield p.basenameWithoutExtension(file.path);
-    }
-  }
-
   static Future<bool> renameRepositoryFiles(String repositoriesDir, {
     required String oldName,
     required String newName

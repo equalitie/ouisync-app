@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:path/path.dart' as p;
 import 'dart:async';
 
 import '../models/folder.dart';
@@ -32,7 +33,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var futures = <Future>[];
 
-    await for (final repoName in await RepositoryHelper.localRepositoryNames(_repositoriesDir)) {
+    await for (final repoName in await _localRepositoryNames(_repositoriesDir)) {
       futures.add(openRepository(repoName, setCurrent: repoName == defaultRepo));
     }
 
@@ -326,5 +327,21 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   void _update(void Function() changeState) {
     changeState();
     changed();
+  }
+
+  static Stream<String> _localRepositoryNames(String location) async* {
+    final dir = io.Directory(location);
+
+    if (!await dir.exists()) {
+      return;
+    }
+
+    await for (final file in dir.list()) {
+      if (!file.path.endsWith(".db")) {
+        continue;
+      }
+
+      yield p.basenameWithoutExtension(file.path);
+    }
   }
 }
