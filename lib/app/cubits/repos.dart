@@ -213,7 +213,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await _forget(oldName);
 
-    final renamed = await RepositoryHelper.renameRepositoryFiles(_repositoriesDir,
+    final renamed = await _renameRepositoryFiles(_repositoriesDir,
       oldName: oldName,
       newName: newName
     );
@@ -343,5 +343,57 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       yield p.basenameWithoutExtension(file.path);
     }
+  }
+
+  Future<bool> _renameRepositoryFiles(String repositoriesDir, {
+    required String oldName,
+    required String newName
+  }) async {
+    if (oldName == newName) return true;
+
+    final dir = io.Directory(repositoriesDir);
+
+    if (!await dir.exists()) {
+      return false;
+    }
+
+    final exts = [ 'db', 'db-wal', 'db-shm' ];
+
+    // Check the source db exists
+    {
+      final path = p.join(repositoriesDir, "$oldName.db");
+      if (!await io.File(path).exists()) {
+        loggy.app("Source database does not exist \"$path\".");
+        return false;
+      }
+    }
+
+    // Check the destination files don't exist
+    for (final ext in exts) {
+      final path = p.join(repositoriesDir, "$newName.$ext");
+      if (await io.File(path).exists()) {
+        loggy.app("Destination file \"$path already exists\".");
+        return false;
+      }
+    }
+
+    for (final ext in exts) {
+      final srcPath = p.join(repositoriesDir, '$oldName.$ext');
+      final srcFile = io.File(srcPath);
+
+      if (!await srcFile.exists()) {
+        continue;
+      }
+
+      final dstPath = p.join(repositoriesDir, '$newName.$ext');
+
+      try {
+        await srcFile.rename(dstPath);
+      } catch (e, st) {
+        loggy.app('Exception when renaming repo file "$srcPath" -> "$dstPath"', e, st);
+      }
+    }
+
+    return true;
   }
 }
