@@ -170,7 +170,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
     await _put(LoadingRepoEntry(name), setCurrent: setCurrent);
 
-    final repo = await _open(name, password: password, token: token);
+    final repo = await _open(name, password: password, token: token, orCreate: true);
 
     if (repo != null) {
       await _put(repo, setCurrent: setCurrent);
@@ -186,23 +186,20 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await _put(LoadingRepoEntry(name), setCurrent: wasCurrent);
 
-    final store = _buildStoreString(name);
-    final storeExist = await io.File(store).exists();
-
-    if (!storeExist) {
-      loggy.app('The repository store doesn\'t exist: $store');
-      return;
-    }
-
     try {
-      final repo = await _getRepository(
-        store: store,
+      final repo = await _open(
+        name,
         password: password,
-        shareToken: null,
-        exist: storeExist
+        token: null,
+        orCreate: false
       );
 
-      await _put(OpenRepoEntry(RepoCubit(name, repo)), setCurrent: wasCurrent);
+      if (repo == null) {
+        loggy.app('Failed to open repository: $name');
+        return;
+      }
+
+      await _put(repo, setCurrent: wasCurrent);
     } catch (e, st) {
       loggy.app('Unlocking of the repository $name failed', e, st);
     }
@@ -221,7 +218,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
 
-      final repo = await _open(oldName);
+      final repo = await _open(oldName, orCreate: false);
 
       if (repo == null) {
         await setCurrent(null);
@@ -234,7 +231,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await Settings.setDefaultRepo(null);
 
-    final repo = await _open(newName);
+    final repo = await _open(newName, orCreate: false);
 
     if (repo == null) {
       await setCurrent(null);
@@ -263,7 +260,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('The repository $repositoryName deletion failed');
 
       loggy.app('Initializing $repositoryName again...');
-      final repo = await _open(repositoryName);
+      final repo = await _open(repositoryName, orCreate: false);
 
       if (repo == null) {
         await setCurrent(null);
@@ -286,42 +283,35 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   _buildStoreString(repositoryName) => '$_repositoriesDir/$repositoryName.db';
 
-  Future<OpenRepoEntry?> _open(String name, { String? password, oui.ShareToken? token }) async {
+  Future<OpenRepoEntry?> _open(String name, { String? password, oui.ShareToken? token, required bool orCreate }) async {
     final store = _buildStoreString(name);
-    final storeExist = await io.File(store).exists();
 
     try {
-      final repo = await _getRepository(
-        store: store,
-        password: password,
-        shareToken: token,
-        exist: storeExist
-      );
+      late oui.Repository repo;
+
+      if (await io.File(store).exists()) {
+        repo = await oui.Repository.open(_session, store: store, password: password);
+      } else {
+        if (orCreate) {
+          repo = await oui.Repository.create(_session, store: store, password: password!, shareToken: token);
+        } else {
+          return null;
+        }
+      }
+
+      if (await Settings.getDhtEnableStatus(repo.lowHexId(), defaultValue: true)) {
+        repo.enableDht();
+      } else {
+        repo.disableDht();
+      }
 
       return OpenRepoEntry(RepoCubit(name, repo));
-    } catch (e, st) {
+    }
+    catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }
 
     return null;
-  }
-
-  Future<oui.Repository> _getRepository({required String store, String? password, oui.ShareToken?  shareToken, required bool exist}) async {
-    final oui.Repository repo;
-
-    if (exist) {
-      repo = await oui.Repository.open(_session, store: store, password: password);
-    } else {
-      repo = await oui.Repository.create(_session, store: store, password: password!, shareToken: shareToken);
-    }
-
-    if (await Settings.getDhtEnableStatus(repo.lowHexId(), defaultValue: true)) {
-      repo.enableDht();
-    } else {
-      repo.disableDht();
-    }
-
-    return repo;
   }
 
   void _update(void Function() changeState) {
