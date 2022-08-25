@@ -40,15 +40,8 @@ Future<void> main() async {
     repositoriesDir,
   );
 
-  final localRepositoriesList =
-      RepositoryHelper.localRepositoriesFiles(repositoriesDir) as List<String>;
-
-  final defaultRepositoryName =
-      await RepositoryHelper.latestRepositoryOrDefault(localRepositoriesList);
-
-  await Settings.setDefaultRepo(defaultRepositoryName);
-
   final session = await Session.open(configDir);
+  final defaultRepo = await Settings.getDefaultRepo();
 
   BlocOverrides.runZoned(
     () => runApp(MaterialApp(
@@ -64,7 +57,7 @@ Future<void> main() async {
           session: session,
           appStorageLocation: appDir,
           repositoriesLocation: repositoriesDir,
-          defaultRepositoryName: defaultRepositoryName,
+          defaultRepositoryName: defaultRepo,
           windowManager: windowManager
         ))),
   );

@@ -11,6 +11,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
+import '../models/repo_entry.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
@@ -35,7 +36,7 @@ class MainPage extends StatefulWidget {
   final Session session;
   final String appStorageLocation;
   final String repositoriesLocation;
-  final String defaultRepositoryName;
+  final String? defaultRepositoryName;
   final MediaReceiver mediaReceiver;
 
   @override
@@ -71,7 +72,7 @@ class _MainPageState extends State<MainPage>
       _panicCounter = _repositories.rootStateMonitor().child("Session").intValue("panic_counter");
     }
 
-    RepoCubit? get _currentRepo => _repositories.currentRepo;
+    RepoEntry? get _currentRepo => _repositories.currentRepo;
     UpgradeExistsCubit get _upgradeExistsCubit => BlocProvider.of<UpgradeExistsCubit>(context);
 
     @override
@@ -159,29 +160,36 @@ class _MainPageState extends State<MainPage>
     switchMainWidget(newMainWidget) => setState(() { _mainWidget = newMainWidget; });
 
     getContent() {
-      _currentRepo?.getContent();
+      final current = _currentRepo;
+      if (current is OpenRepoEntry) {
+        current.cubit.getContent();
+      }
     }
 
     Widget buildMainWidget() {
       return _repositories.builder((repos) {
-        if (repos.isLoading) {
+        final current = repos.currentRepo;
+
+        if (repos.isLoading || current is LoadingRepoEntry) {
           // This one is mainly for when we're unlocking the repository,
           // because during that time the current repository is destroyed so we
           // can't show it's content.
           return const Center(child: CircularProgressIndicator());
         }
 
-        final currentRepo = repos.currentRepo;
+        if (current is OpenRepoEntry) {
+          current.cubit.navigateTo(Strings.root);
+          return _repositoryContentBuilder(current);
+        }
 
-        if (currentRepo == null) {
+        if (current == null) {
           return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
             onAddRepositoryPressed: addRepoWithTokenDialog
           );
         }
 
-        currentRepo.navigateTo(Strings.root);
-        return _repositoryContentBuilder(currentRepo);
+        return Center(child: Text("Error: unhandled state"));
       });
     }
 
@@ -193,7 +201,7 @@ class _MainPageState extends State<MainPage>
         body: WillPopScope(
           child: Column(
             children: <Widget>[
-              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo)),
+              _repositories.builder((repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
               Expanded(child: buildMainWidget()),
             ]
           ),
@@ -205,7 +213,12 @@ class _MainPageState extends State<MainPage>
 
     Future<bool> _onBackPressed() async {
       final currentRepo = _currentRepo;
-      final currentFolder = currentRepo?.currentFolder;
+
+      if (!(currentRepo is OpenRepoEntry)) {
+        return false;
+      }
+
+      final currentFolder = currentRepo.cubit.currentFolder;
 
       if (currentFolder == null || currentFolder.isRoot()) {
         int clickCount = exitClickCounter.registerClick();
@@ -230,9 +243,7 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      if (currentRepo != null) {
-        currentRepo.navigateTo(currentFolder.parent);
-      }
+      currentRepo.cubit.navigateTo(currentFolder.parent);
 
       return false;
     }
@@ -266,12 +277,12 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    StatelessWidget _buildFAB(BuildContext context, RepoCubit? current) {
-      if (current == null) {
+    StatelessWidget _buildFAB(BuildContext context, RepoEntry? current) {
+      if (!(current is OpenRepoEntry)) {
         return Container();
       }
 
-      if (!current.canWrite) {
+      if (!current.cubit.canWrite) {
         return Container();
       }
 
@@ -282,12 +293,8 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    _repositoryContentBuilder(RepoCubit repo) => repo.consumer(
+    _repositoryContentBuilder(OpenRepoEntry repo) => repo.cubit.consumer(
       (repo) {
-        if (repo.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         return _selectLayoutWidget();
       },
       (repo) {
@@ -300,38 +307,42 @@ class _MainPageState extends State<MainPage>
     _selectLayoutWidget() {
       final current = _currentRepo;
 
-      if (current == null) {
+      if (current == null || current is LoadingRepoEntry) {
         return NoRepositoriesState(
           onNewRepositoryPressed: createRepoDialog,
           onAddRepositoryPressed: addRepoWithTokenDialog
         );
       }
 
-      if (!current.canRead) {
-        return LockedRepositoryState(
-          repositoryName: current.name,
-          onUnlockPressed: unlockRepositoryDialog,
-        );
+      if (current is OpenRepoEntry) {
+        if (!current.cubit.canRead) {
+          return LockedRepositoryState(
+            repositoryName: current.name,
+            onUnlockPressed: unlockRepositoryDialog,
+          );
+        }
+
+        return _contentBrowser(current.cubit);
       }
 
-      return _contentBrowser(current);
+      return Center(child: Text("Error: Unhandled state"));
     }
 
-    _contentBrowser(RepoCubit currentRepo) {
+    _contentBrowser(RepoCubit repo) {
       late final child;
       late final Widget navigationBar;
-      final folder = currentRepo.currentFolder;
+      final folder = repo.currentFolder;
 
       if (folder.content.isEmpty) {
           child = NoContentsState(repository: folder.repo, path: folder.path);
       } else {
-          child = _contentsList(currentRepo);
+          child = _contentsList(repo);
       }
 
       if (folder.isRoot()) {
         navigationBar = const SizedBox.shrink();
       } else {
-        navigationBar = FolderNavigationBar(currentRepo);
+        navigationBar = FolderNavigationBar(repo);
       }
 
       return Column(
@@ -505,7 +516,7 @@ class _MainPageState extends State<MainPage>
   Future<void> saveMedia(String sourceFilePath) async {
     final currentRepo = _currentRepo;
 
-    if (currentRepo == null) {
+    if (!(currentRepo is OpenRepoEntry)) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
       return;
     }
@@ -515,9 +526,9 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    String? accessModeMessage = !currentRepo.canRead
+    String? accessModeMessage = !currentRepo.cubit.canRead
       ? S.current.messageAddingFileToLockedRepository
-      : !currentRepo.canWrite
+      : !currentRepo.cubit.canWrite
         ? S.current.messageAddingFileToReadRepository
         : null;
 
@@ -546,23 +557,24 @@ class _MainPageState extends State<MainPage>
     }
 
     loggy.app('Media path: $sourceFilePath');
-    saveFileToOuiSync(currentRepo, sourceFilePath);
+    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
   }
 
-  void saveFileToOuiSync(RepoCubit currentRepo, String path) {
+  Future<void> saveFileToOuiSync(RepoCubit currentRepo, String path) async {
+    final file = io.File(path);
     final fileName = getBasename(path);
-    final length = io.File(path).statSync().size;
+    final length = (await file.stat()).size;
     final filePath = buildDestinationPath(currentRepo.currentFolder.path, fileName);
-    final fileByteStream = io.File(path).openRead();
+    final fileByteStream = file.openRead();
 
-    currentRepo.saveFile(
+    await currentRepo.saveFile(
       filePath: filePath,
       length: length,
       fileByteStream: fileByteStream
     );
   }
 
-  Future<dynamic> _showDirectoryActions(BuildContext context, RepoCubit cubit)
+  Future<dynamic> _showDirectoryActions(BuildContext context, OpenRepoEntry repo)
       => showModalBottomSheet(
     isScrollControlled: true,
     context: context,
@@ -570,7 +582,7 @@ class _MainPageState extends State<MainPage>
     builder: (context) {
       return DirectoryActions(
         context: context,
-        cubit: cubit,
+        cubit: repo.cubit,
       );
     }
   );

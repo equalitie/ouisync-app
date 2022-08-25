@@ -93,5 +93,4 @@ class ListItem extends StatelessWidget {
       icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
       onPressed: () async => await folderDotsAction());
   }
-
 }

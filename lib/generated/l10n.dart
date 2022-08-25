@@ -1130,16 +1130,6 @@ class S {
     );
   }
 
-  /// `File deleted successfully: {name}`
-  String messageFileDeleted(Object name) {
-    return Intl.message(
-      'File deleted successfully: $name',
-      name: 'messageFileDeleted',
-      desc: '',
-      args: [name],
-    );
-  }
-
   /// `Folder deleted successfully: {name}`
   String messageFolderDeleted(Object name) {
     return Intl.message(

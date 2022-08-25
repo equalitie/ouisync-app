@@ -114,7 +114,6 @@
     "messageEntryTypeFolder":"Un directorio",
     "messageEntryTypeFile":"Un archivo",
     "messageEntryAlreadyExist":"{entry} con el mismo nombre ya existe en este directorio",
-    "messageFileDeleted":"Archivo borrado exitosamente: {name}",
     "messageFolderDeleted":"Directorio borrado exitosamente: {name}",
     "messageExitOuiSync":"Presione de nuevo el botón para ir atrás para salir de la aplicación",
     "messageInitializing":"Inicializando...",

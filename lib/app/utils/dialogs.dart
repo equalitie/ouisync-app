@@ -177,7 +177,6 @@ abstract class Dialogs {
         onPressed: () {
           repo.deleteFile(path);
           Navigator.of(context).pop(fileName);
-          showSnackBar(context, content: Text(S.current.messageFileDeleted(fileName)));
         },
       ),
     ],

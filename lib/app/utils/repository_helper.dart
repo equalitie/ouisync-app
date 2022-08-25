@@ -2,49 +2,25 @@ import 'dart:io' as io;
 import 'package:ouisync_app/app/utils/loggers/ouisync_app_logger.dart';
 import 'package:path/path.dart' as p;
 
-
 import 'utils.dart';
 
 class RepositoryHelper {
-  RepositoryHelper._();
-
-  static Map<String, bool>? _dhtStatus;
-
   static final loggyInstance = OuiSyncAppLogger();
 
-  static List<dynamic> localRepositoriesFiles(String location, {
-    bool justNames = true
-  }) {
-    if (!io.Directory(location).existsSync()) {
-      return <String>[];
+  static Stream<String> localRepositoryNames(String location) async* {
+    final dir = io.Directory(location);
+
+    if (!await dir.exists()) {
+      return;
     }
 
-    final repositoryFiles = io.Directory(location).listSync();
+    await for (final file in dir.list()) {
+      if (!file.path.endsWith(".db")) {
+        continue;
+      }
 
-    if (!justNames) {
-      return repositoryFiles;
+      yield p.basenameWithoutExtension(file.path);
     }
-
-    return repositoryFiles.map((e) => p.basenameWithoutExtension(e.path)).toSet().toList();
-  }
-
-  static Future<String> latestRepositoryOrDefault(List<String> localRepositories) async {
-    if (localRepositories.isEmpty) {
-      return '';
-    }
-
-    final defaultRepository = localRepositories.first;
-    final latestRepository = await Settings.getDefaultRepo();
-
-    if (latestRepository == null) {
-      return defaultRepository;
-    }
-
-    if (!localRepositories.contains(latestRepository)) {
-      return defaultRepository;
-    }
-
-    return latestRepository;
   }
 
   static Future<bool> renameRepositoryFiles(String repositoriesDir, {
