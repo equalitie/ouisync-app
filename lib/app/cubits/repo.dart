@@ -161,6 +161,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       return;
     } finally {
       await file.close();
+      await _refreshFolder();
       update((repo) { repo.uploads.remove(filePath); });
     }
 

@@ -567,7 +567,7 @@ class _MainPageState extends State<MainPage>
     final filePath = buildDestinationPath(currentRepo.currentFolder.path, fileName);
     final fileByteStream = file.openRead();
 
-    currentRepo.saveFile(
+    await currentRepo.saveFile(
       filePath: filePath,
       length: length,
       fileByteStream: fileByteStream
