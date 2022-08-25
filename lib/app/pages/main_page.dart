@@ -557,14 +557,15 @@ class _MainPageState extends State<MainPage>
     }
 
     loggy.app('Media path: $sourceFilePath');
-    saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
+    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
   }
 
-  void saveFileToOuiSync(RepoCubit currentRepo, String path) {
+  Future<void> saveFileToOuiSync(RepoCubit currentRepo, String path) async {
+    final file = io.File(path);
     final fileName = getBasename(path);
-    final length = io.File(path).statSync().size;
+    final length = (await file.stat()).size;
     final filePath = buildDestinationPath(currentRepo.currentFolder.path, fileName);
-    final fileByteStream = io.File(path).openRead();
+    final fileByteStream = file.openRead();
 
     currentRepo.saveFile(
       filePath: filePath,
