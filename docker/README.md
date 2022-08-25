@@ -37,7 +37,7 @@ In order to build the image from the **Dockerfile**, you can run this command:
 location from which you are executing the build command. 
 
 If the **Dockerfile** is not in this location, then you can use the `-f` flag to provide the location of the **Dockerfile**. 
-Then, when  the previous command would look like this:
+The previous command would look like this:
 
 `sudo docker build --build-arg build_name=<build-name> --build-arg build_number=<build-number> --build-arg keystore=<keystore-name> --build-arg keystore_password_file=<password-file-name> --build-arg ndk_version=<ndk-version> --build-arg branch=<branch> -f <dockerfile-location> -t <tag> .`
 
