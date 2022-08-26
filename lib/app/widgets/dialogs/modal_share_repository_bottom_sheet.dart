@@ -76,7 +76,7 @@ class _ShareRepositoryState extends State<ShareRepository>
         _accessMode = null;
 
         _shareToken = null;
-        _displayToken = S.current.messageWaitingAccesMode;
+        _displayToken = Constants.ouisyncUrl;
       });
 
       return;
@@ -140,12 +140,12 @@ class _ShareRepositoryState extends State<ShareRepository>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Fields.constrainedText(
-                  _displayToken ?? S.current.messageWaitingAccesMode,
+                  _displayToken ?? Constants.ouisyncUrl,
                   flex: 0,
                   softWrap: true,
                   maxLines: 2,
                   textOverflow: TextOverflow.fade,
-                  color: Colors.black),],),),
+                  color: _shareToken != null ? Colors.black : Colors.black54),],),),
           _buildShareActions()
         ]));
 
