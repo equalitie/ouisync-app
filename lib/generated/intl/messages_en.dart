@@ -134,7 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Password: "),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
-        "labelRepositoryToken": MessageLookupByLibrary.simpleMessage("Token: "),
+        "labelRepositoryLink":
+            MessageLookupByLibrary.simpleMessage("Repository link: "),
         "labelRetypePassword":
             MessageLookupByLibrary.simpleMessage("Retype password: "),
         "labelSelectRepository":
@@ -164,7 +165,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundNotificationAndroid":
             MessageLookupByLibrary.simpleMessage("OuiSync is running"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Your peer can not write nor read the contents"),
+            "Your peer cannot write nor read the contents"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
             "This repository is a blind replica."),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
@@ -256,7 +257,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Can not be modified, just access the contents"),
+            "Cannot be modified, just access the contents"),
         "messageRenameFile":
             MessageLookupByLibrary.simpleMessage("Rename file"),
         "messageRenameFolder":
@@ -273,7 +274,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Repository password"),
         "messageRepositorySuggestedName": m11,
         "messageRepositoryToken":
-            MessageLookupByLibrary.simpleMessage("Paste the token here"),
+            MessageLookupByLibrary.simpleMessage("Paste the link here"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Save the file to this folder"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(

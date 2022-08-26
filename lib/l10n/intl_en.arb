@@ -27,7 +27,7 @@
     "typeFolder":"Folder",
     "typeFile":"File",
 
-    "labelRepositoryToken":"Token: ",
+    "labelRepositoryLink":"Repository link: ",
     "labelName":"Name: ",
     "labelNewName":"New name: ",
     "labelLocation":"Location: ",
@@ -91,7 +91,7 @@
 
     "messageRepositoryAlreadyExist":"This repository already exists in the app under the name \"{name}\".",
     "messageMovingEntry":"This function is not available when moving an entry.",
-    "messageRepositoryToken":"Paste the token here",
+    "messageRepositoryToken":"Paste the link here",
     "messageRepositoryName":"Give the repository a name",
     "messageRepositoryNewName":"Repository new name",
     "messageRepositoryAccessMode":"Access mode granted: {access}",

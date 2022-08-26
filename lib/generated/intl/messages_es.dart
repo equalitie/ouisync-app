@@ -137,7 +137,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre"),
-        "labelRepositoryToken": MessageLookupByLibrary.simpleMessage("Token: "),
+        "labelRepositoryLink":
+            MessageLookupByLibrary.simpleMessage("Link del repositorio: "),
         "labelRetypePassword":
             MessageLookupByLibrary.simpleMessage("Repita la clave: "),
         "labelSelectRepository":
@@ -274,7 +275,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clave del repositorio"),
         "messageRepositorySuggestedName": m11,
         "messageRepositoryToken":
-            MessageLookupByLibrary.simpleMessage("Pegue el token aquí"),
+            MessageLookupByLibrary.simpleMessage("Pegue el link aquí"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Guardar el archivo en este directorio"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(

@@ -310,11 +310,11 @@ class S {
     );
   }
 
-  /// `Token: `
-  String get labelRepositoryToken {
+  /// `Repository link: `
+  String get labelRepositoryLink {
     return Intl.message(
-      'Token: ',
-      name: 'labelRepositoryToken',
+      'Repository link: ',
+      name: 'labelRepositoryLink',
       desc: '',
       args: [],
     );
@@ -880,10 +880,10 @@ class S {
     );
   }
 
-  /// `Paste the token here`
+  /// `Paste the link here`
   String get messageRepositoryToken {
     return Intl.message(
-      'Paste the token here',
+      'Paste the link here',
       name: 'messageRepositoryToken',
       desc: '',
       args: [],

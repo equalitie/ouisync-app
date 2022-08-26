@@ -4,10 +4,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
+import '../../cubits/repo.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../cubits/repo.dart';
-import '../selectors/access_mode_dropddown_menu.dart';
 import '../widgets.dart';
 
 class ShareRepository extends StatefulWidget {
@@ -23,12 +22,12 @@ class ShareRepository extends StatefulWidget {
   State<StatefulWidget> createState() => _ShareRepositoryState();
 }
 
-class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger {
-  final ValueNotifier<AccessMode> _accessMode =
-    ValueNotifier<AccessMode>(AccessMode.blind);
+class _ShareRepositoryState extends State<ShareRepository>
+    with OuiSyncAppLogger {
+  AccessMode? _accessMode;
 
-  final ValueNotifier<String> _shareToken =
-    ValueNotifier<String>(S.current.messageError);
+  String? _shareToken;
+  String? _displayToken;
 
   final Map<AccessMode, String> accessModeDescriptions = {
     AccessMode.blind: S.current.messageBlindReplicaExplanation,
@@ -38,144 +37,148 @@ class _ShareRepositoryState extends State<ShareRepository> with OuiSyncAppLogger
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      initialData: '',
-      future: createShareToken(widget.repository, _accessMode.value),
-      builder: (context, AsyncSnapshot<String> snapshot) {
-        if (snapshot.hasError) {
-          _shareToken.value = S.current.messageAck;
-          return Text(S.current.messageErrorCreatingToken);
-        }
-
-        if (snapshot.hasData) {
-          _shareToken.value = snapshot.data!;
-
-          return Container(
-            padding: Dimensions.paddingBottomSheet,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Fields.bottomSheetHandle(context),
-                Fields.bottomSheetTitle(widget.repository.name),
-                Dimensions.spacingVerticalDouble,
-                AccessModeDropDownMenu(
-                  accessModes: widget.availableAccessModes,
-                  onChanged: _onChanged),
-                Dimensions.spacingVerticalHalf,
-                _buildAccessModeDescription(),
-                Dimensions.spacingVerticalDouble,
-                _buildShareBox()
-              ]
-            ),
-          );
-        }
-
-        _shareToken.value = S.current.messageCreatingToken;
-
-        return SizedBox(
-          height: Dimensions.sizeCircularProgressIndicatorAverage.height,
-          width: Dimensions.sizeCircularProgressIndicatorAverage.width,
-          child: const CircularProgressIndicator(strokeWidth: Dimensions.strokeCircularProgressIndicatorSmall,)
-        );
-      }
+    return Container(
+      padding: Dimensions.paddingBottomSheet,
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Fields.bottomSheetTitle(widget.repository.name),
+            Dimensions.spacingVerticalDouble,
+            AccessModeSelector(
+                accessModes: widget.availableAccessModes,
+                onChanged: _onChanged),
+            Dimensions.spacingVerticalHalf,
+            _buildAccessModeDescription(_accessMode),
+            Dimensions.spacingVerticalDouble,
+            _buildShareBox()
+          ]),
     );
   }
 
   Future<String> createShareToken(RepoCubit repo, AccessMode accessMode) async {
     final shareToken = await repo.createShareToken(accessMode);
 
-    if (kDebugMode) { // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
-      loggy.app('Token for sharing repository ${repo.name}: $shareToken (${accessMode.name})');
+    if (kDebugMode) {
+      // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
+      loggy.app(
+          'Token for sharing repository ${repo.name}: $shareToken (${accessMode.name})');
     }
 
     return shareToken.token;
   }
 
-  Future<void> _onChanged(AccessMode accessMode) async {
-    _accessMode.value = accessMode;
+  Future<void> _onChanged(AccessMode? accessMode) async {
+    if (accessMode == null) {
+      setState(() {
+        _accessMode = null;
+
+        _shareToken = null;
+        _displayToken = S.current.messageWaitingAccesMode;
+      });
+
+      return;
+    }
+
     final token = await createShareToken(widget.repository, accessMode);
-    _shareToken.value = token;
+    final displayToken = _formatShareLinkForDisplay(token);
+    setState(() {
+      _accessMode = accessMode;
+
+      _shareToken = token;
+      _displayToken = displayToken;
+    });
   }
 
-  Widget _buildAccessModeDescription() =>
-    ValueListenableBuilder(
-      valueListenable: _accessMode,
-      builder:(context, accessMode, child) =>
-        Padding(
-          padding: Dimensions.paddingItem,
-          child: Row(children: [Fields.constrainedText(
-            _tokenDescription(accessMode as AccessMode),
+  String _formatShareLinkForDisplay(String shareLink) {
+    final shareTokenUri = Uri.parse(shareLink);
+    final truncatedToken =
+        '${shareTokenUri.fragment.substring(0, Constants.maxCharacterRepoTokenForDisplay)}...';
+
+    final displayToken = shareTokenUri.replace(fragment: truncatedToken);
+    return displayToken.toString();
+  }
+
+  Widget _buildAccessModeDescription(AccessMode? accessMode) => Padding(
+      padding: Dimensions.paddingItem,
+      child: Row(children: [
+        Fields.constrainedText(_tokenDescription(accessMode),
             flex: 0,
             fontSize: Dimensions.fontMicro,
             fontWeight: FontWeight.normal,
-            color: Colors.black54
-          )]))
-    );
+            color: Colors.black54)
+      ]));
 
-  String _tokenDescription(AccessMode accessMode) =>
-    accessModeDescriptions.values.elementAt(accessMode.index);
+  String _tokenDescription(AccessMode? accessMode) {
+    if (accessMode == null) {
+      return S.current.messageSelectAccessMode;
+    }
+    return accessModeDescriptions.values.elementAt(accessMode.index);
+  }
 
   Widget _buildShareBox() => Container(
-    padding: Dimensions.paddingItemBox,
-    decoration: const BoxDecoration(
-      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-      color: Constants.inputBackgroundColor
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Fields.constrainedText(
-                    S.current.labelShareLink,
-                    flex:0,
-                    fontSize: Dimensions.fontMicro,
-                    fontWeight: FontWeight.normal,
-                    color: Constants.inputLabelForeColor),
-                  ValueListenableBuilder(
-                      valueListenable: _shareToken,
-                      builder:(context, value, child) =>
-                        LimitedBox(
-                          maxWidth: 190.0, // TODO: Find how to do it without a fixed value
-                          child: Row(
-                            children: [
-                              Fields.constrainedText(
-                                value as String,
-                                softWrap: false,
-                                textOverflow: TextOverflow.fade,
-                                color: Colors.black)
-                            ],
-                          )))
+      padding: Dimensions.paddingItemBox,
+      decoration: const BoxDecoration(
+          borderRadius:
+              BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+          color: Constants.inputBackgroundColor),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Fields.constrainedText(S.current.labelRepositoryLink,
+              flex: 0,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor),
+          Padding(
+            padding: Dimensions.paddingActionBoxRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Fields.constrainedText(
+                  _displayToken ?? S.current.messageWaitingAccesMode,
+                  flex: 0,
+                  softWrap: true,
+                  maxLines: 2,
+                  textOverflow: TextOverflow.fade,
+                  color: Colors.black),],),),
+          _buildShareActions()
+        ]));
 
-                ])
-            ])),
-        Expanded(
+  Widget _buildShareActions() => Expanded(
+    flex: 0,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Fields.constrainedText(S.current.labelCopyLink,
           flex: 0,
-          child: Row(
-            children: [
-              Fields.actionIcon(
-                const Icon(Icons.content_copy_rounded),
-                size: Dimensions.sizeIconSmall,
-                color: Theme.of(context).primaryColor,
-                onPressed: () async {
-                  await copyStringToClipboard(_shareToken.value);
-                  showSnackBar(context, content: Text(S.current.messageTokenCopiedToClipboard)) ;
-                },),
-              Fields.actionIcon(
-                const Icon(Icons.share_outlined),
-                size: Dimensions.sizeIconSmall,
-                color: Theme.of(context).primaryColor,
-                onPressed: () => Share.share(_shareToken.value),)
-            ]))
-      ],
-    ));
+          fontSize: Dimensions.fontMicro,
+          fontWeight: FontWeight.normal,
+          color: Constants.inputLabelForeColor),
+        Fields.actionIcon(
+          const Icon(Icons.content_copy_rounded),
+          size: Dimensions.sizeIconSmall,
+          color: Theme.of(context).primaryColor,
+          onPressed: _shareToken != null ? () async {
+            await copyStringToClipboard(_shareToken!);
+            showSnackBar(context,
+                content: Text(S.current.messageTokenCopiedToClipboard));
+          } : null,
+        ),
+        Fields.constrainedText(S.current.labelShareLink,
+          flex: 0,
+          fontSize: Dimensions.fontMicro,
+          fontWeight: FontWeight.normal,
+          color: Constants.inputLabelForeColor),
+        Fields.actionIcon(
+          const Icon(Icons.share_outlined),
+          size: Dimensions.sizeIconSmall,
+          color: Theme.of(context).primaryColor,
+          onPressed: _shareToken != null ? () => Share.share(_shareToken!) : null,
+        )
+      ]));
 }

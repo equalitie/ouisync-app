@@ -27,7 +27,7 @@
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
 
-    "labelRepositoryToken":"Token: ",
+    "labelRepositoryLink":"Link del repositorio: ",
     "labelName":"Nombre: ",
     "labelNewName":"Nuevo nombre: ",
     "labelLocation":"Localización: ",
@@ -89,7 +89,7 @@
     "messageDownloadingFileCanceled":"{name} - descarga cancelada",
 
     "messageMovingEntry":"Esta función no está disponible mientras se está moviendo una entrada",
-    "messageRepositoryToken":"Pegue el token aquí",
+    "messageRepositoryToken":"Pegue el link aquí",
     "messageRepositoryName":"De un nombre al repositorio",
     "messageRepositoryNewName":"Nuevo nombre del repositorio",
     "messageRepositoryAccessMode":"Modo de aceso otorgado: {access}",
