@@ -67,8 +67,8 @@
     "messageDownloadingFileError":"{name} - download failed",
     "messageErrorEntryNotFound":"entry not found",
 
-    "messageBlindReplicaExplanation":"Your peer can not write nor read the contents",
-    "messageReadReplicaExplanation":"Can not be modified, just access the contents",
+    "messageBlindReplicaExplanation":"Your peer cannot write nor read the contents",
+    "messageReadReplicaExplanation":"Cannot be modified, just access the contents",
     "messageWriteReplicaExplanation":"Full access. Your peer can read and write",
 
     "messageNoRepo":"Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>",

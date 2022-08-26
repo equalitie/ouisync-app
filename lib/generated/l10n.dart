@@ -660,20 +660,20 @@ class S {
     );
   }
 
-  /// `Your peer can not write nor read the contents`
+  /// `Your peer cannot write nor read the contents`
   String get messageBlindReplicaExplanation {
     return Intl.message(
-      'Your peer can not write nor read the contents',
+      'Your peer cannot write nor read the contents',
       name: 'messageBlindReplicaExplanation',
       desc: '',
       args: [],
     );
   }
 
-  /// `Can not be modified, just access the contents`
+  /// `Cannot be modified, just access the contents`
   String get messageReadReplicaExplanation {
     return Intl.message(
-      'Can not be modified, just access the contents',
+      'Cannot be modified, just access the contents',
       name: 'messageReadReplicaExplanation',
       desc: '',
       args: [],
