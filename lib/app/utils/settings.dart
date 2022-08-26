@@ -53,6 +53,14 @@ class Settings {
     await setDhtEnableStatus(newName, dhtStatus);
   }
 
+  static Future<void> forgetRepository(String repoName) async {
+    if (await _defaultRepo.get() == repoName) {
+      await _defaultRepo.set(null);
+    }
+
+    await Settings.setDhtEnableStatus(repoName, null);
+  }
+
   // Note: Using the repository name instead of it's ID because we know the name without
   // having to open the repository first. So in the future we will be able to pass this
   // value to the function that opens the repository.

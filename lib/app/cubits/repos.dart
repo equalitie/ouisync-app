@@ -247,9 +247,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await _forget(repositoryName);
 
-    if (repoId != null) {
-      Settings.setDhtEnableStatus(repositoryName, null);
-    }
+    await Settings.forgetRepository(repositoryName);
 
     final deleted = await _deleteRepositoryFiles(
       _repositoriesDir,
