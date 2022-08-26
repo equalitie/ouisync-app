@@ -7,6 +7,8 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
+typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
+
 class MoveEntryDialog extends StatelessWidget {
   const MoveEntryDialog(
     this._repo, {

@@ -21,8 +21,6 @@ import 'pages.dart';
 import '../widgets/repository_progress.dart';
 
 typedef BottomSheetControllerCallback = void Function(PersistentBottomSheetController? controller, String entryPath);
-typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
-typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class MainPage extends StatefulWidget {
   const MainPage({

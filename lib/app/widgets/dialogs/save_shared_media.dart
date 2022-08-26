@@ -6,6 +6,8 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
+typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
+
 class SaveSharedMedia extends StatelessWidget {
   const SaveSharedMedia({
     required this.sharedMedia,
