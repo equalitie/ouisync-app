@@ -9,6 +9,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
+import 'utils/settings.dart';
 import 'utils/loggers/ouisync_app_logger.dart';
 import 'utils/platform/platform.dart';
 
@@ -17,15 +18,15 @@ class OuiSyncApp extends StatefulWidget {
     required this.session,
     required this.appStorageLocation,
     required this.repositoriesLocation,
-    required this.defaultRepositoryName,
     required this.windowManager,
+    required this.settings,
     Key? key,
   }) : super(key: key);
 
   final Session session;
   final String appStorageLocation;
   final String repositoriesLocation;
-  final String? defaultRepositoryName;
+  final Settings settings;
   final PlatformWindowManager windowManager;
 
   @override
@@ -72,7 +73,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
             providers: [
               BlocProvider<UpgradeExistsCubit>(
                   create: (BuildContext context) => UpgradeExistsCubit(
-                      widget.session.current_protocol_version)),
+                      widget.session.current_protocol_version,
+                      widget.settings)),
               BlocProvider<ConnectivityCubit>(
                   create: (BuildContext context) => ConnectivityCubit()),
               BlocProvider<PeerSetCubit>(
@@ -98,7 +100,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
                     session: widget.session,
                     appStorageLocation: widget.appStorageLocation,
                     repositoriesLocation: widget.repositoriesLocation,
-                    defaultRepositoryName: widget.defaultRepositoryName,
-                    mediaReceiver: _mediaReceiver,))));
+                    mediaReceiver: _mediaReceiver,
+                    settings: widget.settings))));
   }
 }

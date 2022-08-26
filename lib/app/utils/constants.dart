@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 class Constants{
   Constants._();
 
-  static const String appDirKey = 'APP_DIR';
-  static const String repositoriesDirKey = 'REPOS_DIR';
-
   static const String folderRepositoriesName = 'repositories';
   static const String configuratiosDirName = 'configs';
 

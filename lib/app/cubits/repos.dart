@@ -18,22 +18,33 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final String _appDir;
   final String _repositoriesDir;
   oui.Subscription? _subscription;
+  Settings _settings;
 
   ReposCubit({
     required session,
     required appDir,
-    required repositoriesDir
+    required repositoriesDir,
+    required settings
   }) :
     _session = session,
     _appDir = appDir,
-    _repositoriesDir = repositoriesDir ;
+    _repositoriesDir = repositoriesDir,
+   _settings = settings;
 
-  Future<void> init(String? defaultRepo) async {
+  Settings get settings => _settings;
+
+  Future<void> init() async {
     _update(() { _isLoading = true; });
 
     var futures = <Future>[];
 
+    var defaultRepo = _settings.getDefaultRepo();
+
     await for (final repoName in _localRepositoryNames(_repositoriesDir)) {
+      if (defaultRepo == null) {
+        defaultRepo == repoName;
+        await _settings.setDefaultRepo(repoName);
+      }
       futures.add(openRepository(repoName, setCurrent: repoName == defaultRepo));
     }
 
@@ -87,7 +98,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       _subscription = repo.handle.subscribe(() => repo.cubit.getContent());
     }
 
-    await Settings.setDefaultRepo(repo?.name);
+    await _settings.setDefaultRepo(repo?.name);
 
     _currentRepo = repo;
     changed();
@@ -229,7 +240,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    await Settings.renameRepository(oldName, newName);
+    await _settings.renameRepository(oldName, newName);
 
     final repo = await _open(newName, orCreate: false);
 
@@ -247,7 +258,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await _forget(repositoryName);
 
-    await Settings.forgetRepository(repositoryName);
+    await _settings.forgetRepository(repositoryName);
 
     final deleted = await _deleteRepositoryFiles(
       _repositoriesDir,
@@ -274,7 +285,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final nextRepo = _repos.isNotEmpty ? _repos.values.first : null;
 
     setCurrent(nextRepo);
-    await Settings.setDefaultRepo(nextRepo?.name);
+    await _settings.setDefaultRepo(nextRepo?.name);
 
     changed();
   }
@@ -297,7 +308,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         }
       }
 
-      if (await Settings.getDhtEnableStatus(name, defaultValue: true)) {
+      if (_settings.getDhtEnableStatus(name, defaultValue: true)) {
         repo.enableDht();
       } else {
         repo.disableDht();

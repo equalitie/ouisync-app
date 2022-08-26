@@ -35,13 +35,11 @@ Future<void> main() async {
     print(repositoriesDir);
   }
 
-  await Settings.initSettings(
-    appDir,
-    repositoriesDir,
-  );
+  // TODO: Maybe we don't need to await for this, instead just get the future
+  // and let whoever needs seetings to await for it.
+  final settings = await Settings.init();
 
   final session = await Session.open(configDir);
-  final defaultRepo = await Settings.getDefaultRepo();
 
   BlocOverrides.runZoned(
     () => runApp(MaterialApp(
@@ -57,8 +55,8 @@ Future<void> main() async {
           session: session,
           appStorageLocation: appDir,
           repositoriesLocation: repositoriesDir,
-          defaultRepositoryName: defaultRepo,
-          windowManager: windowManager
+          windowManager: windowManager,
+          settings: settings,
         ))),
   );
 }

@@ -27,21 +27,22 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.appStorageLocation,
     required this.repositoriesLocation,
-    required this.defaultRepositoryName,
     required this.mediaReceiver,
+    required this.settings,
   });
 
   final Session session;
   final String appStorageLocation;
   final String repositoriesLocation;
-  final String? defaultRepositoryName;
   final MediaReceiver mediaReceiver;
+  final Settings settings;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
     session,
     appStorageLocation,
-    repositoriesLocation);
+    repositoriesLocation,
+    settings);
 }
 
 class _MainPageState extends State<MainPage>
@@ -64,8 +65,13 @@ class _MainPageState extends State<MainPage>
     final exitClickCounter = ClickCounter(timeoutMs: 3000);
     late final StateMonitorIntValue _panicCounter;
 
-    _MainPageState(Session session, String appStorageLocation, String repositoriesLocation) :
-      _repositories = ReposCubit(session: session, appDir: appStorageLocation, repositoriesDir: repositoriesLocation)
+    _MainPageState(Session session, String appStorageLocation, String repositoriesLocation, Settings settings) :
+      _repositories = ReposCubit(
+        session: session,
+        appDir: appStorageLocation,
+        repositoriesDir: repositoriesLocation,
+        settings: settings
+      )
     {
       _panicCounter = _repositories.rootStateMonitor().child("Session").intValue("panic_counter");
     }
@@ -91,7 +97,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-      _repositories.init(widget.defaultRepositoryName).then((_) { initMainPage(); });
+      _repositories.init().then((_) { initMainPage(); });
 
       /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
       /// or the MediaReceiverWindows (DropTarget), depending on the platform.

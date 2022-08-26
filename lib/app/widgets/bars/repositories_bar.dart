@@ -269,7 +269,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   }
 
   Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
-    await Settings.setDefaultRepo(repositoryName);
+    await _repositories.settings.setDefaultRepo(repositoryName);
     Navigator.of(context).pop();
   }
 }
