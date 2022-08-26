@@ -1,10 +1,8 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
-import 'package:styled_text/styled_text.dart';
 import 'package:badges/badges.dart';
+import 'package:flutter/material.dart';
+import 'package:styled_text/styled_text.dart';
 
-import '../cubits/upgrade_exists.dart';
+import 'utils.dart';
 
 class Fields {
   Fields._();
@@ -305,7 +303,8 @@ class Fields {
     bool softWrap = true,
     double fontSize = Dimensions.fontAverage,
     FontWeight fontWeight = FontWeight.normal,
-    Color color = Colors.black
+    Color color = Colors.black,
+    int maxLines = 1
   })  => Expanded(
     flex: flex,
     child: Text(
@@ -313,6 +312,7 @@ class Fields {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: textOverflow,
+      maxLines: maxLines,
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: fontWeight,

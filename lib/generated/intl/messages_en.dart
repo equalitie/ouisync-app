@@ -121,6 +121,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
         "labelConnectedPeers":
             MessageLookupByLibrary.simpleMessage("Connected peers: "),
+        "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destination"),
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
@@ -131,7 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Password: "),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
-        "labelRepositoryToken": MessageLookupByLibrary.simpleMessage("Token: "),
+        "labelRepositoryLink":
+            MessageLookupByLibrary.simpleMessage("Repository link: "),
         "labelRetypePassword":
             MessageLookupByLibrary.simpleMessage("Retype password: "),
         "labelSelectRepository":
@@ -142,6 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
+        "labelTokenLink":
+            MessageLookupByLibrary.simpleMessage("Repository share link"),
         "labelTypePassword":
             MessageLookupByLibrary.simpleMessage("Type password: "),
         "labelUseExternalStorage":
@@ -159,7 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundNotificationAndroid":
             MessageLookupByLibrary.simpleMessage("OuiSync is running"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Your peer can not write nor read the contents"),
+            "Your peer cannot write nor read the contents"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
             "This repository is a blind replica."),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
@@ -250,7 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Can not be modified, just access the contents"),
+            "Cannot be modified, just access the contents"),
         "messageRenameFile":
             MessageLookupByLibrary.simpleMessage("Rename file"),
         "messageRenameFolder":
@@ -267,9 +271,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Repository password"),
         "messageRepositorySuggestedName": m10,
         "messageRepositoryToken":
-            MessageLookupByLibrary.simpleMessage("Paste the token here"),
+            MessageLookupByLibrary.simpleMessage("Paste the link here"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Save the file to this folder"),
+        "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
+            "Select a permission to create a share link"),
         "messageSelectLocation":
             MessageLookupByLibrary.simpleMessage("Select the location"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(

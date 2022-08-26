@@ -11,6 +11,9 @@ class Constants{
 
   static const int bufferSize = 64000;
 
+  static const int maxCharacterRepoTokenForDisplay = 8;
+  static const String ouisyncUrl = 'https://ouisync.net/';
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';

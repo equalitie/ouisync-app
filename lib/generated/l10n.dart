@@ -310,11 +310,11 @@ class S {
     );
   }
 
-  /// `Token: `
-  String get labelRepositoryToken {
+  /// `Repository link: `
+  String get labelRepositoryLink {
     return Intl.message(
-      'Token: ',
-      name: 'labelRepositoryToken',
+      'Repository link: ',
+      name: 'labelRepositoryLink',
       desc: '',
       args: [],
     );
@@ -500,6 +500,26 @@ class S {
     );
   }
 
+  /// `Repository share link`
+  String get labelTokenLink {
+    return Intl.message(
+      'Repository share link',
+      name: 'labelTokenLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy link`
+  String get labelCopyLink {
+    return Intl.message(
+      'Copy link',
+      name: 'labelCopyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Share link`
   String get labelShareLink {
     return Intl.message(
@@ -640,20 +660,20 @@ class S {
     );
   }
 
-  /// `Your peer can not write nor read the contents`
+  /// `Your peer cannot write nor read the contents`
   String get messageBlindReplicaExplanation {
     return Intl.message(
-      'Your peer can not write nor read the contents',
+      'Your peer cannot write nor read the contents',
       name: 'messageBlindReplicaExplanation',
       desc: '',
       args: [],
     );
   }
 
-  /// `Can not be modified, just access the contents`
+  /// `Cannot be modified, just access the contents`
   String get messageReadReplicaExplanation {
     return Intl.message(
-      'Can not be modified, just access the contents',
+      'Cannot be modified, just access the contents',
       name: 'messageReadReplicaExplanation',
       desc: '',
       args: [],
@@ -860,10 +880,10 @@ class S {
     );
   }
 
-  /// `Paste the token here`
+  /// `Paste the link here`
   String get messageRepositoryToken {
     return Intl.message(
-      'Paste the token here',
+      'Paste the link here',
       name: 'messageRepositoryToken',
       desc: '',
       args: [],
@@ -1245,6 +1265,16 @@ class S {
     return Intl.message(
       'Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground',
       name: 'messageBackgroundAndroidPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a permission to create a share link`
+  String get messageSelectAccessMode {
+    return Intl.message(
+      'Select a permission to create a share link',
+      name: 'messageSelectAccessMode',
       desc: '',
       args: [],
     );

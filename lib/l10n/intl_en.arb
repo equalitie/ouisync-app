@@ -27,7 +27,7 @@
     "typeFolder":"Folder",
     "typeFile":"File",
 
-    "labelRepositoryToken":"Token: ",
+    "labelRepositoryLink":"Repository link: ",
     "labelName":"Name: ",
     "labelNewName":"New name: ",
     "labelLocation":"Location: ",
@@ -47,6 +47,8 @@
     "labelDownloadedTo":"Downloaded to:",
 
     "labelSetPermission":"Set permission",
+    "labelTokenLink":"Repository share link",
+    "labelCopyLink":"Copy link",
     "labelShareLink":"Share link",
 
     "messageLoadingDefault":"Loading…",
@@ -65,8 +67,8 @@
     "messageDownloadingFileError":"{name} - download failed",
     "messageErrorEntryNotFound":"entry not found",
 
-    "messageBlindReplicaExplanation":"Your peer can not write nor read the contents",
-    "messageReadReplicaExplanation":"Can not be modified, just access the contents",
+    "messageBlindReplicaExplanation":"Your peer cannot write nor read the contents",
+    "messageReadReplicaExplanation":"Cannot be modified, just access the contents",
     "messageWriteReplicaExplanation":"Full access. Your peer can read and write",
 
     "messageNoRepo":"Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>",
@@ -89,7 +91,7 @@
 
     "messageRepositoryAlreadyExist":"This repository already exists in the app under the name \"{name}\".",
     "messageMovingEntry":"This function is not available when moving an entry.",
-    "messageRepositoryToken":"Paste the token here",
+    "messageRepositoryToken":"Paste the link here",
     "messageRepositoryName":"Give the repository a name",
     "messageRepositoryNewName":"Repository new name",
     "messageRepositoryAccessMode":"Access mode granted: {access}",
@@ -132,6 +134,8 @@
 
     "messageBackgroundNotificationAndroid": "OuiSync is running",
     "messageBackgroundAndroidPermissions": "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground",
+
+    "messageSelectAccessMode": "Select a permission to create a share link",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

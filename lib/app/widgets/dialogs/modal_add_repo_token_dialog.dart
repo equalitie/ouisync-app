@@ -99,7 +99,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
         Fields.formTextField(
           context: context,
           textEditingController: _tokenController,
-          label: S.current.labelRepositoryToken,
+          label: S.current.labelRepositoryLink,
           hint: S.current.messageRepositoryToken,
           onSaved: (value) {},
           validator: _repositoryTokenValidator,
