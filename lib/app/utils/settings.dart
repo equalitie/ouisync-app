@@ -39,16 +39,19 @@ class Settings {
     return _defaultRepo.get();
   }
 
-  static Future<bool> getDhtEnableStatus(String repoId, { required bool defaultValue }) async {
+  // Note: Using the repository name instead of it's ID because we know the name without
+  // having to open the repository first. So in the future we will be able to pass this
+  // value to the function that opens the repository.
+  static Future<bool> getDhtEnableStatus(String repoName, { required bool defaultValue }) async {
     final prefs = await _init();
 
-    final status = prefs.getBool(_BT_DHT_KEY_PREFIX + repoId);
+    final status = prefs.getBool(_BT_DHT_KEY_PREFIX + repoName);
     return status ?? defaultValue;
   }
 
-  static Future<void> setDhtEnableStatus(String repoId, bool? status) async {
+  static Future<void> setDhtEnableStatus(String repoName, bool? status) async {
     final prefs = await _init();
-    final key = _BT_DHT_KEY_PREFIX + repoId;
+    final key = _BT_DHT_KEY_PREFIX + repoName;
 
     if (status != null) {
       await prefs.setBool(key, status);

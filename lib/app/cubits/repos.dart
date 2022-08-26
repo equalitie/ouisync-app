@@ -245,10 +245,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   void deleteRepository(String repositoryName) async {
     final wasCurrent = currentRepoName == repositoryName;
 
-    final repoId = await _forget(repositoryName);
+    await _forget(repositoryName);
 
     if (repoId != null) {
-      Settings.setDhtEnableStatus(repoId, null);
+      Settings.setDhtEnableStatus(repositoryName, null);
     }
 
     final deleted = await _deleteRepositoryFiles(
@@ -299,7 +299,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         }
       }
 
-      if (await Settings.getDhtEnableStatus(repo.lowHexId(), defaultValue: true)) {
+      if (await Settings.getDhtEnableStatus(name, defaultValue: true)) {
         repo.enableDht();
       } else {
         repo.disableDht();
