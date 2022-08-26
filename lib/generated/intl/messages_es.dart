@@ -286,8 +286,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Token de repositorio copiado al portapapeles"),
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Ingrese la clave para abrir el repositorio"),
-        "messageWaitingAccesMode": MessageLookupByLibrary.simpleMessage(
-            "Esperando por el nivel de accesso"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Aceso total. Tu colega puede leer y modificar"),
         "messageWritingFileCanceled": m12,

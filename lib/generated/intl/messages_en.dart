@@ -285,8 +285,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Repository token copied to the clipboard."),
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
-        "messageWaitingAccesMode": MessageLookupByLibrary.simpleMessage(
-            "Waiting for permission level"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
         "messageWritingFileCanceled": m12,

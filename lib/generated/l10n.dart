@@ -1290,16 +1290,6 @@ class S {
     );
   }
 
-  /// `Waiting for permission level`
-  String get messageWaitingAccesMode {
-    return Intl.message(
-      'Waiting for permission level',
-      name: 'messageWaitingAccesMode',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
