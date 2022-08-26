@@ -500,6 +500,26 @@ class S {
     );
   }
 
+  /// `Repository share link`
+  String get labelTokenLink {
+    return Intl.message(
+      'Repository share link',
+      name: 'labelTokenLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy link`
+  String get labelCopyLink {
+    return Intl.message(
+      'Copy link',
+      name: 'labelCopyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Share link`
   String get labelShareLink {
     return Intl.message(
@@ -1255,6 +1275,26 @@ class S {
     return Intl.message(
       'Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground',
       name: 'messageBackgroundAndroidPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a permission to create a share link`
+  String get messageSelectAccessMode {
+    return Intl.message(
+      'Select a permission to create a share link',
+      name: 'messageSelectAccessMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Waiting for permission level`
+  String get messageWaitingAccesMode {
+    return Intl.message(
+      'Waiting for permission level',
+      name: 'messageWaitingAccesMode',
       desc: '',
       args: [],
     );

@@ -123,6 +123,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
         "labelConnectedPeers":
             MessageLookupByLibrary.simpleMessage("Connected peers: "),
+        "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destination"),
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
@@ -144,6 +145,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
+        "labelTokenLink":
+            MessageLookupByLibrary.simpleMessage("Repository share link"),
         "labelTypePassword":
             MessageLookupByLibrary.simpleMessage("Type password: "),
         "labelUseExternalStorage":
@@ -273,12 +276,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Paste the token here"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Save the file to this folder"),
+        "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
+            "Select a permission to create a share link"),
         "messageSelectLocation":
             MessageLookupByLibrary.simpleMessage("Select the location"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
+        "messageWaitingAccesMode": MessageLookupByLibrary.simpleMessage(
+            "Waiting for permission level"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
         "messageWritingFileCanceled": m12,

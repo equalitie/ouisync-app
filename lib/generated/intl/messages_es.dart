@@ -126,6 +126,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
         "labelConnectedPeers":
             MessageLookupByLibrary.simpleMessage("Compañeras conectadas: "),
+        "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copia el link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destino"),
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Descargado en:"),
@@ -148,6 +149,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Tamaño: "),
         "labelSyncStatus": MessageLookupByLibrary.simpleMessage(
             "Estado de la sincronización: "),
+        "labelTokenLink":
+            MessageLookupByLibrary.simpleMessage("Link del repositorio"),
         "labelTypePassword":
             MessageLookupByLibrary.simpleMessage("Ingrese la clave: "),
         "labelUseExternalStorage":
@@ -274,12 +277,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pegue el token aquí"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Guardar el archivo en este directorio"),
+        "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
+            "Escoge el nivel de acceso para crear el link para compartir"),
         "messageSelectLocation":
             MessageLookupByLibrary.simpleMessage("Seleccione el lugar"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Token de repositorio copiado al portapapeles"),
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Ingrese la clave para abrir el repositorio"),
+        "messageWaitingAccesMode": MessageLookupByLibrary.simpleMessage(
+            "Esperando por el nivel de accesso"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Aceso total. Tu colega puede leer y modificar"),
         "messageWritingFileCanceled": m12,

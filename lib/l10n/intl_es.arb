@@ -47,6 +47,8 @@
     "labelDownloadedTo":"Descargado en:",
 
     "labelSetPermission":"Determine el accesso",
+    "labelTokenLink":"Link del repositorio",
+    "labelCopyLink":"Copia el link",
     "labelShareLink":"Comparte el link",
 
     "messageLoadingDefault":"Cargando…",
@@ -131,6 +133,9 @@
 
     "messageBackgroundNotificationAndroid": "OuiSync está corriendo",
     "messageBackgroundAndroidPermissions": "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente",
+
+    "messageSelectAccessMode": "Escoge el nivel de acceso para crear el link para compartir",
+    "messageWaitingAccesMode":"Esperando por el nivel de accesso",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

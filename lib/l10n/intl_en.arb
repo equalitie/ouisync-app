@@ -47,6 +47,8 @@
     "labelDownloadedTo":"Downloaded to:",
 
     "labelSetPermission":"Set permission",
+    "labelTokenLink":"Repository share link",
+    "labelCopyLink":"Copy link",
     "labelShareLink":"Share link",
 
     "messageLoadingDefault":"Loading…",
@@ -133,6 +135,9 @@
 
     "messageBackgroundNotificationAndroid": "OuiSync is running",
     "messageBackgroundAndroidPermissions": "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground",
+
+    "messageSelectAccessMode": "Select a permission to create a share link",
+    "messageWaitingAccesMode":"Waiting for permission level",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

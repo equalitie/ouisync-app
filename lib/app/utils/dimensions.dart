@@ -42,6 +42,8 @@ class Dimensions {
   static const EdgeInsets paddingFormTextField = EdgeInsets.only(bottom: 10.0);
   static const EdgeInsets paddingActionsSection = EdgeInsets.only(top: 20.0);
   static const EdgeInsets paddingActionBox = EdgeInsets.all(5.0);
+  static const EdgeInsets paddingActionBoxTop = EdgeInsets.only(top: 10.0, bottom: 5.0);
+  static const EdgeInsets paddingActionBoxRight = EdgeInsets.only(right: 5.0);
   static const EdgeInsets paddingListItem = EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0) ;
   static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
   static const EdgeInsets paddingItemBox = EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0);
