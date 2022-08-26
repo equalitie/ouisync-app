@@ -53,7 +53,6 @@ Future<void> main() async {
         supportedLocales: S.delegate.supportedLocales,
         home: OuiSyncApp(
           session: session,
-          appStorageLocation: appDir,
           repositoriesLocation: repositoriesDir,
           windowManager: windowManager,
           settings: settings,

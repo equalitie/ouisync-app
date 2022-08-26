@@ -15,19 +15,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   bool _isLoading = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
-  final String _appDir;
   final String _repositoriesDir;
   oui.Subscription? _subscription;
   Settings _settings;
 
   ReposCubit({
     required session,
-    required appDir,
     required repositoriesDir,
     required settings
   }) :
     _session = session,
-    _appDir = appDir,
     _repositoriesDir = repositoriesDir,
    _settings = settings;
 
@@ -55,7 +52,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   bool get isLoading => _isLoading;
   oui.Session get session => _session;
-  String get appDir => _appDir;
 
   String? get currentRepoName => currentRepo?.name;
 
