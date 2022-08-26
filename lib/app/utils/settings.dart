@@ -39,14 +39,30 @@ class Settings {
     return _defaultRepo.get();
   }
 
+  static Future<void> renameRepository(String oldName, String newName) async {
+    if (oldName == newName) {
+      return;
+    }
+
+    if (await _defaultRepo.get() == oldName) {
+      await _defaultRepo.set(newName);
+    }
+
+    final dhtStatus = await _getDhtEnableStatus(oldName);
+    await setDhtEnableStatus(oldName, null);
+    await setDhtEnableStatus(newName, dhtStatus);
+  }
+
   // Note: Using the repository name instead of it's ID because we know the name without
   // having to open the repository first. So in the future we will be able to pass this
   // value to the function that opens the repository.
   static Future<bool> getDhtEnableStatus(String repoName, { required bool defaultValue }) async {
-    final prefs = await _init();
+    return (await _getDhtEnableStatus(repoName)) ?? defaultValue;
+  }
 
-    final status = prefs.getBool(_BT_DHT_KEY_PREFIX + repoName);
-    return status ?? defaultValue;
+  static Future<bool?> _getDhtEnableStatus(String repoName) async {
+    final prefs = await _init();
+    return prefs.getBool(_BT_DHT_KEY_PREFIX + repoName);
   }
 
   static Future<void> setDhtEnableStatus(String repoName, bool? status) async {

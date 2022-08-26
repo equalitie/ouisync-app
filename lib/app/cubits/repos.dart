@@ -229,7 +229,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    await Settings.setDefaultRepo(null);
+    await Settings.renameRepository(oldName, newName);
 
     final repo = await _open(newName, orCreate: false);
 
