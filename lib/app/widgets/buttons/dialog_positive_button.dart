@@ -13,20 +13,26 @@ class PositiveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: Dimensions.marginDialogPositiveButton,
-      child: RawMaterialButton(
-        onPressed: onPressed,
-        child: Text((text ?? '').toUpperCase()),
-        constraints: Dimensions.sizeConstrainsDialogAction,
-        elevation: Dimensions.elevationDialogAction,
-        fillColor: _fillColorStatus(context),
-        shape: const RoundedRectangleBorder(
-          borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-        textStyle: TextStyle(
-          color: Theme.of(context).dialogBackgroundColor,
-          fontWeight: FontWeight.w500)
-      ));
+    return Expanded(child: Row(
+      children: [
+        Expanded(child: Align(
+          alignment: Alignment.bottomRight,
+          child: AspectRatio(
+            aspectRatio: Dimensions.aspectRatioModalDialogButton,
+            child: Container(
+              margin: Dimensions.marginDialogPositiveButton,
+              child: RawMaterialButton(
+                onPressed: onPressed,
+                child: Text((text ?? '').toUpperCase()),
+                constraints: Dimensions.sizeConstrainsDialogAction,
+                elevation: Dimensions.elevationDialogAction,
+                fillColor: _fillColorStatus(context),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: Dimensions.borderRadiusDialogPositiveButton),
+                textStyle: TextStyle(
+                  color: Theme.of(context).dialogBackgroundColor,
+                  fontWeight: FontWeight.w500),),))))
+      ],));
   }
 
   Color _fillColorStatus(context) {
