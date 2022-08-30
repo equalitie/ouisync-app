@@ -64,9 +64,9 @@ RUN powershell.exe -Command \
 
 # Install Android Command Line Tools
 
-RUN powershell.exe -Command \
-        cd \Android\tools\bin && \
-        sdkmanager --install "cmdline-tools;latest"
+#RUN powershell.exe -Command \
+#        cd \Android\tools\bin && \
+#        sdkmanager --install "cmdline-tools;latest"
 
 RUN flutter doctor -v 
 
@@ -77,8 +77,8 @@ RUN echo "Checking out branch $branch" && \
     cd ouisync-app && \
     git submodule update --init --recursive 
 
-RUN echo "rust.rustcCommand=\Users\ContainerAdministrator\.cargo\bin\rustc" >> C:\ouisync-app\android\local.properties
-RUN echo "rust.cargoCommand=\Users\ContainerAdministrator\.cargo\bin\cargo" >> C:\ouisync-app\android\local.properties
+#RUN echo "rust.rustcCommand=\Users\ContainerAdministrator\.cargo\bin\rustc" >> C:\ouisync-app\android\local.properties
+#RUN echo "rust.cargoCommand=\Users\ContainerAdministrator\.cargo\bin\cargo" >> C:\ouisync-app\android\local.properties
 
 FROM checkout-code as build
 
