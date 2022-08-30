@@ -1,4 +1,4 @@
-FROM cirrusci/android-sdk:30-windowsservercore-2019
+FROM cirrusci/android-sdk:30-windowsservercore-2019 as pre-build
 
 # Install VS
 ## https://docs.microsoft.com/en-us/visualstudio/install/build-tools-container?view=vs-2019
@@ -17,6 +17,7 @@ RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
     --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
     --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
     --add Microsoft.VisualStudio.Component.VC.CMake.Project \
+    --add Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core \
     --add Microsoft.VisualStudio.Workload.NativeDesktop \
     --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
     --add Microsoft.VisualStudio.Workload.VCTools \
@@ -34,7 +35,7 @@ RUN powershell.exe -Command \
 
 RUN setx path "%path%;C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin;"
 
-RUN git clone --branch stable https://github.com/flutter/flutter.git C:\flutter
+RUN git clone -b stable https://github.com/flutter/flutter.git C:\flutter
 
 RUN flutter config --no-analytics
 
@@ -44,4 +45,56 @@ RUN flutter config --enable-windows-desktop
 RUN powershell.exe -Command \
         Set-Content -Value "`n859f317696f67ef3d7f30a50a5560e7834b43903" -Path C:\Android\licenses\android-sdk-arm-dbt-license
 
-RUN flutter doctor -v
+FROM pre-build as cmdline-tools
+
+RUN powershell.exe -Command \
+        cd \Android\tools\bin && \
+        sdkmanager --install "cmdline-tools;latest"
+
+FROM cmdline-tools as visual-studio
+
+RUN flutter doctor -v 
+
+FROM cmdline-tools as rust
+
+ADD https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe C:/TEMP/rustup-init.exe
+
+RUN powershell.exe -Command \
+        C:\TEMP\rustup-init.exe -y
+
+FROM rust as checkout-code
+
+RUN echo "Checking out branch $branch" && \
+    git clone https://github.com/equalitie/ouisync-app && git -C ouisync-app checkout master && \
+    cd ouisync-app && \
+    git submodule update --init --recursive 
+
+FROM checkout-code as update-locations
+
+# RUN echo "ndk.dir=/opt/android-sdk-linux/ndk/$ndk_version" >> C:\ouisync-app\android\local.properties
+RUN echo "rust.rustcCommand=\Users\ContainerAdministrator\.cargo\bin\rustc" >> C:\ouisync-app\android\local.properties
+RUN echo "rust.cargoCommand=\Users\ContainerAdministrator\.cargo\bin\cargo" >> C:\ouisync-app\android\local.properties
+
+FROM update-locations as LLVM
+
+ADD https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/LLVM-14.0.6-win64.exe C:/TEMP/LLVM-14.0.6-win64.exe
+
+RUN powershell.exe -Command \
+        C:\TEMP\LLVM-14.0.6-win64.exe /S
+
+FROM LLVM as build
+
+RUN cd \ouisync-app\ouisync-plugin\ouisync && \
+    cargo build --release --lib && \
+    cargo run --bin bindgen
+
+RUN cd \ouisync-app\ouisync-plugin\ && \
+    flutter pub get && \
+    flutter pub run ffigen
+
+RUN cd \ouisync-app && \
+    flutter pub get
+
+FROM build as release
+
+RUN flutter build windows --release
