@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   late Session session;
@@ -13,9 +14,10 @@ void main() {
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
     session = await Session.open(dir.path);
+    final info = RepoMetaInfo(p.join(dir.path, "store.db"));
     repository = RepoCubit(
-      "dummy_name",
-      await Repository.create(session, store: '${dir.path}/store.db', password: 'a1b2c3')
+      info,
+      await Repository.create(session, store: info.path(), password: 'a1b2c3')
     );
   });
 
