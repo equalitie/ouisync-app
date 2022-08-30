@@ -334,8 +334,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     if (newName == null || newName.isEmpty) {
                       return;
                     }
-                    final oldName = currentRepo.name;
-                    _repos.renameRepository(oldName, newName);
+                    final oldInfo = _repos.internalRepoMetaInfo(currentRepo.name);
+                    final newInfo = _repos.internalRepoMetaInfo(newName);
+                    _repos.renameRepository(oldInfo, newInfo);
                   });
                 }),
               Fields.actionText(S.current.actionShare,
@@ -383,7 +384,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 );
 
                 if (delete ?? false) {
-                  _repos.deleteRepository(currentRepo.name);
+                  _repos.deleteRepository(currentRepo.metaInfo);
                 }
               })
             ],

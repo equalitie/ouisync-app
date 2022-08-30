@@ -24,15 +24,16 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final List<String> messages = <String>[];
 
   final Folder _currentFolder = Folder();
-  final String _name;
+  final RepoMetaInfo _metaInfo;
   final oui.Repository _handle;
 
-  RepoCubit(this._name, this._handle) {
+  RepoCubit(this._metaInfo, this._handle) {
     _currentFolder.repo = this;
   }
 
   oui.Repository get handle => _handle;
-  String get name => _name;
+  String get name => _metaInfo.name;
+  RepoMetaInfo get metaInfo => _metaInfo;
   Folder get currentFolder => _currentFolder;
 
   bool isDhtEnabled() => handle.isDhtEnabled();
@@ -68,7 +69,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   bool get canWrite => accessMode == oui.AccessMode.write;
 
   Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode) async {
-    return await handle.createShareToken(accessMode: accessMode, name: _name);
+    return await handle.createShareToken(accessMode: accessMode, name: name);
   }
 
   Future<bool> exists(String path) async {

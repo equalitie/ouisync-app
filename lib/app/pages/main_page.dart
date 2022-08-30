@@ -671,7 +671,7 @@ class _MainPageState extends State<MainPage>
     );
 
     await _repositories.unlockRepository(
-      name: repositoryName,
+      _repositories.internalRepoMetaInfo(repositoryName),
       password: password
     );
   }

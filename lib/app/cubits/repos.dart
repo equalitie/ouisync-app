@@ -4,8 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:path/path.dart' as p;
 import 'dart:async';
 
-import '../models/folder.dart';
-import '../models/repo_entry.dart';
+import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -37,12 +36,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    await for (final repoName in _localRepositoryNames(_repositoriesDir)) {
+    await for (final repoInfo in _reposToOpen(_repositoriesDir)) {
+      final repoName = repoInfo.name;
       if (defaultRepo == null) {
-        defaultRepo == repoName;
+        defaultRepo = repoName;
         await _settings.setDefaultRepo(repoName);
       }
-      futures.add(openRepository(repoName, setCurrent: repoName == defaultRepo));
+      futures.add(_openRepository(repoInfo, setCurrent: repoName == defaultRepo));
     }
 
     _update(() { _isLoading = false; });
@@ -60,6 +60,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   RepoEntry? get currentRepo => _currentRepo;
 
   StateMonitor rootStateMonitor() => StateMonitor(_session.getRootStateMonitor());
+
+  RepoMetaInfo internalRepoMetaInfo(String repoName) {
+    // TODO: Check the name doesn't contain directory separators.
+    return RepoMetaInfo(p.join(_repositoriesDir, "$repoName.db"));
+  }
 
   Folder? get currentFolder {
     return currentRepo?.currentFolder;
@@ -174,45 +179,57 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<void> openRepository(String name, {String? password, oui.ShareToken? token, bool setCurrent = false }) async {
-    await _put(LoadingRepoEntry(name), setCurrent: setCurrent);
+  Future<void> _openRepository(RepoMetaInfo info, { String? password, bool setCurrent = false }) async {
+    await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
-    final repo = await _open(name, password: password, token: token, orCreate: true);
+    final repo = await _open(info, password: password);
 
     if (repo != null) {
       await _put(repo, setCurrent: setCurrent);
     } else {
-      loggy.app('Failed to open repository $name');
+      loggy.app('Failed to open repository ${info.name}');
     }
   }
 
-  Future<void> unlockRepository({required String name, required String password}) async {
-    final wasCurrent = currentRepoName == name;
+  Future<void> createRepository(RepoMetaInfo info, { required String password, oui.ShareToken? token, bool setCurrent = false }) async {
+    await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
-    await _forget(name);
+    final repo = await _create(info, password: password, token: token);
 
-    await _put(LoadingRepoEntry(name), setCurrent: wasCurrent);
+    if (repo != null) {
+      await _put(repo, setCurrent: setCurrent);
+    } else {
+      loggy.app('Failed to create repository ${info.name}');
+    }
+  }
+
+  Future<void> unlockRepository(RepoMetaInfo info, { required String password }) async {
+    final wasCurrent = currentRepoName == info.name;
+
+    await _forget(info.name);
+
+    await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
 
     try {
       final repo = await _open(
-        name,
+        info,
         password: password,
-        token: null,
-        orCreate: false
       );
 
       if (repo == null) {
-        loggy.app('Failed to open repository: $name');
+        loggy.app('Failed to open repository: ${info.name}');
         return;
       }
 
       await _put(repo, setCurrent: wasCurrent);
     } catch (e, st) {
-      loggy.app('Unlocking of the repository $name failed', e, st);
+      loggy.app('Unlocking of the repository ${info.name} failed', e, st);
     }
   }
 
-  void renameRepository(String oldName, String newName) async {
+  void renameRepository(RepoMetaInfo oldInfo, RepoMetaInfo newInfo) async {
+    final oldName = oldInfo.name;
+    final newName = newInfo.name;
     final wasCurrent = currentRepoName == oldName;
 
     await _forget(oldName);
@@ -225,7 +242,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
 
-      final repo = await _open(oldName, orCreate: false);
+      final repo = await _open(oldInfo);
 
       if (repo == null) {
         await setCurrent(null);
@@ -238,7 +255,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     await _settings.renameRepository(oldName, newName);
 
-    final repo = await _open(newName, orCreate: false);
+    final repo = await _open(newInfo);
 
     if (repo == null) {
       await setCurrent(null);
@@ -249,23 +266,29 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  void deleteRepository(String repositoryName) async {
-    final wasCurrent = currentRepoName == repositoryName;
+  void deleteRepository(RepoMetaInfo info) async {
+    final repoName = info.name;
+    final wasCurrent = currentRepoName == repoName;
 
-    await _forget(repositoryName);
-
-    await _settings.forgetRepository(repositoryName);
+    await _forget(repoName);
+    await _settings.forgetRepository(repoName);
 
     final deleted = await _deleteRepositoryFiles(
+      info,
       _repositoriesDir,
-      repositoryName: repositoryName
     );
 
+    // TODO: Instead of trying to reopen this repository, we should create a new
+    // subclass of RepoEntry and tell the user that there that deletion failed.
+    // After restarting the app, if the main `.db` file still exists, we should
+    // try to open it as normal, but if the main `.db` file has been deleted while
+    // the supporting files still exist, we should still show the user the new
+    // subclass of RepoEntry.
     if (!deleted) {
-      loggy.app('The repository $repositoryName deletion failed');
+      loggy.app('The repository $repoName deletion failed');
 
-      loggy.app('Initializing $repositoryName again...');
-      final repo = await _open(repositoryName, orCreate: false);
+      loggy.app('Initializing $repoName again...');
+      final repo = await _open(info);
 
       if (repo == null) {
         await setCurrent(null);
@@ -286,23 +309,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  _buildStoreString(repositoryName) => '$_repositoriesDir/$repositoryName.db';
-
-  Future<OpenRepoEntry?> _open(String name, { String? password, oui.ShareToken? token, required bool orCreate }) async {
-    final store = _buildStoreString(name);
+  Future<OpenRepoEntry?> _open(RepoMetaInfo info, { String? password }) async {
+    final name = info.name;
+    final store = info.path();
 
     try {
-      late oui.Repository repo;
-
-      if (await io.File(store).exists()) {
-        repo = await oui.Repository.open(_session, store: store, password: password);
-      } else {
-        if (orCreate) {
-          repo = await oui.Repository.create(_session, store: store, password: password!, shareToken: token);
-        } else {
-          return null;
-        }
+      if (!await io.File(store).exists()) {
+        return null;
       }
+
+      final repo = await oui.Repository.open(_session, store: store, password: password);
 
       if (_settings.getDhtEnableStatus(name, defaultValue: true)) {
         repo.enableDht();
@@ -310,7 +326,30 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         repo.disableDht();
       }
 
-      return OpenRepoEntry(RepoCubit(name, repo));
+      return OpenRepoEntry(RepoCubit(info, repo));
+    }
+    catch (e, st) {
+      loggy.app('Initialization of the repository $name failed', e, st);
+    }
+
+    return null;
+  }
+
+  Future<OpenRepoEntry?> _create(RepoMetaInfo info, { required String password, oui.ShareToken? token }) async {
+    final name = info.name;
+    final store = info.path();
+
+    try {
+      if (await io.File(store).exists()) {
+        return null;
+      }
+
+      final repo = await oui.Repository.create(_session, store: store, password: password, shareToken: token);
+
+      repo.enableDht();
+      _settings.setDhtEnableStatus(name, true);
+
+      return OpenRepoEntry(RepoCubit(info, repo));
     }
     catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
@@ -324,7 +363,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  static Stream<String> _localRepositoryNames(String location) async* {
+  static Stream<RepoMetaInfo> _reposToOpen(String location) async* {
     final dir = io.Directory(location);
 
     if (!await dir.exists()) {
@@ -336,7 +375,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         continue;
       }
 
-      yield p.basenameWithoutExtension(file.path);
+      assert(p.isAbsolute(file.path));
+      yield RepoMetaInfo(file.path);
     }
   }
 
@@ -392,9 +432,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return true;
   }
 
-  Future<bool> _deleteRepositoryFiles(String repositoriesDir, {
-    required String repositoryName
-  }) async {
+  Future<bool> _deleteRepositoryFiles(RepoMetaInfo repoInfo, String repositoriesDir) async {
     final dir = io.Directory(repositoriesDir);
 
     if (!await dir.exists()) {
@@ -406,7 +444,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     var success = true;
 
     for (final ext in exts) {
-      final path = p.join(repositoriesDir, '$repositoryName.$ext');
+      final path = repoInfo.path(ext: ext);
       final file = io.File(path);
 
       if (!await file.exists()) {

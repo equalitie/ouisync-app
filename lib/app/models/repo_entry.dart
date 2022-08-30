@@ -2,10 +2,12 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import '../cubits/cubits.dart';
 import 'folder.dart';
+import 'repo_meta_info.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
-  String get name;
+  RepoMetaInfo get metaInfo;
+  String get name => metaInfo.name;
   oui.Repository? get maybeHandle;
   String? get id;
   Folder? get currentFolder;
@@ -16,13 +18,13 @@ abstract class RepoEntry extends Equatable {
 }
 
 class LoadingRepoEntry extends RepoEntry {
-  final String _repoName;
+  final RepoMetaInfo _metaInfo;
   bool _closeAfter = false;
 
-  LoadingRepoEntry(this._repoName);
+  LoadingRepoEntry(this._metaInfo);
 
   @override
-  String get name => _repoName;
+  RepoMetaInfo get metaInfo => _metaInfo;
 
   Future<void> close() async {
     _closeAfter = true;
@@ -56,7 +58,7 @@ class OpenRepoEntry extends RepoEntry {
   }
 
   @override
-  String get name => _cubit.name;
+  RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
   oui.Repository get handle => _cubit.handle;
 

@@ -334,8 +334,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
       return;
     }
 
+    final info = _repos.internalRepoMetaInfo(name);
+
     widget.formKey.currentState!.save();
-    _repos.openRepository(name, password: password, token: _shareToken, setCurrent: true);
+    _repos.createRepository(info, password: password, token: _shareToken, setCurrent: true);
 
     Navigator.of(widget.context).pop(name);
   }
