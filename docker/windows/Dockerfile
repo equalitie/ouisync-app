@@ -1,3 +1,5 @@
+# Based in the Windows Dockerfile for Android SDK 30 from CirusCI:
+# https://git.openprivacy.ca/openprivacy/flutter-desktop/src/branch/main/windows/Dockerfile
 FROM cirrusci/android-sdk:30-windowsservercore-2019 as tools
 
 # Install VS
