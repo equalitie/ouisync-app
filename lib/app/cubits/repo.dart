@@ -242,6 +242,10 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     final length = await ouisyncFile.length;
 
     final newFile = io.File(destinationPath);
+
+    // TODO: This fails if the file exists, we should ask the user to confirm if they want to overwrite
+    // the existing file.
+    final sink = newFile.openWrite();
     int offset = 0;
 
     final job = cubits.Watch(Job(0, length));
@@ -249,13 +253,18 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
     try {
       while (job.state.cancel == false) {
-        final chunk = await ouisyncFile.read(offset, Constants.bufferSize);
+        late List<int> chunk;
+
+        await Future.wait([
+          ouisyncFile.read(offset, Constants.bufferSize).then((ch) { chunk = ch; }),
+          sink.flush()
+        ]);
+
         offset += chunk.length;
 
-        await newFile.writeAsBytes(chunk, mode: io.FileMode.writeOnlyAppend);
+        sink.add(chunk);
 
         if (chunk.length < Constants.bufferSize) {
-          update((repo) { repo.downloads.remove(sourcePath); });
           break;
         }
 
@@ -266,7 +275,11 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       showMessage(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       update((repo) { repo.downloads.remove(sourcePath); });
-      await ouisyncFile.close();
+
+      await Future.wait([
+        sink.flush().then((_) => sink.close()),
+        ouisyncFile.close()
+      ]);
     }
   }
 
