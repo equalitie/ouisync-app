@@ -126,9 +126,9 @@ msix_config:
   publisher_name: eQualitie
   certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
   certificate_password: _ball$*watch17
-  logo_path: .\assets\OuiSync-App-Icon-1200.png
-  start_menu_icon_path: .\assets\OuiSync-App-Icon-1200.png
-  tile_icon_path: .\assets\OuiSync-App-Icon-1200.png
+  logo_path: .\assets\ouisync-beta-round-1200.png
+  start_menu_icon_path: .\assets\ouisync-beta-round-1200.png
+  tile_icon_path: .\assets\ouisync-beta-round-1200.png
   app_installer: #<-- app installer configuration
     publish_folder_path: .\installers
     hours_between_update_checks: 0
