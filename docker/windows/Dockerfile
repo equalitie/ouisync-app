@@ -75,26 +75,28 @@ RUN flutter doctor -v
 FROM flutter as checkout-code
 
 RUN echo "Checking out branch $branch" && \
-    git clone https://github.com/equalitie/ouisync-app && git -C ouisync-app checkout master && \
-    cd ouisync-app && \
-    git submodule update --init --recursive 
+        git clone https://github.com/equalitie/ouisync-app && git -C ouisync-app checkout master && \
+        cd ouisync-app && \
+        git submodule update --init --recursive 
 
-#RUN echo "rust.rustcCommand=\Users\ContainerAdministrator\.cargo\bin\rustc" >> C:\ouisync-app\android\local.properties
-#RUN echo "rust.cargoCommand=\Users\ContainerAdministrator\.cargo\bin\cargo" >> C:\ouisync-app\android\local.properties
+# RUN echo "rust.rustcCommand=\Users\ContainerAdministrator\.cargo\bin\rustc" >> C:\ouisync-app\android\local.properties
+# RUN echo "rust.cargoCommand=\Users\ContainerAdministrator\.cargo\bin\cargo" >> C:\ouisync-app\android\local.properties
 
 FROM checkout-code as build
 
 RUN cd \ouisync-app\ouisync-plugin\ouisync && \
-    cargo build --release --lib && \
-    cargo run --bin bindgen
+        cargo build --release --lib && \
+        cargo run --bin bindgen
 
-RUN cd \ouisync-app\ouisync-plugin\ && \
-    flutter pub get && \
-    flutter pub run ffigen
+RUN cd \ouisync-app\ouisync-plugin && \
+        flutter pub get && \
+        flutter pub run ffigen
 
 RUN cd \ouisync-app && \
-    flutter pub get
+        flutter pub get
 
 FROM build as release
 
-RUN flutter build windows --release
+ADD CERTIFICATE.pfx C:/ouisync-app/certificates/self-signed/CERTIFICATE.pfx
+RUN cd \ouisync-app && \
+        flutter pub run msix:create
