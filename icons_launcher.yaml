@@ -4,9 +4,9 @@ icons_launcher:
     android:
       enable: true
       image_path: 'assets/ouisync-beta-1024.png'
-      adaptive_icon_background: 'assets/ic_launcher_adaptive_beta_back.png'
-      adaptive_icon_foreground: 'assets/ic_launcher_adaptive_beta_fore.png'
-      adaptive_icon_round: 'assets/ic_launcher_beta.png'
+      adaptive_background_image: 'assets/ic_launcher_background.png'
+      adaptive_foreground_image: 'assets/ic_launcher_foreground.png'
+      adaptive_round_image: 'assets/ic_launcher_round.png'
     windows:
       enable: true
       image_path: 'assets/ouisync-beta-1024.png'
