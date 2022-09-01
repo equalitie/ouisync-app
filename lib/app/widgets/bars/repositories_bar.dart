@@ -211,10 +211,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           _repositories.setCurrentByName(repositoryName);
           updateSettingsAndPop(context, repositoryName);
         },
-        // TODO: This doesn't actually say whether the repo is locked or not.
-        icon: repositoryName == current
-          ? Icons.lock_open_rounded
-          : Icons.lock,
+        icon: _selectIconByAccessMode(_repositories.get(repositoryName)?.maybeHandle?.accessMode),
         textColor: repositoryName == current
           ? Colors.black
           : Colors.black54,
@@ -226,6 +223,26 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           : Colors.black54);
     }
   );
+
+  IconData _selectIconByAccessMode(AccessMode? accessMode) {
+    late final IconData modeIcon;
+    switch (accessMode) {
+      case AccessMode.blind:
+        modeIcon = Icons.lock_outline_rounded;
+        break;
+      case AccessMode.read:
+        modeIcon = Icons.visibility_off_outlined;
+        break;
+      case AccessMode.write:
+        modeIcon = Icons.edit_rounded;
+        break;
+      default:
+        modeIcon = Icons.error_outline_rounded;
+        break;
+    }
+
+    return modeIcon;
+  }
 
   void createRepoDialog(BuildContext context) async {
     final newRepo = await showDialog(
