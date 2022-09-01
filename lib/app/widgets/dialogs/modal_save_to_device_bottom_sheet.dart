@@ -36,10 +36,10 @@ class _SaveToDeviceState extends State<SaveToDevice> {
   void initState() {
     super.initState();
 
-    setDestinationPath();
+    _setDestinationPath();
   }
 
-  Future<void> setDestinationPath() async {
+  Future<void> _setDestinationPath() async {
     final path = await _getDefaultDestinationPath();
     setState(() { _destinationPath = path ?? '?'; });
   }
@@ -110,13 +110,13 @@ class _SaveToDeviceState extends State<SaveToDevice> {
       label: S.current.labelUseExternalStorage,
       padding: const EdgeInsets.all(0.0),
       value: _useExternalStorage,
-      onChanged:(value) async => await _updateDestinationPath(value),
+      onChanged: _updateDestinationPath,
     );
   }
 
   Future<void> _updateDestinationPath(bool value) async {
     setState(() { _useExternalStorage = value; });
-    await setDestinationPath();
+    await _setDestinationPath();
   }
 
   Future<void> _changeDestinationPath() async {
