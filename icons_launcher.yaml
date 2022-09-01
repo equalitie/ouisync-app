@@ -9,7 +9,7 @@ icons_launcher:
       adaptive_round_image: 'assets/ic_launcher_round.png'
     windows:
       enable: true
-      image_path: 'assets/ouisync-beta-1024.png'
+      image_path: 'assets/ouisync-beta-round-1200.png'
     linux:
       enable: true
-      image_path: 'assets/ouisync-beta-1024.png'
+      image_path: 'assets/ouisync-beta-round-1200.png'
