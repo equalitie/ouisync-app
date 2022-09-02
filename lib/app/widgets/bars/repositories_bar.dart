@@ -39,7 +39,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             const Icon(Icons.share_outlined),
             onPressed: () {
               final current = reposCubit.currentRepo;
-              if (!(current is OpenRepoEntry)) return;
+              if (current is! OpenRepoEntry) return;
               shareRepositoryOnTap(current.cubit);
             },
             size: Dimensions.sizeIconSmall,
@@ -90,7 +90,7 @@ class _Picker extends StatelessWidget {
       );
     }
 
-    final color = !(repo is OpenRepoEntry) || repo.cubit.accessMode == AccessMode.blind
+    final color = repo is! OpenRepoEntry || repo.cubit.accessMode == AccessMode.blind
         ? colorLockedRepo
         : colorUnlockedRepo;
 
