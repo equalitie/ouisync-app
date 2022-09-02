@@ -297,12 +297,18 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             color: Colors.black87,
             size: Dimensions.sizeIconAverage),
           Fields.actionIcon(const Icon(Icons.share),
-            onPressed: () {},
+            onPressed: () {
+              if (cubit == null) return;
+              
+              // TODO: Should we dismiss the repo list or leave it open to return to it... ?
+              // Navigator.of(context).pop();
+              _shareRepositoryOnTap(cubit);
+            },
             color: Colors.black87,
             size: Dimensions.sizeIconAverage)
         ],);
   }
-  
+
   void createRepoDialog(BuildContext context) async {
     final newRepo = await showDialog(
       context: context,
