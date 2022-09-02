@@ -11,6 +11,8 @@ class Constants{
   static const int maxCharacterRepoTokenForDisplay = 8;
   static const String ouisyncUrl = 'https://ouisync.net/';
 
+  static Color primaryColor(context) => Theme.of(context).primaryColorDark;
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';

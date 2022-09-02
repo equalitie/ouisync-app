@@ -185,13 +185,23 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           _buildRepositoryList(state.repositoryNames().toList(), state.currentRepoName),
           Dimensions.spacingActionsVertical,
           Fields.paddedActionText(
-            S.current.iconCreateRepository,
-            icon: Icons.add_circle_outline_rounded,
+            S.current.iconAddRepository.toUpperCase(),
+            textFontSize: Dimensions.fontAverage,
+            textColor: Constants.primaryColor(context),
+            textFontWeight: FontWeight.w600,
+            icon: Icons.add,
+            iconSize: Dimensions.sizeIconSmall,
+            iconColor: Constants.primaryColor(context),
             onTap: () => createRepoDialog(context),
           ),
           Fields.paddedActionText(
-            S.current.iconAddRepositoryWithToken,
+            S.current.iconAddRepositoryWithToken.toUpperCase(),
+            textFontSize: Dimensions.fontAverage,
+            textColor: Constants.primaryColor(context),
+            textFontWeight: FontWeight.w600,
             icon: Icons.insert_link_rounded,
+            iconSize: Dimensions.sizeIconSmall,
+            iconColor: Constants.primaryColor(context),
             onTap: () => addRepoWithTokenDialog(context),
           ),
         ]
@@ -205,22 +215,31 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     itemCount: repoNames.length,
     itemBuilder: (context, index) {
       final repositoryName = repoNames[index];
-      return Fields.paddedActionText(
-        repositoryName,
-        onTap: () {
-          _repositories.setCurrentByName(repositoryName);
-          updateSettingsAndPop(context, repositoryName);
-        },
-        icon: _selectIconByAccessMode(_repositories.get(repositoryName)?.maybeHandle?.accessMode),
-        textColor: repositoryName == current
-          ? Colors.black
-          : Colors.black54,
-        textFontWeight: repositoryName == current
-          ? FontWeight.bold
-          : FontWeight.normal,
-        iconColor: repositoryName == current
-          ? Colors.black
-          : Colors.black54);
+      AccessMode? accessMode = _repositories.get(repositoryName)?.maybeHandle?.accessMode;
+
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(child:Fields.paddedActionText(
+            repositoryName,
+            textOverflow: TextOverflow.ellipsis,
+            textSoftWrap: false,
+            onTap: () {
+              _repositories.setCurrentByName(repositoryName);
+              updateSettingsAndPop(context, repositoryName);
+            },
+            icon: _selectIconByAccessMode(accessMode),
+            iconSize: Dimensions.sizeIconAverage,
+            iconColor: repositoryName == current
+              ? Colors.black87
+              : Colors.black54,
+            textColor: repositoryName == current
+              ? Colors.black87
+              : Colors.black54,
+            textFontWeight: repositoryName == current
+              ? FontWeight.bold
+              : FontWeight.normal,)),
+        ],);
     }
   );
 
@@ -228,13 +247,13 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     late final IconData modeIcon;
     switch (accessMode) {
       case AccessMode.blind:
-        modeIcon = Icons.lock_outline_rounded;
-        break;
-      case AccessMode.read:
         modeIcon = Icons.visibility_off_outlined;
         break;
+      case AccessMode.read:
+        modeIcon = Icons.visibility_outlined;
+        break;
       case AccessMode.write:
-        modeIcon = Icons.edit_rounded;
+        modeIcon = Icons.edit_note_rounded;//Icons.save_as_outlined;
         break;
       default:
         modeIcon = Icons.error_outline_rounded;

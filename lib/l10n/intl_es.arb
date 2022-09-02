@@ -156,8 +156,8 @@
     "iconAccessMode":"Modo de aceso",
     "iconShareTokenWithPeer":"Comparte este token con tu colega",
 
-    "actionCreateRepository":"Crear un Repositorio",
-    "actionAddRepositoryWithToken":"Agregar un Repositorio Compartido",
+    "iconAddRepository":"Agregar un Repositorio",
+    "actionAddRepositoryWithToken":"Agregar Repositorio con Link",
     "actionReloadContents":"Recargar",
     "actionNewRepo":"Crear repositorio",
     "actionNewFolder":"Crear directorio",

@@ -64,13 +64,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionAccept": MessageLookupByLibrary.simpleMessage("Aceptar"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACEPTAR"),
         "actionAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
-            "Agregar un Repositorio Compartido"),
+            "Agregar Repositorio con Link"),
         "actionCancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCELAR"),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CERRAR"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Crear"),
-        "actionCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Crear un Repositorio"),
         "actionDelete": MessageLookupByLibrary.simpleMessage("Borrar"),
         "actionDeleteCapital": MessageLookupByLibrary.simpleMessage("BORRAR"),
         "actionDeleteFile":
@@ -105,10 +103,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShow": MessageLookupByLibrary.simpleMessage("Mostrar"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Abrir"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Modo de aceso"),
+        "iconAddRepository":
+            MessageLookupByLibrary.simpleMessage("Agregar un Repositorio"),
         "iconAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
             "Agregar un repositorio usando un token"),
-        "iconCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Crear un nuevo repositorio"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Borrar"),
         "iconDownload": MessageLookupByLibrary.simpleMessage("Descargar"),
         "iconInformation": MessageLookupByLibrary.simpleMessage("Información"),

@@ -1420,20 +1420,20 @@ class S {
     );
   }
 
-  /// `Create a new repository`
-  String get iconCreateRepository {
+  /// `Add new repository`
+  String get iconAddRepository {
     return Intl.message(
-      'Create a new repository',
-      name: 'iconCreateRepository',
+      'Add new repository',
+      name: 'iconAddRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add a repository with token`
+  /// `Add repository with token`
   String get iconAddRepositoryWithToken {
     return Intl.message(
-      'Add a repository with token',
+      'Add repository with token',
       name: 'iconAddRepositoryWithToken',
       desc: '',
       args: [],

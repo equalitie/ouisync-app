@@ -260,7 +260,7 @@ class Fields {
   static Widget iconLabel({
     required IconData icon,
     required String text,
-    double iconSize = Dimensions.sizeIconBig,
+    double iconSize = Dimensions.sizeIconAverage,
     Color iconColor = Colors.black,
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
@@ -333,7 +333,7 @@ class Fields {
 
   static Widget actionIcon(Icon icon, {
     required void Function()? onPressed,
-    double size = Dimensions.sizeIconBig,
+    double size = Dimensions.sizeIconAverage,
     EdgeInsets padding = Dimensions.paddingIconButton,
     AlignmentGeometry alignment = Dimensions.alignmentIconButton,
     Color color = Colors.black,
@@ -361,7 +361,7 @@ class Fields {
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
     IconData? icon,
-    double iconSize = Dimensions.sizeIconBig,
+    double iconSize = Dimensions.sizeIconAverage,
     Color iconColor = Colors.black,
   }) => InkWell(
     onTap: onTap,
@@ -373,7 +373,7 @@ class Fields {
             color: iconColor
           ),
           Dimensions.spacingHorizontal,
-          Text(text,
+          Expanded(child:Text(text,
             textAlign: textAlign,
             softWrap: textSoftWrap,
             overflow: textOverflow,
@@ -382,25 +382,36 @@ class Fields {
               fontWeight: textFontWeight,
               color: textColor
             )
-          )
+          ))
         ],
       )
   );
 
   static Widget paddedActionText(String text, {
     required void Function()? onTap,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.clip,
+    bool textSoftWrap = true,
+    double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
     IconData? icon,
+    double iconSize = Dimensions.sizeIconAverage,
     Color iconColor = Colors.black,
   }) => Padding(
     padding: Dimensions.paddingActionButton,
     child: actionText(
       text,
       onTap: onTap,
+      textAlign: textAlign,
+      textSoftWrap: textSoftWrap,
+      textOverflow: textOverflow,
       textFontWeight: textFontWeight,
       textColor: textColor,
-      icon: icon));
+      textFontSize: textFontSize,
+      icon: icon,
+      iconSize: iconSize,
+      iconColor: iconColor));
 
   static Widget _textFormFieldBase({
     required BuildContext context,
