@@ -250,6 +250,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             textFontWeight: repositoryName == current
               ? FontWeight.bold
               : FontWeight.normal,)),
+            _getActionByAccessMode(
+              context,
+              repositoryName,
+              accessMode,
+              _repositories.get(repositoryName)?.maybeCubit),
         ],);
     }
   );
@@ -274,6 +279,30 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     return modeIcon;
   }
 
+  _getActionByAccessMode(
+    BuildContext context,
+    String repositoryName,
+    AccessMode? accessMode,
+    RepoCubit? cubit) {
+      final modeIcon = accessMode == null
+      ? Icons.error_outline_rounded
+      : accessMode == AccessMode.blind
+      ? Icons.lock_open_outlined
+      : Icons.lock_outline;
+
+      return Row(
+        children: [
+          Fields.actionIcon(Icon(modeIcon),
+            onPressed: () {},
+            color: Colors.black87,
+            size: Dimensions.sizeIconAverage),
+          Fields.actionIcon(const Icon(Icons.share),
+            onPressed: () {},
+            color: Colors.black87,
+            size: Dimensions.sizeIconAverage)
+        ],);
+  }
+  
   void createRepoDialog(BuildContext context) async {
     final newRepo = await showDialog(
       context: context,
