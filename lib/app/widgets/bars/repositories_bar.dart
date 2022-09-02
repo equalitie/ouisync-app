@@ -32,6 +32,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           Expanded(
             child: _Picker(
               reposCubit: reposCubit,
+              shareRepositoryOnTap: shareRepositoryOnTap,
               borderColor: Colors.white,
             ),
           ),
@@ -65,10 +66,12 @@ class _Picker extends StatelessWidget {
 
   const _Picker({
     required this.reposCubit,
+    required this.shareRepositoryOnTap,
     required this.borderColor,
   });
 
   final ReposCubit reposCubit;
+  final void Function(RepoCubit) shareRepositoryOnTap;
   final Color borderColor;
 
   @override
@@ -161,15 +164,20 @@ class _Picker extends StatelessWidget {
     context: context,
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) {
-      return _List(reposCubit);
+      return _List(
+        reposCubit,
+        shareRepositoryOnTap);
     }
   );
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
-  _List(ReposCubit repositories) : _repositories = repositories;
+  _List(ReposCubit repositories, void Function(RepoCubit) shareRepositoryOnTap) : 
+  _repositories = repositories,
+  _shareRepositoryOnTap = shareRepositoryOnTap;
 
   final ReposCubit _repositories;
+  final void Function(RepoCubit) _shareRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) => _repositories.builder((state) {
@@ -182,7 +190,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-          _buildRepositoryList(state.repositoryNames().toList(), state.currentRepoName),
+          _buildRepositoryList(
+            context,
+            state.repositoryNames().toList(),
+            state.currentRepoName),
           Dimensions.spacingActionsVertical,
           Fields.paddedActionText(
             S.current.iconAddRepository.toUpperCase(),
@@ -209,7 +220,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     );
   });
 
-  Widget _buildRepositoryList(List<String> repoNames, String? current) => ListView.builder(
+  Widget _buildRepositoryList(BuildContext context, List<String> repoNames, String? current) => ListView.builder(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     itemCount: repoNames.length,
