@@ -227,6 +227,29 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
+  Future<void> lockRepository(RepoMetaInfo info) async {
+    final wasCurrent = currentRepoName == info.name;
+
+    await _forget(info.name);
+
+    await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
+
+    try {
+      final repo = await _open(
+        info,
+      );
+
+      if (repo == null) {
+        loggy.app('Failed to open repository: ${info.name}');
+        return;
+      }
+
+      await _put(repo, setCurrent: wasCurrent);
+    } catch (e, st) {
+      loggy.app('Unlocking of the repository ${info.name} failed', e, st);
+    }
+  }
+
   void renameRepository(RepoMetaInfo oldInfo, RepoMetaInfo newInfo) async {
     final oldName = oldInfo.name;
     final newName = newInfo.name;

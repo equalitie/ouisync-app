@@ -253,8 +253,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             _getActionByAccessMode(
               context,
               repositoryName,
-              accessMode,
-              _repositories.get(repositoryName)?.maybeCubit),
+              accessMode,),
         ],);
     }
   );
@@ -279,11 +278,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     return modeIcon;
   }
 
-  _getActionByAccessMode(
+  Row _getActionByAccessMode(
     BuildContext context,
     String repositoryName,
-    AccessMode? accessMode,
-    RepoCubit? cubit) {
+    AccessMode? accessMode,) {
+      RepoCubit? repoCubit = _repositories.get(repositoryName)?.maybeCubit;
       final modeIcon = accessMode == null
       ? Icons.error_outline_rounded
       : accessMode == AccessMode.blind
@@ -294,7 +293,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.actionIcon(Icon(modeIcon),
             onPressed: () async {
-              if (cubit == null) return;
+              if (repoCubit == null) return;
               if (accessMode == null) return;
 
               if (accessMode == AccessMode.blind) {
@@ -305,16 +304,19 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
                 return;  
               }
+
+              final info = repoCubit.metaInfo;
+              _repositories.lockRepository(info);
             },
             color: Colors.black87,
             size: Dimensions.sizeIconAverage),
           Fields.actionIcon(const Icon(Icons.share),
             onPressed: () {
-              if (cubit == null) return;
+              if (repoCubit == null) return;
               
               // TODO: Should we dismiss the repo list or leave it open to return to it... ?
               // Navigator.of(context).pop();
-              _shareRepositoryOnTap(cubit);
+              _shareRepositoryOnTap(repoCubit);
             },
             color: Colors.black87,
             size: Dimensions.sizeIconAverage)
