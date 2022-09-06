@@ -179,8 +179,12 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   final ReposCubit _repositories;
   final void Function(RepoCubit) _shareRepositoryOnTap;
 
+  final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
+
   @override
   Widget build(BuildContext context) => _repositories.builder((state) {
+    enableLockAllRepos();
+    
     return Container(
       padding: Dimensions.paddingBottomSheet,
       child: Column(
@@ -190,6 +194,29 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 5.0),
+            child: ValueListenableBuilder(
+              valueListenable: _lockAllEnable,
+              builder: (context, value, child) {
+                final unlockAll = value as bool;
+                
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Fields.constrainedText('Lock all',
+                      flex: 0,
+                      fontSize: Dimensions.fontSmall,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
+                    Fields.actionIcon(
+                      const Icon(Icons.lock_outline),
+                      size: Dimensions.sizeIconAverage,
+                      color: Theme.of(context).primaryColor,
+                      onPressed: unlockAll ?
+                      () async => await _lockAllRepositories() : null,
+                    ),]);
+              },)),
           _buildRepositoryList(
             context,
             state.repositoryNames().toList(),
@@ -219,6 +246,27 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       ),
     );
   });
+
+  void enableLockAllRepos() {
+    _lockAllEnable.value =_repositories
+      .repos
+      .where((element) => element
+        .maybeHandle?.accessMode != AccessMode.blind).isNotEmpty;
+  }
+
+  Future<void> _lockAllRepositories() async {
+    final unlockedRepos = _repositories
+    .repos
+    .where((repo) => 
+      [AccessMode.read,
+      AccessMode.write]
+      .contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
+
+    await Future.forEach(unlockedRepos, (RepoEntry repo) async {
+      loggy.app('locking ${repo.name}');
+      await _repositories.lockRepository(repo.metaInfo);
+    });
+  }
 
   Widget _buildRepositoryList(BuildContext context, List<String> repoNames, String? current) => ListView.builder(
     shrinkWrap: true,
@@ -268,7 +316,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         modeIcon = Icons.visibility_outlined;
         break;
       case AccessMode.write:
-        modeIcon = Icons.edit_note_rounded;//Icons.save_as_outlined;
+        modeIcon = Icons.edit_note_rounded;
         break;
       default:
         modeIcon = Icons.error_outline_rounded;
@@ -302,11 +350,15 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   _repositories,
                   repositoryName);
 
+                _lockAllEnable.value = true;
                 return;  
               }
 
               final info = repoCubit.metaInfo;
               _repositories.lockRepository(info);
+
+              enableLockAllRepos();
+
             },
             color: Colors.black87,
             size: Dimensions.sizeIconAverage),
