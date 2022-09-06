@@ -654,26 +654,10 @@ class _MainPageState extends State<MainPage>
   }
 
   void unlockRepositoryDialog(String repositoryName) async {
-    final password = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
-
-        return ActionsDialog(
-          title: S.current.messageUnlockRepository,
-          body: UnlockRepository(
-            context: context,
-            formKey: formKey,
-            repositoryName:  repositoryName
-          ),
-        );
-      }
-    );
-
-    await _repositories.unlockRepository(
-      _repositories.internalRepoMetaInfo(repositoryName),
-      password: password
-    );
+    await Dialogs.unlockRepositoryDialog(
+      context, 
+      _repositories, 
+      repositoryName);
   }
 
   void showSettings() {

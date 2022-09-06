@@ -3,10 +3,33 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
-import '../widgets/buttons/dialog_danger_button.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
+
+  static Future<void> unlockRepositoryDialog(BuildContext context, ReposCubit repositories, String repositoryName) async {
+    final password = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: S.current.messageUnlockRepository,
+          body: UnlockRepository(
+            context: context,
+            formKey: formKey,
+            repositoryName:  repositoryName
+          ),
+        );
+      }
+    );
+
+    await repositories.unlockRepository(
+      repositories.internalRepoMetaInfo(repositoryName),
+      password: password
+    );
+  }
+
   static Future<dynamic> executeFutureWithLoadingDialog(
     BuildContext context,
     Future<dynamic> f

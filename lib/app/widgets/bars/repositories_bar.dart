@@ -297,10 +297,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
               if (accessMode == null) return;
 
               if (accessMode == AccessMode.blind) {
-                await _unlockRepositoryDialog(
+                await Dialogs.unlockRepositoryDialog(
                   context,
-                  repositoryName,
-                );
+                  _repositories,
+                  repositoryName);
 
                 return;  
               }
@@ -321,29 +321,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             color: Colors.black87,
             size: Dimensions.sizeIconAverage)
         ],);
-  }
-
-  Future _unlockRepositoryDialog(BuildContext context, String repositoryName) async {
-    final password = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
-
-        return ActionsDialog(
-          title: S.current.messageUnlockRepository,
-          body: UnlockRepository(
-            context: context,
-            formKey: formKey,
-            repositoryName:  repositoryName
-          ),
-        );
-      }
-    );
-
-    _repositories.unlockRepository(
-      _repositories.internalRepoMetaInfo(repositoryName),
-      password: password
-    );
   }
 
   void createRepoDialog(BuildContext context) async {
