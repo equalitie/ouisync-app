@@ -1,8 +1,9 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:path/path.dart' as p;
-import 'dart:async';
 
 import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -10,7 +11,7 @@ import '../utils/utils.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
-  final Map<String, RepoEntry> _repos = {};
+  final SplayTreeMap<String, RepoEntry> _repos = SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
@@ -240,13 +241,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       );
 
       if (repo == null) {
-        loggy.app('Failed to open repository: ${info.name}');
+        loggy.app('Failed to lock repository: ${info.name}');
         return;
       }
 
       await _put(repo, setCurrent: wasCurrent);
     } catch (e, st) {
-      loggy.app('Unlocking of the repository ${info.name} failed', e, st);
+      loggy.app('Locking the repository ${info.name} failed', e, st);
     }
   }
 
