@@ -29,13 +29,13 @@ class Dimensions {
 
   static const EdgeInsets paddingContents = EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog = EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 20.0);
-  static const EdgeInsets paddingBottomSheet = EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0);
+  static const EdgeInsets paddingBottomSheet = EdgeInsets.all(10.0);
   static const EdgeInsets paddingBottomSheetActions = EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 20.0);
   static const EdgeInsets paddingIconButton = EdgeInsets.all(2.0);
   static const EdgeInsets paddingActionButton = EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0);
   static const EdgeInsets paddingBox = EdgeInsets.only(top: 10.0, bottom: 10.0);
   static const EdgeInsets paddingRepositoryBar = EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0);
-  static const EdgeInsets paddingepositoryPicker = EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0);
+  static const EdgeInsets paddingepositoryPicker = EdgeInsets.symmetric(vertical: 0.0, horizontal: 2.0);
   static const EdgeInsets paddingInPageMain = EdgeInsets.symmetric(horizontal: 5.0, vertical: 0.0);
   static const EdgeInsets paddingInPageSecondary = EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0);
   static const EdgeInsets paddingBottomSheetTitle = EdgeInsets.only(bottom: 20.0);
