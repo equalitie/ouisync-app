@@ -353,6 +353,7 @@ class Fields {
   );
 
   static Widget actionText(String text, {
+    String? subtitle, 
     required void Function()? onTap,
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
@@ -388,6 +389,7 @@ class Fields {
   );
 
   static Widget paddedActionText(String text, {
+    String? subtitle, 
     required void Function()? onTap,
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
@@ -402,6 +404,7 @@ class Fields {
     padding: Dimensions.paddingActionButton,
     child: actionText(
       text,
+      subtitle: subtitle,
       onTap: onTap,
       textAlign: textAlign,
       textSoftWrap: textSoftWrap,
