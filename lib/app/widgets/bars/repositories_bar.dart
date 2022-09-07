@@ -208,9 +208,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) => _repositories.builder((state) {
     enableLockAllRepos();
+    final repoListMaxHeight =  MediaQuery.of(context).size.height * 0.4;
     
     return Container(
-      padding: Dimensions.paddingBottomSheet,
+      padding: Dimensions.paddingBottomSheet, 
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -218,33 +219,34 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5.0),
-            child: ValueListenableBuilder(
-              valueListenable: _lockAllEnable,
-              builder: (context, value, child) {
-                final unlockAll = value as bool;
-                
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Fields.constrainedText('Lock all',
-                      flex: 0,
-                      fontSize: Dimensions.fontSmall,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87),
-                    Fields.actionIcon(
-                      const Icon(Icons.lock_outline),
-                      size: Dimensions.sizeIconAverage,
-                      color: Theme.of(context).primaryColor,
-                      onPressed: unlockAll ?
-                      () async => await _lockAllRepositories() : null,
-                    ),]);
-              },)),
-          _buildRepositoryList(
-            context,
-            state.repositoryNames().toList(),
-            state.currentRepoName),
+          ValueListenableBuilder(
+            valueListenable: _lockAllEnable,
+            builder: (context, value, child) {
+              final unlockAll = value as bool;
+              
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Fields.constrainedText('Lock all',
+                    flex: 0,
+                    fontSize: Dimensions.fontSmall,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87),
+                  Fields.actionIcon(
+                    const Icon(Icons.lock_outline),
+                    size: Dimensions.sizeIconAverage,
+                    color: Theme.of(context).primaryColor,
+                    onPressed: unlockAll ?
+                    () async => await _lockAllRepositories() : null,
+                  ),]);
+            },),
+          Dimensions.spacingVertical,
+          ConstrainedBox(
+            constraints: BoxConstraints.loose(Size.fromHeight(repoListMaxHeight)),
+            child: _buildRepositoryList(
+              context,
+              state.repositoryNames().toList(),
+              state.currentRepoName)),
           Dimensions.spacingActionsVertical,
           Fields.paddedActionText(
             S.current.iconAddRepository.toUpperCase(),
@@ -266,10 +268,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             iconColor: Constants.primaryColor(context),
             onTap: () => addRepoWithTokenDialog(context),
           ),
-        ]
-      ),
-    );
-  });
+        ]));
+  },);
 
   void enableLockAllRepos() {
     _lockAllEnable.value =_repositories
@@ -292,43 +292,45 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     });
   }
 
-  Widget _buildRepositoryList(BuildContext context, List<String> repoNames, String? current) => ListView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    itemCount: repoNames.length,
-    itemBuilder: (context, index) {
-      final repositoryName = repoNames[index];
-      AccessMode? accessMode = _repositories.get(repositoryName)?.maybeHandle?.accessMode;
+  Widget _buildRepositoryList(
+    BuildContext context,
+    List<String> repoNames,
+    String? current) => ListView.builder(
+        shrinkWrap: true,
+        itemCount: repoNames.length,
+        itemBuilder: (context, index) {
+          final repositoryName = repoNames[index];
+          AccessMode? accessMode = _repositories.get(repositoryName)?.maybeHandle?.accessMode;
 
-      return Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(child:Fields.paddedActionText(
-            repositoryName,
-            textOverflow: TextOverflow.ellipsis,
-            textSoftWrap: false,
-            onTap: () {
-              _repositories.setCurrentByName(repositoryName);
-              updateSettingsAndPop(context, repositoryName);
-            },
-            icon: _selectIconByAccessMode(accessMode),
-            iconSize: Dimensions.sizeIconAverage,
-            iconColor: repositoryName == current
-              ? Colors.black87
-              : Colors.black54,
-            textColor: repositoryName == current
-              ? Colors.black87
-              : Colors.black54,
-            textFontWeight: repositoryName == current
-              ? FontWeight.bold
-              : FontWeight.normal,)),
-            _getActionByAccessMode(
-              context,
-              repositoryName,
-              accessMode,),
-        ],);
-    }
-  );
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(child:Fields.paddedActionText(
+                repositoryName,
+                textOverflow: TextOverflow.ellipsis,
+                textSoftWrap: false,
+                onTap: () {
+                  _repositories.setCurrentByName(repositoryName);
+                  updateSettingsAndPop(context, repositoryName);
+                },
+                icon: _selectIconByAccessMode(accessMode),
+                iconSize: Dimensions.sizeIconAverage,
+                iconColor: repositoryName == current
+                  ? Colors.black87
+                  : Colors.black54,
+                textColor: repositoryName == current
+                  ? Colors.black87
+                  : Colors.black54,
+                textFontWeight: repositoryName == current
+                  ? FontWeight.bold
+                  : FontWeight.normal,)),
+                _getActionByAccessMode(
+                  context,
+                  repositoryName,
+                  accessMode,),
+            ],);
+        }
+      );
 
   Row _getActionByAccessMode(
     BuildContext context,
