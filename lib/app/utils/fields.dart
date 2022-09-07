@@ -352,6 +352,45 @@ class Fields {
     constraints: constraints,
   );
 
+  static Widget actionListTile(String text, {
+    String? subtitle, 
+    required void Function()? onTap,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.clip,
+    bool textSoftWrap = true,
+    double textFontSize = Dimensions.fontBig,
+    FontWeight textFontWeight = FontWeight.normal,
+    Color textColor = Colors.black,
+    IconData? icon,
+    double iconSize = Dimensions.sizeIconAverage,
+    Color iconColor = Colors.black,
+    bool dense = false,
+    VisualDensity visualDensity = VisualDensity.compact,
+  }) => InkWell(
+    onTap: onTap,
+    child: ListTile(
+      visualDensity: visualDensity,
+      dense: dense,
+      contentPadding: EdgeInsets.zero,
+      minLeadingWidth: 20.0,
+      leading: (icon != null) ? _iconBase(
+        icon,
+        size: iconSize,
+        color: iconColor
+      ): const SizedBox(),
+      title: Text(text,
+          textAlign: textAlign,
+          softWrap: textSoftWrap,
+          overflow: textOverflow,
+        style: TextStyle(
+          fontSize: textFontSize,
+          fontWeight: textFontWeight,
+          color: textColor
+        )
+      ),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+    ));
+
   static Widget actionText(String text, {
     String? subtitle, 
     required void Function()? onTap,

@@ -312,8 +312,9 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           return Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Expanded(child:Fields.paddedActionText(
+              Expanded(child:Fields.actionListTile(
                 repositoryName,
+                subtitle: accessMode?.name,
                 textOverflow: TextOverflow.ellipsis,
                 textSoftWrap: false,
                 onTap: () {
@@ -330,11 +331,13 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   : Colors.black54,
                 textFontWeight: repositoryName == current
                   ? FontWeight.bold
-                  : FontWeight.normal,)),
-                _getActionByAccessMode(
-                  context,
-                  repositoryName,
-                  accessMode,),
+                  : FontWeight.normal,
+                dense: true,
+                visualDensity: VisualDensity.compact)),
+              _getActionByAccessMode(
+                context,
+                repositoryName,
+                accessMode,),
             ],);
         }
       );
