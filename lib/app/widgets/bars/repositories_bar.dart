@@ -220,10 +220,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-          ValueListenableBuilder(
+          state.repositoryNames().isNotEmpty
+          ? ValueListenableBuilder(
             valueListenable: _lockAllEnable,
             builder: (context, value, child) {
-              final unlockAll = value as bool;
+              final lockAll = value as bool;
               
               return Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -237,10 +238,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                     const Icon(Icons.lock_outline),
                     size: Dimensions.sizeIconAverage,
                     color: Theme.of(context).primaryColor,
-                    onPressed: unlockAll ?
+                    onPressed: lockAll ?
                     () async => await _lockAllRepositories() : null,
                   ),]);
-            },),
+            },)
+          : const SizedBox(),
           Dimensions.spacingVertical,
           state.repositoryNames().isNotEmpty
           ? ConstrainedBox(
