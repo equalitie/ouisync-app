@@ -510,4 +510,30 @@ class Fields {
       children: buttons
     )
   );
+
+  static Widget emptyWidget({
+    required String assetName,
+    required String text,
+    double? assetScale,
+    double? assetWidth,
+    double? assetHeight,
+    AlignmentGeometry assetAlignment = Alignment.center }) {
+    return Column(
+      children: [
+        Image.asset(
+            assetName,
+            scale: assetScale,
+            width: assetWidth,
+            height: assetHeight,
+            alignment: assetAlignment,),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: Dimensions.fontAverage,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54
+          ),)
+      ],);
+  }
 }
