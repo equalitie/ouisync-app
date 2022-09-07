@@ -249,7 +249,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
               context,
               state.repositoryNames().toList(),
               state.currentRepoName))
-          : Fields.emptyWidget(
+          : Fields.placeholderWidget(
             assetName: 'assets/nothing_here_yet.png',
             text: 'Nothing here yet!',
             assetHeight: noReposImageHeight),

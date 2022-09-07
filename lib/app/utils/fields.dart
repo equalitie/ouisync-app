@@ -511,7 +511,7 @@ class Fields {
     )
   );
 
-  static Widget emptyWidget({
+  static Widget placeholderWidget({
     required String assetName,
     required String text,
     double? assetScale,
