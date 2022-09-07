@@ -13,6 +13,8 @@ class Constants{
 
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
+  static const double repositoryBarHeight = 58.0;
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';

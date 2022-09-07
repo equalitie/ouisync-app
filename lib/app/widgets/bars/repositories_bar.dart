@@ -54,7 +54,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Size get preferredSize {
     // TODO: This value was found experimentally, can it be done programmatically?
-    return const Size.fromHeight(58);
+    return const Size.fromHeight(Constants.repositoryBarHeight);
   }
 }
 
