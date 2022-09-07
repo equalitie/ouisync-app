@@ -226,23 +226,25 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             builder: (context, value, child) {
               final lockAll = value as bool;
               
-              return Row(
+              return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Fields.constrainedText(S.current.labelLockAllRepos,
-                    flex: 0,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
                   Fields.actionIcon(
                     const Icon(Icons.lock_outline),
                     size: Dimensions.sizeIconAverage,
+                    padding: const EdgeInsets.all(0.0),
                     onPressed: lockAll ?
-                    () async => await _lockAllRepositories() : null,
-                  ),]);
+                    () async => await _lockAllRepositories() : null,),
+                  Fields.constrainedText(S.current.labelLockAllRepos,
+                    flex: 0,
+                    fontSize: Dimensions.fontMicro,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,),
+                ],
+              );
             },)
           : const SizedBox(),
-          Dimensions.spacingVertical,
           state.repositoryNames().isNotEmpty
           ? ConstrainedBox(
             constraints: BoxConstraints.loose(Size.fromHeight(repoListMaxHeight)),
