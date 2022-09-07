@@ -237,7 +237,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   Fields.actionIcon(
                     const Icon(Icons.lock_outline),
                     size: Dimensions.sizeIconAverage,
-                    color: Theme.of(context).primaryColor,
                     onPressed: lockAll ?
                     () async => await _lockAllRepositories() : null,
                   ),]);
