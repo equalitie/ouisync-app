@@ -135,6 +135,8 @@
 
     "messageSelectAccessMode": "Escoge el nivel de acceso para crear el link para compartir",
 
+    "messageNothingHereYet":"No hay nada aún!",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

@@ -249,6 +249,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
+        "messageNothingHereYet":
+            MessageLookupByLibrary.simpleMessage("No hay nada aún!"),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("OuiSync"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(

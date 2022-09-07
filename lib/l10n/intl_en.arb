@@ -137,6 +137,8 @@
 
     "messageSelectAccessMode": "Select a permission to create a share link",
 
+    "messageNothingHereYet":"Nothing here yet!",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

@@ -1280,6 +1280,16 @@ class S {
     );
   }
 
+  /// `Nothing here yet!`
+  String get messageNothingHereYet {
+    return Intl.message(
+      'Nothing here yet!',
+      name: 'messageNothingHereYet',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
