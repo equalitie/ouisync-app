@@ -82,11 +82,13 @@ class _Picker extends StatelessWidget {
 
     final repo = state.currentRepo;
     final name = _repoName(repo);
+    final icon = _selectIconByAccessMode(repo?.maybeHandle?.accessMode);
 
     if (repo == null) {
       return _buildState(
         context,
         borderColor: borderColor,
+        icon: icon,
         iconColor: colorNoRepo,
         textColor: colorNoRepo,
         repoName: name,
@@ -100,6 +102,7 @@ class _Picker extends StatelessWidget {
     return _buildState(
       context,
       borderColor: borderColor,
+      icon: icon,
       iconColor: colorUnlockedRepo,
       textColor: color,
       repoName: name,
@@ -117,6 +120,7 @@ class _Picker extends StatelessWidget {
   _buildState(
     BuildContext context, {
     required Color borderColor,
+    required IconData icon,
     required Color iconColor,
     required Color textColor,
     required String repoName,
@@ -135,7 +139,7 @@ class _Picker extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.cloud_outlined,
+            icon,
             size: Dimensions.sizeIconSmall,
             color: iconColor,
           ),
@@ -169,6 +173,26 @@ class _Picker extends StatelessWidget {
         shareRepositoryOnTap);
     }
   );
+}
+
+IconData _selectIconByAccessMode(AccessMode? accessMode) {
+  late final IconData modeIcon;
+  switch (accessMode) {
+    case AccessMode.blind:
+      modeIcon = Icons.visibility_off_outlined;
+      break;
+    case AccessMode.read:
+      modeIcon = Icons.visibility_outlined;
+      break;
+    case AccessMode.write:
+      modeIcon = Icons.edit_note_rounded;
+      break;
+    default:
+      modeIcon = Icons.error_outline_rounded;
+      break;
+  }
+
+  return modeIcon;
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
@@ -305,26 +329,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         ],);
     }
   );
-
-  IconData _selectIconByAccessMode(AccessMode? accessMode) {
-    late final IconData modeIcon;
-    switch (accessMode) {
-      case AccessMode.blind:
-        modeIcon = Icons.visibility_off_outlined;
-        break;
-      case AccessMode.read:
-        modeIcon = Icons.visibility_outlined;
-        break;
-      case AccessMode.write:
-        modeIcon = Icons.edit_note_rounded;
-        break;
-      default:
-        modeIcon = Icons.error_outline_rounded;
-        break;
-    }
-
-    return modeIcon;
-  }
 
   Row _getActionByAccessMode(
     BuildContext context,
