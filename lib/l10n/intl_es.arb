@@ -51,6 +51,8 @@
     "labelCopyLink":"Copia el link",
     "labelShareLink":"Comparte el link",
 
+    "labelLockAllRepos":"Bloquear todos",
+
     "messageLoadingDefault":"Cargando…",
     "messageLoadingContents":"Cargando los contenidos del directorio…",
 

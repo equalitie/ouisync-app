@@ -530,6 +530,16 @@ class S {
     );
   }
 
+  /// `Lock all`
+  String get labelLockAllRepos {
+    return Intl.message(
+      'Lock all',
+      name: 'labelLockAllRepos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(

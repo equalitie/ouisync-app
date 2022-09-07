@@ -128,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Descargado en:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Localización: "),
+        "labelLockAllRepos":
+            MessageLookupByLibrary.simpleMessage("Bloquear todos"),
         "labelName": MessageLookupByLibrary.simpleMessage("Nombre: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("Nuevo nombre: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),

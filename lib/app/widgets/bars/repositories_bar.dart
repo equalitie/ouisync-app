@@ -228,7 +228,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Fields.constrainedText('Lock all',
+                  Fields.constrainedText(S.current.labelLockAllRepos,
                     flex: 0,
                     fontSize: Dimensions.fontSmall,
                     fontWeight: FontWeight.bold,

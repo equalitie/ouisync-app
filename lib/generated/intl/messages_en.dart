@@ -127,6 +127,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
+        "labelLockAllRepos": MessageLookupByLibrary.simpleMessage("Lock all"),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("New name: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Password: "),

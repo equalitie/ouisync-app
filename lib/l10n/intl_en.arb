@@ -51,6 +51,8 @@
     "labelCopyLink":"Copy link",
     "labelShareLink":"Share link",
 
+    "labelLockAllRepos":"Lock all",
+
     "messageLoadingDefault":"Loading…",
 
     "messageLibraryPanic":"Internal crash detected.",
