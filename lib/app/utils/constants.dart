@@ -40,4 +40,6 @@ class Constants{
 
   static const String eventLeftMouseUp = 'leftMouseUp';
   static const String eventRightMouseUp = 'rightMouseUp';
+
+  static const String assetPathNothingHereYet = 'assets/nothing_here_yet.png';
 }

@@ -4,8 +4,8 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
-import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
+import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
@@ -250,7 +250,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
               state.repositoryNames().toList(),
               state.currentRepoName))
           : Fields.placeholderWidget(
-            assetName: 'assets/nothing_here_yet.png',
+            assetName: Constants.assetPathNothingHereYet,
             text: S.current.messageNothingHereYet,
             assetHeight: noReposImageHeight),
           Dimensions.spacingActionsVertical,
