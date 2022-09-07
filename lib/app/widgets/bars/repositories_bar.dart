@@ -209,6 +209,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   Widget build(BuildContext context) => _repositories.builder((state) {
     enableLockAllRepos();
     final repoListMaxHeight =  MediaQuery.of(context).size.height * 0.4;
+    final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
     
     return Container(
       padding: Dimensions.paddingBottomSheet, 
@@ -241,12 +242,17 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   ),]);
             },),
           Dimensions.spacingVertical,
-          ConstrainedBox(
+          state.repositoryNames().isNotEmpty
+          ? ConstrainedBox(
             constraints: BoxConstraints.loose(Size.fromHeight(repoListMaxHeight)),
             child: _buildRepositoryList(
               context,
               state.repositoryNames().toList(),
-              state.currentRepoName)),
+              state.currentRepoName))
+          : Fields.emptyWidget(
+            assetName: 'assets/nothing_here_yet.png',
+            text: 'Nothing here yet!',
+            assetHeight: noReposImageHeight),
           Dimensions.spacingActionsVertical,
           Fields.paddedActionText(
             S.current.iconAddRepository.toUpperCase(),
