@@ -302,10 +302,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       actions: _confirmLockAllReposActions(context));
 
     if (!(lockAll ?? false)) {
-      loggy.app('Lock all cancelled');
       return;
     }
-    loggy.app('Locking all open repos...');
 
     List<Future> futures = <Future>[];
     for (final repo in unlockedRepos) {
