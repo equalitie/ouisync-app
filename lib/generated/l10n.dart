@@ -1300,6 +1300,16 @@ class S {
     );
   }
 
+  /// `Locking all open repositories...`
+  String get messageLockingAllRepos {
+    return Intl.message(
+      'Locking all open repositories...',
+      name: 'messageLockingAllRepos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(

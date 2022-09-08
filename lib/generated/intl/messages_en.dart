@@ -240,6 +240,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is locked."),
+        "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
+            "Locking all open repositories..."),
         "messageMoveEntryOrigin": m6,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),

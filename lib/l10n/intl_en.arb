@@ -140,6 +140,7 @@
     "messageSelectAccessMode": "Select a permission to create a share link",
 
     "messageNothingHereYet":"Nothing here yet!",
+    "messageLockingAllRepos":"Locking all open repositories...",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

@@ -306,7 +306,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: const[
           LinearProgressIndicator(color: Colors.white,),
           Dimensions.spacingVertical,
-          Text('Locking all open repositories...', 
+          Text(S.current.messageLockingAllRepos, 
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,

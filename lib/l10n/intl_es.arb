@@ -138,6 +138,7 @@
     "messageSelectAccessMode": "Escoge el nivel de acceso para crear el link para compartir",
 
     "messageNothingHereYet":"No hay nada aún!",
+    "messageLockingAllRepos":"Bloqueando todos los repositorios abiertos...",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
