@@ -295,16 +295,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       AccessMode.write]
       .contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
 
-
-    final title = 'Lock all repositories';
-    final message = 'Do you want to close all open repositories?\n\n' 
-    '(${unlockedRepos.length} open)';
-    final actions = _confirmLockAllReposActions(context);
     final lockAll = await _confirmLockAll(
       context,
-      message: message,
-      title: title,
-      actions: actions);
+      title: S.current.titleLockAllRepos,
+      message: S.current.messageLockOpenRepos(unlockedRepos.length+10),
+      actions: _confirmLockAllReposActions(context));
 
     if (!(lockAll ?? false)) {
       loggy.app('Lock all cancelled');
@@ -353,7 +348,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       text: S.current.actionCancel,
       onPressed: () => Navigator.of(context, rootNavigator: true).pop(false)),
     PositiveButton(
-      text: 'LOCK',//S.current.actionLock,
+      text: S.current.actionLockCapital,
       onPressed: () => Navigator.of(context, rootNavigator: true).pop(true))
   ];
 

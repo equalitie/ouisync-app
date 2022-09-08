@@ -23,6 +23,7 @@
     "titleDownloadToDevice":"Descargar al dispositivo",
     "titleDownloadLocation":"Ubicación de descarga",
     "titleBackgroundAndroidPermissionsTitle": "Permisos requeridos",
+    "titleLockAllRepos":"Bloquear todos los repositorios",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -139,12 +140,14 @@
 
     "messageNothingHereYet":"No hay nada aún!",
     "messageLockingAllRepos":"Bloqueando todos los repositorios abiertos...",
+    "messageLockOpenRepos":"Desea bloquear todos los repositorios abiertos?\n\n({number} actualmente)",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
     "replacementEntry":"{entry}",
     "replacementAccess":"{access}",
+    "replacementNumber":"{number}",
 
     "statusSync":"SINCRONIZADO",
     "statusUnspecified":"No especificado",
@@ -191,5 +194,6 @@
     "actionCancelCapital":"CANCELAR",
     "actionHideCapital":"OCULTAR",
     "actionCloseCapital":"CERRAR",
-    "actionDeleteCapital":"BORRAR"
+    "actionDeleteCapital":"BORRAR",
+    "actionLockCapital":"BLOQUEAR"
 }

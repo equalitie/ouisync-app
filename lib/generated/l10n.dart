@@ -290,6 +290,16 @@ class S {
     );
   }
 
+  /// `Lock all repositories`
+  String get titleLockAllRepos {
+    return Intl.message(
+      'Lock all repositories',
+      name: 'titleLockAllRepos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1310,6 +1320,16 @@ class S {
     );
   }
 
+  /// `Do you want to close all open repositories?\n\n({number} open)`
+  String messageLockOpenRepos(Object number) {
+    return Intl.message(
+      'Do you want to close all open repositories?\n\n($number open)',
+      name: 'messageLockOpenRepos',
+      desc: '',
+      args: [number],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1357,6 +1377,16 @@ class S {
       name: 'replacementAccess',
       desc: '',
       args: [access],
+    );
+  }
+
+  /// `{number}`
+  String replacementNumber(Object number) {
+    return Intl.message(
+      '$number',
+      name: 'replacementNumber',
+      desc: '',
+      args: [number],
     );
   }
 
@@ -1795,6 +1825,16 @@ class S {
     return Intl.message(
       'DELETE',
       name: 'actionDeleteCapital',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LOCK`
+  String get actionLockCapital {
+    return Intl.message(
+      'LOCK',
+      name: 'actionLockCapital',
       desc: '',
       args: [],
     );
