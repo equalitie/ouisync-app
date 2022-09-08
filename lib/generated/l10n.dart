@@ -290,6 +290,16 @@ class S {
     );
   }
 
+  /// `Lock all repositories`
+  String get titleLockAllRepos {
+    return Intl.message(
+      'Lock all repositories',
+      name: 'titleLockAllRepos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -525,6 +535,16 @@ class S {
     return Intl.message(
       'Share link',
       name: 'labelShareLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lock all`
+  String get labelLockAllRepos {
+    return Intl.message(
+      'Lock all',
+      name: 'labelLockAllRepos',
       desc: '',
       args: [],
     );
@@ -1280,6 +1300,36 @@ class S {
     );
   }
 
+  /// `Nothing here yet!`
+  String get messageNothingHereYet {
+    return Intl.message(
+      'Nothing here yet!',
+      name: 'messageNothingHereYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Locking all open repositories...`
+  String get messageLockingAllRepos {
+    return Intl.message(
+      'Locking all open repositories...',
+      name: 'messageLockingAllRepos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to close all open repositories?\n\n({number} open)`
+  String messageLockOpenRepos(Object number) {
+    return Intl.message(
+      'Do you want to close all open repositories?\n\n($number open)',
+      name: 'messageLockOpenRepos',
+      desc: '',
+      args: [number],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1327,6 +1377,16 @@ class S {
       name: 'replacementAccess',
       desc: '',
       args: [access],
+    );
+  }
+
+  /// `{number}`
+  String replacementNumber(Object number) {
+    return Intl.message(
+      '$number',
+      name: 'replacementNumber',
+      desc: '',
+      args: [number],
     );
   }
 
@@ -1420,20 +1480,20 @@ class S {
     );
   }
 
-  /// `Create a new repository`
-  String get iconCreateRepository {
+  /// `Add new repository`
+  String get iconAddRepository {
     return Intl.message(
-      'Create a new repository',
-      name: 'iconCreateRepository',
+      'Add new repository',
+      name: 'iconAddRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add a repository with token`
+  /// `Add repository with token`
   String get iconAddRepositoryWithToken {
     return Intl.message(
-      'Add a repository with token',
+      'Add repository with token',
       name: 'iconAddRepositoryWithToken',
       desc: '',
       args: [],
@@ -1765,6 +1825,16 @@ class S {
     return Intl.message(
       'DELETE',
       name: 'actionDeleteCapital',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LOCK`
+  String get actionLockCapital {
+    return Intl.message(
+      'LOCK',
+      name: 'actionLockCapital',
       desc: '',
       args: [],
     );

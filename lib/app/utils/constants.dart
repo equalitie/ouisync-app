@@ -11,6 +11,10 @@ class Constants{
   static const int maxCharacterRepoTokenForDisplay = 8;
   static const String ouisyncUrl = 'https://ouisync.net/';
 
+  static Color primaryColor(context) => Theme.of(context).primaryColorDark;
+
+  static const double repositoryBarHeight = 58.0;
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';
@@ -36,4 +40,6 @@ class Constants{
 
   static const String eventLeftMouseUp = 'leftMouseUp';
   static const String eventRightMouseUp = 'rightMouseUp';
+
+  static const String assetPathNothingHereYet = 'assets/nothing_here_yet.png';
 }

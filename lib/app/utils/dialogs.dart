@@ -3,15 +3,39 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
-import '../widgets/buttons/dialog_danger_button.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
-  static Future<dynamic> executeFutureWithLoadingDialog(
-    BuildContext context,
-    Future<dynamic> f
-  ) async {
-    showLoadingDialog(context);
+
+  static Future<void> unlockRepositoryDialog(BuildContext context, ReposCubit repositories, String repositoryName) async {
+    final password = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final formKey = GlobalKey<FormState>();
+
+        return ActionsDialog(
+          title: S.current.messageUnlockRepository,
+          body: UnlockRepository(
+            context: context,
+            formKey: formKey,
+            repositoryName:  repositoryName
+          ),
+        );
+      }
+    );
+
+    await repositories.unlockRepository(
+      repositories.internalRepoMetaInfo(repositoryName),
+      password: password
+    );
+  }
+
+  static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context, {
+    required Future<dynamic> f,
+    String? text,
+    Widget? widget
+  }) async {
+    showLoadingDialog(context, text: text, widget: widget);
 
     var result = await f;
     _hideLoadingDialog(context);
@@ -30,31 +54,43 @@ abstract class Dialogs {
   }
 
   static showLoadingDialog(BuildContext context, {
+    String? text,
     Widget? widget
   }) {
-    final alert = AlertDialog(
-      content: Row(
-        children: [
-          const CircularProgressIndicator(),
-          Container(
-            margin: const EdgeInsets.only(left: 7),
-            child:widget ?? Text(S.current.messageLoadingDefault)
-            ),
-        ],
-      ),
-    );
+    final defaultIndicator =  Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const CircularProgressIndicator.adaptive(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+        if (text?.isNotEmpty ?? false)
+          Dimensions.spacingVertical,
+        if (text?.isNotEmpty ?? false)
+          Text(text!, 
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: Dimensions.fontAverage
+          ),),
+      ],);
 
     return showDialog(
       context:context,
       barrierDismissible: false,
       builder:(BuildContext context){
-        return alert;
+        return Center(
+          child: widget != null
+          ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              widget,
+            ],
+          ) : defaultIndicator,
+        );
       },
     );
   }
 
   static _hideLoadingDialog(context) =>
-    Navigator.pop(context);
+    Navigator.of(context, rootNavigator: true).pop();
 
   static Future<bool?> alertDialogWithActions({
     required BuildContext context,
@@ -81,7 +117,7 @@ abstract class Dialogs {
   }) {
     actions ??= [TextButton(
         child: Text(S.current.actionCloseCapital),
-        onPressed: () => Navigator.of(context).pop(false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       )];
 
     return showDialog(
@@ -170,7 +206,7 @@ abstract class Dialogs {
     actions: <Widget>[
       TextButton(
         child: Text(S.current.actionCancelCapital),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
       ),
       DangerButton(
         text: S.current.actionDeleteCapital,

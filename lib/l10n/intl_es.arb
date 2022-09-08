@@ -23,6 +23,7 @@
     "titleDownloadToDevice":"Descargar al dispositivo",
     "titleDownloadLocation":"Ubicación de descarga",
     "titleBackgroundAndroidPermissionsTitle": "Permisos requeridos",
+    "titleLockAllRepos":"Bloquear todos los repositorios",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -50,6 +51,8 @@
     "labelTokenLink":"Link del repositorio",
     "labelCopyLink":"Copia el link",
     "labelShareLink":"Comparte el link",
+
+    "labelLockAllRepos":"Bloquear todos",
 
     "messageLoadingDefault":"Cargando…",
     "messageLoadingContents":"Cargando los contenidos del directorio…",
@@ -135,11 +138,16 @@
 
     "messageSelectAccessMode": "Escoge el nivel de acceso para crear el link para compartir",
 
+    "messageNothingHereYet":"No hay nada aún!",
+    "messageLockingAllRepos":"Bloqueando todos los repositorios abiertos...",
+    "messageLockOpenRepos":"Desea bloquear todos los repositorios abiertos?\n\n({number} actualmente)",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
     "replacementEntry":"{entry}",
     "replacementAccess":"{access}",
+    "replacementNumber":"{number}",
 
     "statusSync":"SINCRONIZADO",
     "statusUnspecified":"No especificado",
@@ -156,8 +164,8 @@
     "iconAccessMode":"Modo de aceso",
     "iconShareTokenWithPeer":"Comparte este token con tu colega",
 
-    "actionCreateRepository":"Crear un Repositorio",
-    "actionAddRepositoryWithToken":"Agregar un Repositorio Compartido",
+    "iconAddRepository":"Agregar un Repositorio",
+    "actionAddRepositoryWithToken":"Agregar Repositorio con Link",
     "actionReloadContents":"Recargar",
     "actionNewRepo":"Crear repositorio",
     "actionNewFolder":"Crear directorio",
@@ -186,5 +194,6 @@
     "actionCancelCapital":"CANCELAR",
     "actionHideCapital":"OCULTAR",
     "actionCloseCapital":"CERRAR",
-    "actionDeleteCapital":"BORRAR"
+    "actionDeleteCapital":"BORRAR",
+    "actionLockCapital":"BLOQUEAR"
 }

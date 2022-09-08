@@ -23,6 +23,7 @@
     "titleDownloadToDevice":"Download to device",
     "titleDownloadLocation":"Download location",
     "titleBackgroundAndroidPermissionsTitle": "Permissions needed",
+    "titleLockAllRepos":"Lock all repositories",
 
     "typeFolder":"Folder",
     "typeFile":"File",
@@ -50,6 +51,8 @@
     "labelTokenLink":"Repository share link",
     "labelCopyLink":"Copy link",
     "labelShareLink":"Share link",
+
+    "labelLockAllRepos":"Lock all",
 
     "messageLoadingDefault":"Loading…",
 
@@ -137,11 +140,16 @@
 
     "messageSelectAccessMode": "Select a permission to create a share link",
 
+    "messageNothingHereYet":"Nothing here yet!",
+    "messageLockingAllRepos":"Locking all open repositories...",
+    "messageLockOpenRepos":"Do you want to close all open repositories?\n\n({number} open)",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
     "replacementEntry":"{entry}",
     "replacementAccess":"{access}",
+    "replacementNumber":"{number}",
 
     "statusSync":"SYNCED",
     "statusUnspecified":"Unspecified",
@@ -153,8 +161,8 @@
     "iconRename":"Rename",
     "iconMove":"Move",
     "iconDelete":"Delete",
-    "iconCreateRepository":"Create a new repository",
-    "iconAddRepositoryWithToken":"Add a repository with token",
+    "iconAddRepository":"Add new repository",
+    "iconAddRepositoryWithToken":"Add repository with token",
     "iconAccessMode":"Access Mode",
     "iconShareTokenWithPeer":"Share this with your peer",
 
@@ -188,5 +196,6 @@
     "actionCancelCapital":"CANCEL",
     "actionHideCapital":"HIDE",
     "actionCloseCapital":"CLOSE",
-    "actionDeleteCapital":"DELETE"
+    "actionDeleteCapital":"DELETE",
+    "actionLockCapital":"LOCK"
 }

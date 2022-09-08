@@ -112,7 +112,10 @@ class _FileDetailState extends State<FileDetail> {
                   );
                 },
               ).then((fileName) {
-                Navigator.of(context).pop();
+                // If the user canceled the dialog, no file name is returned
+                if (fileName?.isNotEmpty ?? false) {
+                  Navigator.of(context).pop();
+                }
               })
             },
             icon: Icons.delete_outlined,
