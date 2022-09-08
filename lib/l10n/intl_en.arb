@@ -142,7 +142,7 @@
 
     "messageNothingHereYet":"Nothing here yet!",
     "messageLockingAllRepos":"Locking all open repositories...",
-    "messageLockOpenRepos":"Do you want to close all open repositories?\n\n({number} open)",
+    "messageLockOpenRepos":"Do you want to lock all open repositories?\n\n({number} open)",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

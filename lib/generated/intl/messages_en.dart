@@ -34,7 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m5(name) => "Folder deleted successfully: ${name}";
 
   static String m6(number) =>
-      "Do you want to close all open repositories?\n\n(${number} open)";
+      "Do you want to lock all open repositories?\n\n(${number} open)";
 
   static String m7(path) => "from ${path}";
 

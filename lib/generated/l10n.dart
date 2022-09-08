@@ -1320,10 +1320,10 @@ class S {
     );
   }
 
-  /// `Do you want to close all open repositories?\n\n({number} open)`
+  /// `Do you want to lock all open repositories?\n\n({number} open)`
   String messageLockOpenRepos(Object number) {
     return Intl.message(
-      'Do you want to close all open repositories?\n\n($number open)',
+      'Do you want to lock all open repositories?\n\n($number open)',
       name: 'messageLockOpenRepos',
       desc: '',
       args: [number],
