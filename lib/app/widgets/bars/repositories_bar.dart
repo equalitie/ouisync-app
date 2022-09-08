@@ -220,31 +220,32 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-          state.repositoryNames().isNotEmpty
-          ? ValueListenableBuilder(
-            valueListenable: _lockAllEnable,
-            builder: (context, value, child) {
-              final lockAll = value as bool;
+          // TODO: fix the concurrency problem
+          // state.repositoryNames().isNotEmpty
+          // ? ValueListenableBuilder(
+          //   valueListenable: _lockAllEnable,
+          //   builder: (context, value, child) {
+          //     final lockAll = value as bool;
               
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Fields.actionIcon(
-                    const Icon(Icons.lock_outline),
-                    size: Dimensions.sizeIconAverage,
-                    padding: const EdgeInsets.all(0.0),
-                    onPressed: lockAll ?
-                    () async => await _lockAllRepositories() : null,),
-                  Fields.constrainedText(S.current.labelLockAllRepos,
-                    flex: 0,
-                    fontSize: Dimensions.fontMicro,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,),
-                ],
-              );
-            },)
-          : const SizedBox(),
+          //     return Column(
+          //       mainAxisAlignment: MainAxisAlignment.end,
+          //       crossAxisAlignment: CrossAxisAlignment.end,
+          //       children: [
+          //         Fields.actionIcon(
+          //           const Icon(Icons.lock_outline),
+          //           size: Dimensions.sizeIconAverage,
+          //           padding: const EdgeInsets.all(0.0),
+          //           onPressed: lockAll ?
+          //           () async => await _lockAllRepositories() : null,),
+          //         Fields.constrainedText(S.current.labelLockAllRepos,
+          //           flex: 0,
+          //           fontSize: Dimensions.fontMicro,
+          //           fontWeight: FontWeight.bold,
+          //           color: Colors.black87,),
+          //       ],
+          //     );
+          //   },)
+          // : const SizedBox(),
           state.repositoryNames().isNotEmpty
           ? ConstrainedBox(
             constraints: BoxConstraints.loose(Size.fromHeight(repoListMaxHeight)),
