@@ -139,6 +139,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelName": MessageLookupByLibrary.simpleMessage("Nombre: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("Nuevo nombre: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),
+        "labelQRCode": MessageLookupByLibrary.simpleMessage("Código QR"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre"),
         "labelRepositoryLink":

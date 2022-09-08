@@ -51,6 +51,7 @@
     "labelTokenLink":"Link del repositorio",
     "labelCopyLink":"Copia el link",
     "labelShareLink":"Comparte el link",
+    "labelQRCode":"Código QR",
 
     "labelLockAllRepos":"Bloquear todos",
 

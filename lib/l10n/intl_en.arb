@@ -51,6 +51,7 @@
     "labelTokenLink":"Repository share link",
     "labelCopyLink":"Copy link",
     "labelShareLink":"Share link",
+    "labelQRCode":"QR code",
 
     "labelLockAllRepos":"Lock all",
 

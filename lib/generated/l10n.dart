@@ -540,6 +540,16 @@ class S {
     );
   }
 
+  /// `QR code`
+  String get labelQRCode {
+    return Intl.message(
+      'QR code',
+      name: 'labelQRCode',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Lock all`
   String get labelLockAllRepos {
     return Intl.message(

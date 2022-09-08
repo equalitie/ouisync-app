@@ -198,7 +198,7 @@ class _ShareRepositoryState extends State<ShareRepository>
               accessModeIcon: Fields.accessModeIcon(widget.repository.accessMode),
               displayLink: _formatShareLinkForDisplay(_shareToken!))
             : null,),
-          Fields.constrainedText('QR code',
+          Fields.constrainedText(S.current.labelQRCode,
             flex: 0,
             fontSize: Dimensions.fontMicro,
             fontWeight: FontWeight.normal,
