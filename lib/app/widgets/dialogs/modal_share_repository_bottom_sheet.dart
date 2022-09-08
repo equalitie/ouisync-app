@@ -190,7 +190,13 @@ class _ShareRepositoryState extends State<ShareRepository>
             size: Dimensions.sizeIconSmall,
             color: Theme.of(context).primaryColor,
             onPressed: _shareToken != null 
-            ? () => showTokenLinkQRCode(context, _shareToken!)
+            ? () => showTokenLinkQRCode(
+              context,
+              tokenLink: _shareToken!,
+              repoName: widget.repository.name,
+              accessModeName: widget.repository.accessMode.name,
+              accessModeIcon: Fields.accessModeIcon(widget.repository.accessMode),
+              displayLink: _formatShareLinkForDisplay(_shareToken!))
             : null,),
           Fields.constrainedText('QR code',
             flex: 0,
