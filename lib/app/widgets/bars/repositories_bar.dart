@@ -220,32 +220,31 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleRepositoriesList),
-          // TODO: fix the concurrency problem
-          // state.repositoryNames().isNotEmpty
-          // ? ValueListenableBuilder(
-          //   valueListenable: _lockAllEnable,
-          //   builder: (context, value, child) {
-          //     final lockAll = value as bool;
+          state.repositoryNames().isNotEmpty
+          ? ValueListenableBuilder(
+            valueListenable: _lockAllEnable,
+            builder: (context, value, child) {
+              final lockAll = value as bool;
               
-          //     return Column(
-          //       mainAxisAlignment: MainAxisAlignment.end,
-          //       crossAxisAlignment: CrossAxisAlignment.end,
-          //       children: [
-          //         Fields.actionIcon(
-          //           const Icon(Icons.lock_outline),
-          //           size: Dimensions.sizeIconAverage,
-          //           padding: const EdgeInsets.all(0.0),
-          //           onPressed: lockAll ?
-          //           () async => await _lockAllRepositories() : null,),
-          //         Fields.constrainedText(S.current.labelLockAllRepos,
-          //           flex: 0,
-          //           fontSize: Dimensions.fontMicro,
-          //           fontWeight: FontWeight.bold,
-          //           color: Colors.black87,),
-          //       ],
-          //     );
-          //   },)
-          // : const SizedBox(),
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Fields.actionIcon(
+                    const Icon(Icons.lock_outline),
+                    size: Dimensions.sizeIconAverage,
+                    padding: const EdgeInsets.all(0.0),
+                    onPressed: lockAll ?
+                    () async => await _lockAllRepositories(context) : null,),
+                  Fields.constrainedText(S.current.labelLockAllRepos,
+                    flex: 0,
+                    fontSize: Dimensions.fontMicro,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,),
+                ],
+              );
+            },)
+          : const SizedBox(),
           state.repositoryNames().isNotEmpty
           ? ConstrainedBox(
             constraints: BoxConstraints.loose(Size.fromHeight(repoListMaxHeight)),
@@ -288,7 +287,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         .maybeHandle?.accessMode != AccessMode.blind).isNotEmpty;
   }
 
-  Future<void> _lockAllRepositories() async {
+  Future<void> _lockAllRepositories(BuildContext context) async {
     final unlockedRepos = _repositories
     .repos
     .where((repo) => 
@@ -296,10 +295,29 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       AccessMode.write]
       .contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
 
-    await Future.forEach(unlockedRepos, (RepoEntry repo) async {
-      loggy.app('locking ${repo.name}');
-      await _repositories.lockRepository(repo.metaInfo);
-    });
+    List<Future> futures = <Future>[];
+    for (final repo in unlockedRepos) {
+      futures.add(_repositories.lockRepository(repo.metaInfo));
+    }
+
+    final indicator = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+      child: Column(
+        children: const[
+          LinearProgressIndicator(color: Colors.white,),
+          Dimensions.spacingVertical,
+          Text('Locking all open repositories...', 
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: Dimensions.fontAverage
+            ),)
+        ],));
+
+    Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: Future.wait(futures),
+      widget: indicator);
   }
 
   Widget _buildRepositoryList(
