@@ -207,7 +207,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
   @override
   Widget build(BuildContext context) => _repositories.builder((state) {
-    enableLockAllRepos();
+    _enableLockAllRepos();
     final repoListMaxHeight =  MediaQuery.of(context).size.height * 0.4;
     final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
     
@@ -280,7 +280,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         ]));
   },);
 
-  void enableLockAllRepos() {
+  void _enableLockAllRepos() {
     _lockAllEnable.value =_repositories
       .repos
       .where((element) => element
@@ -394,7 +394,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
               final info = repoCubit.metaInfo;
               _repositories.lockRepository(info);
 
-              enableLockAllRepos();
+              _enableLockAllRepos();
 
             },
             color: Colors.black87,
