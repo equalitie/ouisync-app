@@ -301,14 +301,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     }
 
     final indicator = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+      padding: Dimensions.paddingLinearProgressIndicator,
       child: Column(
-        children: const[
-          LinearProgressIndicator(color: Colors.white,),
+        children: [
+          const LinearProgressIndicator(color: Colors.white,),
           Dimensions.spacingVertical,
           Text(S.current.messageLockingAllRepos, 
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: Dimensions.fontAverage
             ),)

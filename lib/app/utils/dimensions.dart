@@ -48,6 +48,7 @@ class Dimensions {
   static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
   static const EdgeInsets paddingItemBox = EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0);
   static const EdgeInsets paddingGreyBox = EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0);
+  static const EdgeInsets paddingLinearProgressIndicator = EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0);
 
   static const double actionsDialogPadding = 20.0;
   static const double actionsDialogAvatarRadius = 10.0;
