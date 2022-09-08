@@ -295,29 +295,85 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       AccessMode.write]
       .contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
 
+
+    final title = 'Lock all repositories';
+    final message = 'Do you want to close all open repositories?\n\n' 
+    '(${unlockedRepos.length} open)';
+    final actions = _confirmLockAllReposActions(context);
+    final lockAll = await _confirmLockAll(
+      context,
+      message: message,
+      title: title,
+      actions: actions);
+
+    if (!(lockAll ?? false)) {
+      loggy.app('Lock all cancelled');
+      return;
+    }
+    loggy.app('Locking all open repos...');
+
     List<Future> futures = <Future>[];
     for (final repo in unlockedRepos) {
       futures.add(_repositories.lockRepository(repo.metaInfo));
     }
 
+    final indicator = _getLinearProgressIndicator(S.current.messageLockingAllRepos);
+    Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: Future.wait(futures),
+      widget: indicator);
+  }
+
+  Future<dynamic> _confirmLockAll(BuildContext context,{
+    required String title,
+    required String message,
+    required List<Widget> actions
+  }) async {
+    final lockAll = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ActionsDialog(
+          title: title,
+          body: Column(
+            children: [
+              Text(message),
+              Fields.dialogActions(
+                context,
+                buttons: actions)
+            ],
+          ),
+        );
+      }
+    );
+    return lockAll;
+  }
+
+  List<Widget> _confirmLockAllReposActions(context) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () => Navigator.of(context, rootNavigator: true).pop(false)),
+    PositiveButton(
+      text: 'LOCK',//S.current.actionLock,
+      onPressed: () => Navigator.of(context, rootNavigator: true).pop(true))
+  ];
+
+  Padding _getLinearProgressIndicator(String? text) {
     final indicator = Padding(
       padding: Dimensions.paddingLinearProgressIndicator,
       child: Column(
         children: [
           const LinearProgressIndicator(color: Colors.white,),
-          Dimensions.spacingVertical,
-          Text(S.current.messageLockingAllRepos, 
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: Dimensions.fontAverage
-            ),)
+          if(text != null)
+            Dimensions.spacingVertical,
+          if(text != null)
+            Text(text, 
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: Dimensions.fontAverage
+              ),)
         ],));
-
-    Dialogs.executeFutureWithLoadingDialog(
-      context,
-      f: Future.wait(futures),
-      widget: indicator);
+    return indicator;
   }
 
   Widget _buildRepositoryList(
