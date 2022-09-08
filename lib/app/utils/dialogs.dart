@@ -77,7 +77,7 @@ abstract class Dialogs {
   }
 
   static _hideLoadingDialog(context) =>
-    Navigator.pop(context);
+    Navigator.of(context, rootNavigator: true).pop();
 
   static Future<bool?> alertDialogWithActions({
     required BuildContext context,
@@ -104,7 +104,7 @@ abstract class Dialogs {
   }) {
     actions ??= [TextButton(
         child: Text(S.current.actionCloseCapital),
-        onPressed: () => Navigator.of(context).pop(false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       )];
 
     return showDialog(
@@ -193,7 +193,7 @@ abstract class Dialogs {
     actions: <Widget>[
       TextButton(
         child: Text(S.current.actionCancelCapital),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
       ),
       DangerButton(
         text: S.current.actionDeleteCapital,
