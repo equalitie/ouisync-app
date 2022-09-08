@@ -82,7 +82,7 @@ class _Picker extends StatelessWidget {
 
     final repo = state.currentRepo;
     final name = _repoName(repo);
-    final icon = _selectIconByAccessMode(repo?.maybeHandle?.accessMode);
+    final icon = Fields.accessModeIcon(repo?.maybeHandle?.accessMode);
 
     if (repo == null) {
       return _buildState(
@@ -173,26 +173,6 @@ class _Picker extends StatelessWidget {
         shareRepositoryOnTap);
     }
   );
-}
-
-IconData _selectIconByAccessMode(AccessMode? accessMode) {
-  late final IconData modeIcon;
-  switch (accessMode) {
-    case AccessMode.blind:
-      modeIcon = Icons.visibility_off_outlined;
-      break;
-    case AccessMode.read:
-      modeIcon = Icons.visibility_outlined;
-      break;
-    case AccessMode.write:
-      modeIcon = Icons.edit_note_rounded;
-      break;
-    default:
-      modeIcon = Icons.error_outline_rounded;
-      break;
-  }
-
-  return modeIcon;
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
@@ -391,7 +371,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   _repositories.setCurrentByName(repositoryName);
                   updateSettingsAndPop(context, repositoryName);
                 },
-                icon: _selectIconByAccessMode(accessMode),
+                icon: Fields.accessModeIcon(accessMode),
                 iconSize: Dimensions.sizeIconAverage,
                 iconColor: repositoryName == current
                   ? Colors.black87

@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'utils.dart';
@@ -379,9 +380,9 @@ class Fields {
         color: iconColor
       ): const SizedBox(),
       title: Text(text,
-          textAlign: textAlign,
-          softWrap: textSoftWrap,
-          overflow: textOverflow,
+        textAlign: textAlign,
+        softWrap: textSoftWrap,
+        overflow: textOverflow,
         style: TextStyle(
           fontSize: textFontSize,
           fontWeight: textFontWeight,
@@ -577,5 +578,25 @@ class Fields {
             color: Colors.black54
           ),)
       ],);
+  }
+
+  static IconData accessModeIcon(AccessMode? accessMode) {
+    late final IconData modeIcon;
+    switch (accessMode) {
+      case AccessMode.blind:
+        modeIcon = Icons.visibility_off_outlined;
+        break;
+      case AccessMode.read:
+        modeIcon = Icons.visibility_outlined;
+        break;
+      case AccessMode.write:
+        modeIcon = Icons.edit_note_rounded;
+        break;
+      default:
+        modeIcon = Icons.error_outline_rounded;
+        break;
+    }
+
+    return modeIcon;
   }
 }
