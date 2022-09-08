@@ -152,33 +152,51 @@ class _ShareRepositoryState extends State<ShareRepository>
   Widget _buildShareActions() => Expanded(
     flex: 0,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Fields.constrainedText(S.current.labelCopyLink,
-          flex: 0,
-          fontSize: Dimensions.fontMicro,
-          fontWeight: FontWeight.normal,
-          color: Constants.inputLabelForeColor),
-        Fields.actionIcon(
-          const Icon(Icons.content_copy_rounded),
-          size: Dimensions.sizeIconSmall,
-          color: Theme.of(context).primaryColor,
-          onPressed: _shareToken != null ? () async {
-            await copyStringToClipboard(_shareToken!);
-            showSnackBar(context,
-                content: Text(S.current.messageTokenCopiedToClipboard));
-          } : null,
-        ),
-        Fields.constrainedText(S.current.labelShareLink,
-          flex: 0,
-          fontSize: Dimensions.fontMicro,
-          fontWeight: FontWeight.normal,
-          color: Constants.inputLabelForeColor),
-        Fields.actionIcon(
-          const Icon(Icons.share_outlined),
-          size: Dimensions.sizeIconSmall,
-          color: Theme.of(context).primaryColor,
-          onPressed: _shareToken != null ? () => Share.share(_shareToken!) : null,
-        )
+        Column(children: [
+          Fields.actionIcon(
+            const Icon(Icons.content_copy_rounded),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: _shareToken != null ? () async {
+              await copyStringToClipboard(_shareToken!);
+              showSnackBar(context,
+                  content: Text(S.current.messageTokenCopiedToClipboard));
+            } : null,
+          ),
+          Fields.constrainedText(S.current.labelCopyLink,
+            flex: 0,
+            fontSize: Dimensions.fontMicro,
+            fontWeight: FontWeight.normal,
+            color: Constants.inputLabelForeColor),
+        ]),
+        Column(children: [
+          Fields.actionIcon(
+            const Icon(Icons.share_outlined),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: _shareToken != null ? () => Share.share(_shareToken!) : null,
+          ),
+          Fields.constrainedText(S.current.labelShareLink,
+            flex: 0,
+            fontSize: Dimensions.fontMicro,
+            fontWeight: FontWeight.normal,
+            color: Constants.inputLabelForeColor),
+        ]),
+        Column(children: [
+          Fields.actionIcon(
+            const Icon(Icons.qr_code_2_outlined),
+            size: Dimensions.sizeIconSmall,
+            color: Theme.of(context).primaryColor,
+            onPressed: _shareToken != null 
+            ? () => showTokenLinkQRCode(context, _shareToken!)
+            : null,),
+          Fields.constrainedText('QR code',
+            flex: 0,
+            fontSize: Dimensions.fontMicro,
+            fontWeight: FontWeight.normal,
+            color: Constants.inputLabelForeColor),
+        ],)
       ]));
 }
