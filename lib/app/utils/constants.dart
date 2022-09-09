@@ -15,6 +15,8 @@ class Constants{
 
   static const double repositoryBarHeight = 58.0;
 
+  static const int modalTransitionDurationMs = 800;
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';

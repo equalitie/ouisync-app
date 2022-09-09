@@ -42,33 +42,28 @@ void showTokenLinkQRCode(BuildContext context,{
 }) {
   final repoNameMaxWidth = MediaQuery.of(context).size.width * 0.5;
   final qrCodeSize = MediaQuery.of(context).size.width * 0.4;
-  final qrCodeImage = QrImage(
-    data: tokenLink,
-    errorCorrectionLevel: QrErrorCorrectLevel.M,
-    size: qrCodeSize,
-    padding: const EdgeInsets.all(5.0),
-  );
+  final qrCodeImage = _getQRCodeImage(tokenLink, qrCodeSize);
 
   showGeneralDialog(
     context: context,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black87,
-    transitionDuration: const Duration(milliseconds: 800),
+    transitionDuration: const Duration(seconds: Constants.modalTransitionDurationMs),
     pageBuilder: (
       BuildContext buildContext,
       Animation animation,
       Animation secondaryAnimation) {
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: Dimensions.paddingQRCode,
             child: Card(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    padding: Dimensions.paddingRepoInfoInQRCode,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -102,24 +97,24 @@ void showTokenLinkQRCode(BuildContext context,{
                         )
                       ],)),
                   Container(
-                    margin: const EdgeInsets.all(20.0),
+                    margin: Dimensions.marginQRCodeImage,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: Theme.of(context).primaryColorDark,
-                        width: 4.0
+                        width: Dimensions.borderQRCodeImage
                       ),
-                      borderRadius: BorderRadius.circular(8.0)
+                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall)
                     ),
                     child: qrCodeImage),
                   Container(
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(8.0), 
-                        bottomRight: Radius.circular(8.0)),
+                        bottomLeft: Radius.circular(Dimensions.radiusSmall), 
+                        bottomRight: Radius.circular(Dimensions.radiusSmall)),
                       color: Constants.inputBackgroundColor,
                     ),
                     child:Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: Dimensions.paddingQRCode,
                       child: Text(
                         displayLink,
                         style: const TextStyle(
@@ -128,6 +123,16 @@ void showTokenLinkQRCode(BuildContext context,{
                         ),)))
                 ],))));
     });
+}
+
+QrImage _getQRCodeImage(String tokenLink, double qrCodeSize) {
+  final qrCodeImage = QrImage(
+    data: tokenLink,
+    errorCorrectionLevel: QrErrorCorrectLevel.M,
+    size: qrCodeSize,
+    padding: const EdgeInsets.all(5.0),
+  );
+  return qrCodeImage;
 }
 
 String? Function(String?) validateNoEmpty(String error) => (String? value) {
