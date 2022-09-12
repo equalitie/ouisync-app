@@ -263,6 +263,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   return AddRepositoryPage(reposCubit: _repositories);
                 }));// () => addRepoWithTokenDialog(context),
 
+              if (shareLink == null) return;
+
               addRepoWithTokenDialog(
                 context,
                 shareLink: shareLink);
