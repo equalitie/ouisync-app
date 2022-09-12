@@ -414,7 +414,7 @@ class Fields {
             color: iconColor
           ),
           Dimensions.spacingHorizontal,
-          Expanded(child:Text(text,
+          Text(text,
             textAlign: textAlign,
             softWrap: textSoftWrap,
             overflow: textOverflow,
@@ -423,7 +423,7 @@ class Fields {
               fontWeight: textFontWeight,
               color: textColor
             )
-          ))
+          )
         ],
       )
   );
