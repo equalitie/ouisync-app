@@ -460,7 +460,7 @@ class Fields {
     required BuildContext context,
     TextEditingController? textEditingController,
     Icon? icon,
-    required String label,
+    String? label,
     required String hint,
     required Function(String?) onSaved,
     required String? Function(String? value) validator,
@@ -470,6 +470,7 @@ class Fields {
     String? initialValue,
     bool obscureText = false,
     int? maxLines = 1,
+    InputBorder? inputBorder,
     Function()? onTap,
     Function(String)? onChanged
   }) => TextFormField(
@@ -482,6 +483,7 @@ class Fields {
     maxLines: maxLines,
     keyboardType: TextInputType.text,
     decoration: InputDecoration (
+      border: inputBorder,
       icon: icon,
       hintText: hint,
       labelText: label,
@@ -499,7 +501,7 @@ class Fields {
     required BuildContext context,
     TextEditingController? textEditingController,
     Icon? icon,
-    required String label,
+    String? label,
     required String hint,
     required Function(String?) onSaved,
     required String? Function(String? value) validator,
@@ -509,6 +511,7 @@ class Fields {
     String? initialValue,
     bool obscureText = false,
     int? maxLines = 1,
+    InputBorder? inputBorder,
     Function()? onTap,
     Function(String)? onChanged,
     padding = Dimensions.paddingFormTextField,
@@ -533,6 +536,7 @@ class Fields {
           initialValue: initialValue,
           obscureText: obscureText,
           maxLines: maxLines,
+          inputBorder: inputBorder,
           onTap: onTap,
           onChanged: onChanged
         )
