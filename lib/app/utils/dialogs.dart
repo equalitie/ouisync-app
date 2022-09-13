@@ -24,6 +24,10 @@ abstract class Dialogs {
       }
     );
 
+    if (password == null) {
+      return;
+    }
+
     await repositories.unlockRepository(
       repositories.internalRepoMetaInfo(repositoryName),
       password: password

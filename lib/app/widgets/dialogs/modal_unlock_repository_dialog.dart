@@ -83,7 +83,7 @@ class UnlockRepository extends StatelessWidget {
   List<Widget> _actions(context) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context).pop('')),
+      onPressed: () => Navigator.of(context).pop(null)),
     PositiveButton(
       text: S.current.actionUnlock,
       onPressed: _validatePassword)
