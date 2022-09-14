@@ -52,6 +52,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
   String? _repoName;
 
   final FocusNode _tokenFocus = FocusNode(debugLabel: 'TokenTextField');
+  final FocusNode _nameFocus = FocusNode(debugLabel: 'NameTextField');
 
   @override
   void initState() {
@@ -86,6 +87,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     _accessModeNotifier.dispose();
 
     _tokenFocus.dispose();
+    _nameFocus.dispose();
 
     super.dispose();
   }
@@ -96,7 +98,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Fields.formTextField(
+        _tokenController.text.isEmpty
+        ? Fields.formTextField(
           context: context,
           textEditingController: _tokenController,
           label: S.current.labelRepositoryLink,
@@ -106,7 +109,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
           autofocus: true,
           focusNode: _tokenFocus,
           maxLines: null,
-        ),
+        )
+        : _buildTokenLabel(),
         ValueListenableBuilder(
           valueListenable: _accessModeNotifier,
           builder: (context, message, child) =>
@@ -128,6 +132,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
           hint: S.current.messageRepositoryName,
           onSaved: (_) {},
           validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
+          autofocus: true,
+          focusNode: _nameFocus,
           autovalidateMode: AutovalidateMode.disabled
         ),
         Visibility(
@@ -223,6 +229,35 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     );
   }
 
+  Widget _buildTokenLabel() {
+    _validateToken();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 6.0),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+          color: Constants.inputBackgroundColor),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Fields.constrainedText(
+                S.current.labelRepositoryLink,
+                flex: 0,
+                fontSize: Dimensions.fontMicro,
+                fontWeight: FontWeight.normal,
+                color: Constants.inputLabelForeColor),
+            Dimensions.spacingVerticalHalf,
+            Text(formatShareLinkForDisplay(_tokenController.text),
+              style: const TextStyle(
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.w500
+              ),)
+          ],)));
+  }
+
   _updateNameController(String? value) {
     _nameController.text = value ?? '';
   }
@@ -316,7 +351,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
   List<Widget> _actions(context) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context).pop('')),
+      onPressed: () => Navigator.of(context, rootNavigator: true).pop('')),
     PositiveButton(
       text: S.current.actionCreate,
       onPressed: _createRepo)
