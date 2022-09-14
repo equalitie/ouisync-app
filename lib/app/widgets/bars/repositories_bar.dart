@@ -291,7 +291,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     final lockAll = await _confirmLockAll(
       context,
       title: S.current.titleLockAllRepos,
-      message: S.current.messageLockOpenRepos(unlockedRepos.length+10),
+      message: S.current.messageLockOpenRepos(unlockedRepos.length),
       actions: _confirmLockAllReposActions(context));
 
     if (!(lockAll ?? false)) {
