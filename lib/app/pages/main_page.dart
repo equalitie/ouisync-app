@@ -607,31 +607,37 @@ class _MainPageState extends State<MainPage>
   }
 
   void addRepoWithTokenDialog({ String? initialTokenValue }) async {
-    if (initialTokenValue != null) {
-      final token = _repositories.createToken(initialTokenValue);
-      final existingRepo = _repositories.findById(token.repositoryId());
+    initialTokenValue ??= await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return AddRepositoryPage(reposCubit: _repositories);
+      }));
+    
+    if (initialTokenValue == null) return;
 
-      if (existingRepo != null) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(S.current.titleAddRepository),
-              content: Text(S.current.messageRepositoryAlreadyExist(existingRepo.name)),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );}
-        );
+    final token = _repositories.createToken(initialTokenValue);
+    final existingRepo = _repositories.findById(token.repositoryId());
 
-        return;
-      }
+    if (existingRepo != null) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(S.current.titleAddRepository),
+            content: Text(S.current.messageRepositoryAlreadyExist(existingRepo.name)),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );}
+      );
+
+      return;
     }
 
     await showDialog(
