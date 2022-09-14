@@ -76,6 +76,26 @@ with OuiSyncAppLogger {
 
         if (data == null) return;
 
+        final tokenValidationError = _repositoryTokenValidator(data);
+        if (tokenValidationError != null) {
+          showSnackBar(context, 
+            content: Text(tokenValidationError));
+
+          return;  
+        }
+
+        final token = _checkForValidToken(data);
+        try {
+          token?.suggestedName;
+        } catch (e) {
+          loggy.app(e.toString());
+
+          showSnackBar(context,
+            content: Text(S.current.messageErrorTokenValidator));
+
+          return;
+        }
+
         Navigator.of(context).pop(data);
       },
       child: Row(
@@ -185,7 +205,7 @@ with OuiSyncAppLogger {
       return;
     }
     
-    final token = _validateToken(shareLink);
+    final token = _checkForValidToken(shareLink);
     try {
       token?.suggestedName;
     } catch (e) {
@@ -197,7 +217,7 @@ with OuiSyncAppLogger {
     Navigator.of(context).pop(shareLink);
   }
 
-  ShareToken? _validateToken(String shareLink) {
+  ShareToken? _checkForValidToken(String shareLink) {
     if (shareLink.isEmpty) {
       return null;
     }
