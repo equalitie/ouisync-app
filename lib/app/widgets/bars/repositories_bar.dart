@@ -261,7 +261,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                 context,
                 MaterialPageRoute(builder: (context) {
                   return AddRepositoryPage(reposCubit: _repositories);
-                }));// () => addRepoWithTokenDialog(context),
+                }));
 
               if (shareLink == null) return;
 
@@ -500,6 +500,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
   Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
     await _repositories.settings.setDefaultRepo(repositoryName);
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(repositoryName);
   }
 }
