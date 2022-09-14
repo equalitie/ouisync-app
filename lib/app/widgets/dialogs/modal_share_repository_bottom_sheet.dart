@@ -186,7 +186,7 @@ class _ShareRepositoryState extends State<ShareRepository>
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  return RepositoryQRPage(tokenLink: _shareToken!,);
+                  return RepositoryQRPage(shareLink: _shareToken!,);
                 }));
             }
             : null,),

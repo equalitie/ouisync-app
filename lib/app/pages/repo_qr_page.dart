@@ -5,10 +5,10 @@ import '../utils/utils.dart';
 
 class RepositoryQRPage extends StatefulWidget {
   const RepositoryQRPage({
-    required this.tokenLink,
+    required this.shareLink,
     Key? key}) : super(key: key);
 
-  final String tokenLink;
+  final String shareLink;
 
   @override
   State<RepositoryQRPage> createState() => _RepositoryQRPageState();
@@ -35,7 +35,7 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
       body: Center(child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _getQRCodeImage(widget.tokenLink),
+          _getQRCodeImage(widget.shareLink),
           _buildShareMessage(),
         ],
       )));
