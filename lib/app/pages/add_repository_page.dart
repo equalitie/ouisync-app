@@ -3,8 +3,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import 'qr_scanner_page.dart';
+import 'pages.dart';
 
 class AddRepositoryPage extends StatefulWidget {
   const AddRepositoryPage({
@@ -17,7 +18,8 @@ class AddRepositoryPage extends StatefulWidget {
   State<AddRepositoryPage> createState() => _AddRepositoryPageState();
 }
 
-class _AddRepositoryPageState extends State<AddRepositoryPage> {
+class _AddRepositoryPageState extends State<AddRepositoryPage> 
+with OuiSyncAppLogger {
   final formKey = GlobalKey<FormState>();
 
   final _tokenController = TextEditingController(text: '');
