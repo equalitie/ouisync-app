@@ -119,7 +119,7 @@ class _ShareRepositoryState extends State<ShareRepository>
   }
 
   Widget _buildShareBox() => Container(
-      padding: Dimensions.paddingItemBox,
+      padding: Dimensions.paddingItemBoxLoose,
       decoration: const BoxDecoration(
           borderRadius:
               BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
