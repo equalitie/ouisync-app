@@ -36,15 +36,17 @@ with OuiSyncAppLogger {
           fontSize: Dimensions.fontAverage,
           color: Colors.black87
         ),),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-        child: SingleChildScrollView(child: Center(child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildScanQrCode(context),
-            _buildOrSeparator(),
-            _buildUseToken(context),
-          ])))));
+      body: Form(
+        key: formKey,
+        autovalidateMode: AutovalidateMode.disabled,
+        child:Center(child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              _buildScanQrCode(context),
+              _buildOrSeparator(),
+              _buildUseToken(context),
+            ]),))));
   }
 
   Widget _buildScanQrCode(BuildContext context) {
@@ -72,6 +74,8 @@ with OuiSyncAppLogger {
 
         if (!mounted) return;
 
+        if (data == null) return;
+
         Navigator.of(context).pop(data);
       },
       child: Row(
@@ -88,10 +92,6 @@ with OuiSyncAppLogger {
       textStyle: TextStyle(
         color: Theme.of(context).dialogBackgroundColor,
         fontWeight: FontWeight.w500),);
-  }
-
-  void setShareLink(String data) {
-    _tokenController.text = data;
   }
 
   Widget _buildOrSeparator() {
@@ -133,10 +133,10 @@ with OuiSyncAppLogger {
           child: Fields.formTextField(
             context: context,
             textEditingController: _tokenController,
+            label: S.current.labelRepositoryLink,
             hint: S.current.messageRepositoryToken,
             onSaved: (value) {},
             validator: _repositoryTokenValidator,
-            maxLines: null,
             inputBorder: InputBorder.none
           )),
         _builAddRepositoryButton(context),
@@ -167,7 +167,7 @@ with OuiSyncAppLogger {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
       child: RawMaterialButton(
-        onPressed: () {},
+        onPressed: () => _onAddRepo(_tokenController.text),
         child: Text('Add repository'.toUpperCase()),
         constraints: Dimensions.sizeConstrainsDialogAction,
         elevation: Dimensions.elevationDialogAction,
@@ -178,5 +178,38 @@ with OuiSyncAppLogger {
         textStyle: TextStyle(
           color: Theme.of(context).dialogBackgroundColor,
           fontWeight: FontWeight.w500),)); 
+  }
+
+  void _onAddRepo(String shareLink) async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+    
+    final token = _validateToken(shareLink);
+    try {
+      token?.suggestedName;
+    } catch (e) {
+      loggy.app(e.toString());
+      return;
+    }
+
+    formKey.currentState!.save();
+    Navigator.of(context).pop(shareLink);
+  }
+
+  ShareToken? _validateToken(String shareLink) {
+    if (shareLink.isEmpty) {
+      return null;
+    }
+
+    ShareToken? token;
+    try {
+      token = ShareToken(widget.reposCubit.session, shareLink);
+    } catch (e, st) {
+      loggy.app('Extract repository token exception', e, st);
+      showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
+    }
+
+    return token;
   }
 }
