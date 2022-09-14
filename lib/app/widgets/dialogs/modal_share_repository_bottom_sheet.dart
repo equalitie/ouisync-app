@@ -83,22 +83,13 @@ class _ShareRepositoryState extends State<ShareRepository>
     }
 
     final token = await createShareToken(widget.repository, accessMode);
-    final displayToken = _formatShareLinkForDisplay(token);
+    final displayToken = formatShareLinkForDisplay(token);
     setState(() {
       _accessMode = accessMode;
 
       _shareToken = token;
       _displayToken = displayToken;
     });
-  }
-
-  String _formatShareLinkForDisplay(String shareLink) {
-    final shareTokenUri = Uri.parse(shareLink);
-    final truncatedToken =
-        '${shareTokenUri.fragment.substring(0, Constants.maxCharacterRepoTokenForDisplay)}...';
-
-    final displayToken = shareTokenUri.replace(fragment: truncatedToken);
-    return displayToken.toString();
   }
 
   Widget _buildAccessModeDescription(AccessMode? accessMode) => Padding(

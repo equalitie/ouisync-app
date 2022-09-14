@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:path/path.dart' as p;
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
@@ -22,4 +23,13 @@ String buildDestinationPath(String parentPath, String entryPath) {
   /// the app is running on Windows.
   final context = p.Context(style: p.Style.posix);
   return context.join(parentPath, entryPath);
+}
+
+String formatShareLinkForDisplay(String shareLink) {
+  final shareTokenUri = Uri.parse(shareLink);
+  final truncatedToken =
+      '${shareTokenUri.fragment.substring(0, Constants.maxCharacterRepoTokenForDisplay)}...';
+
+  final displayToken = shareTokenUri.replace(fragment: truncatedToken);
+  return displayToken.toString();
 }
