@@ -76,14 +76,6 @@ with OuiSyncAppLogger {
 
         if (data == null) return;
 
-        final tokenValidationError = _repositoryTokenValidator(data);
-        if (tokenValidationError != null) {
-          showSnackBar(context, 
-            content: Text(tokenValidationError));
-
-          return;  
-        }
-
         final token = _checkForValidToken(data);
         try {
           token?.suggestedName;
@@ -94,6 +86,14 @@ with OuiSyncAppLogger {
             content: Text(S.current.messageErrorTokenValidator));
 
           return;
+        }
+
+        final tokenValidationError = _repositoryTokenValidator(data);
+        if (tokenValidationError != null) {
+          showSnackBar(context, 
+            content: Text(tokenValidationError));
+
+          return;  
         }
 
         Navigator.of(context).pop(data);
