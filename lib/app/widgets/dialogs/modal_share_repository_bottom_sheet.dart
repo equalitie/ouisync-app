@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
+import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -181,13 +182,13 @@ class _ShareRepositoryState extends State<ShareRepository>
             size: Dimensions.sizeIconSmall,
             color: Theme.of(context).primaryColor,
             onPressed: _shareToken != null 
-            ? () => showTokenLinkQRCode(
-              context,
-              tokenLink: _shareToken!,
-              repoName: widget.repository.name,
-              accessModeName: widget.repository.accessMode.name,
-              accessModeIcon: Fields.accessModeIcon(widget.repository.accessMode),
-              displayLink: _formatShareLinkForDisplay(_shareToken!))
+            ? () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return RepositoryQRPage(tokenLink: _shareToken!,);
+                }));
+            }
             : null,),
           Fields.constrainedText(S.current.labelQRCode,
             flex: 0,
