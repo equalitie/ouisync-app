@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
+import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -83,22 +84,13 @@ class _ShareRepositoryState extends State<ShareRepository>
     }
 
     final token = await createShareToken(widget.repository, accessMode);
-    final displayToken = _formatShareLinkForDisplay(token);
+    final displayToken = formatShareLinkForDisplay(token);
     setState(() {
       _accessMode = accessMode;
 
       _shareToken = token;
       _displayToken = displayToken;
     });
-  }
-
-  String _formatShareLinkForDisplay(String shareLink) {
-    final shareTokenUri = Uri.parse(shareLink);
-    final truncatedToken =
-        '${shareTokenUri.fragment.substring(0, Constants.maxCharacterRepoTokenForDisplay)}...';
-
-    final displayToken = shareTokenUri.replace(fragment: truncatedToken);
-    return displayToken.toString();
   }
 
   Widget _buildAccessModeDescription(AccessMode? accessMode) => Padding(
@@ -119,7 +111,7 @@ class _ShareRepositoryState extends State<ShareRepository>
   }
 
   Widget _buildShareBox() => Container(
-      padding: Dimensions.paddingItemBox,
+      padding: Dimensions.paddingItemBoxLoose,
       decoration: const BoxDecoration(
           borderRadius:
               BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
@@ -190,13 +182,13 @@ class _ShareRepositoryState extends State<ShareRepository>
             size: Dimensions.sizeIconSmall,
             color: Theme.of(context).primaryColor,
             onPressed: _shareToken != null 
-            ? () => showTokenLinkQRCode(
-              context,
-              tokenLink: _shareToken!,
-              repoName: widget.repository.name,
-              accessModeName: widget.repository.accessMode.name,
-              accessModeIcon: Fields.accessModeIcon(widget.repository.accessMode),
-              displayLink: _formatShareLinkForDisplay(_shareToken!))
+            ? () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return RepositoryQRPage(shareLink: _shareToken!,);
+                }));
+            }
             : null,),
           Fields.constrainedText(S.current.labelQRCode,
             flex: 0,

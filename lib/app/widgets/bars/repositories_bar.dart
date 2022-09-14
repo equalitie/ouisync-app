@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
+import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -255,7 +256,19 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             icon: Icons.insert_link_rounded,
             iconSize: Dimensions.sizeIconSmall,
             iconColor: Constants.primaryColor(context),
-            onTap: () => addRepoWithTokenDialog(context),
+            onTap:() async {
+              final shareLink = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return AddRepositoryPage(reposCubit: _repositories);
+                }));
+
+              if (shareLink == null) return;
+
+              addRepoWithTokenDialog(
+                context,
+                shareLink: shareLink);
+            }
           ),
         ]));
   },);
@@ -278,7 +291,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     final lockAll = await _confirmLockAll(
       context,
       title: S.current.titleLockAllRepos,
-      message: S.current.messageLockOpenRepos(unlockedRepos.length+10),
+      message: S.current.messageLockOpenRepos(unlockedRepos.length),
       actions: _confirmLockAllReposActions(context));
 
     if (!(lockAll ?? false)) {
@@ -461,7 +474,9 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     await updateSettingsAndPop(context, newRepo);
   }
 
-  void addRepoWithTokenDialog(BuildContext context) async {
+  void addRepoWithTokenDialog(BuildContext context, {
+    required String shareLink
+  }) async {
     final addedRepo = await showDialog(
       context: context,
       barrierDismissible: false,
@@ -474,6 +489,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             context: context,
             cubit: _repositories,
             formKey: formKey,
+            initialTokenValue: shareLink,
           ),
         );
       }
@@ -484,6 +500,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
   Future<void> updateSettingsAndPop(BuildContext context, String repositoryName) async {
     await _repositories.settings.setDefaultRepo(repositoryName);
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(repositoryName);
   }
 }

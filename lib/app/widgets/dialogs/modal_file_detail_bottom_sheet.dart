@@ -70,7 +70,7 @@ class _FileDetailState extends State<FileDetail> {
               icon: Icons.preview_rounded,
             ),
           if (!io.Platform.isWindows)
-            Fields.actionText(
+            Fields.paddedActionText(
               S.current.iconShare,
               onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
               icon: Icons.share_rounded,

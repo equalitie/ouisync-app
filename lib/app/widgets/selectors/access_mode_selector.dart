@@ -40,8 +40,6 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
 
   Widget _buildModeSelector() {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: Dimensions.paddingItem,
@@ -51,7 +49,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
               fontWeight: FontWeight.normal,
               color: Constants.inputLabelForeColor)])),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _buildAccessModeOptions(),)
         ],);
   }
@@ -60,13 +58,12 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
     return widget.accessModes.map((mode) =>
       Expanded(child: RadioListTile(
         title: Text(mode.name,
+        textAlign: TextAlign.start,
           style: const TextStyle(
             fontSize: Dimensions.fontAverage,
           ),),
         toggleable: true,
-        dense: true,
-        contentPadding: const EdgeInsets.all(0.0),
-        visualDensity: VisualDensity.compact,
+        contentPadding: EdgeInsets.zero,
         value: mode,
         groupValue: _selectedMode,
         onChanged: (current) async {

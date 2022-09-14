@@ -139,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return Scaffold(
         appBar: AppBar(
           title: Text(S.current.titleSettings),
-        ),
+          elevation: 0.0,),
         body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
               child: _repos.builder((repos) => ListView(

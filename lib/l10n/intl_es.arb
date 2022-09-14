@@ -24,6 +24,8 @@
     "titleDownloadLocation":"Ubicación de descarga",
     "titleBackgroundAndroidPermissionsTitle": "Permisos requeridos",
     "titleLockAllRepos":"Bloquear todos los repositorios",
+    "titleAddRepoToken":"Agregar repositorio usando un token",
+    "titleScanRepoQR":"Escanear QR de Repositorio",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -143,6 +145,12 @@
     "messageLockingAllRepos":"Bloqueando todos los repositorios abiertos...",
     "messageLockOpenRepos":"Desea bloquear todos los repositorios abiertos?\n\n({number} actualmente)",
 
+    "messageShareWithWR":"Comparte con Código QR",
+    "messageScanQROrShare":"Escanea este código con tu otro dispositivo or compartelo con tus pares",
+    "messageAddRepoQR":"Agrega un repositorio usando un código QR",
+    "messageOr":"O...",
+    "messageAddRepoLink":"Agrega un repositorio usando un link",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",
@@ -166,6 +174,7 @@
     "iconShareTokenWithPeer":"Comparte este token con tu colega",
 
     "iconAddRepository":"Agregar un Repositorio",
+    "actionAddRepository":"Agregar Repositorio",
     "actionAddRepositoryWithToken":"Agregar Repositorio con Link",
     "actionReloadContents":"Recargar",
     "actionNewRepo":"Crear repositorio",
@@ -191,6 +200,7 @@
     "actionHide":"Ocultar",
     "actionExit":"Salir",
     "actionOK": "OK",
+    "actionScanQR":"Escanea un código QR",
     "actionAcceptCapital":"ACEPTAR",
     "actionCancelCapital":"CANCELAR",
     "actionHideCapital":"OCULTAR",

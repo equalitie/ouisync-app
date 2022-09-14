@@ -68,6 +68,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("Aceptar"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACEPTAR"),
+        "actionAddRepository":
+            MessageLookupByLibrary.simpleMessage("Agregar Repositorio"),
         "actionAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
             "Agregar Repositorio con Link"),
         "actionCancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
@@ -103,6 +105,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionRename": MessageLookupByLibrary.simpleMessage("Renombrar"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Reintentar"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Guardar"),
+        "actionScanQR":
+            MessageLookupByLibrary.simpleMessage("Escanea un código QR"),
         "actionShare": MessageLookupByLibrary.simpleMessage("Compartir"),
         "actionShareFile":
             MessageLookupByLibrary.simpleMessage("Compartir archivo"),
@@ -164,6 +168,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "mesageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("No hay archivos presentes"),
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
+        "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
+            "Agrega un repositorio usando un link"),
+        "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
+            "Agrega un repositorio usando un código QR"),
         "messageAddingFileToLockedRepository": MessageLookupByLibrary.simpleMessage(
             "Este repositorio está cerrado o es una copia ciega.\n\nSi usted tiene la clave, abralo e intente de nuevo."),
         "messageAddingFileToReadRepository":
@@ -263,6 +271,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("No hay nada aún!"),
+        "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("OuiSync"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
@@ -287,10 +296,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pegue el link aquí"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Guardar el archivo en este directorio"),
+        "messageScanQROrShare": MessageLookupByLibrary.simpleMessage(
+            "Escanea este código con tu otro dispositivo or compartelo con tus pares"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
             "Escoge el nivel de acceso para crear el link para compartir"),
         "messageSelectLocation":
             MessageLookupByLibrary.simpleMessage("Seleccione el lugar"),
+        "messageShareWithWR":
+            MessageLookupByLibrary.simpleMessage("Comparte con Código QR"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Token de repositorio copiado al portapapeles"),
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
@@ -310,6 +323,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No especificado"),
         "titleAddFile": MessageLookupByLibrary.simpleMessage(
             "Agregar un archivo a OuiSync"),
+        "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(
+            "Agregar repositorio usando un token"),
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Agregar un repositorio"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
@@ -347,6 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepositoriesList":
             MessageLookupByLibrary.simpleMessage("Tus repositorios"),
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repositorio"),
+        "titleScanRepoQR":
+            MessageLookupByLibrary.simpleMessage("Escanear QR de Repositorio"),
         "titleSettings":
             MessageLookupByLibrary.simpleMessage("Configuraciones"),
         "titleShareRepository": m20,

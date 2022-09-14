@@ -43,14 +43,21 @@ class Dimensions {
   static const EdgeInsets paddingActionsSection = EdgeInsets.only(top: 20.0);
   static const EdgeInsets paddingActionBox = EdgeInsets.all(5.0);
   static const EdgeInsets paddingActionBoxTop = EdgeInsets.only(top: 10.0, bottom: 5.0);
-  static const EdgeInsets paddingActionBoxRight = EdgeInsets.only(right: 5.0);
+  static const EdgeInsets paddingActionBoxRight = EdgeInsets.only(right: 5.0, bottom: 10.0);
   static const EdgeInsets paddingListItem = EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0) ;
   static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
   static const EdgeInsets paddingItemBox = EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0);
+  static const EdgeInsets paddingItemBoxLoose = EdgeInsets.symmetric(vertical: 20.0, horizontal:10.0);
   static const EdgeInsets paddingGreyBox = EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0);
   static const EdgeInsets paddingLinearProgressIndicator = EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0);
-  static const EdgeInsets paddingQRCode = EdgeInsets.all(20.0);
-  static const EdgeInsets paddingRepoInfoInQRCode = EdgeInsets.symmetric(vertical: 10.0);
+  static const EdgeInsets paddingAll20 = EdgeInsets.all(20.0);
+  static const EdgeInsets paddingVertical10 = EdgeInsets.symmetric(vertical: 10.0);
+  static const EdgeInsets paddingVertical20 = EdgeInsets.symmetric(vertical: 20.0);
+  static const EdgeInsets paddingVertical40 = EdgeInsets.symmetric(vertical: 40.0);
+  static const EdgeInsets paddingTop40 = EdgeInsets.only(top: 40.0);
+  static const EdgeInsets paddingShareLinkBox = EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0);
+  static const EdgeInsets paddingPageButton = EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0);
+  static const EdgeInsets paddingPageButtonIcon = EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0);
 
   static const EdgeInsets marginQRCodeImage = EdgeInsets.all(20.0);
 

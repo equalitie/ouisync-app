@@ -43,6 +43,7 @@ dependencies:
   flutter_hooks: ^0.18.2+1
   flutter_loggy: ^2.0.1
   lecle_downloads_path_provider: ^0.0.2+6
+  mobile_scanner: ^2.0.0
   mockito: ^5.1.0
   move_to_background: ^1.0.2
   network_info_plus: ^2.1.3
