@@ -28,7 +28,7 @@ with OuiSyncAppLogger {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add a repository with token'),
+        title: Text(S.current.titleAddRepoToken),
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black87,
@@ -40,7 +40,7 @@ with OuiSyncAppLogger {
         key: formKey,
         autovalidateMode: AutovalidateMode.disabled,
         child:Center(child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: Dimensions.paddingAll20,
           child: Column(
             children: [
               _buildScanQrCode(context),
@@ -56,7 +56,7 @@ with OuiSyncAppLogger {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Fields.constrainedText(
-              'Add a repository using a QR code',
+              S.current.messageAddRepoQR,
               flex: 0),]),
         Dimensions.spacingVerticalDouble,
         _builScanQRButton(context),
@@ -83,9 +83,9 @@ with OuiSyncAppLogger {
         children: [
           const Icon(Icons.qr_code_2_outlined),
           Dimensions.spacingHorizontal,
-          Text('Scan a QR code'.toUpperCase()),
+          Text(S.current.actionScanQR.toUpperCase()),
         ],),
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+      padding: Dimensions.paddingPageButtonIcon,
       fillColor: Theme.of(context).primaryColor,
       shape: const RoundedRectangleBorder(
         borderRadius: Dimensions.borderRadiusDialogPositiveButton),
@@ -96,18 +96,18 @@ with OuiSyncAppLogger {
 
   Widget _buildOrSeparator() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40.0),
+      padding: Dimensions.paddingVertical40,
       child: Row(
-        children: const [
-          Expanded(child: Divider(
+        children: [
+          const Expanded(child: Divider(
             thickness: 1.0,
             endIndent: 20.0,
             color: Colors.black26,)),
-          Text('OR',
-            style: TextStyle(
+          Text(S.current.messageOr.toUpperCase(),
+            style: const TextStyle(
               fontWeight: FontWeight.w500
             ),),
-          Expanded(child: Divider(
+          const Expanded(child: Divider(
             thickness: 1.0,
             indent: 20.0,
             color: Colors.black26,)),
@@ -122,7 +122,7 @@ with OuiSyncAppLogger {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Fields.constrainedText(
-              'Add a repository using a token link',
+              S.current.messageAddRepoLink,
               flex: 0),]),
         Dimensions.spacingVerticalDouble,
         Container(
@@ -165,13 +165,13 @@ with OuiSyncAppLogger {
 
   Widget _builAddRepositoryButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      padding: Dimensions.paddingVertical20,
       child: RawMaterialButton(
         onPressed: () => _onAddRepo(_tokenController.text),
-        child: Text('Add repository'.toUpperCase()),
+        child: Text(S.current.actionAddRepository.toUpperCase()),
         constraints: Dimensions.sizeConstrainsDialogAction,
         elevation: Dimensions.elevationDialogAction,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        padding: Dimensions.paddingPageButton,
         fillColor: Theme.of(context).primaryColor,
         shape: const RoundedRectangleBorder(
           borderRadius: Dimensions.borderRadiusDialogPositiveButton),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
 class RepositoryQRPage extends StatefulWidget {
@@ -63,19 +64,19 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
 
   Widget _buildShareMessage() {
     return Padding(
-      padding: const EdgeInsets.only(top: 40.0),
+      padding: Dimensions.paddingTop40,
       child: Column(
         children: [
-          const Text('Share with QR Code',
-            style: TextStyle(
+          Text(S.current.messageShareWithWR,
+            style: const TextStyle(
               fontSize: Dimensions.fontBig,
               fontWeight: FontWeight.w500,
               color: Colors.white
             ),),
           Dimensions.spacingVertical,
-          const Text('Scan this with your other device or share it with your peers',
+          Text(S.current.messageScanQROrShare,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white
             ),),
           // Padding(

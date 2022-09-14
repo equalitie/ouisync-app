@@ -233,9 +233,9 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken> with Ou
     _validateToken();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: Dimensions.paddingVertical10,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 6.0),
+        padding: Dimensions.paddingShareLinkBox,
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
           color: Constants.inputBackgroundColor),

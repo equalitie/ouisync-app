@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
 class QRScanner extends StatefulWidget {
@@ -17,7 +18,7 @@ class _QRScannerState extends State<QRScanner> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Mobile Scanner'),
+          title: Text(S.current.titleScanRepoQR),
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black87,
@@ -39,7 +40,7 @@ class _QRScannerState extends State<QRScanner> {
                   }
                 },
               ),
-              iconSize: 32.0,
+              iconSize: Dimensions.sizeIconAverage,
               onPressed: () => cameraController.toggleTorch(),
             ),
             IconButton(
@@ -55,7 +56,7 @@ class _QRScannerState extends State<QRScanner> {
                   }
                 },
               ),
-              iconSize: 32.0,
+              iconSize: Dimensions.sizeIconAverage,
               onPressed: () => cameraController.switchCamera(),
             ),
           ],

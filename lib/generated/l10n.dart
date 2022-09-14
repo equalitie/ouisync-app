@@ -300,6 +300,26 @@ class S {
     );
   }
 
+  /// `Add a repository with token`
+  String get titleAddRepoToken {
+    return Intl.message(
+      'Add a repository with token',
+      name: 'titleAddRepoToken',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan Repository QR`
+  String get titleScanRepoQR {
+    return Intl.message(
+      'Scan Repository QR',
+      name: 'titleScanRepoQR',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1340,6 +1360,56 @@ class S {
     );
   }
 
+  /// `Share with QR Code`
+  String get messageShareWithWR {
+    return Intl.message(
+      'Share with QR Code',
+      name: 'messageShareWithWR',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan this with your other device or share it with your peers`
+  String get messageScanQROrShare {
+    return Intl.message(
+      'Scan this with your other device or share it with your peers',
+      name: 'messageScanQROrShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a repository using a QR code`
+  String get messageAddRepoQR {
+    return Intl.message(
+      'Add a repository using a QR code',
+      name: 'messageAddRepoQR',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or`
+  String get messageOr {
+    return Intl.message(
+      'Or',
+      name: 'messageOr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a repository using a token link`
+  String get messageAddRepoLink {
+    return Intl.message(
+      'Add a repository using a token link',
+      name: 'messageAddRepoLink',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1535,6 +1605,16 @@ class S {
     return Intl.message(
       'Create a Repository',
       name: 'actionCreateRepository',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Repository`
+  String get actionAddRepository {
+    return Intl.message(
+      'Add Repository',
+      name: 'actionAddRepository',
       desc: '',
       args: [],
     );
@@ -1785,6 +1865,16 @@ class S {
     return Intl.message(
       'OK',
       name: 'actionOK',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan a QR code`
+  String get actionScanQR {
+    return Intl.message(
+      'Scan a QR code',
+      name: 'actionScanQR',
       desc: '',
       args: [],
     );
