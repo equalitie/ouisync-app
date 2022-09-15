@@ -615,20 +615,18 @@ class _MainPageState extends State<MainPage>
     
     if (initialTokenValue == null) return;
 
-    final token = _repositories.createToken(initialTokenValue);
-    final existingRepo = _repositories.findById(token.repositoryId());
-
-    if (existingRepo != null) {
+    final tokenValidationError = _repositories.validateTokenLink(initialTokenValue);
+    if(tokenValidationError != null) {
       showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(S.current.titleAddRepository),
-            content: Text(S.current.messageRepositoryAlreadyExist(existingRepo.name)),
+            content: Text(tokenValidationError),
             actions: <Widget>[
               TextButton(
-                child: const Text('OK'),
+                child: Text(S.current.actionOK),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },

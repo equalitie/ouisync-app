@@ -76,19 +76,10 @@ with OuiSyncAppLogger {
 
         if (data == null) return;
 
-        final token = _checkForValidToken(data);
-        try {
-          token?.suggestedName;
-        } catch (e) {
-          loggy.app(e.toString());
+        final tokenValidationError = widget
+        .reposCubit
+        .validateTokenLink(data);
 
-          showSnackBar(context,
-            content: Text(S.current.messageErrorTokenValidator));
-
-          return;
-        }
-
-        final tokenValidationError = _repositoryTokenValidator(data);
         if (tokenValidationError != null) {
           showSnackBar(context, 
             content: Text(tokenValidationError));
@@ -205,31 +196,7 @@ with OuiSyncAppLogger {
       return;
     }
     
-    final token = _checkForValidToken(shareLink);
-    try {
-      token?.suggestedName;
-    } catch (e) {
-      loggy.app(e.toString());
-      return;
-    }
-
     formKey.currentState!.save();
     Navigator.of(context).pop(shareLink);
-  }
-
-  ShareToken? _checkForValidToken(String shareLink) {
-    if (shareLink.isEmpty) {
-      return null;
-    }
-
-    ShareToken? token;
-    try {
-      token = ShareToken(widget.reposCubit.session, shareLink);
-    } catch (e, st) {
-      loggy.app('Extract repository token exception', e, st);
-      showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
-    }
-
-    return token;
   }
 }

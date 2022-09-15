@@ -5,6 +5,7 @@ import 'dart:io' as io;
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:path/path.dart' as p;
 
+import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
@@ -75,6 +76,30 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   oui.ShareToken createToken(String tokenString) {
     return oui.ShareToken(session, tokenString);
+  }
+
+  String? validateTokenLink(String tokenLink) {
+    if (tokenLink.isEmpty) {
+      return S.current.messageErrorTokenEmpty;
+    }
+
+    final tokenUri = Uri.tryParse(tokenLink);
+    if (tokenUri == null || !(tokenUri.isValidOuiSyncUri())) {
+      return S.current.messageErrorTokenInvalid;
+    }
+
+    try {
+      final shareToken = oui.ShareToken(session, tokenLink);
+      final existingRepo = findById(shareToken.repositoryId());
+
+      if (existingRepo != null) {
+        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
+      }
+    } catch (e) {
+      return S.current.messageErrorTokenValidator;
+    }
+
+    return null;
   }
 
   RepoEntry? findById(String id) {
