@@ -3,7 +3,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../models/repo_entry.dart';
+import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -128,7 +128,8 @@ class _Picker extends StatelessWidget {
   }) => Container(
     padding: Dimensions.paddingRepositoryPicker,
     decoration: BoxDecoration(
-      borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+      borderRadius: const BorderRadius.all(
+        Radius.circular(Dimensions.radiusSmall)),
       border: Border.all(
         color: borderColor,
         style: BorderStyle.solid
@@ -139,11 +140,20 @@ class _Picker extends StatelessWidget {
       onTap: () async { await _showRepositorySelector(context); },
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: Dimensions.sizeIconSmall,
+          IconButton(
+            icon: Icon(icon),
+            iconSize: Dimensions.sizeIconSmall,
             color: iconColor,
-          ),
+            onPressed: () {
+              if (reposCubit.currentRepo == null) return;
+
+              if (reposCubit.currentRepo!
+                .maybeHandle
+                ?.accessMode == AccessMode.blind) return;
+              
+              final metaInfo = reposCubit.currentRepo!.metaInfo;
+              reposCubit.lockRepository(metaInfo);
+            }),
           Dimensions.spacingHorizontal,
           Fields.constrainedText(
             repoName,
