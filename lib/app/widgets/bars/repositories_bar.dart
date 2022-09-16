@@ -126,7 +126,7 @@ class _Picker extends StatelessWidget {
     required Color textColor,
     required String repoName,
   }) => Container(
-    padding: Dimensions.paddingepositoryPicker,
+    padding: Dimensions.paddingRepositoryPicker,
     decoration: BoxDecoration(
       borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
       border: Border.all(
