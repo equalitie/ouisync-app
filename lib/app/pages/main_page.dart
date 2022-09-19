@@ -51,8 +51,6 @@ class _MainPageState extends State<MainPage>
   String _pathEntryToMove = '';
   PersistentBottomSheetController? _persistentBottomSheetController;
 
-  Widget _mainWidget = const LoadingMainPageState();
-
   final double defaultBottomPadding = kFloatingActionButtonMargin +
       Dimensions.paddingBottomWithFloatingButtonExtra;
   ValueNotifier<double> _bottomPaddingWithBottomSheet =
@@ -160,10 +158,6 @@ class _MainPageState extends State<MainPage>
       },
     );
   }
-
-  switchMainWidget(newMainWidget) => setState(() {
-        _mainWidget = newMainWidget;
-      });
 
   getContent() {
     final current = _currentRepo;
@@ -364,7 +358,7 @@ class _MainPageState extends State<MainPage>
               itemCount: currentRepo.currentFolder.content.length,
               itemBuilder: (context, index) {
                 final item = currentRepo.currentFolder.content[index];
-                var actionByType;
+                Function actionByType;
 
                 if (item is FileItem) {
                   actionByType = () async {
@@ -388,9 +382,7 @@ class _MainPageState extends State<MainPage>
                         item.path, item.size,
                         useDefaultApp: true);
                   };
-                }
-
-                if (item is FolderItem) {
+                } else if (item is FolderItem) {
                   actionByType = () {
                     if (_persistentBottomSheetController != null &&
                         _pathEntryToMove == item.path) {
@@ -399,6 +391,8 @@ class _MainPageState extends State<MainPage>
 
                     currentRepo.navigateTo(item.path);
                   };
+                } else {
+                  throw UnsupportedError('invalid item type: $item');
                 }
 
                 final listItem = ListItem(

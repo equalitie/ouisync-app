@@ -19,7 +19,9 @@ abstract class RepoEntry extends Equatable {
 
 class LoadingRepoEntry extends RepoEntry {
   final RepoMetaInfo _metaInfo;
-  bool _closeAfter = false;
+
+  // FIXME: unused_field
+  // bool _closeAfter = false;
 
   LoadingRepoEntry(this._metaInfo);
 
@@ -28,7 +30,8 @@ class LoadingRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {
-    _closeAfter = true;
+    // FIXME: unused_field
+    //_closeAfter = true;
   }
 
   @override
