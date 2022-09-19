@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -41,21 +40,19 @@ Future<void> main() async {
 
   final session = await Session.open(configDir);
 
-  BlocOverrides.runZoned(
-    () => runApp(MaterialApp(
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: OuiSyncApp(
-          session: session,
-          repositoriesLocation: repositoriesDir,
-          windowManager: windowManager,
-          settings: settings,
-        ))),
-  );
+  runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      home: OuiSyncApp(
+        session: session,
+        repositoriesLocation: repositoriesDir,
+        windowManager: windowManager,
+        settings: settings,
+      )));
 }
