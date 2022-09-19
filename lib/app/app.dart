@@ -28,7 +28,7 @@ class OuiSyncApp extends StatefulWidget {
   final PlatformWindowManager windowManager;
 
   @override
-  _OuiSyncAppState createState() => _OuiSyncAppState();
+  State<OuiSyncApp> createState() => _OuiSyncAppState();
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {

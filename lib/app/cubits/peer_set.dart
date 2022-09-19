@@ -24,11 +24,11 @@ class PeerSetChanged extends Equatable {
       }
     });
 
-    return active.toString() + " / " + peers.length.toString();
+    return "$active/${peers.length}";
   }
 
   @override
   List<Object> get props => [
-    peers,
-  ];
+        peers,
+      ];
 }

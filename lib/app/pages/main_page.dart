@@ -11,7 +11,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
-import '../models/repo_entry.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
@@ -219,13 +218,13 @@ class _MainPageState extends State<MainPage>
   Future<bool> _onBackPressed() async {
     final currentRepo = _currentRepo;
 
-    if (!(currentRepo is OpenRepoEntry)) {
+    if (currentRepo is! OpenRepoEntry) {
       return false;
     }
 
     final currentFolder = currentRepo.cubit.currentFolder;
 
-    if (currentFolder == null || currentFolder.isRoot()) {
+    if (currentFolder.isRoot()) {
       int clickCount = exitClickCounter.registerClick();
 
       if (clickCount <= 1) {
@@ -280,7 +279,7 @@ class _MainPageState extends State<MainPage>
   }
 
   StatelessWidget _buildFAB(BuildContext context, RepoEntry? current) {
-    if (!(current is OpenRepoEntry)) {
+    if (current is! OpenRepoEntry) {
       return Container();
     }
 
@@ -327,8 +326,8 @@ class _MainPageState extends State<MainPage>
   }
 
   _contentBrowser(RepoCubit repo) {
-    late final child;
-    late final Widget navigationBar;
+    Widget child;
+    Widget navigationBar;
     final folder = repo.currentFolder;
 
     if (folder.content.isEmpty) {
@@ -510,13 +509,8 @@ class _MainPageState extends State<MainPage>
   Future<void> saveMedia(String sourceFilePath) async {
     final currentRepo = _currentRepo;
 
-    if (!(currentRepo is OpenRepoEntry)) {
+    if (currentRepo is! OpenRepoEntry) {
       showSnackBar(context, content: Text(S.current.messageNoRepo));
-      return;
-    }
-
-    if (sourceFilePath == null) {
-      showSnackBar(context, content: Text(S.current.mesageNoMediaPresent));
       return;
     }
 

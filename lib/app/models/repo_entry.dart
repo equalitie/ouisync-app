@@ -14,7 +14,7 @@ abstract class RepoEntry extends Equatable {
   RepoCubit? get maybeCubit => null;
 
   @override
-  List<Object> get props => [ name, runtimeType ];
+  List<Object> get props => [name, runtimeType];
 }
 
 class LoadingRepoEntry extends RepoEntry {
@@ -26,6 +26,7 @@ class LoadingRepoEntry extends RepoEntry {
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
 
+  @override
   Future<void> close() async {
     _closeAfter = true;
   }
@@ -53,6 +54,7 @@ class OpenRepoEntry extends RepoEntry {
   @override
   RepoCubit? get maybeCubit => _cubit;
 
+  @override
   Future<void> close() async {
     await _cubit.close();
   }

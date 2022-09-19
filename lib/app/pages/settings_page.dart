@@ -34,12 +34,12 @@ class SettingsPage extends StatefulWidget {
   final StateMonitorIntValue panicCounter;
 
   @override
-  _SettingsPageState createState() =>
+  State<SettingsPage> createState() =>
       _SettingsPageState(reposCubit, panicCounter);
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
-  ReposCubit _repos;
+  final ReposCubit _repos;
   final StateMonitorIntValue _panicCounter;
 
   String? _connectionType;
@@ -213,7 +213,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
-    if (!(repo is OpenRepoEntry)) {
+    if (repo is! OpenRepoEntry) {
       return SizedBox.shrink();
     }
 
@@ -362,7 +362,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   textFontSize: Dimensions.fontAverage,
                   icon: Icons.share,
                   iconSize: Dimensions.sizeIconSmall, onTap: () {
-                if (!(currentRepo is OpenRepoEntry)) {
+                if (currentRepo is! OpenRepoEntry) {
                   return;
                 }
 

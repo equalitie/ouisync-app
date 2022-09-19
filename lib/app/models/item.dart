@@ -5,12 +5,12 @@ abstract class BaseItem extends Equatable {
 
   @override
   List<Object> get props => [
-    name,
-    path,
-  ];
+        name,
+        path,
+      ];
 
-  String name;
-  String path;
+  final String name;
+  final String path;
 }
 
 class FileItem extends BaseItem {
@@ -20,12 +20,12 @@ class FileItem extends BaseItem {
     required this.size,
   }) : super(name, path);
 
-  int size;
+  final int size;
 }
 
 class FolderItem extends BaseItem {
   FolderItem({
     required String name,
     required String path,
-  }): super(name, path);
+  }) : super(name, path);
 }
