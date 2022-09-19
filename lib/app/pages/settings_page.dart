@@ -50,8 +50,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   String? _tcpListenerEndpointV6;
   String? _quicListenerEndpointV4;
   String? _quicListenerEndpointV6;
-  String? _dhtEndpointV4;
-  String? _dhtEndpointV6;
 
   Color? _titlesColor = Colors.black;
 
@@ -98,9 +96,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     String? quicListenerEndpointV4 = session.quicListenerLocalAddressV4;
     String? quicListenerEndpointV6 = session.quicListenerLocalAddressV6;
 
-    final dhtEndpointV4 = session.dhtLocalAddressV4;
-    final dhtEndpointV6 = session.dhtLocalAddressV6;
-
     final info = NetworkInfo();
 
     // This really works only when connected using WiFi.
@@ -133,8 +128,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _tcpListenerEndpointV6 = tcpListenerEndpointV6;
       _quicListenerEndpointV4 = quicListenerEndpointV4;
       _quicListenerEndpointV6 = quicListenerEndpointV6;
-      _dhtEndpointV4 = dhtEndpointV4;
-      _dhtEndpointV6 = dhtEndpointV6;
     });
 
     // This one takes longer, so do it separately.
@@ -191,10 +184,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         _labeledNullableText(
                             Strings.labelQuicListenerEndpointV6,
                             _quicListenerEndpointV6),
-                        _labeledNullableText(
-                            Strings.labelDHTv4Endpoint, _dhtEndpointV4),
-                        _labeledNullableText(
-                            Strings.labelDHTv6Endpoint, _dhtEndpointV6)
                       ].whereType<Widget>().toList());
                     }, listener: (context, state) {
                       if (state is ConnectivityChanged) {
@@ -544,8 +533,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     sink.writeln("_tcpListenerEndpointV6: $_tcpListenerEndpointV6");
     sink.writeln("_quicListenerEndpointV4: $_quicListenerEndpointV4");
     sink.writeln("_quicListenerEndpointV6: $_quicListenerEndpointV6");
-    sink.writeln("_dhtEndpointV4: $_dhtEndpointV4");
-    sink.writeln("_dhtEndpointV6: $_dhtEndpointV6");
     sink.writeln("\n");
 
     await dumpAll(sink, _repos.session.getRootStateMonitor());
