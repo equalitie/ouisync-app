@@ -45,26 +45,38 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFolderDetails),
-          Fields.paddedActionText(
-            S.current.iconRename,
-            onTap: () => _showNewNameDialog(
-              widget.data.path,
-            ),
-            icon: Icons.edit
-          ),
-          Fields.paddedActionText(
-            S.current.iconMove,
-            onTap: () => _showMoveEntryBottomSheet(
-              widget.data.path,
-              EntryType.directory,
-              widget.onMoveEntry,
-              widget.onBottomSheetOpen
-            ),
-            icon: Icons.drive_file_move_outlined,
-          ),
-          Fields.paddedActionText(
-            S.current.iconDelete,
-            onTap: () async => {
+          EntryActionItem(
+            iconData: Icons.edit,
+            title: S.current.iconRename,
+            dense: true,
+            onTap: () async =>
+              _showNewNameDialog(widget.data.path,),
+            enabledValidation: () => widget.isActionAvailableValidator(
+              widget.cubit.accessMode,
+              EntryAction.rename),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
+          EntryActionItem(
+            iconData: Icons.drive_file_move_outlined,
+            title: S.current.iconMove,
+            dense: true,
+            onTap: () async =>
+              _showMoveEntryBottomSheet(
+                widget.data.path,
+                EntryType.directory,
+                widget.onMoveEntry,
+                widget.onBottomSheetOpen
+              ),
+            enabledValidation: () => widget.isActionAvailableValidator(
+              widget.cubit.accessMode,
+              EntryAction.move),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
+          EntryActionItem(
+            iconData: Icons.delete_outlined,
+            title: S.current.iconDelete,
+            dense: true,
+            onTap: () async {
               await showDialog<bool>(
                 context: widget.context,
                 barrierDismissible: false, // user must tap button!
@@ -80,10 +92,13 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                   Navigator.of(context).pop(result);
                   showSnackBar(context, content: Text(S.current.messageFolderDeleted(widget.data.name)));
                 }
-              })
+              });
             },
-            icon: Icons.delete_outlined,
-          ),
+            enabledValidation: () => widget.isActionAvailableValidator(
+              widget.cubit.accessMode,
+              EntryAction.delete),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
           const Divider(
             height: 10.0,
             thickness: 2.0,

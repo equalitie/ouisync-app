@@ -46,7 +46,10 @@ class _FileDetailState extends State<FileDetail> {
         children: [
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFileDetails),
-          Fields.paddedActionText(S.current.iconDownload,
+          EntryActionItem(
+            iconData: Icons.download,
+            title: S.current.iconDownload,
+            dense: true,
             onTap: () async {
               Navigator.of(context, rootNavigator: false).pop();
 
@@ -64,40 +67,72 @@ class _FileDetailState extends State<FileDetail> {
                 }
               );
             },
-            icon: Icons.download
-          ),
+            enabledValidation: () => widget.isActionAvailableValidator(
+              widget.cubit.accessMode,
+              EntryAction.download),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
           if (!io.Platform.isWindows)
-            Fields.paddedActionText(
-              S.current.iconPreview,
-              onTap: () async => await NativeChannels.previewOuiSyncFile(widget.data.path, widget.data.size),
-              icon: Icons.preview_rounded,
-            ),
+            EntryActionItem(
+              iconData: Icons.preview_rounded,
+              title: S.current.iconPreview,
+              dense: true,
+              onTap: () async =>
+                await NativeChannels.previewOuiSyncFile(
+                  widget.data.path, 
+                  widget.data.size),
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.cubit.accessMode,
+                EntryAction.preview),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
           if (!io.Platform.isWindows)
-            Fields.paddedActionText(
-              S.current.iconShare,
-              onTap: () async => await NativeChannels.shareOuiSyncFile(widget.data.path, widget.data.size),
-              icon: Icons.share_rounded,
-            ),
-          Fields.paddedActionText(
-            S.current.iconRename,
-            onTap: () => _showNewNameDialog(
-              widget.data.path,
-            ),
-            icon: Icons.edit
-          ),
-          Fields.paddedActionText(
-            S.current.iconMove,
-            onTap: () => _showMoveEntryBottomSheet(
+            EntryActionItem(
+              iconData: Icons.share_rounded,
+              title: S.current.iconShare,
+              dense: true,
+              onTap: () async =>
+                await NativeChannels.shareOuiSyncFile(
+                  widget.data.path,
+                  widget.data.size),
+              enabledValidation: () => 
+                widget.isActionAvailableValidator(
+                  widget.cubit.accessMode,
+                  EntryAction.share),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
+          EntryActionItem(
+            iconData: Icons.edit,
+            title: S.current.iconRename,
+            dense: true,
+            onTap: () async => _showNewNameDialog(widget.data.path,),
+            enabledValidation: () => 
+              widget.isActionAvailableValidator(
+                widget.cubit.accessMode,
+                EntryAction.rename),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
+          EntryActionItem(
+            iconData: Icons.drive_file_move_outlined,
+            title: S.current.iconMove,
+            dense: true,
+            onTap: () async => _showMoveEntryBottomSheet(
               widget.data.path,
               EntryType.file,
               widget.onMoveEntry,
               widget.onBottomSheetOpen
             ),
-            icon: Icons.drive_file_move_outlined,
-          ),
-          Fields.paddedActionText(
-            S.current.iconDelete,
-            onTap: () async => {
+            enabledValidation: () => 
+              widget.isActionAvailableValidator(
+                widget.cubit.accessMode,
+                EntryAction.move),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
+          EntryActionItem(
+            iconData: Icons.delete_outlined,
+            title: S.current.iconDelete,
+            dense: true,
+            onTap: () async {
               showDialog<String>(
                 context: widget.context,
                 barrierDismissible: false, // user must tap button!
@@ -119,10 +154,14 @@ class _FileDetailState extends State<FileDetail> {
                 if (fileName?.isNotEmpty ?? false) {
                   Navigator.of(context).pop();
                 }
-              })
+              });
             },
-            icon: Icons.delete_outlined,
-          ),
+            enabledValidation: () => 
+              widget.isActionAvailableValidator(
+                widget.cubit.accessMode,
+                EntryAction.delete),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
           const Divider(
             height: 10.0,
             thickness: 2.0,
