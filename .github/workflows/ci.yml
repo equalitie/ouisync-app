@@ -72,6 +72,9 @@ jobs:
          cd ouisync-plugin
          flutter pub run ffigen
 
+      - name: Analyze
+        run: flutter analyze
+
       - name: Build OuiSync library for tests
         run: |
          cd ouisync-plugin/ouisync
