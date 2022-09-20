@@ -60,7 +60,7 @@ class _EntryActionItemState extends State<EntryActionItem> {
   Color? _itemColor;
   
   String? _message = '';
-  bool _disabledMessageVisibility = false;
+  bool _isDisabledMessageVisible = false;
   Duration? _duration = const Duration(seconds: 0);
 
   RestartableTimer? _timer;
@@ -83,10 +83,10 @@ class _EntryActionItemState extends State<EntryActionItem> {
       
       if (!init) {
         _message = widget.disabledMessage;
-        _disabledMessageVisibility =!isEnabled;
+        _isDisabledMessageVisible =!isEnabled;
         _duration = Duration(seconds: widget.disabledMessageDuration);
 
-        if (!_disabledMessageVisibility) {
+        if (!_isDisabledMessageVisible) {
           _timer?.cancel();
         }
         
@@ -94,7 +94,7 @@ class _EntryActionItemState extends State<EntryActionItem> {
           _timer ??= RestartableTimer(
             _duration!,
             () =>
-            setState(() => _disabledMessageVisibility = false));
+            setState(() => _isDisabledMessageVisible = false));
 
           _timer?.reset();
         }
@@ -104,7 +104,7 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
   void _hideDisabledMessage() =>
     setState(() {
-      _disabledMessageVisibility = false;
+      _isDisabledMessageVisible = false;
       _timer?.cancel();});
 
   @override
@@ -143,7 +143,7 @@ class _EntryActionItemState extends State<EntryActionItem> {
           widget.onTap!.call();
         },),
         Visibility(
-          visible: _disabledMessageVisibility,
+          visible: _isDisabledMessageVisible,
           child: GestureDetector(
             onTap: _hideDisabledMessage,
             child: Padding(
