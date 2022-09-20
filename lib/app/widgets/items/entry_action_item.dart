@@ -3,8 +3,17 @@ import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
 
-class EntryAction extends StatefulWidget {
-  const EntryAction({
+enum EntryAction {
+  delete,
+  download,
+  move,
+  preview,
+  rename,
+  share
+}
+
+class EntryActionItem extends StatefulWidget {
+  const EntryActionItem({
     this.iconData,
     required this.title,
     this.subtitle,
@@ -43,10 +52,10 @@ class EntryAction extends StatefulWidget {
   final Color textColor;
 
   @override
-  State<EntryAction> createState() => _EntryActionState();
+  State<EntryActionItem> createState() => _EntryActionItemState();
 }
 
-class _EntryActionState extends State<EntryAction> {
+class _EntryActionItemState extends State<EntryActionItem> {
   bool _enabled = true;
   Color? _itemColor;
   
