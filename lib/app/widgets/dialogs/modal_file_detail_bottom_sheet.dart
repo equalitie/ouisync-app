@@ -37,7 +37,7 @@ class FileDetail extends StatefulWidget {
 class _FileDetailState extends State<FileDetail> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(child: Container(
       padding: Dimensions.paddingBottomSheet,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -149,7 +149,7 @@ class _FileDetailState extends State<FileDetail> {
           ),
         ],
       )
-    );
+    ));
   }
 
   _showMoveEntryBottomSheet(
