@@ -219,7 +219,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return _repos.powerControl.builder((powerControl) {
       Color? badgeColor;
 
-      if (!powerControl.isNetworkEnabled()) {
+      if (!(powerControl.isNetworkEnabled() ?? true)) {
         badgeColor = Constants.warningColor;
       }
 

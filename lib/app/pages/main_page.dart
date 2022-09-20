@@ -271,7 +271,7 @@ class _MainPageState extends State<MainPage>
 
           if (updateExists || ((panicCount ?? 0) > 0)) {
             color = Constants.errorColor;
-          } else if (!powerControl.isNetworkEnabled()) {
+          } else if (!(powerControl.isNetworkEnabled() ?? true)) {
             color = Constants.warningColor;
           }
 

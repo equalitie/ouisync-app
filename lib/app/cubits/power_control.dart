@@ -1,19 +1,28 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'watch.dart';
+import 'repos.dart';
 
 class PowerControl extends WatchSelf<PowerControl> {
+  final ReposCubit _repos;
   final Connectivity _connectivity = Connectivity();
 
-  bool _isNetworkEnabled = false;
+  bool? _isNetworkEnabled;
   String? _networkDisabledReason;
 
-  PowerControl() {
+  PowerControl(this._repos) {
     // TODO: Should we unsusbscribe somewhere?
     _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
-  bool isNetworkEnabled() {
+  Future<void> init() async {
+    final current = await _connectivity.checkConnectivity();
+    _updateConnectionStatus(current);
+  }
+
+  // Null means the answer is not yet known (the init function hasn't finished
+  // or was not called yet).
+  bool? isNetworkEnabled() {
     return _isNetworkEnabled;
   }
 
@@ -21,7 +30,7 @@ class PowerControl extends WatchSelf<PowerControl> {
     return _networkDisabledReason;
   }
 
-  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+  void _updateConnectionStatus(ConnectivityResult result) {
     bool newState = true;
     String? reason;
 
@@ -36,6 +45,13 @@ class PowerControl extends WatchSelf<PowerControl> {
     if (_isNetworkEnabled != newState || _networkDisabledReason != reason) {
       _isNetworkEnabled = newState;
       _networkDisabledReason = reason;
+
+      if (newState) {
+        _repos.enableNetwork();
+      } else {
+        _repos.disableNetwork();
+      }
+
       changed();
     }
   }
