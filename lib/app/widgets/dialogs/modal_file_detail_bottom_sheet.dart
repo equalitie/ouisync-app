@@ -18,7 +18,9 @@ class FileDetail extends StatefulWidget {
     required this.scaffoldKey,
     required this.onBottomSheetOpen,
     required this.onMoveEntry,
-  });
+    required this.isActionAvailableValidator,
+    Key? key
+  }) : super(key: key);
 
   final BuildContext context;
   final RepoCubit cubit;
@@ -26,6 +28,7 @@ class FileDetail extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
   final BottomSheetControllerCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
+  final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
   @override
   _FileDetailState createState() => _FileDetailState();

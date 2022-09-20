@@ -11,7 +11,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
-import '../models/repo_entry.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
@@ -470,6 +469,7 @@ class _MainPageState extends State<MainPage>
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
           onMoveEntry: (origin, path, type) => moveEntry(repoCubit, origin, path, type),
+          isActionAvailableValidator: _isEntryActionAvailable,
         );
       }
     );
@@ -490,6 +490,7 @@ class _MainPageState extends State<MainPage>
           scaffoldKey: scaffoldKey,
           onBottomSheetOpen: retrieveBottomSheetController,
           onMoveEntry: (origin, path, type) => moveEntry(repoCubit, origin, path, type),
+          isActionAvailableValidator: _isEntryActionAvailable,
         );
       }
     );
@@ -498,6 +499,18 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
+  }
+
+  bool _isEntryActionAvailable(AccessMode accessMode, EntryAction action) {
+    if (accessMode == AccessMode.write) return true;
+
+    final readDisabledActions = [
+      EntryAction.delete,
+      EntryAction.move,
+      EntryAction.rename,
+    ];
+
+    return !readDisabledActions.contains(action);
   }
 
   void moveEntry(RepoCubit currentRepo, origin, path, type) async {
