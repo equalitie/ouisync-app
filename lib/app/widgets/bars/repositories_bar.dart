@@ -198,7 +198,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                         ? ValueListenableBuilder(
                             valueListenable: _lockAllEnable,
                             builder: (context, value, child) {
-                              final lockAll = value as bool;
+                              final lockAll = value;
 
                               return Column(
                                 mainAxisAlignment: MainAxisAlignment.end,

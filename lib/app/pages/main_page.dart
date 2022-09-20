@@ -352,7 +352,7 @@ class _MainPageState extends State<MainPage>
       builder: (context, value, child) => RefreshIndicator(
           onRefresh: () async => getContent(),
           child: ListView.separated(
-              padding: EdgeInsets.only(bottom: value as double),
+              padding: EdgeInsets.only(bottom: value),
               separatorBuilder: (context, index) =>
                   const Divider(height: 1, color: Colors.transparent),
               itemCount: currentRepo.currentFolder.content.length,

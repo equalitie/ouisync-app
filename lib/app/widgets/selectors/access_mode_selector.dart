@@ -18,7 +18,8 @@ class AccessModeSelector extends StatefulWidget {
   State<AccessModeSelector> createState() => _AccessModeSelectorState();
 }
 
-class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAppLogger {
+class _AccessModeSelectorState extends State<AccessModeSelector>
+    with OuiSyncAppLogger {
   final Map<AccessMode, String> accessModeDescriptions = {
     AccessMode.blind: S.current.messageBlindReplicaExplanation,
     AccessMode.read: S.current.messageReadReplicaExplanation,
@@ -30,55 +31,62 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: Dimensions.paddingActionBoxTop,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-        color: Constants.inputBackgroundColor
-      ),
-      child: _buildModeSelector());
+        padding: Dimensions.paddingActionBoxTop,
+        decoration: const BoxDecoration(
+            borderRadius:
+                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            color: Constants.inputBackgroundColor),
+        child: _buildModeSelector());
   }
 
   Widget _buildModeSelector() {
     return Column(
-        children: [
-          Padding(
+      children: [
+        Padding(
             padding: Dimensions.paddingItem,
-            child: Row(children: [Fields.constrainedText(
-              S.current.labelSetPermission,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Constants.inputLabelForeColor)])),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _buildAccessModeOptions(),)
-        ],);
+            child: Row(children: [
+              Fields.constrainedText(S.current.labelSetPermission,
+                  fontSize: Dimensions.fontMicro,
+                  fontWeight: FontWeight.normal,
+                  color: Constants.inputLabelForeColor)
+            ])),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: _buildAccessModeOptions(),
+        )
+      ],
+    );
   }
 
   List<Widget> _buildAccessModeOptions() {
-    return widget.accessModes.map((mode) =>
-      Expanded(child: RadioListTile(
-        title: Text(mode.name,
-        textAlign: TextAlign.start,
-          style: const TextStyle(
-            fontSize: Dimensions.fontAverage,
-          ),),
-        toggleable: true,
-        contentPadding: EdgeInsets.zero,
-        value: mode,
-        groupValue: _selectedMode,
-        onChanged: (current) async {
-          loggy.app('Access mode: $current');
+    return widget.accessModes
+        .map((mode) => Expanded(
+                child: RadioListTile(
+              title: Text(
+                mode.name,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  fontSize: Dimensions.fontAverage,
+                ),
+              ),
+              toggleable: true,
+              contentPadding: EdgeInsets.zero,
+              value: mode,
+              groupValue: _selectedMode,
+              onChanged: (current) async {
+                loggy.app('Access mode: $current');
 
-          if (current == null) {
-            setState(() => _selectedMode = null);
-            await widget.onChanged(null);
+                if (current == null) {
+                  setState(() => _selectedMode = null);
+                  await widget.onChanged(null);
 
-            return;
-          }
+                  return;
+                }
 
-          setState(() => _selectedMode = current as AccessMode);
-          await widget.onChanged(current as AccessMode);
-        },
-      ))).toList();
+                setState(() => _selectedMode = current);
+                await widget.onChanged(current);
+              },
+            )))
+        .toList();
   }
 }
