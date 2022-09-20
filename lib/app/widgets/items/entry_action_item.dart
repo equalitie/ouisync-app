@@ -86,15 +86,17 @@ class _EntryActionItemState extends State<EntryActionItem> {
         _disabledMessageVisibility =!isEnabled;
         _duration = Duration(seconds: widget.disabledMessageDuration);
 
-        if (_disabledMessageVisibility) {
-          if (widget.disabledMessageDuration > 0) {
-            _timer ??= RestartableTimer(
-              _duration!,
-              () =>
-              setState(() => _disabledMessageVisibility = false));
+        if (!_disabledMessageVisibility) {
+          _timer?.cancel();
+        }
+        
+        if (widget.disabledMessageDuration > 0) {
+          _timer ??= RestartableTimer(
+            _duration!,
+            () =>
+            setState(() => _disabledMessageVisibility = false));
 
-            _timer?.reset();
-          }
+          _timer?.reset();
         }
       }
     });
