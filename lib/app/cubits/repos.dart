@@ -9,6 +9,7 @@ import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
+import 'power_control.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
@@ -20,11 +21,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final String _repositoriesDir;
   oui.Subscription? _subscription;
   final Settings _settings;
+  late PowerControl _powerControl;
 
   ReposCubit({required session, required repositoriesDir, required settings})
       : _session = session,
         _repositoriesDir = repositoriesDir,
-        _settings = settings;
+        _settings = settings {
+    _powerControl = PowerControl();
+  }
+
+  PowerControl get powerControl => _powerControl;
 
   Settings get settings => _settings;
 

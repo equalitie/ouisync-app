@@ -166,6 +166,16 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         builder: (context, state) {
                       return Column(
                           children: [
+                        _buildConnectionTypeRow(),
+                        repos.powerControl.builder((powerControl) {
+                          final reason = powerControl.networkDisabledReason();
+                          if (reason != null) {
+                            return Text(reason,
+                                style: TextStyle(color: Colors.orange));
+                          } else {
+                            return SizedBox.shrink();
+                          }
+                        }),
                         _labeledNullableText(
                             Strings.connectionType, _connectionType),
                         _labeledNullableText(
@@ -199,6 +209,29 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         info.then((info) => info.version)),
                   ],
                 ))));
+  }
+
+  Widget _buildConnectionTypeRow() {
+    final connectionType = _connectionType;
+    if (connectionType == null) {
+      return SizedBox.shrink();
+    }
+    return _repos.powerControl.builder((powerControl) {
+      Color? badgeColor;
+
+      if (!powerControl.isNetworkEnabled()) {
+        badgeColor = Constants.warningColor;
+      }
+
+      final widget = _labeledText(Strings.connectionType, connectionType);
+
+      if (badgeColor == null) {
+        return widget;
+      } else {
+        return Fields.addBadge(widget,
+            color: badgeColor, moveRight: 18, moveDownwards: 5);
+      }
+    });
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
