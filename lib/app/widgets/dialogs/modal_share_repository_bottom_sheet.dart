@@ -49,7 +49,7 @@ class _ShareRepositoryState extends State<ShareRepository>
             Fields.bottomSheetTitle(widget.repository.name),
             Dimensions.spacingVerticalDouble,
             AccessModeSelector(
-                accessModes: widget.availableAccessModes,
+                availableAccessMode: widget.availableAccessModes,
                 onChanged: _onChanged),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),

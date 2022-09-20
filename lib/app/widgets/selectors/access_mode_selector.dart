@@ -7,11 +7,11 @@ import '../../utils/utils.dart';
 
 class AccessModeSelector extends StatefulWidget {
   const AccessModeSelector({
-    required this.accessModes,
+    required this.availableAccessMode,
     required this.onChanged,
   });
 
-  final List<AccessMode> accessModes;
+  final List<AccessMode> availableAccessMode;
   final Future<void> Function(AccessMode?) onChanged;
 
   @override
@@ -55,7 +55,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
   }
 
   List<Widget> _buildAccessModeOptions() {
-    return widget.accessModes.map((mode) =>
+    return widget.availableAccessMode.map((mode) =>
       Expanded(child: RadioListTile(
         title: Text(mode.name,
         textAlign: TextAlign.start,
