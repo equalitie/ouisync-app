@@ -1410,6 +1410,16 @@ class S {
     );
   }
 
+  /// `This option is not available on read-only repositories`
+  String get messageActionNotAvailable {
+    return Intl.message(
+      'This option is not available on read-only repositories',
+      name: 'messageActionNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(

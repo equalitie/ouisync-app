@@ -151,6 +151,8 @@
     "messageOr":"O...",
     "messageAddRepoLink":"Agrega un repositorio usando un link",
 
+    "messageActionNotAvailable":"Esta opción no está disponible en repositorios de solo lectura",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

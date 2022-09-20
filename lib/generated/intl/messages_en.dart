@@ -164,6 +164,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mesageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("There is no media present."),
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
+        "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
+            "This option is not available on read-only repositories"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Add a repository using a token link"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
