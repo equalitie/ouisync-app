@@ -69,8 +69,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<String> repositoryNames() => _repos.keys;
 
-  void enableNetwork() { _session.enableNetwork(); }
-  void disableNetwork() { _session.disableNetwork(); }
+  void enableNetwork() {
+    _session.enableNetwork();
+  }
+
+  void disableNetwork() {
+    _session.disableNetwork();
+  }
 
   RepoEntry? get currentRepo => _currentRepo;
 
