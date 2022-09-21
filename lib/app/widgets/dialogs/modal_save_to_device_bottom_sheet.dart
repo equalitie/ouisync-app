@@ -16,16 +16,13 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class SaveToDevice extends StatefulWidget with OuiSyncAppLogger {
-  const SaveToDevice({
-    required this.data,
-    required this.cubit
-  });
+  const SaveToDevice({required this.data, required this.cubit});
 
   final FileItem data;
   final RepoCubit cubit;
 
   @override
-  _SaveToDeviceState createState() => _SaveToDeviceState();
+  State<SaveToDevice> createState() => _SaveToDeviceState();
 }
 
 class _SaveToDeviceState extends State<SaveToDevice> {
@@ -41,68 +38,58 @@ class _SaveToDeviceState extends State<SaveToDevice> {
 
   Future<void> _setDestinationPath() async {
     final path = await _getDefaultDestinationPath();
-    setState(() { _destinationPath = path ?? '?'; });
+    setState(() {
+      _destinationPath = path ?? '?';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(children: [
-          Fields.constrainedText('"${widget.data.name}"', color: Colors.grey.shade800)
-        ]),
-        Dimensions.spacingVertical,
-        _buildDestinationSelection(),
-        if (io.Platform.isAndroid)
-          _buildExternalStorageSelection(),
-        Fields.dialogActions(
-          context,
-          buttons: _actions(context)
-        ),
-      ]
-    );
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(children: [
+            Fields.constrainedText('"${widget.data.name}"',
+                color: Colors.grey.shade800)
+          ]),
+          Dimensions.spacingVertical,
+          _buildDestinationSelection(),
+          if (io.Platform.isAndroid) _buildExternalStorageSelection(),
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
   }
 
   Widget _buildDestinationSelection() {
     return Container(
-      padding: Dimensions.paddingGreyBox,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-        border: Border.all(
-          color: Colors.black45,
-          width: 1.0,
-          style: BorderStyle.solid
+        padding: Dimensions.paddingGreyBox,
+        decoration: BoxDecoration(
+          borderRadius:
+              const BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
+          border: Border.all(
+              color: Colors.black45, width: 1.0, style: BorderStyle.solid),
+          color: Colors.grey.shade300,
         ),
-        color: Colors.grey.shade300,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Fields.constrainedText(
-                S.current.labelDestination,
-                flex: 0,
-                fontSize: Dimensions.fontSmall,
-                fontWeight: FontWeight.w300
-              ),
-            ]
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Fields.constrainedText(_destinationPath ?? '?'),
-              Fields.actionIcon(const Icon(Icons.more_horiz),
-                onPressed: () async => await _changeDestinationPath()
-              )
-            ],
-          )
-        ],
-      )
-    );
+        child: Column(
+          children: [
+            Row(children: [
+              Fields.constrainedText(S.current.labelDestination,
+                  flex: 0,
+                  fontSize: Dimensions.fontSmall,
+                  fontWeight: FontWeight.w300),
+            ]),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Fields.constrainedText(_destinationPath ?? '?'),
+                Fields.actionIcon(const Icon(Icons.more_horiz),
+                    onPressed: () async => await _changeDestinationPath())
+              ],
+            )
+          ],
+        ));
   }
 
   Widget _buildExternalStorageSelection() {
@@ -115,7 +102,9 @@ class _SaveToDeviceState extends State<SaveToDevice> {
   }
 
   Future<void> _updateDestinationPath(bool value) async {
-    setState(() { _useExternalStorage = value; });
+    setState(() {
+      _useExternalStorage = value;
+    });
     await _setDestinationPath();
   }
 
@@ -126,23 +115,24 @@ class _SaveToDeviceState extends State<SaveToDevice> {
 
     final defaultDirectory = io.Directory(_destinationPath!);
     final path = await FilesystemPicker.open(
-      context: context,
-      fsType: FilesystemType.folder,
-      rootDirectory: defaultDirectory,
-      rootName: S.current.labelDestination,
-      title: S.current.messageSelectLocation,
-      pickText: S.current.messageSaveToLocation,
-      requestPermission: () async {
-        final status = await Permission.storage.request();
-        return status.isGranted;
-      }
-    );
+        context: context,
+        fsType: FilesystemType.folder,
+        rootDirectory: defaultDirectory,
+        rootName: S.current.labelDestination,
+        title: S.current.messageSelectLocation,
+        pickText: S.current.messageSaveToLocation,
+        requestPermission: () async {
+          final status = await Permission.storage.request();
+          return status.isGranted;
+        });
 
     if (path?.isEmpty ?? true) {
       return;
     }
 
-    setState(() { _destinationPath = path; });
+    setState(() {
+      _destinationPath = path;
+    });
   }
 
   Future<String?> _getDefaultDestinationPath() async {
@@ -157,7 +147,8 @@ class _SaveToDeviceState extends State<SaveToDevice> {
 
     if (io.Platform.isAndroid) {
       if (_useExternalStorage) {
-        final rootPath = (await ExternalPath.getExternalStorageDirectories()).first;
+        final rootPath =
+            (await ExternalPath.getExternalStorageDirectories()).first;
         downloadsPath = io.Directory(rootPath);
       }
 
@@ -169,13 +160,16 @@ class _SaveToDeviceState extends State<SaveToDevice> {
   }
 
   List<Widget> _actions(context) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context, rootNavigator: false).pop('')),
-    PositiveButton(
-      text: S.current.actionSave,
-      onPressed: () async { await _downloadFile(); })
-  ];
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: false).pop('')),
+        PositiveButton(
+            text: S.current.actionSave,
+            onPressed: () async {
+              await _downloadFile();
+            })
+      ];
 
   Future<void> _downloadFile() async {
     if (_destinationPath?.isEmpty ?? true) {
@@ -185,9 +179,7 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     if (await Permission.storage.request().isGranted) {
       final destinationPath = p.join(_destinationPath!, widget.data.name);
       widget.cubit.downloadFile(
-        sourcePath: widget.data.path,
-        destinationPath: destinationPath
-      );
+          sourcePath: widget.data.path, destinationPath: destinationPath);
 
       Navigator.of(context, rootNavigator: false).pop();
     }

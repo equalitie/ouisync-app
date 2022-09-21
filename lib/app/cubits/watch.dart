@@ -11,7 +11,7 @@ class Watch<State> {
   State get state => _state;
 
   void changed() {
-    _cubit.emit(Changed());
+    _cubit.change();
   }
 
   void update(void Function(State) f) {
@@ -28,7 +28,8 @@ class Watch<State> {
     );
   }
 
-  Widget consumer(Widget Function(State) builderFunc, void Function(State) listenerFunc) {
+  Widget consumer(
+      Widget Function(State) builderFunc, void Function(State) listenerFunc) {
     return BlocConsumer<_Cubit, Changed>(
       bloc: _cubit,
       builder: (BuildContext ctx, Changed _) {
@@ -45,7 +46,7 @@ class WatchSelf<Self> {
   final _Cubit _cubit = _Cubit();
 
   void changed() {
-    _cubit.emit(Changed());
+    _cubit.change();
   }
 
   void update(void Function(Self) f) {
@@ -62,7 +63,8 @@ class WatchSelf<Self> {
     );
   }
 
-  Widget consumer(Widget Function(Self) builderFunc, void Function(Self) listenerFunc) {
+  Widget consumer(
+      Widget Function(Self) builderFunc, void Function(Self) listenerFunc) {
     return BlocConsumer<_Cubit, Changed>(
       bloc: _cubit,
       builder: (BuildContext ctx, Changed _) {
@@ -84,10 +86,12 @@ class Changed extends Equatable {
   }
 
   @override
-  List<Object?> get props => [ _version ];
+  List<Object?> get props => [_version];
 }
 
 // We can't use Cubit as it's marked as `abstract` so this is a generic one.
 class _Cubit extends Cubit<Changed> {
   _Cubit() : super(Changed());
+
+  void change() => emit(Changed());
 }

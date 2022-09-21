@@ -28,7 +28,7 @@ class OuiSyncApp extends StatefulWidget {
   final PlatformWindowManager windowManager;
 
   @override
-  _OuiSyncAppState createState() => _OuiSyncAppState();
+  State<OuiSyncApp> createState() => _OuiSyncAppState();
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
@@ -41,8 +41,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
 
     NativeChannels.init();
 
-    initWindowManager().then(
-      (_) async => await _backgroundManager.enableBackgroundExecution(context));
+    initWindowManager().then((_) async =>
+        await _backgroundManager.enableBackgroundExecution(context));
   }
 
   Future<void> initWindowManager() async {
@@ -71,8 +71,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
             providers: [
               BlocProvider<UpgradeExistsCubit>(
                   create: (BuildContext context) => UpgradeExistsCubit(
-                      widget.session.current_protocol_version,
-                      widget.settings)),
+                      widget.session.currentProtocolVersion, widget.settings)),
               BlocProvider<ConnectivityCubit>(
                   create: (BuildContext context) => ConnectivityCubit()),
               BlocProvider<PeerSetCubit>(

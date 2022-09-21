@@ -31,7 +31,7 @@ class FileDetail extends StatefulWidget {
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
   @override
-  _FileDetailState createState() => _FileDetailState();
+  State<FileDetail> createState() => _FileDetailState();
 }
 
 class _FileDetailState extends State<FileDetail> {
@@ -54,14 +54,33 @@ class _FileDetailState extends State<FileDetail> {
               Navigator.of(context, rootNavigator: false).pop();
 
               await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return ActionsDialog(
-                    title: S.current.titleDownloadToDevice,
-                    body: SaveToDevice(
-                      data: widget.data,
-                      cubit: widget.cubit
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return ActionsDialog(
+                      title: S.current.titleDownloadToDevice,
+                      body:
+                          SaveToDevice(data: widget.data, cubit: widget.cubit),
+                    );
+                  });
+            }, icon: Icons.download),
+            if (!io.Platform.isWindows)
+              Fields.paddedActionText(
+                S.current.iconPreview,
+                onTap: () async => await NativeChannels.previewOuiSyncFile(
+                    widget.data.path, widget.data.size),
+                icon: Icons.preview_rounded,
+              ),
+            if (!io.Platform.isWindows)
+              Fields.paddedActionText(
+                S.current.iconShare,
+                onTap: () async => await NativeChannels.shareOuiSyncFile(
+                    widget.data.path, widget.data.size),
+                icon: Icons.share_rounded,
+              ),
+            Fields.paddedActionText(S.current.iconRename,
+                onTap: () => _showNewNameDialog(
+                      widget.data.path,
                     ),
                   );
                 }
@@ -192,23 +211,20 @@ class _FileDetailState extends State<FileDetail> {
   }
 
   _showMoveEntryBottomSheet(
-    String path,
-    EntryType type,
-    MoveEntryCallback moveEntryCallback,
-    BottomSheetControllerCallback bottomSheetControllerCallback
-  ) {
+      String path,
+      EntryType type,
+      MoveEntryCallback moveEntryCallback,
+      BottomSheetControllerCallback bottomSheetControllerCallback) {
     Navigator.of(context).pop();
 
     final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
-      (context) => MoveEntryDialog(
-        widget.cubit,
-        origin: origin,
-        path: path,
-        type: type,
-        onBottomSheetOpen: bottomSheetControllerCallback,
-        onMoveEntry: moveEntryCallback
-      ),
+      (context) => MoveEntryDialog(widget.cubit,
+          origin: origin,
+          path: path,
+          type: type,
+          onBottomSheetOpen: bottomSheetControllerCallback,
+          onMoveEntry: moveEntryCallback),
       enableDrag: false,
     );
 
@@ -217,31 +233,28 @@ class _FileDetailState extends State<FileDetail> {
 
   void _showNewNameDialog(String path) async {
     await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
-        final name = getBasename(path);
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          final formKey = GlobalKey<FormState>();
+          final name = getBasename(path);
 
-        return ActionsDialog(
-          title: S.current.messageRenameFile,
-          body: Rename(
-            context: context,
-            entryName:  name,
-            hint: S.current.messageFileName,
-            formKey: formKey,
-          ),
-        );
-      }
-    ).then((newName) {
-      if (newName.isNotEmpty) { // The new name provided by the user.
+          return ActionsDialog(
+            title: S.current.messageRenameFile,
+            body: Rename(
+              context: context,
+              entryName: name,
+              hint: S.current.messageFileName,
+              formKey: formKey,
+            ),
+          );
+        }).then((newName) {
+      if (newName.isNotEmpty) {
+        // The new name provided by the user.
         final parent = getDirname(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.cubit.moveEntry(
-          source: path,
-          destination: newEntryPath
-        );
+        widget.cubit.moveEntry(source: path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

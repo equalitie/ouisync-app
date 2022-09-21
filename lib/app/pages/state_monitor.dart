@@ -14,11 +14,11 @@ class StateMonitorPage extends StatefulWidget {
 class _State extends State<StateMonitorPage> {
   final oui.Session session;
   late final Subscription subscription;
-  late final _Node root;
+  late final StateMonitor root;
 
   _State(this.session) {
-    root = _Node(session.getRootStateMonitor()!, this);
-    subscription = root.monitor.subscribe()!;
+    root = session.getRootStateMonitor()!;
+    subscription = root.subscribe()!;
   }
 
   @override
@@ -30,89 +30,97 @@ class _State extends State<StateMonitorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("State Monitor")),
-      body: StreamBuilder<void>(
-          stream: subscription.broadcastStream,
-          builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
-            root.monitor.refresh();
-            return Container(child: root.build());
-          }
-      )
-    );
+        appBar: AppBar(title: const Text("State Monitor")),
+        body: StreamBuilder<void>(
+            stream: subscription.broadcastStream,
+            builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
+              root.refresh();
+              return Container(child: _NodeWidget(root));
+            }));
   }
 }
 
-class _Node {
-  _Node(this.monitor, this.state);
-
+class _NodeWidget extends StatelessWidget {
   final StateMonitor monitor;
-  final _State state;
-  final Map<String, _Node> expandedChildren = {};
 
-  Widget build() {
+  _NodeWidget(this.monitor);
+
+  @override
+  Widget build(BuildContext context) {
     if (monitor.path.isEmpty) {
       return ListView(children: buildValuesAndChildren());
     } else {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-        child: Column(children: buildValuesAndChildren()));
+          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+          child: Column(children: buildValuesAndChildren()));
     }
   }
 
-  List<Widget> buildValuesAndChildren() =>
-      monitor.values.entries.map((entry) => buildValue(entry.key, entry.value))
-      .followedBy(monitor.children.entries.map((entry) => buildChild(entry.key, entry.value)))
+  List<Widget> buildValuesAndChildren() => monitor.values.entries
+      .map((entry) => buildValue(entry.key, entry.value))
+      .followedBy(monitor.children.entries
+          .map((entry) => buildChild(entry.key, entry.value)))
       .toList();
 
   Widget buildValue(String key, String value) {
-    return Card(child: ListTile(
-      dense: true,
-      title: Text("$key: $value")
-    ));
+    return Card(child: ListTile(dense: true, title: Text("$key: $value")));
   }
 
-  Widget buildChild(String name, int version) {
-    final expandedChild = expandedChildren[name];
+  Widget buildChild(String name, int version) =>
+      _ChildWidget(monitor, name, version);
+}
 
-    if (expandedChild == null) {
-      return Card(child: ListTile(
-        trailing: const Icon(Icons.add),
-        dense: true,
-        title: Text(name),
-        onTap: () => expandChild(name)));
-    }
-    else {
-      if (expandedChild.monitor.version < version) {
-        expandedChild.monitor.refresh();
+class _ChildWidget extends StatefulWidget {
+  final StateMonitor parent;
+  final String name;
+  final int version;
+
+  _ChildWidget(this.parent, this.name, this.version);
+
+  @override
+  State<_ChildWidget> createState() => _ChildWidgetState();
+}
+
+class _ChildWidgetState extends State<_ChildWidget> {
+  StateMonitor? monitor;
+
+  @override
+  Widget build(BuildContext context) {
+    final monitor = this.monitor;
+
+    if (monitor != null) {
+      if (monitor.version < widget.version) {
+        monitor.refresh();
       }
 
-      return Column(
-        children: <Widget>[
-          Card(child: ListTile(
-            trailing: const Icon(Icons.remove),
-            dense: true,
-            title: Text(name),
-            onTap: () => collapseChild(name))),
-          expandedChild.build(),
-        ]);
+      return Column(children: <Widget>[
+        Card(
+            child: ListTile(
+                trailing: const Icon(Icons.remove),
+                dense: true,
+                title: Text(widget.name),
+                onTap: collapse)),
+        _NodeWidget(monitor),
+      ]);
+    } else {
+      return Card(
+          child: ListTile(
+              trailing: const Icon(Icons.add),
+              dense: true,
+              title: Text(widget.name),
+              onTap: expand));
     }
   }
 
-  void expandChild(String name) {
-    final child = monitor.child(name);
-
-    if (child == null) {
-      return;
-    }
-
-    state.setState(() {
-      expandedChildren[name] = _Node(child, state);
+  void expand() {
+    setState(() {
+      monitor = widget.parent.child(widget.name);
     });
   }
 
-  void collapseChild(String name) {
-    state.setState(() {
-      expandedChildren.remove(name);
+  void collapse() {
+    setState(() {
+      monitor = null;
     });
   }
 }

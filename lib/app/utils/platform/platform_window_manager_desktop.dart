@@ -8,7 +8,9 @@ import '../../../generated/l10n.dart';
 import '../utils.dart';
 import 'platform_window_manager.dart';
 
-class PlatformWindowManagerDesktop with WindowListener implements PlatformWindowManager {
+class PlatformWindowManagerDesktop
+    with WindowListener
+    implements PlatformWindowManager {
   PlatformWindowManagerDesktop() {
     initialize().then((_) async {
       windowManager.addListener(this);
@@ -21,7 +23,6 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
 
   Future<void> initialize() async {
     await windowManager.ensureInitialized();
-
 
     /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
     /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
@@ -49,15 +50,16 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
 
   @override
   Future<void> initSystemTray() async {
-    String path = Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
+    String path =
+        Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
     List<stray.MenuItemBase> menu = [
       stray.MenuItem(
-        label: S.current.actionExit,
-        onClicked: () async {
-          await windowManager.setPreventClose(false);
-          await windowManager.close();
-        }),
+          label: S.current.actionExit,
+          onClicked: () async {
+            await windowManager.setPreventClose(false);
+            await windowManager.close();
+          }),
     ];
 
     await _systemTray.initSystemTray(
@@ -72,8 +74,8 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
       switch (eventName) {
         case Constants.eventLeftMouseUp:
           await windowManager.isVisible()
-          ? _appWindow.hide()
-          : _appWindow.show();
+              ? _appWindow.hide()
+              : _appWindow.show();
 
           break;
         case Constants.eventRightMouseUp:
@@ -88,13 +90,15 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
 
   @override
   Future<void> setTitle(String title) async {
-    WindowOptions windowOptions = WindowOptions(
-      title: title);
+    WindowOptions windowOptions = WindowOptions(title: title);
     return windowManager.waitUntilReadyToShow(windowOptions, () {});
   }
 
   @override
-  Future<bool> get isVisible async { return false;/*windowManager.isVisible();*/ }
+  Future<bool> get isVisible async {
+    return false;
+    /*windowManager.isVisible();*/
+  }
 
   @override
   void dispose() {
@@ -108,8 +112,8 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
 
   @override
   void onWindowClose() async {
-    bool _isPreventClose = await windowManager.isPreventClose();
-    if (_isPreventClose) {
+    bool isPreventClose = await windowManager.isPreventClose();
+    if (isPreventClose) {
       _appWindow.hide();
     }
   }
@@ -118,5 +122,4 @@ class PlatformWindowManagerDesktop with WindowListener implements PlatformWindow
   Future<void> close() async {
     return windowManager.close();
   }
-
 }

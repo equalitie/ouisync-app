@@ -23,7 +23,8 @@ class AccessModeSelector extends StatefulWidget {
   State<AccessModeSelector> createState() => _AccessModeSelectorState();
 }
 
-class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAppLogger {
+class _AccessModeSelectorState extends State<AccessModeSelector>
+    with OuiSyncAppLogger {
   final Map<AccessMode, String> accessModeDescriptions = {
     AccessMode.blind: S.current.messageBlindReplicaExplanation,
     AccessMode.read: S.current.messageReadReplicaExplanation,
@@ -35,12 +36,12 @@ class _AccessModeSelectorState extends State<AccessModeSelector>  with OuiSyncAp
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: Dimensions.paddingActionBoxTop,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-        color: Constants.inputBackgroundColor
-      ),
-      child: _buildModeSelector());
+        padding: Dimensions.paddingActionBoxTop,
+        decoration: const BoxDecoration(
+            borderRadius:
+                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            color: Constants.inputBackgroundColor),
+        child: _buildModeSelector());
   }
 
   Widget _buildModeSelector() {

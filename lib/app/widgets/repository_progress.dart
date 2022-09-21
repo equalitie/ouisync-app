@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../cubits/cubits.dart';
 
 class RepositoryProgress extends StatelessWidget {
-  StateMonitor? _monitor;
+  final StateMonitor? _monitor;
 
   RepositoryProgress(RepoCubit? repo) : _monitor = repo?.stateMonitor();
 
@@ -16,11 +16,13 @@ class RepositoryProgress extends StatelessWidget {
         return shrink();
       }
 
-      final indexInflight = monitor.parseIntValue('index_requests_inflight') ?? 0;
-      final blockInflight = monitor.parseIntValue('block_requests_inflight') ?? 0;
+      final indexInflight =
+          monitor.parseIntValue('index_requests_inflight') ?? 0;
+      final blockInflight =
+          monitor.parseIntValue('block_requests_inflight') ?? 0;
 
       if (indexInflight == 0 && blockInflight == 0) {
-          return shrink();
+        return shrink();
       }
 
       Color? color;

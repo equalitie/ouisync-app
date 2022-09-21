@@ -2,13 +2,14 @@ import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:flutter/material.dart';
 
 class StateMonitor {
-  oui.StateMonitor? _inner;
+  final oui.StateMonitor? _inner;
 
   StateMonitor(this._inner);
 
   StateMonitor child(String name) => StateMonitor(_inner?.child(name));
 
-  StateMonitorIntValue intValue(String value_name) => StateMonitorIntValue(_inner, value_name);
+  StateMonitorIntValue intValue(String valueName) =>
+      StateMonitorIntValue(_inner, valueName);
 
   Widget builder(Widget Function(BuildContext, oui.StateMonitor?) buildFn) {
     return _Widget(_inner, buildFn);
@@ -16,50 +17,56 @@ class StateMonitor {
 }
 
 class StateMonitorIntValue {
-  oui.StateMonitor? _inner;
-  String _value_name;
+  final oui.StateMonitor? _inner;
+  final String _valueName;
 
-  StateMonitorIntValue(this._inner, this._value_name);
+  StateMonitorIntValue(this._inner, this._valueName);
 
   Widget builder(Widget Function(BuildContext, int? value) buildFn) {
     return _Widget(_inner, (BuildContext context, oui.StateMonitor? monitor) {
-      return buildFn(context, monitor?.parseIntValue(_value_name));
+      return buildFn(context, monitor?.parseIntValue(_valueName));
     });
   }
 }
 
-class _Widget extends StatelessWidget {
-  oui.StateMonitor? _monitor;
-  Widget Function(BuildContext, oui.StateMonitor?) _buildFn;
-  oui.Subscription? _subscription;
+class _Widget extends StatefulWidget {
+  final oui.StateMonitor? _monitor;
+  final Widget Function(BuildContext, oui.StateMonitor?) _buildFn;
 
   _Widget(this._monitor, this._buildFn);
 
   @override
+  State<_Widget> createState() => _WidgetState();
+}
+
+class _WidgetState extends State<_Widget> {
+  oui.Subscription? _subscription;
+
+  @override
   void dispose() {
     _subscription?.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final monitor = _monitor;
-    if (monitor == null) return _buildFn(context, null);
+    final monitor = widget._monitor;
+    if (monitor == null) return widget._buildFn(context, null);
 
     _subscription?.close();
     _subscription = monitor.subscribe();
 
     final subscription = _subscription;
-    if (subscription == null) return _buildFn(context, null);
+    if (subscription == null) return widget._buildFn(context, null);
 
     return StreamBuilder<void>(
-      stream: subscription.broadcastStream,
-      builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
-        if (!monitor.refresh()) {
-          return _buildFn(ctx, null);
-        }
+        stream: subscription.broadcastStream,
+        builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
+          if (!monitor.refresh()) {
+            return widget._buildFn(ctx, null);
+          }
 
-        return _buildFn(ctx, monitor);
-      }
-    );
+          return widget._buildFn(ctx, monitor);
+        });
   }
 }

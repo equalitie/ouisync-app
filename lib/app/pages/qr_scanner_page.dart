@@ -12,7 +12,8 @@ class QRScanner extends StatefulWidget {
 }
 
 class _QRScannerState extends State<QRScanner> {
-  final cameraController = MobileScannerController(formats: [BarcodeFormat.qrCode]);
+  final cameraController =
+      MobileScannerController(formats: [BarcodeFormat.qrCode]);
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +24,14 @@ class _QRScannerState extends State<QRScanner> {
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black87,
           titleTextStyle: const TextStyle(
-            fontSize: Dimensions.fontAverage,
-            color: Colors.black87
-          ),
+              fontSize: Dimensions.fontAverage, color: Colors.black87),
           actions: [
             IconButton(
               color: Theme.of(context).primaryColorDark,
               icon: ValueListenableBuilder(
                 valueListenable: cameraController.torchState,
                 builder: (context, state, child) {
-                  switch (state as TorchState) {
+                  switch (state) {
                     case TorchState.off:
                       return const Icon(Icons.flash_off, color: Colors.grey);
                     case TorchState.on:
@@ -48,7 +47,7 @@ class _QRScannerState extends State<QRScanner> {
               icon: ValueListenableBuilder(
                 valueListenable: cameraController.cameraFacingState,
                 builder: (context, state, child) {
-                  switch (state as CameraFacing) {
+                  switch (state) {
                     case CameraFacing.front:
                       return const Icon(Icons.camera_front);
                     case CameraFacing.back:

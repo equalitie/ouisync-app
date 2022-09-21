@@ -34,11 +34,12 @@ class SettingsPage extends StatefulWidget {
   final StateMonitorIntValue panicCounter;
 
   @override
-  _SettingsPageState createState() => _SettingsPageState(reposCubit, panicCounter);
+  State<SettingsPage> createState() =>
+      _SettingsPageState(reposCubit, panicCounter);
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
-  ReposCubit _repos;
+  final ReposCubit _repos;
   final StateMonitorIntValue _panicCounter;
 
   String? _connectionType;
@@ -49,8 +50,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   String? _tcpListenerEndpointV6;
   String? _quicListenerEndpointV4;
   String? _quicListenerEndpointV6;
-  String? _dhtEndpointV4;
-  String? _dhtEndpointV6;
 
   Color? _titlesColor = Colors.black;
 
@@ -73,11 +72,21 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         connectivityResult ?? await Connectivity().checkConnectivity();
 
     switch (connectivity) {
-        case ConnectivityResult.wifi: _connectionType = "WiFi"; break;
-        case ConnectivityResult.mobile: _connectionType = "Mobile"; break;
-        case ConnectivityResult.ethernet: _connectionType = "Ethernet"; break;
-        case ConnectivityResult.none: _connectionType = "None"; break;
-        default: _connectionType = "???"; break;
+      case ConnectivityResult.wifi:
+        _connectionType = "WiFi";
+        break;
+      case ConnectivityResult.mobile:
+        _connectionType = "Mobile";
+        break;
+      case ConnectivityResult.ethernet:
+        _connectionType = "Ethernet";
+        break;
+      case ConnectivityResult.none:
+        _connectionType = "None";
+        break;
+      default:
+        _connectionType = "???";
+        break;
     }
 
     final session = _repos.session;
@@ -87,31 +96,28 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     String? quicListenerEndpointV4 = session.quicListenerLocalAddressV4;
     String? quicListenerEndpointV6 = session.quicListenerLocalAddressV6;
 
-    final dhtEndpointV4 = session.dhtLocalAddressV4;
-    final dhtEndpointV6 = session.dhtLocalAddressV6;
-
     final info = NetworkInfo();
 
     // This really works only when connected using WiFi.
-    var localIPv4  = await info.getWifiIP();
-    var localIPv6  = await info.getWifiIPv6();
+    var localIPv4 = await info.getWifiIP();
+    var localIPv6 = await info.getWifiIPv6();
 
     // This works also when on mobile network, but doesn't show IPv6 address if
     // IPv4 is used as primary.
     final internalIpStr = await RGetIp.internalIP;
 
     if (internalIpStr != null) {
-        final internalIp = InternetAddress.tryParse(internalIpStr);
+      final internalIp = InternetAddress.tryParse(internalIpStr);
 
-        if (internalIp != null) {
-            if (localIPv4 == null && internalIp.type == InternetAddressType.IPv4) {
-                localIPv4 = internalIpStr;
-            }
-
-            if (localIPv6 == null && internalIp.type == InternetAddressType.IPv6) {
-                localIPv6 = internalIpStr;
-            }
+      if (internalIp != null) {
+        if (localIPv4 == null && internalIp.type == InternetAddressType.IPv4) {
+          localIPv4 = internalIpStr;
         }
+
+        if (localIPv6 == null && internalIp.type == InternetAddressType.IPv6) {
+          localIPv6 = internalIpStr;
+        }
+      }
     }
 
     setState(() {
@@ -122,12 +128,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _tcpListenerEndpointV6 = tcpListenerEndpointV6;
       _quicListenerEndpointV4 = quicListenerEndpointV4;
       _quicListenerEndpointV6 = quicListenerEndpointV6;
-      _dhtEndpointV4 = dhtEndpointV4;
-      _dhtEndpointV6 = dhtEndpointV6;
     });
 
     // This one takes longer, so do it separately.
-    RGetIp.externalIP.then((ip) => setState(() { _externalIP = ip; }));
+    RGetIp.externalIP.then((ip) => setState(() {
+          _externalIP = ip;
+        }));
   }
 
   @override
@@ -139,74 +145,79 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     return Scaffold(
         appBar: AppBar(
           title: Text(S.current.titleSettings),
-          elevation: 0.0,),
+          elevation: 0.0,
+        ),
         body: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-              child: _repos.builder((repos) => ListView(
-                // The badge over the version number is shown outside of the row boundary, so we
-                // need to set clipBehaior to Clip.none.
-                clipBehavior: Clip.none,
-                children: [
-                  _buildRepositoriesSection(repos.currentRepo),
-                  _divider(),
-                  Fields.idLabel(S.current.titleNetwork,
-                      fontSize: Dimensions.fontAverage,
-                      fontWeight: FontWeight.normal,
-                      color: _titlesColor!),
-                  _buildCurrentRepoDhtSwitch(repos.currentRepo),
-                  BlocConsumer<ConnectivityCubit, ConnectivityState>(
-                    builder: (context, state) {
+            padding:
+                const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+            child: _repos.builder((repos) => ListView(
+                  // The badge over the version number is shown outside of the row boundary, so we
+                  // need to set clipBehaior to Clip.none.
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildRepositoriesSection(repos.currentRepo),
+                    _divider(),
+                    Fields.idLabel(S.current.titleNetwork,
+                        fontSize: Dimensions.fontAverage,
+                        fontWeight: FontWeight.normal,
+                        color: _titlesColor!),
+                    _buildCurrentRepoDhtSwitch(repos.currentRepo),
+                    BlocConsumer<ConnectivityCubit, ConnectivityState>(
+                        builder: (context, state) {
                       return Column(
-                        children: [
-                          _labeledNullableText(Strings.connectionType, _connectionType),
-                          _labeledNullableText(Strings.labelExternalIP, _externalIP),
-                          _labeledNullableText(Strings.labelLocalIPv4, _localIPv4),
-                          _labeledNullableText(Strings.labelLocalIPv6, _localIPv6),
-                          _labeledNullableText(Strings.labelTcpListenerEndpointV4, _tcpListenerEndpointV4),
-                          _labeledNullableText(Strings.labelTcpListenerEndpointV6, _tcpListenerEndpointV6),
-                          _labeledNullableText(Strings.labelQuicListenerEndpointV4, _quicListenerEndpointV4),
-                          _labeledNullableText(Strings.labelQuicListenerEndpointV6, _quicListenerEndpointV6),
-                          _labeledNullableText(Strings.labelDHTv4Endpoint, _dhtEndpointV4),
-                          _labeledNullableText(Strings.labelDHTv6Endpoint, _dhtEndpointV6)
-                        ]
-                        .whereType<Widget>()
-                        .toList()
-                      );
-                    },
-                    listener: (context, state) {
+                          children: [
+                        _labeledNullableText(
+                            Strings.connectionType, _connectionType),
+                        _labeledNullableText(
+                            Strings.labelExternalIP, _externalIP),
+                        _labeledNullableText(
+                            Strings.labelLocalIPv4, _localIPv4),
+                        _labeledNullableText(
+                            Strings.labelLocalIPv6, _localIPv6),
+                        _labeledNullableText(Strings.labelTcpListenerEndpointV4,
+                            _tcpListenerEndpointV4),
+                        _labeledNullableText(Strings.labelTcpListenerEndpointV6,
+                            _tcpListenerEndpointV6),
+                        _labeledNullableText(
+                            Strings.labelQuicListenerEndpointV4,
+                            _quicListenerEndpointV4),
+                        _labeledNullableText(
+                            Strings.labelQuicListenerEndpointV6,
+                            _quicListenerEndpointV6),
+                      ].whereType<Widget>().toList());
+                    }, listener: (context, state) {
                       if (state is ConnectivityChanged) {
                         _updateLocalEndpoints(
                             connectivityResult: state.connectivityResult);
                       }
                     }),
-                  _buildConnectedPeerListRow(),
-                  _divider(),
-                  _buildLogsSection(),
-                  _divider(),
-                  _versionNumberFutureBuilder(info.then((info) => info.version)),
-                ],
-              ))));
+                    _buildConnectedPeerListRow(),
+                    _divider(),
+                    _buildLogsSection(),
+                    _divider(),
+                    _versionNumberFutureBuilder(
+                        info.then((info) => info.version)),
+                  ],
+                ))));
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
-    if (!(repo is OpenRepoEntry)) {
+    if (repo is! OpenRepoEntry) {
       return SizedBox.shrink();
     }
 
-    return repo.cubit.builder((repo) =>
-      LabeledSwitch(
-        label: S.current.labelBitTorrentDHT,
-        padding: const EdgeInsets.all(0.0),
-        value: repo.isDhtEnabled(),
-        onChanged: (bool enable) {
-          if (enable) {
-            repo.enableDht();
-          } else {
-            repo.disableDht();
-          }
-        },
-      )
-    );
+    return repo.cubit.builder((repo) => LabeledSwitch(
+          label: S.current.labelBitTorrentDHT,
+          padding: const EdgeInsets.all(0.0),
+          value: repo.isDhtEnabled,
+          onChanged: (bool enable) {
+            if (enable) {
+              repo.enableDht();
+            } else {
+              repo.disableDht();
+            }
+          },
+        ));
   }
 
   static Widget? _labeledNullableText(String key, String? value) {
@@ -248,36 +259,35 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           Container(
             padding: Dimensions.paddingActionBox,
             decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-              color: Constants.inputBackgroundColor
-            ),
+                borderRadius:
+                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+                color: Constants.inputBackgroundColor),
             child: DropdownButton<RepoEntry?>(
               isExpanded: true,
               value: currentRepo,
               underline: const SizedBox(),
-              selectedItemBuilder: (context) => repositoryNames().map<Widget>((String repoName) {
+              selectedItemBuilder: (context) =>
+                  repositoryNames().map<Widget>((String repoName) {
                 return Padding(
-                  padding: Dimensions.paddingItem,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Fields.idLabel(
-                            S.current.labelSelectRepository,
-                            fontSize: Dimensions.fontMicro,
-                            fontWeight: FontWeight.normal,
-                            color: Constants.inputLabelForeColor)
+                    padding: Dimensions.paddingItem,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Fields.idLabel(S.current.labelSelectRepository,
+                              fontSize: Dimensions.fontMicro,
+                              fontWeight: FontWeight.normal,
+                              color: Constants.inputLabelForeColor)
                         ]),
-                      Row(
-                        children: [
-                          Fields.constrainedText(repoName,
-                              fontWeight: FontWeight.normal),
-                        ],
-                      ),
-                    ],
-                  ));
+                        Row(
+                          children: [
+                            Fields.constrainedText(repoName,
+                                fontWeight: FontWeight.normal),
+                          ],
+                        ),
+                      ],
+                    ));
               }).toList(),
               items: repositories().map((RepoEntry repo) {
                 return DropdownMenuItem(
@@ -288,12 +298,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Icon(repo == currentRepo ? Icons.check : null,
-                        size: Dimensions.sizeIconSmall,
-                        color: Theme.of(context).primaryColor),
+                          size: Dimensions.sizeIconSmall,
+                          color: Theme.of(context).primaryColor),
                       Dimensions.spacingHorizontalDouble,
-                      Fields.constrainedText(
-                        repo.name,
-                        fontWeight: FontWeight.normal),
+                      Fields.constrainedText(repo.name,
+                          fontWeight: FontWeight.normal),
                     ],
                   ),
                 );
@@ -309,79 +318,76 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-                Fields.actionText(S.current.actionRename,
-                    textFontSize: Dimensions.fontAverage,
-                    icon: Icons.edit,
-                    iconSize: Dimensions.sizeIconSmall,
-                    onTap: () async {
-                  if (currentRepo == null) {
+              Fields.actionText(S.current.actionRename,
+                  textFontSize: Dimensions.fontAverage,
+                  icon: Icons.edit,
+                  iconSize: Dimensions.sizeIconSmall, onTap: () async {
+                if (currentRepo == null) {
+                  return;
+                }
+
+                await showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      final formKey = GlobalKey<FormState>();
+
+                      return ActionsDialog(
+                        title: S.current.messageRenameRepository,
+                        body: RenameRepository(
+                            context: context,
+                            formKey: formKey,
+                            repositoryName: currentRepo.name),
+                      );
+                    }).then((newName) {
+                  if (newName == null || newName.isEmpty) {
                     return;
                   }
-
-                  await showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        final formKey = GlobalKey<FormState>();
-
-                        return ActionsDialog(
-                          title: S.current.messageRenameRepository,
-                          body: RenameRepository(
-                              context: context,
-                              formKey: formKey,
-                              repositoryName: currentRepo.name),
-                        );
-                      }).then((newName) {
-                    if (newName == null || newName.isEmpty) {
-                      return;
-                    }
-                    final oldInfo = _repos.internalRepoMetaInfo(currentRepo.name);
-                    final newInfo = _repos.internalRepoMetaInfo(newName);
-                    _repos.renameRepository(oldInfo, newInfo);
-                  });
-                }),
+                  final oldInfo = _repos.internalRepoMetaInfo(currentRepo.name);
+                  final newInfo = _repos.internalRepoMetaInfo(newName);
+                  _repos.renameRepository(oldInfo, newInfo);
+                });
+              }),
               Fields.actionText(S.current.actionShare,
-                      textFontSize: Dimensions.fontAverage,
-                      icon: Icons.share,
-                      iconSize: Dimensions.sizeIconSmall,
-                      onTap: () {
-                if (!(currentRepo is OpenRepoEntry)) {
+                  textFontSize: Dimensions.fontAverage,
+                  icon: Icons.share,
+                  iconSize: Dimensions.sizeIconSmall, onTap: () {
+                if (currentRepo is! OpenRepoEntry) {
                   return;
                 }
 
                 widget.onShareRepository(currentRepo.cubit);
               }),
               Fields.actionText(S.current.actionDelete,
-                      textFontSize: Dimensions.fontAverage,
-                      textColor: Colors.red,
-                      icon: Icons.delete,
-                      iconSize: Dimensions.sizeIconSmall,
-                      iconColor: Colors.red,
-                      onTap: () async {
+                  textFontSize: Dimensions.fontAverage,
+                  textColor: Colors.red,
+                  icon: Icons.delete,
+                  iconSize: Dimensions.sizeIconSmall,
+                  iconColor: Colors.red, onTap: () async {
                 if (currentRepo == null) {
                   return;
                 }
 
                 final delete = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(S.current.titleDeleteRepository),
-                    content: SingleChildScrollView(
-                      child: ListBody(children: [
-                        Text(S.current.messageConfirmRepositoryDeletion)
-                      ]),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(S.current.actionCloseCapital),
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      DangerButton(
-                        text: S.current.actionDeleteCapital,
-                        onPressed: () => Navigator.of(context).pop(true),
-                      ),
-                    ]
-                  )
-                );
+                    context: context,
+                    builder: (context) => AlertDialog(
+                            title: Text(S.current.titleDeleteRepository),
+                            content: SingleChildScrollView(
+                              child: ListBody(children: [
+                                Text(S.current.messageConfirmRepositoryDeletion)
+                              ]),
+                            ),
+                            actions: [
+                              TextButton(
+                                child: Text(S.current.actionCloseCapital),
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                              ),
+                              DangerButton(
+                                text: S.current.actionDeleteCapital,
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                              ),
+                            ]));
 
                 if (delete ?? false) {
                   _repos.deleteRepository(currentRepo.metaInfo);
@@ -405,19 +411,16 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
 
     return BlocBuilder<PeerSetCubit, PeerSetChanged>(
-      builder: (context, state) =>
-        Fields.labeledButton(
-          label: S.current.labelConnectedPeers,
-          buttonText: state.stats(),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) =>
-                BlocProvider.value(
-                  value: peerSetCubit,
-                  child: PeerList()
-                )));
-          }));
+        builder: (context, state) => Fields.labeledButton(
+            label: S.current.labelConnectedPeers,
+            buttonText: state.stats(),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BlocProvider.value(
+                          value: peerSetCubit, child: PeerList())));
+            }));
   }
 
   Widget _buildLogsSection() => Column(
@@ -429,20 +432,21 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 fontWeight: FontWeight.normal,
                 color: _titlesColor!),
             Padding(
-              padding: Dimensions.paddingActionButton,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Fields.actionText(S.current.actionSave,
-                      textFontSize: Dimensions.fontAverage,
-                      icon: Icons.save,
-                      iconSize: Dimensions.sizeIconSmall,
-                      onTap: _saveLogs),
-                  Fields.actionText(S.current.actionShare,
-                      textFontSize: Dimensions.fontAverage,
-                      icon: Icons.share,
-                      iconSize: Dimensions.sizeIconSmall,
-                      onTap: _shareLogs)])),
+                padding: Dimensions.paddingActionButton,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Fields.actionText(S.current.actionSave,
+                          textFontSize: Dimensions.fontAverage,
+                          icon: Icons.save,
+                          iconSize: Dimensions.sizeIconSmall,
+                          onTap: _saveLogs),
+                      Fields.actionText(S.current.actionShare,
+                          textFontSize: Dimensions.fontAverage,
+                          icon: Icons.share,
+                          iconSize: Dimensions.sizeIconSmall,
+                          onTap: _shareLogs)
+                    ])),
             _panicCounter.builder((context, panics) {
               if ((panics ?? 0) == 0) return SizedBox.shrink();
               return _warningText(context, S.current.messageLibraryPanic);
@@ -451,49 +455,43 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   Widget _versionNumberFutureBuilder(Future<String> value) {
     return FutureBuilder<String>(
-      future: value,
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        late Widget version;
-        final key = S.current.labelAppVersion;
+        future: value,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          late Widget version;
+          final key = S.current.labelAppVersion;
 
-        if (snapshot.hasData) {
-          version = _labeledText(key, snapshot.data!);
-        } else if (snapshot.hasError) {
-          version = _labeledText(key, "???");
-        } else {
-          version = _labeledText(key, "...");
-        }
+          if (snapshot.hasData) {
+            version = _labeledText(key, snapshot.data!);
+          } else if (snapshot.hasError) {
+            version = _labeledText(key, "???");
+          } else {
+            version = _labeledText(key, "...");
+          }
 
-        return GestureDetector(
-          onTap: () {
-            if (_versionNumberClickCounter.registerClick() >= 3) {
-              _versionNumberClickCounter.reset();
+          return GestureDetector(
+            onTap: () {
+              if (_versionNumberClickCounter.registerClick() >= 3) {
+                _versionNumberClickCounter.reset();
 
-              final session = _repos.session;
+                final session = _repos.session;
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => StateMonitorPage(session)
-                )
-              );
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => StateMonitorPage(session)));
+              }
+            },
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               version,
-              BlocBuilder<UpgradeExistsCubit, bool>(
-                builder: (context, state) {
-                  if (state == false) return SizedBox.shrink();
-                  return _warningText(context, S.current.messageNewVersionIsAvailable);
-                }
-              ),
-            ]
-          ),
-        );
-      }
-    );
+              BlocBuilder<UpgradeExistsCubit, bool>(builder: (context, state) {
+                if (state == false) return SizedBox.shrink();
+                return _warningText(
+                    context, S.current.messageNewVersionIsAvailable);
+              }),
+            ]),
+          );
+        });
   }
 
   Future<void> _saveLogs() async {
@@ -516,7 +514,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     // TODO: Add time zone, at time of this writing, time zones have not yet
     // been implemented by DateFormat.
     final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
-    final path = buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
+    final path =
+        buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
     final outFile = File(path);
 
     final sink = outFile.openWrite();
@@ -534,8 +533,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     sink.writeln("_tcpListenerEndpointV6: $_tcpListenerEndpointV6");
     sink.writeln("_quicListenerEndpointV4: $_quicListenerEndpointV4");
     sink.writeln("_quicListenerEndpointV6: $_quicListenerEndpointV6");
-    sink.writeln("_dhtEndpointV4: $_dhtEndpointV4");
-    sink.writeln("_dhtEndpointV6: $_dhtEndpointV6");
     sink.writeln("\n");
 
     await dumpAll(sink, _repos.session.getRootStateMonitor());
@@ -547,5 +544,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 }
 
 Text _warningText(BuildContext context, String str) {
-  return Text(str, style: TextStyle(color: Theme.of(context).colorScheme.error));
+  return Text(str,
+      style: TextStyle(color: Theme.of(context).colorScheme.error));
 }
