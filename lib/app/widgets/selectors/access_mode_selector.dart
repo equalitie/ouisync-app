@@ -96,8 +96,8 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
             return;
           }
 
-          setState(() => _selectedMode = current as AccessMode);
-          await widget.onChanged(current as AccessMode);
+          setState(() => _selectedMode = current);
+          await widget.onChanged(current);
         },
       ))).toList();
   }
