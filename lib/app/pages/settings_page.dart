@@ -121,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     }
 
     setState(() {
-      _externalIP = "...";
+      _externalIP = connectivity == ConnectivityResult.none ? "N/A" : "...";
       _localIPv4 = localIPv4;
       _localIPv6 = localIPv6;
       _tcpListenerEndpointV4 = tcpListenerEndpointV4;
@@ -130,10 +130,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _quicListenerEndpointV6 = quicListenerEndpointV6;
     });
 
-    // This one takes longer, so do it separately.
-    RGetIp.externalIP.then((ip) => setState(() {
-          _externalIP = ip;
-        }));
+    if (connectivity != ConnectivityResult.none) {
+      // This one takes longer, so do it separately.
+      RGetIp.externalIP.then((ip) => setState(() {
+            _externalIP = ip;
+          }));
+    }
   }
 
   @override
