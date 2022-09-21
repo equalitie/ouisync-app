@@ -36,6 +36,11 @@ class _ShareRepositoryState extends State<ShareRepository>
     AccessMode.write: S.current.messageWriteReplicaExplanation
   };
 
+  bool _isDisabledMessageVisible = false;
+  String _dissabledMessage = '';
+
+  RestartableTimer? _timer;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,12 +54,15 @@ class _ShareRepositoryState extends State<ShareRepository>
             Fields.bottomSheetTitle(widget.repository.name),
             Dimensions.spacingVerticalDouble,
             AccessModeSelector(
-                availableAccessMode: widget.availableAccessModes,
-                onChanged: _onChanged),
+              currentAccessMode: widget.repository.accessMode,
+              availableAccessMode: widget.availableAccessModes,
+              onChanged: _onChanged,
+              onDisabledMessage: _setDisabledMessageVisibility,),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),
             Dimensions.spacingVerticalDouble,
-            _buildShareBox()
+            _buildShareBox(),
+            _buildNotAvailableMessage(),
           ]),
     );
   }
@@ -197,4 +205,49 @@ class _ShareRepositoryState extends State<ShareRepository>
             color: Constants.inputLabelForeColor),
         ],)
       ]));
+
+  Widget  _buildNotAvailableMessage() {
+    return Visibility(
+    visible: _isDisabledMessageVisible,
+    child: GestureDetector(
+      onTap: () => _setDisabledMessageVisibility(false, '', 0),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10.0, bottom: 4.0, right: 10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded( 
+              child:Text(_dissabledMessage,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                maxLines: 2,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: Dimensions.fontSmall,
+                  color: Colors.red.shade400
+                )))
+          ]))));
+  }
+
+  void _setDisabledMessageVisibility(bool visible, String message, int duration) {
+    _dissabledMessage = visible
+      ? message
+      : '';
+
+    setState(() => _isDisabledMessageVisible = visible);
+
+    if (!_isDisabledMessageVisible) {
+      _timer?.cancel();
+      return;
+    }
+
+    if (duration > 0) {
+      _timer ??= RestartableTimer(
+        Duration(seconds: duration),
+        () =>
+        setState(() => _isDisabledMessageVisible = false));
+
+      _timer?.reset();
+    }
+  }
 }
