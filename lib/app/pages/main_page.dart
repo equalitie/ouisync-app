@@ -442,10 +442,11 @@ class _MainPageState extends State<MainPage>
             );
           });
 
-  Future<dynamic> _showFileDetails(
-          {required RepoCubit repoCubit,
-          required GlobalKey<ScaffoldState> scaffoldKey,
-          required BaseItem data}) =>
+  Future<dynamic> _showFileDetails({
+    required RepoCubit repoCubit,
+    required GlobalKey<ScaffoldState> scaffoldKey,
+    required BaseItem data,
+  }) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -457,16 +458,26 @@ class _MainPageState extends State<MainPage>
               data: data as FileItem,
               scaffoldKey: scaffoldKey,
               onBottomSheetOpen: retrieveBottomSheetController,
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
+              onMoveEntry: (
+                origin,
+                path,
+                type,
+              ) =>
+                  moveEntry(
+                repoCubit,
+                origin,
+                path,
+                type,
+              ),
               isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
-  Future<dynamic> _showFolderDetails(
-          {required RepoCubit repoCubit,
-          required GlobalKey<ScaffoldState> scaffoldKey,
-          required BaseItem data}) =>
+  Future<dynamic> _showFolderDetails({
+    required RepoCubit repoCubit,
+    required GlobalKey<ScaffoldState> scaffoldKey,
+    required BaseItem data,
+  }) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -478,20 +489,34 @@ class _MainPageState extends State<MainPage>
               data: data as FolderItem,
               scaffoldKey: scaffoldKey,
               onBottomSheetOpen: retrieveBottomSheetController,
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
+              onMoveEntry: (
+                origin,
+                path,
+                type,
+              ) =>
+                  moveEntry(
+                repoCubit,
+                origin,
+                path,
+                type,
+              ),
               isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
   void retrieveBottomSheetController(
-      PersistentBottomSheetController? controller, String entryPath) {
+    PersistentBottomSheetController? controller,
+    String entryPath,
+  ) {
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
   }
 
-  bool _isEntryActionAvailable(AccessMode accessMode, EntryAction action) {
+  bool _isEntryActionAvailable(
+    AccessMode accessMode,
+    EntryAction action,
+  ) {
     if (accessMode == AccessMode.write) return true;
 
     final readDisabledActions = [
@@ -503,22 +528,37 @@ class _MainPageState extends State<MainPage>
     return !readDisabledActions.contains(action);
   }
 
-  void moveEntry(RepoCubit currentRepo, origin, path, type) async {
+  void moveEntry(
+    RepoCubit currentRepo,
+    origin,
+    path,
+    type,
+  ) async {
     final basename = getBasename(path);
-    final destination =
-        buildDestinationPath(currentRepo.currentFolder.path, basename);
+    final destination = buildDestinationPath(
+      currentRepo.currentFolder.path,
+      basename,
+    );
 
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
 
-    currentRepo.moveEntry(source: path, destination: destination);
+    currentRepo.moveEntry(
+      source: path,
+      destination: destination,
+    );
   }
 
   Future<void> saveMedia(String sourceFilePath) async {
     final currentRepo = _currentRepo;
 
     if (currentRepo is! OpenRepoEntry) {
-      showSnackBar(context, content: Text(S.current.messageNoRepo));
+      showSnackBar(
+        context,
+        content: Text(
+          S.current.messageNoRepo,
+        ),
+      );
       return;
     }
 
@@ -542,7 +582,7 @@ class _MainPageState extends State<MainPage>
                 TextButton(
                   child: Text(S.current.actionCloseCapital),
                   onPressed: () => Navigator.of(context).pop(),
-                )
+                ),
               ],
             );
           });
@@ -554,20 +594,30 @@ class _MainPageState extends State<MainPage>
     await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
   }
 
-  Future<void> saveFileToOuiSync(RepoCubit currentRepo, String path) async {
+  Future<void> saveFileToOuiSync(
+    RepoCubit currentRepo,
+    String path,
+  ) async {
     final file = io.File(path);
     final fileName = getBasename(path);
     final length = (await file.stat()).size;
-    final filePath =
-        buildDestinationPath(currentRepo.currentFolder.path, fileName);
+    final filePath = buildDestinationPath(
+      currentRepo.currentFolder.path,
+      fileName,
+    );
     final fileByteStream = file.openRead();
 
     await currentRepo.saveFile(
-        filePath: filePath, length: length, fileByteStream: fileByteStream);
+      filePath: filePath,
+      length: length,
+      fileByteStream: fileByteStream,
+    );
   }
 
   Future<dynamic> _showDirectoryActions(
-          BuildContext context, OpenRepoEntry repo) =>
+    BuildContext context,
+    OpenRepoEntry repo,
+  ) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
@@ -598,10 +648,12 @@ class _MainPageState extends State<MainPage>
   }
 
   void addRepoWithTokenDialog({String? initialTokenValue}) async {
-    initialTokenValue ??=
-        await Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return AddRepositoryPage(reposCubit: _repositories);
-    }));
+    initialTokenValue ??= await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return AddRepositoryPage(reposCubit: _repositories);
+      }),
+    );
 
     if (initialTokenValue == null) return;
 
@@ -621,7 +673,7 @@ class _MainPageState extends State<MainPage>
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                )
+                ),
               ],
             );
           });
@@ -649,7 +701,10 @@ class _MainPageState extends State<MainPage>
 
   void unlockRepositoryDialog(String repositoryName) async {
     await Dialogs.unlockRepositoryDialog(
-        context, _repositories, repositoryName);
+      context,
+      _repositories,
+      repositoryName,
+    );
   }
 
   void showSettings() {
@@ -658,8 +713,10 @@ class _MainPageState extends State<MainPage>
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return MultiBlocProvider(
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return MultiBlocProvider(
           providers: [
             BlocProvider.value(value: connectivityCubit),
             BlocProvider.value(value: peerSetCubit),
@@ -669,7 +726,9 @@ class _MainPageState extends State<MainPage>
             reposCubit: reposCubit,
             onShareRepository: _showShareRepository,
             panicCounter: _panicCounter,
-          ));
-    }));
+          ),
+        );
+      }),
+    );
   }
 }
