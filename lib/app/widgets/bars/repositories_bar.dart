@@ -172,27 +172,7 @@ class _Picker extends StatelessWidget {
               color: iconColor
             )
           ),
-          child: InkWell(
-              onTap: () async {
-                await _showRepositorySelector(context);
-              },
-              child: Row(children: [
-                Icon(
-                  icon,
-                  size: Dimensions.sizeIconSmall,
-                  color: iconColor,
-                ),
-                Dimensions.spacingHorizontal,
-                Fields.constrainedText(repoName,
-                    softWrap: false,
-                    textOverflow: TextOverflow.fade,
-                    color: textColor),
-                SizedBox(
-                    width: 44,
-                    height: 44,
-                    child: Icon(Icons.keyboard_arrow_down_outlined,
-                        color: iconColor)),
-              ])));
+        ])));
 
   Future<dynamic> _showRepositorySelector(BuildContext context) =>
       showModalBottomSheet(
