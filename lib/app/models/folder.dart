@@ -5,7 +5,6 @@ import '../utils/strings.dart';
 import '../utils/actions.dart';
 import '../cubits/repo.dart';
 
-
 class Folder {
   late final RepoCubit repo;
   String path = Strings.root;
@@ -85,7 +84,7 @@ class _Refresher {
           if (path == folder.path) {
             folder.content = content;
           }
-        } catch(_) {
+        } catch (_) {
           if (path == folder.path) {
             folder.content.clear();
           }

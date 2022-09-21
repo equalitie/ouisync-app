@@ -7,7 +7,8 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-typedef MoveEntryCallback = void Function(String origin, String path, EntryType type);
+typedef MoveEntryCallback = void Function(
+    String origin, String path, EntryType type);
 
 class MoveEntryDialog extends StatelessWidget {
   const MoveEntryDialog(
@@ -38,13 +39,10 @@ class MoveEntryDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.iconLabel(
-            icon: Icons.drive_file_move_outlined,
-            text: getBasename(path)
-          ),
+              icon: Icons.drive_file_move_outlined, text: getBasename(path)),
           Fields.constrainedText(
-            S.current.messageMoveEntryOrigin(getDirname(path)),
-            fontWeight: FontWeight.w800
-          ),
+              S.current.messageMoveEntryOrigin(getDirname(path)),
+              fontWeight: FontWeight.w800),
           _selectActions(context)
         ],
       ),
@@ -52,19 +50,18 @@ class MoveEntryDialog extends StatelessWidget {
   }
 
   _selectActions(context) => _repo.builder((state) {
-    bool canMove = false;
-    final folder = _repo.currentFolder;
+        bool canMove = false;
+        final folder = _repo.currentFolder;
 
-    if (folder.path != origin && folder.path != path) {
-      canMove = true;
-    }
+        if (folder.path != origin && folder.path != path) {
+          canMove = true;
+        }
 
-    return Fields.dialogActions(context,
-      buttons: _actions(context, canMove),
-      padding: const EdgeInsets.only(top: 0.0),
-      mainAxisAlignment: MainAxisAlignment.end
-    );
-  });
+        return Fields.dialogActions(context,
+            buttons: _actions(context, canMove),
+            padding: const EdgeInsets.only(top: 0.0),
+            mainAxisAlignment: MainAxisAlignment.end);
+      });
 
   //_selectActions(context) {
   //  return BlocBuilder(
@@ -88,15 +85,17 @@ class MoveEntryDialog extends StatelessWidget {
   //}
 
   List<Widget> _actions(context, canMove) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => _cancelMoving(context)),
-    PositiveButton(
-      text: S.current.actionMove,
-      onPressed: canMove ? () => onMoveEntry.call(origin, path, type) : null)
-      /// If the entry can't be moved (the user selected the same entry/path, for example)
-      /// Then null is used instead of the function, which disable the button.
-  ];
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => _cancelMoving(context)),
+        PositiveButton(
+            text: S.current.actionMove,
+            onPressed:
+                canMove ? () => onMoveEntry.call(origin, path, type) : null)
+
+        /// If the entry can't be moved (the user selected the same entry/path, for example)
+        /// Then null is used instead of the function, which disable the button.
+      ];
 
   void _cancelMoving(context) {
     onBottomSheetOpen.call(null, '');

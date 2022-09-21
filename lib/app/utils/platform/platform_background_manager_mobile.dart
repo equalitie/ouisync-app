@@ -5,10 +5,9 @@ import '../../../generated/l10n.dart';
 import '../loggers/ouisync_app_logger.dart';
 import 'platform.dart';
 
-class PlatformBackgroundManagerMobile 
-  with OuiSyncAppLogger
-  implements PlatformBackgroundManager {
-  
+class PlatformBackgroundManagerMobile
+    with OuiSyncAppLogger
+    implements PlatformBackgroundManager {
   @override
   Future<void> enableBackgroundExecution(BuildContext context) async {
     final config = FlutterBackgroundAndroidConfig(
@@ -22,7 +21,6 @@ class PlatformBackgroundManagerMobile
     var hasPermissions = await FlutterBackground.hasPermissions;
 
     if (!hasPermissions) {
-
       await showDialog(
           context: context,
           builder: (context) {
@@ -45,9 +43,9 @@ class PlatformBackgroundManagerMobile
           await FlutterBackground.enableBackgroundExecution();
 
       if (backgroundExecution) {
-          loggy.app("Background execution enabled");
+        loggy.app("Background execution enabled");
       } else {
-          loggy.app("Background execution NOT enabled");
+        loggy.app("Background execution NOT enabled");
       }
     } else {
       loggy.app("No permissions to enable background execution");

@@ -16,12 +16,11 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
       title: repoList,
       // Make the `repoList` have no spacing on the horizontal axis.
       titleSpacing: 0.0,
-      actions: [ settingsButton ],
+      actions: [settingsButton],
     );
   }
 
   @override
-  Size get preferredSize => Size(
-      repoList.preferredSize.width,
-      repoList.preferredSize.height);
+  Size get preferredSize =>
+      Size(repoList.preferredSize.width, repoList.preferredSize.height);
 }

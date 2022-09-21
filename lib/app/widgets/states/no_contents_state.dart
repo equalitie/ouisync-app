@@ -17,40 +17,36 @@ class NoContentsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SingleChildScrollView(
-        reverse: false,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Fields.inPageMainMessage(
-                path.isEmpty
-                  ? S.current.messageEmptyRepo
-                  : S.current.messageEmptyFolder,
-              ),
-            ),
-            Dimensions.spacingVertical,
-            Align(
-              alignment: Alignment.center,
-              child: Fields.inPageSecondaryMessage(
-                repository.accessMode == oui.AccessMode.write
-                  ? S.current.messageCreateAddNewItem
-                  : S.current.messageReadOnlyContents,
-                tags: {
-                  Constants.inlineTextBold: InlineTextStyles.bold,
-                  Constants.inlineTextIcon: InlineTextStyles.icon(
-                    Icons.add_circle,
-                    size: Dimensions.sizeIconBig,
-                    color: Theme.of(context).primaryColor
-                  )
-                }
-              ),
-            ),
-          ],
-        )
-      )
-    );
+        child: SingleChildScrollView(
+            reverse: false,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Fields.inPageMainMessage(
+                    path.isEmpty
+                        ? S.current.messageEmptyRepo
+                        : S.current.messageEmptyFolder,
+                  ),
+                ),
+                Dimensions.spacingVertical,
+                Align(
+                  alignment: Alignment.center,
+                  child: Fields.inPageSecondaryMessage(
+                      repository.accessMode == oui.AccessMode.write
+                          ? S.current.messageCreateAddNewItem
+                          : S.current.messageReadOnlyContents,
+                      tags: {
+                        Constants.inlineTextBold: InlineTextStyles.bold,
+                        Constants.inlineTextIcon: InlineTextStyles.icon(
+                            Icons.add_circle,
+                            size: Dimensions.sizeIconBig,
+                            color: Theme.of(context).primaryColor)
+                      }),
+                ),
+              ],
+            )));
   }
 }

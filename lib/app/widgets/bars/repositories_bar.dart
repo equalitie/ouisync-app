@@ -127,52 +127,44 @@ class _Picker extends StatelessWidget {
     required Color iconColor,
     required Color textColor,
     required String repoName,
-  }) => 
-    Container(
-      padding: Dimensions.paddingRepositoryPicker,
-      decoration: BoxDecoration(
-        borderRadius: 
-          const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-        border: Border.all(
-          color: borderColor,
-          style: BorderStyle.solid
-        ),
-        color: Colors.white,
-      ),
-    child: InkWell(
-      onTap: () async { await _showRepositorySelector(context); },
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(icon),
-            iconSize: Dimensions.sizeIconSmall,
-            color: iconColor,
-            onPressed: () {
-              if (reposCubit.currentRepo == null) return;
+  }) =>
+      Container(
+          padding: Dimensions.paddingRepositoryPicker,
+          decoration: BoxDecoration(
+            borderRadius:
+                const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            border: Border.all(color: borderColor, style: BorderStyle.solid),
+            color: Colors.white,
+          ),
+          child: InkWell(
+              onTap: () async {
+                await _showRepositorySelector(context);
+              },
+              child: Row(children: [
+                IconButton(
+                    icon: Icon(icon),
+                    iconSize: Dimensions.sizeIconSmall,
+                    color: iconColor,
+                    onPressed: () {
+                      if (reposCubit.currentRepo == null) return;
 
-              if (reposCubit.currentRepo!
-                .maybeHandle
-                ?.accessMode == AccessMode.blind) return;
-              
-              final metaInfo = reposCubit.currentRepo!.metaInfo;
-              reposCubit.lockRepository(metaInfo);
-            }),
-          Dimensions.spacingHorizontal,
-          Fields.constrainedText(
-            repoName,
-            softWrap: false,
-            textOverflow: TextOverflow.fade,
-            color: textColor
-          ),
-          SizedBox(
-            width: 44,
-            height: 44,
-            child: Icon(
-              Icons.keyboard_arrow_down_outlined,
-              color: iconColor
-            )
-          ),
-        ])));
+                      if (reposCubit.currentRepo!.maybeHandle?.accessMode ==
+                          AccessMode.blind) return;
+
+                      final metaInfo = reposCubit.currentRepo!.metaInfo;
+                      reposCubit.lockRepository(metaInfo);
+                    }),
+                Dimensions.spacingHorizontal,
+                Fields.constrainedText(repoName,
+                    softWrap: false,
+                    textOverflow: TextOverflow.fade,
+                    color: textColor),
+                SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Icon(Icons.keyboard_arrow_down_outlined,
+                        color: iconColor)),
+              ])));
 
   Future<dynamic> _showRepositorySelector(BuildContext context) =>
       showModalBottomSheet(

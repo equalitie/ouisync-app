@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'platform.dart';
 
 abstract class PlatformBackgroundManager {
- factory PlatformBackgroundManager() {
-  if (Platform.isAndroid) {
-    return PlatformBackgroundManagerMobile();
+  factory PlatformBackgroundManager() {
+    if (Platform.isAndroid) {
+      return PlatformBackgroundManagerMobile();
+    }
+    return PlatformBackgroundManagerDesktop();
   }
-  return PlatformBackgroundManagerDesktop();
- } 
 
- Future<void> enableBackgroundExecution(BuildContext context);
+  Future<void> enableBackgroundExecution(BuildContext context);
 }

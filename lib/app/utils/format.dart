@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:path/path.dart' as p;
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-dynamic formatSize(int bytes, { int decimals = 2, bool units = false }) {
+dynamic formatSize(int bytes, {int decimals = 2, bool units = false}) {
   if (bytes <= 0) return "0 B";
   if (bytes < 1000) return '$bytes B';
 
@@ -13,9 +13,7 @@ dynamic formatSize(int bytes, { int decimals = 2, bool units = false }) {
 
   final size = double.parse(((bytes / pow(1000, i)).toStringAsFixed(decimals)));
 
-  return units
-  ? '$size ${suffixes[i]}'
-  : size;
+  return units ? '$size ${suffixes[i]}' : size;
 }
 
 String buildDestinationPath(String parentPath, String entryPath) {

@@ -10,14 +10,10 @@ abstract class ConnectivityState extends Equatable {
 class ConnectivityInitial extends ConnectivityState {}
 
 class ConnectivityChanged extends ConnectivityState {
-  const ConnectivityChanged({
-    required this.connectivityResult
-  });
+  const ConnectivityChanged({required this.connectivityResult});
 
   final ConnectivityResult connectivityResult;
 
   @override
-  List<Object> get props => [
-    connectivityResult
-  ];
+  List<Object> get props => [connectivityResult];
 }

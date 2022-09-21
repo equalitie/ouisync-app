@@ -11,9 +11,6 @@ extension UriExtension on Uri {
     final hasCorrectPath = path == '/r';
     final hasToken = hasFragment;
 
-    return isHttps &&
-    hasCorrectPath &&
-    isOuiSync &&
-    hasToken;
+    return isHttps && hasCorrectPath && isOuiSync && hasToken;
   }
 }

@@ -2,11 +2,13 @@ import 'package:loggy/loggy.dart';
 
 class OuiSyncAppLogger implements LoggyType {
   @override
-  Loggy<LoggyType> get loggy => Loggy<OuiSyncAppLogger>('ouisync-app -$runtimeType');
+  Loggy<LoggyType> get loggy =>
+      Loggy<OuiSyncAppLogger>('ouisync-app -$runtimeType');
 }
 
 const LogLevel appLevel = LogLevel('OuiSync', 1);
 
 extension OuiSyncAppLoggy on Loggy {
-  void app(dynamic message, [Object? error, StackTrace? stackTrace]) => log(appLevel, message, error, stackTrace);
+  void app(dynamic message, [Object? error, StackTrace? stackTrace]) =>
+      log(appLevel, message, error, stackTrace);
 }

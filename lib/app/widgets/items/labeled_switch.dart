@@ -39,18 +39,14 @@ class LabeledSwitch extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.clip,
-                softWrap: true,
-                style: const TextStyle(
-                  fontSize: Dimensions.fontAverage,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black
-                )
-              )
-            ),
+                child: Text(label,
+                    textAlign: TextAlign.start,
+                    overflow: TextOverflow.clip,
+                    softWrap: true,
+                    style: const TextStyle(
+                        fontSize: Dimensions.fontAverage,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black))),
             Switch(
               value: value,
               onChanged: (bool newValue) {

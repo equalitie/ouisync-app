@@ -5,12 +5,12 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RenameRepository extends StatelessWidget {
-  const RenameRepository({
-    Key? key,
-    required this.context,
-    required this.formKey,
-    required this.repositoryName
-  }) : super(key: key);
+  const RenameRepository(
+      {Key? key,
+      required this.context,
+      required this.formKey,
+      required this.repositoryName})
+      : super(key: key);
 
   final BuildContext context;
   final GlobalKey<FormState> formKey;
@@ -27,28 +27,22 @@ class RenameRepository extends StatelessWidget {
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Fields.constrainedText(
-          '"$repositoryName"',
-          flex: 0,
-          fontWeight: FontWeight.w400
-        ),
-        Fields.formTextField(
-          context: context,
-          label: S.current.labelRenameRepository,
-          hint: S.current.messageRepositoryNewName,
-          onSaved: _returnName,
-          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
-          autofocus: true
-        ),
-        Fields.dialogActions(
-          context,
-          buttons: _actions(context)),
-      ]
-    );
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.constrainedText('"$repositoryName"',
+              flex: 0, fontWeight: FontWeight.w400),
+          Fields.formTextField(
+              context: context,
+              label: S.current.labelRenameRepository,
+              hint: S.current.messageRepositoryNewName,
+              onSaved: _returnName,
+              validator: validateNoEmpty(
+                  S.current.messageErrorFormValidatorNameDefault),
+              autofocus: true),
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
   }
 
   void _returnName(String? newName) {
@@ -56,13 +50,12 @@ class RenameRepository extends StatelessWidget {
   }
 
   List<Widget> _actions(context) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context).pop('')),
-    PositiveButton(
-      text: S.current.actionRename,
-      onPressed: _validateNewName)
-  ];
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => Navigator.of(context).pop('')),
+        PositiveButton(
+            text: S.current.actionRename, onPressed: _validateNewName)
+      ];
 
   void _validateNewName() {
     if (formKey.currentState!.validate()) {

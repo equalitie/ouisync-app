@@ -1,4 +1,3 @@
-
 class Strings {
   Strings._();
 
@@ -20,8 +19,10 @@ class Strings {
   static const String labelTcpListenerEndpointV4 = 'Listening on TCP IPv4:';
   static const String labelTcpListenerEndpointV6 = 'Listening on TCP IPv6:';
 
-  static const String labelQuicListenerEndpointV4 = 'Listening on QUIC/UDP IPv4:';
-  static const String labelQuicListenerEndpointV6 = 'Listening on QUIC/UDP IPv6:';
+  static const String labelQuicListenerEndpointV4 =
+      'Listening on QUIC/UDP IPv4:';
+  static const String labelQuicListenerEndpointV6 =
+      'Listening on QUIC/UDP IPv6:';
 
   static const String labelDHTv4Endpoint = 'DHT IPv4:';
   static const String labelDHTv6Endpoint = 'DHT IPv6:';
@@ -31,10 +32,12 @@ class Strings {
 
   // Buttons text
 
-  static const String actionDeleteFile = 'Delete file'; // TODO: replace in the switch statement in dialogs.dartL149
+  static const String actionDeleteFile =
+      'Delete file'; // TODO: replace in the switch statement in dialogs.dartL149
 
   static const String emptyIPv4 = '0.0.0.0';
   static const String undeterminedIPv6 = '[::]';
 
-  static const String errorEntryNotFound = 'entry not found'; // TODO:  Move to an error specific class maybe?
+  static const String errorEntryNotFound =
+      'entry not found'; // TODO:  Move to an error specific class maybe?
 }

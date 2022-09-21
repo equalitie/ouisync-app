@@ -4,22 +4,18 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 
-showSnackBar(BuildContext context, { required Widget content, SnackBarAction? action }) =>
-  ScaffoldMessenger
-  .of(context)
-  .showSnackBar(
-    SnackBar(
-      content: content,
-      action: action,
-    ),
-  );
+showSnackBar(BuildContext context,
+        {required Widget content, SnackBarAction? action}) =>
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: content,
+        action: action,
+      ),
+    );
 
-hideSnackBar(context) =>
-  SnackBarAction(
+hideSnackBar(context) => SnackBarAction(
     label: S.current.actionHideCapital,
-    onPressed: () =>
-      ScaffoldMessenger.of(context).hideCurrentSnackBar()
-  );
+    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar());
 
 String getBasename(String path) => p.basename(path);
 
@@ -32,9 +28,9 @@ Future<void> copyStringToClipboard(String data) async {
 }
 
 String? Function(String?) validateNoEmpty(String error) => (String? value) {
-  if (value == null || value.isEmpty) {
-    return error;
-  }
+      if (value == null || value.isEmpty) {
+        return error;
+      }
 
-  return null;
-};
+      return null;
+    };

@@ -13,8 +13,8 @@ class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      child: _getWidgetForState(context),
-      onTap: () => onFileIconTap(context));
+        child: _getWidgetForState(context),
+        onTap: () => onFileIconTap(context));
   }
 
   void onFileIconTap(BuildContext context) {
@@ -29,9 +29,8 @@ class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
     final job = _downloadJob;
 
     if (job == null) {
-      return const Icon(
-        Icons.insert_drive_file_outlined,
-        size: Dimensions.sizeIconAverage);
+      return const Icon(Icons.insert_drive_file_outlined,
+          size: Dimensions.sizeIconAverage);
     }
 
     return job.builder((job) {
@@ -39,14 +38,13 @@ class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
       final percentage = (ratio * 100.0).round();
 
       return CircularPercentIndicator(
-        radius: Dimensions.sizeIconMicro,
-        animation: true,
-        animateFromLastPercent: true,
-        percent: ratio,
-        progressColor: Theme.of(context).colorScheme.secondary,
-        center: Text(
-          '$percentage%',
-          style: const TextStyle(fontSize: Dimensions.fontMicro)));
+          radius: Dimensions.sizeIconMicro,
+          animation: true,
+          animateFromLastPercent: true,
+          percent: ratio,
+          progressColor: Theme.of(context).colorScheme.secondary,
+          center: Text('$percentage%',
+              style: const TextStyle(fontSize: Dimensions.fontMicro)));
     });
 
     // TODO: This code used to show a different icon once the download finished.

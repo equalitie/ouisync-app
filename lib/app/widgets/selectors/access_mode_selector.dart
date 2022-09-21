@@ -6,13 +6,13 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class AccessModeSelector extends StatefulWidget {
-  const AccessModeSelector({
-    required this.currentAccessMode,
-    required this.availableAccessMode,
-    required this.onChanged,
-    required this.onDisabledMessage,
-    Key? key
-  }) : super(key: key);
+  const AccessModeSelector(
+      {required this.currentAccessMode,
+      required this.availableAccessMode,
+      required this.onChanged,
+      required this.onDisabledMessage,
+      Key? key})
+      : super(key: key);
 
   final AccessMode currentAccessMode;
   final List<AccessMode> availableAccessMode;
@@ -46,60 +46,64 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
 
   Widget _buildModeSelector() {
     return Column(
-        children: [
-          Padding(
+      children: [
+        Padding(
             padding: Dimensions.paddingItem,
-            child: Row(children: [Fields.constrainedText(
-              S.current.labelSetPermission,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Constants.inputLabelForeColor)])),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _buildAccessModeOptions(),)
-        ],);
+            child: Row(children: [
+              Fields.constrainedText(S.current.labelSetPermission,
+                  fontSize: Dimensions.fontMicro,
+                  fontWeight: FontWeight.normal,
+                  color: Constants.inputLabelForeColor)
+            ])),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: _buildAccessModeOptions(),
+        )
+      ],
+    );
   }
 
   List<Widget> _buildAccessModeOptions() {
-    return AccessMode.values.map((mode) =>
-      Expanded(child: RadioListTile(
-        title: Text(mode.name,
-        textAlign: TextAlign.start,
-          style: TextStyle(
-            fontSize: Dimensions.fontAverage,
-            color: _getModeStateColor(mode)
-          ),),
-        toggleable: true,
-        contentPadding: EdgeInsets.zero,
-        value: mode,
-        groupValue: _selectedMode,
-        onChanged: (current) async {
-          loggy.app('Access mode: $current');
+    return AccessMode.values
+        .map((mode) => Expanded(
+                child: RadioListTile(
+              title: Text(
+                mode.name,
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    fontSize: Dimensions.fontAverage,
+                    color: _getModeStateColor(mode)),
+              ),
+              toggleable: true,
+              contentPadding: EdgeInsets.zero,
+              value: mode,
+              groupValue: _selectedMode,
+              onChanged: (current) async {
+                loggy.app('Access mode: $current');
 
-          final disabledMessage = 
-            S.current.messageAccessModeDisabled(widget.currentAccessMode.name);
-          final isEnabled = widget.availableAccessMode.contains(mode);
+                final disabledMessage = S.current
+                    .messageAccessModeDisabled(widget.currentAccessMode.name);
+                final isEnabled = widget.availableAccessMode.contains(mode);
 
-          widget.onDisabledMessage(
-            !isEnabled,
-            disabledMessage,
-            Constants.notAvailableActionMessageDuration);
+                widget.onDisabledMessage(!isEnabled, disabledMessage,
+                    Constants.notAvailableActionMessageDuration);
 
-          if (!isEnabled) {
-            return;
-          }
+                if (!isEnabled) {
+                  return;
+                }
 
-          if (current == null) {
-            setState(() => _selectedMode = null);
-            await widget.onChanged(null);
+                if (current == null) {
+                  setState(() => _selectedMode = null);
+                  await widget.onChanged(null);
 
-            return;
-          }
+                  return;
+                }
 
-          setState(() => _selectedMode = current);
-          await widget.onChanged(current);
-        },
-      ))).toList();
+                setState(() => _selectedMode = current);
+                await widget.onChanged(current);
+              },
+            )))
+        .toList();
   }
 
   Color _getModeStateColor(AccessMode accessMode) {

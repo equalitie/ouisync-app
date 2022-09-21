@@ -19,9 +19,7 @@ class LoadingMainPageState extends StatelessWidget {
           Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,
-            child: Fields.inPageMainMessage(
-              S.current.messageInitializing
-            ),
+            child: Fields.inPageMainMessage(S.current.messageInitializing),
           )
         ],
       ),

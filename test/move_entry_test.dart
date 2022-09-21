@@ -16,9 +16,9 @@ void main() {
     session = await Session.open(dir.path);
     final info = RepoMetaInfo(p.join(dir.path, "store.db"));
     repository = RepoCubit(
-      info,
-      await Repository.create(session, store: info.path(), password: 'a1b2c3')
-    );
+        info,
+        await Repository.create(session,
+            store: info.path(), password: 'a1b2c3'));
   });
 
   tearDown(() async {
@@ -26,8 +26,7 @@ void main() {
     session.close();
   });
 
-  test('Move folder ok when folder to move is empty',
-  () async {
+  test('Move folder ok when folder to move is empty', () async {
     const folder1Path = '/folder1';
     const folder2Path = '/folder1/folder2';
     const folder2RootPath = '/folder2';
@@ -65,18 +64,20 @@ void main() {
     }
     // Move folder2 (/folder1/folder2) to root (/folder2)
     {
-      final result = await repository.moveEntry(source: folder2Path, destination: folder2RootPath);
+      final result = await repository.moveEntry(
+          source: folder2Path, destination: folder2RootPath);
       expect(result, equals(true));
     }
 
     {
-      final rootContentsAfterMovingFolder2 = await repository.getFolderContents('/');
-      expect(rootContentsAfterMovingFolder2, equals(rootExpectedContentsWithFolder1AndFolder2));
+      final rootContentsAfterMovingFolder2 =
+          await repository.getFolderContents('/');
+      expect(rootContentsAfterMovingFolder2,
+          equals(rootExpectedContentsWithFolder1AndFolder2));
     }
   });
 
-  test('Move folder ok when folder to move is not empty',
-  () async {
+  test('Move folder ok when folder to move is not empty', () async {
     const folder1Path = '/folder1';
     const folder2Path = '/folder1/folder2';
     const folder2RootPath = '/folder2';
@@ -121,7 +122,6 @@ void main() {
       final file = await File.create(repository.handle, file1InFolder2Path);
       await file.write(0, utf8.encode(filePathContent));
       await file.close();
-      
     }
     // Get contents of folder1 (/folder1) and confirm it contains folder2 (/folder1/folder2)
     {
@@ -135,13 +135,16 @@ void main() {
     }
     // Move folder2 (/folder1/folder2) to root (/folder2) containing file1.txt (/folder1/folder2/file1.txt)
     {
-      final result = await repository.moveEntry(source: folder2Path, destination: folder2RootPath);
+      final result = await repository.moveEntry(
+          source: folder2Path, destination: folder2RootPath);
       expect(result, equals(true));
     }
 
     {
-      final rootContentsAfterMovingFolder2 = await repository.getFolderContents('/');
-      expect(rootContentsAfterMovingFolder2, equals(rootExpectedContentsWithFolder1AndFolder2));
+      final rootContentsAfterMovingFolder2 =
+          await repository.getFolderContents('/');
+      expect(rootContentsAfterMovingFolder2,
+          equals(rootExpectedContentsWithFolder1AndFolder2));
     }
   });
 }

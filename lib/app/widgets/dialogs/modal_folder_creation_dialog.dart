@@ -6,11 +6,8 @@ import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
 class FolderCreation extends StatelessWidget {
-  const FolderCreation({
-    required this.context,
-    required this.cubit,
-    required this.formKey
-  });
+  const FolderCreation(
+      {required this.context, required this.cubit, required this.formKey});
 
   final BuildContext context;
   final RepoCubit cubit;
@@ -27,24 +24,20 @@ class FolderCreation extends StatelessWidget {
 
   Widget _buildCreateFolderWidget(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Fields.formTextField(
-          context: context,
-          label: S.current.labelName,
-          hint: S.current.messageFolderName,
-          onSaved: (value) => _onSaved(cubit, value),
-          validator: validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
-          autofocus: true
-        ),
-        Fields.dialogActions(
-          context,
-          buttons: _actions(context)
-        ),
-      ]
-    );
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.formTextField(
+              context: context,
+              label: S.current.labelName,
+              hint: S.current.messageFolderName,
+              onSaved: (value) => _onSaved(cubit, value),
+              validator: validateNoEmpty(
+                  S.current.messageErrorFormValidatorNameDefault),
+              autofocus: true),
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
   }
 
   void _onSaved(RepoCubit cubit, newFolderName) async {
@@ -61,18 +54,16 @@ class FolderCreation extends StatelessWidget {
   }
 
   List<Widget> _actions(context) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context).pop('')),
-    PositiveButton(
-      text: S.current.actionCreate,
-      onPressed: _validateFolderName)
-  ];
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => Navigator.of(context).pop('')),
+        PositiveButton(
+            text: S.current.actionCreate, onPressed: _validateFolderName)
+      ];
 
   void _validateFolderName() {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
     }
   }
-
 }

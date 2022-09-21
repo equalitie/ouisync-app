@@ -22,13 +22,12 @@ class ListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: InkWell(
-        onTap:() => mainAction.call(),
-        splashColor: Colors.blue,
-        child: Container(
-          padding: Dimensions.paddingListItem,
-          child: _buildItem(),
-        )
-      ),
+          onTap: () => mainAction.call(),
+          splashColor: Colors.blue,
+          child: Container(
+            padding: Dimensions.paddingListItem,
+            child: _buildItem(),
+          )),
       color: Colors.white,
     );
   }
@@ -55,14 +54,12 @@ class ListItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
+        Expanded(flex: 1, child: FileIconAnimated(downloadJob)),
         Expanded(
-          flex: 1,
-          child: FileIconAnimated(downloadJob)),
-        Expanded(
-          flex: 9,
-          child: Padding(
-            padding: Dimensions.paddingItem,
-            child: FileDescription(repository, fileData, uploadJob))),
+            flex: 9,
+            child: Padding(
+                padding: Dimensions.paddingItem,
+                child: FileDescription(repository, fileData, uploadJob))),
         _getVerticalMenuAction(),
       ],
     );
@@ -73,16 +70,15 @@ class ListItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         const Expanded(
-          flex: 1,
-          child: Icon(
-            Icons.folder_rounded,
-            size: Dimensions.sizeIconAverage,
-            color: Constants.folderIconColor)),
+            flex: 1,
+            child: Icon(Icons.folder_rounded,
+                size: Dimensions.sizeIconAverage,
+                color: Constants.folderIconColor)),
         Expanded(
-          flex: 9,
-          child: Padding(
-            padding: Dimensions.paddingItem,
-            child: FolderDescription(folderData: itemData))),
+            flex: 9,
+            child: Padding(
+                padding: Dimensions.paddingItem,
+                child: FolderDescription(folderData: itemData))),
         _getVerticalMenuAction(),
       ],
     );
@@ -90,7 +86,8 @@ class ListItem extends StatelessWidget {
 
   Widget _getVerticalMenuAction() {
     return IconButton(
-      icon: const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-      onPressed: () async => await folderDotsAction());
+        icon:
+            const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
+        onPressed: () async => await folderDotsAction());
   }
 }

@@ -6,11 +6,11 @@ class RepoMetaInfo extends Equatable {
   final String _dir;
   final String _name; // Repo name (without the '.db' extension)
 
-  RepoMetaInfo(String pathToDbFile) :
-    _dir = p.dirname(pathToDbFile),
-    _name = p.basenameWithoutExtension(pathToDbFile);
+  RepoMetaInfo(String pathToDbFile)
+      : _dir = p.dirname(pathToDbFile),
+        _name = p.basenameWithoutExtension(pathToDbFile);
 
-  String path({ ext = "db" }) {
+  String path({ext = "db"}) {
     return p.join(_dir, "$_name.$ext");
   }
 
@@ -18,7 +18,7 @@ class RepoMetaInfo extends Equatable {
 
   @override
   List<Object> get props => [
-    _dir,
-    _name,
-  ];
+        _dir,
+        _name,
+      ];
 }

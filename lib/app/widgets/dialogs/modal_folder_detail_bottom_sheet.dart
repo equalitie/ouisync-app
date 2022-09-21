@@ -10,16 +10,16 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class FolderDetail extends StatefulWidget {
-  const FolderDetail({
-    required this.context,
-    required this.cubit,
-    required this.data,
-    required this.scaffoldKey,
-    required this.onBottomSheetOpen,
-    required this.onMoveEntry,
-    required this.isActionAvailableValidator,
-    Key? key
-  }) : super(key: key);
+  const FolderDetail(
+      {required this.context,
+      required this.cubit,
+      required this.data,
+      required this.scaffoldKey,
+      required this.onBottomSheetOpen,
+      required this.onMoveEntry,
+      required this.isActionAvailableValidator,
+      Key? key})
+      : super(key: key);
 
   final BuildContext context;
   final RepoCubit cubit;
@@ -37,100 +37,103 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: Dimensions.paddingBottomSheet,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(S.current.titleFolderDetails),
-          EntryActionItem(
-            iconData: Icons.edit,
-            title: S.current.iconRename,
-            dense: true,
-            onTap: () async =>
-              _showNewNameDialog(widget.data.path,),
-            enabledValidation: () => widget.isActionAvailableValidator(
-              widget.cubit.accessMode,
-              EntryAction.rename),
-            disabledMessage: S.current.messageActionNotAvailable,
-            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
-          EntryActionItem(
-            iconData: Icons.drive_file_move_outlined,
-            title: S.current.iconMove,
-            dense: true,
-            onTap: () async =>
-              _showMoveEntryBottomSheet(
-                widget.data.path,
-                EntryType.directory,
-                widget.onMoveEntry,
-                widget.onBottomSheetOpen
+        padding: Dimensions.paddingBottomSheet,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Fields.bottomSheetHandle(context),
+              Fields.bottomSheetTitle(S.current.titleFolderDetails),
+              EntryActionItem(
+                iconData: Icons.edit,
+                title: S.current.iconRename,
+                dense: true,
+                onTap: () async => _showNewNameDialog(
+                  widget.data.path,
+                ),
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.accessMode, EntryAction.rename),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
               ),
-            enabledValidation: () => widget.isActionAvailableValidator(
-              widget.cubit.accessMode,
-              EntryAction.move),
-            disabledMessage: S.current.messageActionNotAvailable,
-            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
-          EntryActionItem(
-            iconData: Icons.delete_outlined,
-            title: S.current.iconDelete,
-            dense: true,
-            onTap: () async {
-              await showDialog<bool>(
-                context: widget.context,
-                barrierDismissible: false, // user must tap button!
-                builder: (context) {
-                  return buildDeleteFolderAlertDialog(
-                    context,
-                    widget.cubit,
+              EntryActionItem(
+                iconData: Icons.drive_file_move_outlined,
+                title: S.current.iconMove,
+                dense: true,
+                onTap: () async => _showMoveEntryBottomSheet(
                     widget.data.path,
-                  );
+                    EntryType.directory,
+                    widget.onMoveEntry,
+                    widget.onBottomSheetOpen),
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.accessMode, EntryAction.move),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
+              EntryActionItem(
+                iconData: Icons.delete_outlined,
+                title: S.current.iconDelete,
+                dense: true,
+                onTap: () async {
+                  await showDialog<bool>(
+                    context: widget.context,
+                    barrierDismissible: false, // user must tap button!
+                    builder: (context) {
+                      return buildDeleteFolderAlertDialog(
+                        context,
+                        widget.cubit,
+                        widget.data.path,
+                      );
+                    },
+                  ).then((result) {
+                    if (result ?? false) {
+                      Navigator.of(context).pop(result);
+                      showSnackBar(context,
+                          content: Text(S.current
+                              .messageFolderDeleted(widget.data.name)));
+                    }
+                  });
                 },
-              ).then((result) {
-                if (result ?? false) {
-                  Navigator.of(context).pop(result);
-                  showSnackBar(context, content: Text(S.current.messageFolderDeleted(widget.data.name)));
-                }
-              });
-            },
-            enabledValidation: () => widget.isActionAvailableValidator(
-              widget.cubit.accessMode,
-              EntryAction.delete),
-            disabledMessage: S.current.messageActionNotAvailable,
-            disabledMessageDuration: Constants.notAvailableActionMessageDuration,),
-          const Divider(
-            height: 10.0,
-            thickness: 2.0,
-            indent: 20.0,
-            endIndent: 20.0,
-          ),
-          Fields.iconLabel(
-            icon: Icons.info_rounded,
-            text: S.current.iconInformation,
-            iconSize: Dimensions.sizeIconBig,
-            textAlign: TextAlign.start,
-          ),
-          Fields.labeledText(
-            label: S.current.labelName,
-            labelFontSize: Dimensions.fontAverage,
-            text: widget.data.name,
-            textAlign: TextAlign.start,
-          ),
-          Fields.labeledText(
-            label: S.current.labelLocation,
-            labelFontSize: Dimensions.fontAverage,
-            text: widget.data.path
-            .replaceAll(widget.data.name, '')
-            .trimRight(),
-            textAlign: TextAlign.start,
-          ),
-        ]
-      )
-    );
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.accessMode, EntryAction.delete),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
+              const Divider(
+                height: 10.0,
+                thickness: 2.0,
+                indent: 20.0,
+                endIndent: 20.0,
+              ),
+              Fields.iconLabel(
+                icon: Icons.info_rounded,
+                text: S.current.iconInformation,
+                iconSize: Dimensions.sizeIconBig,
+                textAlign: TextAlign.start,
+              ),
+              Fields.labeledText(
+                label: S.current.labelName,
+                labelFontSize: Dimensions.fontAverage,
+                text: widget.data.name,
+                textAlign: TextAlign.start,
+              ),
+              Fields.labeledText(
+                label: S.current.labelLocation,
+                labelFontSize: Dimensions.fontAverage,
+                text: widget.data.path
+                    .replaceAll(widget.data.name, '')
+                    .trimRight(),
+                textAlign: TextAlign.start,
+              ),
+            ]));
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(BuildContext context, RepoCubit cubit, String path) {
+  AlertDialog buildDeleteFolderAlertDialog(
+      BuildContext context, RepoCubit cubit, String path) {
     return AlertDialog(
       title: Text(S.current.titleDeleteFolder),
       content: SingleChildScrollView(
@@ -139,9 +142,8 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
             Text(
               path,
               style: const TextStyle(
-                fontSize: Dimensions.fontAverage,
-                fontWeight: FontWeight.bold
-              ),
+                  fontSize: Dimensions.fontAverage,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(
               height: 30.0,
@@ -153,7 +155,8 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       actions: <Widget>[
         TextButton(
           child: Text(S.current.actionDeleteCapital),
-          onPressed: () => deleteFolderWithContentsValidation(cubit, path, context),
+          onPressed: () =>
+              deleteFolderWithContentsValidation(cubit, path, context),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
@@ -165,7 +168,8 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     );
   }
 
-  void deleteFolderWithContentsValidation(RepoCubit repo, String path, BuildContext context) async {
+  void deleteFolderWithContentsValidation(
+      RepoCubit repo, String path, BuildContext context) async {
     bool recursive = false;
 
     final type = await repo.type(path);
@@ -184,20 +188,22 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
 
     if (directory.isNotEmpty) {
       recursive = await Dialogs.alertDialogWithActions(
-        context: context,
-        title: S.current.titleDeleteNotEmptyFolder,
-        body: [Text(S.current.messageConfirmNotEmptyFolderDeletion)],
-        actions: [
-          TextButton(
-            child: Text(S.current.actionDeleteCapital),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-          TextButton(
-            child: Text(S.current.actionCancelCapital),
-            onPressed: () => Navigator.of(context).pop(false),
-          )
-        ]
-      ) ?? false;
+              context: context,
+              title: S.current.titleDeleteNotEmptyFolder,
+              body: [
+                Text(S.current.messageConfirmNotEmptyFolderDeletion)
+              ],
+              actions: [
+                TextButton(
+                  child: Text(S.current.actionDeleteCapital),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+                TextButton(
+                  child: Text(S.current.actionCancelCapital),
+                  onPressed: () => Navigator.of(context).pop(false),
+                )
+              ]) ??
+          false;
 
       if (!recursive) {
         return;
@@ -207,29 +213,27 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     deleteAction(context, repo, path, recursive);
   }
 
-  void deleteAction(BuildContext context, RepoCubit repo, String path, bool recursive) {
+  void deleteAction(
+      BuildContext context, RepoCubit repo, String path, bool recursive) {
     repo.deleteFolder(path, recursive);
     Navigator.of(context).pop(true);
   }
 
   _showMoveEntryBottomSheet(
-    String path,
-    EntryType type,
-    MoveEntryCallback moveEntryCallback,
-    BottomSheetControllerCallback bottomSheetControllerCallback
-  ) {
+      String path,
+      EntryType type,
+      MoveEntryCallback moveEntryCallback,
+      BottomSheetControllerCallback bottomSheetControllerCallback) {
     Navigator.of(context).pop();
 
     final origin = getDirname(path);
     final controller = widget.scaffoldKey.currentState?.showBottomSheet(
-      (context) => MoveEntryDialog(
-        widget.cubit,
-        origin: origin,
-        path: path,
-        type: type,
-        onBottomSheetOpen: bottomSheetControllerCallback,
-        onMoveEntry: moveEntryCallback
-      ),
+      (context) => MoveEntryDialog(widget.cubit,
+          origin: origin,
+          path: path,
+          type: type,
+          onBottomSheetOpen: bottomSheetControllerCallback,
+          onMoveEntry: moveEntryCallback),
       enableDrag: false,
     );
 
@@ -238,24 +242,24 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
 
   void _showNewNameDialog(String path) async {
     await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
-        final name = getBasename(path);
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          final formKey = GlobalKey<FormState>();
+          final name = getBasename(path);
 
-        return ActionsDialog(
-          title: S.current.messageRenameFolder,
-          body: Rename(
-            context: context,
-            entryName:  name,
-            hint: S.current.messageFolderName,
-            formKey: formKey,
-          ),
-        );
-      }
-    ).then((newName) {
-      if (newName.isNotEmpty) { // The new name provided by the user.
+          return ActionsDialog(
+            title: S.current.messageRenameFolder,
+            body: Rename(
+              context: context,
+              entryName: name,
+              hint: S.current.messageFolderName,
+              formKey: formKey,
+            ),
+          );
+        }).then((newName) {
+      if (newName.isNotEmpty) {
+        // The new name provided by the user.
         final parent = getDirname(path);
         final newEntryPath = buildDestinationPath(parent, newName);
 

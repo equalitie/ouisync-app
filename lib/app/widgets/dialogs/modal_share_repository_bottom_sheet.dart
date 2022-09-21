@@ -12,11 +12,9 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class ShareRepository extends StatefulWidget {
-  const ShareRepository({
-    required this.repository,
-    required this.availableAccessModes,
-    Key? key
-  }) : super(key: key);
+  const ShareRepository(
+      {required this.repository, required this.availableAccessModes, Key? key})
+      : super(key: key);
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;
@@ -59,7 +57,8 @@ class _ShareRepositoryState extends State<ShareRepository>
               currentAccessMode: widget.repository.accessMode,
               availableAccessMode: widget.availableAccessModes,
               onChanged: _onChanged,
-              onDisabledMessage: _setDisabledMessageVisibility,),
+              onDisabledMessage: _setDisabledMessageVisibility,
+            ),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),
             Dimensions.spacingVerticalDouble,
@@ -127,113 +126,108 @@ class _ShareRepositoryState extends State<ShareRepository>
               BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
           color: Constants.inputBackgroundColor),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Fields.constrainedText(S.current.labelRepositoryLink,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Fields.constrainedText(S.current.labelRepositoryLink,
+                flex: 0,
+                fontSize: Dimensions.fontMicro,
+                fontWeight: FontWeight.normal,
+                color: Constants.inputLabelForeColor),
+            Padding(
+              padding: Dimensions.paddingActionBoxRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Fields.constrainedText(_displayToken ?? Constants.ouisyncUrl,
+                      flex: 0,
+                      softWrap: true,
+                      maxLines: 2,
+                      textOverflow: TextOverflow.fade,
+                      color:
+                          _shareToken != null ? Colors.black : Colors.black54),
+                ],
+              ),
+            ),
+            _buildShareActions()
+          ]));
+
+  Widget _buildShareActions() => Expanded(
+      flex: 0,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Column(children: [
+          Fields.actionIcon(const Icon(Icons.content_copy_rounded),
+              size: Dimensions.sizeIconSmall,
+              color: _getActionStateColor(_shareToken != null),
+              onPressed: () async {
+            if (_shareToken == null) {
+              final disabledMessage = S.current.messageShareActionDisabled;
+              _setDisabledMessageVisibility(true, disabledMessage,
+                  Constants.notAvailableActionMessageDuration);
+
+              return;
+            }
+
+            await copyStringToClipboard(_shareToken!);
+            showSnackBar(context,
+                content: Text(S.current.messageTokenCopiedToClipboard));
+          }),
+          Fields.constrainedText(S.current.labelCopyLink,
               flex: 0,
               fontSize: Dimensions.fontMicro,
               fontWeight: FontWeight.normal,
               color: Constants.inputLabelForeColor),
-          Padding(
-            padding: Dimensions.paddingActionBoxRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Fields.constrainedText(
-                  _displayToken ?? Constants.ouisyncUrl,
-                  flex: 0,
-                  softWrap: true,
-                  maxLines: 2,
-                  textOverflow: TextOverflow.fade,
-                  color: _shareToken != null ? Colors.black : Colors.black54),],),),
-          _buildShareActions()
-        ]));
-
-  Widget _buildShareActions() => Expanded(
-    flex: 0,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Column(children: [
-          Fields.actionIcon(
-            const Icon(Icons.content_copy_rounded),
-            size: Dimensions.sizeIconSmall,
-            color: _getActionStateColor(_shareToken != null),
-            onPressed: () async {
-              if (_shareToken == null) {
-                final disabledMessage = S.current.messageShareActionDisabled;
-                _setDisabledMessageVisibility(
-                  true,
-                  disabledMessage,
-                  Constants.notAvailableActionMessageDuration);
-
-                return;
-              }
-
-              await copyStringToClipboard(_shareToken!);
-              showSnackBar(context,
-                  content: Text(S.current.messageTokenCopiedToClipboard));
-            }),
-          Fields.constrainedText(S.current.labelCopyLink,
-            flex: 0,
-            fontSize: Dimensions.fontMicro,
-            fontWeight: FontWeight.normal,
-            color: Constants.inputLabelForeColor),
         ]),
         Column(children: [
-          Fields.actionIcon(
-            const Icon(Icons.share_outlined),
-            size: Dimensions.sizeIconSmall,
-            color: _getActionStateColor(_shareToken != null),
-            onPressed: () async {
-              if (_shareToken == null) {
-                final disabledMessage = S.current.messageShareActionDisabled;
-                _setDisabledMessageVisibility(
-                  true,
-                  disabledMessage,
+          Fields.actionIcon(const Icon(Icons.share_outlined),
+              size: Dimensions.sizeIconSmall,
+              color: _getActionStateColor(_shareToken != null),
+              onPressed: () async {
+            if (_shareToken == null) {
+              final disabledMessage = S.current.messageShareActionDisabled;
+              _setDisabledMessageVisibility(true, disabledMessage,
                   Constants.notAvailableActionMessageDuration);
 
-                return;
-              }
+              return;
+            }
 
-              await Share.share(_shareToken!);
-            }),
+            await Share.share(_shareToken!);
+          }),
           Fields.constrainedText(S.current.labelShareLink,
-            flex: 0,
-            fontSize: Dimensions.fontMicro,
-            fontWeight: FontWeight.normal,
-            color: Constants.inputLabelForeColor),
+              flex: 0,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor),
         ]),
-        Column(children: [
-          Fields.actionIcon(
-            const Icon(Icons.qr_code_2_outlined),
-            size: Dimensions.sizeIconSmall,
-            color: _getActionStateColor(_shareToken != null),
-            onPressed: () async {
+        Column(
+          children: [
+            Fields.actionIcon(const Icon(Icons.qr_code_2_outlined),
+                size: Dimensions.sizeIconSmall,
+                color: _getActionStateColor(_shareToken != null),
+                onPressed: () async {
               if (_shareToken == null) {
                 final disabledMessage = S.current.messageShareActionDisabled;
-                _setDisabledMessageVisibility(
-                  true,
-                  disabledMessage,
-                  Constants.notAvailableActionMessageDuration);
+                _setDisabledMessageVisibility(true, disabledMessage,
+                    Constants.notAvailableActionMessageDuration);
 
                 return;
               }
 
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return RepositoryQRPage(shareLink: _shareToken!,);
-                }));
+              await Navigator.push(context,
+                  MaterialPageRoute(builder: (context) {
+                return RepositoryQRPage(
+                  shareLink: _shareToken!,
+                );
+              }));
             }),
-          Fields.constrainedText(S.current.labelQRCode,
-            flex: 0,
-            fontSize: Dimensions.fontMicro,
-            fontWeight: FontWeight.normal,
-            color: Constants.inputLabelForeColor),
-        ],)
+            Fields.constrainedText(S.current.labelQRCode,
+                flex: 0,
+                fontSize: Dimensions.fontMicro,
+                fontWeight: FontWeight.normal,
+                color: Constants.inputLabelForeColor),
+          ],
+        )
       ]));
 
   Color _getActionStateColor(bool isEnabled) {
@@ -244,33 +238,30 @@ class _ShareRepositoryState extends State<ShareRepository>
     return Colors.grey;
   }
 
-  Widget  _buildNotAvailableMessage() {
+  Widget _buildNotAvailableMessage() {
     return Visibility(
-    visible: _isDisabledMessageVisible,
-    child: GestureDetector(
-      onTap: () => _setDisabledMessageVisibility(false, '', 0),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 10.0, bottom: 4.0, right: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Expanded( 
-              child:Text(_dissabledMessage,
-                overflow: TextOverflow.ellipsis,
-                softWrap: true,
-                maxLines: 2,
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontSize: Dimensions.fontSmall,
-                  color: Colors.red.shade400
-                )))
-          ]))));
+        visible: _isDisabledMessageVisible,
+        child: GestureDetector(
+            onTap: () => _setDisabledMessageVisibility(false, '', 0),
+            child: Padding(
+                padding:
+                    const EdgeInsets.only(top: 10.0, bottom: 4.0, right: 10.0),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Expanded(
+                      child: Text(_dissabledMessage,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          maxLines: 2,
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                              fontSize: Dimensions.fontSmall,
+                              color: Colors.red.shade400)))
+                ]))));
   }
 
-  void _setDisabledMessageVisibility(bool visible, String message, int duration) {
-    _dissabledMessage = visible
-      ? message
-      : '';
+  void _setDisabledMessageVisibility(
+      bool visible, String message, int duration) {
+    _dissabledMessage = visible ? message : '';
 
     setState(() => _isDisabledMessageVisible = visible);
 
@@ -280,10 +271,8 @@ class _ShareRepositoryState extends State<ShareRepository>
     }
 
     if (duration > 0) {
-      _timer ??= RestartableTimer(
-        Duration(seconds: duration),
-        () =>
-        setState(() => _isDisabledMessageVisible = false));
+      _timer ??= RestartableTimer(Duration(seconds: duration),
+          () => setState(() => _isDisabledMessageVisible = false));
 
       _timer?.reset();
     }

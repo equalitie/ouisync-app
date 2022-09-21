@@ -18,10 +18,7 @@ class FolderNavigationBar extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            width: 0.0,
-            color: Colors.transparent,
-            style: BorderStyle.solid
-          ),
+              width: 0.0, color: Colors.transparent, style: BorderStyle.solid),
         ),
         color: Colors.white,
       ),
@@ -29,13 +26,12 @@ class FolderNavigationBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                Expanded(child: route),
-              ],
-            )
-          ),
+              flex: 1,
+              child: Row(
+                children: [
+                  Expanded(child: route),
+                ],
+              )),
         ],
       ),
     );
@@ -48,11 +44,7 @@ class FolderNavigationBar extends StatelessWidget {
     return Row(
       children: [
         _navigation(path, ctx),
-        SizedBox(
-          width: path == separator
-          ? 5.0
-          : 0.0
-        ),
+        SizedBox(width: path == separator ? 5.0 : 0.0),
         Expanded(
           flex: 1,
           child: Padding(
@@ -83,14 +75,14 @@ class FolderNavigationBar extends StatelessWidget {
         }
       },
       child: path == Strings.root
-      ? const Icon(
-          Icons.lock_rounded,
-          size: Dimensions.sizeIconAverage,
-        )
-      : const Icon(
-          Icons.arrow_back,
-          size: Dimensions.sizeIconAverage,
-        ),
+          ? const Icon(
+              Icons.lock_rounded,
+              size: Dimensions.sizeIconAverage,
+            )
+          : const Icon(
+              Icons.arrow_back,
+              size: Dimensions.sizeIconAverage,
+            ),
     );
   }
 }

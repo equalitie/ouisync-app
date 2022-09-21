@@ -26,45 +26,44 @@ class SaveSharedMedia extends StatelessWidget {
       height: 180.0,
       decoration: Dimensions.decorationBottomSheetAlternative,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.iconLabel(
-            icon: Icons.save_outlined,
-            text: S.current.titleAddFile,
-          )] +
-          sharedMedia.map((media) {
-            return Fields.constrainedText(
-              getBasename(media.path),
-              softWrap: true,
-              textOverflow: TextOverflow.ellipsis,
-              fontWeight: FontWeight.w800
-            );
-          }).toList() + [
-          Fields.dialogActions(context,
-            buttons: _actions(context),
-            padding: const EdgeInsets.only(top: 0.0),
-            mainAxisAlignment: MainAxisAlignment.end
-          )]
-      ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+                Fields.iconLabel(
+                  icon: Icons.save_outlined,
+                  text: S.current.titleAddFile,
+                )
+              ] +
+              sharedMedia.map((media) {
+                return Fields.constrainedText(getBasename(media.path),
+                    softWrap: true,
+                    textOverflow: TextOverflow.ellipsis,
+                    fontWeight: FontWeight.w800);
+              }).toList() +
+              [
+                Fields.dialogActions(context,
+                    buttons: _actions(context),
+                    padding: const EdgeInsets.only(top: 0.0),
+                    mainAxisAlignment: MainAxisAlignment.end)
+              ]),
     );
   }
 
   List<Widget> _actions(BuildContext context) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => _cancelSaveFile(context)),
-    PositiveButton(
-      text: S.current.actionSave,
-      onPressed: () async {
-        for (final media in sharedMedia) {
-          onSaveFile(media.path);
-        }
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => _cancelSaveFile(context)),
+        PositiveButton(
+            text: S.current.actionSave,
+            onPressed: () async {
+              for (final media in sharedMedia) {
+                onSaveFile(media.path);
+              }
 
-        Navigator.of(context).pop();
-      })
-  ];
+              Navigator.of(context).pop();
+            })
+      ];
 
   void _cancelSaveFile(context) {
     onBottomSheetOpen.call(null, '');
