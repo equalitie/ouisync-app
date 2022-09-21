@@ -177,8 +177,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                           }
                         }),
                         _labeledNullableText(
-                            Strings.connectionType, _connectionType),
-                        _labeledNullableText(
                             Strings.labelExternalIP, _externalIP),
                         _labeledNullableText(
                             Strings.labelLocalIPv4, _localIPv4),
