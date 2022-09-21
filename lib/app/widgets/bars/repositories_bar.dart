@@ -3,7 +3,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../models/repo_entry.dart';
+import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -127,14 +127,50 @@ class _Picker extends StatelessWidget {
     required Color iconColor,
     required Color textColor,
     required String repoName,
-  }) =>
-      Container(
-          padding: Dimensions.paddingepositoryPicker,
-          decoration: BoxDecoration(
-            borderRadius:
-                const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-            border: Border.all(color: borderColor, style: BorderStyle.solid),
-            color: Colors.white,
+  }) => 
+    Container(
+      padding: Dimensions.paddingRepositoryPicker,
+      decoration: BoxDecoration(
+        borderRadius: 
+          const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+        border: Border.all(
+          color: borderColor,
+          style: BorderStyle.solid
+        ),
+        color: Colors.white,
+      ),
+    child: InkWell(
+      onTap: () async { await _showRepositorySelector(context); },
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(icon),
+            iconSize: Dimensions.sizeIconSmall,
+            color: iconColor,
+            onPressed: () {
+              if (reposCubit.currentRepo == null) return;
+
+              if (reposCubit.currentRepo!
+                .maybeHandle
+                ?.accessMode == AccessMode.blind) return;
+              
+              final metaInfo = reposCubit.currentRepo!.metaInfo;
+              reposCubit.lockRepository(metaInfo);
+            }),
+          Dimensions.spacingHorizontal,
+          Fields.constrainedText(
+            repoName,
+            softWrap: false,
+            textOverflow: TextOverflow.fade,
+            color: textColor
+          ),
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(
+              Icons.keyboard_arrow_down_outlined,
+              color: iconColor
+            )
           ),
           child: InkWell(
               onTap: () async {

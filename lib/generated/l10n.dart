@@ -1410,6 +1410,36 @@ class S {
     );
   }
 
+  /// `This option is not available on read-only repositories`
+  String get messageActionNotAvailable {
+    return Intl.message(
+      'This option is not available on read-only repositories',
+      name: 'messageActionNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The permission cannot be higger than the repository current access mode: {access}`
+  String messageAccessModeDisabled(Object access) {
+    return Intl.message(
+      'The permission cannot be higger than the repository current access mode: $access',
+      name: 'messageAccessModeDisabled',
+      desc: '',
+      args: [access],
+    );
+  }
+
+  /// `You need to select one permission to create a repository link first`
+  String get messageShareActionDisabled {
+    return Intl.message(
+      'You need to select one permission to create a repository link first',
+      name: 'messageShareActionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(

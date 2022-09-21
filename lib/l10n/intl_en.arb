@@ -153,6 +153,10 @@
     "messageOr":"Or",
     "messageAddRepoLink":"Add a repository using a token link",
 
+    "messageActionNotAvailable":"This option is not available on read-only repositories",
+    "messageAccessModeDisabled":"The permission cannot be higger than the repository current access mode: {access}",
+    "messageShareActionDisabled":"You need to select one permission to create a repository link first",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

@@ -151,6 +151,10 @@
     "messageOr":"O...",
     "messageAddRepoLink":"Agrega un repositorio usando un link",
 
+    "messageActionNotAvailable":"Esta opción no está disponible en repositorios de solo lectura",
+    "messageAccessModeDisabled":"El permiso no puede ser más alto que el modo de acceso actual del repositorio: {access}",
+    "messageShareActionDisabled":"Necesitas seleccionar un permiso para primero crear un link de repository",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

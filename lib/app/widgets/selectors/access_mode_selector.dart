@@ -7,12 +7,17 @@ import '../../utils/utils.dart';
 
 class AccessModeSelector extends StatefulWidget {
   const AccessModeSelector({
-    required this.accessModes,
+    required this.currentAccessMode,
+    required this.availableAccessMode,
     required this.onChanged,
-  });
+    required this.onDisabledMessage,
+    Key? key
+  }) : super(key: key);
 
-  final List<AccessMode> accessModes;
+  final AccessMode currentAccessMode;
+  final List<AccessMode> availableAccessMode;
   final Future<void> Function(AccessMode?) onChanged;
+  final void Function(bool, String, int) onDisabledMessage;
 
   @override
   State<AccessModeSelector> createState() => _AccessModeSelectorState();
@@ -41,52 +46,67 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
 
   Widget _buildModeSelector() {
     return Column(
-      children: [
-        Padding(
+        children: [
+          Padding(
             padding: Dimensions.paddingItem,
-            child: Row(children: [
-              Fields.constrainedText(S.current.labelSetPermission,
-                  fontSize: Dimensions.fontMicro,
-                  fontWeight: FontWeight.normal,
-                  color: Constants.inputLabelForeColor)
-            ])),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: _buildAccessModeOptions(),
-        )
-      ],
-    );
+            child: Row(children: [Fields.constrainedText(
+              S.current.labelSetPermission,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor)])),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: _buildAccessModeOptions(),)
+        ],);
   }
 
   List<Widget> _buildAccessModeOptions() {
-    return widget.accessModes
-        .map((mode) => Expanded(
-                child: RadioListTile(
-              title: Text(
-                mode.name,
-                textAlign: TextAlign.start,
-                style: const TextStyle(
-                  fontSize: Dimensions.fontAverage,
-                ),
-              ),
-              toggleable: true,
-              contentPadding: EdgeInsets.zero,
-              value: mode,
-              groupValue: _selectedMode,
-              onChanged: (current) async {
-                loggy.app('Access mode: $current');
+    return AccessMode.values.map((mode) =>
+      Expanded(child: RadioListTile(
+        title: Text(mode.name,
+        textAlign: TextAlign.start,
+          style: TextStyle(
+            fontSize: Dimensions.fontAverage,
+            color: _getModeStateColor(mode)
+          ),),
+        toggleable: true,
+        contentPadding: EdgeInsets.zero,
+        value: mode,
+        groupValue: _selectedMode,
+        onChanged: (current) async {
+          loggy.app('Access mode: $current');
 
-                if (current == null) {
-                  setState(() => _selectedMode = null);
-                  await widget.onChanged(null);
+          final disabledMessage = 
+            S.current.messageAccessModeDisabled(widget.currentAccessMode.name);
+          final isEnabled = widget.availableAccessMode.contains(mode);
 
-                  return;
-                }
+          widget.onDisabledMessage(
+            !isEnabled,
+            disabledMessage,
+            Constants.notAvailableActionMessageDuration);
 
-                setState(() => _selectedMode = current);
-                await widget.onChanged(current);
-              },
-            )))
-        .toList();
+          if (!isEnabled) {
+            return;
+          }
+
+          if (current == null) {
+            setState(() => _selectedMode = null);
+            await widget.onChanged(null);
+
+            return;
+          }
+
+          setState(() => _selectedMode = current as AccessMode);
+          await widget.onChanged(current as AccessMode);
+        },
+      ))).toList();
+  }
+
+  Color _getModeStateColor(AccessMode accessMode) {
+    if (widget.availableAccessMode.contains(accessMode)) {
+      return Colors.black;
+    }
+
+    return Colors.grey;
   }
 }

@@ -16,6 +16,7 @@ class Constants{
   static const double repositoryBarHeight = 58.0;
 
   static const int modalTransitionDurationMs = 800;
+  static const int notAvailableActionMessageDuration = 4;
 
   /// In-line text style names
 

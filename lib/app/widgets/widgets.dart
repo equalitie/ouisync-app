@@ -25,6 +25,7 @@ export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
 export 'dialogs/save_shared_media.dart';
 
+export 'items/entry_action_item.dart';
 export 'items/file_description.dart';
 export 'items/folder_description.dart';
 export 'items/labeled_switch.dart';

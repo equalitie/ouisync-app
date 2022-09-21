@@ -459,6 +459,7 @@ class _MainPageState extends State<MainPage>
               onBottomSheetOpen: retrieveBottomSheetController,
               onMoveEntry: (origin, path, type) =>
                   moveEntry(repoCubit, origin, path, type),
+              isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
@@ -479,6 +480,7 @@ class _MainPageState extends State<MainPage>
               onBottomSheetOpen: retrieveBottomSheetController,
               onMoveEntry: (origin, path, type) =>
                   moveEntry(repoCubit, origin, path, type),
+              isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
@@ -487,6 +489,18 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController = controller;
     _pathEntryToMove = entryPath;
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
+  }
+
+  bool _isEntryActionAvailable(AccessMode accessMode, EntryAction action) {
+    if (accessMode == AccessMode.write) return true;
+
+    final readDisabledActions = [
+      EntryAction.delete,
+      EntryAction.move,
+      EntryAction.rename,
+    ];
+
+    return !readDisabledActions.contains(action);
   }
 
   void moveEntry(RepoCubit currentRepo, origin, path, type) async {
