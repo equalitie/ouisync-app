@@ -10,6 +10,8 @@ class PowerControl extends WatchSelf<PowerControl> {
 
   bool? _isNetworkEnabled;
   String? _networkDisabledReason;
+  ConnectivityResult? _lastConnectionType;
+  bool _syncOnMobile = false;
 
   PowerControl(this._repos) {
     // TODO: Should we unsusbscribe somewhere?
@@ -19,6 +21,26 @@ class PowerControl extends WatchSelf<PowerControl> {
   Future<void> init() async {
     final current = await _connectivity.checkConnectivity();
     _updateConnectionStatus(current);
+  }
+
+  bool isSyncEnabledOnMobile() {
+    return _syncOnMobile;
+  }
+
+  void enableSyncOnMobile() {
+    _syncOnMobile = true;
+    final lastConnectionType = _lastConnectionType;
+    if (lastConnectionType != null) {
+      _updateConnectionStatus(lastConnectionType);
+    }
+  }
+
+  void disableSyncOnMobile() {
+    _syncOnMobile = false;
+    final lastConnectionType = _lastConnectionType;
+    if (lastConnectionType != null) {
+      _updateConnectionStatus(lastConnectionType);
+    }
   }
 
   // Null means the answer is not yet known (the init function hasn't finished
@@ -36,8 +58,13 @@ class PowerControl extends WatchSelf<PowerControl> {
     String? reason;
 
     if (result == ConnectivityResult.mobile) {
-      newState = false;
-      reason = S.current.messageSyncingIsDisabledOnMobileInternet;
+      if (_syncOnMobile == true) {
+        newState = true;
+        reason = null;
+      } else {
+        newState = false;
+        reason = S.current.messageSyncingIsDisabledOnMobileInternet;
+      }
     } else if (result == ConnectivityResult.none) {
       newState = false;
       reason = S.current.messageNetworkIsUnavailable;
@@ -55,5 +82,7 @@ class PowerControl extends WatchSelf<PowerControl> {
 
       changed();
     }
+
+    _lastConnectionType = result;
   }
 }

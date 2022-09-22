@@ -218,13 +218,43 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         badgeColor = Constants.warningColor;
       }
 
-      final widget = _labeledText(Strings.connectionType, connectionType);
+      //final widget = _labeledText(Strings.connectionType, connectionType);
+      final widget = Fields.labeledButton(
+            label: Strings.connectionType,
+            buttonText: connectionType,
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Sync On Mobile Internet"),
+                    content: const Text("Should synchronization happen while using mobile internet?"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Allow'),
+                        onPressed: () {
+                          _repos.powerControl.enableSyncOnMobile();
+                          Navigator.of(context).pop();
+                        }
+                      ),
+                      TextButton(
+                        child: const Text('Deny'),
+                        onPressed: () {
+                          _repos.powerControl.disableSyncOnMobile();
+                          Navigator.of(context).pop();
+                        }
+                      )
+                    ]
+                  );
+                }
+              );
+            });
 
       if (badgeColor == null) {
         return widget;
       } else {
         return Fields.addBadge(widget,
-            color: badgeColor, moveRight: 18, moveDownwards: 5);
+            color: badgeColor, moveRight: 13, moveDownwards: 8);
       }
     });
 
