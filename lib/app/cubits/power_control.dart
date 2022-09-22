@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../../generated/l10n.dart';
 import 'watch.dart';
 import 'repos.dart';
 
@@ -36,10 +37,10 @@ class PowerControl extends WatchSelf<PowerControl> {
 
     if (result == ConnectivityResult.mobile) {
       newState = false;
-      reason = "Network is disabled when using mobile internet";
+      reason = S.current.messageSyncingIsDisabledOnMobileInternet;
     } else if (result == ConnectivityResult.none) {
       newState = false;
-      reason = "No network available";
+      reason = S.current.messageNetworkIsUnavailable;
     }
 
     if (_isNetworkEnabled != newState || _networkDisabledReason != reason) {
