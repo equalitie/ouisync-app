@@ -121,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     }
 
     setState(() {
-      _externalIP = "...";
+      _externalIP = connectivity == ConnectivityResult.none ? "N/A" : "...";
       _localIPv4 = localIPv4;
       _localIPv6 = localIPv6;
       _tcpListenerEndpointV4 = tcpListenerEndpointV4;
@@ -130,10 +130,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       _quicListenerEndpointV6 = quicListenerEndpointV6;
     });
 
-    // This one takes longer, so do it separately.
-    RGetIp.externalIP.then((ip) => setState(() {
-          _externalIP = ip;
-        }));
+    if (connectivity != ConnectivityResult.none) {
+      // This one takes longer, so do it separately.
+      RGetIp.externalIP.then((ip) => setState(() {
+            _externalIP = ip;
+          }));
+    }
   }
 
   @override
@@ -166,8 +168,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         builder: (context, state) {
                       return Column(
                           children: [
-                        _labeledNullableText(
-                            Strings.connectionType, _connectionType),
+                        ..._buildConnectionTypeRows(),
                         _labeledNullableText(
                             Strings.labelExternalIP, _externalIP),
                         _labeledNullableText(
@@ -199,6 +200,78 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         info.then((info) => info.version)),
                   ],
                 ))));
+  }
+
+  List<Widget> _buildConnectionTypeRows() {
+    final connectionType = _connectionType;
+    var ret = <Widget>[];
+
+    // We don't know the connection type yet.
+    if (connectionType == null) {
+      return ret;
+    }
+
+    final connectionTypeRow = _repos.powerControl.builder((powerControl) {
+      Color? badgeColor;
+
+      if (!(powerControl.isNetworkEnabled() ?? true)) {
+        badgeColor = Constants.warningColor;
+      }
+
+      final widget = Fields.labeledButton(
+            label: Strings.connectionType,
+            buttonText: connectionType,
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Sync On Mobile Internet"),
+                    content: const Text("Should synchronization happen while using mobile internet?"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Allow'),
+                        onPressed: () async {
+                          await _repos.powerControl.enableSyncOnMobile();
+                          Navigator.of(context).pop();
+                        }
+                      ),
+                      TextButton(
+                        child: const Text('Deny'),
+                        onPressed: () async {
+                          await _repos.powerControl.disableSyncOnMobile();
+                          Navigator.of(context).pop();
+                        }
+                      )
+                    ]
+                  );
+                }
+              );
+            });
+
+      if (badgeColor == null) {
+        return widget;
+      } else {
+        return Fields.addBadge(widget,
+            color: badgeColor, moveRight: 13, moveDownwards: 8);
+      }
+    });
+
+    ret.add(connectionTypeRow);
+
+    // If network is disabled, show the reason why.
+    final info = _repos.powerControl.builder((powerControl) {
+      final reason = powerControl.networkDisabledReason();
+      if (reason != null) {
+        return Text(reason, style: TextStyle(color: Colors.orange));
+      } else {
+        return SizedBox.shrink();
+      }
+    });
+
+    ret.add(info);
+
+    return ret;
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {

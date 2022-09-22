@@ -8,19 +8,18 @@ import 'utils.dart';
 class Fields {
   Fields._();
 
-  static Widget addBadge(BuildContext context, Widget child,
-      {bool show = true}) {
+  static Widget addBadge(Widget child,
+      {bool show = true,
+      Color color = Colors.red,
+      double moveRight = 0,
+      double moveDownwards = 0}) {
     return Badge(
         showBadge: show,
         ignorePointer: true,
         badgeContent: SizedBox(width: 10, height: 10),
-        //badgeContent: Icon(
-        //  Icons.warning_amber,
-        //  size: Dimensions.sizeIconBadge,
-        //  color: Theme.of(context).colorScheme.primary
-        //),
-        badgeColor: Colors.red,
-        position: BadgePosition(bottom: 12, end: 10),
+        badgeColor: color,
+        position:
+            BadgePosition(bottom: 12 - moveDownwards, end: 10 - moveRight),
         padding: const EdgeInsets.all(0.0),
         shape: BadgeShape.circle,
         child: child);

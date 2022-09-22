@@ -600,6 +600,26 @@ class S {
     );
   }
 
+  /// `Syncing is disabled while using mobile internet`
+  String get messageSyncingIsDisabledOnMobileInternet {
+    return Intl.message(
+      'Syncing is disabled while using mobile internet',
+      name: 'messageSyncingIsDisabledOnMobileInternet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network is unavailable`
+  String get messageNetworkIsUnavailable {
+    return Intl.message(
+      'Network is unavailable',
+      name: 'messageNetworkIsUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `A new version is available.`
   String get messageNewVersionIsAvailable {
     return Intl.message(

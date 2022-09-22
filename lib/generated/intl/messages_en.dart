@@ -266,6 +266,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMoveEntryOrigin": m8,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
+        "messageNetworkIsUnavailable":
+            MessageLookupByLibrary.simpleMessage("Network is unavailable"),
         "messageNewFileError": m9,
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("A new version is available."),
@@ -311,6 +313,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "You need to select one permission to create a repository link first"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("Share with QR Code"),
+        "messageSyncingIsDisabledOnMobileInternet":
+            MessageLookupByLibrary.simpleMessage(
+                "Syncing is disabled while using mobile internet"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
         "messageUnlockRepository":
