@@ -168,16 +168,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         builder: (context, state) {
                       return Column(
                           children: [
-                        _buildConnectionTypeRow(),
-                        repos.powerControl.builder((powerControl) {
-                          final reason = powerControl.networkDisabledReason();
-                          if (reason != null) {
-                            return Text(reason,
-                                style: TextStyle(color: Colors.orange));
-                          } else {
-                            return SizedBox.shrink();
-                          }
-                        }),
+                        ..._buildConnectionTypeRows(),
                         _labeledNullableText(
                             Strings.labelExternalIP, _externalIP),
                         _labeledNullableText(
@@ -211,12 +202,16 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 ))));
   }
 
-  Widget _buildConnectionTypeRow() {
+  List<Widget> _buildConnectionTypeRows() {
     final connectionType = _connectionType;
+    var ret = <Widget>[];
+
+    // We don't know the connection type yet.
     if (connectionType == null) {
-      return SizedBox.shrink();
+      return ret;
     }
-    return _repos.powerControl.builder((powerControl) {
+
+    final connectionTypeRow = _repos.powerControl.builder((powerControl) {
       Color? badgeColor;
 
       if (!(powerControl.isNetworkEnabled() ?? true)) {
@@ -232,6 +227,22 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             color: badgeColor, moveRight: 18, moveDownwards: 5);
       }
     });
+
+    ret.add(connectionTypeRow);
+
+    // If network is disabled, show the reason why.
+    final info = _repos.powerControl.builder((powerControl) {
+      final reason = powerControl.networkDisabledReason();
+      if (reason != null) {
+        return Text(reason, style: TextStyle(color: Colors.orange));
+      } else {
+        return SizedBox.shrink();
+      }
+    });
+
+    ret.add(info);
+
+    return ret;
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
