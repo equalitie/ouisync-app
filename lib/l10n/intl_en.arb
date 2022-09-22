@@ -61,7 +61,7 @@
 
     "messageLibraryPanic":"Internal crash detected.",
 
-    "messageSyncingIsDisabledOnMobileInternet":"Syncing is disabled when using mobile internet",
+    "messageSyncingIsDisabledOnMobileInternet":"Syncing is disabled while using mobile internet",
     "messageNetworkIsUnavailable":"Network is unavailable",
 
     "messageNewVersionIsAvailable":"A new version is available.",

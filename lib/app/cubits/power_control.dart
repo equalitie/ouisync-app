@@ -3,9 +3,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../generated/l10n.dart';
 import 'watch.dart';
 import 'repos.dart';
+import '../utils/settings.dart';
 
 class PowerControl extends WatchSelf<PowerControl> {
   final ReposCubit _repos;
+  final Settings _settings;
   final Connectivity _connectivity = Connectivity();
 
   bool? _isNetworkEnabled;
@@ -13,12 +15,13 @@ class PowerControl extends WatchSelf<PowerControl> {
   ConnectivityResult? _lastConnectionType;
   bool _syncOnMobile = false;
 
-  PowerControl(this._repos) {
+  PowerControl(this._repos, this._settings) {
     // TODO: Should we unsusbscribe somewhere?
     _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
   Future<void> init() async {
+    _syncOnMobile = _settings.getEnableSyncOnMobile();
     final current = await _connectivity.checkConnectivity();
     _updateConnectionStatus(current);
   }
@@ -27,16 +30,18 @@ class PowerControl extends WatchSelf<PowerControl> {
     return _syncOnMobile;
   }
 
-  void enableSyncOnMobile() {
+  Future<void> enableSyncOnMobile() async {
     _syncOnMobile = true;
+    await _settings.setEnableSyncOnMobile(true);
     final lastConnectionType = _lastConnectionType;
     if (lastConnectionType != null) {
       _updateConnectionStatus(lastConnectionType);
     }
   }
 
-  void disableSyncOnMobile() {
+  Future<void> disableSyncOnMobile() async {
     _syncOnMobile = false;
+    await _settings.setEnableSyncOnMobile(false);
     final lastConnectionType = _lastConnectionType;
     if (lastConnectionType != null) {
       _updateConnectionStatus(lastConnectionType);

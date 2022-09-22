@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings {
   static const String _currentRepoKey = "CURRENT_REPO";
+  static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
   static const String _btDhtKeyPrefix = "BT_DHT_ENABLED-";
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
@@ -66,6 +67,14 @@ class Settings {
     } else {
       await _remove(_prefs, key);
     }
+  }
+
+  Future<void> setEnableSyncOnMobile(bool enable) async {
+    await _prefs.setBool(_syncOnMobileKey, enable);
+  }
+
+  bool getEnableSyncOnMobile() {
+    return _prefs.getBool(_syncOnMobileKey) ?? false;
   }
 
   Future<void> setHighestSeenProtocolNumber(int number) async {

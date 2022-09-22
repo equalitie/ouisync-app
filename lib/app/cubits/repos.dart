@@ -27,7 +27,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       : _session = session,
         _repositoriesDir = repositoriesDir,
         _settings = settings {
-    _powerControl = PowerControl(this);
+    _powerControl = PowerControl(this, _settings);
   }
 
   PowerControl get powerControl => _powerControl;
@@ -39,9 +39,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       _isLoading = true;
     });
 
-    await _powerControl.init();
-
     var futures = <Future>[];
+
+    futures.add(_powerControl.init());
 
     var defaultRepo = _settings.getDefaultRepo();
 

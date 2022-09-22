@@ -218,7 +218,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
         badgeColor = Constants.warningColor;
       }
 
-      //final widget = _labeledText(Strings.connectionType, connectionType);
       final widget = Fields.labeledButton(
             label: Strings.connectionType,
             buttonText: connectionType,
@@ -232,15 +231,15 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                     actions: <Widget>[
                       TextButton(
                         child: const Text('Allow'),
-                        onPressed: () {
-                          _repos.powerControl.enableSyncOnMobile();
+                        onPressed: () async {
+                          await _repos.powerControl.enableSyncOnMobile();
                           Navigator.of(context).pop();
                         }
                       ),
                       TextButton(
                         child: const Text('Deny'),
-                        onPressed: () {
-                          _repos.powerControl.disableSyncOnMobile();
+                        onPressed: () async {
+                          await _repos.powerControl.disableSyncOnMobile();
                           Navigator.of(context).pop();
                         }
                       )

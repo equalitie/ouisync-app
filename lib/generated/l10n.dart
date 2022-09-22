@@ -600,10 +600,10 @@ class S {
     );
   }
 
-  /// `Syncing is disabled when using mobile internet`
+  /// `Syncing is disabled while using mobile internet`
   String get messageSyncingIsDisabledOnMobileInternet {
     return Intl.message(
-      'Syncing is disabled when using mobile internet',
+      'Syncing is disabled while using mobile internet',
       name: 'messageSyncingIsDisabledOnMobileInternet',
       desc: '',
       args: [],
