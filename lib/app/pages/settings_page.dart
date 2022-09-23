@@ -541,19 +541,22 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             version = _labeledText(key, "...");
           }
 
+          final onTap = (count) {
+            if (_versionNumberClickCounter.registerClick(count: count) >= 3) {
+              _versionNumberClickCounter.reset();
+
+              final session = _repos.session;
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StateMonitorPage(session)));
+            }
+          };
+
           return GestureDetector(
-            onTap: () {
-              if (_versionNumberClickCounter.registerClick() >= 3) {
-                _versionNumberClickCounter.reset();
-
-                final session = _repos.session;
-
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => StateMonitorPage(session)));
-              }
-            },
+            onDoubleTap: () => onTap(2),
+            onTap: () => onTap(1),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               version,

@@ -10,13 +10,13 @@ class ClickCounter {
 
   ClickCounter({required int timeoutMs}) : _timeoutMs = timeoutMs;
 
-  int registerClick() {
+  int registerClick({int count = 1}) {
     int now = DateTime.now().millisecondsSinceEpoch;
 
     if (now - _lastClickTime <= _timeoutMs) {
-      _clickCount += 1;
+      _clickCount += count;
     } else {
-      _clickCount = 1;
+      _clickCount = count;
     }
 
     _lastClickTime = now;
