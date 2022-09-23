@@ -541,8 +541,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             version = _labeledText(key, "...");
           }
 
-          final onTap = (count) {
-            if (_versionNumberClickCounter.registerClick(count: count) >= 3) {
+          final onTap = () {
+            if (_versionNumberClickCounter.registerClick() >= 3) {
               _versionNumberClickCounter.reset();
 
               final session = _repos.session;
@@ -554,9 +554,8 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             }
           };
 
-          return GestureDetector(
-            onDoubleTap: () => onTap(2),
-            onTap: () => onTap(1),
+          return Listener(
+            onPointerUp: (_) => onTap(),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               version,
