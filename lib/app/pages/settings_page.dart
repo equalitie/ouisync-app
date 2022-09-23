@@ -219,35 +219,39 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       }
 
       final widget = Fields.labeledButton(
-            label: Strings.connectionType,
-            buttonText: connectionType,
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: (BuildContext context) {
+          label: Strings.connectionType,
+          buttonText: connectionType,
+          onPressed: () {
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
-                    title: const Text("Sync On Mobile Internet"),
-                    content: const Text("Should synchronization happen while using mobile internet?"),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Allow'),
-                        onPressed: () async {
-                          await _repos.powerControl.enableSyncOnMobile();
-                          Navigator.of(context).pop();
-                        }
-                      ),
-                      TextButton(
-                        child: const Text('Deny'),
-                        onPressed: () async {
-                          await _repos.powerControl.disableSyncOnMobile();
-                          Navigator.of(context).pop();
-                        }
-                      )
-                    ]
-                  );
-                }
-              );
-            });
+                      title: const Text("Sync Options"),
+                      content: LabeledSwitch(
+                          label: "Enable sync while using mobile internet",
+                          padding: const EdgeInsets.all(0.0),
+                          value: _repos.powerControl.isSyncEnabledOnMobile(),
+                          onChanged: (bool enable) async {
+                            if (enable) {
+                              await _repos.powerControl.enableSyncOnMobile();
+                            } else {
+                              await _repos.powerControl.disableSyncOnMobile();
+                            }
+                            // Refresh
+                            setState(() {});
+                          }),
+                      actions: <Widget>[
+                        TextButton(
+                            child: const Text('Close'),
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                            }),
+                      ]);
+                });
+              },
+            );
+          });
 
       if (badgeColor == null) {
         return widget;
