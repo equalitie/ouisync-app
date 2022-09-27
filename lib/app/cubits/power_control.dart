@@ -71,8 +71,12 @@ class PowerControl extends WatchSelf<PowerControl> {
         reason = S.current.messageSyncingIsDisabledOnMobileInternet;
       }
     } else if (result == ConnectivityResult.none) {
-      newState = false;
-      reason = S.current.messageNetworkIsUnavailable;
+      // For now we keep the network enabled. It is because when we're tethering and
+      // mobile internet is not enabled we get here as well. Ideally we would have
+      // also the information about whether tethering is enabled and only in such case
+      // we'd keep the connection going.
+      //newState = false;
+      //reason = S.current.messageNetworkIsUnavailable;
     }
 
     if (_isNetworkEnabled != newState || _networkDisabledReason != reason) {
