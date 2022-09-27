@@ -73,8 +73,8 @@ class Settings {
     await _prefs.setBool(_syncOnMobileKey, enable);
   }
 
-  bool getEnableSyncOnMobile() {
-    return _prefs.getBool(_syncOnMobileKey) ?? false;
+  bool getEnableSyncOnMobile(bool default_) {
+    return _prefs.getBool(_syncOnMobileKey) ?? default_;
   }
 
   Future<void> setHighestSeenProtocolNumber(int number) async {

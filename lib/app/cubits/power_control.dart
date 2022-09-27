@@ -13,7 +13,8 @@ class PowerControl extends WatchSelf<PowerControl> {
   bool? _isNetworkEnabled;
   String? _networkDisabledReason;
   ConnectivityResult? _lastConnectionType;
-  bool _syncOnMobile = false;
+  static final bool _syncOnMobileDefault = true;
+  bool _syncOnMobile = _syncOnMobileDefault;
 
   PowerControl(this._repos, this._settings) {
     // TODO: Should we unsusbscribe somewhere?
@@ -21,7 +22,7 @@ class PowerControl extends WatchSelf<PowerControl> {
   }
 
   Future<void> init() async {
-    _syncOnMobile = _settings.getEnableSyncOnMobile();
+    _syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
     final current = await _connectivity.checkConnectivity();
     _updateConnectionStatus(current);
   }
