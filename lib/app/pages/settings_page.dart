@@ -64,12 +64,11 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     _updateLocalEndpoints();
   }
 
-  void _updateLocalEndpoints({ConnectivityResult? connectivityResult}) async {
+  void _updateLocalEndpoints() async {
     // TODO: Some of these awaits takes a while to complete, it would be better
     // to do them all individually.
 
-    final connectivity =
-        connectivityResult ?? await Connectivity().checkConnectivity();
+    final connectivity = await Connectivity().checkConnectivity();
 
     switch (connectivity) {
       case ConnectivityResult.wifi:

@@ -3,12 +3,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../generated/l10n.dart';
 import 'watch.dart';
 import 'repos.dart';
+import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/settings.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
 
-class PowerControl extends WatchSelf<PowerControl> {
+class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
   final ReposCubit _repos;
   final Settings _settings;
   final Connectivity _connectivity = Connectivity();
@@ -70,6 +71,8 @@ class PowerControl extends WatchSelf<PowerControl> {
   }
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    loggy.app('Connectivity event: ${result.name}');
+
     bool newState = true;
     String? reason;
 

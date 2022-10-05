@@ -118,9 +118,6 @@ class _MainPageState extends State<MainPage>
         saveMedia(media.path);
       }
     });
-
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen(_connectivityChange);
   }
 
   @override
@@ -129,12 +126,6 @@ class _MainPageState extends State<MainPage>
     _connectivitySubscription?.cancel();
 
     super.dispose();
-  }
-
-  void _connectivityChange(ConnectivityResult result) {
-    loggy.app('Connectivity event: ${result.name}');
-
-    BlocProvider.of<ConnectivityCubit>(context).connectivityEvent(result);
   }
 
   void initMainPage() async {
@@ -721,7 +712,6 @@ class _MainPageState extends State<MainPage>
   }
 
   void showSettings() {
-    final connectivityCubit = BlocProvider.of<ConnectivityCubit>(context);
     final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
@@ -731,7 +721,6 @@ class _MainPageState extends State<MainPage>
       MaterialPageRoute(builder: (context) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: connectivityCubit),
             BlocProvider.value(value: peerSetCubit),
             BlocProvider.value(value: upgradeExistsCubit),
           ],
