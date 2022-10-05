@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import '../../generated/l10n.dart';
 import 'watch.dart';
-import 'repos.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/settings.dart';
 
@@ -10,7 +10,7 @@ const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
 
 class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
-  final ReposCubit _repos;
+  final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity = Connectivity();
 
@@ -20,7 +20,7 @@ class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
   static final bool _syncOnMobileDefault = true;
   bool _syncOnMobile = _syncOnMobileDefault;
 
-  PowerControl(this._repos, this._settings) {
+  PowerControl(this._session, this._settings) {
     unawaited(_listen());
   }
 
@@ -98,12 +98,12 @@ class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
       _networkDisabledReason = reason;
 
       if (newState) {
-        await _repos.bindNetwork(
+        await _session.bindNetwork(
           quicV4: _unspecifiedV4,
           quicV6: _unspecifiedV6,
         );
       } else {
-        await _repos.bindNetwork();
+        await _session.bindNetwork();
       }
 
       changed();

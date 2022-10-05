@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -10,6 +9,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../cubits/power_control.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -43,8 +43,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger {
   final ReposCubit _repositories;
-
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  final PowerControl _powerControl;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -62,9 +61,11 @@ class _MainPageState extends State<MainPage>
   _MainPageState(
       Session session, String repositoriesLocation, Settings settings)
       : _repositories = ReposCubit(
-            session: session,
-            repositoriesDir: repositoriesLocation,
-            settings: settings) {
+          session: session,
+          repositoriesDir: repositoriesLocation,
+          settings: settings,
+        ),
+        _powerControl = PowerControl(session, settings) {
     _panicCounter = _repositories
         .rootStateMonitor()
         .child("Session")
@@ -123,8 +124,6 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() async {
     await _repositories.close();
-    _connectivitySubscription?.cancel();
-
     super.dispose();
   }
 
@@ -257,7 +256,7 @@ class _MainPageState extends State<MainPage>
     return BlocBuilder<UpgradeExistsCubit, bool>(
         builder: (context, updateExists) {
       return _panicCounter.builder((context, panicCount) {
-        return _repositories.powerControl.builder((powerControl) {
+        return _powerControl.builder((powerControl) {
           Color? color;
 
           if (updateExists || ((panicCount ?? 0) > 0)) {
@@ -726,6 +725,7 @@ class _MainPageState extends State<MainPage>
           ],
           child: SettingsPage(
             reposCubit: reposCubit,
+            powerControl: _powerControl,
             onShareRepository: _showShareRepository,
             panicCounter: _panicCounter,
           ),

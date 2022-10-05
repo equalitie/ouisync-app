@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../cubits/power_control.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../utils/click_counter.dart';
@@ -25,21 +26,24 @@ import 'peer_list.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.reposCubit,
+    required this.powerControl,
     required this.onShareRepository,
     required this.panicCounter,
   });
 
   final ReposCubit reposCubit;
+  final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
   final StateMonitorIntValue panicCounter;
 
   @override
   State<SettingsPage> createState() =>
-      _SettingsPageState(reposCubit, panicCounter);
+      _SettingsPageState(reposCubit, powerControl, panicCounter);
 }
 
 class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   final ReposCubit _repos;
+  final PowerControl _powerControl;
   final StateMonitorIntValue _panicCounter;
 
   String? _connectionType;
@@ -56,15 +60,16 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   // Clicking on the version number three times shall show the state monitor page.
   final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
 
-  _SettingsPageState(this._repos, this._panicCounter);
+  _SettingsPageState(this._repos, this._powerControl, this._panicCounter);
 
   @override
   void initState() {
     super.initState();
-    _updateLocalEndpoints();
+    unawaited(_powerControl.init());
+    unawaited(_updateLocalEndpoints());
   }
 
-  void _updateLocalEndpoints() async {
+  Future<void> _updateLocalEndpoints() async {
     // TODO: Some of these awaits takes a while to complete, it would be better
     // to do them all individually.
 
@@ -165,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       color: _titlesColor!,
                     ),
                     _buildCurrentRepoDhtSwitch(repos.currentRepo),
-                    _repos.powerControl.consumer(
+                    _powerControl.consumer(
                       (powerControl) => Column(
                           children: [
                         ..._buildConnectionTypeRows(),
@@ -207,7 +212,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       return ret;
     }
 
-    final connectionTypeRow = _repos.powerControl.builder((powerControl) {
+    final connectionTypeRow = _powerControl.builder((powerControl) {
       Color? badgeColor;
 
       if (!(powerControl.isNetworkEnabled() ?? true)) {
@@ -227,12 +232,12 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       content: LabeledSwitch(
                           label: "Enable sync while using mobile internet",
                           padding: const EdgeInsets.all(0.0),
-                          value: _repos.powerControl.isSyncEnabledOnMobile(),
+                          value: _powerControl.isSyncEnabledOnMobile(),
                           onChanged: (bool enable) async {
                             if (enable) {
-                              await _repos.powerControl.enableSyncOnMobile();
+                              await _powerControl.enableSyncOnMobile();
                             } else {
-                              await _repos.powerControl.disableSyncOnMobile();
+                              await _powerControl.disableSyncOnMobile();
                             }
                             // Refresh
                             setState(() {});
@@ -260,7 +265,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     ret.add(connectionTypeRow);
 
     // If network is disabled, show the reason why.
-    final info = _repos.powerControl.builder((powerControl) {
+    final info = _powerControl.builder((powerControl) {
       final reason = powerControl.networkDisabledReason();
       if (reason != null) {
         return Text(reason, style: TextStyle(color: Colors.orange));
