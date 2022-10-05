@@ -5,6 +5,9 @@ import 'watch.dart';
 import 'repos.dart';
 import '../utils/settings.dart';
 
+const _unspecifiedV4 = "0.0.0.0:0";
+const _unspecifiedV6 = "[::]:0";
+
 class PowerControl extends WatchSelf<PowerControl> {
   final ReposCubit _repos;
   final Settings _settings;
@@ -17,14 +20,13 @@ class PowerControl extends WatchSelf<PowerControl> {
   bool _syncOnMobile = _syncOnMobileDefault;
 
   PowerControl(this._repos, this._settings) {
-    // TODO: Should we unsusbscribe somewhere?
-    _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    unawaited(_listen());
   }
 
   Future<void> init() async {
     _syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
     final current = await _connectivity.checkConnectivity();
-    _updateConnectionStatus(current);
+    await _updateConnectionStatus(current);
   }
 
   bool isSyncEnabledOnMobile() {
@@ -36,7 +38,7 @@ class PowerControl extends WatchSelf<PowerControl> {
     await _settings.setEnableSyncOnMobile(true);
     final lastConnectionType = _lastConnectionType;
     if (lastConnectionType != null) {
-      _updateConnectionStatus(lastConnectionType);
+      await _updateConnectionStatus(lastConnectionType);
     }
   }
 
@@ -45,7 +47,7 @@ class PowerControl extends WatchSelf<PowerControl> {
     await _settings.setEnableSyncOnMobile(false);
     final lastConnectionType = _lastConnectionType;
     if (lastConnectionType != null) {
-      _updateConnectionStatus(lastConnectionType);
+      await _updateConnectionStatus(lastConnectionType);
     }
   }
 
@@ -59,7 +61,15 @@ class PowerControl extends WatchSelf<PowerControl> {
     return _networkDisabledReason;
   }
 
-  void _updateConnectionStatus(ConnectivityResult result) {
+  Future<void> _listen() async {
+    final stream = _connectivity.onConnectivityChanged;
+
+    await for (var result in stream) {
+      await _updateConnectionStatus(result);
+    }
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     bool newState = true;
     String? reason;
 
@@ -85,9 +95,12 @@ class PowerControl extends WatchSelf<PowerControl> {
       _networkDisabledReason = reason;
 
       if (newState) {
-        _repos.enableNetwork();
+        await _repos.bindNetwork(
+          quicV4: _unspecifiedV4,
+          quicV6: _unspecifiedV6,
+        );
       } else {
-        _repos.disableNetwork();
+        await _repos.bindNetwork();
       }
 
       changed();
