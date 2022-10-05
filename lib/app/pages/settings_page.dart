@@ -159,14 +159,15 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   children: [
                     _buildRepositoriesSection(repos.currentRepo),
                     _divider(),
-                    Fields.idLabel(S.current.titleNetwork,
-                        fontSize: Dimensions.fontAverage,
-                        fontWeight: FontWeight.normal,
-                        color: _titlesColor!),
+                    Fields.idLabel(
+                      S.current.titleNetwork,
+                      fontSize: Dimensions.fontAverage,
+                      fontWeight: FontWeight.normal,
+                      color: _titlesColor!,
+                    ),
                     _buildCurrentRepoDhtSwitch(repos.currentRepo),
-                    BlocConsumer<ConnectivityCubit, ConnectivityState>(
-                        builder: (context, state) {
-                      return Column(
+                    _repos.powerControl.consumer(
+                      (powerControl) => Column(
                           children: [
                         ..._buildConnectionTypeRows(),
                         _labeledNullableText(
@@ -185,13 +186,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                         _labeledNullableText(
                             Strings.labelQuicListenerEndpointV6,
                             _quicListenerEndpointV6),
-                      ].whereType<Widget>().toList());
-                    }, listener: (context, state) {
-                      if (state is ConnectivityChanged) {
-                        _updateLocalEndpoints(
-                            connectivityResult: state.connectivityResult);
-                      }
-                    }),
+                      ].whereType<Widget>().toList()),
+                      (powerControl) => _updateLocalEndpoints(),
+                    ),
                     _buildConnectedPeerListRow(),
                     _divider(),
                     _buildLogsSection(),
