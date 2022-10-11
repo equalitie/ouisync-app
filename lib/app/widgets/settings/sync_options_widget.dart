@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubits/power_control.dart';
-import 'items/labeled_switch.dart';
+import '../../cubits/power_control.dart';
+import '../items/labeled_switch.dart';
 
 /// Widget to configure whether synchronization is enabled while on a mobile network.
 class SyncOptionsWidget extends StatelessWidget {

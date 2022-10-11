@@ -1,8 +1,10 @@
+export 'connectivity_info.dart';
 export 'job.dart';
+export 'peer_set.dart';
+export 'power_control.dart';
 export 'repo.dart';
 export 'repos.dart';
-export 'peer_set.dart';
-export 'upgrade_exists.dart';
-export 'watch.dart';
-export 'value.dart';
 export 'state_monitor.dart';
+export 'upgrade_exists.dart';
+export 'value.dart';
+export 'watch.dart';

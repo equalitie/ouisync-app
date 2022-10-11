@@ -5,25 +5,21 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:r_get_ip/r_get_ip.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:network_info_plus/network_info_plus.dart';
-import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../cubits/power_control.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import '../utils/click_counter.dart';
 import '../widgets/widgets.dart';
 import '../models/repo_entry.dart';
-import 'pages.dart';
 import 'peer_list.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({
     required this.reposCubit,
     required this.powerControl,
@@ -37,11 +33,106 @@ class SettingsPage extends StatefulWidget {
   final StateMonitorIntValue panicCounter;
 
   @override
-  State<SettingsPage> createState() =>
-      _SettingsPageState(reposCubit, powerControl, panicCounter);
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        title: Text(S.current.titleSettings),
+        elevation: 0.0,
+      ),
+      body: SettingsList(
+        sections: [
+          CustomSettingsSection(
+            child: ConnectivityInfoBuilder(
+              session: reposCubit.session,
+              powerControl: powerControl,
+              builder: (context, state) => SettingsSection(
+                title: Text(S.current.titleNetwork),
+                tiles: [
+                  _nullableTile(
+                    Strings.labelTcpListenerEndpointV4,
+                    Icons.computer,
+                    state.tcpListenerV4,
+                  ),
+                  _nullableTile(
+                    Strings.labelTcpListenerEndpointV6,
+                    Icons.computer,
+                    state.tcpListenerV6,
+                  ),
+                  _nullableTile(
+                    Strings.labelQuicListenerEndpointV4,
+                    Icons.computer,
+                    state.quicListenerV4,
+                  ),
+                  _nullableTile(
+                    Strings.labelQuicListenerEndpointV6,
+                    Icons.computer,
+                    state.quicListenerV6,
+                  ),
+                  _nullableTile(
+                    Strings.labelExternalIP,
+                    Icons.cloud_outlined,
+                    state.externalIP,
+                  ),
+                  _nullableTile(
+                    Strings.labelLocalIPv4,
+                    Icons.lan_outlined,
+                    state.localIPv4,
+                  ),
+                  _nullableTile(
+                    Strings.labelLocalIPv6,
+                    Icons.lan_outlined,
+                    state.localIPv6,
+                  ),
+                ].whereType<SettingsTile>().toList(),
+              ),
+            ),
+          ),
+          SettingsSection(
+            title: Text('About'), // TODO: localize
+            tiles: [
+              CustomSettingsTile(
+                child: AppVersionTile(
+                  session: reposCubit.session,
+                  leading: Icon(Icons.info_outline),
+                  title: Text(S.current.labelAppVersion),
+                ),
+              )
+            ],
+          ),
+        ],
+      ));
 }
 
-class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
+SettingsTile? _nullableTile(String title, IconData icon, String value) =>
+    value.isNotEmpty
+        ? SettingsTile(
+            leading: Icon(icon),
+            title: Text(title),
+            value: Text(value),
+          )
+        : null;
+
+//--------------------------------------------------------------------------------------------------
+
+class SettingsPageOld extends StatefulWidget {
+  const SettingsPageOld({
+    required this.reposCubit,
+    required this.powerControl,
+    required this.onShareRepository,
+    required this.panicCounter,
+  });
+
+  final ReposCubit reposCubit;
+  final PowerControl powerControl;
+  final void Function(RepoCubit) onShareRepository;
+  final StateMonitorIntValue panicCounter;
+
+  @override
+  State<SettingsPageOld> createState() =>
+      _SettingsPageOldState(reposCubit, powerControl, panicCounter);
+}
+
+class _SettingsPageOldState extends State<SettingsPageOld>
+    with OuiSyncAppLogger {
   final ReposCubit _repos;
   final PowerControl _powerControl;
   final StateMonitorIntValue _panicCounter;
@@ -57,10 +148,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
   Color? _titlesColor = Colors.black;
 
-  // Clicking on the version number three times shall show the state monitor page.
-  final _versionNumberClickCounter = ClickCounter(timeoutMs: 3000);
-
-  _SettingsPageState(this._repos, this._powerControl, this._panicCounter);
+  _SettingsPageOldState(this._repos, this._powerControl, this._panicCounter);
 
   @override
   void initState() {
@@ -74,133 +162,56 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     final connectivity = await Connectivity().checkConnectivity();
 
-    switch (connectivity) {
-      case ConnectivityResult.wifi:
-        _connectionType = "WiFi";
-        break;
-      case ConnectivityResult.mobile:
-        _connectionType = "Mobile";
-        break;
-      case ConnectivityResult.ethernet:
-        _connectionType = "Ethernet";
-        break;
-      case ConnectivityResult.none:
-        _connectionType = "None";
-        break;
-      default:
-        _connectionType = "???";
-        break;
-    }
-
-    final session = _repos.session;
-
-    String? tcpListenerEndpointV4 = session.tcpListenerLocalAddressV4;
-    String? tcpListenerEndpointV6 = session.tcpListenerLocalAddressV6;
-    String? quicListenerEndpointV4 = session.quicListenerLocalAddressV4;
-    String? quicListenerEndpointV6 = session.quicListenerLocalAddressV6;
-
-    final info = NetworkInfo();
-
-    // This really works only when connected using WiFi.
-    var localIPv4 = await info.getWifiIP();
-    var localIPv6 = await info.getWifiIPv6();
-
-    // This works also when on mobile network, but doesn't show IPv6 address if
-    // IPv4 is used as primary.
-    final internalIpStr = await RGetIp.internalIP;
-
-    if (internalIpStr != null) {
-      final internalIp = InternetAddress.tryParse(internalIpStr);
-
-      if (internalIp != null) {
-        if (localIPv4 == null && internalIp.type == InternetAddressType.IPv4) {
-          localIPv4 = internalIpStr;
-        }
-
-        if (localIPv6 == null && internalIp.type == InternetAddressType.IPv6) {
-          localIPv6 = internalIpStr;
-        }
-      }
-    }
-
     setState(() {
-      _externalIP = connectivity == ConnectivityResult.none ? "N/A" : "...";
-      _localIPv4 = localIPv4;
-      _localIPv6 = localIPv6;
-      _tcpListenerEndpointV4 = tcpListenerEndpointV4;
-      _tcpListenerEndpointV6 = tcpListenerEndpointV6;
-      _quicListenerEndpointV4 = quicListenerEndpointV4;
-      _quicListenerEndpointV6 = quicListenerEndpointV6;
+      switch (connectivity) {
+        case ConnectivityResult.wifi:
+          _connectionType = "WiFi";
+          break;
+        case ConnectivityResult.mobile:
+          _connectionType = "Mobile";
+          break;
+        case ConnectivityResult.ethernet:
+          _connectionType = "Ethernet";
+          break;
+        case ConnectivityResult.none:
+          _connectionType = "None";
+          break;
+        default:
+          _connectionType = "???";
+          break;
+      }
     });
-
-    if (connectivity != ConnectivityResult.none) {
-      // This one takes longer, so do it separately.
-      RGetIp.externalIP.then((ip) => setState(() {
-            _externalIP = ip;
-          }));
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     _titlesColor = Theme.of(context).colorScheme.secondary;
 
-    final info = PackageInfo.fromPlatform();
-
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(S.current.titleSettings),
-          elevation: 0.0,
-        ),
-        body: Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
-            child: _repos.builder((repos) => ListView(
-                  // The badge over the version number is shown outside of the row boundary, so we
-                  // need to set clipBehaior to Clip.none.
-                  clipBehavior: Clip.none,
-                  children: [
-                    _buildRepositoriesSection(repos.currentRepo),
-                    _divider(),
-                    Fields.idLabel(
-                      S.current.titleNetwork,
-                      fontSize: Dimensions.fontAverage,
-                      fontWeight: FontWeight.normal,
-                      color: _titlesColor!,
-                    ),
-                    _buildCurrentRepoDhtSwitch(repos.currentRepo),
-                    BlocConsumer(
-                      bloc: _powerControl,
-                      builder: (context, state) => Column(
-                          children: [
-                        ..._buildConnectionTypeRows(),
-                        _labeledNullableText(
-                            Strings.labelExternalIP, _externalIP),
-                        _labeledNullableText(
-                            Strings.labelLocalIPv4, _localIPv4),
-                        _labeledNullableText(
-                            Strings.labelLocalIPv6, _localIPv6),
-                        _labeledNullableText(Strings.labelTcpListenerEndpointV4,
-                            _tcpListenerEndpointV4),
-                        _labeledNullableText(Strings.labelTcpListenerEndpointV6,
-                            _tcpListenerEndpointV6),
-                        _labeledNullableText(
-                            Strings.labelQuicListenerEndpointV4,
-                            _quicListenerEndpointV4),
-                        _labeledNullableText(
-                            Strings.labelQuicListenerEndpointV6,
-                            _quicListenerEndpointV6),
-                      ].whereType<Widget>().toList()),
-                      listener: (context, state) => _updateLocalEndpoints(),
-                    ),
-                    _buildConnectedPeerListRow(),
-                    _divider(),
-                    _buildLogsSection(),
-                    _divider(),
-                    _versionNumberFutureBuilder(
-                        info.then((info) => info.version)),
-                  ],
-                ))));
+    return _repos.builder((repos) => ListView(
+          // The badge over the version number is shown outside of the row boundary, so we
+          // need to set clipBehaior to Clip.none.
+          clipBehavior: Clip.none,
+          children: [
+            _buildRepositoriesSection(repos.currentRepo),
+            _divider(),
+            Fields.idLabel(
+              S.current.titleNetwork,
+              fontSize: Dimensions.fontAverage,
+              fontWeight: FontWeight.normal,
+              color: _titlesColor!,
+            ),
+            _buildCurrentRepoDhtSwitch(repos.currentRepo),
+            BlocConsumer(
+              bloc: _powerControl,
+              builder: (context, state) =>
+                  Column(children: _buildConnectionTypeRows()),
+              listener: (context, state) => _updateLocalEndpoints(),
+            ),
+            _buildConnectedPeerListRow(),
+            _divider(),
+            _buildLogsSection(),
+          ],
+        ));
   }
 
   List<Widget> _buildConnectionTypeRows() {
@@ -285,30 +296,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             }
           },
         ));
-  }
-
-  static Widget? _labeledNullableText(String key, String? value) {
-    if (value == null) {
-      return null;
-    }
-
-    return Fields.labeledText(
-      label: key,
-      text: value,
-      labelTextAlign: TextAlign.start,
-      textAlign: TextAlign.end,
-      space: Dimensions.spacingHorizontal,
-    );
-  }
-
-  static Widget _labeledText(String key, String value) {
-    return Fields.labeledText(
-      label: key,
-      text: value,
-      labelTextAlign: TextAlign.start,
-      textAlign: TextAlign.end,
-      space: Dimensions.spacingHorizontal,
-    );
   }
 
   static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
@@ -519,49 +506,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
               return _warningText(context, S.current.messageLibraryPanic);
             }),
           ]);
-
-  Widget _versionNumberFutureBuilder(Future<String> value) {
-    return FutureBuilder<String>(
-        future: value,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          late Widget version;
-          final key = S.current.labelAppVersion;
-
-          if (snapshot.hasData) {
-            version = _labeledText(key, snapshot.data!);
-          } else if (snapshot.hasError) {
-            version = _labeledText(key, "???");
-          } else {
-            version = _labeledText(key, "...");
-          }
-
-          void onTap() {
-            if (_versionNumberClickCounter.registerClick() >= 3) {
-              _versionNumberClickCounter.reset();
-
-              final session = _repos.session;
-
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => StateMonitorPage(session)));
-            }
-          }
-
-          return Listener(
-            onPointerUp: (_) => onTap(),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              version,
-              BlocBuilder<UpgradeExistsCubit, bool>(builder: (context, state) {
-                if (state == false) return SizedBox.shrink();
-                return _warningText(
-                    context, S.current.messageNewVersionIsAvailable);
-              }),
-            ]),
-          );
-        });
-  }
 
   Future<void> _saveLogs() async {
     final tempPath = await _dumpInfo();
