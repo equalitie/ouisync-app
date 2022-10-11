@@ -1,3 +1,4 @@
+export 'job.dart';
 export 'repo.dart';
 export 'repos.dart';
 export 'peer_set.dart';

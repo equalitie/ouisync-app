@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -15,7 +16,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
 
   final RepoCubit repository;
   final FileItem fileData;
-  final Watch<Job>? _uploadJob;
+  final Job? _uploadJob;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,10 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
           (uploadJob == null)
               ? _fileSize(fileData.size)
-              : uploadJob.builder((job) => _fileSize(job.soFar)),
+              : BlocBuilder<Job, JobState>(
+                  bloc: uploadJob,
+                  builder: (context, state) => _fileSize(state.soFar),
+                ),
           Dimensions.spacingVerticalHalf,
           (uploadJob != null) ? _uploadProgressWidget(uploadJob) : Container(),
         ],
@@ -45,8 +49,10 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
         softWrap: true);
   }
 
-  Widget _uploadProgressWidget(Watch<Job> cubit) => cubit.builder((job) {
-        final progress = job.soFar / job.total;
+  Widget _uploadProgressWidget(Job cubit) => BlocBuilder<Job, JobState>(
+      bloc: cubit,
+      builder: (context, state) {
+        final progress = state.soFar / state.total;
 
         return Row(
           textBaseline: TextBaseline.alphabetic,
@@ -54,7 +60,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
             Expanded(child: LinearProgressIndicator(value: progress)),
             TextButton(
                 onPressed: () {
-                  cubit.state.cancel = true;
+                  cubit.cancel();
                 },
                 child: Text(
                   S.current.actionCancelCapital,
