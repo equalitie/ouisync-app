@@ -169,8 +169,9 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                       color: _titlesColor!,
                     ),
                     _buildCurrentRepoDhtSwitch(repos.currentRepo),
-                    _powerControl.consumer(
-                      (powerControl) => Column(
+                    BlocConsumer(
+                      bloc: _powerControl,
+                      builder: (context, state) => Column(
                           children: [
                         ..._buildConnectionTypeRows(),
                         _labeledNullableText(
@@ -190,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                             Strings.labelQuicListenerEndpointV6,
                             _quicListenerEndpointV6),
                       ].whereType<Widget>().toList()),
-                      (powerControl) => _updateLocalEndpoints(),
+                      listener: (context, state) => _updateLocalEndpoints(),
                     ),
                     _buildConnectedPeerListRow(),
                     _divider(),
@@ -211,55 +212,56 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
       return ret;
     }
 
-    final connectionTypeRow = _powerControl.builder((powerControl) {
-      Color? badgeColor;
+    final connectionTypeRow = BlocBuilder<PowerControl, PowerControlState>(
+        bloc: _powerControl,
+        builder: (context, state) {
+          Color? badgeColor;
 
-      if (!(powerControl.isNetworkEnabled ?? true)) {
-        badgeColor = Constants.warningColor;
-      }
+          if (!(state.isNetworkEnabled ?? true)) {
+            badgeColor = Constants.warningColor;
+          }
 
-      final widget = Fields.labeledButton(
-          label: Strings.connectionType,
-          buttonText: connectionType,
-          onPressed: () {
-            showDialog<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return StatefulBuilder(builder: (context, setState) {
-                  return AlertDialog(
-                      title: const Text("Sync Options"),
-                      content: SyncOptionsWidget(_powerControl),
-                      actions: <Widget>[
-                        TextButton(
-                            child: const Text('Close'),
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                            }),
-                      ]);
-                });
-              },
-            );
-          });
+          final widget = Fields.labeledButton(
+            label: Strings.connectionType,
+            buttonText: connectionType,
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                    title: const Text("Sync Options"),
+                    content: SyncOptionsWidget(_powerControl),
+                    actions: <Widget>[
+                      TextButton(
+                          child: const Text('Close'),
+                          onPressed: () async {
+                            Navigator.of(context).pop();
+                          }),
+                    ]),
+              );
+            },
+          );
 
-      if (badgeColor == null) {
-        return widget;
-      } else {
-        return Fields.addBadge(widget,
-            color: badgeColor, moveRight: 13, moveDownwards: 8);
-      }
-    });
+          if (badgeColor == null) {
+            return widget;
+          } else {
+            return Fields.addBadge(widget,
+                color: badgeColor, moveRight: 13, moveDownwards: 8);
+          }
+        });
 
     ret.add(connectionTypeRow);
 
     // If network is disabled, show the reason why.
-    final info = _powerControl.builder((powerControl) {
-      final reason = powerControl.networkDisabledReason;
-      if (reason != null) {
-        return Text(reason, style: TextStyle(color: Colors.orange));
-      } else {
-        return SizedBox.shrink();
-      }
-    });
+    final info = BlocBuilder<PowerControl, PowerControlState>(
+        bloc: _powerControl,
+        builder: (context, state) {
+          final reason = state.networkDisabledReason;
+          if (reason != null) {
+            return Text(reason, style: TextStyle(color: Colors.orange));
+          } else {
+            return SizedBox.shrink();
+          }
+        });
 
     ret.add(info);
 

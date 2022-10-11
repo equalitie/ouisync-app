@@ -258,21 +258,23 @@ class _MainPageState extends State<MainPage>
     return BlocBuilder<UpgradeExistsCubit, bool>(
         builder: (context, updateExists) {
       return _panicCounter.builder((context, panicCount) {
-        return _powerControl.builder((powerControl) {
-          Color? color;
+        return BlocBuilder<PowerControl, PowerControlState>(
+            bloc: _powerControl,
+            builder: (context, state) {
+              Color? color;
 
-          if (updateExists || ((panicCount ?? 0) > 0)) {
-            color = Constants.errorColor;
-          } else if (!(powerControl.isNetworkEnabled ?? true)) {
-            color = Constants.warningColor;
-          }
+              if (updateExists || ((panicCount ?? 0) > 0)) {
+                color = Constants.errorColor;
+              } else if (!(state.isNetworkEnabled ?? true)) {
+                color = Constants.warningColor;
+              }
 
-          if (color != null) {
-            return Fields.addBadge(button, color: color);
-          } else {
-            return button;
-          }
-        });
+              if (color != null) {
+                return Fields.addBadge(button, color: color);
+              } else {
+                return button;
+              }
+            });
       });
     });
   }

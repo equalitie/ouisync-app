@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/power_control.dart';
 import 'items/labeled_switch.dart';
 
@@ -11,12 +12,14 @@ class SyncOptionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      powerControl.builder((powerControl) => LabeledSwitch(
-            label: "Enable sync while using mobile internet",
-            padding: const EdgeInsets.all(0.0),
-            value: powerControl.isSyncEnabledOnMobile,
-            onChanged: _onChanged,
-          ));
+      BlocBuilder<PowerControl, PowerControlState>(
+          bloc: powerControl,
+          builder: (context, state) => LabeledSwitch(
+                label: "Enable sync while using mobile internet",
+                padding: const EdgeInsets.all(0.0),
+                value: state.syncOnMobile,
+                onChanged: _onChanged,
+              ));
 
   void _onChanged(bool enable) {
     if (enable) {
