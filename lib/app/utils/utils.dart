@@ -5,6 +5,7 @@ export 'dimensions.dart';
 export 'extensions.dart';
 export 'fields.dart';
 export 'format.dart';
+export 'hotspot.dart';
 export 'inline_text_styles.dart';
 export 'dump.dart';
 export 'settings.dart';

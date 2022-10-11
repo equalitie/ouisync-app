@@ -97,9 +97,11 @@ class _MainPageState extends State<MainPage>
       }
     });
 
-    _repositories.init().then((_) {
+    unawaited(_repositories.init().then((_) {
       initMainPage();
-    });
+    }));
+
+    unawaited(_powerControl.init());
 
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
     /// or the MediaReceiverWindows (DropTarget), depending on the platform.
@@ -261,7 +263,7 @@ class _MainPageState extends State<MainPage>
 
           if (updateExists || ((panicCount ?? 0) > 0)) {
             color = Constants.errorColor;
-          } else if (!(powerControl.isNetworkEnabled() ?? true)) {
+          } else if (!(powerControl.isNetworkEnabled ?? true)) {
             color = Constants.warningColor;
           }
 

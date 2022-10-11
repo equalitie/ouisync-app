@@ -26,13 +26,17 @@ class LabeledSwitch extends StatelessWidget {
   final FontWeight fontWeight;
   final Color color;
   final EdgeInsets padding;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        onChanged(!value);
+        final onChanged = this.onChanged;
+
+        if (onChanged != null) {
+          onChanged(!value);
+        }
       },
       child: Padding(
         padding: padding,
@@ -49,9 +53,7 @@ class LabeledSwitch extends StatelessWidget {
                         color: Colors.black))),
             Switch(
               value: value,
-              onChanged: (bool newValue) {
-                onChanged(newValue);
-              },
+              onChanged: onChanged,
             ),
           ],
         ),
