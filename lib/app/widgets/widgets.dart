@@ -39,3 +39,5 @@ export 'states/loading_main_page_state.dart';
 export 'states/locked_repository_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
+
+export 'sync_options_widget.dart';

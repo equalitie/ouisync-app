@@ -1,24 +1,24 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import '../../generated/l10n.dart';
 import 'watch.dart';
+import '../utils/hotspot.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/settings.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
+const bool _syncOnMobileDefault = true;
 
 class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity = Connectivity();
 
-  bool? _isNetworkEnabled;
-  String? _networkDisabledReason;
-  ConnectivityResult? _lastConnectionType;
-  static final bool _syncOnMobileDefault = true;
+  _NetworkMode _networkMode = _NetworkMode.disabled;
+  _Transition _networkModeTransition = _Transition.none;
+
   bool _syncOnMobile = _syncOnMobileDefault;
 
   PowerControl(this._session, this._settings) {
@@ -27,66 +27,82 @@ class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
 
   Future<void> init() async {
     _syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
-    final current = await _connectivity.checkConnectivity();
-    await _updateConnectionStatus(current);
+    await _refresh();
   }
 
-  bool isSyncEnabledOnMobile() {
-    return _syncOnMobile;
-  }
+  bool get isSyncEnabledOnMobile => _syncOnMobile;
 
   Future<void> enableSyncOnMobile() async {
-    _syncOnMobile = true;
-    await _settings.setEnableSyncOnMobile(true);
-    final lastConnectionType = _lastConnectionType;
-    if (lastConnectionType != null) {
-      await _updateConnectionStatus(lastConnectionType);
+    if (_syncOnMobile) {
+      return;
     }
+
+    _syncOnMobile = true;
+    changed();
+
+    await _settings.setEnableSyncOnMobile(true);
+    await _refresh();
   }
 
   Future<void> disableSyncOnMobile() async {
-    _syncOnMobile = false;
-    await _settings.setEnableSyncOnMobile(false);
-    final lastConnectionType = _lastConnectionType;
-    if (lastConnectionType != null) {
-      await _updateConnectionStatus(lastConnectionType);
+    if (!_syncOnMobile) {
+      return;
     }
+
+    _syncOnMobile = false;
+    changed();
+
+    await _settings.setEnableSyncOnMobile(false);
+    await _refresh();
   }
 
   // Null means the answer is not yet known (the init function hasn't finished
   // or was not called yet).
-  bool? isNetworkEnabled() {
-    return _isNetworkEnabled;
+  bool? get isNetworkEnabled {
+    switch (_networkMode) {
+      case _NetworkMode.full:
+        return true;
+      case _NetworkMode.saving:
+      case _NetworkMode.disabled:
+        return false;
+    }
   }
 
-  String? networkDisabledReason() {
-    return _networkDisabledReason;
+  String? get networkDisabledReason {
+    switch (_networkMode) {
+      case _NetworkMode.full:
+        return null;
+      case _NetworkMode.saving:
+        return S.current.messageSyncingIsDisabledOnMobileInternet;
+      case _NetworkMode.disabled:
+        return S.current.messageNetworkIsUnavailable;
+    }
   }
 
   Future<void> _listen() async {
     final stream = _connectivity.onConnectivityChanged;
 
     await for (var result in stream) {
-      await _updateConnectionStatus(result);
+      await _onConnectivityChange(result);
     }
   }
 
-  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+  Future<void> _onConnectivityChange(ConnectivityResult result) async {
     loggy.app('Connectivity event: ${result.name}');
 
     switch (result) {
       case ConnectivityResult.bluetooth:
-        await _disableNetwork();
+        await _setNetworkMode(_NetworkMode.disabled);
         break;
       case ConnectivityResult.wifi:
       case ConnectivityResult.ethernet:
-        await _enableNetworkFull();
+        await _setNetworkMode(_NetworkMode.full);
         break;
       case ConnectivityResult.mobile:
         if (_syncOnMobile) {
-          await _enableNetworkFull();
+          await _setNetworkMode(_NetworkMode.full);
         } else {
-          await _enableNetworkHotspot();
+          await _setNetworkMode(_NetworkMode.saving);
         }
         break;
       case ConnectivityResult.none:
@@ -94,82 +110,86 @@ class PowerControl extends WatchSelf<PowerControl> with OuiSyncAppLogger {
         // mobile internet is not enabled we get here as well. Ideally we would have
         // also the information about whether tethering is enabled and only in such case
         // we'd keep the connection going.
-        await _enableNetworkFull();
+        await _setNetworkMode(_NetworkMode.full);
+        break;
+    }
+  }
+
+  Future<void> _refresh() async {
+    _onConnectivityChange(await _connectivity.checkConnectivity());
+  }
+
+  Future<void> _setNetworkMode(_NetworkMode mode, {force = false}) async {
+    if (mode != _networkMode || force) {
+      loggy.app('Network mode: $mode');
+
+      _networkMode = mode;
+      changed();
+    } else {
+      return;
+    }
+
+    switch (_networkModeTransition) {
+      case _Transition.none:
+        _networkModeTransition = _Transition.ongoing;
+        break;
+      case _Transition.ongoing:
+      case _Transition.queued:
+        _networkModeTransition = _Transition.queued;
+        return;
+    }
+
+    var transition = _Transition.none;
+    String? quicV4;
+    String? quicV6;
+
+    switch (mode) {
+      case _NetworkMode.full:
+        quicV4 = _unspecifiedV4;
+        quicV6 = _unspecifiedV6;
+        break;
+      case _NetworkMode.saving:
+        final ip = await findHotspotIp();
+        quicV4 = ip != null ? "$ip:0" : null;
+        quicV6 = null;
+        break;
+      case _NetworkMode.disabled:
+        quicV4 = null;
+        quicV6 = null;
         break;
     }
 
-    _lastConnectionType = result;
-    changed();
-  }
+    try {
+      await _session.bindNetwork(quicV4: quicV4, quicV6: quicV6);
+    } catch (e) {
+      _networkMode = _NetworkMode.disabled;
+      rethrow;
+    } finally {
+      transition = _networkModeTransition;
+      _networkModeTransition = _Transition.none;
+      changed();
+    }
 
-  // Enable any network connection.
-  Future<void> _enableNetworkFull() async {
-    await _session.bindNetwork(
-      quicV4: _unspecifiedV4,
-      quicV6: _unspecifiedV6,
-    );
-
-    _isNetworkEnabled = true;
-    _networkDisabledReason = null;
-  }
-
-  // Enable only connections to devices connected to the hotspot provided by this device.
-  Future<void> _enableNetworkHotspot() async {
-    final ip = await _findHotspotIp();
-    final addr = ip != null ? "$ip:0" : null;
-
-    await _session.bindNetwork(quicV4: addr);
-
-    _isNetworkEnabled = false;
-    _networkDisabledReason = S.current.messageSyncingIsDisabledOnMobileInternet;
-  }
-
-  // Disable all connections.
-  Future<void> _disableNetwork() async {
-    await _session.bindNetwork();
-
-    _isNetworkEnabled = false;
-    _networkDisabledReason = S.current.messageNetworkIsUnavailable;
+    if (transition == _Transition.queued) {
+      await _setNetworkMode(_networkMode, force: true);
+    }
   }
 }
 
-// If wifi hotspot is enabled, find the ip address of the hotspot interface, otherwise returns null.
-Future<String?> _findHotspotIp() async {
-  // HACK: Find the hotspot ip address by enumerating all network interfaces and returning the one
-  // whose address is in the 192.168.x.x range. This is based on some experimentation and also on a
-  // couple of stackoverflow answers. Hard to say how reliable this is. The reason we do it this
-  // way is that there doesn't seems to be any stable API to retrieve this info. Also, the hotspot
-  // interface doesn't seem to appear immediately after connectivity event, so we need to poll it
-  // for a short time (typically it appears within 1 seconds or so).
+enum _NetworkMode {
+  /// Unrestricted network - any connection is enabled
+  full,
 
-  // TODO: there is a hidden android API which might be potentially more reliable. See this SO
-  // question for more details:
-  // https://stackoverflow.com/questions/69314959/android-developer-how-to-detect-when-wifi-hotspot-is-turned-on-off
+  /// Mobile data saving mode - only local connections on the hotspot provided by this device
+  /// (if any) are enabled.
+  saving,
 
-  // It seems on android the hotspot ip is always hardcoded to an ip with this prefix.
-  // TODO: We need more testing to verify this.
-  const hotspotIpPrefix = "192.168";
+  /// Network is disabled
+  disabled,
+}
 
-  final stopwatch = Stopwatch()..start();
-  final timeout =
-      Duration(seconds: 5); // poll the interfaces for up to this time.
-  final delay =
-      Duration(milliseconds: 250); // wait this long between each poll.
-
-  while (stopwatch.elapsed < timeout) {
-    final interfaces =
-        await NetworkInterface.list(type: InternetAddressType.IPv4);
-
-    for (var interface in interfaces) {
-      for (var addr in interface.addresses) {
-        if (addr.address.startsWith(hotspotIpPrefix)) {
-          return addr.address;
-        }
-      }
-    }
-
-    await Future.delayed(delay);
-  }
-
-  return null;
+enum _Transition {
+  none,
+  ongoing,
+  queued,
 }

@@ -65,7 +65,6 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
   @override
   void initState() {
     super.initState();
-    unawaited(_powerControl.init());
     unawaited(_updateLocalEndpoints());
   }
 
@@ -215,7 +214,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
     final connectionTypeRow = _powerControl.builder((powerControl) {
       Color? badgeColor;
 
-      if (!(powerControl.isNetworkEnabled() ?? true)) {
+      if (!(powerControl.isNetworkEnabled ?? true)) {
         badgeColor = Constants.warningColor;
       }
 
@@ -229,19 +228,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       title: const Text("Sync Options"),
-                      content: LabeledSwitch(
-                          label: "Enable sync while using mobile internet",
-                          padding: const EdgeInsets.all(0.0),
-                          value: _powerControl.isSyncEnabledOnMobile(),
-                          onChanged: (bool enable) async {
-                            if (enable) {
-                              await _powerControl.enableSyncOnMobile();
-                            } else {
-                              await _powerControl.disableSyncOnMobile();
-                            }
-                            // Refresh
-                            setState(() {});
-                          }),
+                      content: SyncOptionsWidget(_powerControl),
                       actions: <Widget>[
                         TextButton(
                             child: const Text('Close'),
@@ -266,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
 
     // If network is disabled, show the reason why.
     final info = _powerControl.builder((powerControl) {
-      final reason = powerControl.networkDisabledReason();
+      final reason = powerControl.networkDisabledReason;
       if (reason != null) {
         return Text(reason, style: TextStyle(color: Colors.orange));
       } else {
@@ -546,7 +533,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
             version = _labeledText(key, "...");
           }
 
-          final onTap = () {
+          void onTap() {
             if (_versionNumberClickCounter.registerClick() >= 3) {
               _versionNumberClickCounter.reset();
 
@@ -557,7 +544,7 @@ class _SettingsPageState extends State<SettingsPage> with OuiSyncAppLogger {
                   MaterialPageRoute(
                       builder: (context) => StateMonitorPage(session)));
             }
-          };
+          }
 
           return Listener(
             onPointerUp: (_) => onTap(),
