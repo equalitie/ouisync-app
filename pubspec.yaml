@@ -24,7 +24,6 @@ environment:
 dependencies:
   async: ^2.8.2
   badges: ^2.0.2
-  bloc: ^8.1.0
   bloc_test: ^9.0.3
   build_runner: ^2.1.7
   collection: ^1.15.0
