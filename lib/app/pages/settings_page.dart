@@ -48,18 +48,7 @@ class SettingsPage extends StatelessWidget {
                 ),
                 NetworkSection(),
                 LogsSection(repos: reposCubit, panicCounter: panicCounter),
-                SettingsSection(
-                  title: Text(S.current.titleAbout),
-                  tiles: [
-                    CustomSettingsTile(
-                      child: AppVersionTile(
-                        session: reposCubit.session,
-                        leading: Icon(Icons.info_outline),
-                        title: Text(S.current.labelAppVersion),
-                      ),
-                    )
-                  ],
-                ),
+                AboutSection(repos: reposCubit),
               ],
             ),
           ),
