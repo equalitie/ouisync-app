@@ -131,12 +131,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconShare": MessageLookupByLibrary.simpleMessage("Share"),
         "iconShareTokenWithPeer":
             MessageLookupByLibrary.simpleMessage("Share this with your peer"),
-        "labelAppVersion":
-            MessageLookupByLibrary.simpleMessage("App version: "),
+        "labelAppVersion": MessageLookupByLibrary.simpleMessage("App version"),
         "labelBitTorrentDHT":
-            MessageLookupByLibrary.simpleMessage("BitTorrent DHT: "),
+            MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
         "labelConnectedPeers":
-            MessageLookupByLibrary.simpleMessage("Connected peers: "),
+            MessageLookupByLibrary.simpleMessage("Connected peers"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destination"),
         "labelDownloadedTo":
@@ -343,6 +342,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),
+        "titleAbout": MessageLookupByLibrary.simpleMessage("About"),
         "titleAddFile":
             MessageLookupByLibrary.simpleMessage("Add file to OuiSync"),
         "titleAddRepoToken":

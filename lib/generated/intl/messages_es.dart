@@ -134,11 +134,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconShareTokenWithPeer": MessageLookupByLibrary.simpleMessage(
             "Comparte este token con tu colega"),
         "labelAppVersion":
-            MessageLookupByLibrary.simpleMessage("Versión de la App: "),
+            MessageLookupByLibrary.simpleMessage("Versión de la App"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
         "labelConnectedPeers":
-            MessageLookupByLibrary.simpleMessage("Compañeras conectadas: "),
+            MessageLookupByLibrary.simpleMessage("Compañeras conectadas"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copia el link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destino"),
         "labelDownloadedTo":

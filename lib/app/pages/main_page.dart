@@ -9,7 +9,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../cubits/power_control.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -258,21 +257,23 @@ class _MainPageState extends State<MainPage>
     return BlocBuilder<UpgradeExistsCubit, bool>(
         builder: (context, updateExists) {
       return _panicCounter.builder((context, panicCount) {
-        return _powerControl.builder((powerControl) {
-          Color? color;
+        return BlocBuilder<PowerControl, PowerControlState>(
+            bloc: _powerControl,
+            builder: (context, state) {
+              Color? color;
 
-          if (updateExists || ((panicCount ?? 0) > 0)) {
-            color = Constants.errorColor;
-          } else if (!(powerControl.isNetworkEnabled ?? true)) {
-            color = Constants.warningColor;
-          }
+              if (updateExists || ((panicCount ?? 0) > 0)) {
+                color = Constants.errorColor;
+              } else if (!(state.isNetworkEnabled ?? true)) {
+                color = Constants.warningColor;
+              }
 
-          if (color != null) {
-            return Fields.addBadge(button, color: color);
-          } else {
-            return button;
-          }
-        });
+              if (color != null) {
+                return Fields.addBadge(button, color: color);
+              } else {
+                return button;
+              }
+            });
       });
     });
   }

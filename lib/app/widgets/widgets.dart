@@ -40,4 +40,7 @@ export 'states/locked_repository_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 
-export 'sync_options_widget.dart';
+export 'settings/about_section.dart';
+export 'settings/logs_section.dart';
+export 'settings/network_section.dart';
+export 'settings/repository_section.dart';

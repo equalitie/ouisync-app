@@ -44,7 +44,7 @@ packages:
     source: hosted
     version: "2.0.2"
   bloc:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: bloc
       url: "https://pub.dartlang.org"
@@ -939,6 +939,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  settings_ui:
+    dependency: "direct main"
+    description:
+      name: settings_ui
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   share_plus:
     dependency: "direct main"
     description:

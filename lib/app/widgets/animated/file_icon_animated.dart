@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../cubits/cubits.dart';
@@ -8,7 +9,7 @@ import '../../utils/utils.dart';
 class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
   FileIconAnimated(this._downloadJob);
 
-  final Watch<Job>? _downloadJob;
+  final Job? _downloadJob;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
     final job = _downloadJob;
 
     if (job != null) {
-      job.state.cancel = true;
+      job.cancel();
     }
   }
 
@@ -33,19 +34,21 @@ class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
           size: Dimensions.sizeIconAverage);
     }
 
-    return job.builder((job) {
-      final ratio = job.soFar / job.total;
-      final percentage = (ratio * 100.0).round();
+    return BlocBuilder<Job, JobState>(
+        bloc: job,
+        builder: (context, state) {
+          final ratio = state.soFar / state.total;
+          final percentage = (ratio * 100.0).round();
 
-      return CircularPercentIndicator(
-          radius: Dimensions.sizeIconMicro,
-          animation: true,
-          animateFromLastPercent: true,
-          percent: ratio,
-          progressColor: Theme.of(context).colorScheme.secondary,
-          center: Text('$percentage%',
-              style: const TextStyle(fontSize: Dimensions.fontMicro)));
-    });
+          return CircularPercentIndicator(
+              radius: Dimensions.sizeIconMicro,
+              animation: true,
+              animateFromLastPercent: true,
+              percent: ratio,
+              progressColor: Theme.of(context).colorScheme.secondary,
+              center: Text('$percentage%',
+                  style: const TextStyle(fontSize: Dimensions.fontMicro)));
+        });
 
     // TODO: This code used to show a different icon once the download finished.
     //   Also after the download was done, clicking on the icon would show the

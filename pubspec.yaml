@@ -24,7 +24,6 @@ environment:
 dependencies:
   async: ^2.8.2
   badges: ^2.0.2
-  bloc: ^8.1.0
   bloc_test: ^9.0.3
   build_runner: ^2.1.7
   collection: ^1.15.0
@@ -63,6 +62,7 @@ dependencies:
   qr_flutter: ^4.0.0
   r_get_ip: ^0.1.1
   receive_sharing_intent: ^1.4.5
+  settings_ui: ^2.0.2
   share_plus: ^4.0.4
   shared_preferences: ^2.0.13
   styled_text: ^5.0.0+1

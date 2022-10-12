@@ -5,6 +5,7 @@ class Constants {
 
   static const Color errorColor = Colors.red;
   static const Color warningColor = Colors.orange;
+  static const Color dangerColor = Colors.red;
 
   static const String folderRepositoriesName = 'repositories';
   static const String configuratiosDirName = 'configs';

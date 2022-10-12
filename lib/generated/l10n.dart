@@ -50,6 +50,16 @@ class S {
     return Localizations.of<S>(context, S);
   }
 
+  /// `About`
+  String get titleAbout {
+    return Intl.message(
+      'About',
+      name: 'titleAbout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `OuiSync`
   String get titleAppTitle {
     return Intl.message(
@@ -430,10 +440,10 @@ class S {
     );
   }
 
-  /// `BitTorrent DHT: `
+  /// `BitTorrent DHT`
   String get labelBitTorrentDHT {
     return Intl.message(
-      'BitTorrent DHT: ',
+      'BitTorrent DHT',
       name: 'labelBitTorrentDHT',
       desc: '',
       args: [],
@@ -470,20 +480,20 @@ class S {
     );
   }
 
-  /// `App version: `
+  /// `App version`
   String get labelAppVersion {
     return Intl.message(
-      'App version: ',
+      'App version',
       name: 'labelAppVersion',
       desc: '',
       args: [],
     );
   }
 
-  /// `Connected peers: `
+  /// `Connected peers`
   String get labelConnectedPeers {
     return Intl.message(
-      'Connected peers: ',
+      'Connected peers',
       name: 'labelConnectedPeers',
       desc: '',
       args: [],

@@ -9,18 +9,12 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
 import 'cubits.dart' as cubits;
-
-class Job {
-  int soFar;
-  int total;
-  bool cancel = false;
-  Job(this.soFar, this.total);
-}
+import 'job.dart';
 
 class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   bool isLoading = false;
-  final Map<String, cubits.Watch<Job>> uploads = HashMap();
-  final Map<String, cubits.Watch<Job>> downloads = HashMap();
+  final Map<String, Job> uploads = HashMap();
+  final Map<String, Job> downloads = HashMap();
   final List<String> messages = <String>[];
 
   final Folder _currentFolder = Folder();
@@ -149,7 +143,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       return;
     }
 
-    final job = cubits.Watch(Job(0, length));
+    final job = Job(0, length);
     update((repo) {
       repo.uploads[filePath] = job;
     });
@@ -165,9 +159,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       await for (final buffer in stream) {
         await file.write(offset, buffer);
         offset += buffer.length;
-        job.update((job) {
-          job.soFar = offset;
-        });
+        job.update(offset);
       }
     } catch (e) {
       showMessage(S.current.messageWritingFileError(filePath));
@@ -263,7 +255,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     final sink = newFile.openWrite();
     int offset = 0;
 
-    final job = cubits.Watch(Job(0, length));
+    final job = Job(0, length);
     update((repo) {
       repo.downloads[sourcePath] = job;
     });
@@ -287,9 +279,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
           break;
         }
 
-        job.update((job) {
-          job.soFar = offset;
-        });
+        job.update(offset);
       }
     } catch (e, st) {
       loggy.app('Download file $sourcePath exception', e, st);
