@@ -26,16 +26,14 @@ class LogsSection extends AbstractSettingsSection {
   Widget build(BuildContext context) => SettingsSection(
         title: Text(S.current.titleLogs),
         tiles: [
-          SettingsTile.navigation(
+          NavigationTile(
             title: Text(S.current.actionSave),
             leading: Icon(Icons.save),
-            trailing: Icon(navigationIcon),
             onPressed: _saveLogs,
           ),
-          SettingsTile.navigation(
+          NavigationTile(
             title: Text(S.current.actionShare),
             leading: Icon(Icons.share),
-            trailing: Icon(navigationIcon),
             onPressed: _shareLogs,
           ),
           CustomSettingsTile(child: panicCounter.builder((context, count) {

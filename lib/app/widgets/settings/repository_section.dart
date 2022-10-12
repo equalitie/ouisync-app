@@ -79,10 +79,9 @@ class RepositorySection extends AbstractSettingsSection {
       );
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
+      NavigationTile(
           title: Text(S.current.actionRename),
           leading: Icon(Icons.edit),
-          trailing: Icon(navigationIcon),
           onPressed: (context) async {
             final newName = await showDialog<String>(
                 context: context,
@@ -108,20 +107,18 @@ class RepositorySection extends AbstractSettingsSection {
           });
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
+      NavigationTile(
         title: Text(S.current.actionShare),
         leading: Icon(Icons.share),
-        trailing: Icon(navigationIcon),
         onPressed: (context) {
           onShareRepository(repo);
         },
       );
 
   Widget _buildChangePasswordTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
+      NavigationTile(
         title: Text('Change password'), // TODO: localize
         leading: Icon(Icons.password),
-        trailing: Icon(navigationIcon),
         onPressed: (context) {
           // TODO
         },
@@ -129,11 +126,10 @@ class RepositorySection extends AbstractSettingsSection {
       );
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
+      NavigationTile(
         title: Text(S.current.actionDelete,
             style: const TextStyle(color: Constants.dangerColor)),
         leading: Icon(Icons.delete, color: Constants.dangerColor),
-        trailing: Icon(navigationIcon),
         onPressed: (context) async {
           final delete = await showDialog<bool>(
             context: context,

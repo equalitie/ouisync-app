@@ -146,9 +146,8 @@ class NetworkSection extends AbstractSettingsSection {
   AbstractSettingsTile _buildPeerListTile(BuildContext context) =>
       CustomSettingsTile(
         child: BlocBuilder<PeerSetCubit, PeerSetChanged>(
-          builder: (context, state) => SettingsTile.navigation(
+          builder: (context, state) => NavigationTile(
               leading: Icon(Icons.people),
-              trailing: Icon(navigationIcon),
               title: Text(S.current.labelConnectedPeers),
               value: Text(state.stats()),
               onPressed: (context) {
