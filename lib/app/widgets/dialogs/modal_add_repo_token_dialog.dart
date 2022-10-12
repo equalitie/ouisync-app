@@ -222,6 +222,15 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   Widget _buildTokenLabel() {
     _validateToken();
 
+    final targetContext = scrollKey.currentContext;
+    if (targetContext != null) {
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
+
     return Padding(
         padding: Dimensions.paddingVertical10,
         child: Container(
