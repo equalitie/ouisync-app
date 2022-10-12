@@ -221,19 +221,19 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
-  Future<RepoEntry?> createRepository(RepoMetaInfo info,
+  Future<RepoEntry> createRepository(RepoMetaInfo info,
       {required String password,
       oui.ShareToken? token,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
     final repo = await _create(info, password: password, token: token);
-    if (repo != null) {
-      await _put(repo, setCurrent: setCurrent);
+    if (repo is ErrorRepoEntry) {
+      loggy.app('Failed to create repository ${info.name}');
       return repo;
     }
 
-    loggy.app('Failed to create repository ${info.name}');
+    await _put(repo, setCurrent: setCurrent);
     return repo;
   }
 
