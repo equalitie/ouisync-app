@@ -61,19 +61,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<String> repositoryNames() => _repos.keys;
 
-  Future<void> bindNetwork({
-    String? quicV4,
-    String? quicV6,
-    String? tcpV4,
-    String? tcpV6,
-  }) =>
-      _session.bindNetwork(
-        quicV4: quicV4,
-        quicV6: quicV6,
-        tcpV4: tcpV4,
-        tcpV6: tcpV6,
-      );
-
   RepoEntry? get currentRepo => _currentRepo;
 
   StateMonitor rootStateMonitor() =>

@@ -53,27 +53,8 @@ class SettingsPage extends StatelessWidget {
             },
             child: SettingsList(
               sections: [
-                SettingsSection(title: Text(S.current.titleNetwork), tiles: [
-                  _buildConnectivityTypeTile(context),
-                  // TODO:
-                  SettingsTile.switchTile(
-                    initialValue: false,
-                    onToggle: (value) {},
-                    title: Text('Enable UPnP'),
-                    leading: Icon(Icons.router),
-                    enabled: false,
-                  ),
-                  SettingsTile.switchTile(
-                    initialValue: false,
-                    onToggle: (value) {},
-                    title: Text('Enable Local Discovery'),
-                    leading: Icon(Icons.broadcast_on_personal),
-                    enabled: false,
-                  ),
-                  _buildSyncOnMobileSwitch(context),
-                  ..._buildConnectivityInfoTiles(context),
-                  _buildPeerListTile(context),
-                ]),
+                _buildReposSection(context),
+                _buildNetworkSection(context),
                 SettingsSection(
                   title: Text('About'), // TODO: localize
                   tiles: [
@@ -89,6 +70,182 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           )));
+
+  AbstractSettingsSection _buildReposSection(BuildContext context) =>
+      CustomSettingsSection(
+        child: reposCubit.builder(
+          (reposCubit) => SettingsSection(
+            title: Text(S.current.titleRepository),
+            tiles: [
+              SettingsTile(title: RepositorySelector(reposCubit)),
+              _buildCurrentRepoTile(context, _buildRepoDhtSwitch),
+              _buildCurrentRepoTile(context, _buildRepoPexSwitch),
+              _buildCurrentRepoTile(context, _buildRepoRenameTile),
+              _buildCurrentRepoTile(context, _buildRepoShareTile),
+              _buildCurrentRepoTile(context, _buildRepoChangePasswordTile),
+              _buildCurrentRepoTile(context, _buildRepoDeleteTile),
+            ],
+          ),
+        ),
+      );
+
+  AbstractSettingsTile _buildCurrentRepoTile(
+      BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
+    final currentRepo = reposCubit.currentRepo;
+    final widget = currentRepo is OpenRepoEntry
+        ? currentRepo.cubit.builder((repo) => builder(context, repo))
+        : SizedBox.shrink();
+
+    return CustomSettingsTile(child: widget);
+  }
+
+  Widget _buildRepoDhtSwitch(
+    BuildContext context,
+    RepoCubit repo,
+  ) =>
+      SettingsTile.switchTile(
+        initialValue: repo.isDhtEnabled,
+        title: Text(S.current.labelBitTorrentDHT),
+        leading: Icon(Icons.hub),
+        onToggle: (value) {
+          if (value) {
+            repo.enableDht();
+          } else {
+            repo.disableDht();
+          }
+        },
+      );
+
+  Widget _buildRepoPexSwitch(
+    BuildContext context,
+    RepoCubit repo,
+  ) =>
+      SettingsTile.switchTile(
+        initialValue: false /*repo.isPexEnabled*/,
+        title: Text('Peer Exchange'), // TODO: localize
+        leading: Icon(Icons.group_add),
+        onToggle: (value) {
+          // TODO:
+          //if (value) {
+          //  repo.enablePex();
+          //} else {
+          //  repo.disablePex();
+          //}
+        },
+        enabled: false,
+      );
+
+  Widget _buildRepoRenameTile(BuildContext context, RepoCubit repo) =>
+      SettingsTile.navigation(
+          title: Text(S.current.actionRename),
+          leading: Icon(Icons.edit),
+          trailing: Icon(_navigationIcon),
+          onPressed: (context) async {
+            final newName = await showDialog<String>(
+                context: context,
+                builder: (BuildContext context) {
+                  final formKey = GlobalKey<FormState>();
+
+                  return ActionsDialog(
+                    title: S.current.messageRenameRepository,
+                    body: RenameRepository(
+                        context: context,
+                        formKey: formKey,
+                        repositoryName: repo.name),
+                  );
+                });
+
+            if (newName == null || newName.isEmpty) {
+              return;
+            }
+
+            final oldInfo = reposCubit.internalRepoMetaInfo(repo.name);
+            final newInfo = reposCubit.internalRepoMetaInfo(newName);
+            reposCubit.renameRepository(oldInfo, newInfo);
+          });
+
+  Widget _buildRepoShareTile(BuildContext context, RepoCubit repo) =>
+      SettingsTile.navigation(
+        title: Text(S.current.actionShare),
+        leading: Icon(Icons.share),
+        trailing: Icon(_navigationIcon),
+        onPressed: (context) {
+          onShareRepository(repo);
+        },
+      );
+
+  Widget _buildRepoChangePasswordTile(BuildContext context, RepoCubit repo) =>
+      SettingsTile.navigation(
+        title: Text('Change password'), // TODO: localize
+        leading: Icon(Icons.password),
+        trailing: Icon(_navigationIcon),
+        onPressed: (context) {
+          // TODO
+        },
+        enabled: false,
+      );
+
+  Widget _buildRepoDeleteTile(BuildContext context, RepoCubit repo) =>
+      SettingsTile.navigation(
+        title: Text(S.current.actionDelete,
+            style: const TextStyle(color: Constants.dangerColor)),
+        leading: Icon(Icons.delete, color: Constants.dangerColor),
+        trailing: Icon(_navigationIcon),
+        onPressed: (context) async {
+          final delete = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(S.current.titleDeleteRepository),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: [Text(S.current.messageConfirmRepositoryDeletion)],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text(S.current.actionCloseCapital),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                DangerButton(
+                  text: S.current.actionDeleteCapital,
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            ),
+          );
+
+          if (delete ?? false) {
+            reposCubit.deleteRepository(repo.metaInfo);
+          }
+        },
+      );
+
+  AbstractSettingsSection _buildNetworkSection(BuildContext context) =>
+      SettingsSection(
+        title: Text(S.current.titleNetwork),
+        tiles: [
+          _buildConnectivityTypeTile(context),
+          // TODO:
+          SettingsTile.switchTile(
+            initialValue: false,
+            onToggle: (value) {},
+            title: Text('UPnP'),
+            leading: Icon(Icons.router),
+            enabled: false,
+          ),
+          // TODO:
+          SettingsTile.switchTile(
+            initialValue: false,
+            onToggle: (value) {},
+            title: Text('Local Discovery'),
+            leading: Icon(Icons.broadcast_on_personal),
+            enabled: false,
+          ),
+          _buildSyncOnMobileSwitch(context),
+          ..._buildConnectivityInfoTiles(context),
+          _buildPeerListTile(context),
+        ],
+      );
 
   AbstractSettingsTile _buildConnectivityTypeTile(BuildContext context) =>
       CustomSettingsTile(
@@ -279,201 +436,9 @@ class _SettingsPageOldState extends State<SettingsPageOld>
           // need to set clipBehaior to Clip.none.
           clipBehavior: Clip.none,
           children: [
-            _buildRepositoriesSection(repos.currentRepo),
-            _divider(),
-            Fields.idLabel(
-              S.current.titleNetwork,
-              fontSize: Dimensions.fontAverage,
-              fontWeight: FontWeight.normal,
-              color: _titlesColor!,
-            ),
-            _buildCurrentRepoDhtSwitch(repos.currentRepo),
-            _divider(),
             _buildLogsSection(),
           ],
         ));
-  }
-
-  Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
-    if (repo is! OpenRepoEntry) {
-      return SizedBox.shrink();
-    }
-
-    return repo.cubit.builder((repo) => LabeledSwitch(
-          label: S.current.labelBitTorrentDHT,
-          padding: const EdgeInsets.all(0.0),
-          value: repo.isDhtEnabled,
-          onChanged: (bool enable) {
-            if (enable) {
-              repo.enableDht();
-            } else {
-              repo.disableDht();
-            }
-          },
-        ));
-  }
-
-  static Widget _divider() => const Divider(height: 20.0, thickness: 1.0);
-
-  Widget _buildRepositoriesSection(RepoEntry? currentRepo) {
-    return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Fields.idLabel(S.current.titleRepository,
-              fontSize: Dimensions.fontAverage,
-              fontWeight: FontWeight.normal,
-              color: _titlesColor!),
-          Dimensions.spacingVertical,
-          Container(
-            padding: Dimensions.paddingActionBox,
-            decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-                color: Constants.inputBackgroundColor),
-            child: DropdownButton<RepoEntry?>(
-              isExpanded: true,
-              value: currentRepo,
-              underline: const SizedBox(),
-              selectedItemBuilder: (context) =>
-                  repositoryNames().map<Widget>((String repoName) {
-                return Padding(
-                    padding: Dimensions.paddingItem,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(children: [
-                          Fields.idLabel(S.current.labelSelectRepository,
-                              fontSize: Dimensions.fontMicro,
-                              fontWeight: FontWeight.normal,
-                              color: Constants.inputLabelForeColor)
-                        ]),
-                        Row(
-                          children: [
-                            Fields.constrainedText(repoName,
-                                fontWeight: FontWeight.normal),
-                          ],
-                        ),
-                      ],
-                    ));
-              }).toList(),
-              items: repositories().map((RepoEntry repo) {
-                return DropdownMenuItem(
-                  value: repo,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(repo == currentRepo ? Icons.check : null,
-                          size: Dimensions.sizeIconSmall,
-                          color: Theme.of(context).primaryColor),
-                      Dimensions.spacingHorizontalDouble,
-                      Fields.constrainedText(repo.name,
-                          fontWeight: FontWeight.normal),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (repo) async {
-                loggy.app('Selected repository: ${repo?.name}');
-                await _repos.setCurrentByName(repo?.name);
-              },
-            ),
-          ),
-          Dimensions.spacingVertical,
-          Dimensions.spacingVertical,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Fields.actionText(S.current.actionRename,
-                  textFontSize: Dimensions.fontAverage,
-                  icon: Icons.edit,
-                  iconSize: Dimensions.sizeIconSmall, onTap: () async {
-                if (currentRepo == null) {
-                  return;
-                }
-
-                await showDialog<String>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      final formKey = GlobalKey<FormState>();
-
-                      return ActionsDialog(
-                        title: S.current.messageRenameRepository,
-                        body: RenameRepository(
-                            context: context,
-                            formKey: formKey,
-                            repositoryName: currentRepo.name),
-                      );
-                    }).then((newName) {
-                  if (newName == null || newName.isEmpty) {
-                    return;
-                  }
-                  final oldInfo = _repos.internalRepoMetaInfo(currentRepo.name);
-                  final newInfo = _repos.internalRepoMetaInfo(newName);
-                  _repos.renameRepository(oldInfo, newInfo);
-                });
-              }),
-              Fields.actionText(S.current.actionShare,
-                  textFontSize: Dimensions.fontAverage,
-                  icon: Icons.share,
-                  iconSize: Dimensions.sizeIconSmall, onTap: () {
-                if (currentRepo is! OpenRepoEntry) {
-                  return;
-                }
-
-                widget.onShareRepository(currentRepo.cubit);
-              }),
-              Fields.actionText(S.current.actionDelete,
-                  textFontSize: Dimensions.fontAverage,
-                  textColor: Colors.red,
-                  icon: Icons.delete,
-                  iconSize: Dimensions.sizeIconSmall,
-                  iconColor: Colors.red, onTap: () async {
-                if (currentRepo == null) {
-                  return;
-                }
-
-                final delete = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                            title: Text(S.current.titleDeleteRepository),
-                            content: SingleChildScrollView(
-                              child: ListBody(children: [
-                                Text(S.current.messageConfirmRepositoryDeletion)
-                              ]),
-                            ),
-                            actions: [
-                              TextButton(
-                                child: Text(S.current.actionCloseCapital),
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                              ),
-                              DangerButton(
-                                text: S.current.actionDeleteCapital,
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                              ),
-                            ]));
-
-                if (delete ?? false) {
-                  _repos.deleteRepository(currentRepo.metaInfo);
-                }
-              })
-            ],
-          ),
-          Dimensions.spacingVertical,
-        ]);
-  }
-
-  Iterable<String> repositoryNames() {
-    return _repos.repositoryNames();
-  }
-
-  Iterable<RepoEntry> repositories() {
-    return _repos.repos;
   }
 
   Widget _buildLogsSection() => Column(
