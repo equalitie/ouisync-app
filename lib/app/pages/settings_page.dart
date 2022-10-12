@@ -13,7 +13,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import '../models/repo_entry.dart';
@@ -55,6 +54,7 @@ class SettingsPage extends StatelessWidget {
               sections: [
                 _buildReposSection(context),
                 _buildNetworkSection(context),
+                _buildLogsSection(context),
                 SettingsSection(
                   title: Text('About'), // TODO: localize
                   tiles: [
@@ -367,6 +367,91 @@ class SettingsPage extends StatelessWidget {
               }),
         ),
       );
+
+  AbstractSettingsSection _buildLogsSection(BuildContext context) =>
+      SettingsSection(
+        title: Text(S.current.titleLogs),
+        tiles: [
+          SettingsTile.navigation(
+            title: Text(S.current.actionSave),
+            leading: Icon(Icons.save),
+            trailing: Icon(_navigationIcon),
+            onPressed: _saveLogs,
+          ),
+          SettingsTile.navigation(
+            title: Text(S.current.actionShare),
+            leading: Icon(Icons.share),
+            trailing: Icon(_navigationIcon),
+            onPressed: _shareLogs,
+          ),
+          CustomSettingsTile(child: panicCounter.builder((context, count) {
+            if ((count ?? 0) > 0) {
+              final color = Theme.of(context).colorScheme.error;
+              return SettingsTile(
+                title: Text(
+                  S.current.messageLibraryPanic,
+                  style: TextStyle(color: color),
+                ),
+                leading: Icon(Icons.error, color: color),
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          })),
+        ],
+      );
+
+  Future<void> _saveLogs(BuildContext context) async {
+    final tempPath = await _dumpInfo(context);
+    final params = SaveFileDialogParams(sourceFilePath: tempPath);
+    await FlutterFileDialog.saveFile(params: params);
+  }
+
+  Future<void> _shareLogs(BuildContext context) async {
+    final tempPath = await _dumpInfo(context);
+    await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
+  }
+
+  Future<String> _dumpInfo(BuildContext context) async {
+    final dir = await getTemporaryDirectory();
+    final info = await PackageInfo.fromPlatform();
+    final name = info.appName.toLowerCase();
+
+    final connType = context.read<PowerControl>().state.connectivityType;
+    final connInfo = context.read<ConnectivityInfo>().state;
+
+    // TODO: Add time zone, at time of this writing, time zones have not yet
+    // been implemented by DateFormat.
+    final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
+    final timestamp = formatter.format(DateTime.now());
+    final path = buildDestinationPath(dir.path, '$name--$timestamp.log');
+    final outFile = File(path);
+
+    final sink = outFile.openWrite();
+
+    try {
+      sink.writeln("appName: ${info.appName}");
+      sink.writeln("packageName: ${info.packageName}");
+      sink.writeln("version: ${info.version}");
+      sink.writeln("buildNumber: ${info.buildNumber}");
+
+      sink.writeln("connectionType: $connType");
+      sink.writeln("externalIP: ${connInfo.externalIP}");
+      sink.writeln("localIPv4: ${connInfo.localIPv4}");
+      sink.writeln("localIPv6: ${connInfo.localIPv6}");
+      sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
+      sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");
+      sink.writeln("quicListenerV4: ${connInfo.quicListenerV4}");
+      sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
+      sink.writeln("\n");
+
+      await dumpAll(sink, reposCubit.session.getRootStateMonitor());
+    } finally {
+      await sink.close();
+    }
+
+    return path;
+  }
 }
 
 const _navigationIcon = Icons.navigate_next;
@@ -384,143 +469,4 @@ String _connectivityTypeName(ConnectivityResult result) {
     case ConnectivityResult.none:
       return "None";
   }
-}
-
-//--------------------------------------------------------------------------------------------------
-
-class SettingsPageOld extends StatefulWidget {
-  const SettingsPageOld({
-    required this.reposCubit,
-    required this.onShareRepository,
-    required this.panicCounter,
-  });
-
-  final ReposCubit reposCubit;
-  final void Function(RepoCubit) onShareRepository;
-  final StateMonitorIntValue panicCounter;
-
-  @override
-  State<SettingsPageOld> createState() =>
-      _SettingsPageOldState(reposCubit, panicCounter);
-}
-
-class _SettingsPageOldState extends State<SettingsPageOld>
-    with OuiSyncAppLogger {
-  final ReposCubit _repos;
-  final StateMonitorIntValue _panicCounter;
-
-  String? _connectionType;
-  String? _externalIP;
-  String? _localIPv4;
-  String? _localIPv6;
-  String? _tcpListenerEndpointV4;
-  String? _tcpListenerEndpointV6;
-  String? _quicListenerEndpointV4;
-  String? _quicListenerEndpointV6;
-
-  Color? _titlesColor = Colors.black;
-
-  _SettingsPageOldState(this._repos, this._panicCounter);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _titlesColor = Theme.of(context).colorScheme.secondary;
-
-    return _repos.builder((repos) => ListView(
-          // The badge over the version number is shown outside of the row boundary, so we
-          // need to set clipBehaior to Clip.none.
-          clipBehavior: Clip.none,
-          children: [
-            _buildLogsSection(),
-          ],
-        ));
-  }
-
-  Widget _buildLogsSection() => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Fields.idLabel(S.current.titleLogs,
-                fontSize: Dimensions.fontAverage,
-                fontWeight: FontWeight.normal,
-                color: _titlesColor!),
-            Padding(
-                padding: Dimensions.paddingActionButton,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Fields.actionText(S.current.actionSave,
-                          textFontSize: Dimensions.fontAverage,
-                          icon: Icons.save,
-                          iconSize: Dimensions.sizeIconSmall,
-                          onTap: _saveLogs),
-                      Fields.actionText(S.current.actionShare,
-                          textFontSize: Dimensions.fontAverage,
-                          icon: Icons.share,
-                          iconSize: Dimensions.sizeIconSmall,
-                          onTap: _shareLogs)
-                    ])),
-            _panicCounter.builder((context, panics) {
-              if ((panics ?? 0) == 0) return SizedBox.shrink();
-              return _warningText(context, S.current.messageLibraryPanic);
-            }),
-          ]);
-
-  Future<void> _saveLogs() async {
-    final tempPath = await _dumpInfo();
-    final params = SaveFileDialogParams(sourceFilePath: tempPath);
-    await FlutterFileDialog.saveFile(params: params);
-  }
-
-  Future<void> _shareLogs() async {
-    final tempPath = await _dumpInfo();
-    await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
-  }
-
-  Future<String> _dumpInfo() async {
-    final dir = await getTemporaryDirectory();
-    final info = await PackageInfo.fromPlatform();
-    final name = info.appName.toLowerCase();
-
-    final now = DateTime.now();
-    // TODO: Add time zone, at time of this writing, time zones have not yet
-    // been implemented by DateFormat.
-    final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
-    final path =
-        buildDestinationPath(dir.path, '$name--${formatter.format(now)}.log');
-    final outFile = File(path);
-
-    final sink = outFile.openWrite();
-
-    sink.writeln("appName: ${info.appName}");
-    sink.writeln("packageName: ${info.packageName}");
-    sink.writeln("version: ${info.version}");
-    sink.writeln("buildNumber: ${info.buildNumber}");
-
-    sink.writeln("_connectionType: $_connectionType");
-    sink.writeln("_externalIP: $_externalIP");
-    sink.writeln("_localIPv4: $_localIPv4");
-    sink.writeln("_localIPv6: $_localIPv6");
-    sink.writeln("_tcpListenerEndpointV4: $_tcpListenerEndpointV4");
-    sink.writeln("_tcpListenerEndpointV6: $_tcpListenerEndpointV6");
-    sink.writeln("_quicListenerEndpointV4: $_quicListenerEndpointV4");
-    sink.writeln("_quicListenerEndpointV6: $_quicListenerEndpointV6");
-    sink.writeln("\n");
-
-    await dumpAll(sink, _repos.session.getRootStateMonitor());
-
-    await sink.close();
-
-    return path;
-  }
-}
-
-Text _warningText(BuildContext context, String str) {
-  return Text(str,
-      style: TextStyle(color: Theme.of(context).colorScheme.error));
 }

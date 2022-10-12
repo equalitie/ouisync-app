@@ -34,7 +34,7 @@ class _AppVersionTileState extends State<AppVersionTile> {
   Widget build(BuildContext context) => SettingsTile(
         leading: widget.leading,
         title: widget.title,
-        trailing: FutureBuilder<String>(
+        value: FutureBuilder<String>(
           future: _version,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
             late Widget version;
