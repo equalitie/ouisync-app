@@ -41,5 +41,6 @@ export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 
 export 'settings/app_version_tile.dart';
+export 'settings/logs_section.dart';
 export 'settings/network_section.dart';
 export 'settings/repository_section.dart';
