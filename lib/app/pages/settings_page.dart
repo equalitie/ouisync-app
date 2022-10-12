@@ -38,103 +38,218 @@ class SettingsPage extends StatelessWidget {
         title: Text(S.current.titleSettings),
         elevation: 0.0,
       ),
-      body: SettingsList(
-        sections: [
-          CustomSettingsSection(
-            child: ConnectivityInfoBuilder(
-              session: reposCubit.session,
-              powerControl: powerControl,
-              builder: (context, state) => SettingsSection(
-                title: Text(S.current.titleNetwork),
-                tiles: [
-                  _nullableTile(
-                    Strings.labelTcpListenerEndpointV4,
-                    Icons.computer,
-                    state.tcpListenerV4,
+      body: MultiBlocProvider(
+          providers: [
+            BlocProvider<PowerControl>.value(value: powerControl),
+            BlocProvider<ConnectivityInfo>(create: (context) {
+              final cubit = ConnectivityInfo(session: reposCubit.session);
+              unawaited(cubit.update());
+              return cubit;
+            })
+          ],
+          child: BlocListener<PowerControl, PowerControlState>(
+            listener: (context, state) {
+              unawaited(context.read<ConnectivityInfo>().update());
+            },
+            child: SettingsList(
+              sections: [
+                SettingsSection(title: Text(S.current.titleNetwork), tiles: [
+                  _buildConnectivityTypeTile(context),
+                  // TODO:
+                  SettingsTile.switchTile(
+                    initialValue: false,
+                    onToggle: (value) {},
+                    title: Text('Enable UPnP'),
+                    leading: Icon(Icons.router),
+                    enabled: false,
                   ),
-                  _nullableTile(
-                    Strings.labelTcpListenerEndpointV6,
-                    Icons.computer,
-                    state.tcpListenerV6,
+                  SettingsTile.switchTile(
+                    initialValue: false,
+                    onToggle: (value) {},
+                    title: Text('Enable Local Discovery'),
+                    leading: Icon(Icons.broadcast_on_personal),
+                    enabled: false,
                   ),
-                  _nullableTile(
-                    Strings.labelQuicListenerEndpointV4,
-                    Icons.computer,
-                    state.quicListenerV4,
-                  ),
-                  _nullableTile(
-                    Strings.labelQuicListenerEndpointV6,
-                    Icons.computer,
-                    state.quicListenerV6,
-                  ),
-                  _nullableTile(
-                    Strings.labelExternalIP,
-                    Icons.cloud_outlined,
-                    state.externalIP,
-                  ),
-                  _nullableTile(
-                    Strings.labelLocalIPv4,
-                    Icons.lan_outlined,
-                    state.localIPv4,
-                  ),
-                  _nullableTile(
-                    Strings.labelLocalIPv6,
-                    Icons.lan_outlined,
-                    state.localIPv6,
-                  ),
-                ].whereType<SettingsTile>().toList(),
-              ),
-            ),
-          ),
-          SettingsSection(
-            title: Text('About'), // TODO: localize
-            tiles: [
-              CustomSettingsTile(
-                child: AppVersionTile(
-                  session: reposCubit.session,
-                  leading: Icon(Icons.info_outline),
-                  title: Text(S.current.labelAppVersion),
+                  _buildSyncOnMobileSwitch(context),
+                  ..._buildConnectivityInfoTiles(context),
+                  _buildPeerListTile(context),
+                ]),
+                SettingsSection(
+                  title: Text('About'), // TODO: localize
+                  tiles: [
+                    CustomSettingsTile(
+                      child: AppVersionTile(
+                        session: reposCubit.session,
+                        leading: Icon(Icons.info_outline),
+                        title: Text(S.current.labelAppVersion),
+                      ),
+                    )
+                  ],
                 ),
-              )
-            ],
+              ],
+            ),
+          )));
+
+  AbstractSettingsTile _buildConnectivityTypeTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocBuilder<PowerControl, PowerControlState>(
+          builder: (context, state) => SettingsTile(
+            leading: Icon(Icons.wifi),
+            title: Text(Strings.connectionType),
+            value: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_connectivityTypeName(state.connectivityType)),
+                if (state.networkDisabledReason != null)
+                  Text('(${state.networkDisabledReason!})'),
+              ],
+            ),
+            trailing: (state.isNetworkEnabled ?? true)
+                ? null
+                : Icon(Icons.warning, color: Constants.warningColor),
           ),
-        ],
+        ),
+      );
+
+  AbstractSettingsTile _buildSyncOnMobileSwitch(BuildContext context) =>
+      CustomSettingsTile(
+          child: BlocSelector<PowerControl, PowerControlState, bool>(
+        selector: (state) => state.syncOnMobile,
+        builder: (context, value) => SettingsTile.switchTile(
+          initialValue: value,
+          onToggle: (value) {
+            if (value) {
+              unawaited(powerControl.enableSyncOnMobile());
+            } else {
+              unawaited(powerControl.disableSyncOnMobile());
+            }
+          },
+          title: Text('Sync while using mobile data'),
+          leading: Icon(Icons.mobile_screen_share),
+        ),
       ));
+
+  List<AbstractSettingsTile> _buildConnectivityInfoTiles(
+          BuildContext context) =>
+      [
+        _buildConnectivityInfoTile(
+          Strings.labelTcpListenerEndpointV4,
+          Icons.computer,
+          (state) => state.tcpListenerV4,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelTcpListenerEndpointV6,
+          Icons.computer,
+          (state) => state.tcpListenerV6,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelQuicListenerEndpointV4,
+          Icons.computer,
+          (state) => state.quicListenerV4,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelQuicListenerEndpointV6,
+          Icons.computer,
+          (state) => state.quicListenerV6,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelExternalIP,
+          Icons.cloud_outlined,
+          (state) => state.externalIP,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelLocalIPv4,
+          Icons.lan_outlined,
+          (state) => state.localIPv4,
+        ),
+        _buildConnectivityInfoTile(
+          Strings.labelLocalIPv6,
+          Icons.lan_outlined,
+          (state) => state.localIPv6,
+        ),
+      ];
+
+  AbstractSettingsTile _buildConnectivityInfoTile(
+    String title,
+    IconData icon,
+    String Function(ConnectivityInfoState) selector,
+  ) =>
+      CustomSettingsTile(
+          child: BlocSelector<ConnectivityInfo, ConnectivityInfoState, String>(
+              selector: selector,
+              builder: (context, value) {
+                if (value.isNotEmpty) {
+                  return SettingsTile(
+                    leading: Icon(icon),
+                    title: Text(title),
+                    value: Text(value),
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              }));
+
+  AbstractSettingsTile _buildPeerListTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocBuilder<PeerSetCubit, PeerSetChanged>(
+          builder: (context, state) => SettingsTile.navigation(
+              leading: Icon(Icons.people),
+              trailing: Icon(_navigationIcon),
+              title: Text(S.current.labelConnectedPeers),
+              value: Text(state.stats()),
+              onPressed: (context) {
+                final peerSetCubit = context.read<PeerSetCubit>();
+
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => BlocProvider.value(
+                              value: peerSetCubit,
+                              child: PeerList(),
+                            )));
+              }),
+        ),
+      );
 }
 
-SettingsTile? _nullableTile(String title, IconData icon, String value) =>
-    value.isNotEmpty
-        ? SettingsTile(
-            leading: Icon(icon),
-            title: Text(title),
-            value: Text(value),
-          )
-        : null;
+const _navigationIcon = Icons.navigate_next;
+
+String _connectivityTypeName(ConnectivityResult result) {
+  switch (result) {
+    case ConnectivityResult.bluetooth:
+      return "Bluetooth";
+    case ConnectivityResult.wifi:
+      return "WiFi";
+    case ConnectivityResult.mobile:
+      return "Mobile";
+    case ConnectivityResult.ethernet:
+      return "Ethernet";
+    case ConnectivityResult.none:
+      return "None";
+  }
+}
 
 //--------------------------------------------------------------------------------------------------
 
 class SettingsPageOld extends StatefulWidget {
   const SettingsPageOld({
     required this.reposCubit,
-    required this.powerControl,
     required this.onShareRepository,
     required this.panicCounter,
   });
 
   final ReposCubit reposCubit;
-  final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
   final StateMonitorIntValue panicCounter;
 
   @override
   State<SettingsPageOld> createState() =>
-      _SettingsPageOldState(reposCubit, powerControl, panicCounter);
+      _SettingsPageOldState(reposCubit, panicCounter);
 }
 
 class _SettingsPageOldState extends State<SettingsPageOld>
     with OuiSyncAppLogger {
   final ReposCubit _repos;
-  final PowerControl _powerControl;
   final StateMonitorIntValue _panicCounter;
 
   String? _connectionType;
@@ -148,39 +263,11 @@ class _SettingsPageOldState extends State<SettingsPageOld>
 
   Color? _titlesColor = Colors.black;
 
-  _SettingsPageOldState(this._repos, this._powerControl, this._panicCounter);
+  _SettingsPageOldState(this._repos, this._panicCounter);
 
   @override
   void initState() {
     super.initState();
-    unawaited(_updateLocalEndpoints());
-  }
-
-  Future<void> _updateLocalEndpoints() async {
-    // TODO: Some of these awaits takes a while to complete, it would be better
-    // to do them all individually.
-
-    final connectivity = await Connectivity().checkConnectivity();
-
-    setState(() {
-      switch (connectivity) {
-        case ConnectivityResult.wifi:
-          _connectionType = "WiFi";
-          break;
-        case ConnectivityResult.mobile:
-          _connectionType = "Mobile";
-          break;
-        case ConnectivityResult.ethernet:
-          _connectionType = "Ethernet";
-          break;
-        case ConnectivityResult.none:
-          _connectionType = "None";
-          break;
-        default:
-          _connectionType = "???";
-          break;
-      }
-    });
   }
 
   @override
@@ -201,82 +288,10 @@ class _SettingsPageOldState extends State<SettingsPageOld>
               color: _titlesColor!,
             ),
             _buildCurrentRepoDhtSwitch(repos.currentRepo),
-            BlocConsumer(
-              bloc: _powerControl,
-              builder: (context, state) =>
-                  Column(children: _buildConnectionTypeRows()),
-              listener: (context, state) => _updateLocalEndpoints(),
-            ),
-            _buildConnectedPeerListRow(),
             _divider(),
             _buildLogsSection(),
           ],
         ));
-  }
-
-  List<Widget> _buildConnectionTypeRows() {
-    final connectionType = _connectionType;
-    var ret = <Widget>[];
-
-    // We don't know the connection type yet.
-    if (connectionType == null) {
-      return ret;
-    }
-
-    final connectionTypeRow = BlocBuilder<PowerControl, PowerControlState>(
-        bloc: _powerControl,
-        builder: (context, state) {
-          Color? badgeColor;
-
-          if (!(state.isNetworkEnabled ?? true)) {
-            badgeColor = Constants.warningColor;
-          }
-
-          final widget = Fields.labeledButton(
-            label: Strings.connectionType,
-            buttonText: connectionType,
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                    title: const Text("Sync Options"),
-                    content: SyncOptionsWidget(_powerControl),
-                    actions: <Widget>[
-                      TextButton(
-                          child: const Text('Close'),
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-                          }),
-                    ]),
-              );
-            },
-          );
-
-          if (badgeColor == null) {
-            return widget;
-          } else {
-            return Fields.addBadge(widget,
-                color: badgeColor, moveRight: 13, moveDownwards: 8);
-          }
-        });
-
-    ret.add(connectionTypeRow);
-
-    // If network is disabled, show the reason why.
-    final info = BlocBuilder<PowerControl, PowerControlState>(
-        bloc: _powerControl,
-        builder: (context, state) {
-          final reason = state.networkDisabledReason;
-          if (reason != null) {
-            return Text(reason, style: TextStyle(color: Colors.orange));
-          } else {
-            return SizedBox.shrink();
-          }
-        });
-
-    ret.add(info);
-
-    return ret;
   }
 
   Widget _buildCurrentRepoDhtSwitch(RepoEntry? repo) {
@@ -459,22 +474,6 @@ class _SettingsPageOldState extends State<SettingsPageOld>
 
   Iterable<RepoEntry> repositories() {
     return _repos.repos;
-  }
-
-  Widget _buildConnectedPeerListRow() {
-    final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
-
-    return BlocBuilder<PeerSetCubit, PeerSetChanged>(
-        builder: (context, state) => Fields.labeledButton(
-            label: S.current.labelConnectedPeers,
-            buttonText: state.stats(),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BlocProvider.value(
-                          value: peerSetCubit, child: PeerList())));
-            }));
   }
 
   Widget _buildLogsSection() => Column(

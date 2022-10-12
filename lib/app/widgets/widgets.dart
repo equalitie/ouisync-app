@@ -41,5 +41,3 @@ export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 
 export 'settings/app_version_tile.dart';
-export 'settings/connectivity_info_builder.dart';
-export 'settings/sync_options_widget.dart';

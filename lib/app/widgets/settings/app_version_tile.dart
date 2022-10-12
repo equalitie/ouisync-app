@@ -52,18 +52,19 @@ class _AppVersionTileState extends State<AppVersionTile> {
               children: [
                 version,
                 BlocBuilder<UpgradeExistsCubit, bool>(
-                    builder: (context, state) {
-                  if (state) {
-                    return Text(
-                      S.current.messageNewVersionIsAvailable,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                }),
+                  builder: (context, state) {
+                    if (state) {
+                      return Text(
+                        S.current.messageNewVersionIsAvailable,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  },
+                ),
               ],
             );
           },

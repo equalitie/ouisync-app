@@ -8,7 +8,7 @@ class Strings {
 
   // TODO: Translate these:
 
-  static const String connectionType = 'Connection type:';
+  static const String connectionType = 'Connection type';
 
   static const String labelInternalIP = 'Internal IP';
   static const String labelExternalIP = 'External IP';

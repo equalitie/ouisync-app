@@ -60,17 +60,20 @@ class ConnectivityInfoState extends Equatable {
 }
 
 class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
+  final Session _session;
   final _networkInfo = NetworkInfo();
   final _connectivity = Connectivity();
 
-  ConnectivityInfo() : super(ConnectivityInfoState());
+  ConnectivityInfo({required Session session})
+      : _session = session,
+        super(ConnectivityInfoState());
 
-  Future<void> update(Session session) async {
+  Future<void> update() async {
     emit(state.copyWith(
-      tcpListenerV4: session.tcpListenerLocalAddressV4 ?? "",
-      tcpListenerV6: session.tcpListenerLocalAddressV6 ?? "",
-      quicListenerV4: session.quicListenerLocalAddressV4 ?? "",
-      quicListenerV6: session.quicListenerLocalAddressV6 ?? "",
+      tcpListenerV4: _session.tcpListenerLocalAddressV4 ?? "",
+      tcpListenerV6: _session.tcpListenerLocalAddressV6 ?? "",
+      quicListenerV4: _session.quicListenerLocalAddressV4 ?? "",
+      quicListenerV6: _session.quicListenerLocalAddressV6 ?? "",
     ));
 
     // This really works only when connected using WiFi.

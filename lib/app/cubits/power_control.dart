@@ -12,15 +12,22 @@ const _unspecifiedV6 = "[::]:0";
 const bool _syncOnMobileDefault = true;
 
 class PowerControlState {
+  final ConnectivityResult connectivityType;
   final NetworkMode networkMode;
   final bool syncOnMobile;
 
-  PowerControlState(
-      {this.networkMode = NetworkMode.disabled,
-      this.syncOnMobile = _syncOnMobileDefault});
+  PowerControlState({
+    this.connectivityType = ConnectivityResult.none,
+    this.networkMode = NetworkMode.disabled,
+    this.syncOnMobile = _syncOnMobileDefault,
+  });
 
-  PowerControlState copyWith({NetworkMode? networkMode, bool? syncOnMobile}) =>
+  PowerControlState copyWith(
+          {ConnectivityResult? connectivityType,
+          NetworkMode? networkMode,
+          bool? syncOnMobile}) =>
       PowerControlState(
+        connectivityType: connectivityType ?? this.connectivityType,
         networkMode: networkMode ?? this.networkMode,
         syncOnMobile: syncOnMobile ?? this.syncOnMobile,
       );
@@ -89,6 +96,9 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
   }
 
   Future<void> _listen() async {
+    final result = await _connectivity.checkConnectivity();
+    await _onConnectivityChange(result);
+
     final stream = _connectivity.onConnectivityChanged;
 
     await for (var result in stream) {
@@ -98,6 +108,8 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
   Future<void> _onConnectivityChange(ConnectivityResult result) async {
     loggy.app('Connectivity event: ${result.name}');
+
+    emit(state.copyWith(connectivityType: result));
 
     var newMode = NetworkMode.disabled;
 
