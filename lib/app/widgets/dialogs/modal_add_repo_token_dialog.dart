@@ -363,8 +363,21 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     final info = _repos.internalRepoMetaInfo(name);
 
     widget.formKey.currentState!.save();
-    _repos.createRepository(info,
-        password: password, token: _shareToken, setCurrent: true);
+    final repoEntry = await _repos.createRepository(
+      info,
+      password: password,
+      token: _shareToken,
+      setCurrent: true,
+    );
+
+    if (repoEntry is ErrorRepoEntry) {
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: 'Failed to add repository $name',
+        message: repoEntry.error,
+      );
+      return;
+    }
 
     Navigator.of(widget.context).pop(name);
   }
