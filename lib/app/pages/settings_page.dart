@@ -56,7 +56,7 @@ class SettingsPage extends StatelessWidget {
                 _buildNetworkSection(context),
                 _buildLogsSection(context),
                 SettingsSection(
-                  title: Text('About'), // TODO: localize
+                  title: Text(S.current.titleAbout),
                   tiles: [
                     CustomSettingsTile(
                       child: AppVersionTile(
