@@ -76,3 +76,27 @@ class OpenRepoEntry extends RepoEntry {
   @override
   Folder? get currentFolder => _cubit.currentFolder;
 }
+
+class ErrorRepoEntry extends RepoEntry {
+  final RepoMetaInfo _metaInfo;
+  final String _error;
+
+  ErrorRepoEntry(this._metaInfo, this._error);
+
+  String get error => _error;
+
+  @override
+  Future<void> close() => throw UnimplementedError();
+
+  @override
+  Folder? get currentFolder => null;
+
+  @override
+  String? get id => null;
+
+  @override
+  oui.Repository? get maybeHandle => null;
+
+  @override
+  RepoMetaInfo get metaInfo => _metaInfo;
+}

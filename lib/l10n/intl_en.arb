@@ -75,6 +75,10 @@
     "messageWritingFileError":"{name} - writing failed",
     "messageDownloadingFileError":"{name} - download failed",
     "messageErrorEntryNotFound":"entry not found",
+    "messageErrorCreatingRepository":"Error creating the repository",
+    "messsageFailedCreateRepository":"Failed to create repository {name}",
+    "messsageFailedAddRepository":"Failed to add repository {name}",
+    "messageErrorRepositoryNameExist":"There is already a repository with this name",
 
     "messageBlindReplicaExplanation":"Your peer cannot write nor read the contents",
     "messageReadReplicaExplanation":"Cannot be modified, just access the contents",

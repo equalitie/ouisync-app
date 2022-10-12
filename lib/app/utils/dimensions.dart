@@ -59,7 +59,7 @@ class Dimensions {
       EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0);
   static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
   static const EdgeInsets paddingItemBox =
-      EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0);
+      EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0);
   static const EdgeInsets paddingItemBoxLoose =
       EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0);
   static const EdgeInsets paddingGreyBox =

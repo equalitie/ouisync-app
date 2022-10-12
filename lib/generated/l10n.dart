@@ -730,6 +730,46 @@ class S {
     );
   }
 
+  /// `Error creating the repository`
+  String get messageErrorCreatingRepository {
+    return Intl.message(
+      'Error creating the repository',
+      name: 'messageErrorCreatingRepository',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to create repository {name}`
+  String messsageFailedCreateRepository(Object name) {
+    return Intl.message(
+      'Failed to create repository $name',
+      name: 'messsageFailedCreateRepository',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Failed to add repository {name}`
+  String messsageFailedAddRepository(Object name) {
+    return Intl.message(
+      'Failed to add repository $name',
+      name: 'messsageFailedAddRepository',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `There is already a repository with this name`
+  String get messageErrorRepositoryNameExist {
+    return Intl.message(
+      'There is already a repository with this name',
+      name: 'messageErrorRepositoryNameExist',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Your peer cannot write nor read the contents`
   String get messageBlindReplicaExplanation {
     return Intl.message(

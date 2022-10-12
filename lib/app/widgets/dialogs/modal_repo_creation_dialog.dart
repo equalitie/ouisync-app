@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -148,7 +149,7 @@ class RepositoryCreation extends StatelessWidget {
     _onSaved(cubit, newRepositoryName, password);
   }
 
-  void _onSaved(ReposCubit cubit, String name, String password) {
+  void _onSaved(ReposCubit cubit, String name, String password) async {
     if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
@@ -156,7 +157,21 @@ class RepositoryCreation extends StatelessWidget {
     formKey.currentState!.save();
 
     final info = cubit.internalRepoMetaInfo(name);
-    cubit.createRepository(info, password: password, setCurrent: true);
+    final repoEntry = await cubit.createRepository(
+      info,
+      password: password,
+      setCurrent: true,
+    );
+
+    if (repoEntry is ErrorRepoEntry) {
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: S.current.messsageFailedCreateRepository(name),
+        message: repoEntry.error,
+      );
+      return;
+    }
+
     Navigator.of(context).pop(name);
   }
 }
