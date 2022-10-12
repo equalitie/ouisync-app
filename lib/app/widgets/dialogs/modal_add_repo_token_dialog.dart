@@ -3,18 +3,19 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../models/models.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class AddRepositoryWithToken extends StatefulWidget {
-  const AddRepositoryWithToken(
-      {Key? key,
-      required this.context,
-      required this.cubit,
-      required this.formKey,
-      this.initialTokenValue})
-      : super(key: key);
+  const AddRepositoryWithToken({
+    required this.context,
+    required this.cubit,
+    required this.formKey,
+    this.initialTokenValue,
+    Key? key,
+  }) : super(key: key);
 
   final BuildContext context;
   final ReposCubit cubit;
@@ -22,15 +23,20 @@ class AddRepositoryWithToken extends StatefulWidget {
   final String? initialTokenValue;
 
   @override
-  State<AddRepositoryWithToken> createState() =>
-      _AddRepositoryWithTokenState(cubit, initialTokenValue);
+  State<AddRepositoryWithToken> createState() => _AddRepositoryWithTokenState(
+        cubit,
+        initialTokenValue,
+      );
 }
 
 class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     with OuiSyncAppLogger {
-  _AddRepositoryWithTokenState(this._repos, String? initialTokenValue)
-      : _tokenController = TextEditingController(text: initialTokenValue);
+  _AddRepositoryWithTokenState(
+    this._repos,
+    String? initialTokenValue,
+  ) : _tokenController = TextEditingController(text: initialTokenValue);
 
+  final scrollKey = GlobalKey();
   final ReposCubit _repos;
 
   final TextEditingController _tokenController;
@@ -116,79 +122,105 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
                 )
               : _buildTokenLabel(),
           ValueListenableBuilder(
-              valueListenable: _accessModeNotifier,
-              builder: (context, message, child) => Visibility(
-                  visible: _showAccessModeMessage,
-                  child: Fields.constrainedText(
-                      S.current.messageRepositoryAccessMode(
-                          message as String? ?? '?'),
-                      flex: 0,
-                      fontSize: Dimensions.fontSmall,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54))),
+            valueListenable: _accessModeNotifier,
+            builder: (
+              context,
+              message,
+              child,
+            ) =>
+                Visibility(
+              visible: _showAccessModeMessage,
+              child: Fields.constrainedText(
+                S.current
+                    .messageRepositoryAccessMode(message as String? ?? '?'),
+                flex: 0,
+                fontSize: Dimensions.fontSmall,
+                fontWeight: FontWeight.normal,
+                color: Colors.black54,
+              ),
+            ),
+          ),
           Fields.formTextField(
-              context: context,
-              textEditingController: _nameController,
-              label: S.current.labelName,
-              hint: S.current.messageRepositoryName,
-              onSaved: (_) {},
-              validator: validateNoEmpty(
-                  S.current.messageErrorFormValidatorNameDefault),
-              autofocus: true,
-              focusNode: _nameFocus,
-              autovalidateMode: AutovalidateMode.disabled),
+            context: context,
+            textEditingController: _nameController,
+            label: S.current.labelName,
+            hint: S.current.messageRepositoryName,
+            onSaved: (_) {},
+            validator:
+                validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
+            autofocus: true,
+            focusNode: _nameFocus,
+            autovalidateMode: AutovalidateMode.disabled,
+          ),
           Visibility(
               visible: _showSuggestedName,
               child: GestureDetector(
                 onTap: () => _updateNameController(_suggestedName),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Fields.constrainedText(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Fields.constrainedText(
                       S.current.messageRepositorySuggestedName(_repoName ?? ''),
                       flex: 1,
                       fontSize: Dimensions.fontSmall,
                       fontWeight: FontWeight.normal,
-                      color: Colors.black54)
-                ]),
+                      color: Colors.black54,
+                    ),
+                  ],
+                ),
               )),
           Visibility(
             visible: _requiresPassword,
             child: ValueListenableBuilder(
                 valueListenable: _obscurePassword,
-                builder: (context, value, child) {
+                builder: (
+                  context,
+                  value,
+                  child,
+                ) {
                   final obscure = value;
-                  return Row(children: [
-                    Expanded(
+                  return Row(
+                    children: [
+                      Expanded(
                         child: Fields.formTextField(
-                            context: context,
-                            textEditingController: _passwordController,
-                            obscureText: obscure,
-                            label: S.current.labelPassword,
-                            hint: S.current.messageRepositoryPassword,
-                            onSaved: (_) {},
-                            validator: validateNoEmpty(Strings
-                                .messageErrorRepositoryPasswordValidation),
-                            autovalidateMode: AutovalidateMode.disabled)),
-                    Fields.actionIcon(
-                        Icon(
-                          obscure
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall,
-                        ), onPressed: () {
-                      _obscurePassword.value = !_obscurePassword.value;
-                    })
-                  ]);
+                          context: context,
+                          textEditingController: _passwordController,
+                          obscureText: obscure,
+                          label: S.current.labelPassword,
+                          hint: S.current.messageRepositoryPassword,
+                          onSaved: (_) {},
+                          validator: validateNoEmpty(
+                              Strings.messageErrorRepositoryPasswordValidation),
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ),
+                      Fields.actionIcon(
+                          Icon(
+                            obscure
+                                ? Constants.iconVisibilityOn
+                                : Constants.iconVisibilityOff,
+                            size: Dimensions.sizeIconSmall,
+                          ), onPressed: () {
+                        _obscurePassword.value = !_obscurePassword.value;
+                      }),
+                    ],
+                  );
                 }),
           ),
           Visibility(
             visible: _requiresPassword,
             child: ValueListenableBuilder(
                 valueListenable: _obscurePasswordConfirm,
-                builder: (context, value, child) {
+                builder: (
+                  context,
+                  value,
+                  child,
+                ) {
                   final obscure = value;
-                  return Row(children: [
-                    Expanded(
-                      child: Fields.formTextField(
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Fields.formTextField(
                           context: context,
                           textEditingController: _retypedPasswordController,
                           obscureText: obscure,
@@ -197,25 +229,30 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
                           onSaved: (_) {},
                           validator: (retypedPassword) =>
                               retypedPasswordValidator(
-                                password: _passwordController.text,
-                                retypedPassword: retypedPassword,
-                              ),
-                          autovalidateMode: AutovalidateMode.disabled),
-                    ),
-                    Fields.actionIcon(
-                        Icon(
-                          obscure
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall,
-                        ), onPressed: () {
-                      _obscurePasswordConfirm.value =
-                          !_obscurePasswordConfirm.value;
-                    })
-                  ]);
+                            password: _passwordController.text,
+                            retypedPassword: retypedPassword,
+                          ),
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ),
+                      Fields.actionIcon(
+                          Icon(
+                            obscure
+                                ? Constants.iconVisibilityOn
+                                : Constants.iconVisibilityOff,
+                            size: Dimensions.sizeIconSmall,
+                          ), onPressed: () {
+                        _obscurePasswordConfirm.value =
+                            !_obscurePasswordConfirm.value;
+                      }),
+                    ],
+                  );
                 }),
           ),
-          Fields.dialogActions(context, buttons: _actions(context)),
+          Fields.dialogActions(
+            context,
+            buttons: _actions(context),
+          ),
         ]);
   }
 
@@ -232,31 +269,38 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     }
 
     return Padding(
-        padding: Dimensions.paddingVertical10,
-        child: Container(
-            padding: Dimensions.paddingShareLinkBox,
-            decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-                color: Constants.inputBackgroundColor),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Fields.constrainedText(S.current.labelRepositoryLink,
-                    flex: 0,
-                    fontSize: Dimensions.fontMicro,
-                    fontWeight: FontWeight.normal,
-                    color: Constants.inputLabelForeColor),
-                Dimensions.spacingVerticalHalf,
-                Text(
-                  formatShareLinkForDisplay(_tokenController.text),
-                  style: const TextStyle(
-                      fontSize: Dimensions.fontAverage,
-                      fontWeight: FontWeight.w500),
-                )
-              ],
-            )));
+      padding: Dimensions.paddingVertical10,
+      child: Container(
+        padding: Dimensions.paddingShareLinkBox,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(
+            Radius.circular(Dimensions.radiusSmall),
+          ),
+          color: Constants.inputBackgroundColor,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Fields.constrainedText(
+              S.current.labelRepositoryLink,
+              flex: 0,
+              fontSize: Dimensions.fontMicro,
+              fontWeight: FontWeight.normal,
+              color: Constants.inputLabelForeColor,
+            ),
+            Dimensions.spacingVerticalHalf,
+            Text(
+              formatShareLinkForDisplay(_tokenController.text),
+              style: const TextStyle(
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   _updateNameController(String? value) {
@@ -282,10 +326,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
 
     final token = _tokenController.text;
     try {
-      _shareToken = ShareToken(_repos.session, token);
+      _shareToken = ShareToken(
+        _repos.session,
+        token,
+      );
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
-      showSnackBar(context, content: Text(S.current.messageErrorTokenInvalid));
+      showSnackBar(
+        context,
+        content: Text(S.current.messageErrorTokenInvalid),
+      );
 
       cleanupFormOnEmptyToken();
     }
@@ -323,13 +373,19 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     _updateNameController(null);
   }
 
-  String? _repositoryTokenValidator(String? value, {String? error}) {
+  String? _repositoryTokenValidator(
+    String? value, {
+    String? error,
+  }) {
     if ((value ?? '').isEmpty) {
       return S.current.messageErrorTokenEmpty;
     }
 
     try {
-      final shareToken = ShareToken(_repos.session, value!);
+      final shareToken = ShareToken(
+        _repos.session,
+        value!,
+      );
 
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
@@ -354,7 +410,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
             text: S.current.actionCancel,
             onPressed: () =>
                 Navigator.of(context, rootNavigator: true).pop('')),
-        PositiveButton(text: S.current.actionCreate, onPressed: _createRepo)
+        PositiveButton(
+          text: S.current.actionCreate,
+          onPressed: _createRepo,
+        )
       ];
 
   void _createRepo() {
