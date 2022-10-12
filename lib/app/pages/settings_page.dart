@@ -15,7 +15,6 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
-import '../models/repo_entry.dart';
 import 'peer_list.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -52,7 +51,10 @@ class SettingsPage extends StatelessWidget {
             },
             child: SettingsList(
               sections: [
-                _buildReposSection(context),
+                RepositorySection(
+                  repos: reposCubit,
+                  onShareRepository: onShareRepository,
+                ),
                 _buildNetworkSection(context),
                 _buildLogsSection(context),
                 SettingsSection(
@@ -70,155 +72,6 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           )));
-
-  AbstractSettingsSection _buildReposSection(BuildContext context) =>
-      CustomSettingsSection(
-        child: reposCubit.builder(
-          (reposCubit) => SettingsSection(
-            title: Text(S.current.titleRepository),
-            tiles: [
-              SettingsTile(title: RepositorySelector(reposCubit)),
-              _buildCurrentRepoTile(context, _buildRepoDhtSwitch),
-              _buildCurrentRepoTile(context, _buildRepoPexSwitch),
-              _buildCurrentRepoTile(context, _buildRepoRenameTile),
-              _buildCurrentRepoTile(context, _buildRepoShareTile),
-              _buildCurrentRepoTile(context, _buildRepoChangePasswordTile),
-              _buildCurrentRepoTile(context, _buildRepoDeleteTile),
-            ],
-          ),
-        ),
-      );
-
-  AbstractSettingsTile _buildCurrentRepoTile(
-      BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
-    final currentRepo = reposCubit.currentRepo;
-    final widget = currentRepo is OpenRepoEntry
-        ? currentRepo.cubit.builder((repo) => builder(context, repo))
-        : SizedBox.shrink();
-
-    return CustomSettingsTile(child: widget);
-  }
-
-  Widget _buildRepoDhtSwitch(
-    BuildContext context,
-    RepoCubit repo,
-  ) =>
-      SettingsTile.switchTile(
-        initialValue: repo.isDhtEnabled,
-        title: Text(S.current.labelBitTorrentDHT),
-        leading: Icon(Icons.hub),
-        onToggle: (value) {
-          if (value) {
-            repo.enableDht();
-          } else {
-            repo.disableDht();
-          }
-        },
-      );
-
-  Widget _buildRepoPexSwitch(
-    BuildContext context,
-    RepoCubit repo,
-  ) =>
-      SettingsTile.switchTile(
-        initialValue: false /*repo.isPexEnabled*/,
-        title: Text('Peer Exchange'), // TODO: localize
-        leading: Icon(Icons.group_add),
-        onToggle: (value) {
-          // TODO:
-          //if (value) {
-          //  repo.enablePex();
-          //} else {
-          //  repo.disablePex();
-          //}
-        },
-        enabled: false,
-      );
-
-  Widget _buildRepoRenameTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
-          title: Text(S.current.actionRename),
-          leading: Icon(Icons.edit),
-          trailing: Icon(_navigationIcon),
-          onPressed: (context) async {
-            final newName = await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) {
-                  final formKey = GlobalKey<FormState>();
-
-                  return ActionsDialog(
-                    title: S.current.messageRenameRepository,
-                    body: RenameRepository(
-                        context: context,
-                        formKey: formKey,
-                        repositoryName: repo.name),
-                  );
-                });
-
-            if (newName == null || newName.isEmpty) {
-              return;
-            }
-
-            final oldInfo = reposCubit.internalRepoMetaInfo(repo.name);
-            final newInfo = reposCubit.internalRepoMetaInfo(newName);
-            reposCubit.renameRepository(oldInfo, newInfo);
-          });
-
-  Widget _buildRepoShareTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
-        title: Text(S.current.actionShare),
-        leading: Icon(Icons.share),
-        trailing: Icon(_navigationIcon),
-        onPressed: (context) {
-          onShareRepository(repo);
-        },
-      );
-
-  Widget _buildRepoChangePasswordTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
-        title: Text('Change password'), // TODO: localize
-        leading: Icon(Icons.password),
-        trailing: Icon(_navigationIcon),
-        onPressed: (context) {
-          // TODO
-        },
-        enabled: false,
-      );
-
-  Widget _buildRepoDeleteTile(BuildContext context, RepoCubit repo) =>
-      SettingsTile.navigation(
-        title: Text(S.current.actionDelete,
-            style: const TextStyle(color: Constants.dangerColor)),
-        leading: Icon(Icons.delete, color: Constants.dangerColor),
-        trailing: Icon(_navigationIcon),
-        onPressed: (context) async {
-          final delete = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(S.current.titleDeleteRepository),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: [Text(S.current.messageConfirmRepositoryDeletion)],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: Text(S.current.actionCloseCapital),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                DangerButton(
-                  text: S.current.actionDeleteCapital,
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            ),
-          );
-
-          if (delete ?? false) {
-            reposCubit.deleteRepository(repo.metaInfo);
-          }
-        },
-      );
 
   AbstractSettingsSection _buildNetworkSection(BuildContext context) =>
       SettingsSection(
