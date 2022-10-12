@@ -398,8 +398,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     try {
       if (await io.File(store).exists()) {
-        return ErrorRepoEntry(
-            info, 'There is already a repository with this name');
+        return ErrorRepoEntry(info, S.current.messageErrorRepositoryNameExist);
       }
 
       final repo = await oui.Repository.create(_session,
@@ -413,7 +412,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('Initialization of the repository $name failed', e, st);
     }
 
-    return ErrorRepoEntry(info, 'Error creating the repository');
+    return ErrorRepoEntry(info, S.current.messageErrorCreatingRepository);
   }
 
   void _update(void Function() changeState) {

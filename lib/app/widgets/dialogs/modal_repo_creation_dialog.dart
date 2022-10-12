@@ -166,7 +166,7 @@ class RepositoryCreation extends StatelessWidget {
     if (repoEntry is ErrorRepoEntry) {
       Dialogs.simpleAlertDialog(
         context: context,
-        title: 'Failed to create repository $name',
+        title: S.current.messsageFailedCreateRepository(name),
         message: repoEntry.error,
       );
       return;

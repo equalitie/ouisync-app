@@ -441,7 +441,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     if (repoEntry is ErrorRepoEntry) {
       Dialogs.simpleAlertDialog(
         context: context,
-        title: 'Failed to add repository $name',
+        title: S.current.messsageFailedAddRepository(name),
         message: repoEntry.error,
       );
       return;
