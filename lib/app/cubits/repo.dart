@@ -49,40 +49,36 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   bool get isDhtEnabled => handle.isDhtEnabled;
 
-  void enableDht() {
-    if (!isDhtEnabled) {
-      handle.enableDht();
-      unawaited(_settings.setDhtEnabled(name, true));
-      changed();
+  void setDhtEnabled(bool value) {
+    if (isDhtEnabled == value) {
+      return;
     }
-  }
 
-  void disableDht() {
-    if (isDhtEnabled) {
+    if (value) {
+      handle.enableDht();
+    } else {
       handle.disableDht();
-      unawaited(_settings.setDhtEnabled(name, false));
-      changed();
     }
+
+    unawaited(_settings.setDhtEnabled(name, value));
+    changed();
   }
 
   bool get isPexEnabled => handle.isPexEnabled;
 
-  void enablePex() {
-    if (!isPexEnabled) {
-      loggy.app("enabling PEX");
-      handle.enablePex();
-      unawaited(_settings.setPexEnabled(name, true));
-      changed();
+  void setPexEnabled(bool value) {
+    if (isPexEnabled == value) {
+      return;
     }
-  }
 
-  void disablePex() {
-    if (isPexEnabled) {
-      loggy.app("disabling PEX");
+    if (value) {
+      handle.enablePex();
+    } else {
       handle.disablePex();
-      unawaited(_settings.setPexEnabled(name, false));
-      changed();
     }
+
+    unawaited(_settings.setPexEnabled(name, true));
+    changed();
   }
 
   Future<oui.Directory> openDirectory(String path) async {
