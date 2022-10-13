@@ -5,6 +5,7 @@ class Settings {
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
+  static const String _portForwardingEnabledKey = "PORT_FORWARDING_ENABLED";
   static const String _repositoriesPrefix = "REPOSITORIES";
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
@@ -65,9 +66,7 @@ class Settings {
   Future<void> setPexEnabled(String repoName, bool? value) =>
       _setRepositoryBool(repoName, _pexEnabledKey, value);
 
-  Future<void> setEnableSyncOnMobile(bool enable) async {
-    await _prefs.setBool(_syncOnMobileKey, enable);
-  }
+  bool? getPortForwardingEnabled() => _prefs.getBool(_portForwardingEnabledKey);
 
   bool getEnableSyncOnMobile(bool default_) {
     return _prefs.getBool(_syncOnMobileKey) ?? default_;
@@ -79,6 +78,13 @@ class Settings {
 
   int? getHighestSeenProtocolNumber() {
     return _prefs.getInt(_highestSeenProtocolNumberKey);
+  }
+
+  Future<void> setPortForwardingEnabled(bool value) =>
+      _prefs.setBool(_portForwardingEnabledKey, value);
+
+  Future<void> setEnableSyncOnMobile(bool enable) async {
+    await _prefs.setBool(_syncOnMobileKey, enable);
   }
 
   Future<void> _setRepositoryBool(

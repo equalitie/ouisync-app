@@ -20,14 +20,7 @@ class NetworkSection extends AbstractSettingsSection {
         title: Text(S.current.titleNetwork),
         tiles: [
           _buildConnectivityTypeTile(context),
-          // TODO:
-          SettingsTile.switchTile(
-            initialValue: false,
-            onToggle: (value) {},
-            title: Text('UPnP'),
-            leading: Icon(Icons.router),
-            enabled: false,
-          ),
+          _buildPortForwardingTile(context),
           // TODO:
           SettingsTile.switchTile(
             initialValue: false,
@@ -59,6 +52,22 @@ class NetworkSection extends AbstractSettingsSection {
             trailing: (state.isNetworkEnabled ?? true)
                 ? null
                 : Icon(Icons.warning, color: Constants.warningColor),
+          ),
+        ),
+      );
+
+  AbstractSettingsTile _buildPortForwardingTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocSelector<PowerControl, PowerControlState, bool>(
+          selector: (state) => state.portForwardingEnabled,
+          builder: (context, value) => SettingsTile.switchTile(
+            initialValue: value,
+            onToggle: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setPortForwardingEnabled(value));
+            },
+            title: Text('UPnP'),
+            leading: Icon(Icons.router),
           ),
         ),
       );

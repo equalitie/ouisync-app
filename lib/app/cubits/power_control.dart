@@ -10,26 +10,33 @@ import '../utils/settings.dart';
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
 const bool _syncOnMobileDefault = true;
+const bool _portForwardingEnabledDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
   final NetworkMode networkMode;
   final bool syncOnMobile;
+  final bool portForwardingEnabled;
 
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
     this.networkMode = NetworkMode.disabled,
     this.syncOnMobile = _syncOnMobileDefault,
+    this.portForwardingEnabled = false,
   });
 
-  PowerControlState copyWith(
-          {ConnectivityResult? connectivityType,
-          NetworkMode? networkMode,
-          bool? syncOnMobile}) =>
+  PowerControlState copyWith({
+    ConnectivityResult? connectivityType,
+    NetworkMode? networkMode,
+    bool? syncOnMobile,
+    bool? portForwardingEnabled,
+  }) =>
       PowerControlState(
         connectivityType: connectivityType ?? this.connectivityType,
         networkMode: networkMode ?? this.networkMode,
         syncOnMobile: syncOnMobile ?? this.syncOnMobile,
+        portForwardingEnabled:
+            portForwardingEnabled ?? this.portForwardingEnabled,
       );
 
   // Null means the answer is not yet known (the init function hasn't finished
@@ -62,13 +69,21 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
   final Connectivity _connectivity = Connectivity();
   _Transition _networkModeTransition = _Transition.none;
 
-  PowerControl(this._session, this._settings) : super(PowerControlState());
+  PowerControl(this._session, this._settings)
+      : super(PowerControlState(
+            portForwardingEnabled: _session.isPortForwardingEnabled));
 
   Future<void> init() async {
     unawaited(_listen());
 
     final syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
-    emit(state.copyWith(syncOnMobile: syncOnMobile));
+    final portForwardingEnabled =
+        _settings.getPortForwardingEnabled() ?? _portForwardingEnabledDefault;
+
+    emit(state.copyWith(
+      syncOnMobile: syncOnMobile,
+      portForwardingEnabled: portForwardingEnabled,
+    ));
 
     await _refresh();
   }
@@ -93,6 +108,22 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
     await _settings.setEnableSyncOnMobile(false);
     await _refresh();
+  }
+
+  Future<void> setPortForwardingEnabled(bool value) async {
+    if (state.portForwardingEnabled == value) {
+      return;
+    }
+
+    emit(state.copyWith(portForwardingEnabled: value));
+
+    if (value) {
+      _session.enablePortForwarding();
+    } else {
+      _session.disablePortForwarding();
+    }
+
+    await _settings.setPortForwardingEnabled(value);
   }
 
   Future<void> _listen() async {
