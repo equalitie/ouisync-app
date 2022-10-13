@@ -9,7 +9,7 @@ abstract class RepoEntry extends Equatable {
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
   oui.Repository? get maybeHandle;
-  String? get id;
+  String? get infoHash;
   Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
 
@@ -38,7 +38,7 @@ class LoadingRepoEntry extends RepoEntry {
   oui.Repository? get maybeHandle => null;
 
   @override
-  String? get id => null;
+  String? get infoHash => null;
 
   @override
   Folder? get currentFolder => null;
@@ -71,7 +71,7 @@ class OpenRepoEntry extends RepoEntry {
   oui.Repository? get maybeHandle => _cubit.handle;
 
   @override
-  String? get id => _cubit.id;
+  String? get infoHash => _cubit.infoHash;
 
   @override
   Folder? get currentFolder => _cubit.currentFolder;
@@ -92,7 +92,7 @@ class ErrorRepoEntry extends RepoEntry {
   Folder? get currentFolder => null;
 
   @override
-  String? get id => null;
+  String? get infoHash => null;
 
   @override
   oui.Repository? get maybeHandle => null;

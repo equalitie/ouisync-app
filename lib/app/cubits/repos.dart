@@ -93,7 +93,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     try {
       final shareToken = oui.ShareToken(session, tokenLink);
-      final existingRepo = findById(shareToken.repositoryId());
+      final existingRepo = findByInfoHash(shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);
@@ -105,14 +105,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  RepoEntry? findById(String id) {
-    for (final r in repos) {
-      if (r.id == id) {
-        return r;
-      }
-    }
-    return null;
-  }
+  RepoEntry? findByInfoHash(String infoHash) =>
+      repos.firstWhere((repo) => repo.infoHash == infoHash);
 
   Future<void> setCurrent(RepoEntry? repo) async {
     if (currentRepo == repo) {
@@ -185,10 +179,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return null;
     }
 
-    final id = repo.id;
+    final infoHash = repo.infoHash;
     await repo.close();
     _repos.remove(name);
-    return id;
+    return infoHash;
   }
 
   Future<void> close() async {
@@ -377,13 +371,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo =
           await oui.Repository.open(_session, store: store, password: password);
 
-      if (_settings.getDhtEnableStatus(name, defaultValue: true)) {
-        repo.enableDht();
-      } else {
-        repo.disableDht();
-      }
+      final cubit =
+          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      cubit.loadSettings();
 
-      return OpenRepoEntry(RepoCubit(info, repo));
+      return OpenRepoEntry(cubit);
     } catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }
@@ -391,8 +383,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  Future<RepoEntry> _create(RepoMetaInfo info,
-      {required String password, oui.ShareToken? token}) async {
+  Future<RepoEntry> _create(
+    RepoMetaInfo info, {
+    required String password,
+    oui.ShareToken? token,
+  }) async {
     final name = info.name;
     final store = info.path();
 
@@ -404,10 +399,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo = await oui.Repository.create(_session,
           store: store, password: password, shareToken: token);
 
-      repo.enableDht();
-      _settings.setDhtEnableStatus(name, true);
+      final cubit =
+          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      cubit.loadSettings();
 
-      return OpenRepoEntry(RepoCubit(info, repo));
+      return OpenRepoEntry(cubit);
     } catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }

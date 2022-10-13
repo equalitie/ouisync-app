@@ -160,7 +160,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
       final shareToken = ShareToken(widget.reposCubit.session, value!);
 
       final existingRepo =
-          widget.reposCubit.findById(shareToken.repositoryId());
+          widget.reposCubit.findByInfoHash(shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);

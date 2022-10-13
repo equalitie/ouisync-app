@@ -20,22 +20,8 @@ class NetworkSection extends AbstractSettingsSection {
         title: Text(S.current.titleNetwork),
         tiles: [
           _buildConnectivityTypeTile(context),
-          // TODO:
-          SettingsTile.switchTile(
-            initialValue: false,
-            onToggle: (value) {},
-            title: Text('UPnP'),
-            leading: Icon(Icons.router),
-            enabled: false,
-          ),
-          // TODO:
-          SettingsTile.switchTile(
-            initialValue: false,
-            onToggle: (value) {},
-            title: Text('Local Discovery'),
-            leading: Icon(Icons.broadcast_on_personal),
-            enabled: false,
-          ),
+          _buildPortForwardingTile(context),
+          _buildLocalDiscoveryTile(context),
           _buildSyncOnMobileSwitch(context),
           ..._buildConnectivityInfoTiles(context),
           _buildPeerListTile(context),
@@ -63,6 +49,38 @@ class NetworkSection extends AbstractSettingsSection {
         ),
       );
 
+  AbstractSettingsTile _buildPortForwardingTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocSelector<PowerControl, PowerControlState, bool>(
+          selector: (state) => state.portForwardingEnabled,
+          builder: (context, value) => SettingsTile.switchTile(
+            initialValue: value,
+            onToggle: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setPortForwardingEnabled(value));
+            },
+            title: Text('UPnP'),
+            leading: Icon(Icons.router),
+          ),
+        ),
+      );
+
+  AbstractSettingsTile _buildLocalDiscoveryTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocSelector<PowerControl, PowerControlState, bool>(
+          selector: (state) => state.localDiscoveryEnabled,
+          builder: (context, value) => SettingsTile.switchTile(
+            initialValue: value,
+            onToggle: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setLocalDiscoveryEnabled(value));
+            },
+            title: Text('Local Discovery'), // TODO: localize
+            leading: Icon(Icons.broadcast_on_personal),
+          ),
+        ),
+      );
+
   AbstractSettingsTile _buildSyncOnMobileSwitch(BuildContext context) =>
       CustomSettingsTile(
           child: BlocSelector<PowerControl, PowerControlState, bool>(
@@ -71,12 +89,7 @@ class NetworkSection extends AbstractSettingsSection {
           initialValue: value,
           onToggle: (value) {
             final powerControl = context.read<PowerControl>();
-
-            if (value) {
-              unawaited(powerControl.enableSyncOnMobile());
-            } else {
-              unawaited(powerControl.disableSyncOnMobile());
-            }
+            unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
           title: Text('Sync while using mobile data'),
           leading: Icon(Icons.mobile_screen_share),

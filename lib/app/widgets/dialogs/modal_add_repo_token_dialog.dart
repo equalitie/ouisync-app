@@ -390,7 +390,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
       _suggestedName = shareToken.suggestedName;
       _accessModeNotifier.value = shareToken.mode.name;
 
-      final existingRepo = _repos.findById(shareToken.repositoryId());
+      final existingRepo = _repos.findByInfoHash(shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);

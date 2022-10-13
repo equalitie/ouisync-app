@@ -20,8 +20,15 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final Folder _currentFolder = Folder();
   final RepoMetaInfo _metaInfo;
   final oui.Repository _handle;
+  final Settings _settings;
 
-  RepoCubit(this._metaInfo, this._handle) {
+  RepoCubit({
+    required RepoMetaInfo metaInfo,
+    required oui.Repository handle,
+    required Settings settings,
+  })  : _metaInfo = metaInfo,
+        _handle = handle,
+        _settings = settings {
     _currentFolder.repo = this;
   }
 
@@ -30,20 +37,48 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   RepoMetaInfo get metaInfo => _metaInfo;
   Folder get currentFolder => _currentFolder;
 
-  bool get isDhtEnabled => handle.isDhtEnabled;
-
-  void enableDht() {
-    if (!isDhtEnabled) {
+  void loadSettings() {
+    if (_settings.getDhtEnabled(name) ?? true) {
       handle.enableDht();
-      changed();
+    }
+
+    if (_settings.getPexEnabled(name) ?? true) {
+      handle.enablePex();
     }
   }
 
-  void disableDht() {
-    if (isDhtEnabled) {
-      handle.disableDht();
-      changed();
+  bool get isDhtEnabled => handle.isDhtEnabled;
+
+  void setDhtEnabled(bool value) {
+    if (isDhtEnabled == value) {
+      return;
     }
+
+    if (value) {
+      handle.enableDht();
+    } else {
+      handle.disableDht();
+    }
+
+    unawaited(_settings.setDhtEnabled(name, value));
+    changed();
+  }
+
+  bool get isPexEnabled => handle.isPexEnabled;
+
+  void setPexEnabled(bool value) {
+    if (isPexEnabled == value) {
+      return;
+    }
+
+    if (value) {
+      handle.enablePex();
+    } else {
+      handle.disablePex();
+    }
+
+    unawaited(_settings.setPexEnabled(name, true));
+    changed();
   }
 
   Future<oui.Directory> openDirectory(String path) async {
@@ -54,11 +89,11 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is RepoCubit && id == other.id;
+    return other is RepoCubit && infoHash == other.infoHash;
   }
 
   oui.AccessMode get accessMode => handle.accessMode;
-  String get id => handle.lowHexId();
+  String get infoHash => handle.infoHash;
   bool get canRead => accessMode != oui.AccessMode.blind;
   bool get canWrite => accessMode == oui.AccessMode.write;
 

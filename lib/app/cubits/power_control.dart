@@ -10,26 +10,39 @@ import '../utils/settings.dart';
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
 const bool _syncOnMobileDefault = true;
+const bool _portForwardingEnabledDefault = true;
+const bool _localDiscoveryEnabledDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
   final NetworkMode networkMode;
   final bool syncOnMobile;
+  final bool portForwardingEnabled;
+  final bool localDiscoveryEnabled;
 
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
     this.networkMode = NetworkMode.disabled,
-    this.syncOnMobile = _syncOnMobileDefault,
+    this.syncOnMobile = false,
+    this.portForwardingEnabled = false,
+    this.localDiscoveryEnabled = false,
   });
 
-  PowerControlState copyWith(
-          {ConnectivityResult? connectivityType,
-          NetworkMode? networkMode,
-          bool? syncOnMobile}) =>
+  PowerControlState copyWith({
+    ConnectivityResult? connectivityType,
+    NetworkMode? networkMode,
+    bool? syncOnMobile,
+    bool? portForwardingEnabled,
+    bool? localDiscoveryEnabled,
+  }) =>
       PowerControlState(
         connectivityType: connectivityType ?? this.connectivityType,
         networkMode: networkMode ?? this.networkMode,
         syncOnMobile: syncOnMobile ?? this.syncOnMobile,
+        portForwardingEnabled:
+            portForwardingEnabled ?? this.portForwardingEnabled,
+        localDiscoveryEnabled:
+            localDiscoveryEnabled ?? this.localDiscoveryEnabled,
       );
 
   // Null means the answer is not yet known (the init function hasn't finished
@@ -62,37 +75,71 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
   final Connectivity _connectivity = Connectivity();
   _Transition _networkModeTransition = _Transition.none;
 
-  PowerControl(this._session, this._settings) : super(PowerControlState());
+  PowerControl(this._session, this._settings)
+      : super(PowerControlState(
+          portForwardingEnabled: _session.isPortForwardingEnabled,
+          localDiscoveryEnabled: _session.isLocalDiscoveryEnabled,
+        ));
 
   Future<void> init() async {
+    final syncOnMobile =
+        _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
+    await setSyncOnMobileEnabled(syncOnMobile);
+
+    final portForwardingEnabled =
+        _settings.getPortForwardingEnabled() ?? _portForwardingEnabledDefault;
+    await setPortForwardingEnabled(portForwardingEnabled);
+
+    final localDiscoveryEnabled =
+        _settings.getLocalDiscoveryEnabled() ?? _localDiscoveryEnabledDefault;
+    await setLocalDiscoveryEnabled(localDiscoveryEnabled);
+
+    await _refresh();
+
     unawaited(_listen());
-
-    final syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
-    emit(state.copyWith(syncOnMobile: syncOnMobile));
-
-    await _refresh();
   }
 
-  Future<void> enableSyncOnMobile() async {
-    if (state.syncOnMobile) {
+  Future<void> setSyncOnMobileEnabled(bool value) async {
+    if (state.syncOnMobile == value) {
       return;
     }
 
-    emit(state.copyWith(syncOnMobile: true));
+    emit(state.copyWith(syncOnMobile: value));
 
-    await _settings.setEnableSyncOnMobile(true);
+    await _settings.setSyncOnMobileEnabled(value);
     await _refresh();
   }
 
-  Future<void> disableSyncOnMobile() async {
-    if (!state.syncOnMobile) {
+  Future<void> setPortForwardingEnabled(bool value) async {
+    if (state.portForwardingEnabled == value) {
       return;
     }
 
-    emit(state.copyWith(syncOnMobile: false));
+    emit(state.copyWith(portForwardingEnabled: value));
 
-    await _settings.setEnableSyncOnMobile(false);
-    await _refresh();
+    if (value) {
+      _session.enablePortForwarding();
+    } else {
+      _session.disablePortForwarding();
+    }
+
+    await _settings.setPortForwardingEnabled(value);
+  }
+
+  Future<void> setLocalDiscoveryEnabled(bool value) async {
+    if (state.localDiscoveryEnabled == value) {
+      return;
+    }
+
+    emit(state.copyWith(localDiscoveryEnabled: value));
+
+    if (value) {
+      _session.enableLocalDiscovery();
+    } else {
+      _session.disableLocalDiscovery();
+    }
+
+    await _settings.setLocalDiscoveryEnabled(value);
   }
 
   Future<void> _listen() async {

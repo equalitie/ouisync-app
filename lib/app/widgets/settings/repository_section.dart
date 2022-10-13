@@ -51,11 +51,7 @@ class RepositorySection extends AbstractSettingsSection {
         title: Text(S.current.labelBitTorrentDHT),
         leading: Icon(Icons.hub),
         onToggle: (value) {
-          if (value) {
-            repo.enableDht();
-          } else {
-            repo.disableDht();
-          }
+          repo.setDhtEnabled(value);
         },
       );
 
@@ -64,18 +60,12 @@ class RepositorySection extends AbstractSettingsSection {
     RepoCubit repo,
   ) =>
       SettingsTile.switchTile(
-        initialValue: false /*repo.isPexEnabled*/,
+        initialValue: repo.isPexEnabled,
         title: Text('Peer Exchange'), // TODO: localize
         leading: Icon(Icons.group_add),
         onToggle: (value) {
-          // TODO:
-          //if (value) {
-          //  repo.enablePex();
-          //} else {
-          //  repo.disablePex();
-          //}
+          repo.setPexEnabled(value);
         },
-        enabled: false,
       );
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
