@@ -3,9 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Settings {
   static const String _currentRepoKey = "CURRENT_REPO";
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
-  static const String _btDhtKeyPrefix = "BT_DHT_ENABLED-";
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
+  static const String _repositoriesPrefix = "REPOSITORIES";
+  static const String _dhtEnabledKey = "DHT_ENABLED";
+  static const String _pexEnabledKey = "PEX_ENABLED";
 
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
@@ -35,9 +37,11 @@ class Settings {
       await _defaultRepo.set(newName);
     }
 
-    final dhtStatus = _getDhtEnableStatus(oldName);
-    await setDhtEnableStatus(oldName, null);
-    await setDhtEnableStatus(newName, dhtStatus);
+    await setDhtEnabled(newName, getDhtEnabled(oldName));
+    await setDhtEnabled(oldName, null);
+
+    await setPexEnabled(newName, getPexEnabled(oldName));
+    await setPexEnabled(oldName, null);
   }
 
   Future<void> forgetRepository(String repoName) async {
@@ -45,29 +49,21 @@ class Settings {
       await _defaultRepo.set(null);
     }
 
-    await setDhtEnableStatus(repoName, null);
+    await setDhtEnabled(repoName, null);
+    await setPexEnabled(repoName, null);
   }
 
-  // Note: Using the repository name instead of it's ID because we know the name without
-  // having to open the repository first. So in the future we will be able to pass this
-  // value to the function that opens the repository.
-  bool getDhtEnableStatus(String repoName, {required bool defaultValue}) {
-    return _getDhtEnableStatus(repoName) ?? defaultValue;
-  }
+  bool? getDhtEnabled(String repoName) =>
+      _prefs.getBool(_repositoryKey(repoName, _dhtEnabledKey));
 
-  bool? _getDhtEnableStatus(String repoName) {
-    return _prefs.getBool(_btDhtKeyPrefix + repoName);
-  }
+  Future<void> setDhtEnabled(String repoName, bool? value) =>
+      _setRepositoryBool(repoName, _dhtEnabledKey, value);
 
-  Future<void> setDhtEnableStatus(String repoName, bool? status) async {
-    final key = _btDhtKeyPrefix + repoName;
+  bool? getPexEnabled(String repoName) =>
+      _prefs.getBool(_repositoryKey(repoName, _pexEnabledKey));
 
-    if (status != null) {
-      await _prefs.setBool(key, status);
-    } else {
-      await _remove(_prefs, key);
-    }
-  }
+  Future<void> setPexEnabled(String repoName, bool? value) =>
+      _setRepositoryBool(repoName, _pexEnabledKey, value);
 
   Future<void> setEnableSyncOnMobile(bool enable) async {
     await _prefs.setBool(_syncOnMobileKey, enable);
@@ -85,6 +81,17 @@ class Settings {
     return _prefs.getInt(_highestSeenProtocolNumberKey);
   }
 
+  Future<void> _setRepositoryBool(
+      String repoName, String key, bool? value) async {
+    final fullKey = _repositoryKey(repoName, key);
+
+    if (value != null) {
+      await _prefs.setBool(fullKey, value);
+    } else {
+      await _prefs.remove(fullKey);
+    }
+  }
+
   // TODO: It's not clear from the documentation whether
   // SharedPreferences.remove throws if the key doesn't exist (it might also be
   // platform dependent), so we check for it.
@@ -92,6 +99,11 @@ class Settings {
     try {
       await prefs.remove(key);
     } catch (_) {}
+  }
+
+  static String _repositoryKey(String repoName, String key) {
+    final escapedName = repoName.replaceAll('/', '_');
+    return "$_repositoriesPrefix/$escapedName/$key";
   }
 }
 

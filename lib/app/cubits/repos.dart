@@ -371,7 +371,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo =
           await oui.Repository.open(_session, store: store, password: password);
 
-      if (_settings.getDhtEnableStatus(name, defaultValue: true)) {
+      if (_settings.getDhtEnabled(name) ?? true) {
         repo.enableDht();
       } else {
         repo.disableDht();
@@ -399,7 +399,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
           store: store, password: password, shareToken: token);
 
       repo.enableDht();
-      _settings.setDhtEnableStatus(name, true);
+      _settings.setDhtEnabled(name, true);
 
       return OpenRepoEntry(RepoCubit(info, repo));
     } catch (e, st) {
