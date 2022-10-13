@@ -54,11 +54,11 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is RepoCubit && id == other.id;
+    return other is RepoCubit && infoHash == other.infoHash;
   }
 
   oui.AccessMode get accessMode => handle.accessMode;
-  String get id => handle.lowHexId();
+  String get infoHash => handle.infoHash;
   bool get canRead => accessMode != oui.AccessMode.blind;
   bool get canWrite => accessMode == oui.AccessMode.write;
 

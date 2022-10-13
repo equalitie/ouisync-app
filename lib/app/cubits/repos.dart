@@ -93,7 +93,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     try {
       final shareToken = oui.ShareToken(session, tokenLink);
-      final existingRepo = findById(shareToken.repositoryId());
+      final existingRepo = findByInfoHash(shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);
@@ -105,14 +105,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  RepoEntry? findById(String id) {
-    for (final r in repos) {
-      if (r.id == id) {
-        return r;
-      }
-    }
-    return null;
-  }
+  RepoEntry? findByInfoHash(String infoHash) =>
+      repos.firstWhere((repo) => repo.infoHash == infoHash);
 
   Future<void> setCurrent(RepoEntry? repo) async {
     if (currentRepo == repo) {
@@ -185,10 +179,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return null;
     }
 
-    final id = repo.id;
+    final infoHash = repo.infoHash;
     await repo.close();
     _repos.remove(name);
-    return id;
+    return infoHash;
   }
 
   Future<void> close() async {
