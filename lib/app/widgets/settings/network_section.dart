@@ -21,14 +21,7 @@ class NetworkSection extends AbstractSettingsSection {
         tiles: [
           _buildConnectivityTypeTile(context),
           _buildPortForwardingTile(context),
-          // TODO:
-          SettingsTile.switchTile(
-            initialValue: false,
-            onToggle: (value) {},
-            title: Text('Local Discovery'),
-            leading: Icon(Icons.broadcast_on_personal),
-            enabled: false,
-          ),
+          _buildLocalDiscoveryTile(context),
           _buildSyncOnMobileSwitch(context),
           ..._buildConnectivityInfoTiles(context),
           _buildPeerListTile(context),
@@ -68,6 +61,22 @@ class NetworkSection extends AbstractSettingsSection {
             },
             title: Text('UPnP'),
             leading: Icon(Icons.router),
+          ),
+        ),
+      );
+
+  AbstractSettingsTile _buildLocalDiscoveryTile(BuildContext context) =>
+      CustomSettingsTile(
+        child: BlocSelector<PowerControl, PowerControlState, bool>(
+          selector: (state) => state.localDiscoveryEnabled,
+          builder: (context, value) => SettingsTile.switchTile(
+            initialValue: value,
+            onToggle: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setLocalDiscoveryEnabled(value));
+            },
+            title: Text('Local Discovery'), // TODO: localize
+            leading: Icon(Icons.broadcast_on_personal),
           ),
         ),
       );

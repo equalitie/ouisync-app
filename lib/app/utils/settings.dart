@@ -6,6 +6,7 @@ class Settings {
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
   static const String _portForwardingEnabledKey = "PORT_FORWARDING_ENABLED";
+  static const String _localDiscoveryEnabledKey = "LOCAL_DISCOVERY_ENABLED";
   static const String _repositoriesPrefix = "REPOSITORIES";
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
@@ -70,6 +71,11 @@ class Settings {
 
   Future<void> setPortForwardingEnabled(bool value) =>
       _prefs.setBool(_portForwardingEnabledKey, value);
+
+  bool? getLocalDiscoveryEnabled() => _prefs.getBool(_localDiscoveryEnabledKey);
+
+  Future<void> setLocalDiscoveryEnabled(bool value) =>
+      _prefs.setBool(_localDiscoveryEnabledKey, value);
 
   bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
 
