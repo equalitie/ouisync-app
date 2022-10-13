@@ -21,7 +21,7 @@ class PowerControlState {
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
     this.networkMode = NetworkMode.disabled,
-    this.syncOnMobile = _syncOnMobileDefault,
+    this.syncOnMobile = false,
     this.portForwardingEnabled = false,
   });
 
@@ -74,19 +74,17 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
             portForwardingEnabled: _session.isPortForwardingEnabled));
 
   Future<void> init() async {
-    unawaited(_listen());
-
     final syncOnMobile =
         _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
+    await setSyncOnMobileEnabled(syncOnMobile);
+
     final portForwardingEnabled =
         _settings.getPortForwardingEnabled() ?? _portForwardingEnabledDefault;
-
-    emit(state.copyWith(
-      syncOnMobile: syncOnMobile,
-      portForwardingEnabled: portForwardingEnabled,
-    ));
+    await setPortForwardingEnabled(portForwardingEnabled);
 
     await _refresh();
+
+    unawaited(_listen());
   }
 
   Future<void> setSyncOnMobileEnabled(bool value) async {
