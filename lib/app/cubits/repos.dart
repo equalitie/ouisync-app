@@ -371,13 +371,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo =
           await oui.Repository.open(_session, store: store, password: password);
 
-      if (_settings.getDhtEnabled(name) ?? true) {
-        repo.enableDht();
-      } else {
-        repo.disableDht();
-      }
+      final cubit =
+          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      cubit.loadSettings();
 
-      return OpenRepoEntry(RepoCubit(info, repo));
+      return OpenRepoEntry(cubit);
     } catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }
@@ -385,8 +383,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  Future<RepoEntry> _create(RepoMetaInfo info,
-      {required String password, oui.ShareToken? token}) async {
+  Future<RepoEntry> _create(
+    RepoMetaInfo info, {
+    required String password,
+    oui.ShareToken? token,
+  }) async {
     final name = info.name;
     final store = info.path();
 
@@ -398,10 +399,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo = await oui.Repository.create(_session,
           store: store, password: password, shareToken: token);
 
-      repo.enableDht();
-      _settings.setDhtEnabled(name, true);
+      final cubit =
+          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      cubit.loadSettings();
 
-      return OpenRepoEntry(RepoCubit(info, repo));
+      return OpenRepoEntry(cubit);
     } catch (e, st) {
       loggy.app('Initialization of the repository $name failed', e, st);
     }

@@ -20,8 +20,15 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final Folder _currentFolder = Folder();
   final RepoMetaInfo _metaInfo;
   final oui.Repository _handle;
+  final Settings _settings;
 
-  RepoCubit(this._metaInfo, this._handle) {
+  RepoCubit({
+    required RepoMetaInfo metaInfo,
+    required oui.Repository handle,
+    required Settings settings,
+  })  : _metaInfo = metaInfo,
+        _handle = handle,
+        _settings = settings {
     _currentFolder.repo = this;
   }
 
@@ -30,11 +37,22 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   RepoMetaInfo get metaInfo => _metaInfo;
   Folder get currentFolder => _currentFolder;
 
+  void loadSettings() {
+    if (_settings.getDhtEnabled(name) ?? true) {
+      handle.enableDht();
+    }
+
+    if (_settings.getPexEnabled(name) ?? true) {
+      handle.enablePex();
+    }
+  }
+
   bool get isDhtEnabled => handle.isDhtEnabled;
 
   void enableDht() {
     if (!isDhtEnabled) {
       handle.enableDht();
+      unawaited(_settings.setDhtEnabled(name, true));
       changed();
     }
   }
@@ -42,6 +60,27 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   void disableDht() {
     if (isDhtEnabled) {
       handle.disableDht();
+      unawaited(_settings.setDhtEnabled(name, false));
+      changed();
+    }
+  }
+
+  bool get isPexEnabled => handle.isPexEnabled;
+
+  void enablePex() {
+    if (!isPexEnabled) {
+      loggy.app("enabling PEX");
+      handle.enablePex();
+      unawaited(_settings.setPexEnabled(name, true));
+      changed();
+    }
+  }
+
+  void disablePex() {
+    if (isPexEnabled) {
+      loggy.app("disabling PEX");
+      handle.disablePex();
+      unawaited(_settings.setPexEnabled(name, false));
       changed();
     }
   }

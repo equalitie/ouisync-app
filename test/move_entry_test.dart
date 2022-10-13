@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
+import 'package:ouisync_app/app/utils/settings.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 
@@ -14,11 +15,18 @@ void main() {
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
     session = await Session.open(dir.path);
+
+    final settings = await Settings.init();
     final info = RepoMetaInfo(p.join(dir.path, "store.db"));
+
     repository = RepoCubit(
-        info,
-        await Repository.create(session,
-            store: info.path(), password: 'a1b2c3'));
+        metaInfo: info,
+        handle: await Repository.create(
+          session,
+          store: info.path(),
+          password: 'a1b2c3',
+        ),
+        settings: settings);
   });
 
   tearDown(() async {
