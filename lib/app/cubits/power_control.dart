@@ -76,7 +76,8 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
   Future<void> init() async {
     unawaited(_listen());
 
-    final syncOnMobile = _settings.getEnableSyncOnMobile(_syncOnMobileDefault);
+    final syncOnMobile =
+        _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
     final portForwardingEnabled =
         _settings.getPortForwardingEnabled() ?? _portForwardingEnabledDefault;
 
@@ -88,25 +89,14 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
     await _refresh();
   }
 
-  Future<void> enableSyncOnMobile() async {
-    if (state.syncOnMobile) {
+  Future<void> setSyncOnMobileEnabled(bool value) async {
+    if (state.syncOnMobile == value) {
       return;
     }
 
-    emit(state.copyWith(syncOnMobile: true));
+    emit(state.copyWith(syncOnMobile: value));
 
-    await _settings.setEnableSyncOnMobile(true);
-    await _refresh();
-  }
-
-  Future<void> disableSyncOnMobile() async {
-    if (!state.syncOnMobile) {
-      return;
-    }
-
-    emit(state.copyWith(syncOnMobile: false));
-
-    await _settings.setEnableSyncOnMobile(false);
+    await _settings.setSyncOnMobileEnabled(value);
     await _refresh();
   }
 

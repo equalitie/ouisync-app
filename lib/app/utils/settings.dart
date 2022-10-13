@@ -68,8 +68,13 @@ class Settings {
 
   bool? getPortForwardingEnabled() => _prefs.getBool(_portForwardingEnabledKey);
 
-  bool getEnableSyncOnMobile(bool default_) {
-    return _prefs.getBool(_syncOnMobileKey) ?? default_;
+  Future<void> setPortForwardingEnabled(bool value) =>
+      _prefs.setBool(_portForwardingEnabledKey, value);
+
+  bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
+
+  Future<void> setSyncOnMobileEnabled(bool enable) async {
+    await _prefs.setBool(_syncOnMobileKey, enable);
   }
 
   Future<void> setHighestSeenProtocolNumber(int number) async {
@@ -78,13 +83,6 @@ class Settings {
 
   int? getHighestSeenProtocolNumber() {
     return _prefs.getInt(_highestSeenProtocolNumberKey);
-  }
-
-  Future<void> setPortForwardingEnabled(bool value) =>
-      _prefs.setBool(_portForwardingEnabledKey, value);
-
-  Future<void> setEnableSyncOnMobile(bool enable) async {
-    await _prefs.setBool(_syncOnMobileKey, enable);
   }
 
   Future<void> _setRepositoryBool(

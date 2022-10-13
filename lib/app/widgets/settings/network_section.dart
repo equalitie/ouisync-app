@@ -80,12 +80,7 @@ class NetworkSection extends AbstractSettingsSection {
           initialValue: value,
           onToggle: (value) {
             final powerControl = context.read<PowerControl>();
-
-            if (value) {
-              unawaited(powerControl.enableSyncOnMobile());
-            } else {
-              unawaited(powerControl.disableSyncOnMobile());
-            }
+            unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
           title: Text('Sync while using mobile data'),
           leading: Icon(Icons.mobile_screen_share),
