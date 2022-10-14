@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
+import '../../models/item.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -8,13 +9,13 @@ class Rename extends StatelessWidget {
   const Rename({
     Key? key,
     required this.context,
-    required this.entryName,
+    required this.entryData,
     required this.hint,
     required this.formKey,
   }) : super(key: key);
 
   final BuildContext context;
-  final String entryName;
+  final BaseItem entryData;
   final String hint;
   final GlobalKey<FormState> formKey;
 

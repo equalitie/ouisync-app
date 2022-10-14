@@ -102,9 +102,7 @@ class _FileDetailState extends State<FileDetail> {
               iconData: Icons.edit,
               title: S.current.iconRename,
               dense: true,
-              onTap: () async => _showNewNameDialog(
-                widget.data.path,
-              ),
+              onTap: () async => _showRenameDialog(widget.data),
               enabledValidation: () => widget.isActionAvailableValidator(
                   widget.cubit.accessMode, EntryAction.rename),
               disabledMessage: S.current.messageActionNotAvailable,
@@ -208,19 +206,18 @@ class _FileDetailState extends State<FileDetail> {
     widget.onBottomSheetOpen(controller!, path);
   }
 
-  void _showNewNameDialog(String path) async {
+  void _showRenameDialog(FileItem data) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         final formKey = GlobalKey<FormState>();
-        final name = getBasename(path);
 
         return ActionsDialog(
           title: S.current.messageRenameFile,
           body: Rename(
             context: context,
-            entryName: name,
+            entryData: data,
             hint: S.current.messageFileName,
             formKey: formKey,
           ),
@@ -229,10 +226,10 @@ class _FileDetailState extends State<FileDetail> {
     ).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(path);
+        final parent = getDirname(data.path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.cubit.moveEntry(source: path, destination: newEntryPath);
+        widget.cubit.moveEntry(source: data.path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

@@ -49,9 +49,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                 iconData: Icons.edit,
                 title: S.current.iconRename,
                 dense: true,
-                onTap: () async => _showNewNameDialog(
-                  widget.data.path,
-                ),
+                onTap: () async => _showRenameDialog(widget.data),
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.accessMode, EntryAction.rename),
                 disabledMessage: S.current.messageActionNotAvailable,
@@ -240,19 +238,19 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
     widget.onBottomSheetOpen.call(controller!, path);
   }
 
-  void _showNewNameDialog(String path) async {
+  void _showRenameDialog(FolderItem data) async {
     await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           final formKey = GlobalKey<FormState>();
-          final name = getBasename(path);
+          final name = getBasename(data.path);
 
           return ActionsDialog(
             title: S.current.messageRenameFolder,
             body: Rename(
               context: context,
-              entryName: name,
+              entryData: data,
               hint: S.current.messageFolderName,
               formKey: formKey,
             ),
@@ -260,10 +258,10 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         }).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(path);
+        final parent = getDirname(data.path);
         final newEntryPath = buildDestinationPath(parent, newName);
 
-        widget.cubit.moveEntry(source: path, destination: newEntryPath);
+        widget.cubit.moveEntry(source: data.path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }
