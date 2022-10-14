@@ -244,7 +244,6 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
         barrierDismissible: false,
         builder: (BuildContext context) {
           final formKey = GlobalKey<FormState>();
-          final name = getBasename(data.path);
 
           return ActionsDialog(
             title: S.current.messageRenameFolder,
