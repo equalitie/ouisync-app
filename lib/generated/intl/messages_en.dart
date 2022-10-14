@@ -193,6 +193,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "This repository is a blind replica."),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "The provided <bold>password</bold> does not grant you access to view the content of this repository."),
+        "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
+            "Changing the extension of a file can make it unusable"),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to delete this file?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
@@ -222,6 +224,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
+        "messageErrorCharactersNotAllowed":
+            MessageLookupByLibrary.simpleMessage(
+                "Using \\ or / is not allowed"),
         "messageErrorCreatingRepository": MessageLookupByLibrary.simpleMessage(
             "Error creating the repository"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
@@ -371,6 +376,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Edit repository"),
         "titleFileDetails":
             MessageLookupByLibrary.simpleMessage("File details"),
+        "titleFileExtensionChanged":
+            MessageLookupByLibrary.simpleMessage("File extension changed"),
+        "titleFileExtensionMissing":
+            MessageLookupByLibrary.simpleMessage("File extension missing"),
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Create"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Folder details"),

@@ -197,6 +197,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Este repositorio es de sólo lectura"),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "La <bold>clave</bold> ingresada no da acceso a los contenidos"),
+        "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
+            "Cambiar la extensión del archivo puede hacerlo inutilizable"),
         "messageConfirmFileDeletion":
             MessageLookupByLibrary.simpleMessage("¿Borrar este archivo?"),
         "messageConfirmFolderDeletion":
@@ -226,6 +228,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("Un directorio"),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
+        "messageErrorCharactersNotAllowed":
+            MessageLookupByLibrary.simpleMessage(
+                "Usar \\ o / no está permitido"),
         "messageErrorCreatingRepository": MessageLookupByLibrary.simpleMessage(
             "Error creando el repositorio"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
@@ -368,6 +373,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Editar repositorio"),
         "titleFileDetails":
             MessageLookupByLibrary.simpleMessage("Detalles de archivo"),
+        "titleFileExtensionChanged": MessageLookupByLibrary.simpleMessage(
+            "Extensión de archivo modificada"),
+        "titleFileExtensionMissing": MessageLookupByLibrary.simpleMessage(
+            "Extensión de archivo faltante"),
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Crear"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Detalles de directorio"),

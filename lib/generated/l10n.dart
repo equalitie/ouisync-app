@@ -320,6 +320,26 @@ class S {
     );
   }
 
+  /// `File extension changed`
+  String get titleFileExtensionChanged {
+    return Intl.message(
+      'File extension changed',
+      name: 'titleFileExtensionChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File extension missing`
+  String get titleFileExtensionMissing {
+    return Intl.message(
+      'File extension missing',
+      name: 'titleFileExtensionMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -765,6 +785,16 @@ class S {
     return Intl.message(
       'There is already a repository with this name',
       name: 'messageErrorRepositoryNameExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Using \ or / is not allowed`
+  String get messageErrorCharactersNotAllowed {
+    return Intl.message(
+      'Using \\ or / is not allowed',
+      name: 'messageErrorCharactersNotAllowed',
       desc: '',
       args: [],
     );
@@ -1495,6 +1525,16 @@ class S {
     return Intl.message(
       'You need to select one permission to create a repository link first',
       name: 'messageShareActionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changing the extension of a file can make it unusable`
+  String get messageChangeExtensionAlert {
+    return Intl.message(
+      'Changing the extension of a file can make it unusable',
+      name: 'messageChangeExtensionAlert',
       desc: '',
       args: [],
     );

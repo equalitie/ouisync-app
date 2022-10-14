@@ -79,7 +79,7 @@ class _RenameState extends State<Rename> {
                   regExp: '.*[/\\\\].*',
 
                   /// No / nor \ allowed
-                  regExpError: 'Using \\ or / is not allowed'),
+                  regExpError: S.current.messageErrorCharactersNotAllowed),
               autofocus: true),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);
@@ -122,14 +122,14 @@ class _RenameState extends State<Rename> {
     if (_originalExtension.isEmpty) return true;
 
     String title = '';
-    String message = 'Changing the extension of a file can make it unnusable';
+    String message = S.current.messageChangeExtensionAlert;
 
     if (fileExtension != _originalExtension) {
-      title = 'File extension changed';
+      title = S.current.titleFileExtensionChanged;
     }
 
     if (fileExtension.isEmpty) {
-      title = 'File extension missing';
+      title = S.current.titleFileExtensionMissing;
     }
 
     if (title.isEmpty) return true;
