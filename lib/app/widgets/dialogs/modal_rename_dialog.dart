@@ -40,6 +40,13 @@ class _RenameState extends State<Rename> {
   }
 
   @override
+  void dispose() {
+    _newNameController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
       key: widget.formKey,
