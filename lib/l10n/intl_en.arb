@@ -27,6 +27,8 @@
     "titleLockAllRepos":"Lock all repositories",
     "titleAddRepoToken":"Add a repository with token",
     "titleScanRepoQR":"Scan Repository QR",
+    "titleFileExtensionChanged":"File extension changed",
+    "titleFileExtensionMissing":"File extension missing",
 
     "typeFolder":"Folder",
     "typeFile":"File",
@@ -80,6 +82,7 @@
     "messsageFailedCreateRepository":"Failed to create repository {name}",
     "messsageFailedAddRepository":"Failed to add repository {name}",
     "messageErrorRepositoryNameExist":"There is already a repository with this name",
+    "messageErrorCharactersNotAllowed":"Using \\ or / is not allowed",
 
     "messageBlindReplicaExplanation":"Your peer cannot write nor read the contents",
     "messageReadReplicaExplanation":"Cannot be modified, just access the contents",
@@ -164,6 +167,8 @@
     "messageActionNotAvailable":"This option is not available on read-only repositories",
     "messageAccessModeDisabled":"The permission cannot be higger than the repository current access mode: {access}",
     "messageShareActionDisabled":"You need to select one permission to create a repository link first",
+
+    "messageChangeExtensionAlert":"Changing the extension of a file can make it unusable",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",

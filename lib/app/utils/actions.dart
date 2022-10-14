@@ -19,6 +19,9 @@ hideSnackBar(context) => SnackBarAction(
 
 String getBasename(String path) => p.basename(path);
 
+String getBasenameWhithoutExtension(String path) =>
+    p.basenameWithoutExtension(path);
+
 String getDirname(String path) => p.dirname(path);
 
 String getFileExtension(String fileName) => p.extension(fileName);

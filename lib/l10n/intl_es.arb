@@ -26,6 +26,8 @@
     "titleLockAllRepos":"Bloquear todos los repositorios",
     "titleAddRepoToken":"Agregar repositorio usando un token",
     "titleScanRepoQR":"Escanear QR de Repositorio",
+    "titleFileExtensionChanged":"Extensión de archivo modificada",
+    "titleFileExtensionMissing":"Extensión de archivo faltante",
 
     "typeFolder":"Directorio",
     "typeFile":"Archivo",
@@ -74,6 +76,7 @@
     "messsageFailedCreateRepository":"Fallo creando el repositorio {name}",
     "messsageFailedAddRepository":"Fallo agregando el repositorio {name}",
     "messageErrorRepositoryNameExist":"Ya existe un repositorio con este nombre",
+    "messageErrorCharactersNotAllowed":"Usar \\ o / no está permitido",
 
     "messageBlindReplicaExplanation":"Tu colega no puede escribir o leer los contenidos",
     "messageReadReplicaExplanation":"No puede ser modificado, sólo acceder sus contenidos",
@@ -158,6 +161,8 @@
     "messageActionNotAvailable":"Esta opción no está disponible en repositorios de solo lectura",
     "messageAccessModeDisabled":"El permiso no puede ser más alto que el modo de acceso actual del repositorio: {access}",
     "messageShareActionDisabled":"Necesitas seleccionar un permiso para primero crear un link de repository",
+
+    "messageChangeExtensionAlert":"Cambiar la extensión del archivo puede hacerlo inutilizable",
 
     "replacementName":"{name}",
     "replacementPath":"{path}",
