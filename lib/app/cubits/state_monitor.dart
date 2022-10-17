@@ -6,7 +6,8 @@ class StateMonitor {
 
   StateMonitor(this._inner);
 
-  StateMonitor child(String name) => StateMonitor(_inner?.child(name));
+  StateMonitor child(oui.MonitorId childId) =>
+      StateMonitor(_inner?.child(childId));
 
   StateMonitorIntValue intValue(String valueName) =>
       StateMonitorIntValue(_inner, valueName);

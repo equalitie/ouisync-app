@@ -66,16 +66,16 @@ class _NodeWidget extends StatelessWidget {
     return Card(child: ListTile(dense: true, title: Text("$key: $value")));
   }
 
-  Widget buildChild(String name, int version) =>
-      _ChildWidget(monitor, name, version);
+  Widget buildChild(MonitorId childId, int version) =>
+      _ChildWidget(monitor, childId, version);
 }
 
 class _ChildWidget extends StatefulWidget {
   final StateMonitor parent;
-  final String name;
+  final MonitorId id;
   final int version;
 
-  _ChildWidget(this.parent, this.name, this.version);
+  _ChildWidget(this.parent, this.id, this.version);
 
   @override
   State<_ChildWidget> createState() => _ChildWidgetState();
@@ -98,7 +98,7 @@ class _ChildWidgetState extends State<_ChildWidget> {
             child: ListTile(
                 trailing: const Icon(Icons.remove),
                 dense: true,
-                title: Text(widget.name),
+                title: Text(widget.id.name),
                 onTap: collapse)),
         _NodeWidget(monitor),
       ]);
@@ -107,14 +107,14 @@ class _ChildWidgetState extends State<_ChildWidget> {
           child: ListTile(
               trailing: const Icon(Icons.add),
               dense: true,
-              title: Text(widget.name),
+              title: Text(widget.id.name),
               onTap: expand));
     }
   }
 
   void expand() {
     setState(() {
-      monitor = widget.parent.child(widget.name);
+      monitor = widget.parent.child(widget.id);
     });
   }
 

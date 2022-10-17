@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:ouisync_plugin/state_monitor.dart' as oui;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -67,7 +68,7 @@ class _MainPageState extends State<MainPage>
         _powerControl = PowerControl(session, settings) {
     _panicCounter = _repositories
         .rootStateMonitor()
-        .child("Session")
+        .child(oui.MonitorId.expect_unique("Session"))
         .intValue("panic_counter");
   }
 

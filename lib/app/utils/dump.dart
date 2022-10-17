@@ -40,7 +40,7 @@ void _dumpStateMonitor(IOSink sink, StateMonitor? node, int depth) {
     sink.writeln("$pad${e.key}: ${e.value}");
   }
 
-  for (String child in node.children.keys) {
+  for (MonitorId child in node.children.keys) {
     sink.writeln("$pad$child");
     _dumpStateMonitor(sink, node.child(child), depth + 1);
   }
