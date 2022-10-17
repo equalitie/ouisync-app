@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
 
+import 'package:collection/collection.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:path/path.dart' as p;
 
@@ -106,7 +107,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   RepoEntry? findByInfoHash(String infoHash) =>
-      repos.firstWhere((repo) => repo.infoHash == infoHash);
+      repos.firstWhereOrNull((repo) => repo.infoHash == infoHash);
 
   Future<void> setCurrent(RepoEntry? repo) async {
     if (currentRepo == repo) {
