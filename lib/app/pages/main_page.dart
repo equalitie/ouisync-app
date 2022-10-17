@@ -331,7 +331,9 @@ class _MainPageState extends State<MainPage>
     final folder = repo.currentFolder;
 
     if (folder.content.isEmpty) {
-      child = NoContentsState(repository: folder.repo, path: folder.path);
+      child = repo.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : NoContentsState(repository: folder.repo, path: folder.path);
     } else {
       child = _contentsList(repo);
     }
