@@ -250,7 +250,8 @@ class Fields {
           ));
 
   static Widget constrainedText(String text,
-          {int flex = 1,
+          {Key? key,
+          int flex = 1,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool softWrap = true,
@@ -259,6 +260,7 @@ class Fields {
           Color color = Colors.black,
           int maxLines = 1}) =>
       Expanded(
+        key: key,
         flex: flex,
         child: Text(
           text,
@@ -400,7 +402,8 @@ class Fields {
               iconColor: iconColor));
 
   static Widget _textFormFieldBase(
-          {required BuildContext context,
+          {Key? key,
+          required BuildContext context,
           TextEditingController? textEditingController,
           Icon? icon,
           String? label,
@@ -417,6 +420,7 @@ class Fields {
           Function()? onTap,
           Function(String)? onChanged}) =>
       TextFormField(
+        key: key,
         controller: textEditingController,
         autovalidateMode: autovalidateMode,
         autofocus: autofocus,
@@ -439,6 +443,7 @@ class Fields {
       );
 
   static Widget formTextField({
+    Key? key,
     required BuildContext context,
     TextEditingController? textEditingController,
     Icon? icon,
@@ -465,6 +470,7 @@ class Fields {
             textBaseline: TextBaseline.alphabetic,
             children: [
               _textFormFieldBase(
+                  key: key,
                   context: context,
                   textEditingController: textEditingController,
                   icon: icon,
