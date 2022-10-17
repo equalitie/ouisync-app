@@ -34,12 +34,11 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   _AddRepositoryWithTokenState(
     this._repos,
     String? initialTokenValue,
-  ) : _tokenController = TextEditingController(text: initialTokenValue);
+  );
 
   final scrollKey = GlobalKey();
   final ReposCubit _repos;
 
-  final TextEditingController _tokenController;
   final TextEditingController _nameController =
       TextEditingController(text: null);
   final TextEditingController _passwordController =
@@ -59,18 +58,18 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   bool _requiresPassword = false;
 
   ShareToken? _shareToken;
-  String? _repoName;
 
-  final FocusNode _tokenFocus = FocusNode(debugLabel: 'TokenTextField');
   final FocusNode _nameFocus = FocusNode(debugLabel: 'NameTextField');
 
   @override
   void initState() {
-    _tokenFocus.addListener(() {
-      if (!_tokenFocus.hasFocus) {
-        _validateToken();
+    _nameFocus.addListener(() async {
+      if (_nameController.text.isEmpty) {
+        setState(() => _showSuggestedName = _nameController.text.isEmpty);
       }
     });
+
+    _validateToken();
 
     super.initState();
   }
@@ -86,7 +85,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
 
   @override
   void dispose() {
-    _tokenController.dispose();
     _nameController.dispose();
     _passwordController.dispose();
     _retypedPasswordController.dispose();
@@ -96,7 +94,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
 
     _accessModeNotifier.dispose();
 
-    _tokenFocus.dispose();
     _nameFocus.dispose();
 
     super.dispose();
@@ -108,19 +105,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _tokenController.text.isEmpty
-              ? Fields.formTextField(
-                  context: context,
-                  textEditingController: _tokenController,
-                  label: S.current.labelRepositoryLink,
-                  hint: S.current.messageRepositoryToken,
-                  onSaved: (value) {},
-                  validator: _repositoryTokenValidator,
-                  autofocus: true,
-                  focusNode: _tokenFocus,
-                  maxLines: null,
-                )
-              : _buildTokenLabel(),
+          _buildTokenLabel(),
           ValueListenableBuilder(
             valueListenable: _accessModeNotifier,
             builder: (
@@ -141,11 +126,14 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
             ),
           ),
           Fields.formTextField(
+            key: scrollKey,
             context: context,
             textEditingController: _nameController,
             label: S.current.labelName,
             hint: S.current.messageRepositoryName,
             onSaved: (_) {},
+            onChanged: (value) =>
+                setState(() => _showSuggestedName = value.isEmpty),
             validator:
                 validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
             autofocus: true,
@@ -160,7 +148,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Fields.constrainedText(
-                      S.current.messageRepositorySuggestedName(_repoName ?? ''),
+                      S.current.messageRepositorySuggestedName(_suggestedName),
                       flex: 1,
                       fontSize: Dimensions.fontSmall,
                       fontWeight: FontWeight.normal,
@@ -257,17 +245,6 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   }
 
   Widget _buildTokenLabel() {
-    _validateToken();
-
-    final targetContext = scrollKey.currentContext;
-    if (targetContext != null) {
-      Scrollable.ensureVisible(
-        targetContext,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    }
-
     return Padding(
       padding: Dimensions.paddingVertical10,
       child: Container(
@@ -291,7 +268,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
             ),
             Dimensions.spacingVerticalHalf,
             Text(
-              formatShareLinkForDisplay(_tokenController.text),
+              formatShareLinkForDisplay(widget.initialTokenValue ?? ''),
               style: const TextStyle(
                 fontSize: Dimensions.fontAverage,
                 fontWeight: FontWeight.w500,
@@ -305,6 +282,16 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
 
   _updateNameController(String? value) {
     _nameController.text = value ?? '';
+    _nameController.selection =
+        TextSelection(baseOffset: 0, extentOffset: _suggestedName.length);
+
+    setState(() => _showSuggestedName = _nameController.text.isEmpty);
+
+    final targetContext = scrollKey.currentContext;
+    if (targetContext != null) {
+      Scrollable.ensureVisible(targetContext,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    }
   }
 
   String? retypedPasswordValidator({
@@ -319,16 +306,11 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   }
 
   _validateToken() {
-    if (_tokenController.text.isEmpty) {
-      cleanupFormOnEmptyToken();
-      return;
-    }
-
-    final token = _tokenController.text;
+    if (widget.initialTokenValue == null) return;
     try {
       _shareToken = ShareToken(
         _repos.session,
-        token,
+        widget.initialTokenValue!,
       );
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
@@ -347,12 +329,11 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     _suggestedName = _shareToken!.suggestedName;
     _accessModeNotifier.value = _shareToken!.mode.name;
 
-    if (_suggestedName.isNotEmpty) {
-      _repoName = _suggestedName;
-    }
+    _updateNameController(_suggestedName);
 
     setState(() {
-      _showSuggestedName = _suggestedName.isNotEmpty;
+      _showSuggestedName = _nameController.text.isEmpty;
+
       _showAccessModeMessage = _accessModeNotifier.value.toString().isNotEmpty;
 
       _requiresPassword = _shareToken!.mode != AccessMode.blind;
@@ -366,43 +347,10 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
     });
 
     _suggestedName = '';
-    _repoName = '';
 
     _accessModeNotifier.value = '';
 
     _updateNameController(null);
-  }
-
-  String? _repositoryTokenValidator(
-    String? value, {
-    String? error,
-  }) {
-    if ((value ?? '').isEmpty) {
-      return S.current.messageErrorTokenEmpty;
-    }
-
-    try {
-      final shareToken = ShareToken(
-        _repos.session,
-        value!,
-      );
-
-      _suggestedName = shareToken.suggestedName;
-      _accessModeNotifier.value = shareToken.mode.name;
-
-      final existingRepo = _repos.findByInfoHash(shareToken.infoHash);
-
-      if (existingRepo != null) {
-        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
-      }
-    } catch (e) {
-      _suggestedName = '';
-      _accessModeNotifier.value = '';
-
-      return error ?? S.current.messageErrorTokenValidator;
-    }
-
-    return null;
   }
 
   List<Widget> _actions(context) => [
