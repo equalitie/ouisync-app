@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -155,6 +156,60 @@ class Fields {
             TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
       );
 
+  static autosizedLabeledText(
+          {required String label,
+          required String text,
+          Key? textKey,
+          TextAlign labelTextAlign = TextAlign.center,
+          TextOverflow labelTextOverflow = TextOverflow.ellipsis,
+          bool labelSoftWrap = false,
+          double labelFontSize = Dimensions.fontAverage,
+          FontWeight labelFontWeight = FontWeight.w500,
+          Color labelColor = Colors.black,
+          TextAlign textAlign = TextAlign.start,
+          TextOverflow textOverflow = TextOverflow.ellipsis,
+          bool textSoftWrap = true,
+          double textFontSize = Dimensions.fontAverage,
+          double minTextFontSize = Dimensions.fontSmall,
+          double maxTextFontSize = Dimensions.fontAverage,
+          FontWeight textFontWeight = FontWeight.normal,
+          Color textColor = Colors.black,
+          int textMaxLines = 1,
+          EdgeInsets padding = Dimensions.paddingBox,
+          Widget space = Dimensions.spacingHorizontal}) =>
+      Padding(
+          padding: padding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                  flex: 0,
+                  child: idLabel(label,
+                      textAlign: labelTextAlign,
+                      textOverflow: labelTextOverflow,
+                      softWrap: labelSoftWrap,
+                      fontSize: labelFontSize,
+                      fontWeight: labelFontWeight,
+                      color: labelColor)),
+              space,
+              Expanded(
+                  flex: 1,
+                  child: autosizeText(text,
+                      key: textKey,
+                      textAlign: textAlign,
+                      textOverflow: textOverflow,
+                      softWrap: textSoftWrap,
+                      fontSize: textFontSize,
+                      minFontSize: minTextFontSize,
+                      maxFontSize: maxTextFontSize,
+                      fontWeight: textFontWeight,
+                      color: textColor,
+                      maxLines: textMaxLines))
+            ],
+          ));
+
   static Widget labeledText(
           {required String label,
           required String text,
@@ -248,6 +303,30 @@ class Fields {
                   color: textColor)
             ],
           ));
+
+  static Widget autosizeText(String text,
+          {Key? key,
+          TextAlign textAlign = TextAlign.start,
+          TextOverflow textOverflow = TextOverflow.ellipsis,
+          bool softWrap = true,
+          double fontSize = Dimensions.fontAverage,
+          double minFontSize = Dimensions.fontSmall,
+          double maxFontSize = Dimensions.fontAverage,
+          FontWeight fontWeight = FontWeight.normal,
+          Color color = Colors.black,
+          int maxLines = 1}) =>
+      AutoSizeText(
+        text,
+        key: key,
+        textAlign: textAlign,
+        softWrap: softWrap,
+        overflow: textOverflow,
+        maxLines: maxLines,
+        style:
+            TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
+        minFontSize: minFontSize,
+        maxFontSize: maxFontSize,
+      );
 
   static Widget constrainedText(String text,
           {Key? key,
