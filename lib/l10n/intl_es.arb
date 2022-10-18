@@ -46,7 +46,7 @@
     "labelRenameRepository":"Ingrese el nuevo nombre",
     "labelEndpoint":"Endpoint: ",
     "labelAppVersion":"Versión de la App",
-    "labelConnectedPeers":"Compañeras conectadas",
+    "labelPeers":"Compañeras",
     "labelDestination":"Destino",
     "labelUseExternalStorage":"Usar almacenamiento externo",
     "labelDownloadedTo":"Descargado en:",

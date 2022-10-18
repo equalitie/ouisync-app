@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../../generated/l10n.dart';
 import '../cubits/peer_set.dart';
 import '../utils/utils.dart';
 
@@ -12,7 +13,7 @@ class PeerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text("Connected Peers")),
+        appBar: AppBar(title: Text(S.current.labelPeers)),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
           builder: (context, state) => SingleChildScrollView(
             child: Container(

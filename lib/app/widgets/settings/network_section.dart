@@ -161,7 +161,7 @@ class NetworkSection extends AbstractSettingsSection {
         child: BlocBuilder<PeerSetCubit, PeerSet>(
           builder: (context, state) => NavigationTile(
               leading: Icon(Icons.people),
-              title: Text(S.current.labelConnectedPeers),
+              title: Text(S.current.labelPeers),
               value: Text(state.stats()),
               onPressed: (context) {
                 final peerSetCubit = context.read<PeerSetCubit>();

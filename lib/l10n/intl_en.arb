@@ -47,7 +47,7 @@
     "labelRenameRepository":"Enter the new name: ",
     "labelEndpoint":"Endpoint: ",
     "labelAppVersion":"App version",
-    "labelConnectedPeers":"Connected peers",
+    "labelPeers":"Peers",
     "labelDestination":"Destination",
     "labelUseExternalStorage":"Use external storage",
     "labelDownloadedTo":"Downloaded to:",

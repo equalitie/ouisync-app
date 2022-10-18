@@ -137,8 +137,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Versión de la App"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
-        "labelConnectedPeers":
-            MessageLookupByLibrary.simpleMessage("Compañeras conectadas"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copia el link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destino"),
         "labelDownloadedTo":
@@ -150,6 +148,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelName": MessageLookupByLibrary.simpleMessage("Nombre: "),
         "labelNewName": MessageLookupByLibrary.simpleMessage("Nuevo nombre: "),
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),
+        "labelPeers": MessageLookupByLibrary.simpleMessage("Compañeras"),
         "labelQRCode": MessageLookupByLibrary.simpleMessage("Código QR"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre"),
