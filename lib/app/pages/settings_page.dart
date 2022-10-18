@@ -30,11 +30,17 @@ class SettingsPage extends StatelessWidget {
         body: MultiBlocProvider(
           providers: [
             BlocProvider<PowerControl>.value(value: powerControl),
-            BlocProvider<ConnectivityInfo>(create: (context) {
-              final cubit = ConnectivityInfo(session: reposCubit.session);
-              unawaited(cubit.update());
-              return cubit;
-            })
+            BlocProvider<ConnectivityInfo>(
+              create: (context) {
+                final cubit = ConnectivityInfo(session: reposCubit.session);
+                unawaited(cubit.update());
+                return cubit;
+              },
+            ),
+            BlocProvider<PeerSetCubit>(
+              create: (context) =>
+                  PeerSetCubit(session: reposCubit.session)..init(),
+            ),
           ],
           child: BlocListener<PowerControl, PowerControlState>(
             listener: (context, state) {

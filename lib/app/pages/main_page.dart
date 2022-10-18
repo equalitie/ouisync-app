@@ -80,13 +80,9 @@ class _MainPageState extends State<MainPage>
   void initState() {
     super.initState();
 
-    widget.session.subscribeToNetworkEvents((event) {
+    widget.session.networkEvents.listen((event) {
       switch (event) {
         case NetworkEvent.peerSetChange:
-          {
-            BlocProvider.of<PeerSetCubit>(context)
-                .onPeerSetChanged(widget.session);
-          }
           break;
         case NetworkEvent.protocolVersionMismatch:
           {
@@ -717,16 +713,14 @@ class _MainPageState extends State<MainPage>
   }
 
   void showSettings() {
-    final peerSetCubit = BlocProvider.of<PeerSetCubit>(context);
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) {
-        return MultiBlocProvider(
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: peerSetCubit),
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
@@ -735,8 +729,8 @@ class _MainPageState extends State<MainPage>
             onShareRepository: _showShareRepository,
             panicCounter: _panicCounter,
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

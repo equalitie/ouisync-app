@@ -72,8 +72,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
               BlocProvider<UpgradeExistsCubit>(
                   create: (BuildContext context) => UpgradeExistsCubit(
                       widget.session.currentProtocolVersion, widget.settings)),
-              BlocProvider<PeerSetCubit>(
-                  create: (BuildContext context) => PeerSetCubit()),
             ],
             child: DropTarget(
                 onDragDone: (detail) {
