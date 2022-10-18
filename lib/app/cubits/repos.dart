@@ -19,7 +19,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   RepoEntry? _currentRepo;
   final oui.Session _session;
   final String _repositoriesDir;
-  oui.Subscription? _subscription;
+  StreamSubscription<oui.RepositoryEvent>? _subscription;
   final Settings _settings;
 
   ReposCubit({required session, required repositoriesDir, required settings})
@@ -120,7 +120,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     _subscription = null;
 
     if (repo is OpenRepoEntry) {
-      _subscription = repo.handle.subscribe(() => repo.cubit.getContent());
+      _subscription = repo.handle.events.listen((_) => repo.cubit.getContent());
     }
 
     await _settings.setDefaultRepo(repo?.name);

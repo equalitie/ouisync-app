@@ -21,7 +21,15 @@ class AboutSection extends AbstractSettingsSection {
               leading: Icon(Icons.info_outline),
               title: Text(S.current.labelAppVersion),
             ),
-          )
+          ),
+          SettingsTile(
+            title: Text('Runtime ID'),
+            leading: Icon(Icons.person),
+            value: Text(
+              repos.session.thisRuntimeId,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       );
 }
