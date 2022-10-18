@@ -26,7 +26,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.constrainedText(fileData.name, flex: 0, softWrap: true),
+          Fields.autosizeText(fileData.name),
           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
           (uploadJob == null)
               ? _fileSize(fileData.size)
