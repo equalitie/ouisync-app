@@ -126,56 +126,46 @@ class _FileDetailState extends State<FileDetail> {
                   Constants.notAvailableActionMessageDuration,
             ),
             EntryActionItem(
-              iconData: Icons.delete_outlined,
-              title: S.current.iconDelete,
-              dense: true,
-              onTap: () async {
-                showDialog<String>(
-                  context: widget.context,
-                  barrierDismissible: false, // user must tap button!
-                  builder: (BuildContext context) {
-                    final fileName = getBasename(widget.data.path);
-                    final parent = getDirname(widget.data.path);
+                iconData: Icons.delete_outlined,
+                title: S.current.iconDelete,
+                dense: true,
+                onTap: () async {
+                  showDialog<String>(
+                    context: widget.context,
+                    barrierDismissible: false, // user must tap button!
+                    builder: (BuildContext context) {
+                      final fileName = getBasename(widget.data.path);
+                      final parent = getDirname(widget.data.path);
 
-                    return Dialogs.buildDeleteFileAlertDialog(widget.cubit,
-                        widget.data.path, context, fileName, parent);
-                  },
-                ).then((fileName) {
-                  // If the user canceled the dialog, no file name is returned
-                  if (fileName?.isNotEmpty ?? false) {
-                    Navigator.of(context).pop();
-                  }
-                });
-              },
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.accessMode, EntryAction.delete),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
+                      return Dialogs.buildDeleteFileAlertDialog(widget.cubit,
+                          widget.data.path, context, fileName, parent);
+                    },
+                  ).then((fileName) {
+                    // If the user canceled the dialog, no file name is returned
+                    if (fileName?.isNotEmpty ?? false) {
+                      Navigator.of(context).pop();
+                    }
+                  });
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.accessMode, EntryAction.delete),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration),
             const Divider(
-              height: 10.0,
-              thickness: 2.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
+                height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
             Fields.iconLabel(
-              icon: Icons.info_rounded,
-              text: S.current.iconInformation,
-            ),
+                icon: Icons.info_rounded, text: S.current.iconInformation),
+            Fields.autosizedLabeledText(
+                label: S.current.labelName, text: widget.data.name),
             Fields.labeledText(
-              label: S.current.labelName,
-              text: widget.data.name,
-            ),
+                label: S.current.labelLocation,
+                text: widget.data.path
+                    .replaceAll(widget.data.name, '')
+                    .trimRight()),
             Fields.labeledText(
-              label: S.current.labelLocation,
-              text:
-                  widget.data.path.replaceAll(widget.data.name, '').trimRight(),
-            ),
-            Fields.labeledText(
-              label: S.current.labelSize,
-              text: formatSize(widget.data.size, units: true),
-            ),
+                label: S.current.labelSize,
+                text: formatSize(widget.data.size, units: true)),
           ],
         ),
       ),

@@ -72,61 +72,54 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                     Constants.notAvailableActionMessageDuration,
               ),
               EntryActionItem(
-                iconData: Icons.delete_outlined,
-                title: S.current.iconDelete,
-                dense: true,
-                onTap: () async {
-                  await showDialog<bool>(
-                    context: widget.context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (context) {
-                      return buildDeleteFolderAlertDialog(
-                        context,
-                        widget.cubit,
-                        widget.data.path,
-                      );
-                    },
-                  ).then((result) {
-                    if (result ?? false) {
-                      Navigator.of(context).pop(result);
-                      showSnackBar(context,
-                          content: Text(S.current
-                              .messageFolderDeleted(widget.data.name)));
-                    }
-                  });
-                },
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.delete),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
+                  iconData: Icons.delete_outlined,
+                  title: S.current.iconDelete,
+                  dense: true,
+                  onTap: () async {
+                    await showDialog<bool>(
+                      context: widget.context,
+                      barrierDismissible: false, // user must tap button!
+                      builder: (context) {
+                        return buildDeleteFolderAlertDialog(
+                          context,
+                          widget.cubit,
+                          widget.data.path,
+                        );
+                      },
+                    ).then((result) {
+                      if (result ?? false) {
+                        Navigator.of(context).pop(result);
+                        showSnackBar(context,
+                            content: Text(S.current
+                                .messageFolderDeleted(widget.data.name)));
+                      }
+                    });
+                  },
+                  enabledValidation: () => widget.isActionAvailableValidator(
+                      widget.cubit.accessMode, EntryAction.delete),
+                  disabledMessage: S.current.messageActionNotAvailable,
+                  disabledMessageDuration:
+                      Constants.notAvailableActionMessageDuration),
               const Divider(
-                height: 10.0,
-                thickness: 2.0,
-                indent: 20.0,
-                endIndent: 20.0,
-              ),
+                  height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
               Fields.iconLabel(
-                icon: Icons.info_rounded,
-                text: S.current.iconInformation,
-                iconSize: Dimensions.sizeIconBig,
-                textAlign: TextAlign.start,
-              ),
+                  icon: Icons.info_rounded,
+                  text: S.current.iconInformation,
+                  iconSize: Dimensions.sizeIconBig,
+                  textAlign: TextAlign.start),
+              Fields.autosizedLabeledText(
+                  label: S.current.labelName,
+                  labelFontSize: Dimensions.fontAverage,
+                  text: widget.data.name,
+                  textAlign: TextAlign.start,
+                  textMaxLines: 2),
               Fields.labeledText(
-                label: S.current.labelName,
-                labelFontSize: Dimensions.fontAverage,
-                text: widget.data.name,
-                textAlign: TextAlign.start,
-              ),
-              Fields.labeledText(
-                label: S.current.labelLocation,
-                labelFontSize: Dimensions.fontAverage,
-                text: widget.data.path
-                    .replaceAll(widget.data.name, '')
-                    .trimRight(),
-                textAlign: TextAlign.start,
-              ),
+                  label: S.current.labelLocation,
+                  labelFontSize: Dimensions.fontAverage,
+                  text: widget.data.path
+                      .replaceAll(widget.data.name, '')
+                      .trimRight(),
+                  textAlign: TextAlign.start),
             ]));
   }
 
