@@ -68,7 +68,7 @@ class _MainPageState extends State<MainPage>
         _powerControl = PowerControl(session, settings) {
     _panicCounter = _repositories
         .rootStateMonitor()
-        .child(oui.MonitorId.expect_unique("Session"))
+        .child(oui.MonitorId.expectUnique("Session"))
         .intValue("panic_counter");
   }
 
