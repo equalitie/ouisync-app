@@ -23,6 +23,7 @@ environment:
 
 dependencies:
   async: ^2.8.2
+  auto_size_text: ^3.0.0
   badges: ^2.0.2
   bloc_test: ^9.0.3
   build_runner: ^2.1.7
