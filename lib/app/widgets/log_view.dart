@@ -37,14 +37,16 @@ class _LogViewState extends State<LogView> {
   }
 
   @override
-  Widget build(BuildContext context) => ListView.builder(
-        controller: _scrollController,
-        shrinkWrap: true,
-        itemBuilder: (context, index) => _buildMessage(
-          context,
-          _buffer[index],
+  Widget build(BuildContext context) => SelectionArea(
+        child: ListView.builder(
+          controller: _scrollController,
+          shrinkWrap: true,
+          itemBuilder: (context, index) => _buildMessage(
+            context,
+            _buffer[index],
+          ),
+          itemCount: _buffer.length,
         ),
-        itemCount: _buffer.length,
       );
 
   Widget _buildMessage(BuildContext context, LogMessage message) =>
