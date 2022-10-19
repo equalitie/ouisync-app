@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 
 import 'navigation_tile.dart';
@@ -35,6 +36,12 @@ class LogsSection extends AbstractSettingsSection {
             title: Text(S.current.actionShare),
             leading: Icon(Icons.share),
             onPressed: _shareLogs,
+          ),
+          NavigationTile(
+            title: Text('View'), // TODO: localize
+            leading: Icon(Icons.visibility),
+            onPressed: (context) => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => LogViewPage())),
           ),
           CustomSettingsTile(child: panicCounter.builder((context, count) {
             if ((count ?? 0) > 0) {

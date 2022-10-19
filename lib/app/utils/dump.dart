@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:ouisync_plugin/state_monitor.dart';
+
+import 'ansi_parser.dart';
 
 Future<void> dumpAll(IOSink sink, StateMonitor? rootMonitor) async {
   sink.writeln(
@@ -25,7 +29,8 @@ Future<void> _dumpLogs(IOSink sink) async {
     'flutter-ouisync:V'
   ]);
 
-  await sink.addStream(logcat.stdout);
+  await sink.addStream(logcat.stdout
+      .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk)))));
 }
 
 /// Dump content of the state monitor
