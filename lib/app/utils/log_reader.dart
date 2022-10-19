@@ -8,11 +8,16 @@ import 'package:flutter/material.dart';
 import 'ansi_parser.dart';
 
 enum LogLevel {
-  error,
-  warn,
-  info,
-  debug,
   verbose,
+  debug,
+  info,
+  warn,
+  error;
+
+  bool operator <(LogLevel other) => index < other.index;
+  bool operator >(LogLevel other) => index > other.index;
+  bool operator <=(LogLevel other) => index <= other.index;
+  bool operator >=(LogLevel other) => index >= other.index;
 }
 
 LogLevel _parseLogLevel(String input) {
@@ -71,7 +76,8 @@ class LogMessage {
 /// Reader of messages from the system logger (logcat)
 class LogReader {
   final Process _logcat;
-  final Stream<LogMessage> _messages;
+  late final Stream<LogMessage> _messages;
+  LogLevel filter = LogLevel.verbose;
 
   static Future<LogReader> open() async {
     final logcat = await Process.start(
@@ -85,14 +91,15 @@ class LogReader {
       ],
     );
 
-    final messages = logcat.stdout
-        .map((line) => utf8.decode(line))
-        .expand((line) => LogMessage.parse(line));
-
-    return LogReader._(logcat, messages);
+    return LogReader._(logcat);
   }
 
-  LogReader._(this._logcat, this._messages);
+  LogReader._(this._logcat) {
+    _messages = _logcat.stdout
+        .map((line) => utf8.decode(line))
+        .expand((line) => LogMessage.parse(line))
+        .where((message) => message.level >= filter);
+  }
 
   Stream<LogMessage> get messages => _messages;
 

@@ -37,9 +37,7 @@ class _LogViewState extends State<LogView> {
   }
 
   @override
-  Widget build(BuildContext context) => _buildContent(context);
-
-  Widget _buildContent(BuildContext context) => ListView.builder(
+  Widget build(BuildContext context) => ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,
         itemBuilder: (context, index) => _buildMessage(
