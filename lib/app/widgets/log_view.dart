@@ -37,28 +37,7 @@ class _LogViewState extends State<LogView> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          Row(children: [
-            TextButton(
-                child: Text('log one line'),
-                onPressed: () {
-                  print('DEBUG');
-                }),
-            TextButton(
-                child: Text('log multiple lines'),
-                onPressed: () {
-                  print('DEBUG 0');
-                  print('DEBUG 1');
-                  print('DEBUG 2');
-                  print('DEBUG 3');
-                  print('DEBUG 4');
-                  print('DEBUG 5');
-                }),
-          ]),
-          Expanded(child: _buildContent(context)),
-        ],
-      );
+  Widget build(BuildContext context) => _buildContent(context);
 
   Widget _buildContent(BuildContext context) => ListView.builder(
         controller: _scrollController,
@@ -71,7 +50,7 @@ class _LogViewState extends State<LogView> {
       );
 
   Widget _buildMessage(BuildContext context, LogMessage message) =>
-      Text(message.content);
+      Text.rich(TextSpan(children: message.content));
 
   void _onMessage(LogMessage message) {
     setState(() {
