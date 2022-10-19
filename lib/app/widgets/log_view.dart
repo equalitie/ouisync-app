@@ -1,0 +1,112 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import '../utils/utils.dart';
+
+class LogView extends StatefulWidget {
+  final LogReader reader;
+
+  LogView(this.reader);
+
+  @override
+  State<LogView> createState() => _LogViewState(reader);
+}
+
+class _LogViewState extends State<LogView> {
+  final LogReader _reader;
+  final _buffer = LogBuffer();
+  final _scrollController = ScrollController();
+  var _follow = true;
+  var _onScrollEnabled = true;
+
+  _LogViewState(this._reader);
+
+  @override
+  void initState() {
+    super.initState();
+
+    _reader.messages.listen(_onMessage);
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _reader.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Row(children: [
+            TextButton(
+                child: Text('log one line'),
+                onPressed: () {
+                  print('DEBUG');
+                }),
+            TextButton(
+                child: Text('log multiple lines'),
+                onPressed: () {
+                  print('DEBUG 0');
+                  print('DEBUG 1');
+                  print('DEBUG 2');
+                  print('DEBUG 3');
+                  print('DEBUG 4');
+                  print('DEBUG 5');
+                }),
+          ]),
+          Expanded(child: _buildContent(context)),
+        ],
+      );
+
+  Widget _buildContent(BuildContext context) => ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        itemBuilder: (context, index) => _buildMessage(
+          context,
+          _buffer[index],
+        ),
+        itemCount: _buffer.length,
+      );
+
+  Widget _buildMessage(BuildContext context, LogMessage message) =>
+      Text(message.content);
+
+  void _onMessage(LogMessage message) {
+    setState(() {
+      _buffer.add(message);
+    });
+
+    if (_follow) {
+      // Scroll to bottom after widget fully rebuilds.
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => unawaited(_scrollToBottom()));
+    }
+  }
+
+  void _onScroll() {
+    if (!_onScrollEnabled) {
+      return;
+    }
+
+    var end =
+        _scrollController.offset >= _scrollController.position.maxScrollExtent;
+
+    setState(() {
+      _follow = end;
+    });
+  }
+
+  Future<void> _scrollToBottom() async {
+    _onScrollEnabled = false;
+
+    await _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+
+    _onScrollEnabled = true;
+  }
+}

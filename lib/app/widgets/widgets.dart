@@ -44,3 +44,5 @@ export 'settings/about_section.dart';
 export 'settings/logs_section.dart';
 export 'settings/network_section.dart';
 export 'settings/repository_section.dart';
+
+export 'log_view.dart';
