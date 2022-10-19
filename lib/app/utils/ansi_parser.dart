@@ -26,6 +26,9 @@ Iterable<AnsiSpan> parseAnsi(String input) sync* {
   yield AnsiSpan(input.substring(offset), codes);
 }
 
+String removeAnsi(String input) =>
+    parseAnsi(input).map((span) => span.text).join();
+
 List<int> _parseCodes(String input) =>
     input.trim().split(';').map((chunk) => int.tryParse(chunk) ?? 0).toList();
 

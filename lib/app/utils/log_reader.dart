@@ -45,8 +45,7 @@ class LogMessage {
       _regexp.allMatches(input).map((match) {
         final timestamp = DateTime.tryParse(match.group(1)!) ?? DateTime.now();
         final level = _parseLogLevel(match.group(2)!);
-        final content =
-            parseAnsi(match.group(3)!).map((span) => span.text).join();
+        final content = removeAnsi(match.group(3)!);
 
         return LogMessage(
           timestamp: timestamp,
