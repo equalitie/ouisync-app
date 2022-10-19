@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
 
+import 'ansi_parser.dart';
+
 enum LogLevel {
   error,
   warn,
@@ -43,7 +45,8 @@ class LogMessage {
       _regexp.allMatches(input).map((match) {
         final timestamp = DateTime.tryParse(match.group(1)!) ?? DateTime.now();
         final level = _parseLogLevel(match.group(2)!);
-        final content = match.group(3)!;
+        final content =
+            parseAnsi(match.group(3)!).map((span) => span.text).join();
 
         return LogMessage(
           timestamp: timestamp,
