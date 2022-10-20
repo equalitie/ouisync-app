@@ -28,6 +28,7 @@ class FolderCreation extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Dimensions.spacingVerticalDouble,
           Fields.formTextField(
               context: context,
               label: S.current.labelName,

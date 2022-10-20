@@ -54,8 +54,9 @@ class _SaveToDeviceState extends State<SaveToDevice> {
             Fields.constrainedText('"${widget.data.name}"',
                 color: Colors.grey.shade800)
           ]),
-          Dimensions.spacingVertical,
+          Dimensions.spacingVerticalDouble,
           _buildDestinationSelection(),
+          Dimensions.spacingVertical,
           if (io.Platform.isAndroid) _buildExternalStorageSelection(),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);

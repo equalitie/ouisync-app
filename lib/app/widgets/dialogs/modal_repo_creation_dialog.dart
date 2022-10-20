@@ -51,6 +51,7 @@ class RepositoryCreation extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Dimensions.spacingVerticalDouble,
           Fields.formTextField(
             context: context,
             textEditingController: _nameController,

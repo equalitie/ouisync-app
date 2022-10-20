@@ -38,6 +38,7 @@ class UnlockRepository extends StatelessWidget {
         children: [
           Fields.constrainedText('"$repositoryName"',
               flex: 0, fontWeight: FontWeight.w400),
+          Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,
               builder: (context, value, child) {
