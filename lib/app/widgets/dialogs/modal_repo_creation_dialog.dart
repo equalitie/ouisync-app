@@ -72,20 +72,20 @@ class RepositoryCreation extends StatelessWidget {
                           textEditingController: _passwordController,
                           obscureText: obscure,
                           label: S.current.labelPassword,
+                          subffixIcon: Fields.actionIcon(
+                              Icon(
+                                obscure
+                                    ? Constants.iconVisibilityOn
+                                    : Constants.iconVisibilityOff,
+                                size: Dimensions.sizeIconSmall,
+                              ), onPressed: () {
+                            _obscurePassword.value = !_obscurePassword.value;
+                          }),
                           hint: S.current.messageRepositoryPassword,
                           onSaved: (_) {},
                           validator: validateNoEmpty(
                               Strings.messageErrorRepositoryPasswordValidation),
-                          autovalidateMode: AutovalidateMode.disabled)),
-                  Fields.actionIcon(
-                      Icon(
-                        obscure
-                            ? Constants.iconVisibilityOn
-                            : Constants.iconVisibilityOff,
-                        size: Dimensions.sizeIconSmall,
-                      ), onPressed: () {
-                    _obscurePassword.value = !_obscurePassword.value;
-                  })
+                          autovalidateMode: AutovalidateMode.disabled))
                 ]);
               }),
           ValueListenableBuilder(
@@ -99,6 +99,16 @@ class RepositoryCreation extends StatelessWidget {
                         textEditingController: _retypedPasswordController,
                         obscureText: obscure,
                         label: S.current.labelRetypePassword,
+                        subffixIcon: Fields.actionIcon(
+                            Icon(
+                              obscure
+                                  ? Constants.iconVisibilityOn
+                                  : Constants.iconVisibilityOff,
+                              size: Dimensions.sizeIconSmall,
+                            ), onPressed: () {
+                          _obscurePasswordConfirm.value =
+                              !_obscurePasswordConfirm.value;
+                        }),
                         hint: S.current.messageRepositoryPassword,
                         onSaved: (_) {},
                         validator: (retypedPassword) =>
@@ -107,17 +117,7 @@ class RepositoryCreation extends StatelessWidget {
                               retypedPassword: retypedPassword,
                             ),
                         autovalidateMode: AutovalidateMode.disabled),
-                  ),
-                  Fields.actionIcon(
-                      Icon(
-                        obscure
-                            ? Constants.iconVisibilityOn
-                            : Constants.iconVisibilityOff,
-                        size: Dimensions.sizeIconSmall,
-                      ), onPressed: () {
-                    _obscurePasswordConfirm.value =
-                        !_obscurePasswordConfirm.value;
-                  })
+                  )
                 ]);
               }),
           Fields.dialogActions(context, buttons: _actions(context)),
