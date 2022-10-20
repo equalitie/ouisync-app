@@ -97,7 +97,7 @@ class Dimensions {
   static const Widget spacingHorizontalHalf = SizedBox(width: 5.0);
   static const Widget spacingHorizontal = SizedBox(width: 10.0);
   static const Widget spacingHorizontalDouble = SizedBox(width: 20.0);
-  static const Widget spacingActionsVertical = SizedBox(height: 20.0);
+  static const Widget spacingActionsVertical = SizedBox(height: 5.0);
   static const Widget spacingActionsHorizontal = SizedBox(width: 20.0);
 
   static const double borderQRCodeImage = 4.0;
