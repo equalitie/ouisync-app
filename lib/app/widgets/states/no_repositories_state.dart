@@ -35,14 +35,18 @@ class NoRepositoriesState extends StatelessWidget {
           Dimensions.spacingVertical,
           Fields.inPageButton(
               onPressed: () => onNewRepositoryPressed(),
+              leadingIcon: const Icon(Icons.add),
               text: S.current.actionCreateRepository,
               size: Dimensions.sizeInPageButtonLong,
+              alignment: Alignment.centerLeft,
               autofocus: true),
           Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
             onPressed: () => onAddRepositoryPressed(),
+            leadingIcon: const Icon(Icons.add),
             text: S.current.actionAddRepositoryWithToken,
             size: Dimensions.sizeInPageButtonLong,
+            alignment: Alignment.centerLeft,
           ),
         ],
       ),

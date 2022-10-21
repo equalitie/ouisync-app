@@ -42,6 +42,7 @@ class LockedRepositoryState extends StatelessWidget {
               onPressed: () {
                 onUnlockPressed!.call(repositoryName);
               },
+              leadingIcon: const Icon(Icons.lock_open_rounded),
               text: S.current.actionUnlock,
               autofocus: true)
         ],
