@@ -597,7 +597,7 @@ class Fields {
 
   static Widget placeholderWidget(
       {required String assetName,
-      required String text,
+      String? text,
       double? assetScale,
       double? assetWidth,
       double? assetHeight,
@@ -611,14 +611,15 @@ class Fields {
           height: assetHeight,
           alignment: assetAlignment,
         ),
-        Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-              fontSize: Dimensions.fontAverage,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54),
-        )
+        if (text != null)
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54),
+          )
       ],
     );
   }
