@@ -76,10 +76,11 @@ class Fields {
 
   static Widget inPageButton({
     required void Function()? onPressed,
+    Icon? leadingIcon,
     required String text,
     Alignment alignment = Alignment.center,
     Size size = Dimensions.sizeInPageButtonRegular,
-    double fontSize = Dimensions.fontAverage,
+    double fontSize = Dimensions.fontSmall,
     FontWeight fontWeight = FontWeight.normal,
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.white,
@@ -87,7 +88,11 @@ class Fields {
   }) =>
       ElevatedButton(
         onPressed: onPressed,
-        child: Text(text),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (leadingIcon != null) leadingIcon,
+          if (leadingIcon != null) Dimensions.spacingHorizontal,
+          Text(text.toUpperCase())
+        ]),
         style: ButtonStyle(
           alignment: alignment,
           minimumSize: MaterialStateProperty.all<Size?>(size),
