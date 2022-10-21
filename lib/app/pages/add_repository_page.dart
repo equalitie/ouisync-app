@@ -25,6 +25,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
 
   @override
   Widget build(BuildContext context) {
+    final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
+
     return Scaffold(
         appBar: AppBar(
           title: Text(S.current.titleAddRepoToken),
@@ -41,6 +43,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                 child: SingleChildScrollView(
               padding: Dimensions.paddingAll20,
               child: Column(children: [
+                Fields.placeholderWidget(
+                    assetName: Constants.assetPathAddWithQR,
+                    assetHeight: noReposImageHeight),
                 _buildScanQrCode(context),
                 _buildOrSeparator(),
                 _buildUseToken(context),
@@ -102,7 +107,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
 
   Widget _buildOrSeparator() {
     return Padding(
-        padding: Dimensions.paddingVertical40,
+        padding: Dimensions.paddingVertical20,
         child: Row(
           children: [
             const Expanded(
@@ -133,7 +138,6 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         ]),
         Dimensions.spacingVerticalDouble,
         Container(
-            padding: Dimensions.paddingItemBox,
             decoration: const BoxDecoration(
                 borderRadius:
                     BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
