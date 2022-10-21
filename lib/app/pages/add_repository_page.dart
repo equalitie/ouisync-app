@@ -130,6 +130,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                 context: context,
                 textEditingController: _tokenController,
                 label: S.current.labelRepositoryLink,
+                subffixIcon: const Icon(Icons.key_rounded),
                 hint: S.current.messageRepositoryToken,
                 onSaved: (value) {},
                 validator: _repositoryTokenValidator,
