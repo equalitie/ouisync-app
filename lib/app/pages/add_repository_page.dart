@@ -65,8 +65,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     );
   }
 
-  RawMaterialButton _builScanQRButton(BuildContext context) {
-    return RawMaterialButton(
+  Widget _builScanQRButton(BuildContext context) => Fields.inPageButton(
       onPressed: () async {
         final data =
             await Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -87,23 +86,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
 
         Navigator.of(context).pop(data);
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.qr_code_2_outlined),
-          Dimensions.spacingHorizontal,
-          Text(S.current.actionScanQR.toUpperCase()),
-        ],
-      ),
-      padding: Dimensions.paddingPageButtonIcon,
-      fillColor: Theme.of(context).primaryColor,
-      shape: const RoundedRectangleBorder(
-          borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-      textStyle: TextStyle(
-          color: Theme.of(context).dialogBackgroundColor,
-          fontWeight: FontWeight.w500),
-    );
-  }
+      leadingIcon: const Icon(Icons.qr_code_2_outlined),
+      text: S.current.actionScanQR.toUpperCase());
 
   Widget _buildOrSeparator() {
     return Padding(
@@ -176,23 +160,11 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     return null;
   }
 
-  Widget _builAddRepositoryButton(BuildContext context) {
-    return Padding(
-        padding: Dimensions.paddingVertical20,
-        child: RawMaterialButton(
+  Widget _builAddRepositoryButton(BuildContext context) => Padding(
+      padding: Dimensions.paddingVertical20,
+      child: Fields.inPageButton(
           onPressed: () => _onAddRepo(_tokenController.text),
-          child: Text(S.current.actionAddRepository.toUpperCase()),
-          constraints: Dimensions.sizeConstrainsDialogAction,
-          elevation: Dimensions.elevationDialogAction,
-          padding: Dimensions.paddingPageButton,
-          fillColor: Theme.of(context).primaryColor,
-          shape: const RoundedRectangleBorder(
-              borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-          textStyle: TextStyle(
-              color: Theme.of(context).dialogBackgroundColor,
-              fontWeight: FontWeight.w500),
-        ));
-  }
+          text: S.current.actionAddRepository.toUpperCase()));
 
   void _onAddRepo(String shareLink) async {
     if (!formKey.currentState!.validate()) {
