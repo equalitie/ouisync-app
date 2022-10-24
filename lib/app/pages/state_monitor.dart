@@ -75,7 +75,8 @@ class _ChildWidget extends StatefulWidget {
   final MonitorId id;
   final int version;
 
-  _ChildWidget(this.parent, this.id, this.version);
+  _ChildWidget(this.parent, this.id, this.version)
+      : super(key: Key(id.toString()));
 
   @override
   State<_ChildWidget> createState() => _ChildWidgetState();
