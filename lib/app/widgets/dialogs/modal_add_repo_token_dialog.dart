@@ -167,32 +167,30 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
                   child,
                 ) {
                   final obscure = value;
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Fields.formTextField(
-                          context: context,
-                          textEditingController: _passwordController,
-                          obscureText: obscure,
-                          label: S.current.labelPassword,
-                          hint: S.current.messageRepositoryPassword,
-                          onSaved: (_) {},
-                          validator: validateNoEmpty(
-                              Strings.messageErrorRepositoryPasswordValidation),
-                          autovalidateMode: AutovalidateMode.disabled,
-                        ),
+                  return Row(children: [
+                    Expanded(
+                      child: Fields.formTextField(
+                        context: context,
+                        textEditingController: _passwordController,
+                        obscureText: obscure,
+                        label: S.current.labelPassword,
+                        subffixIcon: Fields.actionIcon(
+                            Icon(
+                              obscure
+                                  ? Constants.iconVisibilityOn
+                                  : Constants.iconVisibilityOff,
+                              size: Dimensions.sizeIconSmall,
+                            ), onPressed: () {
+                          _obscurePassword.value = !_obscurePassword.value;
+                        }),
+                        hint: S.current.messageRepositoryPassword,
+                        onSaved: (_) {},
+                        validator: validateNoEmpty(
+                            Strings.messageErrorRepositoryPasswordValidation),
+                        autovalidateMode: AutovalidateMode.disabled,
                       ),
-                      Fields.actionIcon(
-                          Icon(
-                            obscure
-                                ? Constants.iconVisibilityOn
-                                : Constants.iconVisibilityOff,
-                            size: Dimensions.sizeIconSmall,
-                          ), onPressed: () {
-                        _obscurePassword.value = !_obscurePassword.value;
-                      }),
-                    ],
-                  );
+                    )
+                  ]);
                 }),
           ),
           Visibility(
@@ -205,36 +203,34 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
                   child,
                 ) {
                   final obscure = value;
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Fields.formTextField(
-                          context: context,
-                          textEditingController: _retypedPasswordController,
-                          obscureText: obscure,
-                          label: S.current.labelRetypePassword,
-                          hint: S.current.messageRepositoryPassword,
-                          onSaved: (_) {},
-                          validator: (retypedPassword) =>
-                              retypedPasswordValidator(
-                            password: _passwordController.text,
-                            retypedPassword: retypedPassword,
-                          ),
-                          autovalidateMode: AutovalidateMode.disabled,
+                  return Row(children: [
+                    Expanded(
+                      child: Fields.formTextField(
+                        context: context,
+                        textEditingController: _retypedPasswordController,
+                        obscureText: obscure,
+                        label: S.current.labelRetypePassword,
+                        subffixIcon: Fields.actionIcon(
+                            Icon(
+                              obscure
+                                  ? Constants.iconVisibilityOn
+                                  : Constants.iconVisibilityOff,
+                              size: Dimensions.sizeIconSmall,
+                            ), onPressed: () {
+                          _obscurePasswordConfirm.value =
+                              !_obscurePasswordConfirm.value;
+                        }),
+                        hint: S.current.messageRepositoryPassword,
+                        onSaved: (_) {},
+                        validator: (retypedPassword) =>
+                            retypedPasswordValidator(
+                          password: _passwordController.text,
+                          retypedPassword: retypedPassword,
                         ),
+                        autovalidateMode: AutovalidateMode.disabled,
                       ),
-                      Fields.actionIcon(
-                          Icon(
-                            obscure
-                                ? Constants.iconVisibilityOn
-                                : Constants.iconVisibilityOff,
-                            size: Dimensions.sizeIconSmall,
-                          ), onPressed: () {
-                        _obscurePasswordConfirm.value =
-                            !_obscurePasswordConfirm.value;
-                      }),
-                    ],
-                  );
+                    )
+                  ]);
                 }),
           ),
           Fields.dialogActions(

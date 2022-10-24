@@ -38,6 +38,7 @@ class UnlockRepository extends StatelessWidget {
         children: [
           Fields.constrainedText('"$repositoryName"',
               flex: 0, fontWeight: FontWeight.w400),
+          Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,
               builder: (context, value, child) {
@@ -49,20 +50,20 @@ class UnlockRepository extends StatelessWidget {
                           textEditingController: _passwordController,
                           obscureText: obscure,
                           label: S.current.labelTypePassword,
+                          subffixIcon: Fields.actionIcon(
+                              Icon(
+                                obscure
+                                    ? Constants.iconVisibilityOn
+                                    : Constants.iconVisibilityOff,
+                                size: Dimensions.sizeIconSmall,
+                              ), onPressed: () {
+                            _obscurePassword.value = !_obscurePassword.value;
+                          }),
                           hint: S.current.messageRepositoryPassword,
                           onSaved: _returnPassword,
                           validator: validateNoEmpty(
                               Strings.messageErrorRepositoryPasswordValidation),
-                          autofocus: true)),
-                  Fields.actionIcon(
-                      Icon(
-                        obscure
-                            ? Constants.iconVisibilityOn
-                            : Constants.iconVisibilityOff,
-                        size: Dimensions.sizeIconSmall,
-                      ), onPressed: () {
-                    _obscurePassword.value = !_obscurePassword.value;
-                  })
+                          autofocus: true))
                 ]);
               }),
           Fields.dialogActions(context, buttons: _actions(context)),

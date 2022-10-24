@@ -54,8 +54,9 @@ class _SaveToDeviceState extends State<SaveToDevice> {
             Fields.constrainedText('"${widget.data.name}"',
                 color: Colors.grey.shade800)
           ]),
-          Dimensions.spacingVertical,
+          Dimensions.spacingVerticalDouble,
           _buildDestinationSelection(),
+          Dimensions.spacingVertical,
           if (io.Platform.isAndroid) _buildExternalStorageSelection(),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);
@@ -66,30 +67,30 @@ class _SaveToDeviceState extends State<SaveToDevice> {
         padding: Dimensions.paddingGreyBox,
         decoration: BoxDecoration(
           borderRadius:
-              const BorderRadius.all(Radius.circular(Dimensions.radiusMicro)),
-          border: Border.all(
-              color: Colors.black45, width: 1.0, style: BorderStyle.solid),
+              const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
           color: Colors.grey.shade300,
         ),
-        child: Column(
-          children: [
-            Row(children: [
-              Fields.constrainedText(S.current.labelDestination,
-                  flex: 0,
-                  fontSize: Dimensions.fontSmall,
-                  fontWeight: FontWeight.w300),
-            ]),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Padding(
+            padding: Dimensions.paddingGreyBox,
+            child: Column(
               children: [
-                Fields.constrainedText(_destinationPath ?? '?'),
-                Fields.actionIcon(const Icon(Icons.more_horiz),
-                    onPressed: () async => await _changeDestinationPath())
+                Row(children: [
+                  Fields.constrainedText(S.current.labelDestination,
+                      flex: 0,
+                      fontSize: Dimensions.fontSmall,
+                      fontWeight: FontWeight.w300),
+                ]),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Fields.constrainedText(_destinationPath ?? '?'),
+                    Fields.actionIcon(const Icon(Icons.more_horiz),
+                        onPressed: () async => await _changeDestinationPath())
+                  ],
+                )
               ],
-            )
-          ],
-        ));
+            )));
   }
 
   Widget _buildExternalStorageSelection() {

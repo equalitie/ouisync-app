@@ -75,6 +75,7 @@ class _RenameState extends State<Rename> {
         children: [
           Fields.constrainedText('"$_oldName"',
               flex: 0, fontWeight: FontWeight.w400),
+          Dimensions.spacingVerticalDouble,
           Fields.formTextField(
               context: context,
               textEditingController: _newNameController,

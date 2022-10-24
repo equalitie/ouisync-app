@@ -76,10 +76,11 @@ class Fields {
 
   static Widget inPageButton({
     required void Function()? onPressed,
+    Icon? leadingIcon,
     required String text,
     Alignment alignment = Alignment.center,
     Size size = Dimensions.sizeInPageButtonRegular,
-    double fontSize = Dimensions.fontAverage,
+    double fontSize = Dimensions.fontSmall,
     FontWeight fontWeight = FontWeight.normal,
     FontStyle fontStyle = FontStyle.normal,
     Color color = Colors.white,
@@ -87,7 +88,11 @@ class Fields {
   }) =>
       ElevatedButton(
         onPressed: onPressed,
-        child: Text(text),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (leadingIcon != null) leadingIcon,
+          if (leadingIcon != null) Dimensions.spacingHorizontal,
+          Text(text.toUpperCase())
+        ]),
         style: ButtonStyle(
           alignment: alignment,
           minimumSize: MaterialStateProperty.all<Size?>(size),
@@ -485,6 +490,8 @@ class Fields {
           required BuildContext context,
           TextEditingController? textEditingController,
           Icon? icon,
+          Widget? prefixIcon,
+          Widget? subffixIcon,
           String? label,
           required String hint,
           required Function(String?) onSaved,
@@ -509,11 +516,15 @@ class Fields {
         maxLines: maxLines,
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
+            filled: true,
+            fillColor: Constants.inputBackgroundColor,
             border: inputBorder,
             icon: icon,
+            prefixIcon: prefixIcon,
+            suffixIcon: subffixIcon,
             hintText: hint,
             labelText: label,
-            labelStyle: TextStyle(color: Colors.grey.shade600),
+            labelStyle: TextStyle(color: Constants.inputLabelForeColor),
             errorMaxLines: 2),
         validator: validator,
         onSaved: onSaved,
@@ -526,6 +537,8 @@ class Fields {
     required BuildContext context,
     TextEditingController? textEditingController,
     Icon? icon,
+    Widget? prefixIcon,
+    Widget? subffixIcon,
     String? label,
     required String hint,
     required Function(String?) onSaved,
@@ -553,6 +566,8 @@ class Fields {
                   context: context,
                   textEditingController: textEditingController,
                   icon: icon,
+                  prefixIcon: prefixIcon,
+                  subffixIcon: subffixIcon,
                   label: label,
                   hint: hint,
                   onSaved: onSaved,
@@ -582,7 +597,7 @@ class Fields {
 
   static Widget placeholderWidget(
       {required String assetName,
-      required String text,
+      String? text,
       double? assetScale,
       double? assetWidth,
       double? assetHeight,
@@ -596,14 +611,15 @@ class Fields {
           height: assetHeight,
           alignment: assetAlignment,
         ),
-        Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-              fontSize: Dimensions.fontAverage,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54),
-        )
+        if (text != null)
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                fontSize: Dimensions.fontAverage,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54),
+          )
       ],
     );
   }

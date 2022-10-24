@@ -25,6 +25,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
 
   @override
   Widget build(BuildContext context) {
+    final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
+
     return Scaffold(
         appBar: AppBar(
           title: Text(S.current.titleAddRepoToken),
@@ -41,6 +43,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                 child: SingleChildScrollView(
               padding: Dimensions.paddingAll20,
               child: Column(children: [
+                Fields.placeholderWidget(
+                    assetName: Constants.assetPathAddWithQR,
+                    assetHeight: noReposImageHeight),
                 _buildScanQrCode(context),
                 _buildOrSeparator(),
                 _buildUseToken(context),
@@ -60,8 +65,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     );
   }
 
-  RawMaterialButton _builScanQRButton(BuildContext context) {
-    return RawMaterialButton(
+  Widget _builScanQRButton(BuildContext context) => Fields.inPageButton(
       onPressed: () async {
         final data =
             await Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -82,27 +86,12 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
 
         Navigator.of(context).pop(data);
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.qr_code_2_outlined),
-          Dimensions.spacingHorizontal,
-          Text(S.current.actionScanQR.toUpperCase()),
-        ],
-      ),
-      padding: Dimensions.paddingPageButtonIcon,
-      fillColor: Theme.of(context).primaryColor,
-      shape: const RoundedRectangleBorder(
-          borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-      textStyle: TextStyle(
-          color: Theme.of(context).dialogBackgroundColor,
-          fontWeight: FontWeight.w500),
-    );
-  }
+      leadingIcon: const Icon(Icons.qr_code_2_outlined),
+      text: S.current.actionScanQR.toUpperCase());
 
   Widget _buildOrSeparator() {
     return Padding(
-        padding: Dimensions.paddingVertical40,
+        padding: Dimensions.paddingVertical20,
         child: Row(
           children: [
             const Expanded(
@@ -133,7 +122,6 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         ]),
         Dimensions.spacingVerticalDouble,
         Container(
-            padding: Dimensions.paddingItemBox,
             decoration: const BoxDecoration(
                 borderRadius:
                     BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
@@ -142,6 +130,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                 context: context,
                 textEditingController: _tokenController,
                 label: S.current.labelRepositoryLink,
+                subffixIcon: const Icon(Icons.key_rounded),
                 hint: S.current.messageRepositoryToken,
                 onSaved: (value) {},
                 validator: _repositoryTokenValidator,
@@ -172,23 +161,11 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     return null;
   }
 
-  Widget _builAddRepositoryButton(BuildContext context) {
-    return Padding(
-        padding: Dimensions.paddingVertical20,
-        child: RawMaterialButton(
+  Widget _builAddRepositoryButton(BuildContext context) => Padding(
+      padding: Dimensions.paddingVertical20,
+      child: Fields.inPageButton(
           onPressed: () => _onAddRepo(_tokenController.text),
-          child: Text(S.current.actionAddRepository.toUpperCase()),
-          constraints: Dimensions.sizeConstrainsDialogAction,
-          elevation: Dimensions.elevationDialogAction,
-          padding: Dimensions.paddingPageButton,
-          fillColor: Theme.of(context).primaryColor,
-          shape: const RoundedRectangleBorder(
-              borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-          textStyle: TextStyle(
-              color: Theme.of(context).dialogBackgroundColor,
-              fontWeight: FontWeight.w500),
-        ));
-  }
+          text: S.current.actionAddRepository.toUpperCase()));
 
   void _onAddRepo(String shareLink) async {
     if (!formKey.currentState!.validate()) {

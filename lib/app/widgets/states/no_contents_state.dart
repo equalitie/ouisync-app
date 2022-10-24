@@ -16,6 +16,8 @@ class NoContentsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emptyFolderImageHeight = MediaQuery.of(context).size.height * 0.2;
+
     return Center(
         child: SingleChildScrollView(
             reverse: false,
@@ -23,6 +25,12 @@ class NoContentsState extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Align(
+                    alignment: Alignment.center,
+                    child: Fields.placeholderWidget(
+                        assetName: Constants.assetEmptyFolder,
+                        assetHeight: emptyFolderImageHeight)),
+                Dimensions.spacingVerticalDouble,
                 Align(
                   alignment: Alignment.center,
                   child: Fields.inPageMainMessage(

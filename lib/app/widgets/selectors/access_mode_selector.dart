@@ -62,57 +62,53 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: _buildAccessModeOptions(),
         )
       ],
     );
   }
 
-  List<Widget> _buildAccessModeOptions() {
-    return AccessMode.values
-        .map(
-          (mode) => Expanded(
-            child: RadioListTile(
-              title: Text(
-                mode.name,
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontSize: Dimensions.fontAverage,
-                  color: _getModeStateColor(mode),
-                ),
+  List<Widget> _buildAccessModeOptions() => AccessMode.values
+      .map((mode) => Expanded(
+              child:
+                  Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            Radio(
+                value: mode,
+                groupValue: _selectedMode,
+                toggleable: true,
+                onChanged: (current) async {
+                  loggy.app('Access mode: $current');
+
+                  final disabledMessage = S.current
+                      .messageAccessModeDisabled(widget.currentAccessMode.name);
+                  final isEnabled = widget.availableAccessMode.contains(mode);
+
+                  widget.onDisabledMessage(!isEnabled, disabledMessage,
+                      Constants.notAvailableActionMessageDuration);
+
+                  if (!isEnabled) return;
+
+                  if (current == null) {
+                    setState(() => _selectedMode = null);
+                    await widget.onChanged(null);
+
+                    return;
+                  }
+
+                  setState(() => _selectedMode = current);
+                  await widget.onChanged(current);
+                }),
+            Text(
+              mode.name,
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: Dimensions.fontAverage,
+                color: _getModeStateColor(mode),
               ),
-              toggleable: true,
-              contentPadding: EdgeInsets.zero,
-              value: mode,
-              groupValue: _selectedMode,
-              onChanged: (current) async {
-                loggy.app('Access mode: $current');
-
-                final disabledMessage = S.current
-                    .messageAccessModeDisabled(widget.currentAccessMode.name);
-                final isEnabled = widget.availableAccessMode.contains(mode);
-
-                widget.onDisabledMessage(!isEnabled, disabledMessage,
-                    Constants.notAvailableActionMessageDuration);
-
-                if (!isEnabled) return;
-
-                if (current == null) {
-                  setState(() => _selectedMode = null);
-                  await widget.onChanged(null);
-
-                  return;
-                }
-
-                setState(() => _selectedMode = current);
-                await widget.onChanged(current);
-              },
-            ),
-          ),
-        )
-        .toList();
-  }
+            )
+          ])))
+      .toList();
 
   Color _getModeStateColor(AccessMode accessMode) {
     if (widget.availableAccessMode.contains(accessMode)) {
