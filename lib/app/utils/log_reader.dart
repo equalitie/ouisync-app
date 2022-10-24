@@ -96,6 +96,7 @@ class LogReader {
 
   LogReader._(this._logcat) {
     _messages = _logcat.stdout
+        .asBroadcastStream()
         .map((line) => utf8.decode(line))
         .expand((line) => LogMessage.parse(line))
         .where((message) => message.level >= filter);
