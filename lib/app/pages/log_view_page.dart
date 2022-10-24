@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class LogViewPage extends StatefulWidget {
-  const LogViewPage();
+  final Settings settings;
+
+  const LogViewPage({required this.settings});
 
   @override
   State<LogViewPage> createState() => _LogViewPageState();
@@ -16,7 +20,16 @@ class _LogViewPageState extends State<LogViewPage> {
   @override
   void initState() {
     super.initState();
-    _readerFuture = LogReader.open();
+    _readerFuture = LogReader.open().then((reader) {
+      reader.filter = widget.settings.getLogViewFilter();
+      return reader;
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_readerFuture.then((reader) => reader.close()));
+    super.dispose();
   }
 
   @override
@@ -40,7 +53,7 @@ class _LogViewPageState extends State<LogViewPage> {
         ),
         body: Padding(
           padding: Dimensions.paddingContents,
-          child: LogView(reader),
+          child: LogView(reader, theme: LogViewTheme.system(context)),
         ),
       );
 
@@ -63,6 +76,8 @@ class _LogViewPageState extends State<LogViewPage> {
       setState(() {
         reader.filter = filter;
       });
+
+      await widget.settings.setLogViewFilter(filter);
     }
   }
 

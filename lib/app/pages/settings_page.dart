@@ -6,16 +6,19 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({
+    required this.settings,
     required this.reposCubit,
     required this.powerControl,
     required this.onShareRepository,
     required this.panicCounter,
   });
 
+  final Settings settings;
   final ReposCubit reposCubit;
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
@@ -53,7 +56,10 @@ class SettingsPage extends StatelessWidget {
                   onShareRepository: onShareRepository,
                 ),
                 NetworkSection(),
-                LogsSection(repos: reposCubit, panicCounter: panicCounter),
+                LogsSection(
+                    settings: settings,
+                    repos: reposCubit,
+                    panicCounter: panicCounter),
                 AboutSection(repos: reposCubit),
               ],
             ),

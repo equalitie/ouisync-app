@@ -3,8 +3,6 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import 'ansi_parser.dart';
 
 enum LogLevel {
@@ -18,29 +16,31 @@ enum LogLevel {
   bool operator >(LogLevel other) => index > other.index;
   bool operator <=(LogLevel other) => index <= other.index;
   bool operator >=(LogLevel other) => index >= other.index;
-}
 
-LogLevel _parseLogLevel(String input) {
-  switch (input.trim().toUpperCase()) {
-    case 'E':
-      return LogLevel.error;
-    case 'W':
-      return LogLevel.warn;
-    case 'I':
-      return LogLevel.info;
-    case 'D':
-      return LogLevel.debug;
-    case 'V':
-      return LogLevel.verbose;
-    default:
-      return LogLevel.verbose;
+  static LogLevel parse(String input) {
+    switch (input.trim().toUpperCase()) {
+      case 'E':
+        return LogLevel.error;
+      case 'W':
+        return LogLevel.warn;
+      case 'I':
+        return LogLevel.info;
+      case 'D':
+        return LogLevel.debug;
+      case 'V':
+        return LogLevel.verbose;
+      default:
+        return LogLevel.verbose;
+    }
   }
+
+  String toShortString() => name[0].toUpperCase();
 }
 
 class LogMessage {
   final DateTime timestamp;
   final LogLevel level;
-  final List<TextSpan> content;
+  final List<AnsiSpan> content;
 
   LogMessage({
     required this.timestamp,
@@ -51,7 +51,7 @@ class LogMessage {
   static Iterable<LogMessage> parse(String input) =>
       _regexp.allMatches(input).map((match) {
         final timestamp = DateTime.tryParse(match.group(1)!) ?? DateTime.now();
-        final level = _parseLogLevel(match.group(2)!);
+        final level = LogLevel.parse(match.group(2)!);
         final content = parseAnsi(match.group(3)!).toList();
 
         return LogMessage(
@@ -96,6 +96,7 @@ class LogReader {
 
   LogReader._(this._logcat) {
     _messages = _logcat.stdout
+        .asBroadcastStream()
         .map((line) => utf8.decode(line))
         .expand((line) => LogMessage.parse(line))
         .where((message) => message.level >= filter);
