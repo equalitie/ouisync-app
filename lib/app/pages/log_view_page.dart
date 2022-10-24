@@ -53,7 +53,7 @@ class _LogViewPageState extends State<LogViewPage> {
         ),
         body: Padding(
           padding: Dimensions.paddingContents,
-          child: LogView(reader),
+          child: LogView(reader, theme: LogViewTheme.system(context)),
         ),
       );
 

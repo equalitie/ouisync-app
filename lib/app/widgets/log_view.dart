@@ -6,9 +6,9 @@ import '../utils/utils.dart';
 
 class LogView extends StatefulWidget {
   final LogReader reader;
-  final LogViewTheme? theme;
+  final LogViewTheme theme;
 
-  LogView(this.reader, {super.key, this.theme});
+  LogView(this.reader, {super.key, this.theme = LogViewTheme.light});
 
   @override
   State<LogView> createState() => _LogViewState(reader);
@@ -17,8 +17,9 @@ class LogView extends StatefulWidget {
 class _LogViewState extends State<LogView> {
   final LogReader _reader;
   final _buffer = LogBuffer();
-  final _scrollController = ScrollController();
   StreamSubscription<LogMessage>? _subscription;
+
+  final _scrollController = ScrollController();
   var _follow = true;
   var _onScrollEnabled = true;
 
@@ -52,15 +53,12 @@ class _LogViewState extends State<LogView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = widget.theme ?? _getDefaultTheme(context);
-
     return SelectionArea(
       child: ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,
         itemBuilder: (context, index) => _buildMessage(
           context,
-          theme,
           _buffer[index],
         ),
         itemCount: _buffer.length,
@@ -68,15 +66,21 @@ class _LogViewState extends State<LogView> {
     );
   }
 
-  Widget _buildMessage(
-          BuildContext context, LogViewTheme theme, LogMessage message) =>
+  Widget _buildMessage(BuildContext context, LogMessage message) =>
       Text.rich(TextSpan(
           children: message.content
               .map((span) => TextSpan(
                     text: span.text,
-                    style: _resolveStyle(theme, span.style),
+                    style: _resolveStyle(span.style),
                   ))
               .toList()));
+
+  TextStyle _resolveStyle(AnsiStyle style) => TextStyle(
+        color: widget.theme.resolveColor(style.foreground),
+        backgroundColor: widget.theme.resolveColor(style.background),
+        fontWeight: style.fontWeight,
+        fontStyle: style.fontStyle,
+      );
 
   void _onMessage(LogMessage message) {
     setState(() {
@@ -104,6 +108,10 @@ class _LogViewState extends State<LogView> {
   }
 
   Future<void> _scrollToBottom() async {
+    if (!mounted) {
+      return;
+    }
+
     _onScrollEnabled = false;
 
     await _scrollController.animateTo(
@@ -113,15 +121,6 @@ class _LogViewState extends State<LogView> {
     );
 
     _onScrollEnabled = true;
-  }
-
-  LogViewTheme _getDefaultTheme(BuildContext context) {
-    switch (Theme.of(context).brightness) {
-      case Brightness.light:
-        return LogViewTheme.light;
-      case Brightness.dark:
-        return LogViewTheme.dark;
-    }
   }
 
   void _subscribe() {
@@ -166,6 +165,21 @@ class LogViewTheme {
     white: Color.fromARGB(255, 0, 0, 0),
   );
 
+  static LogViewTheme system(
+    BuildContext context, {
+    light = light,
+    dark = dark,
+  }) {
+    final theme = Theme.of(context);
+
+    switch (theme.brightness) {
+      case Brightness.light:
+        return light;
+      case Brightness.dark:
+        return dark;
+    }
+  }
+
   const LogViewTheme({
     required this.black,
     required this.red,
@@ -200,10 +214,3 @@ class LogViewTheme {
     }
   }
 }
-
-TextStyle _resolveStyle(LogViewTheme theme, AnsiStyle style) => TextStyle(
-      color: theme.resolveColor(style.foreground),
-      backgroundColor: theme.resolveColor(style.background),
-      fontWeight: style.fontWeight,
-      fontStyle: style.fontStyle,
-    );
