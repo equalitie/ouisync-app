@@ -102,6 +102,7 @@ flutter:
     - assets/Ouisync-icon-blue.ico
     - assets/add_with_qr.png
     - assets/nothing_here_yet.png
+    - assets/locked_repo.png
     # - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see

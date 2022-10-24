@@ -51,4 +51,5 @@ class Constants {
 
   static const String assetPathNothingHereYet = 'assets/nothing_here_yet.png';
   static const String assetPathAddWithQR = 'assets/add_with_qr.png';
+  static const String assetLockedRepository = 'assets/locked_repo.png';
 }
