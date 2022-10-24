@@ -14,6 +14,8 @@ class NoRepositoriesState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final nothingHereYetImageHeight = MediaQuery.of(context).size.height * 0.2;
+
     return Center(
         child: SingleChildScrollView(
       reverse: false,
@@ -21,6 +23,12 @@ class NoRepositoriesState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Align(
+              alignment: Alignment.center,
+              child: Fields.placeholderWidget(
+                  assetName: Constants.assetPathNothingHereYet,
+                  assetHeight: nothingHereYetImageHeight)),
+          Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,
             child: Fields.inPageMainMessage(S.current.messageNoRepos),
