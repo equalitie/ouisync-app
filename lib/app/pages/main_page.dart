@@ -724,6 +724,7 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
+            settings: widget.settings,
             reposCubit: reposCubit,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,

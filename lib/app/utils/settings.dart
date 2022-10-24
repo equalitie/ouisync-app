@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'log_reader.dart';
+
 class Settings {
   static const String _currentRepoKey = "CURRENT_REPO";
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
@@ -10,6 +12,7 @@ class Settings {
   static const String _repositoriesPrefix = "REPOSITORIES";
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
+  static const String _logViewFilterKey = "LOG_VIEW/FILTER";
 
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
@@ -89,6 +92,13 @@ class Settings {
 
   int? getHighestSeenProtocolNumber() {
     return _prefs.getInt(_highestSeenProtocolNumberKey);
+  }
+
+  LogLevel getLogViewFilter() =>
+      LogLevel.parse(_prefs.getString(_logViewFilterKey) ?? '');
+
+  Future<void> setLogViewFilter(LogLevel value) async {
+    await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
 
   Future<void> _setRepositoryBool(

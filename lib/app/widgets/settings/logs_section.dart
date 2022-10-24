@@ -18,10 +18,15 @@ import '../../utils/utils.dart';
 import 'navigation_tile.dart';
 
 class LogsSection extends AbstractSettingsSection {
+  final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntValue panicCounter;
 
-  LogsSection({required this.repos, required this.panicCounter});
+  LogsSection({
+    required this.settings,
+    required this.repos,
+    required this.panicCounter,
+  });
 
   @override
   Widget build(BuildContext context) => SettingsSection(
@@ -40,8 +45,11 @@ class LogsSection extends AbstractSettingsSection {
           NavigationTile(
             title: Text('View'), // TODO: localize
             leading: Icon(Icons.visibility),
-            onPressed: (context) => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => LogViewPage())),
+            onPressed: (context) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LogViewPage(settings: settings),
+                )),
           ),
           CustomSettingsTile(child: panicCounter.builder((context, count) {
             if ((count ?? 0) > 0) {
