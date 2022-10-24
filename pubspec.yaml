@@ -46,6 +46,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_loggy: ^2.0.1
+  font_awesome_flutter: ^10.2.1
   intl: ^0.17.0
   lecle_downloads_path_provider: ^0.0.2+6
   loggy: ^2.0.1+1
