@@ -3,8 +3,6 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import 'ansi_parser.dart';
 
 enum LogLevel {
@@ -40,7 +38,7 @@ LogLevel _parseLogLevel(String input) {
 class LogMessage {
   final DateTime timestamp;
   final LogLevel level;
-  final List<TextSpan> content;
+  final List<AnsiSpan> content;
 
   LogMessage({
     required this.timestamp,

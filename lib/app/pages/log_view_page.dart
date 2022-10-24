@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
@@ -17,6 +19,12 @@ class _LogViewPageState extends State<LogViewPage> {
   void initState() {
     super.initState();
     _readerFuture = LogReader.open();
+  }
+
+  @override
+  void dispose() {
+    unawaited(_readerFuture.then((reader) => reader.close()));
+    super.dispose();
   }
 
   @override

@@ -4,6 +4,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+class AnsiSpan {
+  final String text;
+  final AnsiStyle style;
+
+  AnsiSpan({required this.text, required this.style});
+}
+
 class RawAnsiSpan {
   final String text;
   final List<int> codes;
@@ -11,13 +18,13 @@ class RawAnsiSpan {
   RawAnsiSpan(this.text, this.codes);
 }
 
-Iterable<TextSpan> parseAnsi(String input) sync* {
+Iterable<AnsiSpan> parseAnsi(String input) sync* {
   final styleBuilder = _StyleBuilder();
 
   for (final span in parseAnsiRaw(input)) {
     final style = styleBuilder.interpret(span.codes);
 
-    yield TextSpan(
+    yield AnsiSpan(
       text: span.text,
       style: style,
     );
@@ -52,74 +59,75 @@ List<int> _parseCodes(String input) =>
     input.trim().split(';').map((chunk) => int.tryParse(chunk) ?? 0).toList();
 
 class _StyleBuilder {
-  Color? foreground;
-  Color? background;
-  FontWeight fontWeight = FontWeight.normal;
-  FontStyle fontStyle = FontStyle.normal;
+  AnsiStyle _style = AnsiStyle();
 
   _StyleBuilder();
 
-  TextStyle interpret(List<int> codes) {
+  AnsiStyle interpret(List<int> codes) {
     for (final code in codes) {
       if (code == 0) {
-        foreground = null;
-        background = null;
-        fontWeight = FontWeight.normal;
-        fontStyle = FontStyle.normal;
+        _style = AnsiStyle();
       }
 
       if (code == 1) {
-        fontWeight = FontWeight.w500;
+        _style.fontWeight = FontWeight.w500;
         continue;
       }
 
       if (code == 2) {
-        fontWeight = FontWeight.w300;
+        _style.fontWeight = FontWeight.w300;
         continue;
       }
 
       if (code == 3) {
-        fontStyle = FontStyle.italic;
+        _style.fontStyle = FontStyle.italic;
       }
 
       if (code >= 30 && code <= 37) {
-        foreground = _palette[code - 30];
+        _style.foreground = AnsiColor.values[code - 30];
         continue;
       }
 
       if (code == 39) {
-        foreground = null;
+        _style.foreground = null;
         continue;
       }
 
       if (code >= 40 && code <= 47) {
-        background = _palette[code - 40];
+        _style.background = AnsiColor.values[code - 40];
         continue;
       }
 
       if (code == 49) {
-        background = null;
+        _style.background = null;
         continue;
       }
     }
 
-    return TextStyle(
-      color: foreground,
-      backgroundColor: background,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
+    return _style;
   }
 }
 
-final _palette = <int, Color>{
-  0: Colors.black,
-  1: Colors.red,
-  2: Colors.green,
-  3: Colors.yellow,
-  4: Colors.blue,
-  5: Colors.purple,
-  6: Colors.cyan,
-  7: Colors.grey.shade600,
-};
+enum AnsiColor {
+  black,
+  red,
+  green,
+  yellow,
+  blue,
+  magenta,
+  cyan,
+  white,
+}
+
+class AnsiStyle {
+  AnsiColor? foreground;
+  AnsiColor? background;
+  FontWeight fontWeight;
+  FontStyle fontStyle;
+
+  AnsiStyle(
+      {this.foreground,
+      this.background,
+      this.fontWeight = FontWeight.normal,
+      this.fontStyle = FontStyle.normal});
+}
