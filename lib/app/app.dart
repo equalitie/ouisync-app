@@ -61,38 +61,34 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: S.of(context).titleAppTitle,
-        theme: ThemeData(
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: MultiBlocProvider(
-            providers: [
-              BlocProvider<UpgradeExistsCubit>(
-                  create: (BuildContext context) => UpgradeExistsCubit(
-                      widget.session.currentProtocolVersion, widget.settings)),
-            ],
-            child: DropTarget(
-                onDragDone: (detail) {
-                  loggy.app('Drop done: ${detail.files.first.path}');
+    return Scaffold(
+      body: MultiBlocProvider(
+          providers: [
+            BlocProvider<UpgradeExistsCubit>(
+                create: (BuildContext context) => UpgradeExistsCubit(
+                    widget.session.currentProtocolVersion, widget.settings)),
+          ],
+          child: DropTarget(
+              onDragDone: (detail) {
+                loggy.app('Drop done: ${detail.files.first.path}');
 
-                  final xFile = detail.files.firstOrNull;
-                  if (xFile != null) {
-                    final file = io.File(xFile.path);
-                    _mediaReceiver.controller.add(file);
-                  }
-                },
-                onDragEntered: (detail) {
-                  loggy.app('Drop entered: ${detail.localPosition}');
-                },
-                onDragExited: (detail) {
-                  loggy.app('Drop exited: ${detail.localPosition}');
-                },
-                child: MainPage(
-                    session: widget.session,
-                    repositoriesLocation: widget.repositoriesLocation,
-                    mediaReceiver: _mediaReceiver,
-                    settings: widget.settings))));
+                final xFile = detail.files.firstOrNull;
+                if (xFile != null) {
+                  final file = io.File(xFile.path);
+                  _mediaReceiver.controller.add(file);
+                }
+              },
+              onDragEntered: (detail) {
+                loggy.app('Drop entered: ${detail.localPosition}');
+              },
+              onDragExited: (detail) {
+                loggy.app('Drop exited: ${detail.localPosition}');
+              },
+              child: MainPage(
+                  session: widget.session,
+                  repositoriesLocation: widget.repositoriesLocation,
+                  mediaReceiver: _mediaReceiver,
+                  settings: widget.settings))),
+    );
   }
 }
