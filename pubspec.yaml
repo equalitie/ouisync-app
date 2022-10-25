@@ -37,6 +37,7 @@ dependencies:
   file: ^6.1.2
   file_picker: ^4.5.1
   filesystem_picker: ^2.0.1
+  firebase_core: ^2.1.0
   firebase_crashlytics: ^3.0.2
   flutter:
     sdk: flutter
