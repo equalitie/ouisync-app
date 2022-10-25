@@ -133,8 +133,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                 subffixIcon: const Icon(Icons.key_rounded),
                 hint: S.current.messageRepositoryToken,
                 onSaved: (value) {},
-                validator: _repositoryTokenValidator,
-                inputBorder: InputBorder.none)),
+                validator: _repositoryTokenValidator)),
         _builAddRepositoryButton(context),
       ],
     );
