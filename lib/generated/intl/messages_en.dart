@@ -118,10 +118,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
-        "iconAddRepository":
-            MessageLookupByLibrary.simpleMessage("Add new repository"),
-        "iconAddRepositoryWithToken":
-            MessageLookupByLibrary.simpleMessage("Add repository with token"),
+        "iconAddExistingRepository":
+            MessageLookupByLibrary.simpleMessage("Add an existing repository"),
+        "iconCreateRepository":
+            MessageLookupByLibrary.simpleMessage("Create a repository"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Delete"),
         "iconDownload": MessageLookupByLibrary.simpleMessage("Download"),
         "iconInformation": MessageLookupByLibrary.simpleMessage("Information"),

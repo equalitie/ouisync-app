@@ -247,7 +247,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                             assetHeight: noReposImageHeight),
                     Dimensions.spacingActionsVertical,
                     Fields.paddedActionText(
-                      S.current.iconAddRepository.toUpperCase(),
+                      S.current.iconCreateRepository.toUpperCase(),
                       textFontSize: Dimensions.fontAverage,
                       textColor: Constants.primaryColor(context),
                       textFontWeight: FontWeight.w600,
@@ -257,7 +257,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                       onTap: () => createRepoDialog(context),
                     ),
                     Fields.paddedActionText(
-                        S.current.iconAddRepositoryWithToken.toUpperCase(),
+                        S.current.iconAddExistingRepository.toUpperCase(),
                         textFontSize: Dimensions.fontAverage,
                         textColor: Constants.primaryColor(context),
                         textFontWeight: FontWeight.w600,

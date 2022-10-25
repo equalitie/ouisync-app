@@ -187,8 +187,8 @@
     "iconRename":"Rename",
     "iconMove":"Move",
     "iconDelete":"Delete",
-    "iconAddRepository":"Add new repository",
-    "iconAddRepositoryWithToken":"Add repository with token",
+    "iconCreateRepository":"Create a repository",
+    "iconAddExistingRepository":"Add an existing repository",
     "iconAccessMode":"Access Mode",
     "iconShareTokenWithPeer":"Share this with your peer",
 

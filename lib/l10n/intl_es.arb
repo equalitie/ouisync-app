@@ -182,7 +182,7 @@
     "iconMove":"Mover",
     "iconDelete":"Borrar",
     "iconCreateRepository":"Crear un nuevo repositorio",
-    "iconAddRepositoryWithToken":"Agregar un repositorio usando un token",
+    "iconAddExistingRepository":"Agregar un repositorio usando un token",
     "iconAccessMode":"Modo de aceso",
     "iconShareTokenWithPeer":"Comparte este token con tu colega",
 
