@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'app/app.dart';
 import 'app/utils/platform/platform.dart';
 import 'app/utils/utils.dart';
+import 'firebase_options.dart';
 import 'generated/l10n.dart';
 
 Future<void> main() async {
@@ -18,6 +20,10 @@ Future<void> main() async {
   print("------------------------ OuiSync Start ------------------------");
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   final windowManager = PlatformWindowManager();
 
