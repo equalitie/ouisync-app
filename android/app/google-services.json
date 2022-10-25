@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "40550718684",
+    "project_id": "ouisync-a49f0",
+    "storage_bucket": "ouisync-a49f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:40550718684:android:9fec77ccdf223c34142819",
+        "android_client_info": {
+          "package_name": "org.equalitie.ouisync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "40550718684-rgpo9uv7bj8kvq5a54k9eblvv8rcbs7h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJelX5WkXR9ozmmpnO2wyQI4vW3-RM3iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "40550718684-rgpo9uv7bj8kvq5a54k9eblvv8rcbs7h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
