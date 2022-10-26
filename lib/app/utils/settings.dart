@@ -1,6 +1,11 @@
+import 'dart:io' as io;
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as p;
 
 import 'log_reader.dart';
+import 'constants.dart';
+import '../models/repo_meta_info.dart';
 
 class Settings {
   static const String _currentRepoKey = "CURRENT_REPO";
@@ -16,13 +21,44 @@ class Settings {
 
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
+  final io.Directory _legacyReposDirectory;
 
-  Settings._(this._prefs)
+  Settings._(this._prefs, this._legacyReposDirectory)
       : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
 
   static Future<Settings> init() async {
     final prefs = await SharedPreferences.getInstance();
-    return Settings._(prefs);
+
+    // We used to have all the repositories in a single place in the internal
+    // memory. The disadvantage was that the user had no access to them and
+    // thus couldn't back them up or put them on an SD card.
+    final legacyReposDirectory = io.Directory(p.join(
+        (await path_provider.getApplicationSupportDirectory()).path,
+        Constants.folderRepositoriesName));
+
+    return Settings._(prefs, legacyReposDirectory);
+  }
+
+  Stream<RepoMetaInfo> repos() async* {
+    final dir = _legacyReposDirectory;
+
+    if (!await dir.exists()) {
+      return;
+    }
+
+    await for (final file in dir.list()) {
+      if (!file.path.endsWith(".db")) {
+        continue;
+      }
+
+      assert(p.isAbsolute(file.path));
+      yield RepoMetaInfo(file.path);
+    }
+  }
+
+  RepoMetaInfo repoMetaInfo(String repoName) {
+    // TODO: Check the name doesn't contain directory separators.
+    return RepoMetaInfo(p.join(_legacyReposDirectory.path, "$repoName.db"));
   }
 
   Future<void> setDefaultRepo(String? name) async {

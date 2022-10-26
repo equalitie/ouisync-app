@@ -33,14 +33,11 @@ Future<void> main() async {
   Loggy.initLoggy();
 
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = p.join(appDir, Constants.folderRepositoriesName);
   final configDir = p.join(appDir, Constants.configuratiosDirName);
 
   if (kDebugMode) {
     print(appDir);
-
     print(configDir);
-    print(repositoriesDir);
   }
 
   // TODO: Maybe we don't need to await for this, instead just get the future
@@ -60,7 +57,6 @@ Future<void> main() async {
       supportedLocales: S.delegate.supportedLocales,
       home: OuiSyncApp(
         session: session,
-        repositoriesLocation: repositoriesDir,
         windowManager: windowManager,
         settings: settings,
       )));

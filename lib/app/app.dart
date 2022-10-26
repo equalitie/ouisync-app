@@ -16,14 +16,12 @@ import 'utils/platform/platform.dart';
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     required this.session,
-    required this.repositoriesLocation,
     required this.windowManager,
     required this.settings,
     Key? key,
   }) : super(key: key);
 
   final Session session;
-  final String repositoriesLocation;
   final Settings settings;
   final PlatformWindowManager windowManager;
 
@@ -86,7 +84,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
               },
               child: MainPage(
                   session: widget.session,
-                  repositoriesLocation: widget.repositoriesLocation,
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );

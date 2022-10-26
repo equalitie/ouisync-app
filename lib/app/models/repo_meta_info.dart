@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart' as p;
+import 'dart:io' as io;
 
 // Information about a repository that we can deduce without opening it.
 class RepoMetaInfo extends Equatable {
@@ -15,6 +16,8 @@ class RepoMetaInfo extends Equatable {
   }
 
   String get name => _name;
+
+  io.Directory get dir => io.Directory(_dir);
 
   @override
   List<Object> get props => [
