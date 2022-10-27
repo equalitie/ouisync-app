@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 enum Flavor {
-  VANILLA,
-  ANALYTICS,
+  vanilla,
+  analytics,
 }
 
 class F {
@@ -13,9 +13,9 @@ class F {
 
   static String get title {
     switch (appFlavor) {
-      case Flavor.VANILLA:
+      case Flavor.vanilla:
         return 'OuiSync';
-      case Flavor.ANALYTICS:
+      case Flavor.analytics:
         return 'OuiSync';
       default:
         return 'title';
@@ -24,9 +24,9 @@ class F {
 
   static Color? get color {
     switch (appFlavor) {
-      case Flavor.VANILLA:
+      case Flavor.vanilla:
         return null;
-      case Flavor.ANALYTICS:
+      case Flavor.analytics:
         return Colors.grey.shade800;
       default:
         return null;

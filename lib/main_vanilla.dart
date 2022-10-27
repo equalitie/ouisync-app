@@ -9,7 +9,7 @@ Future<void> main() async {
   // belongs to the last app instance.
   print("------------------------ OuiSync Start ------------------------");
 
-  F.appFlavor = Flavor.VANILLA;
+  F.appFlavor = Flavor.vanilla;
 
   WidgetsFlutterBinding.ensureInitialized();
 

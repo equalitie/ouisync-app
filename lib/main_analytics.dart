@@ -13,7 +13,7 @@ Future<void> main() async {
   print(
       "------------------------ OuiSync (with Analytics) Start ------------------------");
 
-  F.appFlavor = Flavor.ANALYTICS;
+  F.appFlavor = Flavor.analytics;
 
   WidgetsFlutterBinding.ensureInitialized();
 
