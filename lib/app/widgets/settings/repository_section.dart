@@ -91,9 +91,7 @@ class RepositorySection extends AbstractSettingsSection {
               return;
             }
 
-            final oldInfo = repos.internalRepoMetaInfo(repo.name);
-            final newInfo = repos.internalRepoMetaInfo(newName);
-            repos.renameRepository(oldInfo, newInfo);
+            repos.renameRepository(repo.name, newName);
           });
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>

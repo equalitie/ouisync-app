@@ -7,9 +7,16 @@ class RepoMetaInfo extends Equatable {
   final String _dir;
   final String _name; // Repo name (without the '.db' extension)
 
-  RepoMetaInfo(String pathToDbFile)
-      : _dir = p.dirname(pathToDbFile),
-        _name = p.basenameWithoutExtension(pathToDbFile);
+  RepoMetaInfo._(this._dir, this._name);
+
+  static RepoMetaInfo fromDbPath(String pathToDbFile) {
+    return RepoMetaInfo._(
+        p.dirname(pathToDbFile), p.basenameWithoutExtension(pathToDbFile));
+  }
+
+  static RepoMetaInfo fromDirAndName(io.Directory dir, String repoName) {
+    return RepoMetaInfo._(dir.path, repoName);
+  }
 
   String path({ext = "db"}) {
     return p.join(_dir, "$_name.$ext");

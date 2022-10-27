@@ -36,7 +36,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    await for (final repoInfo in _settings.repos()) {
+    for (final repoInfo in (await _settings.repos())) {
       final repoName = repoInfo.name;
       if (defaultRepo == null) {
         defaultRepo = repoName;
@@ -64,10 +64,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   StateMonitor rootStateMonitor() =>
       StateMonitor(_session.getRootStateMonitor());
-
-  RepoMetaInfo internalRepoMetaInfo(String repoName) {
-    return _settings.repoMetaInfo(repoName);
-  }
 
   Folder? get currentFolder {
     return currentRepo?.currentFolder;
@@ -219,6 +215,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
+    await _settings.addRepo(info);
+
     final repo = await _create(info, password: password, token: token);
     if (repo is ErrorRepoEntry) {
       loggy.app('Failed to create repository ${info.name}');
@@ -229,11 +227,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return repo;
   }
 
-  Future<void> unlockRepository(RepoMetaInfo info,
+  Future<void> unlockRepository(String repoName,
       {required String password}) async {
-    final wasCurrent = currentRepoName == info.name;
+    final wasCurrent = currentRepoName == repoName;
 
-    await _forget(info.name);
+    final info = _settings.repoMetaInfo(repoName)!;
+
+    await _forget(repoName);
 
     await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
 
@@ -277,9 +277,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
-  void renameRepository(RepoMetaInfo oldInfo, RepoMetaInfo newInfo) async {
-    final oldName = oldInfo.name;
-    final newName = newInfo.name;
+  void renameRepository(String oldName, String newName) async {
+    final oldInfo = _settings.repoMetaInfo(oldName)!;
+    final newInfo = RepoMetaInfo.fromDirAndName(oldInfo.dir, newName);
     final wasCurrent = currentRepoName == oldName;
 
     await _forget(oldName);

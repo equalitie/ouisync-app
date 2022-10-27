@@ -157,7 +157,9 @@ class RepositoryCreation extends StatelessWidget {
 
     formKey.currentState!.save();
 
-    final info = cubit.internalRepoMetaInfo(name);
+    final info = RepoMetaInfo.fromDirAndName(
+        await cubit.settings.defaultRepoLocation(), name);
+
     final repoEntry = await cubit.createRepository(
       info,
       password: password,
