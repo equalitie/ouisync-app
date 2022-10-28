@@ -165,18 +165,29 @@ flavorizr:
 
       ios:
         bundleId: 'org.equalitie.ouisync'
+
     analytics:
       app:
         name: 'OuiSync'
 
       android:
-        applicationId: 'org.equalitie.ouisync.analytics'
-        customConfig:
-          versionNameSuffix: "\"-analytics\""
+        applicationId: 'org.equalitie.ouisync'
         firebase:
           config: './lib/firebase_options.dart' 
 
       ios:
-        bundleId: 'org.equalitie.ouisync-dev'
+        bundleId: 'org.equalitie.ouisync'
+    
+    development:
+      app:
+        name: 'OuiSync-Dev'
+
+      android:
+        applicationId: 'org.equalitie.ouisync.dev'
+        customConfig:
+          versionNameSuffix: "\"-dev\""
         firebase:
-          config: './lib/firebase_options.dart'
+          config: './lib/firebase_options.dart' 
+      
+      ios:
+        bundleId: 'org.equalitie.ouisync.dev'
