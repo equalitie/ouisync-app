@@ -36,7 +36,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    for (final repoInfo in (await _settings.repos())) {
+    for (final repoInfo in _settings.repos()) {
       final repoName = repoInfo.name;
       if (defaultRepo == null) {
         defaultRepo = repoName;
