@@ -15,14 +15,19 @@ const bool _localDiscoveryEnabledDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
-  final NetworkMode networkMode;
+  // We need the null state to express that we don't yet know what the mode is.
+  // That information is needed by the warning widgets shown to the user (if
+  // it's null then there is no warning). If we instead set this value to
+  // `disabled` by default, then the warning would show up if only breafly
+  // until `_onConnectivityChange` is invoked for the first time.
+  final NetworkMode? networkMode;
   final bool syncOnMobile;
   final bool portForwardingEnabled;
   final bool localDiscoveryEnabled;
 
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
-    this.networkMode = NetworkMode.disabled,
+    this.networkMode = null,
     this.syncOnMobile = false,
     this.portForwardingEnabled = false,
     this.localDiscoveryEnabled = false,
@@ -48,7 +53,9 @@ class PowerControlState {
   // Null means the answer is not yet known (the init function hasn't finished
   // or was not called yet).
   bool? get isNetworkEnabled {
-    switch (networkMode) {
+    final mode = networkMode;
+    if (mode == null) return null;
+    switch (mode) {
       case NetworkMode.full:
         return true;
       case NetworkMode.saving:
@@ -58,7 +65,9 @@ class PowerControlState {
   }
 
   String? get networkDisabledReason {
-    switch (networkMode) {
+    final mode = networkMode;
+    if (mode == null) return null;
+    switch (mode) {
       case NetworkMode.full:
         return null;
       case NetworkMode.saving:
@@ -191,7 +200,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
       _onConnectivityChange(await _connectivity.checkConnectivity());
 
   Future<void> _setNetworkMode(NetworkMode mode, {force = false}) async {
-    if (mode != state.networkMode || force) {
+    if (state.networkMode == null || mode != state.networkMode || force) {
       loggy.app('Network mode: $mode');
       emit(state.copyWith(networkMode: mode));
     } else {
@@ -239,7 +248,8 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
     }
 
     if (transition == _Transition.queued) {
-      await _setNetworkMode(state.networkMode, force: true);
+      // We set state.networkMode above, so it can't be null.
+      await _setNetworkMode(state.networkMode!, force: true);
     } else {
       emit(state.copyWith());
     }
