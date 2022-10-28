@@ -372,7 +372,8 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
       return;
     }
 
-    final info = _repos.internalRepoMetaInfo(name);
+    final info = RepoMetaInfo.fromDirAndName(
+        await _repos.settings.defaultRepoLocation(), name);
 
     widget.formKey.currentState!.save();
     final repoEntry = await _repos.createRepository(

@@ -26,9 +26,7 @@ abstract class Dialogs {
       return;
     }
 
-    await repositories.unlockRepository(
-        repositories.internalRepoMetaInfo(repositoryName),
-        password: password);
+    await repositories.unlockRepository(repositoryName, password: password);
   }
 
   static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context,

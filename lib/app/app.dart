@@ -24,14 +24,11 @@ Future<Widget> initOuiSyncApp() async {
   Loggy.initLoggy();
 
   final appDir = (await getApplicationSupportDirectory()).path;
-  final repositoriesDir = p.join(appDir, Constants.folderRepositoriesName);
   final configDir = p.join(appDir, Constants.configuratiosDirName);
 
   if (kDebugMode) {
     print(appDir);
-
     print(configDir);
-    print(repositoriesDir);
   }
 
   // TODO: Maybe we don't need to await for this, instead just get the future
@@ -51,7 +48,6 @@ Future<Widget> initOuiSyncApp() async {
       supportedLocales: S.delegate.supportedLocales,
       home: OuiSyncApp(
         session: session,
-        repositoriesLocation: repositoriesDir,
         windowManager: windowManager,
         settings: settings,
       ));
@@ -60,14 +56,12 @@ Future<Widget> initOuiSyncApp() async {
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
     required this.session,
-    required this.repositoriesLocation,
     required this.windowManager,
     required this.settings,
     Key? key,
   }) : super(key: key);
 
   final Session session;
-  final String repositoriesLocation;
   final Settings settings;
   final PlatformWindowManager windowManager;
 
@@ -130,7 +124,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
               },
               child: MainPage(
                   session: widget.session,
-                  repositoriesLocation: widget.repositoriesLocation,
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );
