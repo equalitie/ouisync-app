@@ -44,6 +44,7 @@ dependencies:
   flutter_background: ^1.1.0
   flutter_bloc: ^8.0.1
   flutter_file_dialog: ^2.3.0
+  flutter_flavorizr: ^2.1.3
   flutter_hooks: ^0.18.2+1
   flutter_localizations:
     sdk: flutter
@@ -152,3 +153,41 @@ msix_config:
     capabilities: internetClient, internetClientServer, privateNetworkClientServer,
       removableStorage, documentsLibrary
   msix_version: 1.0.0.0
+
+flavorizr:
+  flavors:
+    vanilla:
+      app:
+        name: 'OuiSync'
+
+      android:
+        applicationId: 'org.equalitie.ouisync'
+
+      ios:
+        bundleId: 'org.equalitie.ouisync'
+
+    analytics:
+      app:
+        name: 'OuiSync'
+
+      android:
+        applicationId: 'org.equalitie.ouisync'
+        firebase:
+          config: './lib/firebase_options.dart' 
+
+      ios:
+        bundleId: 'org.equalitie.ouisync'
+    
+    development:
+      app:
+        name: 'OuiSync-Dev'
+
+      android:
+        applicationId: 'org.equalitie.ouisync.dev'
+        customConfig:
+          versionNameSuffix: "\"-dev\""
+        firebase:
+          config: './lib/firebase_options.dart' 
+      
+      ios:
+        bundleId: 'org.equalitie.ouisync.dev'

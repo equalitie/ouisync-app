@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
@@ -15,9 +16,9 @@ import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../widgets/repository_progress.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
-import '../widgets/repository_progress.dart';
 
 typedef BottomSheetControllerCallback = void Function(
     PersistentBottomSheetController? controller, String entryPath);
@@ -379,7 +380,7 @@ class _MainPageState extends State<MainPage>
                     }
 
                     await NativeChannels.previewOuiSyncFile(
-                        item.path, item.size,
+                        F.authority, item.path, item.size,
                         useDefaultApp: true);
                   };
                 } else if (item is FolderItem) {

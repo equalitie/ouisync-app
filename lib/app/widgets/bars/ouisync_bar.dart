@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/flavors.dart';
 
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({
@@ -17,6 +18,7 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
       // Make the `repoList` have no spacing on the horizontal axis.
       titleSpacing: 0.0,
       actions: [settingsButton],
+      backgroundColor: F.color,
     );
   }
 
