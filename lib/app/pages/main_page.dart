@@ -25,19 +25,16 @@ typedef BottomSheetControllerCallback = void Function(
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.session,
-    required this.repositoriesLocation,
     required this.mediaReceiver,
     required this.settings,
   });
 
   final Session session;
-  final String repositoriesLocation;
   final MediaReceiver mediaReceiver;
   final Settings settings;
 
   @override
-  State<StatefulWidget> createState() =>
-      _MainPageState(session, repositoriesLocation, settings);
+  State<StatefulWidget> createState() => _MainPageState(session, settings);
 }
 
 class _MainPageState extends State<MainPage>
@@ -58,11 +55,9 @@ class _MainPageState extends State<MainPage>
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
   late final StateMonitorIntValue _panicCounter;
 
-  _MainPageState(
-      Session session, String repositoriesLocation, Settings settings)
+  _MainPageState(Session session, Settings settings)
       : _repositories = ReposCubit(
           session: session,
-          repositoriesDir: repositoriesLocation,
           settings: settings,
         ),
         _powerControl = PowerControl(session, settings) {

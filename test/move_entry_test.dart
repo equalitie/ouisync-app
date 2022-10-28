@@ -17,7 +17,7 @@ void main() {
     session = await Session.open(dir.path);
 
     final settings = await Settings.init();
-    final info = RepoMetaInfo(p.join(dir.path, "store.db"));
+    final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
 
     repository = RepoCubit(
         metaInfo: info,

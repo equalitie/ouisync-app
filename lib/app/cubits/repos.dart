@@ -18,13 +18,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   bool _isLoading = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
-  final String _repositoriesDir;
   StreamSubscription<oui.RepositoryEvent>? _subscription;
   final Settings _settings;
 
-  ReposCubit({required session, required repositoriesDir, required settings})
+  ReposCubit({required session, required settings})
       : _session = session,
-        _repositoriesDir = repositoriesDir,
         _settings = settings;
 
   Settings get settings => _settings;
@@ -38,7 +36,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    await for (final repoInfo in _reposToOpen(_repositoriesDir)) {
+    for (final repoInfo in _settings.repos()) {
       final repoName = repoInfo.name;
       if (defaultRepo == null) {
         defaultRepo = repoName;
@@ -66,11 +64,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   StateMonitor rootStateMonitor() =>
       StateMonitor(_session.getRootStateMonitor());
-
-  RepoMetaInfo internalRepoMetaInfo(String repoName) {
-    // TODO: Check the name doesn't contain directory separators.
-    return RepoMetaInfo(p.join(_repositoriesDir, "$repoName.db"));
-  }
 
   Folder? get currentFolder {
     return currentRepo?.currentFolder;
@@ -222,6 +215,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
+    await _settings.addRepo(info);
+
     final repo = await _create(info, password: password, token: token);
     if (repo is ErrorRepoEntry) {
       loggy.app('Failed to create repository ${info.name}');
@@ -232,11 +227,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return repo;
   }
 
-  Future<void> unlockRepository(RepoMetaInfo info,
+  Future<void> unlockRepository(String repoName,
       {required String password}) async {
-    final wasCurrent = currentRepoName == info.name;
+    final wasCurrent = currentRepoName == repoName;
 
-    await _forget(info.name);
+    final info = _settings.repoMetaInfo(repoName)!;
+
+    await _forget(repoName);
 
     await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
 
@@ -280,15 +277,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
-  void renameRepository(RepoMetaInfo oldInfo, RepoMetaInfo newInfo) async {
-    final oldName = oldInfo.name;
-    final newName = newInfo.name;
+  void renameRepository(String oldName, String newName) async {
+    final oldInfo = _settings.repoMetaInfo(oldName)!;
+    final newInfo = RepoMetaInfo.fromDirAndName(oldInfo.dir, newName);
     final wasCurrent = currentRepoName == oldName;
 
     await _forget(oldName);
 
-    final renamed = await _renameRepositoryFiles(_repositoriesDir,
-        oldName: oldName, newName: newName);
+    final renamed =
+        await _renameRepositoryFiles(oldInfo: oldInfo, newName: newName);
 
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
@@ -324,10 +321,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     await _forget(repoName);
     await _settings.forgetRepository(repoName);
 
-    final deleted = await _deleteRepositoryFiles(
-      info,
-      _repositoriesDir,
-    );
+    final deleted = await _deleteRepositoryFiles(info);
 
     // TODO: Instead of trying to reopen this repository, we should create a new
     // subclass of RepoEntry and tell the user that there that deletion failed.
@@ -417,28 +411,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  static Stream<RepoMetaInfo> _reposToOpen(String location) async* {
-    final dir = io.Directory(location);
+  Future<bool> _renameRepositoryFiles(
+      {required RepoMetaInfo oldInfo, required String newName}) async {
+    final oldName = oldInfo.name;
 
-    if (!await dir.exists()) {
-      return;
-    }
-
-    await for (final file in dir.list()) {
-      if (!file.path.endsWith(".db")) {
-        continue;
-      }
-
-      assert(p.isAbsolute(file.path));
-      yield RepoMetaInfo(file.path);
-    }
-  }
-
-  Future<bool> _renameRepositoryFiles(String repositoriesDir,
-      {required String oldName, required String newName}) async {
     if (oldName == newName) return true;
 
-    final dir = io.Directory(repositoriesDir);
+    final dir = oldInfo.dir;
 
     if (!await dir.exists()) {
       return false;
@@ -448,7 +427,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     // Check the source db exists
     {
-      final path = p.join(repositoriesDir, "$oldName.db");
+      final path = p.join(dir.path, "$oldName.db");
       if (!await io.File(path).exists()) {
         loggy.app("Source database does not exist \"$path\".");
         return false;
@@ -457,7 +436,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     // Check the destination files don't exist
     for (final ext in exts) {
-      final path = p.join(repositoriesDir, "$newName.$ext");
+      final path = p.join(dir.path, "$newName.$ext");
       if (await io.File(path).exists()) {
         loggy.app("Destination file \"$path already exists\".");
         return false;
@@ -465,14 +444,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     for (final ext in exts) {
-      final srcPath = p.join(repositoriesDir, '$oldName.$ext');
+      final srcPath = p.join(dir.path, '$oldName.$ext');
       final srcFile = io.File(srcPath);
 
       if (!await srcFile.exists()) {
         continue;
       }
 
-      final dstPath = p.join(repositoriesDir, '$newName.$ext');
+      final dstPath = p.join(dir.path, '$newName.$ext');
 
       try {
         await srcFile.rename(dstPath);
@@ -485,9 +464,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return true;
   }
 
-  Future<bool> _deleteRepositoryFiles(
-      RepoMetaInfo repoInfo, String repositoriesDir) async {
-    final dir = io.Directory(repositoriesDir);
+  Future<bool> _deleteRepositoryFiles(RepoMetaInfo repoInfo) async {
+    final dir = repoInfo.dir;
 
     if (!await dir.exists()) {
       return false;
