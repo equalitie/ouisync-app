@@ -27,7 +27,7 @@ class PowerControlState {
 
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
-    this.networkMode = null,
+    this.networkMode,
     this.syncOnMobile = false,
     this.portForwardingEnabled = false,
     this.localDiscoveryEnabled = false,
