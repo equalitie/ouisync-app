@@ -123,7 +123,7 @@ You can run the app from the command line and make use of different flags to obt
 
 ### Flutter
 
-The Ouisync app implements some build variants, specifically product flavors, as a way to control the inclusion of some tools in its releases.
+The **OuiSync Flutter app** implements some build variants, specifically product flavors, as a way to control the inclusion of some tools in its releases.
 
 Currently, there are three (3) flavors:
 
