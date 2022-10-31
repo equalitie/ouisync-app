@@ -129,9 +129,9 @@ Currently, there are three (3) flavors:
 
 - **vanilla**: regular code base, no extra tooling.
 - **analytics**: regular code base, includes Firebase Crashlytics **ON** by default.
-- **development**: This flavor is used for testing any new functionality or tools without replacing the regular app installation (**vanilla** or **anayltics**). It has a different `applicationId` and authority for the content provider, so it will install next to the regular app.
+- **development**: This flavor is used for testing any new functionality or tools without replacing the regular app installation (**vanilla** or **analytics**). It has a different `applicationId` and `authority` for the content provider, so it will install next to the regular app.
   
-Inside the project folder, you can execute `flutter run --flavor vanilla -t lib/main_vanilla.dart` for running the app in the default device (replacing the flavor and entry point accordingly). 
+Inside the project folder, you can execute `flutter run --flavor vanilla -t lib/main_vanilla.dart` for running the app in the default device (replacing the flavor and target accordingly). 
 
 There are some other useful flags you should checkout (You can find all the available flags in the SDK help: `flutter --help`):
 
