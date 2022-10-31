@@ -84,4 +84,4 @@ jobs:
         run: OUISYNC_LIB=`pwd`/ouisync-plugin/ouisync/target/release/libouisync_ffi.so flutter test
 
       - name: Building APK (android-x64)
-        run: flutter build apk --target-platform android-x64
+        run: flutter build apk --flavor vanilla -t lib/main_vanilla.dart --target-platform android-x64
