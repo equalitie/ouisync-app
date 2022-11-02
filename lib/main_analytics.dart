@@ -11,7 +11,7 @@ Future<void> main() async {
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
   print(
-      "------------------------ OuiSync (with Analytics) Start ------------------------");
+      "------------------------ OuiSync (analytics) Start ------------------------");
 
   F.appFlavor = Flavor.analytics;
 
