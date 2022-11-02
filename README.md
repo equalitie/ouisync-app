@@ -247,3 +247,41 @@ For this add the path to the `NDK` installation to the `local.properties` file:
 ```
 ndk.dir=<path-to-ndk-installation>
 ```
+
+## How to add localized strings
+
+We use the package **intl_utils** for handling the localization of the strings used in the app.
+
+If you want to add a new localized string, just add a new `"key": "value"` pair at then end of the English `.arb` file, like this:
+
+
+In `/lib/l10n/intl_en.arb`
+
+```
+{
+    "@@locale": "en",
+    ... 
+    ...
+    ...
+    "hello": "Hello"
+}
+
+```
+
+Then run `flutter pub run intl_utils:generate` to generate the bindings for the new localized string.
+
+Once the generated files are updated by the package (`lib/generated/l10.dart`, `lib/l10n/intl_en.arb`), you can use it in any widget, like this:
+
+
+```
+import '../../../generated/l10n.dart';
+
+...
+...
+...
+
+Text(S.current.hello);
+```
+
+
+**NOTE:** For translations to any other language, please create a new issue in this repository, so we can take care of it.
