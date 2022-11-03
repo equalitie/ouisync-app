@@ -399,5 +399,7 @@
   "actionLockCapital": "BLOQUEAR",
   "@actionLockCapital": {},
   "titleAbout": "Acerca de",
-  "@titleAbout": {}
+  "@titleAbout": {},
+  "messageSyncingIsDisabledOnMobileInternet": "La sincronización está deshabilitada mientras se usa Internet móvil",
+  "@messageSyncingIsDisabledOnMobileInternet": {}
 }
