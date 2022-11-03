@@ -13,7 +13,7 @@ class PlatformBackgroundManagerMobile
     final config = FlutterBackgroundAndroidConfig(
       notificationTitle: S.current.titleAppTitle,
       notificationText: S.current.messageBackgroundNotificationAndroid,
-      notificationIcon: const AndroidResource(name: 'ic_stat_ouisync'),
+      notificationIcon: const AndroidResource(name: 'notification_icon'),
       notificationImportance: AndroidNotificationImportance.Default,
       enableWifiLock: true,
     );
