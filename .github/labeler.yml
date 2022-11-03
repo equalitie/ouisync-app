@@ -1,0 +1,3 @@
+# Add 'i18n' label to any change to lib/l10n/intl_*.arb files within the source dir
+i18n:
+- src/lib/l10n/intl_*.arb
