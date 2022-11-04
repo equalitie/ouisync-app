@@ -401,5 +401,9 @@
   "titleAbout": "Acerca de",
   "@titleAbout": {},
   "messageSyncingIsDisabledOnMobileInternet": "La sincronización está deshabilitada mientras se usa Internet móvil",
-  "@messageSyncingIsDisabledOnMobileInternet": {}
+  "@messageSyncingIsDisabledOnMobileInternet": {},
+  "messageNetworkIsUnavailable": "La red no está disponible",
+  "@messageNetworkIsUnavailable": {},
+  "messageNewVersionIsAvailable": "Una nueva versión está disponible.",
+  "@messageNewVersionIsAvailable": {}
 }
