@@ -86,7 +86,7 @@
   "@labelSelectRepository": {},
   "labelRenameRepository": "Ingrese el nuevo nombre: ",
   "@labelRenameRepository": {},
-  "labelEndpoint": "Endpoint: ",
+  "labelEndpoint": "Punto final: ",
   "@labelEndpoint": {},
   "labelAppVersion": "Versión de la App",
   "@labelAppVersion": {},
