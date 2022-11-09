@@ -38,7 +38,7 @@
   "@titleDeleteFile": {},
   "titleNetwork": "Conectividad",
   "@titleNetwork": {},
-  "titleLogs": "Logs",
+  "titleLogs": "Registros",
   "@titleLogs": {},
   "titleDeleteRepository": "Borrar repositorio",
   "@titleDeleteRepository": {},
@@ -240,7 +240,7 @@
   "@messageEntryTypeFolder": {},
   "messageEntryTypeFile": "Un archivo",
   "@messageEntryTypeFile": {},
-  "messageEntryAlreadyExist": "{entry} con el mismo nombre ya existe en este directorio.",
+  "messageEntryAlreadyExist": "La {entry} ya existe.",
   "@messageEntryAlreadyExist": {},
   "messageFolderDeleted": "Directorio borrado exitosamente: {name}",
   "@messageFolderDeleted": {},
@@ -405,5 +405,11 @@
   "messageNetworkIsUnavailable": "La red no está disponible",
   "@messageNetworkIsUnavailable": {},
   "messageNewVersionIsAvailable": "Una nueva versión está disponible.",
-  "@messageNewVersionIsAvailable": {}
+  "@messageNewVersionIsAvailable": {},
+  "messageLibraryPanic": "Se detectó un fallo interno.",
+  "@messageLibraryPanic": {},
+  "messageRepositoryAlreadyExist": "Este repositorio ya existe en la aplicación \"{name}\".",
+  "@messageRepositoryAlreadyExist": {},
+  "actionCreateRepository": "Crear un repositorio",
+  "@actionCreateRepository": {}
 }
