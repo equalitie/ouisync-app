@@ -304,10 +304,7 @@ class _AddRepositoryWithTokenState extends State<AddRepositoryWithToken>
   _validateToken() {
     if (widget.initialTokenValue == null) return;
     try {
-      _shareToken = ShareToken(
-        _repos.session,
-        widget.initialTokenValue!,
-      );
+      _shareToken = ShareToken(widget.initialTokenValue!);
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
       showSnackBar(

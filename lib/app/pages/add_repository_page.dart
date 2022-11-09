@@ -145,7 +145,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     }
 
     try {
-      final shareToken = ShareToken(widget.reposCubit.session, value!);
+      final shareToken = ShareToken(value!);
 
       final existingRepo =
           widget.reposCubit.findByInfoHash(shareToken.infoHash);
