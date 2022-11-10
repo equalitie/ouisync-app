@@ -30,15 +30,15 @@ Flutter application that implements the **[OuiSync Flutter plugin](https://githu
 
 **Operating systems currently supported:**
 
-| OS | Supported | Notes |
-|:--- |:---:|:---|
-| Android | :white_check_mark: | Early access |
-| iOS | :x: |
-| Linux | :x: |
-| macOS | :x: |
-| Windows | :ballot_box_with_check: | Available soon |
+| OS | GUI | CLI |
+|:--- |:---:|:---:|
+| Android | Beta | - |
+| iOS | :x: | - |
+| Linux | Alpha | Beta |
+| macOS | :x: | :x: |
+| Windows | Alpha | :x: |
 
-:ballot_box_with_check:: Some functionalities are not yet available.
+**GUI:** Graphic User Interface | **CLI:** Command Line Interface
 
 <br />
 
