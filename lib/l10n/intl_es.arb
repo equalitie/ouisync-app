@@ -218,7 +218,7 @@
   "@messageConfirmNotEmptyFolderDeletion": {},
   "messageError": "Error!",
   "@messageError": {},
-  "messageAck": "Ack!",
+  "messageAck": "¡Vaya!",
   "@messageAck": {},
   "messageCreatingToken": "Creando el token para compartir...",
   "@messageCreatingToken": {},
