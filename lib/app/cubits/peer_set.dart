@@ -18,9 +18,10 @@ class PeerSetCubit extends Cubit<PeerSet> {
       return;
     }
 
-    _subscription = _session.peers.listen((peers) {
-      emit(PeerSet(peers));
-    });
+    _subscription =
+        _session.onPeersChange.listen((peers) => emit(PeerSet(peers)));
+
+    emit(PeerSet(_session.peers));
   }
 
   @override
