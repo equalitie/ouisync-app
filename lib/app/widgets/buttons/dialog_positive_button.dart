@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import '../../utils/utils.dart';
 
 class PositiveButton extends StatelessWidget {
-  const PositiveButton({required this.text, required this.onPressed, Key? key})
+  const PositiveButton(
+      {required this.text,
+      required this.onPressed,
+      this.buttonsAspectRatio = Dimensions.aspectRatioModalDialogButton,
+      Key? key})
       : super(key: key);
 
   final String? text;
   final GestureTapCallback? onPressed;
+  final double buttonsAspectRatio;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,7 @@ class PositiveButton extends StatelessWidget {
             child: Align(
                 alignment: Alignment.bottomRight,
                 child: AspectRatio(
-                    aspectRatio: Dimensions.aspectRatioModalDialogButton,
+                    aspectRatio: buttonsAspectRatio,
                     child: Container(
                       margin: Dimensions.marginDialogPositiveButton,
                       child: RawMaterialButton(
