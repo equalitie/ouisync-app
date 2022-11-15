@@ -83,7 +83,7 @@
     "messageReadReplicaExplanation":"No puede ser modificado, sólo acceder sus contenidos",
     "messageWriteReplicaExplanation":"Aceso total. Tu colega puede leer y modificar",
 
-    "messageNoRepo":"Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>",
+    "messageNoRepo":"Antes de agregar archivos, tienes que crear un repositorio",
     "messageCreateNewRepo":"Crea un  nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>",
     "messageNoRepos":"No se hayaron repositorios",
     "messageEmptyRepo":"Este <bold>repositorio</bold> está vacío",

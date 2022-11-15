@@ -284,7 +284,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Esta función no está disponible mientras se está moviendo una entrada"),
         "messageNewFileError": m9,
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
-            "Antes de agregar un <bold>archivo</bold>, tienes que crear un <bold>repositorio</bold>"),
+            "Antes de agregar archivos, tienes que crear un repositorio"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
         "messageNothingHereYet":
