@@ -16,6 +16,7 @@ class SettingsPage extends StatelessWidget {
     required this.powerControl,
     required this.onShareRepository,
     required this.panicCounter,
+    required this.natDetection,
   });
 
   final Settings settings;
@@ -23,6 +24,7 @@ class SettingsPage extends StatelessWidget {
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
   final StateMonitorIntValue panicCounter;
+  final Future<NatDetection> natDetection;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -55,7 +57,7 @@ class SettingsPage extends StatelessWidget {
                   repos: reposCubit,
                   onShareRepository: onShareRepository,
                 ),
-                NetworkSection(),
+                NetworkSection(natDetection),
                 LogsSection(
                     settings: settings,
                     repos: reposCubit,

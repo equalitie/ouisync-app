@@ -1,5 +1,6 @@
 export 'connectivity_info.dart';
 export 'job.dart';
+export 'nat_detection.dart';
 export 'peer_set.dart';
 export 'power_control.dart';
 export 'repo.dart';

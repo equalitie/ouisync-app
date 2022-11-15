@@ -11,6 +11,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../cubits/nat_detection.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -42,6 +43,7 @@ class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, OuiSyncAppLogger {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
+  final Future<NatDetection> _natDetection = NatDetection.init();
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -117,6 +119,7 @@ class _MainPageState extends State<MainPage>
 
   @override
   void dispose() async {
+    await (await _natDetection).close();
     await _repositories.close();
     super.dispose();
   }
@@ -735,6 +738,7 @@ class _MainPageState extends State<MainPage>
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
             panicCounter: _panicCounter,
+            natDetection: _natDetection,
           ),
         ),
       ),

@@ -13,7 +13,9 @@ import '../../utils/utils.dart';
 import 'navigation_tile.dart';
 
 class NetworkSection extends AbstractSettingsSection {
-  NetworkSection();
+  Future<NatDetection> _natDetection;
+
+  NetworkSection(this._natDetection);
 
   @override
   Widget build(BuildContext context) => SettingsSection(
@@ -25,6 +27,7 @@ class NetworkSection extends AbstractSettingsSection {
           _buildSyncOnMobileSwitch(context),
           ..._buildConnectivityInfoTiles(context),
           _buildPeerListTile(context),
+          _buildNatDetectionTile(context),
         ],
       );
 
@@ -176,6 +179,28 @@ class NetworkSection extends AbstractSettingsSection {
               }),
         ),
       );
+
+  AbstractSettingsTile _buildNatDetectionTile(BuildContext context) =>
+      CustomSettingsTile(
+          child: FutureBuilder<NatDetection>(
+              future: _natDetection,
+              builder:
+                  (BuildContext context, AsyncSnapshot<NatDetection> snapshot) {
+                final natDetection = snapshot.data;
+                if (natDetection == null) {
+                  return SizedBox.shrink();
+                }
+
+                return BlocBuilder<NatDetection, NatDetectionType>(
+                    bloc: natDetection,
+                    builder: (context, type) {
+                      return SettingsTile(
+                        leading: Icon(Icons.nat),
+                        title: Text("NAT type"),
+                        value: Text(type.message()),
+                      );
+                    });
+              }));
 }
 
 String _connectivityTypeName(ConnectivityResult result) {
