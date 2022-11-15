@@ -134,11 +134,13 @@ class _MainPageState extends State<MainPage>
         defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
 
     _scaffoldKey.currentState?.showBottomSheet(
+      enableDrag: false,
       (context) {
         return SaveSharedMedia(
             sharedMedia: payload,
             onBottomSheetOpen: retrieveBottomSheetController,
-            onSaveFile: saveMedia);
+            onSaveFile: saveMedia,
+            validationFunction: canSaveMedia);
       },
     );
   }
@@ -554,16 +556,45 @@ class _MainPageState extends State<MainPage>
     final currentRepo = _currentRepo;
 
     if (currentRepo is! OpenRepoEntry) {
-      showSnackBar(
-        context,
-        content: Text(
-          S.current.messageNoRepo,
-        ),
-      );
       return;
     }
 
-    String? accessModeMessage = !currentRepo.cubit.canRead
+    loggy.app('Media path: $sourceFilePath');
+    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
+  }
+
+  Future<bool> canSaveMedia() async {
+    final currentRepo = _currentRepo;
+    if (currentRepo is! OpenRepoEntry) {
+      await Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.titleAddFile,
+          message: S.current.messageNoRepo,
+          actions: [
+            TextButton(
+              child: Text(S.current.actionCloseCapital),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text(S.current.actionCreateRepository.toUpperCase()),
+              onPressed: () {
+                Navigator.of(context).pop();
+                createRepoDialog();
+              },
+            ),
+            TextButton(
+              child: Text(S.current.actionAddRepository.toUpperCase()),
+              onPressed: () {
+                Navigator.of(context).pop();
+                addRepoWithTokenDialog();
+              },
+            ),
+          ]);
+
+      return false;
+    }
+
+    String? accessModeMessage = currentRepo.cubit.canRead == false
         ? S.current.messageAddingFileToLockedRepository
         : !currentRepo.cubit.canWrite
             ? S.current.messageAddingFileToReadRepository
@@ -584,15 +615,21 @@ class _MainPageState extends State<MainPage>
                   child: Text(S.current.actionCloseCapital),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
+                TextButton(
+                  child: Text(S.current.actionUnlock.toUpperCase()),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    unlockRepositoryDialog(currentRepo.name);
+                  },
+                ),
               ],
             );
           });
 
-      return;
+      return false;
     }
 
-    loggy.app('Media path: $sourceFilePath');
-    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
+    return true;
   }
 
   Future<void> saveFileToOuiSync(

@@ -840,10 +840,10 @@ class S {
     );
   }
 
-  /// `Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>`
+  /// `Before adding files, you need to create a repository`
   String get messageNoRepo {
     return Intl.message(
-      'Before adding a <bold>file</bold>, you need to create a <bold>repository</bold>',
+      'Before adding files, you need to create a repository',
       name: 'messageNoRepo',
       desc: '',
       args: [],
