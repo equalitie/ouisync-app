@@ -8,7 +8,7 @@ import '../widgets.dart';
 
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
-class SaveSharedMedia extends StatelessWidget {
+class SaveSharedMedia extends StatefulWidget {
   const SaveSharedMedia({
     required this.sharedMedia,
     required this.onBottomSheetOpen,
@@ -22,8 +22,21 @@ class SaveSharedMedia extends StatelessWidget {
   final Future<bool> Function() validationFunction;
 
   @override
+  State<SaveSharedMedia> createState() => _SaveSharedMediaState();
+}
+
+class _SaveSharedMediaState extends State<SaveSharedMedia> {
+  final Icon _collapsableIconUp = const Icon(Icons.keyboard_arrow_up_rounded);
+  final Icon _collapsableIconDown =
+      const Icon(Icons.keyboard_arrow_down_rounded);
+
+  Icon _collapsableIcon = const Icon(Icons.keyboard_arrow_down_rounded);
+
+  bool _minimize = false;
+
+  @override
   Widget build(BuildContext context) {
-    final nediaListMaxHeight = MediaQuery.of(context).size.height * 0.2;
+    final mediaListMaxHeight = MediaQuery.of(context).size.height * 0.2;
 
     return Container(
       padding: Dimensions.paddingBottomSheet,
@@ -33,18 +46,53 @@ class SaveSharedMedia extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Fields.bottomSheetTitle(S.current.titleAddFile,
-                textAlign: TextAlign.start),
-            ConstrainedBox(
-                constraints:
-                    BoxConstraints.loose(Size.fromHeight(nediaListMaxHeight)),
-                child: _buildMediaList(context, sharedMedia)),
-            Fields.dialogActions(context,
-                buttons: _actions(context),
-                padding: const EdgeInsets.only(top: 20.0),
-                mainAxisAlignment: MainAxisAlignment.end)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Fields.bottomSheetTitle(S.current.titleAddFile,
+                    textAlign: TextAlign.start, padding: EdgeInsets.all(0.0)),
+                Fields.actionIcon(_collapsableIcon,
+                    onPressed: _collapsableAction,
+                    padding: EdgeInsets.all(0.0),
+                    alignment: Alignment.center,
+                    size: Dimensions.sizeIconBig)
+              ],
+            ),
+            Fields.autosizeText(
+                '(${widget.sharedMedia.length} ${widget.sharedMedia.length == 1 ? S.current.messageFile : S.current.messageFiles})',
+                textAlign: TextAlign.center,
+                fontWeight: FontWeight.w700),
+            Dimensions.spacingVertical,
+            Visibility(
+                visible: !_minimize,
+                child: ConstrainedBox(
+                    constraints: BoxConstraints.loose(
+                        Size.fromHeight(mediaListMaxHeight)),
+                    child: _buildMediaList(context, widget.sharedMedia))),
+            Visibility(
+                visible: !_minimize,
+                child: Fields.dialogActions(context,
+                    buttons: _actions(context),
+                    padding: const EdgeInsets.only(top: 20.0),
+                    mainAxisAlignment: MainAxisAlignment.end))
           ]),
     );
+  }
+
+  void _collapsableAction() {
+    if (_collapsableIcon == _collapsableIconDown) {
+      setState(() {
+        _collapsableIcon = _collapsableIconUp;
+        _minimize = true;
+      });
+
+      return;
+    }
+
+    setState(() {
+      _collapsableIcon = _collapsableIconDown;
+      _minimize = false;
+    });
   }
 
   Widget _buildMediaList(BuildContext context, List<SharedMediaFile> media) =>
@@ -63,8 +111,7 @@ class SaveSharedMedia extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Expanded(
                             flex: 1,
@@ -89,13 +136,13 @@ class SaveSharedMedia extends StatelessWidget {
         PositiveButton(
             text: S.current.actionSave,
             onPressed: () async {
-              final canSaveMedia = await validationFunction();
+              final canSaveMedia = await widget.validationFunction();
               if (!canSaveMedia) {
                 return;
               }
 
-              for (final media in sharedMedia) {
-                await onSaveFile(media.path);
+              for (final media in widget.sharedMedia) {
+                await widget.onSaveFile(media.path);
               }
 
               Navigator.of(context).pop();
@@ -104,7 +151,7 @@ class SaveSharedMedia extends StatelessWidget {
       ];
 
   void _cancelSaveFile(context) {
-    onBottomSheetOpen.call(null, '');
+    widget.onBottomSheetOpen.call(null, '');
     Navigator.of(context).pop('');
   }
 }

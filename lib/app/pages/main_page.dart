@@ -569,27 +569,7 @@ class _MainPageState extends State<MainPage>
       await Dialogs.simpleAlertDialog(
           context: context,
           title: S.current.titleAddFile,
-          message: S.current.messageNoRepo,
-          actions: [
-            TextButton(
-              child: Text(S.current.actionCloseCapital),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text(S.current.actionCreateRepository.toUpperCase()),
-              onPressed: () {
-                Navigator.of(context).pop();
-                createRepoDialog();
-              },
-            ),
-            TextButton(
-              child: Text(S.current.actionAddRepository.toUpperCase()),
-              onPressed: () {
-                Navigator.of(context).pop();
-                addRepoWithTokenDialog();
-              },
-            ),
-          ]);
+          message: S.current.messageNoRepo);
 
       return false;
     }
@@ -614,14 +594,7 @@ class _MainPageState extends State<MainPage>
                 TextButton(
                   child: Text(S.current.actionCloseCapital),
                   onPressed: () => Navigator.of(context).pop(),
-                ),
-                TextButton(
-                  child: Text(S.current.actionUnlock.toUpperCase()),
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    unlockRepositoryDialog(currentRepo.name);
-                  },
-                ),
+                )
               ],
             );
           });
