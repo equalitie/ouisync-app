@@ -13,7 +13,8 @@ class NoRepositoriesState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nothingHereYetImageHeight = MediaQuery.of(context).size.height * 0.2;
+    final nothingHereYetImageHeight = MediaQuery.of(context).size.height *
+        Constants.statePlaceholderImageHeightFactor;
 
     return Center(
         child: SingleChildScrollView(

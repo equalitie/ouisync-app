@@ -22,6 +22,8 @@ class Constants {
   static const int modalTransitionDurationMs = 800;
   static const int notAvailableActionMessageDuration = 4;
 
+  static const double statePlaceholderImageHeightFactor = 0.15;
+
   /// In-line text style names
 
   static const String inlineTextBold = 'bold';

@@ -16,7 +16,8 @@ class NoContentsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emptyFolderImageHeight = MediaQuery.of(context).size.height * 0.2;
+    final emptyFolderImageHeight = MediaQuery.of(context).size.height *
+        Constants.statePlaceholderImageHeightFactor;
 
     return Center(
         child: SingleChildScrollView(

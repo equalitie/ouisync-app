@@ -13,7 +13,8 @@ class LockedRepositoryState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lockedRepoImageHeight = MediaQuery.of(context).size.height * 0.2;
+    final lockedRepoImageHeight = MediaQuery.of(context).size.height *
+        Constants.statePlaceholderImageHeightFactor;
 
     return Center(
         child: SingleChildScrollView(
