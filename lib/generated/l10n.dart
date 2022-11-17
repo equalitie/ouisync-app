@@ -1550,6 +1550,26 @@ class S {
     );
   }
 
+  /// `file`
+  String get messageFile {
+    return Intl.message(
+      'file',
+      name: 'messageFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `files`
+  String get messageFiles {
+    return Intl.message(
+      'files',
+      name: 'messageFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(

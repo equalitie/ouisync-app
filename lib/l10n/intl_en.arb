@@ -171,6 +171,9 @@
 
     "messageChangeExtensionAlert":"Changing the extension of a file can make it unusable",
 
+    "messageFile":"file",
+    "messageFiles":"files",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

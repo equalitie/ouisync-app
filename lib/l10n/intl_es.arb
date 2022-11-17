@@ -165,6 +165,9 @@
 
     "messageChangeExtensionAlert":"Cambiar la extensión del archivo puede hacerlo inutilizable",
 
+    "messageFile":"archivo",
+    "messageFiles":"archivos",
+
     "replacementName":"{name}",
     "replacementPath":"{path}",
     "replacementStatus":"{status}",

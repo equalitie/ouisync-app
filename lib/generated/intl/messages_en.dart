@@ -255,9 +255,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a valid token."),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
+        "messageFile": MessageLookupByLibrary.simpleMessage("file"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "File preview is not yet available"),
+        "messageFiles": MessageLookupByLibrary.simpleMessage("files"),
         "messageFolderDeleted": m6,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Folder name"),
