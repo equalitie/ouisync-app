@@ -13,7 +13,7 @@ import '../../utils/utils.dart';
 import 'navigation_tile.dart';
 
 class NetworkSection extends AbstractSettingsSection {
-  Future<NatDetection> _natDetection;
+  final Future<NatDetection> _natDetection;
 
   NetworkSection(this._natDetection);
 

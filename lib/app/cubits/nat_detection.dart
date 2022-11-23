@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'package:udp/udp.dart';
@@ -9,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class NatDetection extends Cubit<NatDetectionType> {
   int _nextTask = 0;
   int? _highestRunningTask;
-  DnsClient _dns;
+  final DnsClient _dns;
   StreamSubscription<ConnectivityResult>? _subscription;
 
   static Future<NatDetection> init() async {
@@ -28,6 +27,7 @@ class NatDetection extends Cubit<NatDetectionType> {
     _startTask(initialConnection);
   }
 
+  @override
   Future<void> close() async {
     final sub = _subscription;
     _subscription = null;
@@ -35,6 +35,8 @@ class NatDetection extends Cubit<NatDetectionType> {
     if (sub != null) {
       sub.cancel();
     }
+
+    await super.close();
   }
 
   void _startTask(ConnectivityResult result) async {
@@ -94,7 +96,7 @@ class NatDetection extends Cubit<NatDetectionType> {
   Future<String> _endpointEcho(
       int currentTask, int serverId, UDP socket) async {
     final port = 7777;
-    final ips = await _dns.lookup("natdetect${serverId}.ouisync.net");
+    final ips = await _dns.lookup("natdetect$serverId.ouisync.net");
     for (final ip in ips) {
       // Indicate that this is the first version of this protocol. The remote
       // doesn't currently read it, but in future if we need to change the
