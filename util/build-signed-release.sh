@@ -90,6 +90,8 @@ flutter clean
 
 NO_SIGN="true" \
     flutter build appbundle \
+    --flavor vanilla \
+    -t lib/main_development.dart \
     --release \
     $platforms_flag \
     --build-number=$build_number \
