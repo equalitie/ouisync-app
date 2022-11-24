@@ -53,10 +53,10 @@ class PlatformWindowManagerDesktop
     String path =
         Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
-    List<stray.MenuItemBase> menu = [
-      stray.MenuItem(
+    List<stray.MenuItem> menus = [
+      stray.MenuItemLabel(
           label: S.current.actionExit,
-          onClicked: () async {
+          onClicked: (_) async {
             await windowManager.setPreventClose(false);
             await windowManager.close();
           }),
@@ -68,6 +68,8 @@ class PlatformWindowManagerDesktop
       toolTip: S.current.messageOuiSyncDesktopTitle,
     );
 
+    final menu = stray.Menu();
+    await menu.buildFrom(menus);
     await _systemTray.setContextMenu(menu);
 
     _systemTray.registerSystemTrayEventHandler((eventName) async {

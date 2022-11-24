@@ -216,4 +216,5 @@ String _connectivityTypeName(ConnectivityResult result) {
     case ConnectivityResult.none:
       return "None";
   }
+  return "Unknown";
 }
