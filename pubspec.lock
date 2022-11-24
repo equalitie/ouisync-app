@@ -1248,12 +1248,10 @@ packages:
   system_tray:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "576d7cc17fbab10bcdb40468a0db012d2365462e"
-      url: "https://github.com/antler119/system_tray.git"
-    source: git
-    version: "0.1.0"
+      name: system_tray
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   term_glyph:
     dependency: transitive
     description:
@@ -1373,6 +1371,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.7"
   vector_math:
     dependency: transitive
     description:
