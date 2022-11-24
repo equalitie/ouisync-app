@@ -23,7 +23,7 @@ jobs:
       - name: Building OuiSync library
         run: |
          cd ouisync-plugin\ouisync
-         cargo build --release --lib
+         cargo build --release -p ouisync-ffi
       - name: Generating Rust FFI bindings for the library, to be used in the OuiSync plugin.
         run: |
          cd ouisync-plugin\ouisync
