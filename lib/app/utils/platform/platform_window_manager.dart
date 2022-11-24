@@ -4,7 +4,8 @@ import 'platform.dart';
 
 abstract class PlatformWindowManager {
   factory PlatformWindowManager() {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid ||
+    Platform.isIOS) {
       return PlatformWindowManagerMobile();
     }
     return PlatformWindowManagerDesktop();
