@@ -1,0 +1,18 @@
+icons_launcher:
+  image_path: 'assets/ouisync-beta-1024.png'
+  platforms:
+    android:
+      enable: true
+      image_path: 'assets/ouisync-beta-1024.png'
+      adaptive_background_image: 'assets/ic_launcher_background.png'
+      adaptive_foreground_image: 'assets/ic_launcher_foreground.png'
+      adaptive_round_image: 'assets/ic_launcher_round.png'
+    ios:
+      enable: true
+      image_path: 'assets/ouisync-beta-1024.png'
+    windows:
+      enable: true
+      image_path: 'assets/ouisync-beta-round-1200.png'
+    linux:
+      enable: true
+      image_path: 'assets/ouisync-beta-round-1200.png'
