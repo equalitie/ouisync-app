@@ -49,5 +49,20 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera for reading the QR code</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ShareMedia</string>
+			</array>
+		</dict>
+		<dict/>
+	</array>
+
+  <key>NSPhotoLibraryUsageDescription</key>
+	<string>To upload photos, please allow permission to access your photo library.</string>
 </dict>
 </plist>
