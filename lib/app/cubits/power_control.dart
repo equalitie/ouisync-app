@@ -175,6 +175,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
         break;
       case ConnectivityResult.wifi:
       case ConnectivityResult.ethernet:
+      case ConnectivityResult.vpn:
         newMode = NetworkMode.full;
         break;
       case ConnectivityResult.mobile:

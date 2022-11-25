@@ -78,7 +78,7 @@ jobs:
       - name: Build OuiSync library for tests
         run: |
          cd ouisync-plugin/ouisync
-         cargo build --release --lib
+         cargo build --release -p ouisync-ffi
 
       - name: Run tests
         run: OUISYNC_LIB=`pwd`/ouisync-plugin/ouisync/target/release/libouisync_ffi.so flutter test

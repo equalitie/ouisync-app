@@ -213,8 +213,9 @@ String _connectivityTypeName(ConnectivityResult result) {
       return "Mobile";
     case ConnectivityResult.ethernet:
       return "Ethernet";
+    case ConnectivityResult.vpn:
+      return "VPN";
     case ConnectivityResult.none:
       return "None";
   }
-  return "Unknown";
 }
