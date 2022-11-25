@@ -254,7 +254,7 @@ packages:
     source: hosted
     version: "1.5.0"
   cross_file:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cross_file
       url: "https://pub.dartlang.org"
@@ -1022,7 +1022,7 @@ packages:
       name: share_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.0"
+    version: "4.5.3"
   share_plus_linux:
     dependency: transitive
     description:
@@ -1050,14 +1050,14 @@ packages:
       name: share_plus_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.1.0"
   share_plus_windows:
     dependency: transitive
     description:
       name: share_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1307,7 +1307,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.20"
+    version: "6.1.7"
   url_launcher_android:
     dependency: transitive
     description:
@@ -1342,7 +1342,7 @@ packages:
       name: url_launcher_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.1.1"
   url_launcher_web:
     dependency: transitive
     description:

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:intl/intl.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -76,7 +77,7 @@ class LogsSection extends AbstractSettingsSection {
 
   Future<void> _shareLogs(BuildContext context) async {
     final tempPath = await _dumpInfo(context);
-    await Share.shareFiles([tempPath], mimeTypes: ['text/plain']);
+    await Share.shareXFiles([XFile(tempPath, mimeType: 'text/plain')]);
   }
 
   Future<String> _dumpInfo(BuildContext context) async {
