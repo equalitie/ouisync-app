@@ -29,6 +29,7 @@ dependencies:
   build_runner: ^2.1.7
   collection: ^1.15.0
   connectivity_plus: ^2.2.1
+  cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.3.3
   dns_client: ^0.2.1
@@ -68,7 +69,7 @@ dependencies:
   r_get_ip: ^0.1.1
   receive_sharing_intent: ^1.4.5
   settings_ui: ^2.0.2
-  share_plus: ^4.0.4
+  share_plus: ^4.5.3
   shared_preferences: ^2.0.13
   styled_text: ^5.0.0+1
   system_tray: ^2.0.2
