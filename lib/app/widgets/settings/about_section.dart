@@ -32,22 +32,18 @@ class AboutSection extends AbstractSettingsSection {
       );
 
   Widget _getRuntimeIdForOS() {
-    if (Platform.isIOS) {
-      return Expanded(
-          child: Row(
-        children: [
-          Expanded(
-              child: Text(
-            repos.session.thisRuntimeId,
-            overflow: TextOverflow.ellipsis,
-          ))
-        ],
-      ));
-    }
-
-    return Text(
+    final runtimeId = Text(
       repos.session.thisRuntimeId,
       overflow: TextOverflow.ellipsis,
     );
+
+    if (Platform.isIOS) {
+      return Expanded(
+          child: Row(
+        children: [Expanded(child: runtimeId)],
+      ));
+    }
+
+    return runtimeId;
   }
 }
