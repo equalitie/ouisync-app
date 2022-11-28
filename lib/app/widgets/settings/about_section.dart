@@ -25,10 +25,16 @@ class AboutSection extends AbstractSettingsSection {
           SettingsTile(
             title: Text('Runtime ID'),
             leading: Icon(Icons.person),
-            value: Text(
-              repos.session.thisRuntimeId,
-              overflow: TextOverflow.ellipsis,
-            ),
+            value: Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child:Text(
+                      repos.session.thisRuntimeId,
+                      overflow: TextOverflow.ellipsis,
+                    ))
+                ],
+              )),
           ),
         ],
       );
