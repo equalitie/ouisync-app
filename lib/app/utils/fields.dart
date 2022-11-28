@@ -431,6 +431,7 @@ class Fields {
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
+    int textMaxLines = 1,
     double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
@@ -445,14 +446,15 @@ class Fields {
               if (icon != null)
                 _iconBase(icon, size: iconSize, color: iconColor),
               Dimensions.spacingHorizontal,
-              Text(text,
+              Expanded(child: Text(text,
                   textAlign: textAlign,
-                  softWrap: textSoftWrap,
                   overflow: textOverflow,
+                  softWrap: textSoftWrap,
+                  maxLines: textMaxLines,
                   style: TextStyle(
                       fontSize: textFontSize,
                       fontWeight: textFontWeight,
-                      color: textColor))
+                      color: textColor)))
             ],
           ));
 
@@ -463,6 +465,7 @@ class Fields {
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
+    int textMaxLines = 1,
     double textFontSize = Dimensions.fontBig,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
@@ -478,6 +481,7 @@ class Fields {
               textAlign: textAlign,
               textSoftWrap: textSoftWrap,
               textOverflow: textOverflow,
+              textMaxLines: textMaxLines,
               textFontWeight: textFontWeight,
               textColor: textColor,
               textFontSize: textFontSize,
