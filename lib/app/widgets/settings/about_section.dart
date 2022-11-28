@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-
 import 'app_version_tile.dart';
 
 class AboutSection extends AbstractSettingsSection {
@@ -25,17 +26,28 @@ class AboutSection extends AbstractSettingsSection {
           SettingsTile(
             title: Text('Runtime ID'),
             leading: Icon(Icons.person),
-            value: Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child:Text(
-                      repos.session.thisRuntimeId,
-                      overflow: TextOverflow.ellipsis,
-                    ))
-                ],
-              )),
+            value: _getRuntimeIdForOS(),
           ),
         ],
       );
+
+  Widget _getRuntimeIdForOS() {
+    if (Platform.isIOS) {
+      return Expanded(
+          child: Row(
+        children: [
+          Expanded(
+              child: Text(
+            repos.session.thisRuntimeId,
+            overflow: TextOverflow.ellipsis,
+          ))
+        ],
+      ));
+    }
+
+    return Text(
+      repos.session.thisRuntimeId,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 }
