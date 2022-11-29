@@ -13,13 +13,11 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      shadowColor: Colors.black26,
-      title: repoList,
-      // Make the `repoList` have no spacing on the horizontal axis.
-      titleSpacing: 0.0,
-      actions: [settingsButton],
-      backgroundColor: F.color,
-    );
+        shadowColor: Colors.black26,
+        title: repoList,
+        // Make the `repoList` have no spacing on the horizontal axis.
+        titleSpacing: 0.0,
+        actions: [settingsButton]);
   }
 
   @override
