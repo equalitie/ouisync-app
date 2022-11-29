@@ -14,6 +14,7 @@ Future<void> main() async {
       "------------------------ OuiSync (development) Start ------------------------");
 
   F.appFlavor = Flavor.development;
+  final themePrimaryColor = F.color;
 
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,6 +24,6 @@ Future<void> main() async {
 
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  final app = await initOuiSyncApp();
+  final app = await initOuiSyncApp(themePrimaryColor);
   runApp(app);
 }

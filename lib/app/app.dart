@@ -18,7 +18,7 @@ import 'utils/loggers/ouisync_app_logger.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp() async {
+Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
   final windowManager = PlatformWindowManager();
 
   Loggy.initLoggy();
@@ -39,6 +39,7 @@ Future<Widget> initOuiSyncApp() async {
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(appBarTheme: AppBarTheme(color: themePrimaryColor)),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,

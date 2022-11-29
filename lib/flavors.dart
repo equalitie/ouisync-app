@@ -6,7 +6,6 @@ class F {
   static const String _baseAuthority = 'org.equalitie.ouisync';
 
   static Flavor? appFlavor;
-  static Color? backgroundColor;
 
   static String get name => appFlavor?.name ?? '';
 

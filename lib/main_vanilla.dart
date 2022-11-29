@@ -11,9 +11,10 @@ Future<void> main() async {
       "------------------------ OuiSync (vanilla) Start ------------------------");
 
   F.appFlavor = Flavor.vanilla;
+  final themePrimaryColor = F.color;
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  final app = await initOuiSyncApp();
+  final app = await initOuiSyncApp(themePrimaryColor);
   runApp(app);
 }
