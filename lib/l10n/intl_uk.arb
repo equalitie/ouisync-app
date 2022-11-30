@@ -405,5 +405,9 @@
   "actionDeleteCapital": "",
   "@actionDeleteCapital": {},
   "actionLockCapital": "",
-  "@actionLockCapital": {}
+  "@actionLockCapital": {},
+  "messageFiles": "",
+  "@messageFiles": {},
+  "messageFile": "",
+  "@messageFile": {}
 }
