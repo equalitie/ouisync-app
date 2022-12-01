@@ -208,7 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
             "Create a new <bold>repository</bold>, or link to one from a friend using a <bold>repository token</bold>"),
         "messageCreatingToken":
-            MessageLookupByLibrary.simpleMessage("Creating the share token..."),
+            MessageLookupByLibrary.simpleMessage("Creating the share token…"),
         "messageDownloadingFileCanceled": m1,
         "messageDownloadingFileError": m2,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -264,7 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageInitializing":
-            MessageLookupByLibrary.simpleMessage("Initializing..."),
+            MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
         "messageLibraryPanic":
@@ -275,7 +275,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is locked."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
-            "Locking all open repositories..."),
+            "Locking all open repositories…"),
         "messageMoveEntryOrigin": m8,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
