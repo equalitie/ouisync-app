@@ -28,7 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(name) => "${name} - fallo durante descarga";
 
   static String m3(entry) =>
-      "${entry} con el mismo nombre ya existe en este directorio";
+      "${entry} con el mismo nombre ya existe en este directorio.";
 
   static String m4(path) =>
       "Este directorio no existe más, navegando al ancestro: ${path}";
@@ -45,6 +45,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m9(name) => "Error creando archivo ${name}";
 
   static String m10(access) => "Modo de aceso otorgado: ${access}";
+
+  static String m11(name) =>
+      "Este repositorio ya existe en la aplicación con el nombre \"${name}\".";
 
   static String m12(name) =>
       "Sugerido: ${name}\n(clic aquí para usar este nombre)";
@@ -83,6 +86,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCELAR"),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CERRAR"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Crear"),
+        "actionCreateRepository":
+            MessageLookupByLibrary.simpleMessage("Crear un Repositorio"),
         "actionDelete": MessageLookupByLibrary.simpleMessage("Borrar"),
         "actionDeleteCapital": MessageLookupByLibrary.simpleMessage("BORRAR"),
         "actionDeleteFile":
@@ -151,13 +156,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPeers": MessageLookupByLibrary.simpleMessage("Compañeras"),
         "labelQRCode": MessageLookupByLibrary.simpleMessage("Código QR"),
         "labelRenameRepository":
-            MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre"),
+            MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre: "),
         "labelRepositoryLink":
             MessageLookupByLibrary.simpleMessage("Link del repositorio: "),
         "labelRetypePassword":
             MessageLookupByLibrary.simpleMessage("Repita la clave: "),
         "labelSelectRepository":
-            MessageLookupByLibrary.simpleMessage("seleccione el repositorio"),
+            MessageLookupByLibrary.simpleMessage("Seleccione el repositorio "),
         "labelSetPermission":
             MessageLookupByLibrary.simpleMessage("Determine el accesso"),
         "labelShareLink":
@@ -172,7 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelUseExternalStorage":
             MessageLookupByLibrary.simpleMessage("Usar almacenamiento externo"),
         "mesageNoMediaPresent":
-            MessageLookupByLibrary.simpleMessage("No hay archivos presentes"),
+            MessageLookupByLibrary.simpleMessage("No hay archivos presentes."),
         "messageAccessModeDisabled": m0,
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
@@ -193,9 +198,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Tu colega no puede escribir o leer los contenidos"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
-            "Este repositorio es de sólo lectura"),
+            "Este repositorio es de sólo lectura."),
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
-            "La <bold>clave</bold> ingresada no da acceso a los contenidos"),
+            "La <bold>clave</bold> ingresada no da acceso a los contenidos."),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Cambiar la extensión del archivo puede hacerlo inutilizable"),
         "messageConfirmFileDeletion":
@@ -210,9 +215,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Crea un nuevo <bold>directorio</bold>, o agregar un <bold>archivo</bold>, usando <icon></icon>"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
-            "Crea un  nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
+            "Crea un nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
         "messageCreatingToken": MessageLookupByLibrary.simpleMessage(
-            "Creando el token para compartir..."),
+            "Creando el token para compartir…"),
         "messageDownloadingFileCanceled": m1,
         "messageDownloadingFileError": m2,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -233,34 +238,34 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorCreatingRepository": MessageLookupByLibrary.simpleMessage(
             "Error creando el repositorio"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
-            "Error creando el token para compartir"),
+            "Error creando el token para compartir."),
         "messageErrorCurrentPathMissing": m4,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
-            "Algo falló. Por favor intente de nuevo"),
+            "Algo falló. Por favor intente de nuevo."),
         "messageErrorDefaultShort":
-            MessageLookupByLibrary.simpleMessage("Falló"),
+            MessageLookupByLibrary.simpleMessage("Falló."),
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entrada no encontrada"),
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage(
-                "Por favor ingrese in nombre válido (unico, no spacios, ...)"),
+                "Por favor ingrese in nombre válido."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "No pudimos cargar los contenidos de este directorio. Por favor intente de nuevo"),
+            "No pudimos cargar los contenidos de este directorio. Por favor intente de nuevo."),
         "messageErrorPathNotEmpty": m5,
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Ya existe un repositorio con este nombre"),
         "messageErrorRepositoryPasswordValidation":
-            MessageLookupByLibrary.simpleMessage("Por favor ingrese la clave"),
+            MessageLookupByLibrary.simpleMessage("Por favor ingrese la clave."),
         "messageErrorRetypePassword": MessageLookupByLibrary.simpleMessage(
-            "La clave y la repetición de la clave no concuerdan"),
+            "La clave y la repetición de la clave no concuerdan."),
         "messageErrorTokenEmpty":
-            MessageLookupByLibrary.simpleMessage("Por favor ingrese un token"),
+            MessageLookupByLibrary.simpleMessage("Por favor ingrese un token."),
         "messageErrorTokenInvalid": MessageLookupByLibrary.simpleMessage(
-            "El token parece no ser válido"),
+            "El token parece no ser válido."),
         "messageErrorTokenValidator": MessageLookupByLibrary.simpleMessage(
-            "Por favor ingrese in token válido"),
+            "Por favor ingrese in token válido."),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
-            "Presione de nuevo el botón para ir atrás para salir de la aplicación"),
+            "Presione de nuevo el botón para ir atrás para salir de la aplicación."),
         "messageFile": MessageLookupByLibrary.simpleMessage("archivo"),
         "messageFileName":
             MessageLookupByLibrary.simpleMessage("Nombre de archivo"),
@@ -271,20 +276,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageInitializing":
-            MessageLookupByLibrary.simpleMessage("Inicializando..."),
+            MessageLookupByLibrary.simpleMessage("Inicializando…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
-            "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos"),
+            "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos."),
+        "messageLibraryPanic":
+            MessageLookupByLibrary.simpleMessage("Fallo interno detectado."),
         "messageLoadingDefault":
             MessageLookupByLibrary.simpleMessage("Cargando…"),
         "messageLockOpenRepos": m7,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
-            "Este <bold>repositorio</bold> está cerrado"),
+            "Este <bold>repositorio</bold> está cerrado."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
-            "Bloqueando todos los repositorios abiertos..."),
+            "Bloqueando todos los repositorios abiertos…"),
         "messageMoveEntryOrigin": m8,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
-            "Esta función no está disponible mientras se está moviendo una entrada"),
+            "Esta función no está disponible mientras se está moviendo una entrada."),
+        "messageNetworkIsUnavailable":
+            MessageLookupByLibrary.simpleMessage("Red no disponible"),
         "messageNewFileError": m9,
+        "messageNewVersionIsAvailable":
+            MessageLookupByLibrary.simpleMessage("Existe una nueva versión."),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Antes de agregar archivos, tienes que crear un repositorio"),
         "messageNoRepos":
@@ -295,7 +306,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("OuiSync"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
-            "Este repositorio es de <bold>solo lectura</bold>"),
+            "Este repositorio es de <bold>solo lectura</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "No puede ser modificado, sólo acceder sus contenidos"),
         "messageRenameFile":
@@ -305,6 +316,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(
             "Cambiar nombre de repositorio"),
         "messageRepositoryAccessMode": m10,
+        "messageRepositoryAlreadyExist": m11,
         "messageRepositoryName":
             MessageLookupByLibrary.simpleMessage("De un nombre al repositorio"),
         "messageRepositoryNewName": MessageLookupByLibrary.simpleMessage(
@@ -326,8 +338,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Necesitas seleccionar un permiso para primero crear un link de repository"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("Comparte con Código QR"),
+        "messageSyncingIsDisabledOnMobileInternet":
+            MessageLookupByLibrary.simpleMessage(
+                "La sincronización está desactivada cuando usas los datos móviles"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
-            "Token de repositorio copiado al portapapeles"),
+            "Token de repositorio copiado al portapapeles."),
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Ingrese la clave para abrir el repositorio"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -345,6 +360,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),
+        "titleAbout": MessageLookupByLibrary.simpleMessage("Sobre"),
         "titleAddFile": MessageLookupByLibrary.simpleMessage(
             "Agregar un archivo a OuiSync"),
         "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(

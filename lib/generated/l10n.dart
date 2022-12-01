@@ -1190,10 +1190,10 @@ class S {
     );
   }
 
-  /// `Creating the share token...`
+  /// `Creating the share token…`
   String get messageCreatingToken {
     return Intl.message(
-      'Creating the share token...',
+      'Creating the share token…',
       name: 'messageCreatingToken',
       desc: '',
       args: [],
@@ -1320,10 +1320,10 @@ class S {
     );
   }
 
-  /// `Initializing...`
+  /// `Initializing…`
   String get messageInitializing {
     return Intl.message(
-      'Initializing...',
+      'Initializing…',
       name: 'messageInitializing',
       desc: '',
       args: [],
@@ -1440,10 +1440,10 @@ class S {
     );
   }
 
-  /// `Locking all open repositories...`
+  /// `Locking all open repositories…`
   String get messageLockingAllRepos {
     return Intl.message(
-      'Locking all open repositories...',
+      'Locking all open repositories…',
       name: 'messageLockingAllRepos',
       desc: '',
       args: [],
