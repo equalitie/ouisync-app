@@ -24,7 +24,8 @@ void main() {
         handle: await Repository.create(
           session,
           store: info.path(),
-          password: 'a1b2c3',
+          readPassword: null,
+          writePassword: null,
         ),
         settings: settings);
   });

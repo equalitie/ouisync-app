@@ -391,8 +391,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         return ErrorRepoEntry(info, S.current.messageErrorRepositoryNameExist);
       }
 
+      // TODO: readPassword and writePassword may be different, they can also
+      // be null (together or separately). Consult documentation to
+      // `Repository.create` for details.
       final repo = await oui.Repository.create(_session,
-          store: store, password: password, shareToken: token);
+          store: store,
+          readPassword: password,
+          writePassword: password,
+          shareToken: token);
 
       final cubit =
           RepoCubit(metaInfo: info, handle: repo, settings: _settings);
