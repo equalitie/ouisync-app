@@ -200,36 +200,31 @@ class _MainPageState extends State<MainPage>
   Future<bool> _onBackPressed() async {
     final currentRepo = _currentRepo;
 
-    if (currentRepo is! OpenRepoEntry) {
-      return false;
-    }
-
-    final currentFolder = currentRepo.cubit.currentFolder;
-
-    if (currentFolder.isRoot()) {
-      int clickCount = exitClickCounter.registerClick();
-
-      if (clickCount <= 1) {
-        showSnackBar(context, content: Text(S.current.messageExitOuiSync));
-
-        // Don't pop => don't exit
-        return false;
-      } else {
-        exitClickCounter.reset();
-        // We still don't want to do the pop because that would destroy the
-        // current Isolate's execution context and we would lose track of
-        // open OuiSync objects (i.e. repositories, files, directories,
-        // network handles,...). This is bad because even though the current
-        // execution context is deleted, the OuiSync Rust global variables
-        // and threads stay alive. If the user at that point tried to open
-        // the app again, this widget would try to reinitialize all those
-        // variables without previously properly closing them.
-        MoveToBackground.moveTaskToBack();
+    if (currentRepo is OpenRepoEntry) {
+      final currentFolder = currentRepo.cubit.currentFolder;
+      if (!currentFolder.isRoot()) {
+        currentRepo.cubit.navigateTo(currentFolder.parent);
         return false;
       }
     }
 
-    currentRepo.cubit.navigateTo(currentFolder.parent);
+    int clickCount = exitClickCounter.registerClick();
+
+    if (clickCount <= 1) {
+      showSnackBar(context, content: Text(S.current.messageExitOuiSync));
+      // Don't pop => don't exit
+    } else {
+      exitClickCounter.reset();
+      // We still don't want to do the pop because that would destroy the
+      // current Isolate's execution context and we would lose track of
+      // open OuiSync objects (i.e. repositories, files, directories,
+      // network handles,...). This is bad because even though the current
+      // execution context is deleted, the OuiSync Rust global variables
+      // and threads stay alive. If the user at that point tried to open
+      // the app again, this widget would try to reinitialize all those
+      // variables without previously properly closing them.
+      MoveToBackground.moveTaskToBack();
+    }
 
     return false;
   }
