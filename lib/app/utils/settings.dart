@@ -1,11 +1,12 @@
 import 'dart:io' as io;
+
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path/path.dart' as p;
 
-import 'log_reader.dart';
-import 'constants.dart';
 import '../models/repo_meta_info.dart';
+import 'constants.dart';
+import 'log_reader.dart';
 
 class Settings {
   // Per app settings
@@ -151,6 +152,9 @@ class Settings {
 
     await setDhtEnabled(repoName, null);
     await setPexEnabled(repoName, null);
+
+    _repos.remove(repoName);
+    _storeRepos(_prefs, _repos);
   }
 
   bool? getDhtEnabled(String repoName) =>
