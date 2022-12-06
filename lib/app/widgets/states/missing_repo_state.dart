@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class MissingRepositoryState extends StatelessWidget {
@@ -28,23 +29,19 @@ class MissingRepositoryState extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.center,
-            child:
-                Fields.inPageMainMessage(errorMessage), //'Repository missing'),
+            child: Fields.inPageMainMessage(errorMessage),
           ),
           if (errorDescription != null) Dimensions.spacingVertical,
           if (errorDescription != null)
             Align(
                 alignment: Alignment.center,
                 child: Fields.inPageSecondaryMessage(errorDescription!,
-                    // 'We could not find this repository in your device.\n\n'
-                    // 'If you recently moved this repository files, put them '
-                    // 'back and reload the repository; otherwise just delete it.',
                     tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
           if (onReloadRepository != null)
             Fields.inPageButton(
                 onPressed: () => onReloadRepository!(),
-                text: 'Reload repository',
+                text: S.current.actionReloadRepo,
                 size: Dimensions.sizeInPageButtonLong,
                 alignment: Alignment.center,
                 autofocus: true),
@@ -52,7 +49,7 @@ class MissingRepositoryState extends StatelessWidget {
           if (onDeleteRepository != null)
             Fields.inPageButton(
               onPressed: () => onDeleteRepository!(),
-              text: 'Delete repository',
+              text: S.current.actionDeleteRepo,
               size: Dimensions.sizeInPageButtonLong,
               alignment: Alignment.center,
             ),

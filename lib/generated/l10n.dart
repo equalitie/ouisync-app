@@ -1570,6 +1570,66 @@ class S {
     );
   }
 
+  /// `The repository deletion failed`
+  String get messageRepoDeletionFailed {
+    return Intl.message(
+      'The repository deletion failed',
+      name: 'messageRepoDeletionFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We could not delete the repository "{name}"`
+  String messageRepoDeletionErrorDescription(Object name) {
+    return Intl.message(
+      'We could not delete the repository "$name"',
+      name: 'messageRepoDeletionErrorDescription',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `The repository is not there anymore`
+  String get messageRepoMissing {
+    return Intl.message(
+      'The repository is not there anymore',
+      name: 'messageRepoMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We could not find the repository "{name}" at the usual location`
+  String messageRepoMissingErrorDescription(Object name) {
+    return Intl.message(
+      'We could not find the repository "$name" at the usual location',
+      name: 'messageRepoMissingErrorDescription',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error opening the repository`
+  String get messageErrorOpeningRepo {
+    return Intl.message(
+      'Error opening the repository',
+      name: 'messageErrorOpeningRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Initialization of the repository {name} failed`
+  String messageErrorOpeningRepoDescription(Object name) {
+    return Intl.message(
+      'Initialization of the repository $name failed',
+      name: 'messageErrorOpeningRepoDescription',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -1805,6 +1865,26 @@ class S {
     return Intl.message(
       'Create repository',
       name: 'actionNewRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reload repository`
+  String get actionReloadRepo {
+    return Intl.message(
+      'Reload repository',
+      name: 'actionReloadRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete repository`
+  String get actionDeleteRepo {
+    return Intl.message(
+      'Delete repository',
+      name: 'actionDeleteRepo',
       desc: '',
       args: [],
     );
