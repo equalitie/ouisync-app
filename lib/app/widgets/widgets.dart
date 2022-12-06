@@ -37,6 +37,7 @@ export 'selectors/access_mode_selector.dart';
 export 'states/error_state.dart';
 export 'states/loading_main_page_state.dart';
 export 'states/locked_repository_state.dart';
+export 'states/missing_repo_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 

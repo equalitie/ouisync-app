@@ -170,6 +170,23 @@ class _MainPageState extends State<MainPage>
         return _repositoryContentBuilder(current);
       }
 
+      if (current is MissingRepoEntry) {
+        return MissingRepositoryState(
+            errorMessage: current.error,
+            errorDescription: current.errorDescription,
+            onReloadRepository: null,
+            onDeleteRepository: () => deleteRepository(current.metaInfo));
+      }
+
+      if (current is ErrorRepoEntry) {
+        // This is a general purpose error state.
+        // errorDescription is required, but nullable.
+        return ErrorState(
+            errorMessage: current.error,
+            errorDescription: current.errorDescription,
+            onReload: null);
+      }
+
       if (current == null) {
         return NoRepositoriesState(
             onNewRepositoryPressed: createRepoDialog,
@@ -714,6 +731,11 @@ class _MainPageState extends State<MainPage>
       repositoryName,
     );
   }
+
+  void deleteRepository(RepoMetaInfo repoInfo) =>
+      _repositories.deleteRepository(repoInfo);
+
+  void reloadRepository() => _repositories.init();
 
   void showSettings() {
     final reposCubit = _repositories;

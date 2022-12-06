@@ -201,12 +201,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
     final repo = await _open(info, password: password);
-
-    if (repo != null) {
-      await _put(repo, setCurrent: setCurrent);
-    } else {
+    if (repo is ErrorRepoEntry) {
       loggy.app('Failed to open repository ${info.name}');
     }
+
+    await _put(repo, setCurrent: setCurrent);
   }
 
   Future<RepoEntry> createRepository(RepoMetaInfo info,
@@ -243,7 +242,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         password: password,
       );
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         loggy.app('Failed to open repository: ${info.name}');
         return;
       }
@@ -266,7 +265,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         info,
       );
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         loggy.app('Failed to lock repository: ${info.name}');
         return;
       }
@@ -292,7 +291,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       final repo = await _open(oldInfo);
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         await setCurrent(null);
       } else {
         await _put(repo, setCurrent: wasCurrent);
@@ -305,7 +304,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     final repo = await _open(newInfo);
 
-    if (repo == null) {
+    if (repo is ErrorRepoEntry) {
       await setCurrent(null);
     } else {
       await _put(repo, setCurrent: wasCurrent);
@@ -323,23 +322,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     final deleted = await _deleteRepositoryFiles(info);
 
-    // TODO: Instead of trying to reopen this repository, we should create a new
-    // subclass of RepoEntry and tell the user that there that deletion failed.
-    // After restarting the app, if the main `.db` file still exists, we should
-    // try to open it as normal, but if the main `.db` file has been deleted while
-    // the supporting files still exist, we should still show the user the new
-    // subclass of RepoEntry.
     if (!deleted) {
-      loggy.app('The repository $repoName deletion failed');
+      loggy.app('The repository "$repoName" deletion failed');
 
-      loggy.app('Initializing $repoName again...');
-      final repo = await _open(info);
-
-      if (repo == null) {
-        await setCurrent(null);
-      } else {
-        await _put(repo, setCurrent: wasCurrent);
-      }
+      await _put(
+          ErrorRepoEntry(info, 'The repository deletion failed.',
+              'We could not delete the repository "$repoName"'),
+          setCurrent: wasCurrent);
 
       changed();
 
@@ -354,13 +343,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<OpenRepoEntry?> _open(RepoMetaInfo info, {String? password}) async {
+  Future<RepoEntry> _open(RepoMetaInfo info, {String? password}) async {
     final name = info.name;
     final store = info.path();
 
+    String? errorDescription;
+
     try {
       if (!await io.File(store).exists()) {
-        return null;
+        return MissingRepoEntry(info, 'The repository is not there anymore',
+            'We could not find the repository "$name" at the usual location');
       }
 
       final repo =
@@ -372,10 +364,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      loggy.app('Initialization of the repository $name failed', e, st);
+      errorDescription = 'Initialization of the repository $name failed';
+      loggy.app(errorDescription, e, st);
     }
 
-    return null;
+    return ErrorRepoEntry(
+        info, 'Error opening the repository', errorDescription);
   }
 
   Future<RepoEntry> _create(
@@ -386,9 +380,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final name = info.name;
     final store = info.path();
 
+    String? errorDescription;
+
     try {
       if (await io.File(store).exists()) {
-        return ErrorRepoEntry(info, S.current.messageErrorRepositoryNameExist);
+        return ErrorRepoEntry(
+            info, S.current.messageErrorRepositoryNameExist, null);
       }
 
       // TODO: readPassword and writePassword may be different, they can also
@@ -406,10 +403,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      loggy.app('Initialization of the repository $name failed', e, st);
+      errorDescription = 'Initialization of the repository $name failed';
+      loggy.app(errorDescription, e, st);
     }
 
-    return ErrorRepoEntry(info, S.current.messageErrorCreatingRepository);
+    return ErrorRepoEntry(
+        info, S.current.messageErrorCreatingRepository, errorDescription);
   }
 
   void _update(void Function() changeState) {
