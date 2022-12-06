@@ -201,12 +201,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
     final repo = await _open(info, password: password);
-
-    if (repo != null) {
-      await _put(repo, setCurrent: setCurrent);
-    } else {
+    if (repo is ErrorRepoEntry) {
       loggy.app('Failed to open repository ${info.name}');
     }
+
+    await _put(repo, setCurrent: setCurrent);
   }
 
   Future<RepoEntry> createRepository(RepoMetaInfo info,
@@ -243,7 +242,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         password: password,
       );
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         loggy.app('Failed to open repository: ${info.name}');
         return;
       }
@@ -266,7 +265,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
         info,
       );
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         loggy.app('Failed to lock repository: ${info.name}');
         return;
       }
@@ -292,7 +291,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       final repo = await _open(oldInfo);
 
-      if (repo == null) {
+      if (repo is ErrorRepoEntry) {
         await setCurrent(null);
       } else {
         await _put(repo, setCurrent: wasCurrent);
@@ -305,7 +304,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     final repo = await _open(newInfo);
 
-    if (repo == null) {
+    if (repo is ErrorRepoEntry) {
       await setCurrent(null);
     } else {
       await _put(repo, setCurrent: wasCurrent);
@@ -354,9 +353,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<OpenRepoEntry?> _open(RepoMetaInfo info, {String? password}) async {
+  Future<RepoEntry> _open(RepoMetaInfo info, {String? password}) async {
     final name = info.name;
     final store = info.path();
+
+    String? errorDescription;
 
     try {
       if (!await io.File(store).exists()) {
@@ -372,10 +373,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      loggy.app('Initialization of the repository $name failed', e, st);
+      errorDescription = 'Initialization of the repository $name failed';
+      loggy.app(errorDescription, e, st);
     }
 
-    return null;
+    return ErrorRepoEntry(
+        info, 'Error opening the repository', errorDescription);
   }
 
   Future<RepoEntry> _create(
@@ -386,9 +389,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final name = info.name;
     final store = info.path();
 
+    String? errorDescription;
+
     try {
       if (await io.File(store).exists()) {
-        return ErrorRepoEntry(info, S.current.messageErrorRepositoryNameExist);
+        return ErrorRepoEntry(
+            info, S.current.messageErrorRepositoryNameExist, null);
       }
 
       final repo = await oui.Repository.create(_session,
@@ -400,10 +406,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      loggy.app('Initialization of the repository $name failed', e, st);
+      errorDescription = 'Initialization of the repository $name failed';
+      loggy.app(errorDescription, e, st);
     }
 
-    return ErrorRepoEntry(info, S.current.messageErrorCreatingRepository);
+    return ErrorRepoEntry(
+        info, S.current.messageErrorCreatingRepository, errorDescription);
   }
 
   void _update(void Function() changeState) {
