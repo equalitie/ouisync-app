@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+
 import '../cubits/cubits.dart';
 import 'folder.dart';
 import 'repo_meta_info.dart';
@@ -75,6 +76,33 @@ class OpenRepoEntry extends RepoEntry {
 
   @override
   Folder? get currentFolder => _cubit.currentFolder;
+}
+
+class MissingRepoEntry extends RepoEntry {
+  final RepoMetaInfo _metaInfo;
+  final String _error;
+  final String? _errorDescription;
+
+  MissingRepoEntry(this._metaInfo, this._error, this._errorDescription);
+
+  String get error => _error;
+
+  String? get errorDescription => _errorDescription;
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Folder? get currentFolder => null;
+
+  @override
+  String? get infoHash => null;
+
+  @override
+  oui.Repository? get maybeHandle => null;
+
+  @override
+  RepoMetaInfo get metaInfo => _metaInfo;
 }
 
 class ErrorRepoEntry extends RepoEntry {
