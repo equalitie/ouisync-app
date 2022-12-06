@@ -361,7 +361,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     try {
       if (!await io.File(store).exists()) {
-        return null;
+        return MissingRepoEntry(info, 'The repository is not there anymore',
+            'We could not find the repository "$name" at the usual location');
       }
 
       final repo =
