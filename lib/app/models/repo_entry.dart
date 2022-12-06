@@ -80,13 +80,16 @@ class OpenRepoEntry extends RepoEntry {
 class ErrorRepoEntry extends RepoEntry {
   final RepoMetaInfo _metaInfo;
   final String _error;
+  final String? _errorDescription;
 
-  ErrorRepoEntry(this._metaInfo, this._error);
+  ErrorRepoEntry(this._metaInfo, this._error, this._errorDescription);
 
   String get error => _error;
 
+  String? get errorDescription => _errorDescription;
+
   @override
-  Future<void> close() => throw UnimplementedError();
+  Future<void> close() async {}
 
   @override
   Folder? get currentFolder => null;
