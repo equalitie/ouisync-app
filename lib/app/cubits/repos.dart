@@ -326,8 +326,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('The repository "$repoName" deletion failed');
 
       await _put(
-          ErrorRepoEntry(info, 'The repository deletion failed.',
-              'We could not delete the repository "$repoName"'),
+          ErrorRepoEntry(info, S.current.messageRepoDeletionFailed,
+              S.current.messageRepoDeletionErrorDescription(repoName)),
           setCurrent: wasCurrent);
 
       changed();
@@ -347,12 +347,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final name = info.name;
     final store = info.path();
 
-    String? errorDescription;
-
     try {
       if (!await io.File(store).exists()) {
-        return MissingRepoEntry(info, 'The repository is not there anymore',
-            'We could not find the repository "$name" at the usual location');
+        return MissingRepoEntry(info, S.current.messageRepoMissing,
+            S.current.messageRepoMissingErrorDescription(name));
       }
 
       final repo =
@@ -364,12 +362,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      errorDescription = 'Initialization of the repository $name failed';
-      loggy.app(errorDescription, e, st);
+      loggy.app('Initialization of the repository $name failed', e, st);
     }
 
-    return ErrorRepoEntry(
-        info, 'Error opening the repository', errorDescription);
+    return ErrorRepoEntry(info, S.current.messageErrorOpeningRepo,
+        S.current.messageErrorOpeningRepoDescription(name));
   }
 
   Future<RepoEntry> _create(
@@ -379,8 +376,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }) async {
     final name = info.name;
     final store = info.path();
-
-    String? errorDescription;
 
     try {
       if (await io.File(store).exists()) {
@@ -403,12 +398,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
-      errorDescription = 'Initialization of the repository $name failed';
-      loggy.app(errorDescription, e, st);
+      loggy.app('Initialization of the repository $name failed', e, st);
     }
 
-    return ErrorRepoEntry(
-        info, S.current.messageErrorCreatingRepository, errorDescription);
+    return ErrorRepoEntry(info, S.current.messageErrorCreatingRepository,
+        S.current.messageErrorOpeningRepoDescription(name));
   }
 
   void _update(void Function() changeState) {
