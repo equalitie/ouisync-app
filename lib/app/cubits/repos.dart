@@ -322,23 +322,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     final deleted = await _deleteRepositoryFiles(info);
 
-    // TODO: Instead of trying to reopen this repository, we should create a new
-    // subclass of RepoEntry and tell the user that there that deletion failed.
-    // After restarting the app, if the main `.db` file still exists, we should
-    // try to open it as normal, but if the main `.db` file has been deleted while
-    // the supporting files still exist, we should still show the user the new
-    // subclass of RepoEntry.
     if (!deleted) {
-      loggy.app('The repository $repoName deletion failed');
+      loggy.app('The repository "$repoName" deletion failed');
 
-      loggy.app('Initializing $repoName again...');
-      final repo = await _open(info);
-
-      if (repo == null) {
-        await setCurrent(null);
-      } else {
-        await _put(repo, setCurrent: wasCurrent);
-      }
+      await _put(
+          ErrorRepoEntry(info, 'The repository deletion failed.',
+              'We could not delete the repository "$repoName"'),
+          setCurrent: wasCurrent);
 
       changed();
 
