@@ -988,6 +988,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.1"
+  random_password_generator:
+    dependency: "direct main"
+    description:
+      name: random_password_generator
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   receive_sharing_intent:
     dependency: "direct main"
     description:

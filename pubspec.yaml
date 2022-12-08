@@ -67,6 +67,7 @@ dependencies:
   permission_handler: ^10.2.0
   qr_flutter: ^4.0.0
   r_get_ip: ^0.1.1
+  random_password_generator: ^0.2.1
   receive_sharing_intent: ^1.4.5
   settings_ui: ^2.0.2
   share_plus: ^4.5.3
