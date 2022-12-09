@@ -6,7 +6,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoryCreation extends StatelessWidget {
+class RepositoryCreation extends StatefulWidget {
   RepositoryCreation(
       {Key? key,
       required this.context,
@@ -18,20 +18,28 @@ class RepositoryCreation extends StatelessWidget {
   final ReposCubit cubit;
   final GlobalKey<FormState> formKey;
 
+  @override
+  State<RepositoryCreation> createState() => _RepositoryCreationState();
+}
+
+class _RepositoryCreationState extends State<RepositoryCreation> {
   final TextEditingController _nameController =
       TextEditingController(text: null);
+
   final TextEditingController _passwordController =
       TextEditingController(text: null);
+
   final TextEditingController _retypedPasswordController =
       TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+
   final ValueNotifier<bool> _obscurePasswordConfirm = ValueNotifier<bool>(true);
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: widget.formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -40,7 +48,7 @@ class RepositoryCreation extends StatelessWidget {
           children: [
             SingleChildScrollView(
                 reverse: true,
-                child: _buildCreateRepositoryWidget(this.context))
+                child: _buildCreateRepositoryWidget(widget.context))
           ]),
     );
   }
@@ -147,15 +155,15 @@ class RepositoryCreation extends StatelessWidget {
     final newRepositoryName = _nameController.text;
     final password = _passwordController.text;
 
-    _onSaved(cubit, newRepositoryName, password);
+    _onSaved(widget.cubit, newRepositoryName, password);
   }
 
   void _onSaved(ReposCubit cubit, String name, String password) async {
-    if (!(formKey.currentState?.validate() ?? false)) {
+    if (!(widget.formKey.currentState?.validate() ?? false)) {
       return;
     }
 
-    formKey.currentState!.save();
+    widget.formKey.currentState!.save();
 
     final info = RepoMetaInfo.fromDirAndName(
         await cubit.settings.defaultRepoLocation(), name);
@@ -168,13 +176,13 @@ class RepositoryCreation extends StatelessWidget {
 
     if (repoEntry is ErrorRepoEntry) {
       Dialogs.simpleAlertDialog(
-        context: context,
+        context: widget.context,
         title: S.current.messsageFailedCreateRepository(name),
         message: repoEntry.error,
       );
       return;
     }
 
-    Navigator.of(context).pop(name);
+    Navigator.of(widget.context).pop(name);
   }
 }
