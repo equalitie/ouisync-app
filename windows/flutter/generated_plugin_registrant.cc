@@ -8,6 +8,7 @@
 
 #include <connectivity_plus_windows/connectivity_plus_windows_plugin.h>
 #include <desktop_drop/desktop_drop_plugin.h>
+#include <local_auth_windows/local_auth_plugin.h>
 #include <network_info_plus_windows/network_info_plus_windows_plugin.h>
 #include <ouisync_plugin/ouisync_plugin.h>
 #include <permission_handler_windows/permission_handler_windows_plugin.h>
@@ -23,6 +24,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("ConnectivityPlusWindowsPlugin"));
   DesktopDropPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopDropPlugin"));
+  LocalAuthPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("LocalAuthPlugin"));
   NetworkInfoPlusWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("NetworkInfoPlusWindowsPlugin"));
   OuisyncPluginRegisterWithRegistrar(

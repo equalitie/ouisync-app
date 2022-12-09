@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus_windows
   desktop_drop
+  local_auth_windows
   network_info_plus_windows
   ouisync_plugin
   permission_handler_windows
