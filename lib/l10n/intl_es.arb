@@ -415,5 +415,21 @@
   "messageRepositoryAlreadyExist": "Este repositorio ya existe en la aplicación con el nombre \"{name}\".",
   "@messageRepositoryAlreadyExist": {},
   "messageSyncingIsDisabledOnMobileInternet": "La sincronización está desactivada cuando usas los datos móviles",
-  "@messageSyncingIsDisabledOnMobileInternet": {}
+  "@messageSyncingIsDisabledOnMobileInternet": {},
+  "messageRepoMissing": "El repositorio ya no está allí",
+  "@messageRepoMissing": {},
+  "messageRepoMissingErrorDescription": "No pudimos encontrar el repositorio \"{name}\" en la ubicación habitual",
+  "@messageRepoMissingErrorDescription": {},
+  "messageRepoDeletionFailed": "El borrado del repositorio falló",
+  "@messageRepoDeletionFailed": {},
+  "messageErrorOpeningRepo": "Error al abrir el repositorio",
+  "@messageErrorOpeningRepo": {},
+  "messageErrorOpeningRepoDescription": "La inicialización del repositorio \"{name}\" falló",
+  "@messageErrorOpeningRepoDescription": {},
+  "actionReloadRepo": "Recargar repositorio",
+  "@actionReloadRepo": {},
+  "actionDeleteRepo": "Borrar repositorio",
+  "@actionDeleteRepo": {},
+  "messageRepoDeletionErrorDescription": "No pudimos borrar el repositorio \"{name}\"",
+  "@messageRepoDeletionErrorDescription": {}
 }
