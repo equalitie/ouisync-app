@@ -465,7 +465,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             ),
           );
         });
-    await updateSettingsAndPop(context, newRepo);
+
+    if (newRepo?.isEmpty ?? true) return;
+
+    await updateSettingsAndPop(context, newRepo!);
   }
 
   void addRepoWithTokenDialog(BuildContext context,
