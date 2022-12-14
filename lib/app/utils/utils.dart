@@ -1,5 +1,6 @@
 export 'actions.dart';
 export 'ansi_parser.dart';
+export 'biometrics.dart';
 export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
