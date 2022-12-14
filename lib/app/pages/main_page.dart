@@ -251,12 +251,10 @@ class _MainPageState extends State<MainPage>
         settingsButton: _buildSettingsIcon(),
       );
 
-  RepositoriesBar _buildRepositoriesBar() {
-    return RepositoriesBar(
+  RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
       reposCubit: _repositories,
       shareRepositoryOnTap: _showShareRepository,
-    );
-  }
+      unlockRepositoryOnTap: _unlockRepository);
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -323,9 +321,8 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.canRead) {
         return LockedRepositoryState(
-          repositoryName: current.name,
-          onUnlockPressed: unlockRepositoryDialog,
-        );
+            repositoryName: current.name,
+            unlockRepositoryCallback: _unlockRepository);
       }
 
       return _contentBrowser(current.cubit);
@@ -724,13 +721,42 @@ class _MainPageState extends State<MainPage>
         });
   }
 
-  void unlockRepositoryDialog(String repositoryName) async {
-    await Dialogs.unlockRepositoryDialog(
-      context,
-      _repositories,
-      repositoryName,
-    );
+  Future<void> _unlockRepository({required String repositoryName}) async {
+    final biometricPassword =
+        await Biometrics.getRepositoryPassword(repositoryName: repositoryName);
+
+    if (biometricPassword?.isNotEmpty ?? false) {
+      await _unlockRepositoryUsingBiometrics(
+          repositoryName: repositoryName, password: biometricPassword!);
+      return;
+    }
+
+    await _unlockRepositoryDialog(repositoryName: repositoryName);
   }
+
+  Future<void> _unlockRepositoryDialog({required String repositoryName}) async {
+    final password = await showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          final formKey = GlobalKey<FormState>();
+
+          return ActionsDialog(
+            title: S.current.messageUnlockRepository,
+            body: UnlockRepository(
+                context: context,
+                formKey: formKey,
+                repositoryName: repositoryName),
+          );
+        });
+
+    if (password == null) return;
+
+    await _repositories.unlockRepository(repositoryName, password: password);
+  }
+
+  Future<void> _unlockRepositoryUsingBiometrics(
+          {required String repositoryName, required String password}) async =>
+      await _repositories.unlockRepository(repositoryName, password: password);
 
   void deleteRepository(RepoMetaInfo repoInfo) =>
       _repositories.deleteRepository(repoInfo);

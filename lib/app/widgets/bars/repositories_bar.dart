@@ -11,10 +11,14 @@ import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar(
-      {required this.reposCubit, required this.shareRepositoryOnTap});
+      {required this.reposCubit,
+      required this.shareRepositoryOnTap,
+      required this.unlockRepositoryOnTap});
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
+  final Future<void> Function({required String repositoryName})
+      unlockRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +39,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
               child: _Picker(
                 reposCubit: reposCubit,
                 shareRepositoryOnTap: shareRepositoryOnTap,
+                unlockRepositoryOnTap: unlockRepositoryOnTap,
                 borderColor: Colors.white,
               ),
             ),
@@ -67,11 +72,14 @@ class _Picker extends StatelessWidget {
   const _Picker({
     required this.reposCubit,
     required this.shareRepositoryOnTap,
+    required this.unlockRepositoryOnTap,
     required this.borderColor,
   });
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
+  final Future<void> Function({required String repositoryName})
+      unlockRepositoryOnTap;
   final Color borderColor;
 
   @override
@@ -172,18 +180,25 @@ class _Picker extends StatelessWidget {
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           builder: (context) {
-            return _List(reposCubit, shareRepositoryOnTap);
+            return _List(
+                reposCubit, shareRepositoryOnTap, unlockRepositoryOnTap);
           });
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
-  _List(ReposCubit repositories, void Function(RepoCubit) shareRepositoryOnTap)
+  _List(
+      ReposCubit repositories,
+      void Function(RepoCubit) shareRepositoryOnTap,
+      Future<void> Function({required String repositoryName})
+          unlockRepositoryOnTap)
       : _repositories = repositories,
-        _shareRepositoryOnTap = shareRepositoryOnTap;
+        _shareRepositoryOnTap = shareRepositoryOnTap,
+        _unlockRepositoryOnTap = unlockRepositoryOnTap;
 
   final ReposCubit _repositories;
   final void Function(RepoCubit) _shareRepositoryOnTap;
-
+  final Future<void> Function({required String repositoryName})
+      _unlockRepositoryOnTap;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
 
   @override
@@ -426,8 +441,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           if (accessMode == null) return;
 
           if (accessMode == AccessMode.blind) {
-            await Dialogs.unlockRepositoryDialog(
-                context, _repositories, repositoryName);
+            await _unlockRepositoryOnTap(repositoryName: repositoryName);
 
             _lockAllEnable.value = true;
             return;
@@ -450,7 +464,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   }
 
   void createRepoDialog(BuildContext context) async {
-    final newRepo = await showDialog(
+    final newRepo = await showDialog<String>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -465,7 +479,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             ),
           );
         });
-    await updateSettingsAndPop(context, newRepo);
+
+    if (newRepo?.isEmpty ?? true) return;
+
+    await updateSettingsAndPop(context, newRepo!);
   }
 
   void addRepoWithTokenDialog(BuildContext context,

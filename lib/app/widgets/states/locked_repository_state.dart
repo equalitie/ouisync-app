@@ -5,11 +5,14 @@ import '../../utils/utils.dart';
 
 class LockedRepositoryState extends StatelessWidget {
   const LockedRepositoryState(
-      {Key? key, required this.repositoryName, required this.onUnlockPressed})
+      {required this.repositoryName,
+      required this.unlockRepositoryCallback,
+      Key? key})
       : super(key: key);
 
   final String repositoryName;
-  final Function(String)? onUnlockPressed;
+  final Future<void> Function({required String repositoryName})
+      unlockRepositoryCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +51,8 @@ class LockedRepositoryState extends StatelessWidget {
                 })),
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
-            onPressed: () {
-              onUnlockPressed!.call(repositoryName);
-            },
+            onPressed: () async =>
+                await unlockRepositoryCallback(repositoryName: repositoryName),
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
             autofocus: true)
