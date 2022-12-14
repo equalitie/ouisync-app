@@ -6,29 +6,6 @@ import '../widgets/widgets.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
-  static Future<void> unlockRepositoryDialog(BuildContext context,
-      ReposCubit repositories, String repositoryName) async {
-    final password = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
-
-          return ActionsDialog(
-            title: S.current.messageUnlockRepository,
-            body: UnlockRepository(
-                context: context,
-                formKey: formKey,
-                repositoryName: repositoryName),
-          );
-        });
-
-    if (password == null) {
-      return;
-    }
-
-    await repositories.unlockRepository(repositoryName, password: password);
-  }
-
   static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context,
       {required Future<dynamic> f, String? text, Widget? widget}) async {
     showLoadingDialog(context, text: text, widget: widget);
