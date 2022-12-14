@@ -20,6 +20,7 @@ class UnlockRepository extends StatelessWidget {
       TextEditingController(text: null);
 
   final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _useBiometrics = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
@@ -60,17 +61,44 @@ class UnlockRepository extends StatelessWidget {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
                           hint: S.current.messageRepositoryPassword,
-                          onSaved: _returnPassword,
+                          onSaved: (String? password) async {
+                            await _returnPassword(password);
+                          },
                           validator: validateNoEmpty(
                               Strings.messageErrorRepositoryPasswordValidation),
                           autofocus: true))
                 ]);
               }),
+          _useBiometricsCheckbox(),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);
   }
 
-  void _returnPassword(String? password) {
+  Widget _useBiometricsCheckbox() => ValueListenableBuilder(
+      valueListenable: _useBiometrics,
+      builder: (context, useBiometrics, child) {
+        return CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            onChanged: (value) {
+              _useBiometrics.value = value ?? false;
+            },
+            value: useBiometrics,
+            title: Text(
+              'Secure using biometrics',
+              textAlign: TextAlign.end,
+            ));
+      });
+
+  Future<void> _returnPassword(String? password) async {
+    if (password?.isEmpty ?? true) {
+      return;
+    }
+
+    if (_useBiometrics.value) {
+      await Biometrics.addRepositoryPassword(
+          repositoryName: repositoryName, password: password!);
+    }
+
     Navigator.of(context).pop(password);
   }
 
