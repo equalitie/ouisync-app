@@ -254,7 +254,7 @@ class _MainPageState extends State<MainPage>
   RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
       reposCubit: _repositories,
       shareRepositoryOnTap: _showShareRepository,
-      unlockRepositoryOnTap: _unlockRepository);
+      unlockRepositoryOnTap: _unlockRepositoryCallback);
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -322,7 +322,7 @@ class _MainPageState extends State<MainPage>
       if (!current.cubit.canRead) {
         return LockedRepositoryState(
             repositoryName: current.name,
-            unlockRepositoryCallback: _unlockRepository);
+            unlockRepositoryCallback: _unlockRepositoryCallback);
       }
 
       return _contentBrowser(current.cubit);
@@ -721,40 +721,38 @@ class _MainPageState extends State<MainPage>
         });
   }
 
-  Future<void> _unlockRepository({required String repositoryName}) async {
+  Future<void> _unlockRepositoryCallback(
+      {required String repositoryName}) async {
     final biometricPassword =
         await Biometrics.getRepositoryPassword(repositoryName: repositoryName);
 
     if (biometricPassword?.isNotEmpty ?? false) {
-      await _unlockRepositoryUsingBiometrics(
+      await _unlockRepository(
           repositoryName: repositoryName, password: biometricPassword!);
       return;
     }
 
-    await _unlockRepositoryDialog(repositoryName: repositoryName);
+    await _getRepositoryPasswordDialog(repositoryName: repositoryName);
   }
 
-  Future<void> _unlockRepositoryDialog({required String repositoryName}) async {
-    final password = await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
+  Future<void> _getRepositoryPasswordDialog(
+          {required String repositoryName}) async =>
+      await showDialog<String>(
+          context: context,
+          builder: (BuildContext context) {
+            final formKey = GlobalKey<FormState>();
 
-          return ActionsDialog(
-            title: S.current.messageUnlockRepository,
-            body: UnlockRepository(
-                context: context,
-                formKey: formKey,
-                repositoryName: repositoryName),
-          );
-        });
+            return ActionsDialog(
+              title: S.current.messageUnlockRepository,
+              body: UnlockRepository(
+                  context: context,
+                  formKey: formKey,
+                  repositoryName: repositoryName,
+                  unlockRepositoryCallback: _unlockRepository),
+            );
+          });
 
-    if (password == null) return;
-
-    await _repositories.unlockRepository(repositoryName, password: password);
-  }
-
-  Future<void> _unlockRepositoryUsingBiometrics(
+  Future<AccessMode?> _unlockRepository(
           {required String repositoryName, required String password}) async =>
       await _repositories.unlockRepository(repositoryName, password: password);
 

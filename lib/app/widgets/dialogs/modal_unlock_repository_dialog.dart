@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
@@ -9,12 +10,16 @@ class UnlockRepository extends StatelessWidget {
       {Key? key,
       required this.context,
       required this.formKey,
-      required this.repositoryName})
+      required this.repositoryName,
+      required this.unlockRepositoryCallback})
       : super(key: key);
 
   final BuildContext context;
   final GlobalKey<FormState> formKey;
   final String repositoryName;
+  final Future<AccessMode?> Function(
+      {required String repositoryName,
+      required String password}) unlockRepositoryCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -94,12 +99,19 @@ class UnlockRepository extends StatelessWidget {
       return;
     }
 
-    if (_useBiometrics.value) {
-      await Biometrics.addRepositoryPassword(
-          repositoryName: repositoryName, password: password!);
+    final accessMode = await unlockRepositoryCallback.call(
+        repositoryName: repositoryName, password: password!);
+
+    // Only if the password successfuly unlocked the repo, then we add it
+    // to the biometrics store -if the user selected the option.
+    if ((accessMode ?? AccessMode.blind) != AccessMode.blind) {
+      if (_useBiometrics.value) {
+        await Biometrics.addRepositoryPassword(
+            repositoryName: repositoryName, password: password);
+      }
     }
 
-    Navigator.of(context).pop(password);
+    Navigator.of(context).pop();
   }
 
   List<Widget> _actions(context) => [
