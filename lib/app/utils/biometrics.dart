@@ -1,11 +1,9 @@
 import 'package:biometric_storage/biometric_storage.dart';
 
 class Biometrics {
-  static late final BiometricStorage _storage;
+  static final BiometricStorage _storage = BiometricStorage();
 
-  Biometrics._() {
-    _storage = BiometricStorage();
-  }
+  Biometrics._();
 
   static Future<BiometricStorageFile> _getStorageFileForKey(String key) async {
     return _storage.getStorage(key);
