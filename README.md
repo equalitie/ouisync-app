@@ -92,6 +92,12 @@ In order for the app to properly run, you need to make sure that both submodules
 
 **IMPORTANT:** We use some Flutter packages for various functionalities in the app, so after initializing the submodules, please execute this command to install them: `flutter pub get`
 
+### Linux dependencies
+
+```bash
+sudo apt-get install appindicator3-0.1 libsecret-1-dev
+```
+
 <br />
 
 ### Build the OuiSync library
