@@ -61,7 +61,8 @@ class SettingsPage extends StatelessWidget {
                 LogsSection(
                     settings: settings,
                     repos: reposCubit,
-                    panicCounter: panicCounter),
+                    panicCounter: panicCounter,
+                    natDetection: natDetection),
                 AboutSection(repos: reposCubit),
               ],
             ),

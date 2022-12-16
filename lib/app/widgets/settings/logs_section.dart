@@ -22,11 +22,13 @@ class LogsSection extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntValue panicCounter;
+  final Future<NatDetection> natDetection;
 
   LogsSection({
     required this.settings,
     required this.repos,
     required this.panicCounter,
+    required this.natDetection,
   });
 
   @override
@@ -97,6 +99,8 @@ class LogsSection extends AbstractSettingsSection {
 
     final sink = outFile.openWrite();
 
+    final natType = (await natDetection).state.message();
+
     try {
       sink.writeln("appName: ${info.appName}");
       sink.writeln("packageName: ${info.packageName}");
@@ -107,6 +111,7 @@ class LogsSection extends AbstractSettingsSection {
       sink.writeln("externalIP: ${connInfo.externalIP}");
       sink.writeln("localIPv4: ${connInfo.localIPv4}");
       sink.writeln("localIPv6: ${connInfo.localIPv6}");
+      sink.writeln("NAT type: $natType");
       sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
       sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");
       sink.writeln("quicListenerV4: ${connInfo.quicListenerV4}");
