@@ -718,13 +718,15 @@ class _MainPageState extends State<MainPage>
     final biometricPassword =
         await Biometrics.getRepositoryPassword(repositoryName: repositoryName);
 
-    if (biometricPassword?.isNotEmpty ?? false) {
-      await _unlockRepository(
-          repositoryName: repositoryName, password: biometricPassword!);
+    if (biometricPassword?.isEmpty ?? true) {
+      // Unlock manually
+      await _getRepositoryPasswordDialog(repositoryName: repositoryName);
       return;
     }
 
-    await _getRepositoryPasswordDialog(repositoryName: repositoryName);
+    // Unlock using biometrics
+    await _unlockRepository(
+        repositoryName: repositoryName, password: biometricPassword!);
   }
 
   Future<void> _getRepositoryPasswordDialog(
