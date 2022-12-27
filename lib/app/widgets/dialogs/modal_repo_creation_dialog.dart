@@ -207,32 +207,26 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       )));
 
   Widget _generatePasswordCheckbox() => Container(
-      child: CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          onChanged: (value) {
-            setState(() => _generatePassword = value ?? false);
+      child: SwitchListTile.adaptive(
+          value: _generatePassword,
+          title: Text('Generate password', textAlign: TextAlign.end),
+          onChanged: (generatePassword) {
+            setState(() => _generatePassword = generatePassword);
 
             _configureInputs(_generatePassword, _useBiometrics);
           },
-          value: _generatePassword,
-          title: Text(
-            'Generate password',
-            textAlign: TextAlign.end,
-          )));
+          contentPadding: EdgeInsets.zero));
 
   Widget _useBiometricsCheckbox() => Container(
-      child: CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          onChanged: (value) {
-            setState(() => _useBiometrics = value ?? false);
+      child: SwitchListTile.adaptive(
+          value: _useBiometrics,
+          title: Text('Secure using biometrics', textAlign: TextAlign.end),
+          onChanged: (enableBiometrics) {
+            setState(() => _useBiometrics = enableBiometrics);
 
             _configureInputs(_generatePassword, _useBiometrics);
           },
-          value: _useBiometrics,
-          title: Text(
-            'Secure using biometrics',
-            textAlign: TextAlign.end,
-          )));
+          contentPadding: EdgeInsets.zero));
 
   _configureInputs(bool generatePassword, bool useBiometrics) {
     final showPasswordSection = !(_generatePassword && _useBiometrics);
