@@ -82,16 +82,13 @@ class UnlockRepository extends StatelessWidget {
   Widget _useBiometricsCheckbox() => ValueListenableBuilder(
       valueListenable: _useBiometrics,
       builder: (context, useBiometrics, child) {
-        return CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            onChanged: (value) {
-              _useBiometrics.value = value ?? false;
-            },
+        return SwitchListTile.adaptive(
             value: useBiometrics,
-            title: Text(
-              'Secure using biometrics',
-              textAlign: TextAlign.end,
-            ));
+            title: Text('Secure using biometrics'),
+            onChanged: (enableBiometrics) {
+              _useBiometrics.value = enableBiometrics;
+            },
+            contentPadding: EdgeInsets.zero);
       });
 
   Future<void> _returnPassword(String? password) async {
