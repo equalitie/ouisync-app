@@ -317,11 +317,15 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     final isRetypePasswordOk =
         _retypePasswordInputKey.currentState?.validate() ?? false;
 
-    if (!(isRepoNameOk && isPasswordOk && isRetypePasswordOk)) return;
-
+    if (!isRepoNameOk) return;
     _repositoryNameInputKey.currentState!.save();
-    _passwordInputKey.currentState!.save();
-    _retypePasswordInputKey.currentState!.save();
+
+    if (!_generatePassword) {
+      if (!(isPasswordOk && isRetypePasswordOk)) return;
+
+      _passwordInputKey.currentState!.save();
+      _retypePasswordInputKey.currentState!.save();
+    }
 
     if (_useBiometrics) {
       await Biometrics.addRepositoryPassword(
