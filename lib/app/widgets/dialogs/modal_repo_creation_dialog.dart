@@ -231,12 +231,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           onChanged: (enableBiometrics) {
             setState(() => _useBiometrics = enableBiometrics);
 
-            _configureInputs(_generatePassword, _useBiometrics);
+            _configureInputs(_generatePassword, _useBiometrics,
+                preservePassword: true);
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
-  _configureInputs(bool generatePassword, bool useBiometrics) {
+  _configureInputs(bool generatePassword, bool useBiometrics,
+      {bool preservePassword = false}) {
     setState(() {
       _showPasswordInput = !(generatePassword && useBiometrics);
       _showRetypePasswordInput = !generatePassword && _showPasswordInput;
@@ -250,11 +252,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       }
     });
 
-    // Generate password or clean controllers if manual was selected by the user
-    final password = _generatePassword ? _generateRandomPassword() : '';
+    if (!preservePassword) {
+      // Generate password or clean controllers if manual was selected by the user
+      final password = _generatePassword ? _generateRandomPassword() : '';
 
-    _passwordController.text = password;
-    _retypedPasswordController.text = password;
+      _passwordController.text = password;
+      _retypedPasswordController.text = password;
+    }
 
     // Set the fos and scroll to make the focused input visible
     generatePassword
