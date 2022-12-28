@@ -36,6 +36,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   final TextEditingController _retypedPasswordController =
       TextEditingController(text: null);
 
+  final _repoNameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
 
@@ -44,8 +47,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   bool _generatePassword = true;
 
-  bool _showPasswordSection = true;
-  bool _showRetypePassword = true;
+  bool _showPasswordInput = false;
+  bool _showRetypePasswordInput = false;
 
   @override
   void initState() {
@@ -66,6 +69,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         return;
       }
     });
+
+    _repoNameFocus.requestFocus();
   }
 
   Future<bool?> isBiometricsAvailable() async {
@@ -142,40 +147,41 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         onSaved: (_) {},
         validator:
             validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
-        autofocus: true,
-        autovalidateMode: AutovalidateMode.disabled);
+        autovalidateMode: AutovalidateMode.disabled,
+        focusNode: _repoNameFocus);
   }
 
-  Widget _passwordInputs() => Visibility(
-      visible: _showPasswordSection,
-      child: Container(
+  Widget _passwordInputs() => Container(
           child: Column(
         children: [
-          Row(children: [
-            Expanded(
-                child: Fields.formTextField(
-                    key: _passwordInputKey,
-                    context: context,
-                    textEditingController: _passwordController,
-                    obscureText: _obscurePassword,
-                    label: S.current.labelPassword,
-                    subffixIcon: Fields.actionIcon(
-                        Icon(
-                          _obscurePassword
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall,
-                        ), onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    }),
-                    hint: S.current.messageRepositoryPassword,
-                    onSaved: (_) {},
-                    validator: validateNoEmpty(
-                        Strings.messageErrorRepositoryPasswordValidation),
-                    autovalidateMode: AutovalidateMode.disabled))
-          ]),
           Visibility(
-              visible: _showRetypePassword,
+              visible: _showPasswordInput,
+              child: Row(children: [
+                Expanded(
+                    child: Fields.formTextField(
+                        key: _passwordInputKey,
+                        context: context,
+                        textEditingController: _passwordController,
+                        obscureText: _obscurePassword,
+                        label: S.current.labelPassword,
+                        subffixIcon: Fields.actionIcon(
+                            Icon(
+                              _obscurePassword
+                                  ? Constants.iconVisibilityOn
+                                  : Constants.iconVisibilityOff,
+                              size: Dimensions.sizeIconSmall,
+                            ), onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        }),
+                        hint: S.current.messageRepositoryPassword,
+                        onSaved: (_) {},
+                        validator: validateNoEmpty(
+                            Strings.messageErrorRepositoryPasswordValidation),
+                        autovalidateMode: AutovalidateMode.disabled,
+                        focusNode: _passwordFocus))
+              ])),
+          Visibility(
+              visible: _showRetypePasswordInput,
               child: Row(children: [
                 Expanded(
                   child: Fields.formTextField(
@@ -204,7 +210,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 )
               ])),
         ],
-      )));
+      ));
 
   Widget _generatePasswordCheckbox() => Container(
       child: SwitchListTile.adaptive(
@@ -231,27 +237,39 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           visualDensity: VisualDensity.compact));
 
   _configureInputs(bool generatePassword, bool useBiometrics) {
-    final showPasswordSection = !(_generatePassword && _useBiometrics);
-    final showRetypePassword = !(_generatePassword && !_useBiometrics);
-
     setState(() {
-      _showPasswordSection = showPasswordSection;
-      _showRetypePassword = showRetypePassword;
+      _showPasswordInput = !(generatePassword && useBiometrics);
+      _showRetypePasswordInput = !generatePassword && _showPasswordInput;
 
       // If for some reason the user decides to keep the autogenerated password,
       // but not to use biometrics, we make the password visible to signal the user
       // that the password need to be saved manually -just as it is stated in the
       // message explaning this, made visible at the same time.
-      if (generatePassword && !_useBiometrics) {
+      if (generatePassword && !useBiometrics) {
         _obscurePassword = false;
       }
     });
 
+    // Generate password or clean controllers if manual was selected by the user
     final password = _generatePassword ? _generateRandomPassword() : '';
 
     _passwordController.text = password;
     _retypedPasswordController.text = password;
+
+    // Set the fos and scroll to make the focused input visible
+    generatePassword
+        ? _scrollToVisible(_repoNameFocus)
+        : _nameController.text.isEmpty
+            ? _scrollToVisible(_repoNameFocus)
+            : _passwordFocus.requestFocus();
   }
+
+  void _scrollToVisible(FocusNode focusNode) => WidgetsBinding.instance
+      .addPostFrameCallback((_) => Scrollable.ensureVisible(
+            focusNode.context!,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeIn,
+          ));
 
   Widget _manualPasswordWarning() => Padding(
       padding: Dimensions.paddingVertical10,
