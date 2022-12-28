@@ -736,21 +736,23 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _getRepositoryPasswordDialog(
-          {required String repositoryName}) async =>
-      await showDialog<String>(
-          context: context,
-          builder: (BuildContext context) {
-            final formKey = GlobalKey<FormState>();
-
-            return ActionsDialog(
+      {required String repositoryName}) async {
+    final accessModeUnlocked = await showDialog<AccessMode>(
+        context: context,
+        builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
               body: UnlockRepository(
                   context: context,
-                  formKey: formKey,
                   repositoryName: repositoryName,
                   unlockRepositoryCallback: _unlockRepository),
-            );
-          });
+            ));
+
+    String unlockedMessage = accessModeUnlocked == AccessMode.blind
+        ? '"$repositoryName" unlocking failed. Open as a blind replica'
+        : '"$repositoryName" unlocked as a ${accessModeUnlocked!.name} replica';
+
+    showSnackBar(context, content: Text(unlockedMessage));
+  }
 
   Future<AccessMode?> _unlockRepository(
           {required String repositoryName, required String password}) async =>

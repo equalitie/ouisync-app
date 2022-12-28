@@ -9,14 +9,17 @@ class UnlockRepository extends StatelessWidget {
   UnlockRepository(
       {Key? key,
       required this.context,
-      required this.formKey,
       required this.repositoryName,
+      this.useBiometrics = false,
       required this.unlockRepositoryCallback})
       : super(key: key);
 
   final BuildContext context;
-  final GlobalKey<FormState> formKey;
   final String repositoryName;
+  final bool useBiometrics;
+
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   final Future<AccessMode?> Function(
       {required String repositoryName,
       required String password}) unlockRepositoryCallback;
@@ -29,6 +32,8 @@ class UnlockRepository extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _useBiometrics.value = useBiometrics;
+
     return Form(
       key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -99,16 +104,19 @@ class UnlockRepository extends StatelessWidget {
     final accessMode = await unlockRepositoryCallback.call(
         repositoryName: repositoryName, password: password!);
 
-    // Only if the password successfuly unlocked the repo, then we add it
-    // to the biometrics store -if the user selected the option.
-    if ((accessMode ?? AccessMode.blind) != AccessMode.blind) {
-      if (_useBiometrics.value) {
-        await Biometrics.addRepositoryPassword(
-            repositoryName: repositoryName, password: password);
-      }
+    if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
+      Navigator.of(context).pop(AccessMode.blind);
+      return;
     }
 
-    Navigator.of(context).pop();
+    // Only if the password successfuly unlocked the repo, then we add it
+    // to the biometrics store -if the user selected the option.
+    if (_useBiometrics.value) {
+      await Biometrics.addRepositoryPassword(
+          repositoryName: repositoryName, password: password);
+    }
+
+    Navigator.of(context).pop(accessMode!);
   }
 
   List<Widget> _actions(context) => [
