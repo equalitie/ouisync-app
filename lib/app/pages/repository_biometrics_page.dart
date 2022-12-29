@@ -167,7 +167,7 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
                 AccessMode.blind) ==
             AccessMode.blind;
 
-    final newAccessMode = await showDialog<AccessMode>(
+    final newAccessMode = await showDialog<AccessMode?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -177,6 +177,8 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
                   useBiometrics: true,
                   unlockRepositoryCallback: _unlockRepository),
             ));
+
+    if (newAccessMode == null) return;
 
     final biometricsAddedSuccessfully = newAccessMode != AccessMode.blind;
     if (!biometricsAddedSuccessfully) return;
