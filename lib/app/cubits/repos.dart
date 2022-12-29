@@ -226,7 +226,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return repo;
   }
 
-  Future<void> unlockRepository(String repoName,
+  Future<oui.AccessMode?> unlockRepository(String repoName,
       {required String password}) async {
     final wasCurrent = currentRepoName == repoName;
 
@@ -244,12 +244,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       if (repo is ErrorRepoEntry) {
         loggy.app('Failed to open repository: ${info.name}');
-        return;
+        return null;
       }
 
       await _put(repo, setCurrent: wasCurrent);
+
+      return repo.maybeHandle?.accessMode ?? oui.AccessMode.blind;
     } catch (e, st) {
       loggy.app('Unlocking of the repository ${info.name} failed', e, st);
+      return null;
     }
   }
 

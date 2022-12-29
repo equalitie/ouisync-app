@@ -30,7 +30,7 @@ class Dimensions {
   static const EdgeInsets paddingContents =
       EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog =
-      EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 20.0);
+      EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 10.0);
   static const EdgeInsets paddingBottomSheet = EdgeInsets.all(10.0);
   static const EdgeInsets paddingBottomSheetActions =
       EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 20.0);
@@ -107,8 +107,8 @@ class Dimensions {
   static const double radiusSmall = 5.0;
   static const double radiusMicro = 2.0;
 
-  static const double aspectRatioModalDialogButton = 11 / 5;
-  static const double aspectRatioBottomDialogButton = 9 / 3;
+  static const double aspectRatioModalDialogButton = 13 / 5;
+  static const double aspectRatioBottomDialogButton = 11 / 3;
 
   static const BoxConstraints sizeConstrainsDialogAction =
       BoxConstraints(minWidth: 98, minHeight: 46.0);

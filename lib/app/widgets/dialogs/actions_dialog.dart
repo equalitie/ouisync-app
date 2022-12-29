@@ -48,6 +48,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
                       BoxConstraints(minHeight: viewportConstraints.minHeight),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Fields.constrainedText(widget.title,

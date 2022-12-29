@@ -4,13 +4,14 @@ import 'package:settings_ui/settings_ui.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
+import '../../pages/pages.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
-
-import 'repository_selector.dart';
 import 'navigation_tile.dart';
+import 'repository_selector.dart';
 
-class RepositorySection extends AbstractSettingsSection {
+class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   final ReposCubit repos;
   final void Function(RepoCubit) onShareRepository;
 
@@ -105,13 +106,29 @@ class RepositorySection extends AbstractSettingsSection {
 
   Widget _buildChangePasswordTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
-        title: Text('Change password'), // TODO: localize
-        leading: Icon(Icons.password),
-        onPressed: (context) {
-          // TODO
-        },
-        enabled: false,
-      );
+          title: Text('Biometrics'), // TODO: localize
+          leading: Icon(Icons.password),
+          onPressed: (context) async {
+            String? biometricPassword;
+            try {
+              biometricPassword = await Biometrics.getRepositoryPassword(
+                  repositoryName: repo.name);
+            } catch (e) {
+              loggy.app(e);
+              return;
+            }
+
+            final usesBiometrics = biometricPassword?.isNotEmpty ?? false;
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RepositoryBiometrics(
+                      repositoryName: repo.name,
+                      repositories: repos,
+                      biometrics: usesBiometrics),
+                ));
+          });
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
