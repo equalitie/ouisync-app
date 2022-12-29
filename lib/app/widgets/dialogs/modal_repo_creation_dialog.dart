@@ -352,7 +352,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         message: repoEntry.error,
       );
 
-      Biometrics.deleteRepositoryPassword(repositoryName: name);
+      await Biometrics.deleteRepositoryPassword(repositoryName: name);
       return;
     }
 

@@ -24,6 +24,6 @@ class Biometrics {
   static Future<void> deleteRepositoryPassword(
       {required String repositoryName}) async {
     final storageFile = await _getStorageFileForKey(repositoryName);
-    await storageFile.delete();
+    return storageFile.delete();
   }
 }
