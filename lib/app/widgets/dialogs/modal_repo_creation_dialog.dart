@@ -11,16 +11,11 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends StatefulWidget {
-  RepositoryCreation(
-      {Key? key,
-      required this.context,
-      required this.cubit,
-      required this.formKey})
+  RepositoryCreation({Key? key, required this.context, required this.cubit})
       : super(key: key);
 
   final BuildContext context;
   final ReposCubit cubit;
-  final GlobalKey<FormState> formKey;
 
   @override
   State<RepositoryCreation> createState() => _RepositoryCreationState();
@@ -28,6 +23,10 @@ class RepositoryCreation extends StatefulWidget {
 
 class _RepositoryCreationState extends State<RepositoryCreation>
     with OuiSyncAppLogger {
+  final _repositoryNameInputKey = GlobalKey<FormFieldState>();
+  final _passwordInputKey = GlobalKey<FormFieldState>();
+  final _retypePasswordInputKey = GlobalKey<FormFieldState>();
+
   final TextEditingController _nameController =
       TextEditingController(text: null);
 
@@ -37,6 +36,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   final TextEditingController _retypedPasswordController =
       TextEditingController(text: null);
 
+  final _repoNameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
 
@@ -45,8 +47,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   bool _generatePassword = true;
 
-  bool _showPasswordSection = true;
-  bool _showRetypePassword = true;
+  bool _showPasswordInput = false;
+  bool _showRetypePasswordInput = false;
 
   @override
   void initState() {
@@ -67,6 +69,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         return;
       }
     });
+
+    _repoNameFocus.requestFocus();
   }
 
   Future<bool?> isBiometricsAvailable() async {
@@ -105,8 +109,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: widget.formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +139,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   Widget _repoName() {
     return Fields.formTextField(
+        key: _repositoryNameInputKey,
         context: context,
         textEditingController: _nameController,
         label: S.current.labelName,
@@ -144,42 +147,45 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         onSaved: (_) {},
         validator:
             validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
-        autofocus: true,
-        autovalidateMode: AutovalidateMode.disabled);
+        autovalidateMode: AutovalidateMode.disabled,
+        focusNode: _repoNameFocus);
   }
 
-  Widget _passwordInputs() => Visibility(
-      visible: _showPasswordSection,
-      child: Container(
+  Widget _passwordInputs() => Container(
           child: Column(
         children: [
-          Row(children: [
-            Expanded(
-                child: Fields.formTextField(
-                    context: context,
-                    textEditingController: _passwordController,
-                    obscureText: _obscurePassword,
-                    label: S.current.labelPassword,
-                    subffixIcon: Fields.actionIcon(
-                        Icon(
-                          _obscurePassword
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall,
-                        ), onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    }),
-                    hint: S.current.messageRepositoryPassword,
-                    onSaved: (_) {},
-                    validator: validateNoEmpty(
-                        Strings.messageErrorRepositoryPasswordValidation),
-                    autovalidateMode: AutovalidateMode.disabled))
-          ]),
           Visibility(
-              visible: _showRetypePassword,
+              visible: _showPasswordInput,
+              child: Row(children: [
+                Expanded(
+                    child: Fields.formTextField(
+                        key: _passwordInputKey,
+                        context: context,
+                        textEditingController: _passwordController,
+                        obscureText: _obscurePassword,
+                        label: S.current.labelPassword,
+                        subffixIcon: Fields.actionIcon(
+                            Icon(
+                              _obscurePassword
+                                  ? Constants.iconVisibilityOn
+                                  : Constants.iconVisibilityOff,
+                              size: Dimensions.sizeIconSmall,
+                            ), onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        }),
+                        hint: S.current.messageRepositoryPassword,
+                        onSaved: (_) {},
+                        validator: validateNoEmpty(
+                            Strings.messageErrorRepositoryPasswordValidation),
+                        autovalidateMode: AutovalidateMode.disabled,
+                        focusNode: _passwordFocus))
+              ])),
+          Visibility(
+              visible: _showRetypePasswordInput,
               child: Row(children: [
                 Expanded(
                   child: Fields.formTextField(
+                      key: _retypePasswordInputKey,
                       context: context,
                       textEditingController: _retypedPasswordController,
                       obscureText: _obscurePasswordConfirm,
@@ -204,57 +210,77 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 )
               ])),
         ],
-      )));
+      ));
 
   Widget _generatePasswordCheckbox() => Container(
-      child: CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          onChanged: (value) {
-            setState(() => _generatePassword = value ?? false);
+      child: SwitchListTile.adaptive(
+          value: _generatePassword,
+          title: Text('Generate password', textAlign: TextAlign.end),
+          onChanged: (generatePassword) {
+            setState(() => _generatePassword = generatePassword);
 
             _configureInputs(_generatePassword, _useBiometrics);
           },
-          value: _generatePassword,
-          title: Text(
-            'Generate password',
-            textAlign: TextAlign.end,
-          )));
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact));
 
   Widget _useBiometricsCheckbox() => Container(
-      child: CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          onChanged: (value) {
-            setState(() => _useBiometrics = value ?? false);
-
-            _configureInputs(_generatePassword, _useBiometrics);
-          },
+      child: SwitchListTile.adaptive(
           value: _useBiometrics,
-          title: Text(
-            'Secure using biometrics',
-            textAlign: TextAlign.end,
-          )));
+          title: Text('Secure using biometrics', textAlign: TextAlign.end),
+          onChanged: (enableBiometrics) {
+            setState(() => _useBiometrics = enableBiometrics);
 
-  _configureInputs(bool generatePassword, bool useBiometrics) {
-    final showPasswordSection = !(_generatePassword && _useBiometrics);
-    final showRetypePassword = !(_generatePassword && !_useBiometrics);
+            _configureInputs(_generatePassword, _useBiometrics,
+                preservePassword: true);
+          },
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact));
 
+  _configureInputs(bool generatePassword, bool useBiometrics,
+      {bool preservePassword = false}) {
     setState(() {
-      _showPasswordSection = showPasswordSection;
-      _showRetypePassword = showRetypePassword;
+      _showPasswordInput = !(generatePassword && useBiometrics);
+      _showRetypePasswordInput = !generatePassword && _showPasswordInput;
+
+      // If for some reason the user decides to keep the autogenerated password,
+      // but not to use biometrics, we make the password visible to signal the user
+      // that the password need to be saved manually -just as it is stated in the
+      // message explaning this, made visible at the same time.
+      if (generatePassword && !useBiometrics) {
+        _obscurePassword = false;
+      }
     });
 
-    final password = _generatePassword ? _generateRandomPassword() : '';
+    if (!preservePassword) {
+      // Generate password or clean controllers if manual was selected by the user
+      final password = _generatePassword ? _generateRandomPassword() : '';
 
-    _passwordController.text = password;
-    _retypedPasswordController.text = password;
+      _passwordController.text = password;
+      _retypedPasswordController.text = password;
+    }
+
+    // Set the fos and scroll to make the focused input visible
+    generatePassword
+        ? _scrollToVisible(_repoNameFocus)
+        : _nameController.text.isEmpty
+            ? _scrollToVisible(_repoNameFocus)
+            : _passwordFocus.requestFocus();
   }
+
+  void _scrollToVisible(FocusNode focusNode) => WidgetsBinding.instance
+      .addPostFrameCallback((_) => Scrollable.ensureVisible(
+            focusNode.context!,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeIn,
+          ));
 
   Widget _manualPasswordWarning() => Padding(
       padding: Dimensions.paddingVertical10,
       child: Visibility(
           visible: !_useBiometrics,
           child: Fields.autosizeText(
-              'Remember to securely save the password.\n\nIf you forget it, there is no way to retrieve it.',
+              'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
               color: Colors.red,
               maxLines: 10,
               softWrap: true,
@@ -289,11 +315,21 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       _onSaved(widget.cubit, name, password);
 
   void _onSaved(ReposCubit cubit, String name, String password) async {
-    if (!(widget.formKey.currentState?.validate() ?? false)) {
-      return;
-    }
+    final isRepoNameOk =
+        _repositoryNameInputKey.currentState?.validate() ?? false;
+    final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
+    final isRetypePasswordOk =
+        _retypePasswordInputKey.currentState?.validate() ?? false;
 
-    widget.formKey.currentState!.save();
+    if (!isRepoNameOk) return;
+    _repositoryNameInputKey.currentState!.save();
+
+    if (!_generatePassword) {
+      if (!(isPasswordOk && isRetypePasswordOk)) return;
+
+      _passwordInputKey.currentState!.save();
+      _retypePasswordInputKey.currentState!.save();
+    }
 
     if (_useBiometrics) {
       await Biometrics.addRepositoryPassword(
@@ -316,7 +352,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         message: repoEntry.error,
       );
 
-      Biometrics.deleteRepositoryPassword(repositoryName: name);
+      await Biometrics.deleteRepositoryPassword(repositoryName: name);
       return;
     }
 

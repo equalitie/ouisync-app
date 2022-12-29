@@ -33,6 +33,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m4(path) =>
       "Este directorio no existe más, navegando al ancestro: ${path}";
 
+  static String m5(name) =>
+      "La inicialización del repositorio \"${name}\" falló";
+
   static String m6(path) => "${path} no está vacío";
 
   static String m7(name) => "Directorio borrado exitosamente: ${name}";
@@ -43,6 +46,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m9(path) => "desde ${path}";
 
   static String m10(name) => "Error creando archivo ${name}";
+
+  static String m11(name) => "No pudimos borrar el repositorio \"${name}\"";
+
+  static String m12(name) =>
+      "No pudimos encontrar el repositorio \"${name}\" en la ubicación habitual";
 
   static String m13(access) => "Modo de aceso otorgado: ${access}";
 
@@ -94,6 +102,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Borrar archivo"),
         "actionDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Borrar directorio"),
+        "actionDeleteRepo":
+            MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionEditRepositoryName":
@@ -114,6 +124,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Vista previa de archivo"),
         "actionReloadContents":
             MessageLookupByLibrary.simpleMessage("Recargar"),
+        "actionReloadRepo":
+            MessageLookupByLibrary.simpleMessage("Recargar repositorio"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Renombrar"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Reintentar"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Guardar"),
@@ -251,6 +263,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Por favor ingrese un nombre válido."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "No pudimos cargar los contenidos de este directorio. Por favor intente de nuevo."),
+        "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
+            "Error al abrir el repositorio"),
+        "messageErrorOpeningRepoDescription": m5,
         "messageErrorPathNotEmpty": m6,
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Ya existe un repositorio con este nombre"),
@@ -315,6 +330,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cambiar nombre de directorio"),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(
             "Cambiar nombre de repositorio"),
+        "messageRepoDeletionErrorDescription": m11,
+        "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
+            "El borrado del repositorio falló"),
+        "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
+            "El repositorio ya no está allí"),
+        "messageRepoMissingErrorDescription": m12,
         "messageRepositoryAccessMode": m13,
         "messageRepositoryAlreadyExist": m14,
         "messageRepositoryName":
