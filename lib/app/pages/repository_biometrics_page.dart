@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
@@ -32,7 +31,6 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
   bool _usesBiometrics = false;
   bool _managePassword = false;
   bool _previewPassword = false;
-
   bool _removeBiometrics = false;
 
   @override
@@ -51,16 +49,17 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
         elevation: 0.0,
       ),
       body: _biometricsState());
-  // body: _password?.isNotEmpty ?? false
-  //     ? _biometricsState()
-  //     : _noPasswordState());
+  // Repositories without passwords are not yet implemented
+  //
+  // body:
+  //     _password?.isEmpty ?? true ? _noPasswordState() : _biometricsState());
 
-  Widget _noPasswordState() {
-    return Container(
-        child: Column(
-      children: [],
-    ));
-  }
+  // Widget _noPasswordState() {
+  //   return Container(
+  //       child: Column(
+  //     children: [],
+  //   ));
+  // }
 
   Widget _biometricsState() {
     return SingleChildScrollView(
@@ -73,12 +72,64 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
             onChanged: (useBiometrics) async =>
                 await _unlockUsingBiometrics(useBiometrics)),
         Divider(),
-        ..._usesBiometrics ? _manageBiometrics() : _addBiometrics(),
+        if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
+        // ...[
+        //   ..._usesBiometrics ? _manageBiometrics() : _manualSecurity(),
+        //   Divider()
+        // ],
+        ListTile(
+          title: Text(
+            'Password',
+          ),
+          subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                  flex: 0,
+                  child: IconButton(
+                      onPressed: _managePassword
+                          ? () => setState(
+                              () => _previewPassword = !_previewPassword)
+                          : null,
+                      icon: _previewPassword
+                          ? const Icon(Constants.iconVisibilityOff)
+                          : const Icon(Constants.iconVisibilityOn),
+                      padding: EdgeInsets.zero,
+                      color: Theme.of(context).primaryColor)),
+              Expanded(
+                  flex: 0,
+                  child: IconButton(
+                      onPressed: _managePassword
+                          ? () async {
+                              if (_password == null) return;
+
+                              await copyStringToClipboard(_password!);
+                              showSnackBar(context,
+                                  content: Text(
+                                      '"${widget.repositoryName}" password copied to the clipboard'));
+                            }
+                          : null,
+                      icon: const Icon(Icons.copy_rounded),
+                      padding: EdgeInsets.zero,
+                      color: Theme.of(context).primaryColor))
+            ],
+          ),
+        ),
+        Visibility(
+            visible: _removeBiometrics,
+            child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                child: Text(
+                    'Once you navigate out of this screen you wont be able to see or copy '
+                    'the password anymore; please save it in a secure place.',
+                    style: TextStyle(color: Colors.red)))),
         Divider(),
         ListTile(
           title: Text('Repository name'),
           subtitle: Text(widget.repositoryName),
         ),
+
         Divider()
       ],
     )));
@@ -115,63 +166,12 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
                   _password = biometricPassword;
                   _managePassword = enableManagement;
                 });
-              })),
-      ListTile(
-        title: Text(
-          'Password',
-        ),
-        subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-                flex: 0,
-                child: IconButton(
-                    onPressed: _managePassword
-                        ? () =>
-                            setState(() => _previewPassword = !_previewPassword)
-                        : null,
-                    icon: _previewPassword
-                        ? const Icon(Constants.iconVisibilityOff)
-                        : const Icon(Constants.iconVisibilityOn),
-                    padding: EdgeInsets.zero,
-                    color: Theme.of(context).primaryColor)),
-            Expanded(
-                flex: 0,
-                child: IconButton(
-                    onPressed: _managePassword
-                        ? () async {
-                            if (_password == null) return;
-
-                            await copyStringToClipboard(_password!);
-                            showSnackBar(context,
-                                content: Text(
-                                    '"${widget.repositoryName}" password copied to the clipboard'));
-                          }
-                        : null,
-                    icon: const Icon(Icons.copy_rounded),
-                    padding: EdgeInsets.zero,
-                    color: Theme.of(context).primaryColor))
-          ],
-        ),
-      ),
-      Visibility(
-          visible: _removeBiometrics,
-          child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-              child: Text(
-                  'Once you navigate out of this screen you wont be able to see or copy '
-                  'the password anymore; please save it in a secure place.',
-                  style: TextStyle(color: Colors.red)))),
+              }))
     ];
   }
 
   String _formattPassword(String? password, {bool mask = true}) =>
       (mask ? "*" * (password ?? '').length : password) ?? '';
-
-  List<Widget> _addBiometrics() {
-    return [];
-  }
 
   // Removing a repository from the biometrics storage:
   // After authenticating using biometrics, we remove the password from the
@@ -183,11 +183,12 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
       : await _removeRepoBiometrics();
 
   Future<void> _addRepoBiometrics() async {
-    final initialAccessMode =
-        widget.repositories.currentRepo?.maybeCubit?.accessMode ??
+    final wasLocked =
+        (widget.repositories.currentRepo?.maybeCubit?.accessMode ??
+                AccessMode.blind) ==
             AccessMode.blind;
 
-    final passwordValidation = await showDialog<bool?>(
+    final newAccessMode = await showDialog<AccessMode>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -198,37 +199,45 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
-    if (!(passwordValidation ?? false)) return;
+    final biometricsAddedSuccessfully = newAccessMode != AccessMode.blind;
+    if (!biometricsAddedSuccessfully) return;
 
-    if (initialAccessMode == AccessMode.blind) {
+    // Validating the password would unlock the repo, if successful; so if it was
+    // originally locked, we need to leave it that way.
+    if (wasLocked) {
       await _unlockRepository(
           repositoryName: widget.repositoryName, password: '');
     }
 
-    setState(() {
-      _usesBiometrics = passwordValidation!;
-      _managePassword = !passwordValidation;
-    });
+    setState(() => _usesBiometrics = biometricsAddedSuccessfully);
   }
 
   Future<void> _removeRepoBiometrics() async {
     final removeBiometrics = await _removeBiometricsDialog();
     if (!(removeBiometrics ?? false)) return;
 
-    final authenticatedOk = await LocalAuthentication()
-        .authenticate(localizedReason: 'Authenticate first...');
-
-    if (authenticatedOk) {
-      await Biometrics.deleteRepositoryPassword(
+    String? biometricPassword;
+    try {
+      biometricPassword = await Biometrics.getRepositoryPassword(
           repositoryName: widget.repositoryName);
-
-      setState(() {
-        _removeBiometrics = true;
-
-        _usesBiometrics = false;
-        _managePassword = true;
-      });
+    } catch (e) {
+      loggy.app(e);
+      return;
     }
+
+    if (biometricPassword?.isEmpty ?? true) return;
+
+    await Biometrics.deleteRepositoryPassword(
+        repositoryName: widget.repositoryName);
+
+    setState(() {
+      _password = biometricPassword;
+
+      _removeBiometrics = true;
+      _managePassword = true;
+
+      _usesBiometrics = false;
+    });
   }
 
   Future<AccessMode?> _unlockRepository(
