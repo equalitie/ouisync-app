@@ -49,17 +49,6 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
         elevation: 0.0,
       ),
       body: _biometricsState());
-  // Repositories without passwords are not yet implemented
-  //
-  // body:
-  //     _password?.isEmpty ?? true ? _noPasswordState() : _biometricsState());
-
-  // Widget _noPasswordState() {
-  //   return Container(
-  //       child: Column(
-  //     children: [],
-  //   ));
-  // }
 
   Widget _biometricsState() {
     return SingleChildScrollView(
@@ -73,10 +62,6 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
                 await _unlockUsingBiometrics(useBiometrics)),
         Divider(),
         if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
-        // ...[
-        //   ..._usesBiometrics ? _manageBiometrics() : _manualSecurity(),
-        //   Divider()
-        // ],
         ListTile(
           title: Text(
             'Password',
@@ -129,7 +114,6 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
           title: Text('Repository name'),
           subtitle: Text(widget.repositoryName),
         ),
-
         Divider()
       ],
     )));
@@ -173,11 +157,6 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
   String _formattPassword(String? password, {bool mask = true}) =>
       (mask ? "*" * (password ?? '').length : password) ?? '';
 
-  // Removing a repository from the biometrics storage:
-  // After authenticating using biometrics, we remove the password from the
-  // biometric storage and enable the "Manage password" section so the user
-  // can see / copy the password and saved it on its own.
-  // We also display a meesage telling the user to do this.
   Future<void> _unlockUsingBiometrics(bool useBiometrics) async => useBiometrics
       ? await _addRepoBiometrics()
       : await _removeRepoBiometrics();
@@ -212,6 +191,11 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
     setState(() => _usesBiometrics = biometricsAddedSuccessfully);
   }
 
+  // Removing a repository from the biometrics storage:
+  // We retrive the password, then we remove it from the biometric storage and
+  // enable the password section so the user can see / copy the password and
+  // saved it on its own.
+  // We also display a meesage telling the user to do this.
   Future<void> _removeRepoBiometrics() async {
     final removeBiometrics = await _removeBiometricsDialog();
     if (!(removeBiometrics ?? false)) return;
