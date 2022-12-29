@@ -12,7 +12,7 @@ class Biometrics {
   static Future<void> addRepositoryPassword(
       {required String repositoryName, required String password}) async {
     final storageFile = await _getStorageFileForKey(repositoryName);
-    storageFile.write(password);
+    return storageFile.write(password);
   }
 
   static Future<String?> getRepositoryPassword(
