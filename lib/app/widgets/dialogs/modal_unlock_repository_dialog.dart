@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class UnlockRepository extends StatelessWidget {
+class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   UnlockRepository(
       {Key? key,
       required this.context,
@@ -112,8 +113,13 @@ class UnlockRepository extends StatelessWidget {
     // Only if the password successfuly unlocked the repo, then we add it
     // to the biometrics store -if the user selected the option.
     if (_useBiometrics.value) {
-      await Biometrics.addRepositoryPassword(
-          repositoryName: repositoryName, password: password);
+      try {
+        await Biometrics.addRepositoryPassword(
+            repositoryName: repositoryName, password: password);
+      } catch (e) {
+        loggy.app(e);
+        return;
+      }
     }
 
     Navigator.of(context).pop(accessMode!);
