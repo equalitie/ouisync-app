@@ -129,7 +129,9 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
               onChanged: (enableManagement) async {
                 if (!enableManagement) {
                   setState(() {
-                    _managePassword = enableManagement;
+                    _managePassword = false;
+                    _previewPassword = false;
+
                     _password = '';
                   });
                   return;
@@ -190,7 +192,15 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
           repositoryName: widget.repositoryName, password: '');
     }
 
-    setState(() => _usesBiometrics = biometricsAddedSuccessfully);
+    setState(() {
+      _usesBiometrics = biometricsAddedSuccessfully;
+
+      _managePassword = false;
+      _previewPassword = false;
+      _removeBiometrics = false;
+
+      _password = '';
+    });
   }
 
   // Removing a repository from the biometrics storage:
@@ -223,6 +233,7 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
       _managePassword = true;
 
       _usesBiometrics = false;
+      _previewPassword = false;
     });
   }
 
