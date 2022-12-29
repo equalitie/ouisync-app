@@ -737,7 +737,7 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _getRepositoryPasswordDialog(
       {required String repositoryName}) async {
-    final accessModeUnlocked = await showDialog<AccessMode>(
+    final accessModeUnlocked = await showDialog<AccessMode?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -747,9 +747,11 @@ class _MainPageState extends State<MainPage>
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
+    if (accessModeUnlocked == null) return;
+
     String unlockedMessage = accessModeUnlocked == AccessMode.blind
         ? '"$repositoryName" unlocking failed. Open as a blind replica'
-        : '"$repositoryName" unlocked as a ${accessModeUnlocked!.name} replica';
+        : '"$repositoryName" unlocked as a ${accessModeUnlocked.name} replica';
 
     showSnackBar(context, content: Text(unlockedMessage));
   }
