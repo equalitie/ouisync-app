@@ -60,7 +60,7 @@
   "@titleFileExtensionChanged": {},
   "titleFileExtensionMissing": "File extension missing",
   "@titleFileExtensionMissing": {},
-  "titleBiometrics":"Biometrics",
+  "titleSecurity":"Security",
   "titleRemoveBiometrics":"Remove biometrics",
   "titleStateMonitor":"State Monitor",
   "typeFolder": "Folder",

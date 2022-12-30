@@ -43,7 +43,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        title: Text(S.current.titleBiometrics),
+        title: Text(S.current.titleSecurity),
         elevation: 0.0,
       ),
       body: _biometricsState());

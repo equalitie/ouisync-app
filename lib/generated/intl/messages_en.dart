@@ -433,7 +433,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions needed"),
-        "titleBiometrics": MessageLookupByLibrary.simpleMessage("Biometrics"),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Create a folder"),
         "titleCreateRepository":
@@ -473,6 +472,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
         "titleScanRepoQR":
             MessageLookupByLibrary.simpleMessage("Scan Repository QR"),
+        "titleSecurity": MessageLookupByLibrary.simpleMessage("Security"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
         "titleShareRepository": m27,
         "titleStateMonitor":

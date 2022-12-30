@@ -27,7 +27,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             _buildCurrentTile(context, _buildPexSwitch),
             _buildCurrentTile(context, _buildRenameTile),
             _buildCurrentTile(context, _buildShareTile),
-            _buildCurrentTile(context, _buildChangePasswordTile),
+            _buildCurrentTile(context, _buildSecurityTile),
             _buildCurrentTile(context, _buildDeleteTile),
           ],
         ),
@@ -104,9 +104,9 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
         },
       );
 
-  Widget _buildChangePasswordTile(BuildContext context, RepoCubit repo) =>
+  Widget _buildSecurityTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
-          title: Text(S.current.titleBiometrics),
+          title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
             String? biometricPassword;

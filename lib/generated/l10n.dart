@@ -350,11 +350,11 @@ class S {
     );
   }
 
-  /// `Biometrics`
-  String get titleBiometrics {
+  /// `Security`
+  String get titleSecurity {
     return Intl.message(
-      'Biometrics',
-      name: 'titleBiometrics',
+      'Security',
+      name: 'titleSecurity',
       desc: '',
       args: [],
     );
