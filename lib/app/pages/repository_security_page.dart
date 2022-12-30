@@ -51,66 +51,64 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   Widget _biometricsState() {
     return SingleChildScrollView(
         child: Container(
-            child: Column(
-      children: [
-        SwitchListTile.adaptive(
-            value: _usesBiometrics,
-            title: Text(S.current.messageUnlockUsingBiometrics),
-            onChanged: (useBiometrics) async =>
-                await _unlockUsingBiometrics(useBiometrics)),
-        Divider(),
-        if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
-        ListTile(
-          title: Text(S.current.messagePassword),
-          subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                  flex: 0,
-                  child: IconButton(
-                      onPressed: _managePassword
-                          ? () => setState(
-                              () => _previewPassword = !_previewPassword)
-                          : null,
-                      icon: _previewPassword
-                          ? const Icon(Constants.iconVisibilityOff)
-                          : const Icon(Constants.iconVisibilityOn),
-                      padding: EdgeInsets.zero,
-                      color: Theme.of(context).primaryColor)),
-              Expanded(
-                  flex: 0,
-                  child: IconButton(
-                      onPressed: _managePassword
-                          ? () async {
-                              if (_password == null) return;
+            child: Column(children: [
+      ListTile(
+        title: Text('Repository name'),
+        subtitle: Text(widget.repositoryName),
+      ),
+      Divider(),
+      SwitchListTile.adaptive(
+          value: _usesBiometrics,
+          title: Text(S.current.messageUnlockUsingBiometrics),
+          onChanged: (useBiometrics) async =>
+              await _unlockUsingBiometrics(useBiometrics)),
+      Divider(),
+      if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
+      ListTile(
+        title: Text(S.current.messagePassword),
+        subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+                flex: 0,
+                child: IconButton(
+                    onPressed: _managePassword
+                        ? () =>
+                            setState(() => _previewPassword = !_previewPassword)
+                        : null,
+                    icon: _previewPassword
+                        ? const Icon(Constants.iconVisibilityOff)
+                        : const Icon(Constants.iconVisibilityOn),
+                    padding: EdgeInsets.zero,
+                    color: Theme.of(context).primaryColor)),
+            Expanded(
+                flex: 0,
+                child: IconButton(
+                    onPressed: _managePassword
+                        ? () async {
+                            if (_password == null) return;
 
-                              await copyStringToClipboard(_password!);
-                              showSnackBar(context,
-                                  content: Text(S
-                                      .current.messagePasswordCopiedClipboard));
-                            }
-                          : null,
-                      icon: const Icon(Icons.copy_rounded),
-                      padding: EdgeInsets.zero,
-                      color: Theme.of(context).primaryColor))
-            ],
-          ),
+                            await copyStringToClipboard(_password!);
+                            showSnackBar(context,
+                                content: Text(
+                                    S.current.messagePasswordCopiedClipboard));
+                          }
+                        : null,
+                    icon: const Icon(Icons.copy_rounded),
+                    padding: EdgeInsets.zero,
+                    color: Theme.of(context).primaryColor))
+          ],
         ),
-        Visibility(
-            visible: _removeBiometrics,
-            child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-                child: Text(S.current.messageAlertSaveCopyPassword,
-                    style: TextStyle(color: Colors.red)))),
-        Divider(),
-        ListTile(
-          title: Text('Repository name'),
-          subtitle: Text(widget.repositoryName),
-        ),
-        Divider()
-      ],
-    )));
+      ),
+      Visibility(
+          visible: _removeBiometrics,
+          child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+              child: Text(S.current.messageAlertSaveCopyPassword,
+                  style: TextStyle(color: Colors.red)))),
+      Divider()
+    ])));
   }
 
   List<Widget> _manageBiometrics() {
