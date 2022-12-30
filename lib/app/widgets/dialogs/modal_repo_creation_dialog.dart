@@ -215,7 +215,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _generatePasswordCheckbox() => Container(
       child: SwitchListTile.adaptive(
           value: _generatePassword,
-          title: Text('Generate password', textAlign: TextAlign.end),
+          title:
+              Text(S.current.messageGeneratePassword, textAlign: TextAlign.end),
           onChanged: (generatePassword) {
             setState(() => _generatePassword = generatePassword);
 
@@ -227,7 +228,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _useBiometricsCheckbox() => Container(
       child: SwitchListTile.adaptive(
           value: _useBiometrics,
-          title: Text('Secure using biometrics', textAlign: TextAlign.end),
+          title: Text(S.current.messageSecureUsingBiometrics,
+              textAlign: TextAlign.end),
           onChanged: (enableBiometrics) {
             setState(() => _useBiometrics = enableBiometrics);
 
@@ -279,8 +281,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       padding: Dimensions.paddingVertical10,
       child: Visibility(
           visible: !_useBiometrics,
-          child: Fields.autosizeText(
-              'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
+          child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
               color: Colors.red,
               maxLines: 10,
               softWrap: true,

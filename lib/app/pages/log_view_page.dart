@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -47,7 +48,7 @@ class _LogViewPageState extends State<LogViewPage> {
 
   Widget _buildContent(BuildContext context, LogReader reader) => Scaffold(
         appBar: AppBar(
-          title: Text('Log viewer'),
+          title: Text(S.current.messageLogViewer),
           actions: [_buildSettingsButton(context, reader)],
           elevation: 0.0,
         ),
@@ -83,7 +84,7 @@ class _LogViewPageState extends State<LogViewPage> {
 
   Widget _buildSettingsDialog(BuildContext context, LogReader reader) =>
       AlertDialog(
-          title: Text('Log verbosity'),
+          title: Text(S.current.messageVerbosity),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: LogLevel.values
@@ -99,7 +100,7 @@ class _LogViewPageState extends State<LogViewPage> {
           ),
           actions: [
             TextButton(
-                child: Text('Cancel'),
+                child: Text(S.current.actionCancel),
                 onPressed: () {
                   Navigator.pop(context);
                 }),
@@ -109,14 +110,14 @@ class _LogViewPageState extends State<LogViewPage> {
 String _logLevelName(LogLevel level) {
   switch (level) {
     case LogLevel.error:
-      return 'Only Error';
+      return S.current.messageLogLevelError;
     case LogLevel.warn:
-      return 'Error and Warn';
+      return S.current.messageLogLevelErrorWarn;
     case LogLevel.info:
-      return 'Error, Warn and Info';
+      return S.current.messageLogLevelErrorWarnInfo;
     case LogLevel.debug:
-      return 'Error, Warn, Info and Debug';
+      return S.current.messageLogLevelErroWarnInfoDebug;
     case LogLevel.verbose:
-      return 'All';
+      return S.current.messageLogLevelAll;
   }
 }

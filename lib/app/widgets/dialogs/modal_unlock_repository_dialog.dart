@@ -90,7 +90,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       builder: (context, useBiometrics, child) {
         return SwitchListTile.adaptive(
             value: useBiometrics,
-            title: Text('Secure using biometrics'),
+            title: Text(S.current.messageSecureUsingBiometrics),
             onChanged: (enableBiometrics) {
               _useBiometrics.value = enableBiometrics;
             },

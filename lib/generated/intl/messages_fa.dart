@@ -46,27 +46,27 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(name) => "";
 
-  static String m16(name) => "";
-
   static String m17(name) => "";
 
   static String m18(name) => "";
 
   static String m19(name) => "";
 
-  static String m20(access) => "";
+  static String m20(name) => "";
 
-  static String m21(entry) => "";
+  static String m21(access) => "";
 
-  static String m22(name) => "";
+  static String m22(entry) => "";
 
-  static String m23(number) => "";
+  static String m23(name) => "";
 
-  static String m24(path) => "";
+  static String m24(number) => "";
 
-  static String m25(status) => "";
+  static String m25(path) => "";
 
-  static String m26(name) => "";
+  static String m26(status) => "";
+
+  static String m27(name) => "";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -253,16 +253,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageWriteReplicaExplanation":
             MessageLookupByLibrary.simpleMessage(""),
-        "messageWritingFileCanceled": m16,
-        "messageWritingFileError": m17,
-        "messsageFailedAddRepository": m18,
-        "messsageFailedCreateRepository": m19,
-        "replacementAccess": m20,
-        "replacementEntry": m21,
-        "replacementName": m22,
-        "replacementNumber": m23,
-        "replacementPath": m24,
-        "replacementStatus": m25,
+        "messageWritingFileCanceled": m17,
+        "messageWritingFileError": m18,
+        "messsageFailedAddRepository": m19,
+        "messsageFailedCreateRepository": m20,
+        "replacementAccess": m21,
+        "replacementEntry": m22,
+        "replacementName": m23,
+        "replacementNumber": m24,
+        "replacementPath": m25,
+        "replacementStatus": m26,
         "statusSync": MessageLookupByLibrary.simpleMessage(""),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage(""),
         "titleAbout": MessageLookupByLibrary.simpleMessage(""),
@@ -294,7 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepository": MessageLookupByLibrary.simpleMessage(""),
         "titleScanRepoQR": MessageLookupByLibrary.simpleMessage(""),
         "titleSettings": MessageLookupByLibrary.simpleMessage(""),
-        "titleShareRepository": m26,
+        "titleShareRepository": m27,
         "titleUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
         "typeFile": MessageLookupByLibrary.simpleMessage(""),
         "typeFolder": MessageLookupByLibrary.simpleMessage("")

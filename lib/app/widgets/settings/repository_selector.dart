@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
-import '../../utils/utils.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
+import '../../utils/utils.dart';
 
 class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
   final ReposCubit repos;

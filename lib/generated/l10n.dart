@@ -350,6 +350,36 @@ class S {
     );
   }
 
+  /// `Biometrics`
+  String get titleBiometrics {
+    return Intl.message(
+      'Biometrics',
+      name: 'titleBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove biometrics`
+  String get titleRemoveBiometrics {
+    return Intl.message(
+      'Remove biometrics',
+      name: 'titleRemoveBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `State Monitor`
+  String get titleStateMonitor {
+    return Intl.message(
+      'State Monitor',
+      name: 'titleStateMonitor',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1627,6 +1657,326 @@ class S {
       name: 'messageErrorOpeningRepoDescription',
       desc: '',
       args: [name],
+    );
+  }
+
+  /// `File is already being uploaded`
+  String get messageFileIsDownloading {
+    return Intl.message(
+      'File is already being uploaded',
+      name: 'messageFileIsDownloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log viewer`
+  String get messageLogViewer {
+    return Intl.message(
+      'Log viewer',
+      name: 'messageLogViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log verbosity`
+  String get messageVerbosity {
+    return Intl.message(
+      'Log verbosity',
+      name: 'messageVerbosity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only Error`
+  String get messageLogLevelError {
+    return Intl.message(
+      'Only Error',
+      name: 'messageLogLevelError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error and Warn`
+  String get messageLogLevelErrorWarn {
+    return Intl.message(
+      'Error and Warn',
+      name: 'messageLogLevelErrorWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error, Warn and Info`
+  String get messageLogLevelErrorWarnInfo {
+    return Intl.message(
+      'Error, Warn and Info',
+      name: 'messageLogLevelErrorWarnInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error, Warn, Info and Debug`
+  String get messageLogLevelErroWarnInfoDebug {
+    return Intl.message(
+      'Error, Warn, Info and Debug',
+      name: 'messageLogLevelErroWarnInfoDebug',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get messageLogLevelAll {
+    return Intl.message(
+      'All',
+      name: 'messageLogLevelAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error: unhandled state`
+  String get messageErrorUnhandledState {
+    return Intl.message(
+      'Error: unhandled state',
+      name: 'messageErrorUnhandledState',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlocking failed. Open as a blind replica`
+  String get messageUnlockRepoFailed {
+    return Intl.message(
+      'Unlocking failed. Open as a blind replica',
+      name: 'messageUnlockRepoFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlocked as a {access} replica`
+  String messageUnlockRepoOk(Object access) {
+    return Intl.message(
+      'Unlocked as a $access replica',
+      name: 'messageUnlockRepoOk',
+      desc: '',
+      args: [access],
+    );
+  }
+
+  /// `Unlock using biometrics`
+  String get messageUnlockUsingBiometrics {
+    return Intl.message(
+      'Unlock using biometrics',
+      name: 'messageUnlockUsingBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password`
+  String get messagePassword {
+    return Intl.message(
+      'Password',
+      name: 'messagePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password copied to the clipboard`
+  String get messagePasswordCopiedClipboard {
+    return Intl.message(
+      'Password copied to the clipboard',
+      name: 'messagePasswordCopiedClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.`
+  String get messageAlertSaveCopyPassword {
+    return Intl.message(
+      'Once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.',
+      name: 'messageAlertSaveCopyPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage password`
+  String get messageManagePassword {
+    return Intl.message(
+      'Manage password',
+      name: 'messageManagePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to remove this repository biometrics?`
+  String get messageRemoveBiometricsConfirmation {
+    return Intl.message(
+      'Are you sure you want to remove this repository biometrics?',
+      name: 'messageRemoveBiometricsConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Generate password`
+  String get messageGeneratePassword {
+    return Intl.message(
+      'Generate password',
+      name: 'messageGeneratePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Secure using biometrics`
+  String get messageSecureUsingBiometrics {
+    return Intl.message(
+      'Secure using biometrics',
+      name: 'messageSecureUsingBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remember to securely save the password; if you forget it, there is no way to retrieve it.`
+  String get messageRememberSavePasswordAlert {
+    return Intl.message(
+      'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
+      name: 'messageRememberSavePasswordAlert',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Runtime ID`
+  String get messageSettingsRuntimeID {
+    return Intl.message(
+      'Runtime ID',
+      name: 'messageSettingsRuntimeID',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View`
+  String get messageView {
+    return Intl.message(
+      'View',
+      name: 'messageView',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local Discovery`
+  String get messageLocalDiscovery {
+    return Intl.message(
+      'Local Discovery',
+      name: 'messageLocalDiscovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync while using mobile data`
+  String get messageSyncMobileData {
+    return Intl.message(
+      'Sync while using mobile data',
+      name: 'messageSyncMobileData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NAT type`
+  String get messageNATType {
+    return Intl.message(
+      'NAT type',
+      name: 'messageNATType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bluetooth`
+  String get messageBluetooth {
+    return Intl.message(
+      'Bluetooth',
+      name: 'messageBluetooth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wi-Fi`
+  String get messageWiFi {
+    return Intl.message(
+      'Wi-Fi',
+      name: 'messageWiFi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile`
+  String get messageMobile {
+    return Intl.message(
+      'Mobile',
+      name: 'messageMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ethernet`
+  String get messageEthernet {
+    return Intl.message(
+      'Ethernet',
+      name: 'messageEthernet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN`
+  String get messageVPN {
+    return Intl.message(
+      'VPN',
+      name: 'messageVPN',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `None`
+  String get messageNone {
+    return Intl.message(
+      'None',
+      name: 'messageNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Peer Exchange`
+  String get messagePeerExchange {
+    return Intl.message(
+      'Peer Exchange',
+      name: 'messagePeerExchange',
+      desc: '',
+      args: [],
     );
   }
 

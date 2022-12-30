@@ -193,7 +193,7 @@ class _MainPageState extends State<MainPage>
             onAddRepositoryPressed: addRepoWithTokenDialog);
       }
 
-      return Center(child: Text("Error: unhandled state"));
+      return Center(child: Text(S.current.messageErrorUnhandledState));
     });
   }
 
@@ -328,7 +328,7 @@ class _MainPageState extends State<MainPage>
       return _contentBrowser(current.cubit);
     }
 
-    return Center(child: Text("Error: Unhandled state"));
+    return Center(child: Text(S.current.messageErrorUnhandledState));
   }
 
   _contentBrowser(RepoCubit repo) {
@@ -750,8 +750,8 @@ class _MainPageState extends State<MainPage>
     if (accessModeUnlocked == null) return;
 
     String unlockedMessage = accessModeUnlocked == AccessMode.blind
-        ? '"$repositoryName" unlocking failed. Open as a blind replica'
-        : '"$repositoryName" unlocked as a ${accessModeUnlocked.name} replica';
+        ? S.current.messageUnlockRepoFailed
+        : S.current.messageUnlockRepoOk(accessModeUnlocked.name);
 
     showSnackBar(context, content: Text(unlockedMessage));
   }

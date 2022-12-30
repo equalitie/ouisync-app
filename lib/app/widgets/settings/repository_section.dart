@@ -62,7 +62,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   ) =>
       SettingsTile.switchTile(
         initialValue: repo.isPexEnabled,
-        title: Text('Peer Exchange'), // TODO: localize
+        title: Text(S.current.messagePeerExchange),
         leading: Icon(Icons.group_add),
         onToggle: (value) {
           repo.setPexEnabled(value);
@@ -106,7 +106,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
 
   Widget _buildChangePasswordTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
-          title: Text('Biometrics'), // TODO: localize
+          title: Text(S.current.titleBiometrics),
           leading: Icon(Icons.password),
           onPressed: (context) async {
             String? biometricPassword;

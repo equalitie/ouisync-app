@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../../../generated/l10n.dart';
-import '../../utils/utils.dart';
 import '../../cubits/repo.dart';
+import '../../utils/utils.dart';
 
 class NoContentsState extends StatelessWidget {
   const NoContentsState({

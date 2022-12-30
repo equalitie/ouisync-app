@@ -167,7 +167,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     required Stream<List<int>> fileByteStream,
   }) async {
     if (uploads.containsKey(filePath)) {
-      showMessage("File is already being uploaded");
+      showMessage(S.current.messageFileIsDownloading);
       return;
     }
 
@@ -276,7 +276,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   Future<void> downloadFile(
       {required String sourcePath, required String destinationPath}) async {
     if (downloads.containsKey(sourcePath)) {
-      showMessage("File is already being downloaded");
+      showMessage(S.current.messageFileIsDownloading);
       return;
     }
 

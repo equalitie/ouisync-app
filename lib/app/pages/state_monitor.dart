@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
-import 'package:flutter/material.dart';
+
+import '../../generated/l10n.dart';
 
 class StateMonitorPage extends StatefulWidget {
   const StateMonitorPage(this.session);
@@ -30,7 +32,7 @@ class _State extends State<StateMonitorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("State Monitor")),
+        appBar: AppBar(title: Text(S.current.titleStateMonitor)),
         body: StreamBuilder<void>(
             stream: subscription.broadcastStream,
             builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
