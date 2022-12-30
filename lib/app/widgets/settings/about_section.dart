@@ -24,7 +24,7 @@ class AboutSection extends AbstractSettingsSection {
             ),
           ),
           SettingsTile(
-            title: Text('Runtime ID'),
+            title: Text(S.current.messageSettingsRuntimeID),
             leading: Icon(Icons.person),
             value: _getRuntimeIdForOS(),
           ),

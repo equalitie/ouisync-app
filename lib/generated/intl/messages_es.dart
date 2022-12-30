@@ -60,27 +60,27 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(name) =>
       "Sugerido: ${name}\n(clic aquí para usar este nombre)";
 
-  static String m16(name) => "${name} escritura cancelada";
+  static String m17(name) => "${name} escritura cancelada";
 
-  static String m17(name) => "${name} - fallo durante escritura";
+  static String m18(name) => "${name} - fallo durante escritura";
 
-  static String m18(name) => "Fallo agregando el repositorio ${name}";
+  static String m19(name) => "Fallo agregando el repositorio ${name}";
 
-  static String m19(name) => "Fallo creando el repositorio ${name}";
+  static String m20(name) => "Fallo creando el repositorio ${name}";
 
-  static String m20(access) => "${access}";
+  static String m21(access) => "${access}";
 
-  static String m21(entry) => "${entry}";
+  static String m22(entry) => "${entry}";
 
-  static String m22(name) => "${name}";
+  static String m23(name) => "${name}";
 
-  static String m23(number) => "${number}";
+  static String m24(number) => "${number}";
 
-  static String m24(path) => "${path}";
+  static String m25(path) => "${path}";
 
-  static String m25(status) => "${status}";
+  static String m26(status) => "${status}";
 
-  static String m26(name) => "Compartir repositorio \"${name}\"";
+  static String m27(name) => "Compartir repositorio \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -368,16 +368,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ingrese la clave para abrir el repositorio"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Acceso total. Tu par puede leer y modificar"),
-        "messageWritingFileCanceled": m16,
-        "messageWritingFileError": m17,
-        "messsageFailedAddRepository": m18,
-        "messsageFailedCreateRepository": m19,
-        "replacementAccess": m20,
-        "replacementEntry": m21,
-        "replacementName": m22,
-        "replacementNumber": m23,
-        "replacementPath": m24,
-        "replacementStatus": m25,
+        "messageWritingFileCanceled": m17,
+        "messageWritingFileError": m18,
+        "messsageFailedAddRepository": m19,
+        "messsageFailedCreateRepository": m20,
+        "replacementAccess": m21,
+        "replacementEntry": m22,
+        "replacementName": m23,
+        "replacementNumber": m24,
+        "replacementPath": m25,
+        "replacementStatus": m26,
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),
@@ -431,7 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Escanear QR de Repositorio"),
         "titleSettings":
             MessageLookupByLibrary.simpleMessage("Configuraciones"),
-        "titleShareRepository": m26,
+        "titleShareRepository": m27,
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Abrir repositorio"),
         "typeFile": MessageLookupByLibrary.simpleMessage("Archivo"),

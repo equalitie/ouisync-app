@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:intl/intl.dart';
-import 'package:cross_file/cross_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -15,7 +15,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
-
 import 'navigation_tile.dart';
 
 class LogsSection extends AbstractSettingsSection {
@@ -46,7 +45,7 @@ class LogsSection extends AbstractSettingsSection {
             onPressed: _shareLogs,
           ),
           NavigationTile(
-            title: Text('View'), // TODO: localize
+            title: Text(S.current.messageView),
             leading: Icon(Icons.visibility),
             onPressed: (context) => Navigator.push(
                 context,

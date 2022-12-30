@@ -37,15 +37,13 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
   void initState() {
     super.initState();
 
-    setState(() {
-      _usesBiometrics = widget.biometrics;
-    });
+    setState(() => _usesBiometrics = widget.biometrics);
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        title: Text('Biometrics'),
+        title: Text(S.current.titleBiometrics),
         elevation: 0.0,
       ),
       body: _biometricsState());
@@ -57,15 +55,13 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
       children: [
         SwitchListTile.adaptive(
             value: _usesBiometrics,
-            title: Text('Unlock using biometrics'),
+            title: Text(S.current.messageUnlockUsingBiometrics),
             onChanged: (useBiometrics) async =>
                 await _unlockUsingBiometrics(useBiometrics)),
         Divider(),
         if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
         ListTile(
-          title: Text(
-            'Password',
-          ),
+          title: Text(S.current.messagePassword),
           subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -91,8 +87,8 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
 
                               await copyStringToClipboard(_password!);
                               showSnackBar(context,
-                                  content: Text(
-                                      '"${widget.repositoryName}" password copied to the clipboard'));
+                                  content: Text(S
+                                      .current.messagePasswordCopiedClipboard));
                             }
                           : null,
                       icon: const Icon(Icons.copy_rounded),
@@ -105,9 +101,7 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
             visible: _removeBiometrics,
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-                child: Text(
-                    'Once you navigate out of this screen you wont be able to see or copy '
-                    'the password anymore; please save it in a secure place.',
+                child: Text(S.current.messageAlertSaveCopyPassword,
                     style: TextStyle(color: Colors.red)))),
         Divider(),
         ListTile(
@@ -125,7 +119,7 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
           visible: _usesBiometrics,
           child: SwitchListTile.adaptive(
               value: _managePassword,
-              title: Text('Manage password'),
+              title: Text(S.current.messageManagePassword),
               onChanged: (enableManagement) async {
                 if (!enableManagement) {
                   setState(() {
@@ -245,9 +239,9 @@ class _RepositoryBiometricsState extends State<RepositoryBiometrics>
   Future<bool?> _removeBiometricsDialog() async =>
       await Dialogs.alertDialogWithActions(
           context: context,
-          title: 'Remove biometrics',
+          title: S.current.titleRemoveBiometrics,
           body: [
-            Text('Are you sure you want to remove this repository biometrics?')
+            Text(S.current.messageRemoveBiometricsConfirmation)
           ],
           actions: [
             TextButton(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/widgets/widgets.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class FolderCreation extends StatelessWidget {
   const FolderCreation(

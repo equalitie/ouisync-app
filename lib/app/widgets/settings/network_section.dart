@@ -9,7 +9,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peer_list.dart';
 import '../../utils/utils.dart';
-
 import 'navigation_tile.dart';
 
 class NetworkSection extends AbstractSettingsSection {
@@ -78,7 +77,7 @@ class NetworkSection extends AbstractSettingsSection {
               final powerControl = context.read<PowerControl>();
               unawaited(powerControl.setLocalDiscoveryEnabled(value));
             },
-            title: Text('Local Discovery'), // TODO: localize
+            title: Text(S.current.messageLocalDiscovery),
             leading: Icon(Icons.broadcast_on_personal),
           ),
         ),
@@ -94,7 +93,7 @@ class NetworkSection extends AbstractSettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
-          title: Text('Sync while using mobile data'),
+          title: Text(S.current.messageSyncMobileData),
           leading: Icon(Icons.mobile_screen_share),
         ),
       ));
@@ -196,7 +195,7 @@ class NetworkSection extends AbstractSettingsSection {
                     builder: (context, type) {
                       return SettingsTile(
                         leading: Icon(Icons.nat),
-                        title: Text("NAT type"),
+                        title: Text(S.current.messageNATType),
                         value: Text(type.message()),
                       );
                     });
@@ -206,16 +205,16 @@ class NetworkSection extends AbstractSettingsSection {
 String _connectivityTypeName(ConnectivityResult result) {
   switch (result) {
     case ConnectivityResult.bluetooth:
-      return "Bluetooth";
+      return S.current.messageBluetooth;
     case ConnectivityResult.wifi:
-      return "WiFi";
+      return S.current.messageWiFi;
     case ConnectivityResult.mobile:
-      return "Mobile";
+      return S.current.messageMobile;
     case ConnectivityResult.ethernet:
-      return "Ethernet";
+      return S.current.messageEthernet;
     case ConnectivityResult.vpn:
-      return "VPN";
+      return S.current.messageVPN;
     case ConnectivityResult.none:
-      return "None";
+      return S.current.messageNone;
   }
 }

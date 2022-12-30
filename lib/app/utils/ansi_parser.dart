@@ -1,5 +1,4 @@
 /// Simple parser for ANSI color sequences
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
