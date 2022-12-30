@@ -9,8 +9,8 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
-class RepositoryBiometrics extends StatefulWidget {
-  const RepositoryBiometrics(
+class RepositorySecurity extends StatefulWidget {
+  const RepositorySecurity(
       {required this.repositoryName,
       required this.repositories,
       required this.biometrics,
@@ -21,10 +21,10 @@ class RepositoryBiometrics extends StatefulWidget {
   final bool biometrics;
 
   @override
-  State<RepositoryBiometrics> createState() => _RepositoryBiometricsState();
+  State<RepositorySecurity> createState() => _RepositorySecurityState();
 }
 
-class _RepositoryBiometricsState extends State<RepositoryBiometrics>
+class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
   String? _password;
 

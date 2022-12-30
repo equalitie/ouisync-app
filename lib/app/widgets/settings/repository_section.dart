@@ -123,7 +123,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RepositoryBiometrics(
+                  builder: (context) => RepositorySecurity(
                       repositoryName: repo.name,
                       repositories: repos,
                       biometrics: usesBiometrics),
