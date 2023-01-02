@@ -73,7 +73,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
                           }),
                           hint: S.current.messageRepositoryPassword,
                           onSaved: (String? password) async {
-                            await _returnPassword(password);
+                            await _unlockRepository(password);
                           },
                           validator: validateNoEmpty(
                               Strings.messageErrorRepositoryPasswordValidation),
@@ -97,7 +97,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
             contentPadding: EdgeInsets.zero);
       });
 
-  Future<void> _returnPassword(String? password) async {
+  Future<void> _unlockRepository(String? password) async {
     if (password?.isEmpty ?? true) {
       return;
     }
@@ -106,7 +106,13 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
         repositoryName: repositoryName, password: password!);
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
-      Navigator.of(context).pop(AccessMode.blind);
+      final notUnlockedResponse = UnlockRepositoryResult(
+          repositoryName: repositoryName,
+          password: password,
+          accessMode: AccessMode.blind,
+          message: S.current.messageUnlockRepoFailed);
+
+      Navigator.of(context).pop(notUnlockedResponse);
       return;
     }
 
@@ -122,7 +128,17 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       }
     }
 
-    Navigator.of(context).pop(accessMode!);
+    final message = _useBiometrics.value
+        ? 'Biometric validation added for repository "$repositoryName"'
+        : S.current.messageUnlockRepoOk(repositoryName);
+
+    final unlockedResponse = UnlockRepositoryResult(
+        repositoryName: repositoryName,
+        password: password,
+        accessMode: accessMode!,
+        message: message);
+
+    Navigator.of(context).pop(unlockedResponse);
   }
 
   List<Widget> _actions(context) => [
@@ -138,4 +154,17 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       formKey.currentState!.save();
     }
   }
+}
+
+class UnlockRepositoryResult {
+  UnlockRepositoryResult(
+      {required this.repositoryName,
+      required this.password,
+      required this.accessMode,
+      required this.message});
+
+  final String repositoryName;
+  final String password;
+  final AccessMode accessMode;
+  final String message;
 }

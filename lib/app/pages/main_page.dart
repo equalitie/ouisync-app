@@ -737,7 +737,7 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _getRepositoryPasswordDialog(
       {required String repositoryName}) async {
-    final accessModeUnlocked = await showDialog<AccessMode?>(
+    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -747,13 +747,9 @@ class _MainPageState extends State<MainPage>
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
-    if (accessModeUnlocked == null) return;
+    if (unlockRepoResponse == null) return;
 
-    String unlockedMessage = accessModeUnlocked == AccessMode.blind
-        ? S.current.messageUnlockRepoFailed
-        : S.current.messageUnlockRepoOk(accessModeUnlocked.name);
-
-    showSnackBar(context, content: Text(unlockedMessage));
+    showSnackBar(context, content: Text(unlockRepoResponse.message));
   }
 
   Future<AccessMode?> _unlockRepository(

@@ -152,7 +152,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 AccessMode.blind) ==
             AccessMode.blind;
 
-    final newAccessMode = await showDialog<AccessMode?>(
+    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -163,10 +163,15 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
-    if (newAccessMode == null) return;
+    if (unlockRepoResponse == null) return;
 
-    final biometricsAddedSuccessfully = newAccessMode != AccessMode.blind;
-    if (!biometricsAddedSuccessfully) return;
+    final biometricsAddedSuccessfully =
+        unlockRepoResponse.accessMode != AccessMode.blind;
+
+    if (!biometricsAddedSuccessfully) {
+      showSnackBar(context, content: Text(unlockRepoResponse.message));
+      return;
+    }
 
     // Validating the password would unlock the repo, if successful; so if it was
     // originally locked, we need to leave it that way.
@@ -175,14 +180,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           repositoryName: widget.repositoryName, password: '');
     }
 
-    setState(() {
-      _usesBiometrics = biometricsAddedSuccessfully;
+    showSnackBar(context, content: Text(unlockRepoResponse.message));
 
-      _previewPassword = false;
-      _removeBiometrics = false;
+    if (biometricsAddedSuccessfully) {
+      setState(() {
+        _usesBiometrics = biometricsAddedSuccessfully;
 
-      _password = '';
-    });
+        _previewPassword = false;
+        _password = unlockRepoResponse.password;
+      });
+    }
   }
 
   Future<AccessMode?> _unlockRepository(
@@ -207,6 +214,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     await Biometrics.deleteRepositoryPassword(
         repositoryName: widget.repositoryName);
+
+    showSnackBar(context, content: Text('Biometric validation removed'));
 
     setState(() {
       _usesBiometrics = false;
