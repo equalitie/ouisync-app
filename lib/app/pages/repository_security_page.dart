@@ -56,7 +56,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         child: Container(
             child: Column(children: [
       ListTile(
-        title: Text('Repository name'),
+        title: Text(S.current.titleRepositoryName),
         subtitle: Text(widget.repositoryName),
       ),
       Divider(),
@@ -113,7 +113,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             children: [
               ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text('Remove biometric validation'),
+                  title: Text(S.current.messageRemoveBiometricValidation),
                   trailing: const Icon(Icons.fingerprint_rounded)),
               Text(S.current.messageAlertSaveCopyPassword,
                   textAlign: TextAlign.justify,
@@ -124,7 +124,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 children: [
                   TextButton(
                       onPressed: () async => await _removeRepoBiometrics(),
-                      child: Text('Remove'))
+                      child: Text(S.current.actionRemove))
                 ],
               )
             ],
@@ -137,7 +137,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           child: Column(children: [
             ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text('Secure using biometrics'),
+                title: Text(S.current.messageSecureUsingBiometrics),
                 trailing: Icon(Icons.fingerprint_rounded,
                     color: Theme.of(context).primaryColor),
                 onTap: () async => await _addRepoBiometrics())
@@ -215,7 +215,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     await Biometrics.deleteRepositoryPassword(
         repositoryName: widget.repositoryName);
 
-    showSnackBar(context, content: Text('Biometric validation removed'));
+    showSnackBar(context,
+        content: Text(S.current.messageBiometricValidationRemoved));
 
     setState(() {
       _usesBiometrics = false;

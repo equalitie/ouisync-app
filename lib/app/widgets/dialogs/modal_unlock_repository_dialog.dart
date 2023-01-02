@@ -129,7 +129,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
     }
 
     final message = _useBiometrics.value
-        ? 'Biometric validation added for repository "$repositoryName"'
+        ? S.current.messageBiometricValidationAdded(repositoryName)
         : S.current.messageUnlockRepoOk(repositoryName);
 
     final unlockedResponse = UnlockRepositoryResult(
