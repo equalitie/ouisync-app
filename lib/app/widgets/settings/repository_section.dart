@@ -126,6 +126,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
                   builder: (context) => RepositorySecurity(
                       repositoryName: repo.name,
                       repositories: repos,
+                      password: biometricPassword,
                       biometrics: usesBiometrics),
                 ));
           });

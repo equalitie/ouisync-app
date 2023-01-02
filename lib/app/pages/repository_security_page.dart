@@ -13,11 +13,13 @@ class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
       {required this.repositoryName,
       required this.repositories,
+      required this.password,
       required this.biometrics,
       super.key});
 
   final String repositoryName;
   final ReposCubit repositories;
+  final String? password;
   final bool biometrics;
 
   @override
@@ -37,7 +39,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   void initState() {
     super.initState();
 
-    setState(() => _usesBiometrics = widget.biometrics);
+    setState(() {
+      _password = widget.password;
+      _usesBiometrics = widget.biometrics;
+    });
   }
 
   @override
