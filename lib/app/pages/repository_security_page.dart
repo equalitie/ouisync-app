@@ -31,9 +31,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   String? _password;
 
   bool _usesBiometrics = false;
-  bool _managePassword = false;
   bool _previewPassword = false;
-  bool _removeBiometrics = false;
 
   @override
   void initState() {
@@ -62,23 +60,22 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         subtitle: Text(widget.repositoryName),
       ),
       Divider(),
-      SwitchListTile.adaptive(
-          value: _usesBiometrics,
-          title: Text(S.current.messageUnlockUsingBiometrics),
-          onChanged: (useBiometrics) async =>
-              await _unlockUsingBiometrics(useBiometrics)),
-      Divider(),
-      if (_usesBiometrics) ...[..._manageBiometrics(), Divider()],
+      ..._managePassword(),
+      Divider()
+    ])));
+  }
+
+  List<Widget> _managePassword() {
+    return [
       ListTile(
-        title: Text(S.current.messagePassword),
-        subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+          contentPadding: EdgeInsets.only(left: 16.0),
+          title: Text(S.current.messagePassword),
+          subtitle: Text(_formattPassword(_password, mask: !_previewPassword)),
+          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
             Expanded(
                 flex: 0,
                 child: IconButton(
-                    onPressed: _managePassword
+                    onPressed: _password?.isNotEmpty ?? false
                         ? () =>
                             setState(() => _previewPassword = !_previewPassword)
                         : null,
@@ -90,7 +87,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             Expanded(
                 flex: 0,
                 child: IconButton(
-                    onPressed: _managePassword
+                    onPressed: _password?.isNotEmpty ?? false
                         ? () async {
                             if (_password == null) return;
 
@@ -103,62 +100,51 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                     icon: const Icon(Icons.copy_rounded),
                     padding: EdgeInsets.zero,
                     color: Theme.of(context).primaryColor))
-          ],
-        ),
-      ),
-      Visibility(
-          visible: _removeBiometrics,
-          child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-              child: Text(S.current.messageAlertSaveCopyPassword,
-                  style: TextStyle(color: Colors.red)))),
-      Divider()
-    ])));
-  }
-
-  List<Widget> _manageBiometrics() {
-    return [
-      Visibility(
-          visible: _usesBiometrics,
-          child: SwitchListTile.adaptive(
-              value: _managePassword,
-              title: Text(S.current.messageManagePassword),
-              onChanged: (enableManagement) async {
-                if (!enableManagement) {
-                  setState(() {
-                    _managePassword = false;
-                    _previewPassword = false;
-
-                    _password = '';
-                  });
-                  return;
-                }
-
-                String? biometricPassword;
-                try {
-                  biometricPassword = await Biometrics.getRepositoryPassword(
-                      repositoryName: widget.repositoryName);
-                } catch (e) {
-                  loggy.app(e);
-                  return;
-                }
-
-                if (biometricPassword?.isEmpty ?? true) return;
-
-                setState(() {
-                  _password = biometricPassword;
-                  _managePassword = enableManagement;
-                });
-              }))
+          ])),
+      _usesBiometrics ? _removeBiometrics() : _useBiometrics()
     ];
   }
 
+  Widget _removeBiometrics() => Visibility(
+      visible: _usesBiometrics,
+      child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+          child: Column(
+            children: [
+              ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('Remove biometric validation'),
+                  trailing: const Icon(Icons.fingerprint_rounded)),
+              Text(S.current.messageAlertSaveCopyPassword,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(color: Colors.red)),
+              Dimensions.spacingVertical,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () async => await _removeRepoBiometrics(),
+                      child: Text('Remove'))
+                ],
+              )
+            ],
+          )));
+
+  Widget _useBiometrics() => Visibility(
+      visible: !_usesBiometrics,
+      child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+          child: Column(children: [
+            ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('Secure using biometrics'),
+                trailing: Icon(Icons.fingerprint_rounded,
+                    color: Theme.of(context).primaryColor),
+                onTap: () async => await _addRepoBiometrics())
+          ])));
+
   String _formattPassword(String? password, {bool mask = true}) =>
       (mask ? "*" * (password ?? '').length : password) ?? '';
-
-  Future<void> _unlockUsingBiometrics(bool useBiometrics) async => useBiometrics
-      ? await _addRepoBiometrics()
-      : await _removeRepoBiometrics();
 
   Future<void> _addRepoBiometrics() async {
     final wasLocked =
@@ -192,7 +178,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     setState(() {
       _usesBiometrics = biometricsAddedSuccessfully;
 
-      _managePassword = false;
       _previewPassword = false;
       _removeBiometrics = false;
 
@@ -200,13 +185,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     });
   }
 
-  // Removing a repository from the biometrics storage:
-  // We retrive the password, then we remove it from the biometric storage and
-  // enable the password section so the user can see / copy the password and
-  // saved it on its own.
-  // We also display a meesage telling the user to do this.
+  Future<AccessMode?> _unlockRepository(
+          {required String repositoryName, required String password}) async =>
+      await widget.repositories
+          .unlockRepository(repositoryName, password: password);
+
   Future<void> _removeRepoBiometrics() async {
-    final removeBiometrics = await _removeBiometricsDialog();
+    final removeBiometrics = await _removeBiometricsConfirmationDialog();
     if (!(removeBiometrics ?? false)) return;
 
     String? biometricPassword;
@@ -224,22 +209,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         repositoryName: widget.repositoryName);
 
     setState(() {
-      _password = biometricPassword;
-
-      _removeBiometrics = true;
-      _managePassword = true;
-
       _usesBiometrics = false;
       _previewPassword = false;
     });
   }
 
-  Future<AccessMode?> _unlockRepository(
-          {required String repositoryName, required String password}) async =>
-      await widget.repositories
-          .unlockRepository(repositoryName, password: password);
-
-  Future<bool?> _removeBiometricsDialog() async =>
+  Future<bool?> _removeBiometricsConfirmationDialog() async =>
       await Dialogs.alertDialogWithActions(
           context: context,
           title: S.current.titleRemoveBiometrics,
