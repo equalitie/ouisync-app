@@ -9,21 +9,47 @@ class Biometrics {
     return _storage.getStorage(key);
   }
 
-  static Future<void> addRepositoryPassword(
+  static Future<BiometricsResult> addRepositoryPassword(
       {required String repositoryName, required String password}) async {
-    final storageFile = await _getStorageFileForKey(repositoryName);
-    return storageFile.write(password);
+    try {
+      final storageFile = await _getStorageFileForKey(repositoryName);
+      await storageFile.write(password);
+    } on Exception catch (e) {
+      return BiometricsResult(value: null, exception: e);
+    }
+
+    return BiometricsResult(value: null);
   }
 
-  static Future<String?> getRepositoryPassword(
+  static Future<BiometricsResult> getRepositoryPassword(
       {required String repositoryName}) async {
-    final storageFile = await _getStorageFileForKey(repositoryName);
-    return storageFile.read();
+    String? password;
+    try {
+      final storageFile = await _getStorageFileForKey(repositoryName);
+      password = await storageFile.read();
+    } on Exception catch (e) {
+      return BiometricsResult(value: null, exception: e);
+    }
+
+    return BiometricsResult(value: password);
   }
 
-  static Future<void> deleteRepositoryPassword(
+  static Future<BiometricsResult> deleteRepositoryPassword(
       {required String repositoryName}) async {
-    final storageFile = await _getStorageFileForKey(repositoryName);
-    return storageFile.delete();
+    try {
+      final storageFile = await _getStorageFileForKey(repositoryName);
+      await storageFile.delete();
+    } on Exception catch (e) {
+      return BiometricsResult(value: null, exception: e);
+    }
+
+    return BiometricsResult(value: null);
   }
+}
+
+class BiometricsResult {
+  BiometricsResult({required this.value, this.exception});
+
+  final String? value;
+  final Exception? exception;
 }

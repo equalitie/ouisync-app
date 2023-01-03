@@ -1,3 +1,4 @@
+import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
@@ -332,9 +333,32 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       _retypePasswordInputKey.currentState!.save();
     }
 
+    // We add the password to the biometric storage before creating the repo.
+    // The reason for this is that in case of the user canceling the biometric
+    // authentication, we can just stay in the dialog, before even creating the
+    // repo.
+    // If instead we first create the repo, then add biometrics and there is an
+    // exception  (most likely the user canceling the validation), we would
+    // have the repo, but no biometrics, which would be confusiong for the user.
     if (_useBiometrics) {
-      await Biometrics.addRepositoryPassword(
-          repositoryName: name, password: password);
+      final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+          context,
+          f: Biometrics.addRepositoryPassword(
+              repositoryName: name, password: password));
+
+      if (biometricsResult.exception != null) {
+        loggy.app(biometricsResult.exception);
+
+        if (biometricsResult.exception is AuthException) {
+          if ((biometricsResult.exception as AuthException).code !=
+              AuthExceptionCode.userCanceled) {
+            showSnackBar(context,
+                content: Text(S.current.messageErrorAuthenticatingBiometrics));
+          }
+        }
+
+        return;
+      }
     }
 
     final info = RepoMetaInfo.fromDirAndName(
@@ -353,7 +377,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         message: repoEntry.error,
       );
 
-      await Biometrics.deleteRepositoryPassword(repositoryName: name);
       return;
     }
 

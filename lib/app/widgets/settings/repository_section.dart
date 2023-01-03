@@ -27,7 +27,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             _buildCurrentTile(context, _buildPexSwitch),
             _buildCurrentTile(context, _buildRenameTile),
             _buildCurrentTile(context, _buildShareTile),
-            _buildCurrentTile(context, _buildChangePasswordTile),
+            _buildCurrentTile(context, _buildSecurityTile),
             _buildCurrentTile(context, _buildDeleteTile),
           ],
         ),
@@ -104,28 +104,30 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
         },
       );
 
-  Widget _buildChangePasswordTile(BuildContext context, RepoCubit repo) =>
+  Widget _buildSecurityTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
-          title: Text(S.current.titleBiometrics),
+          title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
-            String? biometricPassword;
-            try {
-              biometricPassword = await Biometrics.getRepositoryPassword(
-                  repositoryName: repo.name);
-            } catch (e) {
-              loggy.app(e);
+            final biometricsResult =
+                await Dialogs.executeFutureWithLoadingDialog(context,
+                    f: Biometrics.getRepositoryPassword(
+                        repositoryName: repo.name));
+
+            if (biometricsResult.exception != null) {
+              loggy.app(biometricsResult.exception);
               return;
             }
 
-            final usesBiometrics = biometricPassword?.isNotEmpty ?? false;
+            final usesBiometrics = biometricsResult.value?.isNotEmpty ?? false;
 
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RepositoryBiometrics(
+                  builder: (context) => RepositorySecurity(
                       repositoryName: repo.name,
                       repositories: repos,
+                      password: biometricsResult.value, //biometricPassword,
                       biometrics: usesBiometrics),
                 ));
           });
