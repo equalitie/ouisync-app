@@ -119,8 +119,10 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
     // Only if the password successfuly unlocked the repo, then we add it
     // to the biometrics store -if the user selected the option.
     if (_useBiometrics.value) {
-      final biometricsResult = await Biometrics.addRepositoryPassword(
-          repositoryName: repositoryName, password: password);
+      final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+          context,
+          f: Biometrics.addRepositoryPassword(
+              repositoryName: repositoryName, password: password));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);

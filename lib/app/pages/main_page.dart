@@ -715,8 +715,9 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _unlockRepositoryCallback(
       {required String repositoryName}) async {
-    final biometricsResult =
-        await Biometrics.getRepositoryPassword(repositoryName: repositoryName);
+    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: Biometrics.getRepositoryPassword(repositoryName: repositoryName));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);

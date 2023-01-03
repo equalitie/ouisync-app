@@ -109,8 +109,10 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
-            final biometricsResult = await Biometrics.getRepositoryPassword(
-                repositoryName: repo.name);
+            final biometricsResult =
+                await Dialogs.executeFutureWithLoadingDialog(context,
+                    f: Biometrics.getRepositoryPassword(
+                        repositoryName: repo.name));
 
             if (biometricsResult.exception != null) {
               loggy.app(biometricsResult.exception);

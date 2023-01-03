@@ -341,8 +341,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     // exception  (most likely the user canceling the validation), we would
     // have the repo, but no biometrics, which would be confusiong for the user.
     if (_useBiometrics) {
-      final biometricsResult = await Biometrics.addRepositoryPassword(
-          repositoryName: name, password: password);
+      final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+          context,
+          f: Biometrics.addRepositoryPassword(
+              repositoryName: name, password: password));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);
