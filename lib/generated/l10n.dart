@@ -2170,10 +2170,10 @@ class S {
     );
   }
 
-  /// `Create a repository`
+  /// `Create a new repository`
   String get iconCreateRepository {
     return Intl.message(
-      'Create a repository',
+      'Create a new repository',
       name: 'iconCreateRepository',
       desc: '',
       args: [],
@@ -2210,10 +2210,10 @@ class S {
     );
   }
 
-  /// `Create a Repository`
+  /// `Create a New Repository`
   String get actionCreateRepository {
     return Intl.message(
-      'Create a Repository',
+      'Create a New Repository',
       name: 'actionCreateRepository',
       desc: '',
       args: [],
