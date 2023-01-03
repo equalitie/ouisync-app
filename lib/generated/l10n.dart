@@ -1870,10 +1870,10 @@ class S {
     );
   }
 
-  /// `Biometric validation added for repository {name}`
+  /// `Biometric validation added for repository "{name}"`
   String messageBiometricValidationAdded(Object name) {
     return Intl.message(
-      'Biometric validation added for repository $name',
+      'Biometric validation added for repository "$name"',
       name: 'messageBiometricValidationAdded',
       desc: '',
       args: [name],

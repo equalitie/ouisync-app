@@ -334,7 +334,7 @@
   "messageGeneratePassword":"Generate password",
   "messageSecureUsingBiometrics":"Secure using biometrics",
   "messageRememberSavePasswordAlert":"Remember to securely save the password; if you forget it, there is no way to retrieve it.",
-  "messageBiometricValidationAdded":"Biometric validation added for repository {name}",
+  "messageBiometricValidationAdded":"Biometric validation added for repository \"{name}\"",
   "messageBiometricValidationRemoved":"Biometric validation removed",
   "messageSettingsRuntimeID":"Runtime ID",
   "messageView":"View",

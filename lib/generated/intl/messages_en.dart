@@ -23,7 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "The permission cannot be higger than the repository current access mode: ${access}";
 
-  static String m1(name) => "Biometric validation added for repository ${name}";
+  static String m1(name) =>
+      "Biometric validation added for repository \"${name}\"";
 
   static String m2(name) => "${name} - downloading canceled";
 
