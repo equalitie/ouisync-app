@@ -351,8 +351,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           if ((biometricsResult.exception as AuthException).code !=
               AuthExceptionCode.userCanceled) {
             showSnackBar(context,
-                content: Text(
-                    'There was an error authenticathing using biometrics. Please try again'));
+                content: Text(S.current.messageErrorAuthenticatingBiometrics));
           }
         }
 

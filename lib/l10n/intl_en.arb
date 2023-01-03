@@ -336,6 +336,7 @@
   "messageRememberSavePasswordAlert":"Remember to securely save the password; if you forget it, there is no way to retrieve it.",
   "messageBiometricValidationAdded":"Biometric validation added for repository \"{name}\"",
   "messageBiometricValidationRemoved":"Biometric validation removed",
+  "messageErrorAuthenticatingBiometrics":"There was an error authenticathing using biometrics. Please try again",
   "messageSettingsRuntimeID":"Runtime ID",
   "messageView":"View",
   "messageLocalDiscovery":"Local Discovery",

@@ -1890,6 +1890,16 @@ class S {
     );
   }
 
+  /// `There was an error authenticathing using biometrics. Please try again`
+  String get messageErrorAuthenticatingBiometrics {
+    return Intl.message(
+      'There was an error authenticathing using biometrics. Please try again',
+      name: 'messageErrorAuthenticatingBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Runtime ID`
   String get messageSettingsRuntimeID {
     return Intl.message(

@@ -246,6 +246,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
+        "messageErrorAuthenticatingBiometrics":
+            MessageLookupByLibrary.simpleMessage(
+                "There was an error authenticathing using biometrics. Please try again"),
         "messageErrorCharactersNotAllowed":
             MessageLookupByLibrary.simpleMessage(
                 "Using \\ or / is not allowed"),
