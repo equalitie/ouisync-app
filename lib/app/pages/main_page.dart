@@ -715,16 +715,16 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _unlockRepositoryCallback(
       {required String repositoryName}) async {
-    String? biometricPassword;
-    try {
-      biometricPassword = await Biometrics.getRepositoryPassword(
-          repositoryName: repositoryName);
-    } catch (e) {
-      loggy.app(e);
+    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: Biometrics.getRepositoryPassword(repositoryName: repositoryName));
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
       return;
     }
 
-    if (biometricPassword?.isEmpty ?? true) {
+    if (biometricsResult.value?.isEmpty ?? true) {
       // Unlock manually
       await _getRepositoryPasswordDialog(repositoryName: repositoryName);
       return;
@@ -732,12 +732,12 @@ class _MainPageState extends State<MainPage>
 
     // Unlock using biometrics
     await _unlockRepository(
-        repositoryName: repositoryName, password: biometricPassword!);
+        repositoryName: repositoryName, password: biometricsResult.value!);
   }
 
   Future<void> _getRepositoryPasswordDialog(
       {required String repositoryName}) async {
-    final accessModeUnlocked = await showDialog<AccessMode?>(
+    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
@@ -747,13 +747,9 @@ class _MainPageState extends State<MainPage>
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
-    if (accessModeUnlocked == null) return;
+    if (unlockRepoResponse == null) return;
 
-    String unlockedMessage = accessModeUnlocked == AccessMode.blind
-        ? S.current.messageUnlockRepoFailed
-        : S.current.messageUnlockRepoOk(accessModeUnlocked.name);
-
-    showSnackBar(context, content: Text(unlockedMessage));
+    showSnackBar(context, content: Text(unlockRepoResponse.message));
   }
 
   Future<AccessMode?> _unlockRepository(

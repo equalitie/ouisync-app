@@ -320,9 +320,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final repoName = info.name;
     final wasCurrent = currentRepoName == repoName;
 
+    final biometricsResult =
+        await Biometrics.deleteRepositoryPassword(repositoryName: repoName);
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
+      return;
+    }
+
     await _forget(repoName);
     await _settings.forgetRepository(repoName);
-    await Biometrics.deleteRepositoryPassword(repositoryName: repoName);
 
     final deleted = await _deleteRepositoryFiles(info);
 

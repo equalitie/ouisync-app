@@ -350,11 +350,11 @@ class S {
     );
   }
 
-  /// `Biometrics`
-  String get titleBiometrics {
+  /// `Security`
+  String get titleSecurity {
     return Intl.message(
-      'Biometrics',
-      name: 'titleBiometrics',
+      'Security',
+      name: 'titleSecurity',
       desc: '',
       args: [],
     );
@@ -375,6 +375,16 @@ class S {
     return Intl.message(
       'State Monitor',
       name: 'titleStateMonitor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository name`
+  String get titleRepositoryName {
+    return Intl.message(
+      'Repository name',
+      name: 'titleRepositoryName',
       desc: '',
       args: [],
     );
@@ -1750,10 +1760,10 @@ class S {
     );
   }
 
-  /// `Unlocking failed. Open as a blind replica`
+  /// `The password did not unlock the repository`
   String get messageUnlockRepoFailed {
     return Intl.message(
-      'Unlocking failed. Open as a blind replica',
+      'The password did not unlock the repository',
       name: 'messageUnlockRepoFailed',
       desc: '',
       args: [],
@@ -1800,21 +1810,21 @@ class S {
     );
   }
 
-  /// `Once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.`
-  String get messageAlertSaveCopyPassword {
+  /// `Remove biometric validation`
+  String get messageRemoveBiometricValidation {
     return Intl.message(
-      'Once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.',
-      name: 'messageAlertSaveCopyPassword',
+      'Remove biometric validation',
+      name: 'messageRemoveBiometricValidation',
       desc: '',
       args: [],
     );
   }
 
-  /// `Manage password`
-  String get messageManagePassword {
+  /// `If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.`
+  String get messageAlertSaveCopyPassword {
     return Intl.message(
-      'Manage password',
-      name: 'messageManagePassword',
+      'If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.',
+      name: 'messageAlertSaveCopyPassword',
       desc: '',
       args: [],
     );
@@ -1855,6 +1865,36 @@ class S {
     return Intl.message(
       'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
       name: 'messageRememberSavePasswordAlert',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Biometric validation added for repository "{name}"`
+  String messageBiometricValidationAdded(Object name) {
+    return Intl.message(
+      'Biometric validation added for repository "$name"',
+      name: 'messageBiometricValidationAdded',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Biometric validation removed`
+  String get messageBiometricValidationRemoved {
+    return Intl.message(
+      'Biometric validation removed',
+      name: 'messageBiometricValidationRemoved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `There was an error authenticathing using biometrics. Please try again`
+  String get messageErrorAuthenticatingBiometrics {
+    return Intl.message(
+      'There was an error authenticathing using biometrics. Please try again',
+      name: 'messageErrorAuthenticatingBiometrics',
       desc: '',
       args: [],
     );
@@ -2525,6 +2565,16 @@ class S {
     return Intl.message(
       'LOCK',
       name: 'actionLockCapital',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove`
+  String get actionRemove {
+    return Intl.message(
+      'Remove',
+      name: 'actionRemove',
       desc: '',
       args: [],
     );
