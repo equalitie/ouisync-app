@@ -109,16 +109,15 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
-            String? biometricPassword;
-            try {
-              biometricPassword = await Biometrics.getRepositoryPassword(
-                  repositoryName: repo.name);
-            } catch (e) {
-              loggy.app(e);
+            final biometricsResult = await Biometrics.getRepositoryPassword(
+                repositoryName: repo.name);
+
+            if (biometricsResult.exception != null) {
+              loggy.app(biometricsResult.exception);
               return;
             }
 
-            final usesBiometrics = biometricPassword?.isNotEmpty ?? false;
+            final usesBiometrics = biometricsResult.value?.isNotEmpty ?? false;
 
             Navigator.push(
                 context,
@@ -126,7 +125,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
                   builder: (context) => RepositorySecurity(
                       repositoryName: repo.name,
                       repositories: repos,
-                      password: biometricPassword,
+                      password: biometricsResult.value, //biometricPassword,
                       biometrics: usesBiometrics),
                 ));
           });

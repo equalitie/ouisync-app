@@ -715,16 +715,15 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _unlockRepositoryCallback(
       {required String repositoryName}) async {
-    String? biometricPassword;
-    try {
-      biometricPassword = await Biometrics.getRepositoryPassword(
-          repositoryName: repositoryName);
-    } catch (e) {
-      loggy.app(e);
+    final biometricsResult =
+        await Biometrics.getRepositoryPassword(repositoryName: repositoryName);
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
       return;
     }
 
-    if (biometricPassword?.isEmpty ?? true) {
+    if (biometricsResult.value?.isEmpty ?? true) {
       // Unlock manually
       await _getRepositoryPasswordDialog(repositoryName: repositoryName);
       return;
@@ -732,7 +731,7 @@ class _MainPageState extends State<MainPage>
 
     // Unlock using biometrics
     await _unlockRepository(
-        repositoryName: repositoryName, password: biometricPassword!);
+        repositoryName: repositoryName, password: biometricsResult.value!);
   }
 
   Future<void> _getRepositoryPasswordDialog(
