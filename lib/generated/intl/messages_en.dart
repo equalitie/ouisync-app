@@ -97,7 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CLOSE"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Create"),
         "actionCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Create a Repository"),
+            MessageLookupByLibrary.simpleMessage("Create a New Repository"),
         "actionDelete": MessageLookupByLibrary.simpleMessage("Delete"),
         "actionDeleteCapital": MessageLookupByLibrary.simpleMessage("DELETE"),
         "actionDeleteFile": MessageLookupByLibrary.simpleMessage("Delete file"),
@@ -138,7 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("Add an existing repository"),
         "iconCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Create a repository"),
+            MessageLookupByLibrary.simpleMessage("Create a new repository"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Delete"),
         "iconDownload": MessageLookupByLibrary.simpleMessage("Download"),
         "iconInformation": MessageLookupByLibrary.simpleMessage("Information"),
