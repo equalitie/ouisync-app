@@ -482,19 +482,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     final addedRepo = await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
-
-          return ActionsDialog(
+        builder: (BuildContext context) => ActionsDialog(
             title: S.current.titleAddRepository,
-            body: AddRepositoryWithToken(
-              context: context,
-              cubit: _repositories,
-              formKey: formKey,
-              initialTokenValue: shareLink,
-            ),
-          );
-        });
+            body: RepositoryCreation(
+                context: context,
+                cubit: _repositories,
+                initialTokenValue: shareLink)));
+
+    if (addedRepo?.isEmpty ?? true) return;
 
     await updateSettingsAndPop(context, addedRepo);
   }
