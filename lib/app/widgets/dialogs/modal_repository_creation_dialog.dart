@@ -272,7 +272,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     fontWeight: FontWeight.normal,
                     color: Colors.black54,
                   )
-                ])))
+                ]))),
+        Dimensions.spacingVertical
       ];
 
   List<Widget> _passwordSection() =>
