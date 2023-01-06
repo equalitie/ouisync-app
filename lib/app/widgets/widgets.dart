@@ -11,14 +11,13 @@ export 'buttons/dialog_danger_button.dart';
 
 export 'dialogs/actions_dialog.dart';
 export 'dialogs/modal_actions_bottom_sheet.dart';
-export 'dialogs/modal_add_repo_token_dialog.dart';
 export 'dialogs/modal_file_detail_bottom_sheet.dart';
 export 'dialogs/modal_file_detail_bottom_sheet.dart';
 export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_folder_detail_bottom_sheet.dart';
 export 'dialogs/modal_rename_dialog.dart';
 export 'dialogs/modal_rename_repository_dialog.dart';
-export 'dialogs/modal_repo_creation_dialog.dart';
+export 'dialogs/modal_repository_creation_dialog.dart';
 export 'dialogs/modal_save_to_device_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
