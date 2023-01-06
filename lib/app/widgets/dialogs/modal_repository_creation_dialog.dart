@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +66,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   String _suggestedName = '';
   bool _showSuggestedName = false;
+
+  bool _showRepositoryNameInUseWarning = false;
 
   @override
   void initState() {
@@ -171,15 +175,17 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   void _addListeners() {
     _repositoryNameFocus.addListener(() {
-      if (_nameController.text.isEmpty) {
+      if (widget.initialTokenValue != null && _nameController.text.isEmpty) {
         setState(() => _showSuggestedName = _nameController.text.isEmpty);
       }
     });
 
     _nameController.addListener(() {
-      if (_nameController.text.isEmpty) {
+      if (widget.initialTokenValue != null && _nameController.text.isEmpty) {
         setState(() => _showSuggestedName = true);
       }
+
+      setState(() => _showRepositoryNameInUseWarning = false);
     });
   }
 
@@ -260,6 +266,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
             autovalidateMode: AutovalidateMode.disabled,
             focusNode: _repositoryNameFocus),
+        _repositoryNameTakenWarning(),
         Visibility(
             visible: _showSuggestedName,
             child: GestureDetector(
@@ -275,6 +282,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 ]))),
         Dimensions.spacingVertical
       ];
+
+  Widget _repositoryNameTakenWarning() => Visibility(
+      visible: _showRepositoryNameInUseWarning,
+      child: Fields.autosizeText(S.current.messageErrorRepositoryNameExist,
+          color: Colors.red,
+          maxLines: 10,
+          softWrap: true,
+          textOverflow: TextOverflow.ellipsis));
 
   List<Widget> _passwordSection() =>
       [_passwordInputs(), _generatePasswordSwitch()];
@@ -374,15 +389,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
-  Widget _manualPasswordWarning() => Padding(
-      padding: Dimensions.paddingVertical10,
-      child: Visibility(
-          visible: !_useBiometrics,
-          child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-              color: Colors.red,
-              maxLines: 10,
-              softWrap: true,
-              textOverflow: TextOverflow.ellipsis)));
+  Widget _manualPasswordWarning() => Visibility(
+      visible: !_useBiometrics,
+      child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
+          color: Colors.red,
+          maxLines: 10,
+          softWrap: true,
+          textOverflow: TextOverflow.ellipsis));
 
   _configureInputs(bool generatePassword, bool useBiometrics,
       {bool preservePassword = false}) {
@@ -471,45 +484,52 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         _passwordInputKey.currentState!.save();
         _retypePasswordInputKey.currentState!.save();
       }
-
-      // We add the password to the biometric storage before creating the repo.
-      // The reason for this is that in case of the user canceling the biometric
-      // authentication, we can just stay in the dialog, before even creating the
-      // repo.
-      // If instead we first create the repo, then add biometrics and there is an
-      // exception  (most likely the user canceling the validation), we would
-      // have the repo, but no biometrics, which would be confusiong for the user.
-      if (_useBiometrics) {
-        final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-            context,
-            f: Biometrics.addRepositoryPassword(
-                repositoryName: name, password: password));
-
-        if (biometricsResult.exception != null) {
-          loggy.app(biometricsResult.exception);
-
-          if (biometricsResult.exception is AuthException) {
-            if ((biometricsResult.exception as AuthException).code !=
-                AuthExceptionCode.userCanceled) {
-              showSnackBar(context,
-                  content:
-                      Text(S.current.messageErrorAuthenticatingBiometrics));
-            }
-          }
-
-          return;
-        }
-      }
     }
 
     final info = RepoMetaInfo.fromDirAndName(
         await cubit.settings.defaultRepoLocation(), name);
 
+    final exist = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: io.File(info.path()).exists());
+    setState(() => _showRepositoryNameInUseWarning = exist);
+
+    if (exist) return;
+
+    // We add the password to the biometric storage before creating the repo.
+    // The reason for this is that in case of the user canceling the biometric
+    // authentication, we can just stay in the dialog, before even creating the
+    // repo.
+    // If instead we first create the repo, then add biometrics and there is an
+    // exception  (most likely the user canceling the validation), we would
+    // have the repo, but no biometrics, which would be confusiong for the user.
+    if (_useBiometrics) {
+      final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+          context,
+          f: Biometrics.addRepositoryPassword(
+              repositoryName: name, password: password));
+
+      if (biometricsResult.exception != null) {
+        loggy.app(biometricsResult.exception);
+
+        if (biometricsResult.exception is AuthException) {
+          if ((biometricsResult.exception as AuthException).code !=
+              AuthExceptionCode.userCanceled) {
+            await Dialogs.simpleAlertDialog(
+                context: widget.context,
+                title: S.current.messsageFailedCreateRepository(name),
+                message: S.current.messageErrorAuthenticatingBiometrics);
+          }
+        }
+
+        return;
+      }
+    }
+
     final repoEntry = await cubit.createRepository(info,
         password: password, setCurrent: true);
 
     if (repoEntry is ErrorRepoEntry) {
-      Dialogs.simpleAlertDialog(
+      await Dialogs.simpleAlertDialog(
           context: widget.context,
           title: S.current.messsageFailedCreateRepository(name),
           message: repoEntry.error);
