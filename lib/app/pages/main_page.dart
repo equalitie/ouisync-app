@@ -656,9 +656,8 @@ class _MainPageState extends State<MainPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => ActionsDialog(
-              title: S.current.titleCreateRepository,
-              body: RepositoryCreation(context: context, cubit: _repositories),
-            ));
+            title: S.current.titleCreateRepository,
+            body: RepositoryCreation(context: context, cubit: _repositories)));
   }
 
   void addRepoWithTokenDialog({String? initialTokenValue}) async {
@@ -698,19 +697,12 @@ class _MainPageState extends State<MainPage>
     await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
-
-          return ActionsDialog(
+        builder: (BuildContext context) => ActionsDialog(
             title: S.current.titleAddRepository,
-            body: AddRepositoryWithToken(
-              context: context,
-              cubit: _repositories,
-              formKey: formKey,
-              initialTokenValue: initialTokenValue,
-            ),
-          );
-        });
+            body: RepositoryCreation(
+                context: context,
+                cubit: _repositories,
+                initialTokenValue: initialTokenValue)));
   }
 
   Future<void> _unlockRepositoryCallback(

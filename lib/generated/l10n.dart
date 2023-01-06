@@ -110,10 +110,10 @@ class S {
     );
   }
 
-  /// `Create a repository`
+  /// `Create a new repository`
   String get titleCreateRepository {
     return Intl.message(
-      'Create a repository',
+      'Create a new repository',
       name: 'titleCreateRepository',
       desc: '',
       args: [],

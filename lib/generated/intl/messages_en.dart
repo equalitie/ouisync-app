@@ -447,7 +447,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Create a folder"),
         "titleCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Create a repository"),
+            MessageLookupByLibrary.simpleMessage("Create a new repository"),
         "titleDeleteFile": MessageLookupByLibrary.simpleMessage("Delete file"),
         "titleDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Delete folder"),
