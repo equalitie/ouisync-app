@@ -446,6 +446,11 @@ class _MainPageState extends State<MainPage>
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           builder: (_) => ConstrainedBox(
+              // This is an empiric value that works for high resolutions, but
+              // not quite good for lower resolutions (still does, but adds extra
+              // space at the bottom, which doesn't look good).
+
+              // TODO: Find a better solution
               constraints: BoxConstraints(maxHeight: 410.0),
               child: ScaffoldMessenger(child: Builder(builder: (context) {
                 final accessModes = repository.accessMode == AccessMode.write
