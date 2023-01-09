@@ -448,7 +448,7 @@ class _MainPageState extends State<MainPage>
           builder: (_) => ConstrainedBox(
               // This is an empiric value that works for high resolutions, but
               // not quite good for lower resolutions (still does, but adds extra
-              // space at the bottom, which doesn't look good).
+              // space at the top, which doesn't look good).
 
               // TODO: Find a better solution
               constraints: BoxConstraints(maxHeight: 410.0),
