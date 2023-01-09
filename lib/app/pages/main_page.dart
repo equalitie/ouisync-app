@@ -188,9 +188,11 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current == null) {
-        return NoRepositoriesState(
-            onNewRepositoryPressed: createRepoDialog,
-            onAddRepositoryPressed: addRepoWithTokenDialog);
+        return repos.repos.isNotEmpty
+            ? SizedBox.shrink()
+            : NoRepositoriesState(
+                onNewRepositoryPressed: createRepoDialog,
+                onAddRepositoryPressed: addRepoWithTokenDialog);
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
