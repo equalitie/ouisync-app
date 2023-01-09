@@ -445,18 +445,22 @@ class _MainPageState extends State<MainPage>
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            final accessModes = repository.accessMode == AccessMode.write
-                ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-                : repository.accessMode == AccessMode.read
-                    ? [AccessMode.blind, AccessMode.read]
-                    : [AccessMode.blind];
+          builder: (_) => ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 410.0),
+              child: ScaffoldMessenger(child: Builder(builder: (context) {
+                final accessModes = repository.accessMode == AccessMode.write
+                    ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+                    : repository.accessMode == AccessMode.read
+                        ? [AccessMode.blind, AccessMode.read]
+                        : [AccessMode.blind];
 
-            return ShareRepository(
-              repository: repository,
-              availableAccessModes: accessModes,
-            );
-          });
+                return Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: ShareRepository(
+                      repository: repository,
+                      availableAccessModes: accessModes,
+                    ));
+              }))));
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
