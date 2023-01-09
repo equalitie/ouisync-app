@@ -526,7 +526,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     }
 
     final repoEntry = await cubit.createRepository(info,
-        password: password, setCurrent: true);
+        password: password, setCurrent: true, token: _shareToken);
 
     if (repoEntry is ErrorRepoEntry) {
       await Dialogs.simpleAlertDialog(
