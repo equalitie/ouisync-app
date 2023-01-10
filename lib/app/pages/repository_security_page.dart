@@ -147,6 +147,15 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       (mask ? "*" * (password ?? '').length : password) ?? '';
 
   Future<void> _addRepoBiometrics() async {
+    if (_password?.isEmpty ?? true) {
+      await _unlockAndAddPasswordToBiometricStorage();
+      return;
+    }
+
+    await _addPasswordToBiometricStorage(password: _password!);
+  }
+
+  Future<void> _unlockAndAddPasswordToBiometricStorage() async {
     final wasLocked =
         (widget.repositories.currentRepo?.maybeCubit?.accessMode ??
                 AccessMode.blind) ==
@@ -182,14 +191,31 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     showSnackBar(context, content: Text(unlockRepoResponse.message));
 
-    if (biometricsAddedSuccessfully) {
-      setState(() {
-        _usesBiometrics = biometricsAddedSuccessfully;
+    _useBiometricsStatus(unlockRepoResponse.password);
+  }
 
-        _previewPassword = false;
-        _password = unlockRepoResponse.password;
-      });
+  Future<void> _addPasswordToBiometricStorage(
+      {required String password}) async {
+    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: Biometrics.addRepositoryPassword(
+            repositoryName: widget.repositoryName, password: password));
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
+      return;
     }
+
+    _useBiometricsStatus(password);
+  }
+
+  void _useBiometricsStatus(String password) {
+    setState(() {
+      _usesBiometrics = true;
+
+      _previewPassword = false;
+      _password = password;
+    });
   }
 
   Future<AccessMode?> _unlockRepository(
