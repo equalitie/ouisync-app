@@ -398,7 +398,7 @@
   "actionNewRepo": "Create repository",
   "@actionNewRepo": {},
   "actionReloadRepo": "Reload repository",
-  "actionDeleteRepo": "Delete repository",
+  "actionRemoveRepo":"Remove repository",
   "actionNewFolder": "Create folder",
   "@actionNewFolder": {},
   "actionNewFile": "Add file",

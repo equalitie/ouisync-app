@@ -102,8 +102,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Borrar archivo"),
         "actionDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Borrar directorio"),
-        "actionDeleteRepo":
-            MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionEditRepositoryName":
