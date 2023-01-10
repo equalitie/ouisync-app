@@ -2270,11 +2270,11 @@ class S {
     );
   }
 
-  /// `Delete repository`
-  String get actionDeleteRepo {
+  /// `Remove repository`
+  String get actionRemoveRepo {
     return Intl.message(
-      'Delete repository',
-      name: 'actionDeleteRepo',
+      'Remove repository',
+      name: 'actionRemoveRepo',
       desc: '',
       args: [],
     );

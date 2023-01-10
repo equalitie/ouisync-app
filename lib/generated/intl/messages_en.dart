@@ -103,8 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDeleteFile": MessageLookupByLibrary.simpleMessage("Delete file"),
         "actionDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Delete folder"),
-        "actionDeleteRepo":
-            MessageLookupByLibrary.simpleMessage("Delete repository"),
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
         "actionEditRepositoryName":
@@ -126,6 +124,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionReloadRepo":
             MessageLookupByLibrary.simpleMessage("Reload repository"),
         "actionRemove": MessageLookupByLibrary.simpleMessage("Remove"),
+        "actionRemoveRepo":
+            MessageLookupByLibrary.simpleMessage("Remove repository"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Retry"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
