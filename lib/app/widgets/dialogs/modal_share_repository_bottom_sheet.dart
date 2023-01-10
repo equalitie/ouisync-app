@@ -46,6 +46,7 @@ class _ShareRepositoryState extends State<ShareRepository>
   @override
   Widget build(BuildContext context) {
     return Container(
+      alignment: Alignment.bottomCenter,
       padding: Dimensions.paddingBottomSheet,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
