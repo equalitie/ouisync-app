@@ -116,6 +116,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       return;
     }
 
+    assert(accessMode != null, 'Error: accessMode is null');
+
     // Only if the password successfuly unlocked the repo, then we add it
     // to the biometrics store -if the user selected the option.
     if (_useBiometrics.value) {
@@ -132,7 +134,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
 
     final message = _useBiometrics.value
         ? S.current.messageBiometricValidationAdded(repositoryName)
-        : S.current.messageUnlockRepoOk(repositoryName);
+        : S.current.messageUnlockRepoOk(accessMode!.name);
 
     final unlockedResponse = UnlockRepositoryResult(
         repositoryName: repositoryName,
