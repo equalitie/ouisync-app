@@ -201,15 +201,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final removeBiometrics = await _removeBiometricsConfirmationDialog();
     if (!(removeBiometrics ?? false)) return;
 
-    final biometricsResultGetPassword =
-        await Dialogs.executeFutureWithLoadingDialog(context,
-            f: Biometrics.getRepositoryPassword(
-                repositoryName: widget.repositoryName));
-
-    if (biometricsResultGetPassword.exception != null) return;
-
-    if (biometricsResultGetPassword.value?.isEmpty ?? true) return;
-
     final biometricsResultDeletePassword =
         await Dialogs.executeFutureWithLoadingDialog(context,
             f: Biometrics.deleteRepositoryPassword(
@@ -238,7 +229,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           ],
           actions: [
             TextButton(
-              child: Text(S.current.actionAccept),
+              child: Text(S.current.actionRemove),
               onPressed: () => Navigator.of(context).pop(true),
             ),
             TextButton(
