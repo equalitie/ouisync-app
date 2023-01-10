@@ -49,7 +49,7 @@ class MissingRepositoryState extends StatelessWidget {
           if (onDeleteRepository != null)
             Fields.inPageButton(
               onPressed: () => onDeleteRepository!(),
-              text: S.current.actionDeleteRepo,
+              text: S.current.actionRemoveRepo,
               size: Dimensions.sizeInPageButtonLong,
               alignment: Alignment.center,
             ),
