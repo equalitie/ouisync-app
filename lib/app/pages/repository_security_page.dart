@@ -7,7 +7,6 @@ import '../../generated/l10n.dart';
 import '../cubits/repos.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
@@ -15,12 +14,17 @@ class RepositorySecurity extends StatefulWidget {
       required this.repositories,
       required this.password,
       required this.biometrics,
+      required this.validateManualPasswordCallback,
       super.key});
 
   final String repositoryName;
   final ReposCubit repositories;
   final String? password;
   final bool biometrics;
+
+  final Future<String?> Function(BuildContext context,
+      {required ReposCubit repositories,
+      required String repositoryName}) validateManualPasswordCallback;
 
   @override
   State<RepositorySecurity> createState() => _RepositorySecurityState();
@@ -156,42 +160,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   Future<void> _unlockAndAddPasswordToBiometricStorage() async {
-    final wasLocked =
-        (widget.repositories.currentRepo?.maybeCubit?.accessMode ??
-                AccessMode.blind) ==
-            AccessMode.blind;
+    final password = await widget.validateManualPasswordCallback.call(context,
+        repositories: widget.repositories,
+        repositoryName: widget.repositoryName);
 
-    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-              title: S.current.messageUnlockRepository,
-              body: UnlockRepository(
-                  context: context,
-                  repositoryName: widget.repositoryName,
-                  useBiometrics: true,
-                  unlockRepositoryCallback: _unlockRepository),
-            ));
-
-    if (unlockRepoResponse == null) return;
-
-    final biometricsAddedSuccessfully =
-        unlockRepoResponse.accessMode != AccessMode.blind;
-
-    if (!biometricsAddedSuccessfully) {
-      showSnackBar(context, content: Text(unlockRepoResponse.message));
-      return;
+    if (password?.isNotEmpty ?? false) {
+      _useBiometricsStatus(password!);
     }
-
-    // Validating the password would unlock the repo, if successful; so if it was
-    // originally locked, we need to leave it that way.
-    if (wasLocked) {
-      await _unlockRepository(
-          repositoryName: widget.repositoryName, password: '');
-    }
-
-    showSnackBar(context, content: Text(unlockRepoResponse.message));
-
-    _useBiometricsStatus(unlockRepoResponse.password);
   }
 
   Future<void> _addPasswordToBiometricStorage(
@@ -217,11 +192,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       _password = password;
     });
   }
-
-  Future<AccessMode?> _unlockRepository(
-          {required String repositoryName, required String password}) async =>
-      await widget.repositories
-          .unlockRepository(repositoryName, password: password);
 
   Future<void> _removeRepoBiometrics() async {
     final removeBiometrics = await _removeBiometricsConfirmationDialog();
