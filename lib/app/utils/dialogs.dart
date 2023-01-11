@@ -6,8 +6,8 @@ import '../widgets/widgets.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
-  static Future<dynamic> executeFutureWithLoadingDialog(BuildContext context,
-      {required Future<dynamic> f, String? text, Widget? widget}) async {
+  static Future<T> executeFutureWithLoadingDialog<T>(BuildContext context,
+      {required Future<T> f, String? text, Widget? widget}) async {
     showLoadingDialog(context, text: text, widget: widget);
 
     var result = await f;
