@@ -12,12 +12,14 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       required this.context,
       required this.repositoryName,
       this.useBiometrics = false,
+      this.isPasswordValidation = false,
       required this.unlockRepositoryCallback})
       : super(key: key);
 
   final BuildContext context;
   final String repositoryName;
   final bool useBiometrics;
+  final bool isPasswordValidation;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -80,7 +82,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
                           autofocus: true))
                 ]);
               }),
-          _useBiometricsCheckbox(),
+          if (!isPasswordValidation) _useBiometricsCheckbox(),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);
   }

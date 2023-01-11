@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
@@ -104,33 +105,109 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
         },
       );
 
-  Widget _buildSecurityTile(BuildContext context, RepoCubit repo) =>
+  Widget _buildSecurityTile(BuildContext parentContext, RepoCubit repo) =>
       NavigationTile(
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
-            final biometricsResult =
-                await Dialogs.executeFutureWithLoadingDialog(context,
-                    f: Biometrics.getRepositoryPassword(
-                        repositoryName: repo.name));
+            final biometricsResult = await _tryGetBiometricPassword(context,
+                repositoryName: repo.name);
 
-            if (biometricsResult.exception != null) {
-              loggy.app(biometricsResult.exception);
+            if (biometricsResult == null) return;
+
+            if (biometricsResult.value?.isNotEmpty ?? false) {
+              await _pushRepositorySecurityPage(context,
+                  repositories: repos,
+                  repositoryName: repo.name,
+                  password: biometricsResult.value!,
+                  usesBiometrics: true);
+
               return;
             }
 
-            final usesBiometrics = biometricsResult.value?.isNotEmpty ?? false;
+            final password = await _validateManualPassword(parentContext,
+                repositories: repos, repositoryName: repo.name);
 
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RepositorySecurity(
-                      repositoryName: repo.name,
-                      repositories: repos,
-                      password: biometricsResult.value, //biometricPassword,
-                      biometrics: usesBiometrics),
-                ));
+            if (password == null) return;
+
+            await _pushRepositorySecurityPage(parentContext,
+                repositories: repos,
+                repositoryName: repo.name,
+                password: password,
+                usesBiometrics: false);
           });
+
+  Future<BiometricsResult?> _tryGetBiometricPassword(BuildContext context,
+      {required String repositoryName}) async {
+    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: Biometrics.getRepositoryPassword(repositoryName: repositoryName));
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
+      return null;
+    }
+
+    return biometricsResult;
+  }
+
+  Future<String?> _validateManualPassword(BuildContext context,
+      {required ReposCubit repositories,
+      required String repositoryName}) async {
+    final wasLocked =
+        (repos.currentRepo?.maybeCubit?.accessMode ?? AccessMode.blind) ==
+            AccessMode.blind;
+
+    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
+        context: context,
+        builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageUnlockRepository,
+            body: UnlockRepository(
+                context: context,
+                repositoryName: repositoryName,
+                useBiometrics: false,
+                isPasswordValidation: true,
+                unlockRepositoryCallback: _unlockRepository)));
+
+    if (unlockRepoResponse == null) return null;
+
+    final unlockedSuccessfully =
+        unlockRepoResponse.accessMode != AccessMode.blind;
+
+    if (!unlockedSuccessfully) {
+      showSnackBar(context, content: Text(unlockRepoResponse.message));
+      return null;
+    }
+
+    // Validating the password would unlock the repo, if successful; so if it was
+    // originally locked, we need to leave it that way.
+    if (wasLocked) {
+      await _unlockRepository(repositoryName: repositoryName, password: '');
+    }
+
+    return unlockRepoResponse.password;
+  }
+
+  Future<AccessMode?> _unlockRepository(
+          {required String repositoryName, required String password}) async =>
+      await repos.unlockRepository(repositoryName, password: password);
+
+  Future<void> _pushRepositorySecurityPage(BuildContext context,
+      {required ReposCubit repositories,
+      required String repositoryName,
+      required String password,
+      required bool usesBiometrics}) async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepositorySecurity(
+              repositoryName: repositoryName,
+              repositories: repositories,
+              password: password,
+              biometrics: usesBiometrics,
+              validateManualPasswordCallback: _validateManualPassword),
+        ));
+  }
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repo) =>
       NavigationTile(
