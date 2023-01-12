@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'package:external_path/external_path.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:lecle_downloads_path_provider/lecle_downloads_path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -104,7 +103,7 @@ class PickLocationNonAndroid extends StatefulWidget {
 
 class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
   String? _selectedPath;
-  void Function(String) _onDestinationSelected;
+  final void Function(String) _onDestinationSelected;
 
   _PickLocationNonAndroidState(this._onDestinationSelected);
 
@@ -139,10 +138,8 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
 
     selectedPath ??= (await getApplicationDocumentsDirectory()).path;
 
-    if (selectedPath != null) {
-      _selectedPath = selectedPath;
-      _onDestinationSelected(selectedPath);
-    }
+    _selectedPath = selectedPath;
+    _onDestinationSelected(selectedPath);
 
     return selectedPath;
   }
@@ -194,19 +191,19 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
 // Android
 // ---------------------------------------------------------------------------------------
 class PickLocationAndroid extends StatefulWidget {
-  final void Function(String) onDestinationSelected;
+  final void Function(String) _onDestinationSelected;
 
-  const PickLocationAndroid(this.onDestinationSelected);
+  const PickLocationAndroid(this._onDestinationSelected);
 
   @override
   State<PickLocationAndroid> createState() =>
-      _PickLocationAndroidState(onDestinationSelected);
+      _PickLocationAndroidState(_onDestinationSelected);
 }
 
 class _PickLocationAndroidState extends State<PickLocationAndroid> {
   List<_Drive>? _drives;
   int _selectedDrive = 0; // Assumes there will always be at least one drive.
-  void Function(String) _onDestinationSelected;
+  final void Function(String) _onDestinationSelected;
 
   _PickLocationAndroidState(this._onDestinationSelected);
 
@@ -327,7 +324,7 @@ class _PickLocationAndroidState extends State<PickLocationAndroid> {
 
     for (final dirStr in dirs) {
       final dir = io.Directory(dirStr);
-      var storage;
+      _Drive storage;
       if (i == 0) {
         storage = _Drive("Internal drive", dir);
       } else {
@@ -374,6 +371,6 @@ class _Drive {
 
   String defaultDirRelative() {
     var d = defaultDir().path;
-    return d.substring(root.path.length) + "/";
+    return "${d.substring(root.path.length)}/";
   }
 }
