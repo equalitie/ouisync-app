@@ -122,15 +122,21 @@ class Settings {
       return;
     }
 
+    if (_repos.containsKey(newName)) {
+      print("Failed to rename repo: \"$newName\" already exists");
+      return;
+    }
+
     if (_defaultRepo.get() == oldName) {
       await _defaultRepo.set(newName);
     }
 
-    await setDhtEnabled(newName, getDhtEnabled(oldName));
-    await setDhtEnabled(oldName, null);
+    _repos[newName] = _repos[oldName]!;
 
+    await setDhtEnabled(newName, getDhtEnabled(oldName));
     await setPexEnabled(newName, getPexEnabled(oldName));
-    await setPexEnabled(oldName, null);
+
+    await forgetRepository(oldName);
   }
 
   Future<bool> addRepo(RepoMetaInfo info) async {

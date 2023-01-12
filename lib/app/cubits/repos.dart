@@ -280,6 +280,17 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   void renameRepository(String oldName, String newName) async {
+    if (!_repos.containsKey(oldName)) {
+      print("Error renaming repository \"$oldName\": Does not exist");
+      return;
+    }
+
+    if (_repos.containsKey(newName)) {
+      print(
+          "Error renaming repository \"$oldName\": Repository \"$newName\" already exists");
+      return;
+    }
+
     final oldInfo = _settings.repoMetaInfo(oldName)!;
     final newInfo = RepoMetaInfo.fromDirAndName(oldInfo.dir, newName);
     final wasCurrent = currentRepoName == oldName;
