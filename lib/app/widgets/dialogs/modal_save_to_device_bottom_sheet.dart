@@ -26,68 +26,211 @@ class SaveToDevice extends StatefulWidget with OuiSyncAppLogger {
 }
 
 class _SaveToDeviceState extends State<SaveToDevice> {
+  String? destinationDir;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Dimensions.spacingVertical,
+          Row(children: [
+            Fields.constrainedText('"${widget.data.name}"',
+                color: Colors.grey.shade800)
+          ]),
+          Dimensions.spacingVerticalDouble,
+          _locationPicker(),
+          Dimensions.spacingVertical,
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
+  }
+
+  Widget _locationPicker() {
+    if (io.Platform.isAndroid) {
+      return PickLocationAndroid((String d) => setState(() {
+            destinationDir = d;
+          }));
+    } else {
+      return PickLocationNonAndroid((String d) => setState(() {
+            destinationDir = d;
+          }));
+    }
+  }
+
+  List<Widget> _actions(context) {
+    final dst = destinationDir;
+
+    return [
+      NegativeButton(
+          text: S.current.actionCancel,
+          onPressed: () => Navigator.of(context, rootNavigator: false).pop('')),
+      if (dst != null)
+        PositiveButton(
+            text: S.current.actionSave,
+            onPressed: () async {
+              await _downloadFile(dst);
+            })
+    ];
+  }
+
+  Future<void> _downloadFile(String destinationDir) async {
+    if (await Permission.storage.request().isGranted) {
+      final destinationPath = p.join(destinationDir, widget.data.name);
+
+      print("Storing file to $destinationPath");
+
+      widget.cubit.downloadFile(
+          sourcePath: widget.data.path, destinationPath: destinationPath);
+
+      Navigator.of(context, rootNavigator: false).pop();
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+// Non Android
+// ---------------------------------------------------------------------------------------
+class PickLocationNonAndroid extends StatefulWidget {
+  final void Function(String) onDestinationSelected;
+
+  const PickLocationNonAndroid(this.onDestinationSelected);
+
+  @override
+  State<PickLocationNonAndroid> createState() =>
+      _PickLocationNonAndroidState(onDestinationSelected);
+}
+
+class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
+  String? _selectedPath;
+  void Function(String) _onDestinationSelected;
+
+  _PickLocationNonAndroidState(this._onDestinationSelected);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+        future: _determineDefault(),
+        builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+          final dst = snapshot.data;
+          return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (dst != null) _buildDestinationSelection(dst),
+              ]);
+        });
+  }
+
+  Future<String?> _determineDefault() async {
+    var selectedPath = _selectedPath;
+    if (selectedPath != null) return selectedPath;
+
+    if (io.Platform.isWindows) {
+      selectedPath = (await getDownloadsDirectory())?.path;
+    }
+
+    selectedPath ??= (await getApplicationDocumentsDirectory()).path;
+
+    if (selectedPath != null) {
+      _selectedPath = selectedPath;
+      _onDestinationSelected(selectedPath);
+    }
+
+    return selectedPath;
+  }
+
+  Widget _buildDestinationSelection(String dst) {
+    return Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Fields.constrainedText(dst),
+                Fields.actionIcon(const Icon(Icons.more_horiz),
+                    onPressed: () async => await _changeDestinationPath(dst))
+              ],
+            )
+          ],
+        ));
+  }
+
+  Future<void> _changeDestinationPath(String currentDestination) async {
+    final path = await FilesystemPicker.open(
+        context: context,
+        fsType: FilesystemType.folder,
+        rootDirectory: io.Directory(currentDestination),
+        title: S.current.messageSelectLocation,
+        pickText: S.current.messageSaveToLocation,
+        requestPermission: () async {
+          final status = await Permission.storage.request();
+          return status.isGranted;
+        });
+
+    if (path == null) return;
+    if (path.isEmpty) return;
+
+    setState(() {
+      _selectedPath = path;
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+// Android
+// ---------------------------------------------------------------------------------------
+class PickLocationAndroid extends StatefulWidget {
+  final void Function(String) onDestinationSelected;
+
+  const PickLocationAndroid(this.onDestinationSelected);
+
+  @override
+  State<PickLocationAndroid> createState() =>
+      _PickLocationAndroidState(onDestinationSelected);
+}
+
+class _PickLocationAndroidState extends State<PickLocationAndroid> {
   List<_Drive>? _drives;
   int _selectedDrive = 0; // Assumes there will always be at least one drive.
+  void Function(String) _onDestinationSelected;
+
+  _PickLocationAndroidState(this._onDestinationSelected);
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<_Drive>>(
         future: _initDrives(),
         builder: (BuildContext context, AsyncSnapshot<List<_Drive>> snapshot) {
-          return _buildMainWidget(context, snapshot.data);
-        });
-  }
-
-  Widget _buildMainWidget(BuildContext context, List<_Drive>? drives) {
-    return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(children: [
-            Fields.constrainedText('"${widget.data.name}"',
-                color: Colors.grey.shade800)
-          ]),
-          Dimensions.spacingVerticalDouble,
-          if (drives != null) _buildExternalStorageSelection(drives),
-          Dimensions.spacingVertical,
-          if (drives != null) _buildDestinationSelection(drives),
-          Fields.dialogActions(context, buttons: _actions(context)),
-        ]);
-  }
-
-  Widget _buildDestinationSelection(List<_Drive> drives) {
-    final drive = drives[_selectedDrive];
-
-    return Container(
-        padding: Dimensions.paddingGreyBox,
-        decoration: BoxDecoration(
-          borderRadius:
-              const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-          color: Colors.grey.shade300,
-        ),
-        child: Padding(
-            padding: Dimensions.paddingGreyBox,
-            child: Column(
+          final drives = snapshot.data;
+          return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(children: [
-                  Fields.constrainedText(S.current.labelDestination,
-                      flex: 0,
-                      fontSize: Dimensions.fontSmall,
-                      fontWeight: FontWeight.w300),
-                ]),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Fields.constrainedText(drive.defaultDirRelative()),
-                    Fields.actionIcon(const Icon(Icons.more_horiz),
-                        onPressed: () async =>
-                            await _changeDestinationPath(drives))
-                  ],
-                )
-              ],
-            )));
+                if (drives != null) _buildExternalStorageSelection(drives),
+                Dimensions.spacingVertical,
+                if (drives != null) _buildDestinationSelection(drives),
+              ]);
+        });
   }
 
   Widget _buildExternalStorageSelection(List<_Drive> drives) {
@@ -111,6 +254,30 @@ class _SaveToDeviceState extends State<SaveToDevice> {
         );
       }).toList(),
     );
+  }
+
+  Widget _buildDestinationSelection(List<_Drive> drives) {
+    final drive = drives[_selectedDrive];
+
+    return Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Fields.constrainedText(drive.defaultDirRelative()),
+                Fields.actionIcon(const Icon(Icons.more_horiz),
+                    onPressed: () async => await _changeDestinationPath(drives))
+              ],
+            )
+          ],
+        ));
   }
 
   Future<void> _changeDestinationPath(List<_Drive> drives) async {
@@ -137,7 +304,6 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     });
   }
 
-  // TODO: Non Android devies.
   Future<List<_Drive>> _initDrives() async {
     var drives = _drives;
     if (drives != null) {
@@ -176,34 +342,9 @@ class _SaveToDeviceState extends State<SaveToDevice> {
       i += 1;
     }
 
+    _onDestinationSelected(drives[_selectedDrive].defaultDir().path);
+
     return drives;
-  }
-
-  List<Widget> _actions(context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: false).pop('')),
-        PositiveButton(
-            text: S.current.actionSave,
-            onPressed: () async {
-              await _downloadFile();
-            })
-      ];
-
-  Future<void> _downloadFile() async {
-    final destinationDir = (await _initDrives())[_selectedDrive].defaultDir();
-
-    if (await Permission.storage.request().isGranted) {
-      final destinationPath = p.join(destinationDir.path, widget.data.name);
-
-      print("Storing file to $destinationPath");
-
-      widget.cubit.downloadFile(
-          sourcePath: widget.data.path, destinationPath: destinationPath);
-
-      Navigator.of(context, rootNavigator: false).pop();
-    }
   }
 }
 
