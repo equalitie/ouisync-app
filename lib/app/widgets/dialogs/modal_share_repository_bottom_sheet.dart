@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -38,38 +37,48 @@ class _ShareRepositoryState extends State<ShareRepository>
     AccessMode.write: S.current.messageWriteReplicaExplanation,
   };
 
-  bool _isDisabledMessageVisible = false;
-  String _dissabledMessage = '';
-
-  RestartableTimer? _timer;
+  final scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
+    // On certain resolutions (higer) the constrain set on this dialog when called
+    // causes the content to scroll, giving the appearance of a smaller padding
+    // at the bottom of the content.
+    //
+    // That is why we force the scroll all the way back, so the removed space is
+    // taken from the top and not the bottom
+
+    // TODO: Remove once the constrains for this dialog are not longer needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    });
+
     return Container(
-      alignment: Alignment.bottomCenter,
-      padding: Dimensions.paddingBottomSheet,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(widget.repository.name),
-          Dimensions.spacingVerticalDouble,
-          AccessModeSelector(
-            currentAccessMode: widget.repository.accessMode,
-            availableAccessMode: widget.availableAccessModes,
-            onChanged: _onChanged,
-            onDisabledMessage: _setDisabledMessageVisibility,
-          ),
-          Dimensions.spacingVerticalHalf,
-          _buildAccessModeDescription(_accessMode),
-          Dimensions.spacingVerticalDouble,
-          _buildShareBox(),
-          _buildNotAvailableMessage(),
-        ],
-      ),
-    );
+        alignment: Alignment.bottomCenter,
+        padding: Dimensions.paddingBottomSheet,
+        child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Fields.bottomSheetHandle(context),
+                  Fields.bottomSheetTitle(widget.repository.name),
+                  Dimensions.spacingVertical,
+                  AccessModeSelector(
+                    currentAccessMode: widget.repository.accessMode,
+                    availableAccessMode: widget.availableAccessModes,
+                    onChanged: _onChanged,
+                    onDisabledMessage: (String message) =>
+                        showSnackBar(context, content: Text(message)),
+                  ),
+                  Dimensions.spacingVerticalHalf,
+                  _buildAccessModeDescription(_accessMode),
+                  Dimensions.spacingVerticalDouble,
+                  _buildShareBox()
+                ])));
   }
 
   Future<String> createShareToken(RepoCubit repo, AccessMode accessMode) async {
@@ -186,13 +195,8 @@ class _ShareRepositoryState extends State<ShareRepository>
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    final disabledMessage =
-                        S.current.messageShareActionDisabled;
-                    _setDisabledMessageVisibility(
-                      true,
-                      disabledMessage,
-                      Constants.notAvailableActionMessageDuration,
-                    );
+                    showSnackBar(context,
+                        content: Text(S.current.messageShareActionDisabled));
 
                     return;
                   }
@@ -223,12 +227,8 @@ class _ShareRepositoryState extends State<ShareRepository>
                   color: _getActionStateColor(_shareToken != null),
                   onPressed: () async {
                 if (_shareToken == null) {
-                  final disabledMessage = S.current.messageShareActionDisabled;
-                  _setDisabledMessageVisibility(
-                    true,
-                    disabledMessage,
-                    Constants.notAvailableActionMessageDuration,
-                  );
+                  showSnackBar(context,
+                      content: Text(S.current.messageShareActionDisabled));
 
                   return;
                 }
@@ -253,13 +253,8 @@ class _ShareRepositoryState extends State<ShareRepository>
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    final disabledMessage =
-                        S.current.messageShareActionDisabled;
-                    _setDisabledMessageVisibility(
-                      true,
-                      disabledMessage,
-                      Constants.notAvailableActionMessageDuration,
-                    );
+                    showSnackBar(context,
+                        content: Text(S.current.messageShareActionDisabled));
 
                     return;
                   }
@@ -292,67 +287,5 @@ class _ShareRepositoryState extends State<ShareRepository>
     }
 
     return Colors.grey;
-  }
-
-  Widget _buildNotAvailableMessage() {
-    return Visibility(
-      visible: _isDisabledMessageVisible,
-      child: GestureDetector(
-        onTap: () => _setDisabledMessageVisibility(
-          false,
-          '',
-          0,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            top: 10.0,
-            bottom: 4.0,
-            right: 10.0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  _dissabledMessage,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                  maxLines: 2,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    fontSize: Dimensions.fontSmall,
-                    color: Colors.red.shade400,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _setDisabledMessageVisibility(
-    bool visible,
-    String message,
-    int duration,
-  ) {
-    _dissabledMessage = visible ? message : '';
-
-    setState(() => _isDisabledMessageVisible = visible);
-
-    if (!_isDisabledMessageVisible) {
-      _timer?.cancel();
-      return;
-    }
-
-    if (duration > 0) {
-      _timer ??= RestartableTimer(
-        Duration(seconds: duration),
-        () => setState(() => _isDisabledMessageVisible = false),
-      );
-
-      _timer?.reset();
-    }
   }
 }

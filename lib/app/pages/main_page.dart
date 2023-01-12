@@ -440,19 +440,18 @@ class _MainPageState extends State<MainPage>
                 return listItem;
               })));
 
+  // This is an empiric value that works for high resolutions, but
+  // not quite good for lower resolutions (still does, but adds extra
+  // space at the top, which doesn't look good).
+
+  // TODO: Find a better solution
   Future<dynamic> _showShareRepository(RepoCubit repository) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
-          builder: (_) => ConstrainedBox(
-              // This is an empiric value that works for high resolutions, but
-              // not quite good for lower resolutions (still does, but adds extra
-              // space at the top, which doesn't look good).
-
-              // TODO: Find a better solution
-              constraints: BoxConstraints(maxHeight: 410.0),
-              child: ScaffoldMessenger(child: Builder(builder: (context) {
+          constraints: BoxConstraints(maxHeight: 390.0),
+          builder: (_) => ScaffoldMessenger(child: Builder(builder: (context) {
                 final accessModes = repository.accessMode == AccessMode.write
                     ? [AccessMode.blind, AccessMode.read, AccessMode.write]
                     : repository.accessMode == AccessMode.read
@@ -465,7 +464,7 @@ class _MainPageState extends State<MainPage>
                       repository: repository,
                       availableAccessModes: accessModes,
                     ));
-              }))));
+              })));
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,

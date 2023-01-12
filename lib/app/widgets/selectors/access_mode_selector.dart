@@ -17,7 +17,7 @@ class AccessModeSelector extends StatefulWidget {
   final AccessMode currentAccessMode;
   final List<AccessMode> availableAccessMode;
   final Future<void> Function(AccessMode?) onChanged;
-  final void Function(bool, String, int) onDisabledMessage;
+  final void Function(String) onDisabledMessage;
 
   @override
   State<AccessModeSelector> createState() => _AccessModeSelectorState();
@@ -84,8 +84,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                       .messageAccessModeDisabled(widget.currentAccessMode.name);
                   final isEnabled = widget.availableAccessMode.contains(mode);
 
-                  widget.onDisabledMessage(!isEnabled, disabledMessage,
-                      Constants.notAvailableActionMessageDuration);
+                  widget.onDisabledMessage(disabledMessage);
 
                   if (!isEnabled) return;
 
