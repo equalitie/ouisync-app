@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
+import '../utils/settings.dart';
 import 'folder.dart';
 import 'repo_meta_info.dart';
 
@@ -55,6 +56,8 @@ class OpenRepoEntry extends RepoEntry {
 
   RepoCubit get cubit => _cubit;
 
+  String get databaseId => _cubit.databaseId;
+
   @override
   RepoCubit? get maybeCubit => _cubit;
 
@@ -65,6 +68,9 @@ class OpenRepoEntry extends RepoEntry {
 
   @override
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
+
+  @override
+  SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 
   oui.Repository get handle => _cubit.handle;
 

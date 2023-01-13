@@ -323,6 +323,7 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.canRead) {
         return LockedRepositoryState(
+            databaseId: current.databaseId,
             repositoryName: current.name,
             unlockRepositoryCallback: _unlockRepositoryCallback);
       }
@@ -716,10 +717,11 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _unlockRepositoryCallback(
-      {required String repositoryName}) async {
+      {required String databaseId, required String repositoryName}) async {
+    final databaseId = widget.settings.getDatabaseId(repositoryName);
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: Biometrics.getRepositoryPassword(repositoryName: repositoryName));
+        f: Biometrics.getRepositoryPassword(databaseId: databaseId));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -728,7 +730,8 @@ class _MainPageState extends State<MainPage>
 
     if (biometricsResult.value?.isEmpty ?? true) {
       // Unlock manually
-      await _getRepositoryPasswordDialog(repositoryName: repositoryName);
+      await _getRepositoryPasswordDialog(
+          databaseId: databaseId, repositoryName: repositoryName);
       return;
     }
 
@@ -738,13 +741,14 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _getRepositoryPasswordDialog(
-      {required String repositoryName}) async {
+      {required String databaseId, required String repositoryName}) async {
     final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.messageUnlockRepository,
               body: UnlockRepository(
                   context: context,
+                  databaseId: databaseId,
                   repositoryName: repositoryName,
                   unlockRepositoryCallback: _unlockRepository),
             ));

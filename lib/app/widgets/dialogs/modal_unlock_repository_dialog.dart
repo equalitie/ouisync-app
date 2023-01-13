@@ -10,6 +10,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   UnlockRepository(
       {Key? key,
       required this.context,
+      required this.databaseId,
       required this.repositoryName,
       this.useBiometrics = false,
       this.isPasswordValidation = false,
@@ -17,6 +18,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       : super(key: key);
 
   final BuildContext context;
+  final String databaseId;
   final String repositoryName;
   final bool useBiometrics;
   final bool isPasswordValidation;
@@ -126,7 +128,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
           context,
           f: Biometrics.addRepositoryPassword(
-              repositoryName: repositoryName, password: password));
+              databaseId: databaseId, password: password));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);

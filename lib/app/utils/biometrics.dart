@@ -10,9 +10,9 @@ class Biometrics {
   }
 
   static Future<BiometricsResult> addRepositoryPassword(
-      {required String repositoryName, required String password}) async {
+      {required String databaseId, required String password}) async {
     try {
-      final storageFile = await _getStorageFileForKey(repositoryName);
+      final storageFile = await _getStorageFileForKey(databaseId);
       await storageFile.write(password);
     } on Exception catch (e) {
       return BiometricsResult(value: null, exception: e);
@@ -22,10 +22,10 @@ class Biometrics {
   }
 
   static Future<BiometricsResult> getRepositoryPassword(
-      {required String repositoryName}) async {
+      {required String databaseId}) async {
     String? password;
     try {
-      final storageFile = await _getStorageFileForKey(repositoryName);
+      final storageFile = await _getStorageFileForKey(databaseId);
       password = await storageFile.read();
     } on Exception catch (e) {
       return BiometricsResult(value: null, exception: e);
@@ -35,9 +35,9 @@ class Biometrics {
   }
 
   static Future<BiometricsResult> deleteRepositoryPassword(
-      {required String repositoryName}) async {
+      {required String databaseId}) async {
     try {
-      final storageFile = await _getStorageFileForKey(repositoryName);
+      final storageFile = await _getStorageFileForKey(databaseId);
       await storageFile.delete();
     } on Exception catch (e) {
       return BiometricsResult(value: null, exception: e);

@@ -18,23 +18,25 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   final List<String> messages = <String>[];
 
   final Folder _currentFolder = Folder();
-  final RepoMetaInfo _metaInfo;
+  final SettingsRepoEntry _settingsRepoEntry;
   final oui.Repository _handle;
   final Settings _settings;
 
   RepoCubit({
-    required RepoMetaInfo metaInfo,
+    required SettingsRepoEntry settingsRepoEntry,
     required oui.Repository handle,
     required Settings settings,
-  })  : _metaInfo = metaInfo,
+  })  : _settingsRepoEntry = settingsRepoEntry,
         _handle = handle,
         _settings = settings {
     _currentFolder.repo = this;
   }
 
   oui.Repository get handle => _handle;
-  String get name => _metaInfo.name;
-  RepoMetaInfo get metaInfo => _metaInfo;
+  String get databaseId => _settingsRepoEntry.databaseId;
+  String get name => _settingsRepoEntry.name;
+  RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
+  SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
   Folder get currentFolder => _currentFolder;
 
   void loadSettings() {
