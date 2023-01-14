@@ -501,5 +501,7 @@
   "titleStateMonitor": "Моніторинг статусу",
   "@titleStateMonitor": {},
   "messageVPN": "ВПН",
-  "@messageVPN": {}
+  "@messageVPN": {},
+  "messageVerbosity": "Багатослівність журналу",
+  "@messageVerbosity": {}
 }
