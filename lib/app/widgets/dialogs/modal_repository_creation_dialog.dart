@@ -495,6 +495,24 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     if (exist) return;
 
+    final repoEntry = await cubit.createRepository(info,
+        password: password, setCurrent: true, token: _shareToken);
+
+    if (repoEntry is! OpenRepoEntry) {
+      var err = "Unknown";
+
+      if (repoEntry is ErrorRepoEntry) {
+        err = repoEntry.error;
+      }
+
+      await Dialogs.simpleAlertDialog(
+          context: widget.context,
+          title: S.current.messsageFailedCreateRepository(name),
+          message: err);
+
+      return;
+    }
+
     // We add the password to the biometric storage before creating the repo.
     // The reason for this is that in case of the user canceling the biometric
     // authentication, we can just stay in the dialog, before even creating the
@@ -506,7 +524,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
           context,
           f: Biometrics.addRepositoryPassword(
-              repositoryName: name, password: password));
+              databaseId: repoEntry.databaseId, password: password));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);
@@ -521,20 +539,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           }
         }
 
+        await cubit.deleteRepository(repoEntry.metaInfo);
+
         return;
       }
-    }
-
-    final repoEntry = await cubit.createRepository(info,
-        password: password, setCurrent: true, token: _shareToken);
-
-    if (repoEntry is ErrorRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-          context: widget.context,
-          title: S.current.messsageFailedCreateRepository(name),
-          message: repoEntry.error);
-
-      return;
     }
 
     Navigator.of(widget.context).pop(name);

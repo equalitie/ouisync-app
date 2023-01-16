@@ -10,6 +10,7 @@ import '../utils/utils.dart';
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
       {required this.repositoryName,
+      required this.databaseId,
       required this.repositories,
       required this.password,
       required this.biometrics,
@@ -17,12 +18,14 @@ class RepositorySecurity extends StatefulWidget {
       super.key});
 
   final String repositoryName;
+  final String databaseId;
   final ReposCubit repositories;
   final String? password;
   final bool biometrics;
 
   final Future<String?> Function(BuildContext context,
       {required ReposCubit repositories,
+      required String databaseId,
       required String repositoryName}) validateManualPasswordCallback;
 
   @override
@@ -161,6 +164,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   Future<void> _unlockAndAddPasswordToBiometricStorage() async {
     final password = await widget.validateManualPasswordCallback.call(context,
         repositories: widget.repositories,
+        databaseId: widget.databaseId,
         repositoryName: widget.repositoryName);
 
     if (password?.isNotEmpty ?? false) {
@@ -173,7 +177,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
         f: Biometrics.addRepositoryPassword(
-            repositoryName: widget.repositoryName, password: password));
+            databaseId: widget.databaseId, password: password));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -199,7 +203,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResultDeletePassword =
         await Dialogs.executeFutureWithLoadingDialog(context,
             f: Biometrics.deleteRepositoryPassword(
-                repositoryName: widget.repositoryName));
+                databaseId: widget.databaseId));
 
     if (biometricsResultDeletePassword.exception != null) {
       loggy.app(biometricsResultDeletePassword.exception);
