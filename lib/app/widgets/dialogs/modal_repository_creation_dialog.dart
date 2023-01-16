@@ -85,10 +85,16 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   }
 
   void _validateToken() {
-    if (widget.initialTokenValue == null) return;
+    final token = widget.initialTokenValue;
+
+    if (token == null) return;
 
     try {
-      _shareToken = ShareToken(widget.initialTokenValue!);
+      _shareToken = ShareToken.fromString(token);
+
+      if (_shareToken == null) {
+        throw "Failed to construct the token from \"$token\"";
+      }
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
       showSnackBar(

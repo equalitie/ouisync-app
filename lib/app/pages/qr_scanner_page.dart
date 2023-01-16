@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' as plugin;
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
@@ -60,18 +61,35 @@ class _QRScannerState extends State<QRScanner> {
             ),
           ],
         ),
-        body: MobileScanner(
-            allowDuplicates: false,
-            controller: cameraController,
-            onDetect: (barcode, args) {
-              if (barcode.rawValue == null) {
-                debugPrint('Failed to scan Barcode');
-              } else {
-                final String code = barcode.rawValue!;
-                debugPrint('Barcode found! $code');
+        body: oneTimeScanner());
+  }
 
-                Navigator.of(context).pop(code);
-              }
-            }));
+  MobileScanner oneTimeScanner() {
+    var scanned = false;
+
+    return MobileScanner(
+        allowDuplicates: false,
+        controller: cameraController,
+        onDetect: (barcode, args) {
+          final code = barcode.rawValue;
+
+          if (code == null) {
+            debugPrint('Failed to scan Barcode');
+          } else {
+            if (scanned == true) {
+              debugPrint('Barcode found! $code (skipped)');
+              return;
+            }
+
+            if (plugin.ShareToken.fromString(code) == null) {
+              debugPrint('Barcode found! $code (invalid)');
+              return;
+            }
+
+            debugPrint('Barcode found! $code');
+            scanned = true;
+            Navigator.of(context).pop(code);
+          }
+        });
   }
 }

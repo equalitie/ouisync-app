@@ -70,8 +70,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
-  oui.ShareToken createToken(String tokenString) {
-    return oui.ShareToken(tokenString);
+  oui.ShareToken? createToken(String tokenString) {
+    return oui.ShareToken.fromString(tokenString);
   }
 
   String? validateTokenLink(String tokenLink) {
@@ -85,7 +85,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     try {
-      final shareToken = oui.ShareToken(tokenLink);
+      final shareToken = oui.ShareToken.fromString(tokenLink);
+
+      if (shareToken == null) {
+        return S.current.messageErrorTokenInvalid;
+      }
+
       final existingRepo = findByInfoHash(shareToken.infoHash);
 
       if (existingRepo != null) {

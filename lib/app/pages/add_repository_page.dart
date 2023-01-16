@@ -140,12 +140,16 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
   }
 
   String? _repositoryTokenValidator(String? value, {String? error}) {
-    if ((value ?? '').isEmpty) {
+    if (value == null || value.isEmpty) {
       return S.current.messageErrorTokenEmpty;
     }
 
     try {
-      final shareToken = ShareToken(value!);
+      final shareToken = ShareToken.fromString(value);
+
+      if (shareToken == null) {
+        return S.current.messageErrorTokenValidator;
+      }
 
       final existingRepo =
           widget.reposCubit.findByInfoHash(shareToken.infoHash);
