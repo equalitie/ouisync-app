@@ -430,7 +430,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
           shareToken: token);
 
       final settingsRepoEntry =
-          await _settings.addRepo(info, databaseId: repo.infoHash!);
+          await _settings.addRepo(info, databaseId: await repo.hexDatabaseId());
 
       final cubit = RepoCubit(
           settingsRepoEntry: settingsRepoEntry!,
