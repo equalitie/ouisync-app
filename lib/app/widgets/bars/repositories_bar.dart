@@ -9,7 +9,7 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-typedef _UnlockRepoFunction = Future<void> Function(
+typedef UnlockRepoFunction = Future<void> Function(
     {required String databaseId, required String repositoryName});
 
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
@@ -20,7 +20,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
-  final _UnlockRepoFunction unlockRepositoryOnTap;
+  final UnlockRepoFunction unlockRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class _Picker extends StatelessWidget {
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
-  final _UnlockRepoFunction unlockRepositoryOnTap;
+  final UnlockRepoFunction unlockRepositoryOnTap;
   final Color borderColor;
 
   @override
@@ -191,14 +191,14 @@ class _Picker extends StatelessWidget {
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
   _List(ReposCubit repositories, void Function(RepoCubit) shareRepositoryOnTap,
-      _UnlockRepoFunction unlockRepositoryOnTap)
+      UnlockRepoFunction unlockRepositoryOnTap)
       : _repositories = repositories,
         _shareRepositoryOnTap = shareRepositoryOnTap,
         _unlockRepositoryOnTap = unlockRepositoryOnTap;
 
   final ReposCubit _repositories;
   final void Function(RepoCubit) _shareRepositoryOnTap;
-  final _UnlockRepoFunction _unlockRepositoryOnTap;
+  final UnlockRepoFunction _unlockRepositoryOnTap;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
 
   @override

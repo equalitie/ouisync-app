@@ -83,7 +83,7 @@ class Settings {
 
   Future<void> _migrateIds() async {
     for (final entry in _repos.entries) {
-      if (await _getDatabaseIdMaybe(entry.key) == null) {
+      if (_getDatabaseIdMaybe(entry.key) == null) {
         // We used to have biometric data stored under repository names, but
         // that caused problems with repository renaming. So we introduced
         // database IDs but in order to not invalidate previously stored
@@ -189,6 +189,7 @@ class Settings {
   Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
       {required String databaseId}) async {
     if (_repos.containsKey(info.name)) {
+      print("Settings already contains a repo with the name \"${info.name}\"");
       return null;
     }
 
