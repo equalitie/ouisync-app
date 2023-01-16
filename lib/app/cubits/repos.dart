@@ -298,7 +298,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     final settingsRepoEntry = _settings.entryByName(oldName)!;
-    final newInfo = RepoMetaInfo.fromDirAndName(settingsRepoEntry.dir, newName);
     final wasCurrent = currentRepoName == oldName;
 
     await _forget(oldName);

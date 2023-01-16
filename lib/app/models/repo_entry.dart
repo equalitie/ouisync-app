@@ -69,7 +69,6 @@ class OpenRepoEntry extends RepoEntry {
   @override
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
-  @override
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 
   oui.Repository get handle => _cubit.handle;
