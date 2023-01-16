@@ -9,6 +9,9 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
+typedef _UnlockRepoFunction = Future<void> Function(
+    {required String databaseId, required String repositoryName});
+
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar(
       {required this.reposCubit,
@@ -17,8 +20,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
-  final Future<void> Function({required String repositoryName})
-      unlockRepositoryOnTap;
+  final _UnlockRepoFunction unlockRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +80,7 @@ class _Picker extends StatelessWidget {
 
   final ReposCubit reposCubit;
   final void Function(RepoCubit) shareRepositoryOnTap;
-  final Future<void> Function({required String repositoryName})
-      unlockRepositoryOnTap;
+  final _UnlockRepoFunction unlockRepositoryOnTap;
   final Color borderColor;
 
   @override
@@ -159,8 +160,11 @@ class _Picker extends StatelessWidget {
                       if (reposCubit.currentRepo!.maybeHandle?.accessMode ==
                           AccessMode.blind) return;
 
-                      final metaInfo = reposCubit.currentRepo!.metaInfo;
-                      reposCubit.lockRepository(metaInfo);
+                      final repo = reposCubit.currentRepo;
+
+                      if (repo is OpenRepoEntry) {
+                        reposCubit.lockRepository(repo.settingsRepoEntry);
+                      }
                     }),
                 Dimensions.spacingHorizontal,
                 Fields.constrainedText(repoName,
@@ -186,19 +190,15 @@ class _Picker extends StatelessWidget {
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
-  _List(
-      ReposCubit repositories,
-      void Function(RepoCubit) shareRepositoryOnTap,
-      Future<void> Function({required String repositoryName})
-          unlockRepositoryOnTap)
+  _List(ReposCubit repositories, void Function(RepoCubit) shareRepositoryOnTap,
+      _UnlockRepoFunction unlockRepositoryOnTap)
       : _repositories = repositories,
         _shareRepositoryOnTap = shareRepositoryOnTap,
         _unlockRepositoryOnTap = unlockRepositoryOnTap;
 
   final ReposCubit _repositories;
   final void Function(RepoCubit) _shareRepositoryOnTap;
-  final Future<void> Function({required String repositoryName})
-      _unlockRepositoryOnTap;
+  final _UnlockRepoFunction _unlockRepositoryOnTap;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
 
   @override
@@ -252,10 +252,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                         ? ConstrainedBox(
                             constraints: BoxConstraints.loose(
                                 Size.fromHeight(repoListMaxHeight)),
-                            child: _buildRepositoryList(
-                                context,
-                                state.repositoryNames().toList(),
-                                state.currentRepoName))
+                            child: _buildRepositoryList(context,
+                                state.repos.toList(), state.currentRepoName))
                         : Fields.placeholderWidget(
                             assetName: Constants.assetPathNothingHereYet,
                             text: S.current.messageNothingHereYet,
@@ -317,8 +315,13 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     }
 
     List<Future> futures = <Future>[];
+
     for (final repo in unlockedRepos) {
-      futures.add(_repositories.lockRepository(repo.metaInfo));
+      // TODO: What about LoadingRepoEntry? That should be locked right after
+      // loading is finished.
+      if (repo is OpenRepoEntry) {
+        futures.add(_repositories.lockRepository(repo.settingsRepoEntry));
+      }
     }
 
     final indicator =
@@ -380,14 +383,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   }
 
   Widget _buildRepositoryList(
-          BuildContext context, List<String> repoNames, String? current) =>
+          BuildContext context, List<RepoEntry> repos, String? current) =>
       ListView.builder(
           shrinkWrap: true,
-          itemCount: repoNames.length,
+          itemCount: repos.length,
           itemBuilder: (context, index) {
-            final repositoryName = repoNames[index];
-            AccessMode? accessMode =
-                _repositories.get(repositoryName)?.maybeHandle?.accessMode;
+            final repo = repos[index];
+            final repositoryName = repo.name;
+            AccessMode? accessMode = repo.maybeHandle?.accessMode;
 
             return Row(
               mainAxisSize: MainAxisSize.max,
@@ -413,17 +416,20 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                             : FontWeight.normal,
                         dense: true,
                         visualDensity: VisualDensity.compact)),
-                _getActionByAccessMode(
-                  context,
-                  repositoryName,
-                  accessMode,
-                ),
+                if (repo is OpenRepoEntry)
+                  _getActionByAccessMode(
+                    context,
+                    repo.databaseId,
+                    repo.name,
+                    accessMode,
+                  )
               ],
             );
           });
 
   Row _getActionByAccessMode(
     BuildContext context,
+    String databaseId,
     String repositoryName,
     AccessMode? accessMode,
   ) {
@@ -441,14 +447,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           if (accessMode == null) return;
 
           if (accessMode == AccessMode.blind) {
-            await _unlockRepositoryOnTap(repositoryName: repositoryName);
+            await _unlockRepositoryOnTap(
+                databaseId: databaseId, repositoryName: repositoryName);
 
             _lockAllEnable.value = true;
             return;
           }
 
-          final info = repoCubit.metaInfo;
-          _repositories.lockRepository(info);
+          _repositories.lockRepository(repoCubit.settingsRepoEntry);
 
           _enableLockAllRepos();
         }, color: Colors.black87, size: Dimensions.sizeIconAverage),

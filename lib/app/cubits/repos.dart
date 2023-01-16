@@ -36,14 +36,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    for (final repoInfo in _settings.repos()) {
-      final repoName = repoInfo.name;
+    for (final repo in _settings.repos()) {
+      final repoName = repo.name;
       if (defaultRepo == null) {
         defaultRepo = repoName;
         await _settings.setDefaultRepo(repoName);
       }
-      futures
-          .add(_openRepository(repoInfo, setCurrent: repoName == defaultRepo));
+      futures.add(_openRepository(repo, setCurrent: repoName == defaultRepo));
     }
 
     _update(() {
@@ -196,13 +195,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<void> _openRepository(RepoMetaInfo info,
+  Future<void> _openRepository(SettingsRepoEntry settingsRepoEntry,
       {String? password, bool setCurrent = false}) async {
-    await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
+    await _put(LoadingRepoEntry(settingsRepoEntry.info),
+        setCurrent: setCurrent);
 
-    final repo = await _open(info, password: password);
-    if (repo is ErrorRepoEntry) {
-      loggy.app('Failed to open repository ${info.name}');
+    final repo = await _open(settingsRepoEntry, password: password);
+    if (repo is! OpenRepoEntry) {
+      loggy.app('Failed to open repository ${settingsRepoEntry.info.path()}');
     }
 
     await _put(repo, setCurrent: setCurrent);
@@ -214,10 +214,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
-    await _settings.addRepo(info);
-
     final repo = await _create(info, password: password, token: token);
-    if (repo is ErrorRepoEntry) {
+
+    if (repo is! OpenRepoEntry) {
       loggy.app('Failed to create repository ${info.name}');
       return repo;
     }
@@ -230,20 +229,22 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       {required String password}) async {
     final wasCurrent = currentRepoName == repoName;
 
-    final info = _settings.repoMetaInfo(repoName)!;
+    final settingsRepoEntry = _settings.entryByName(repoName)!;
 
     await _forget(repoName);
 
-    await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
+    await _put(LoadingRepoEntry(settingsRepoEntry.info),
+        setCurrent: wasCurrent);
 
     try {
       final repo = await _open(
-        info,
+        settingsRepoEntry,
         password: password,
       );
 
       if (repo is ErrorRepoEntry) {
-        loggy.app('Failed to open repository: ${info.name}');
+        loggy
+            .app('Failed to open repository: ${settingsRepoEntry.info.path()}');
         return null;
       }
 
@@ -251,31 +252,36 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       return repo.maybeHandle?.accessMode ?? oui.AccessMode.blind;
     } catch (e, st) {
-      loggy.app('Unlocking of the repository ${info.name} failed', e, st);
+      loggy.app(
+          'Unlocking of the repository ${settingsRepoEntry.info.path()} failed',
+          e,
+          st);
       return null;
     }
   }
 
-  Future<void> lockRepository(RepoMetaInfo info) async {
-    final wasCurrent = currentRepoName == info.name;
+  Future<void> lockRepository(SettingsRepoEntry settingsRepoEntry) async {
+    final wasCurrent = currentRepoName == settingsRepoEntry.name;
 
-    await _forget(info.name);
+    await _forget(settingsRepoEntry.name);
 
-    await _put(LoadingRepoEntry(info), setCurrent: wasCurrent);
+    await _put(LoadingRepoEntry(settingsRepoEntry.info),
+        setCurrent: wasCurrent);
 
     try {
       final repo = await _open(
-        info,
+        settingsRepoEntry,
       );
 
       if (repo is ErrorRepoEntry) {
-        loggy.app('Failed to lock repository: ${info.name}');
+        loggy.app('Failed to lock repository: ${settingsRepoEntry.name}');
         return;
       }
 
       await _put(repo, setCurrent: wasCurrent);
     } catch (e, st) {
-      loggy.app('Locking the repository ${info.name} failed', e, st);
+      loggy.app(
+          'Locking the repository ${settingsRepoEntry.name} failed', e, st);
     }
   }
 
@@ -291,19 +297,19 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    final oldInfo = _settings.repoMetaInfo(oldName)!;
-    final newInfo = RepoMetaInfo.fromDirAndName(oldInfo.dir, newName);
+    final settingsRepoEntry = _settings.entryByName(oldName)!;
+    final newInfo = RepoMetaInfo.fromDirAndName(settingsRepoEntry.dir, newName);
     final wasCurrent = currentRepoName == oldName;
 
     await _forget(oldName);
 
-    final renamed =
-        await _renameRepositoryFiles(oldInfo: oldInfo, newName: newName);
+    final renamed = await _renameRepositoryFiles(
+        oldInfo: settingsRepoEntry.info, newName: newName);
 
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
 
-      final repo = await _open(oldInfo);
+      final repo = await _open(settingsRepoEntry);
 
       if (repo is ErrorRepoEntry) {
         await setCurrent(null);
@@ -314,9 +320,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    await _settings.renameRepository(oldName, newName);
+    final newSettingsRepoEntry =
+        await _settings.renameRepository(oldName, newName);
 
-    final repo = await _open(newInfo);
+    final repo = await _open(newSettingsRepoEntry!);
 
     if (repo is ErrorRepoEntry) {
       await setCurrent(null);
@@ -327,12 +334,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  void deleteRepository(RepoMetaInfo info) async {
+  Future<void> deleteRepository(RepoMetaInfo info) async {
     final repoName = info.name;
     final wasCurrent = currentRepoName == repoName;
+    final databaseId = _settings.getDatabaseId(repoName);
 
     final biometricsResult =
-        await Biometrics.deleteRepositoryPassword(repositoryName: repoName);
+        await Biometrics.deleteRepositoryPassword(databaseId: databaseId);
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -365,21 +373,26 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<RepoEntry> _open(RepoMetaInfo info, {String? password}) async {
-    final name = info.name;
-    final store = info.path();
+  Future<RepoEntry> _open(SettingsRepoEntry settingsRepoEntry,
+      {String? password}) async {
+    final name = settingsRepoEntry.name;
+    final store = settingsRepoEntry.info.path();
 
     try {
       if (!await io.File(store).exists()) {
-        return MissingRepoEntry(info, S.current.messageRepoMissing,
+        return MissingRepoEntry(
+            settingsRepoEntry.info,
+            S.current.messageRepoMissing,
             S.current.messageRepoMissingErrorDescription(name));
       }
 
       final repo =
           await oui.Repository.open(_session, store: store, password: password);
 
-      final cubit =
-          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      final cubit = RepoCubit(
+          settingsRepoEntry: settingsRepoEntry,
+          handle: repo,
+          settings: _settings);
       cubit.loadSettings();
 
       return OpenRepoEntry(cubit);
@@ -387,7 +400,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       loggy.app('Initialization of the repository $name failed', e, st);
     }
 
-    return ErrorRepoEntry(info, S.current.messageErrorOpeningRepo,
+    return ErrorRepoEntry(
+        settingsRepoEntry.info,
+        S.current.messageErrorOpeningRepo,
         S.current.messageErrorOpeningRepoDescription(name));
   }
 
@@ -414,8 +429,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
           writePassword: password,
           shareToken: token);
 
-      final cubit =
-          RepoCubit(metaInfo: info, handle: repo, settings: _settings);
+      final settingsRepoEntry =
+          await _settings.addRepo(info, databaseId: await repo.hexDatabaseId());
+
+      final cubit = RepoCubit(
+          settingsRepoEntry: settingsRepoEntry!,
+          handle: repo,
+          settings: _settings);
+
       cubit.loadSettings();
 
       return OpenRepoEntry(cubit);

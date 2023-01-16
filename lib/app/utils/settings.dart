@@ -8,6 +8,16 @@ import '../models/repo_meta_info.dart';
 import 'constants.dart';
 import 'log_reader.dart';
 
+class SettingsRepoEntry {
+  String databaseId;
+  RepoMetaInfo info;
+
+  String get name => info.name;
+  io.Directory get dir => info.dir;
+
+  SettingsRepoEntry(this.databaseId, this.info);
+}
+
 class Settings {
   // Per app settings
   static const String _currentRepoKey = "CURRENT_REPO";
@@ -16,12 +26,13 @@ class Settings {
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
   static const String _portForwardingEnabledKey = "PORT_FORWARDING_ENABLED";
   static const String _localDiscoveryEnabledKey = "LOCAL_DISCOVERY_ENABLED";
+  static const String _logViewFilterKey = "LOG_VIEW/FILTER";
 
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
+  static const String _databaseId = "DATABASE_ID";
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
-  static const String _logViewFilterKey = "LOG_VIEW/FILTER";
 
   // List of all repositories this app is concerned about
   static const String _knownRepositoriesKey = "KNOWN_REPOSITORIES";
@@ -63,7 +74,25 @@ class Settings {
       await _storeRepos(prefs, repos);
     }
 
-    return Settings._(prefs, repos);
+    final settings = Settings._(prefs, repos);
+
+    await settings._migrateIds();
+
+    return settings;
+  }
+
+  Future<void> _migrateIds() async {
+    for (final entry in _repos.entries) {
+      if (await _getDatabaseIdMaybe(entry.key) == null) {
+        // We used to have biometric data stored under repository names, but
+        // that caused problems with repository renaming. So we introduced
+        // database IDs but in order to not invalidate previously stored
+        // biometrics, we use the old names as IDs for old repositories. For
+        // any newly created repository we'll use a database ID provided by the
+        // repository.
+        await _setDatabaseId(entry.key, entry.key);
+      }
+    }
   }
 
   static Future<void> _storeRepos(
@@ -93,14 +122,25 @@ class Settings {
     return await path_provider.getApplicationDocumentsDirectory();
   }
 
-  List<RepoMetaInfo> repos() {
-    final knownRepos = _prefs.getStringList(_knownRepositoriesKey);
+  List<SettingsRepoEntry> repos() {
+    final paths = _prefs.getStringList(_knownRepositoriesKey);
 
-    if (knownRepos == null) {
-      return <RepoMetaInfo>[];
+    if (paths == null) {
+      return <SettingsRepoEntry>[];
     }
 
-    return knownRepos.map((path) => RepoMetaInfo.fromDbPath(path)).toList();
+    return paths.map((path) {
+      final info = RepoMetaInfo.fromDbPath(path);
+      final id = getDatabaseId(info.name);
+      return SettingsRepoEntry(id, info);
+    }).toList();
+  }
+
+  SettingsRepoEntry? entryByName(String name) {
+    final info = repoMetaInfo(name);
+    if (info == null) return null;
+    final id = getDatabaseId(name);
+    return SettingsRepoEntry(id, info);
   }
 
   RepoMetaInfo? repoMetaInfo(String repoName) {
@@ -117,38 +157,46 @@ class Settings {
     return _defaultRepo.get();
   }
 
-  Future<void> renameRepository(String oldName, String newName) async {
+  Future<SettingsRepoEntry?> renameRepository(
+      String oldName, String newName) async {
     if (oldName == newName) {
-      return;
+      return null;
     }
 
     if (_repos.containsKey(newName)) {
       print("Failed to rename repo: \"$newName\" already exists");
-      return;
+      return null;
     }
 
     if (_defaultRepo.get() == oldName) {
       await _defaultRepo.set(newName);
     }
 
-    _repos[newName] = _repos[oldName]!;
+    final path = _repos[oldName]!;
+    _repos[newName] = path;
 
+    final databaseId = getDatabaseId(oldName);
+    await _setDatabaseId(newName, databaseId);
     await setDhtEnabled(newName, getDhtEnabled(oldName));
     await setPexEnabled(newName, getPexEnabled(oldName));
 
     await forgetRepository(oldName);
+
+    return SettingsRepoEntry(
+        databaseId, RepoMetaInfo.fromDirAndName(io.Directory(path), newName));
   }
 
-  Future<bool> addRepo(RepoMetaInfo info) async {
+  Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
+      {required String databaseId}) async {
     if (_repos.containsKey(info.name)) {
-      return false;
+      return null;
     }
 
     _repos[info.name] = info.dir.path;
+    await _setDatabaseId(info.name, databaseId);
+    await _storeRepos(_prefs, _repos);
 
-    _storeRepos(_prefs, _repos);
-
-    return true;
+    return SettingsRepoEntry(databaseId, info);
   }
 
   Future<void> forgetRepository(String repoName) async {
@@ -156,12 +204,21 @@ class Settings {
       await _defaultRepo.set(null);
     }
 
+    await _setDatabaseId(repoName, null);
     await setDhtEnabled(repoName, null);
     await setPexEnabled(repoName, null);
 
     _repos.remove(repoName);
-    _storeRepos(_prefs, _repos);
+    await _storeRepos(_prefs, _repos);
   }
+
+  String getDatabaseId(String repoName) => _getDatabaseIdMaybe(repoName)!;
+
+  String? _getDatabaseIdMaybe(String repoName) =>
+      _prefs.getString(_repositoryKey(repoName, _databaseId));
+
+  Future<void> _setDatabaseId(String repoName, String? databaseId) =>
+      _setRepositoryString(repoName, _databaseId, databaseId);
 
   bool? getDhtEnabled(String repoName) =>
       _prefs.getBool(_repositoryKey(repoName, _dhtEnabledKey));
@@ -212,6 +269,17 @@ class Settings {
 
     if (value != null) {
       await _prefs.setBool(fullKey, value);
+    } else {
+      await _prefs.remove(fullKey);
+    }
+  }
+
+  Future<void> _setRepositoryString(
+      String repoName, String key, String? value) async {
+    final fullKey = _repositoryKey(repoName, key);
+
+    if (value != null) {
+      await _prefs.setString(fullKey, value);
     } else {
       await _prefs.remove(fullKey);
     }

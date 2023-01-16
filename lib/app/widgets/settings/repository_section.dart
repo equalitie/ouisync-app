@@ -111,13 +111,14 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           leading: Icon(Icons.password),
           onPressed: (context) async {
             final biometricsResult = await _tryGetBiometricPassword(context,
-                repositoryName: repo.name);
+                databaseId: repo.databaseId);
 
             if (biometricsResult == null) return;
 
             if (biometricsResult.value?.isNotEmpty ?? false) {
               await _pushRepositorySecurityPage(context,
                   repositories: repos,
+                  databaseId: repo.databaseId,
                   repositoryName: repo.name,
                   password: biometricsResult.value!,
                   usesBiometrics: true);
@@ -126,22 +127,25 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             }
 
             final password = await _validateManualPassword(parentContext,
-                repositories: repos, repositoryName: repo.name);
+                repositories: repos,
+                databaseId: repo.databaseId,
+                repositoryName: repo.name);
 
             if (password == null) return;
 
             await _pushRepositorySecurityPage(parentContext,
                 repositories: repos,
+                databaseId: repo.databaseId,
                 repositoryName: repo.name,
                 password: password,
                 usesBiometrics: false);
           });
 
   Future<BiometricsResult?> _tryGetBiometricPassword(BuildContext context,
-      {required String repositoryName}) async {
+      {required String databaseId}) async {
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: Biometrics.getRepositoryPassword(repositoryName: repositoryName));
+        f: Biometrics.getRepositoryPassword(databaseId: databaseId));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -153,6 +157,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
 
   Future<String?> _validateManualPassword(BuildContext context,
       {required ReposCubit repositories,
+      required String databaseId,
       required String repositoryName}) async {
     final wasLocked =
         (repos.currentRepo?.maybeCubit?.accessMode ?? AccessMode.blind) ==
@@ -164,6 +169,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             title: S.current.messageUnlockRepository,
             body: UnlockRepository(
                 context: context,
+                databaseId: databaseId,
                 repositoryName: repositoryName,
                 useBiometrics: false,
                 isPasswordValidation: true,
@@ -194,6 +200,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
 
   Future<void> _pushRepositorySecurityPage(BuildContext context,
       {required ReposCubit repositories,
+      required String databaseId,
       required String repositoryName,
       required String password,
       required bool usesBiometrics}) async {
@@ -201,6 +208,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
         context,
         MaterialPageRoute(
           builder: (context) => RepositorySecurity(
+              databaseId: databaseId,
               repositoryName: repositoryName,
               repositories: repositories,
               password: password,
