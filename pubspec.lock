@@ -521,6 +521,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
+  hex:
+    dependency: transitive
+    description:
+      name: hex
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   http:
     dependency: transitive
     description:
