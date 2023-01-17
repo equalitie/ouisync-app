@@ -154,10 +154,6 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   Future<String?> _validateManualPassword(BuildContext context,
       {required ReposCubit repositories,
       required String repositoryName}) async {
-    final wasLocked =
-        (repos.currentRepo?.maybeCubit?.accessMode ?? AccessMode.blind) ==
-            AccessMode.blind;
-
     final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
@@ -177,12 +173,6 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
     if (!unlockedSuccessfully) {
       showSnackBar(context, content: Text(unlockRepoResponse.message));
       return null;
-    }
-
-    // Validating the password would unlock the repo, if successful; so if it was
-    // originally locked, we need to leave it that way.
-    if (wasLocked) {
-      await _unlockRepository(repositoryName: repositoryName, password: '');
     }
 
     return unlockRepoResponse.password;
