@@ -338,6 +338,21 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
+  Future<bool> setReadWritePassword(
+      RepoMetaInfo info, String newPassword, oui.ShareToken? shareToken) async {
+    final name = info.name;
+
+    try {
+      await currentRepo?.maybeHandle?.setReadWriteAccess(
+          newPassword: newPassword, shareToken: shareToken);
+    } catch (e, st) {
+      loggy.app('Password change for repository $name failed', e, st);
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> deleteRepository(RepoMetaInfo info) async {
     final repoName = info.name;
     final wasCurrent = currentRepoName == repoName;

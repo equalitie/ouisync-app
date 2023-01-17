@@ -68,7 +68,7 @@ abstract class Dialogs {
           required String title,
           required List<Widget> body,
           required List<Widget> actions}) =>
-      showDialog(
+      showDialog<bool?>(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
