@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
@@ -126,7 +127,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
-                  title: Text('Change password'),
+                  title: Badge(
+                      showBadge: _newPassword != null,
+                      padding: EdgeInsets.all(2.0),
+                      alignment: Alignment.centerLeft,
+                      position: BadgePosition.topEnd(top: 0.0, end: 55.0),
+                      child: Text('Change password')),
                   trailing:
                       Icon(Icons.chevron_right_rounded, color: Colors.black),
                   onTap: () async => await _getNewPassword())
@@ -253,7 +259,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         SwitchListTile.adaptive(
             value: _addBiometricState,
             secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
-            title: Text(S.current.messageSecureUsingBiometrics),
+            title: Badge(
+                showBadge: _addBiometricState != _usesBiometrics,
+                padding: EdgeInsets.all(2.0),
+                alignment: Alignment.centerLeft,
+                position: BadgePosition.topEnd(top: 0.0, end: 55.0),
+                child: Text(S.current.messageSecureUsingBiometrics)),
             onChanged: ((noBiometrics) {
               setState(() {
                 _addBiometricState = noBiometrics;
@@ -278,9 +289,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       child: Container(
           padding: EdgeInsets.only(left: 16.0, top: 30.0, right: 16.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            TextButton.icon(
-                icon: const Icon(Icons.save_outlined),
-                label: Text('Save changes'),
+            TextButton(
+                child: Text('Save changes'),
                 onPressed: (() async {
                   final saveChanges = await _confirmSaveChanges();
 
