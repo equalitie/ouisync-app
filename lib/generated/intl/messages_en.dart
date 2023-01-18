@@ -98,6 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add a Shared Repository"),
         "actionCancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCEL"),
+        "actionClear": MessageLookupByLibrary.simpleMessage("Clear"),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CLOSE"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Create"),
         "actionCreateRepository":

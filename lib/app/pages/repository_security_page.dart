@@ -48,6 +48,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   bool _useBiometricState = false;
   bool _showRemoveBiometricsWarning = false;
 
+  bool _isUnsavedNewPassword = false;
+  bool _isUnsavedBiometrics = false;
   bool _hasUnsavedChanges = false;
 
   @override
@@ -127,7 +129,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         ListTile(
             leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
             title: Badge(
-                showBadge: _newPassword != null,
+                showBadge: _isUnsavedNewPassword,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
                 position: BadgePosition.topEnd(),
@@ -151,14 +153,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               Container(
                   padding: EdgeInsets.only(right: 16.0),
                   child: TextButton(
-                      child: Text('Clear'),
+                      child: Text(S.current.actionClear),
                       onPressed: (() {
                         setState(() {
                           _newPassword = null;
                           _previewNewPassword = false;
+
+                          _isUnsavedNewPassword = false;
                         });
 
-                        _showActionSection();
+                        _updateUnsavedChanges();
                       })))
             ]))
       ];
@@ -218,9 +222,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       _isNewPasswordGenerated = setPasswordResult.generated;
 
       _previewNewPassword = false;
+      _isUnsavedNewPassword = true;
     });
 
-    _showActionSection();
+    _updateUnsavedChanges();
   }
 
   Widget _newPasswordActions() => Wrap(children: [
@@ -255,7 +260,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             value: _useBiometricState,
             secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
             title: Badge(
-                showBadge: _useBiometricState != _hasBiometrics,
+                showBadge: _isUnsavedBiometrics,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
                 position: BadgePosition.topEnd(),
@@ -266,9 +271,11 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                 _showRemoveBiometricsWarning =
                     !useBiometrics && (!useBiometrics && _hasBiometrics);
+
+                _isUnsavedBiometrics = useBiometrics != _hasBiometrics;
               });
 
-              _showActionSection();
+              _updateUnsavedChanges();
             })),
         Visibility(
             visible: _showRemoveBiometricsWarning,
@@ -293,12 +300,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                   if (!saveChanges) return;
 
-                  final changePassword = _newPassword?.isNotEmpty ?? false;
-                  final updateBiometrics =
-                      _useBiometricState != _hasBiometrics ||
-                          (changePassword && _hasBiometrics);
-
-                  if (changePassword) {
+                  if (_isUnsavedNewPassword) {
                     assert(_newPassword != null, '_newPassword is null');
 
                     final metaInfo = widget.repositories.currentRepo!.metaInfo;
@@ -320,10 +322,14 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                       _newPassword = null;
                       _previewNewPassword = false;
+
+                      _isUnsavedNewPassword = false;
                     });
+
+                    _updateUnsavedChanges();
                   }
 
-                  if (updateBiometrics) {
+                  if (_isUnsavedBiometrics) {
                     assert(_password != null, '_password is null');
 
                     _useBiometricState
@@ -367,7 +373,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     return saveChanges;
   }
 
-  Future<bool?> _addPasswordToBiometricStorage(
+  Future<void> _addPasswordToBiometricStorage(
       {required String password}) async {
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
@@ -376,25 +382,25 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
-      return false;
+      return;
     }
 
     setState(() {
       _useBiometricState = true;
       _showRemoveBiometricsWarning = false;
 
+      _isUnsavedBiometrics = false;
+
       _previewPassword = false;
       _password = password;
     });
 
-    _showActionSection();
-
-    return true;
+    _updateUnsavedChanges();
   }
 
-  Future<bool> _removeRepoBiometrics() async {
+  Future<void> _removeRepoBiometrics() async {
     final removeBiometrics = await _removeBiometricsConfirmationDialog();
-    if (!(removeBiometrics ?? false)) return false;
+    if (!(removeBiometrics ?? false)) return;
 
     final biometricsResultDeletePassword =
         await Dialogs.executeFutureWithLoadingDialog(context,
@@ -403,7 +409,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     if (biometricsResultDeletePassword.exception != null) {
       loggy.app(biometricsResultDeletePassword.exception);
-      return false;
+      return;
     }
 
     showSnackBar(context,
@@ -413,12 +419,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       _useBiometricState = false;
       _showRemoveBiometricsWarning = true;
 
+      _isUnsavedBiometrics = false;
+
       _previewPassword = false;
     });
 
-    _showActionSection();
-
-    return true;
+    _updateUnsavedChanges();
   }
 
   Future<bool?> _removeBiometricsConfirmationDialog() async =>
@@ -439,10 +445,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             )
           ]);
 
-  void _showActionSection() {
-    final show = (_newPassword?.isNotEmpty ?? false) ||
-        (_useBiometricState != _hasBiometrics);
-
-    setState(() => _hasUnsavedChanges = show);
+  _updateUnsavedChanges() {
+    final unsavedChanges = _isUnsavedNewPassword || _isUnsavedBiometrics;
+    setState(() => _hasUnsavedChanges = unsavedChanges);
   }
 }
