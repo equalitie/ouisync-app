@@ -90,8 +90,8 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                       if (result ?? false) {
                         Navigator.of(context).pop(result);
                         showSnackBar(context,
-                            content: Text(S.current
-                                .messageFolderDeleted(widget.data.name)));
+                            message: S.current
+                                .messageFolderDeleted(widget.data.name));
                       }
                     });
                   },
@@ -174,7 +174,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
 
     if (directory.isNotEmpty) {
       String message = S.current.messageErrorPathNotEmpty(path);
-      showSnackBar(context, content: Text(message));
+      showSnackBar(context, message: message);
     }
 
     if (directory.isNotEmpty) {

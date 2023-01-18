@@ -190,8 +190,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     await copyStringToClipboard(_password!);
                     showSnackBar(context,
-                        content:
-                            Text(S.current.messagePasswordCopiedClipboard));
+                        message: S.current.messagePasswordCopiedClipboard);
                   }
                 : null)
       ]);
@@ -249,8 +248,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     await copyStringToClipboard(_newPassword!);
                     showSnackBar(context,
-                        content:
-                            Text(S.current.messageNewPasswordCopiedClipboard));
+                        message: S.current.messageNewPasswordCopiedClipboard);
                   }
                 : null)
       ]);
@@ -311,8 +309,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     if (!changePasswordResult) {
                       showSnackBar(context,
-                          content:
-                              Text(S.current.messageErrorChangingPassword));
+                          message: S.current.messageErrorChangingPassword);
                       return;
                     }
 
@@ -412,8 +409,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    showSnackBar(context,
-        content: Text(S.current.messageBiometricValidationRemoved));
+    showSnackBar(context, message: S.current.messageBiometricValidationRemoved);
 
     setState(() {
       _useBiometricState = false;

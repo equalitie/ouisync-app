@@ -72,7 +72,7 @@ class _ShareRepositoryState extends State<ShareRepository>
                     availableAccessMode: widget.availableAccessModes,
                     onChanged: _onChanged,
                     onDisabledMessage: (String message) =>
-                        showSnackBar(context, content: Text(message)),
+                        showSnackBar(context, message: message),
                   ),
                   Dimensions.spacingVerticalHalf,
                   _buildAccessModeDescription(_accessMode),
@@ -196,7 +196,7 @@ class _ShareRepositoryState extends State<ShareRepository>
                     onPressed: () async {
                   if (_shareToken == null) {
                     showSnackBar(context,
-                        content: Text(S.current.messageShareActionDisabled));
+                        message: S.current.messageShareActionDisabled);
 
                     return;
                   }
@@ -204,9 +204,7 @@ class _ShareRepositoryState extends State<ShareRepository>
                   await copyStringToClipboard(_shareToken!);
                   showSnackBar(
                     context,
-                    content: Text(
-                      S.current.messageTokenCopiedToClipboard,
-                    ),
+                    message: S.current.messageTokenCopiedToClipboard,
                   );
                 }),
                 Fields.constrainedText(
@@ -228,7 +226,7 @@ class _ShareRepositoryState extends State<ShareRepository>
                   onPressed: () async {
                 if (_shareToken == null) {
                   showSnackBar(context,
-                      content: Text(S.current.messageShareActionDisabled));
+                      message: S.current.messageShareActionDisabled);
 
                   return;
                 }
@@ -254,7 +252,7 @@ class _ShareRepositoryState extends State<ShareRepository>
                     onPressed: () async {
                   if (_shareToken == null) {
                     showSnackBar(context,
-                        content: Text(S.current.messageShareActionDisabled));
+                        message: S.current.messageShareActionDisabled);
 
                     return;
                   }

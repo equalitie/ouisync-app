@@ -177,7 +177,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
         unlockRepoResponse.accessMode != AccessMode.blind;
 
     if (!unlockedSuccessfully) {
-      showSnackBar(context, content: Text(unlockRepoResponse.message));
+      showSnackBar(context, message: unlockRepoResponse.message);
       return null;
     }
 
