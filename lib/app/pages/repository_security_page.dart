@@ -84,17 +84,17 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   Future<bool?> _discardUnsavedChangesAlert() async =>
       await Dialogs.alertDialogWithActions(
           context: context,
-          title: 'Unsaved changes',
+          title: S.current.titleUnsavedChanges,
           body: [
-            Text('You have unsaved changes.\n\nDo you want to discard them?')
+            Text(S.current.messageUnsavedChanges)
           ],
           actions: [
             TextButton(
-              child: Text('Discard'),
+              child: Text(S.current.actionDiscard),
               onPressed: () => Navigator.of(context).pop(true),
             ),
             TextButton(
-              child: Text('Cancel'),
+              child: Text(S.current.actionCancel),
               onPressed: () => Navigator.of(context).pop(false),
             )
           ]);
@@ -131,7 +131,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
                 position: BadgePosition.topEnd(),
-                child: Text('Change password')),
+                child: Text(S.current.titleChangePassword)),
             trailing: Icon(Icons.chevron_right_rounded, color: Colors.black),
             onTap: () async => await _getNewPassword()),
         Visibility(
@@ -141,7 +141,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 visualDensity: VisualDensity.compact,
                 style: ListTileStyle.drawer,
                 tileColor: Colors.blueGrey.shade100,
-                title: Text('New password'),
+                title: Text(S.current.messageNewPassword),
                 subtitle: Text(
                     _formattPassword(_newPassword, mask: !_previewNewPassword)),
                 trailing: _newPasswordActions())),
@@ -200,7 +200,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final setPasswordResult = await showDialog<SetPasswordResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
-            title: 'Set password for',
+            title: S.current.titleSetPasswordFor,
             body: SetPassword(
                 context: context,
                 cubit: widget.repositories,
@@ -244,7 +244,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     await copyStringToClipboard(_newPassword!);
                     showSnackBar(context,
-                        content: Text('New password copied to clipboard'));
+                        content:
+                            Text(S.current.messageNewPasswordCopiedClipboard));
                   }
                 : null)
       ]);
@@ -284,7 +285,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           padding: EdgeInsets.only(top: 30.0, right: 18.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
             TextButton(
-                child: Text('Save changes'),
+                child: Text(S.current.actionSaveChanges),
                 onPressed: (() async {
                   final saveChanges = await _confirmSaveChanges();
 
@@ -308,8 +309,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     if (!changePasswordResult) {
                       showSnackBar(context,
-                          content: Text(
-                              'There was a problem changing the password. Please try again'));
+                          content:
+                              Text(S.current.messageErrorChangingPassword));
                       return;
                     }
 
@@ -334,30 +335,31 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           ])));
 
   Future<bool?> _confirmSaveChanges() async {
-    final passwordChangedChunk =
-        ((_newPassword?.isNotEmpty ?? false) ? '- Change password\n' : '')
-            .trimLeft();
+    final passwordChangedChunk = ((_newPassword?.isNotEmpty ?? false)
+            ? '${S.current.messageNewPassword}\n'
+            : '')
+        .trimLeft();
     final biometricsChunk = (_useBiometricState != _hasBiometrics
             ? _useBiometricState
-                ? '- Secure using biometrics'
-                : '- Remove biometrics'
+                ? S.current.messageSecureUsingBiometrics
+                : S.current.messageRemoveBiometrics
             : '')
         .trimLeft();
     final changes = '$passwordChangedChunk$biometricsChunk';
 
     final saveChanges = await Dialogs.alertDialogWithActions(
         context: context,
-        title: 'Save changes',
+        title: S.current.titleSaveChanges,
         body: [
-          Text('Save the following changes:\n\n$changes')
+          Text(S.current.messageSavingChanges(changes))
         ],
         actions: [
           TextButton(
-            child: Text('Yes'),
+            child: Text(S.current.actionSave),
             onPressed: () => Navigator.of(context).pop(true),
           ),
           TextButton(
-            child: Text('No'),
+            child: Text(S.current.actionCancel),
             onPressed: () => Navigator.of(context).pop(false),
           )
         ]);

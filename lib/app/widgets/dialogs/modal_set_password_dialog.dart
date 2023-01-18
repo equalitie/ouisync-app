@@ -155,7 +155,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                           size: Dimensions.sizeIconSmall), onPressed: () {
                     setState(() => _obscurePassword = !_obscurePassword);
                   }),
-                  hint: 'New password',
+                  hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: validateNoEmpty(
                       Strings.messageErrorRepositoryPasswordValidation),
@@ -179,7 +179,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                     setState(
                         () => _obscureRetypePassword = !_obscureRetypePassword);
                   }),
-                  hint: 'New password',
+                  hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: (retypedPassword) => retypedPasswordValidator(
                         password: _passwordController.text,
@@ -259,7 +259,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
   Widget _samePasswordWarning() => Visibility(
       visible: _samePassword,
       child: Fields.autosizeText(
-          'The new password is the same as the old password',
+          S.current.messageErrorNewPasswordSameOldPassword,
           color: Colors.red,
           maxLines: 10,
           softWrap: true,

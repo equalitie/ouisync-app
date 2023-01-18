@@ -60,29 +60,33 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m16(name) => "Suggested: ${name}\n(tap here to use this name)";
 
-  static String m17(access) => "Unlocked as a ${access} replica";
+  static String m17(changes) => "Saving the following changes:\n\n${changes}";
 
-  static String m18(name) => "${name} writing canceled";
+  static String m18(access) => "Unlocked as a ${access} replica";
 
-  static String m19(name) => "${name} - writing failed";
+  static String m19(name) => "${name} writing canceled";
 
-  static String m20(name) => "Failed to add repository ${name}";
+  static String m20(name) => "${name} - writing failed";
 
-  static String m21(name) => "Failed to create repository ${name}";
+  static String m21(name) => "Failed to add repository ${name}";
 
-  static String m22(access) => "${access}";
+  static String m22(name) => "Failed to create repository ${name}";
 
-  static String m23(entry) => "${entry}";
+  static String m23(access) => "${access}";
 
-  static String m24(name) => "${name}";
+  static String m24(changes) => "${changes}";
 
-  static String m25(number) => "${number}";
+  static String m25(entry) => "${entry}";
 
-  static String m26(path) => "${path}";
+  static String m26(name) => "${name}";
 
-  static String m27(status) => "${status}";
+  static String m27(number) => "${number}";
 
-  static String m28(name) => "Share repository \"${name}\"";
+  static String m28(path) => "${path}";
+
+  static String m29(status) => "${status}";
+
+  static String m30(name) => "Share repository \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -105,6 +109,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete folder"),
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
+        "actionDiscard": MessageLookupByLibrary.simpleMessage("Discard"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
@@ -129,6 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Retry"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
+        "actionSaveChanges":
+            MessageLookupByLibrary.simpleMessage("Save changes"),
         "actionScanQR": MessageLookupByLibrary.simpleMessage("Scan a QR code"),
         "actionShare": MessageLookupByLibrary.simpleMessage("Share"),
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
@@ -249,6 +256,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "There was an error authenticathing using biometrics. Please try again"),
+        "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
+            "There was a problem changing the password. Please try again"),
         "messageErrorCharactersNotAllowed":
             MessageLookupByLibrary.simpleMessage(
                 "Using \\ or / is not allowed"),
@@ -267,6 +276,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a valid name."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
             "We couldn’t load this folder\'s contents. Please try again."),
+        "messageErrorNewPasswordSameOldPassword":
+            MessageLookupByLibrary.simpleMessage(
+                "The new password is the same as the old password"),
         "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
             "Error opening the repository"),
         "messageErrorOpeningRepoDescription": m6,
@@ -333,6 +345,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Network is unavailable"),
         "messageNewFileError": m11,
+        "messageNewPassword":
+            MessageLookupByLibrary.simpleMessage("New password"),
+        "messageNewPasswordCopiedClipboard":
+            MessageLookupByLibrary.simpleMessage(
+                "New password copied to the clipboard"),
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("A new version is available."),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
@@ -358,6 +375,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Remember to securely save the password; if you forget it, there is no way to retrieve it."),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
+        "messageRemoveBiometrics":
+            MessageLookupByLibrary.simpleMessage("Remove biometrics"),
         "messageRemoveBiometricsConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this repository biometrics?"),
@@ -379,13 +398,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Give the repository a name"),
         "messageRepositoryNewName":
             MessageLookupByLibrary.simpleMessage("Repository new name"),
+        "messageRepositoryNewPassword":
+            MessageLookupByLibrary.simpleMessage("New password"),
         "messageRepositoryPassword":
-            MessageLookupByLibrary.simpleMessage("Repository password"),
+            MessageLookupByLibrary.simpleMessage("Password"),
         "messageRepositorySuggestedName": m16,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the link here"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Save the file to this folder"),
+        "messageSavingChanges": m17,
         "messageScanQROrShare": MessageLookupByLibrary.simpleMessage(
             "Scan this with your other device or share it with your peers"),
         "messageSecureUsingBiometrics":
@@ -409,11 +431,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Repository token copied to the clipboard."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "The password did not unlock the repository"),
-        "messageUnlockRepoOk": m17,
+        "messageUnlockRepoOk": m18,
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Unlock using biometrics"),
+        "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
+            "You have unsaved changes.\n\nDo you want to discard them?"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageVerbosity":
             MessageLookupByLibrary.simpleMessage("Log verbosity"),
@@ -421,16 +445,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
-        "messageWritingFileCanceled": m18,
-        "messageWritingFileError": m19,
-        "messsageFailedAddRepository": m20,
-        "messsageFailedCreateRepository": m21,
-        "replacementAccess": m22,
-        "replacementEntry": m23,
-        "replacementName": m24,
-        "replacementNumber": m25,
-        "replacementPath": m26,
-        "replacementStatus": m27,
+        "messageWritingFileCanceled": m19,
+        "messageWritingFileError": m20,
+        "messsageFailedAddRepository": m21,
+        "messsageFailedCreateRepository": m22,
+        "replacementAccess": m23,
+        "replacementChanges": m24,
+        "replacementEntry": m25,
+        "replacementName": m26,
+        "replacementNumber": m27,
+        "replacementPath": m28,
+        "replacementStatus": m29,
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),
@@ -444,6 +469,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions needed"),
+        "titleChangePassword":
+            MessageLookupByLibrary.simpleMessage("Change password"),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Create a folder"),
         "titleCreateRepository":
@@ -483,15 +510,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
         "titleRepositoryName":
             MessageLookupByLibrary.simpleMessage("Repository name"),
+        "titleSaveChanges":
+            MessageLookupByLibrary.simpleMessage("Save changes"),
         "titleScanRepoQR":
             MessageLookupByLibrary.simpleMessage("Scan Repository QR"),
         "titleSecurity": MessageLookupByLibrary.simpleMessage("Security"),
+        "titleSetPasswordFor":
+            MessageLookupByLibrary.simpleMessage("Set password for"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "titleShareRepository": m28,
+        "titleShareRepository": m30,
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("State Monitor"),
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Unlock repository"),
+        "titleUnsavedChanges":
+            MessageLookupByLibrary.simpleMessage("Unsaved changes"),
         "typeFile": MessageLookupByLibrary.simpleMessage("File"),
         "typeFolder": MessageLookupByLibrary.simpleMessage("Folder")
       };

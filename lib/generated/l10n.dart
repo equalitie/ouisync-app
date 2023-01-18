@@ -390,6 +390,46 @@ class S {
     );
   }
 
+  /// `Unsaved changes`
+  String get titleUnsavedChanges {
+    return Intl.message(
+      'Unsaved changes',
+      name: 'titleUnsavedChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get titleChangePassword {
+    return Intl.message(
+      'Change password',
+      name: 'titleChangePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set password for`
+  String get titleSetPasswordFor {
+    return Intl.message(
+      'Set password for',
+      name: 'titleSetPasswordFor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save changes`
+  String get titleSaveChanges {
+    return Intl.message(
+      'Save changes',
+      name: 'titleSaveChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1120,11 +1160,21 @@ class S {
     );
   }
 
-  /// `Repository password`
+  /// `Password`
   String get messageRepositoryPassword {
     return Intl.message(
-      'Repository password',
+      'Password',
       name: 'messageRepositoryPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New password`
+  String get messageRepositoryNewPassword {
+    return Intl.message(
+      'New password',
+      name: 'messageRepositoryNewPassword',
       desc: '',
       args: [],
     );
@@ -1145,6 +1195,16 @@ class S {
     return Intl.message(
       'The passwords do not match.',
       name: 'messageErrorRetypePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The new password is the same as the old password`
+  String get messageErrorNewPasswordSameOldPassword {
+    return Intl.message(
+      'The new password is the same as the old password',
+      name: 'messageErrorNewPasswordSameOldPassword',
       desc: '',
       args: [],
     );
@@ -1810,6 +1870,16 @@ class S {
     );
   }
 
+  /// `New password copied to the clipboard`
+  String get messageNewPasswordCopiedClipboard {
+    return Intl.message(
+      'New password copied to the clipboard',
+      name: 'messageNewPasswordCopiedClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remove biometric validation`
   String get messageRemoveBiometricValidation {
     return Intl.message(
@@ -1860,6 +1930,16 @@ class S {
     );
   }
 
+  /// `Remove biometrics`
+  String get messageRemoveBiometrics {
+    return Intl.message(
+      'Remove biometrics',
+      name: 'messageRemoveBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remember to securely save the password; if you forget it, there is no way to retrieve it.`
   String get messageRememberSavePasswordAlert {
     return Intl.message(
@@ -1895,6 +1975,16 @@ class S {
     return Intl.message(
       'There was an error authenticathing using biometrics. Please try again',
       name: 'messageErrorAuthenticatingBiometrics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `There was a problem changing the password. Please try again`
+  String get messageErrorChangingPassword {
+    return Intl.message(
+      'There was a problem changing the password. Please try again',
+      name: 'messageErrorChangingPassword',
       desc: '',
       args: [],
     );
@@ -2020,6 +2110,36 @@ class S {
     );
   }
 
+  /// `You have unsaved changes.\n\nDo you want to discard them?`
+  String get messageUnsavedChanges {
+    return Intl.message(
+      'You have unsaved changes.\n\nDo you want to discard them?',
+      name: 'messageUnsavedChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saving the following changes:\n\n{changes}`
+  String messageSavingChanges(Object changes) {
+    return Intl.message(
+      'Saving the following changes:\n\n$changes',
+      name: 'messageSavingChanges',
+      desc: '',
+      args: [changes],
+    );
+  }
+
+  /// `New password`
+  String get messageNewPassword {
+    return Intl.message(
+      'New password',
+      name: 'messageNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -2077,6 +2197,16 @@ class S {
       name: 'replacementNumber',
       desc: '',
       args: [number],
+    );
+  }
+
+  /// `{changes}`
+  String replacementChanges(Object changes) {
+    return Intl.message(
+      '$changes',
+      name: 'replacementChanges',
+      desc: '',
+      args: [changes],
     );
   }
 
@@ -2575,6 +2705,26 @@ class S {
     return Intl.message(
       'Remove',
       name: 'actionRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discard`
+  String get actionDiscard {
+    return Intl.message(
+      'Discard',
+      name: 'actionDiscard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save changes`
+  String get actionSaveChanges {
+    return Intl.message(
+      'Save changes',
+      name: 'actionSaveChanges',
       desc: '',
       args: [],
     );
