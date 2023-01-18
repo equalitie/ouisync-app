@@ -541,5 +541,9 @@
   "messageNewPasswordCopiedClipboard": "La nueva contraseña fue copiada en el portapapeles",
   "@messageNewPasswordCopiedClipboard": {},
   "actionDiscard": "Descartar",
-  "@actionDiscard": {}
+  "@actionDiscard": {},
+  "actionClear": "Limpiar",
+  "@actionClear": {},
+  "actionSaveChanges": "Guardar los cambios",
+  "@actionSaveChanges": {}
 }
