@@ -202,7 +202,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               repositoryName: repositoryName,
               repositories: repositories,
               password: password,
-              biometrics: usesBiometrics,
+              hasBiometrics: usesBiometrics,
               validateManualPasswordCallback: _validateManualPassword),
         ));
   }

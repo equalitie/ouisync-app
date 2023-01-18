@@ -15,7 +15,7 @@ class RepositorySecurity extends StatefulWidget {
       required this.databaseId,
       required this.repositories,
       required this.password,
-      required this.biometrics,
+      required this.hasBiometrics,
       required this.validateManualPasswordCallback,
       super.key});
 
@@ -23,7 +23,7 @@ class RepositorySecurity extends StatefulWidget {
   final String databaseId;
   final ReposCubit repositories;
   final String? password;
-  final bool biometrics;
+  final bool hasBiometrics;
 
   final Future<String?> Function(BuildContext context,
       {required ReposCubit repositories,
@@ -37,18 +37,18 @@ class RepositorySecurity extends StatefulWidget {
 class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
   String? _password;
+  bool _previewPassword = false;
 
   String? _newPassword;
-  bool _generated = false;
-
-  bool _previewPassword = false;
   bool _previewNewPassword = false;
 
-  bool _usesBiometrics = false;
-  bool _addBiometricState = false;
+  bool _isNewPasswordGenerated = false;
+
+  bool _hasBiometrics = false;
+  bool _useBiometricState = false;
   bool _showRemoveBiometricsWarning = false;
 
-  bool _unsavedChanges = false;
+  bool _hasUnsavedChanges = false;
 
   @override
   void initState() {
@@ -57,8 +57,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     setState(() {
       _password = widget.password;
 
-      _usesBiometrics = widget.biometrics;
-      _addBiometricState = widget.biometrics;
+      _hasBiometrics = widget.hasBiometrics;
+      _useBiometricState = widget.hasBiometrics;
 
       _showRemoveBiometricsWarning = false;
     });
@@ -73,7 +73,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       body: WillPopScope(child: _securityState(), onWillPop: _onBackPressed));
 
   Future<bool> _onBackPressed() async {
-    if (_unsavedChanges) {
+    if (_hasUnsavedChanges) {
       final discardChanges = await _discardUnsavedChangesAlert();
       return discardChanges ?? false;
     }
@@ -99,51 +99,44 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             )
           ]);
 
-  Widget _securityState() {
-    return SingleChildScrollView(
-        child: Container(
-            child: Column(children: [
-      ListTile(
+  Widget _securityState() => SingleChildScrollView(
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 4.0),
+          child: Column(children: [
+            _repositoryName(),
+            Divider(),
+            ..._managePassword(),
+            Divider(),
+            ..._manageBiometrics(),
+            Divider(),
+            _securityActions()
+          ])));
+
+  Widget _repositoryName() => ListTile(
         title: Text(S.current.titleRepositoryName),
         subtitle: Text(widget.repositoryName),
-      ),
-      Divider(),
-      ..._managePassword(),
-      Divider(),
-      ..._biometrics(),
-      Divider(),
-      _securityActions()
-    ])));
-  }
+      );
 
   List<Widget> _managePassword() => [
         ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
             leading: const Icon(Icons.password_rounded, color: Colors.black),
             title: Text(S.current.messagePassword),
             subtitle:
                 Text(_formattPassword(_password, mask: !_previewPassword)),
             trailing: _passwordActions()),
-        Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(children: [
-              ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
-                  title: Badge(
-                      showBadge: _newPassword != null,
-                      padding: EdgeInsets.all(2.0),
-                      alignment: Alignment.centerLeft,
-                      position: BadgePosition.topEnd(top: 0.0, end: 55.0),
-                      child: Text('Change password')),
-                  trailing:
-                      Icon(Icons.chevron_right_rounded, color: Colors.black),
-                  onTap: () async => await _getNewPassword())
-            ])),
+        ListTile(
+            leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
+            title: Badge(
+                showBadge: _newPassword != null,
+                padding: EdgeInsets.all(2.0),
+                alignment: Alignment.centerLeft,
+                position: BadgePosition.topEnd(top: 0.0, end: 55.0),
+                child: Text('Change password')),
+            trailing: Icon(Icons.chevron_right_rounded, color: Colors.black),
+            onTap: () async => await _getNewPassword()),
         Visibility(
             visible: _newPassword?.isNotEmpty ?? false,
             child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                 dense: false,
                 visualDensity: VisualDensity.compact,
                 style: ListTileStyle.drawer,
@@ -155,9 +148,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         Visibility(
             visible: _newPassword?.isNotEmpty ?? false,
             child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+              Container(
+                  padding: EdgeInsets.only(right: 16.0),
                   child: TextButton(
+                      child: Text('Clear'),
                       onPressed: (() {
                         setState(() {
                           _newPassword = null;
@@ -165,8 +159,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                         });
 
                         _showActionSection();
-                      }),
-                      child: Text('Clear')))
+                      })))
             ]))
       ];
 
@@ -175,15 +168,18 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Widget _passwordActions() => Wrap(children: [
         IconButton(
-            onPressed: _password?.isNotEmpty ?? false
-                ? () => setState(() => _previewPassword = !_previewPassword)
-                : null,
             icon: _previewPassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
             padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor),
+            color: Theme.of(context).primaryColor,
+            onPressed: _password?.isNotEmpty ?? false
+                ? () => setState(() => _previewPassword = !_previewPassword)
+                : null),
         IconButton(
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            color: Theme.of(context).primaryColor,
             onPressed: _password?.isNotEmpty ?? false
                 ? () async {
                     if (_password == null) return;
@@ -193,10 +189,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                         content:
                             Text(S.current.messagePasswordCopiedClipboard));
                   }
-                : null,
-            icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor)
+                : null)
       ]);
 
   Future<void> _getNewPassword() async {
@@ -214,36 +207,37 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 repositoryName: widget.repositoryName,
                 currentPassword: _password!,
                 newPassword: _newPassword,
-                generated: _generated)));
+                generated: _isNewPasswordGenerated)));
 
     if (setPasswordResult == null) return;
 
-    if (setPasswordResult.newPassword.isNotEmpty) {
-      final newPassword = setPasswordResult.newPassword;
+    if (setPasswordResult.newPassword.isEmpty) return;
 
-      setState(() {
-        _newPassword = newPassword.isEmpty ? null : newPassword;
-        _generated = setPasswordResult.generated;
+    setState(() {
+      _newPassword = setPasswordResult.newPassword;
+      _isNewPasswordGenerated = setPasswordResult.generated;
 
-        _previewNewPassword = false;
-      });
+      _previewNewPassword = false;
+    });
 
-      _showActionSection();
-    }
+    _showActionSection();
   }
 
   Widget _newPasswordActions() => Wrap(children: [
         IconButton(
-            onPressed: _newPassword?.isNotEmpty ?? false
-                ? () =>
-                    setState(() => _previewNewPassword = !_previewNewPassword)
-                : null,
             icon: _previewPassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
             padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor),
+            color: Theme.of(context).primaryColor,
+            onPressed: _newPassword?.isNotEmpty ?? false
+                ? () =>
+                    setState(() => _previewNewPassword = !_previewNewPassword)
+                : null),
         IconButton(
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            color: Theme.of(context).primaryColor,
             onPressed: _newPassword?.isNotEmpty ?? false
                 ? () async {
                     if (_newPassword == null) return;
@@ -252,28 +246,25 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                     showSnackBar(context,
                         content: Text('New password copied to clipboard'));
                   }
-                : null,
-            icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor)
+                : null)
       ]);
 
-  List<Widget> _biometrics() => [
+  List<Widget> _manageBiometrics() => [
         SwitchListTile.adaptive(
-            value: _addBiometricState,
+            value: _useBiometricState,
             secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
             title: Badge(
-                showBadge: _addBiometricState != _usesBiometrics,
+                showBadge: _useBiometricState != _hasBiometrics,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
                 position: BadgePosition.topEnd(top: 0.0, end: 55.0),
                 child: Text(S.current.messageSecureUsingBiometrics)),
-            onChanged: ((noBiometrics) {
+            onChanged: ((useBiometrics) {
               setState(() {
-                _addBiometricState = noBiometrics;
+                _useBiometricState = useBiometrics;
 
                 _showRemoveBiometricsWarning =
-                    !noBiometrics && (!noBiometrics && _usesBiometrics);
+                    !useBiometrics && (!useBiometrics && _hasBiometrics);
               });
 
               _showActionSection();
@@ -281,16 +272,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         Visibility(
             visible: _showRemoveBiometricsWarning,
             child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
                 child: Text(S.current.messageAlertSaveCopyPassword,
                     textAlign: TextAlign.justify,
                     style: TextStyle(color: Colors.red))))
       ];
 
   Widget _securityActions() => Visibility(
-      visible: _unsavedChanges,
+      visible: _hasUnsavedChanges,
       child: Container(
-          padding: EdgeInsets.only(left: 16.0, top: 30.0, right: 16.0),
+          padding: EdgeInsets.only(top: 30.0, right: 18.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
             TextButton(
                 child: Text('Save changes'),
@@ -303,15 +294,17 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                   final changePassword = _newPassword?.isNotEmpty ?? false;
                   final updateBiometrics =
-                      _addBiometricState != _usesBiometrics ||
-                          (changePassword && _usesBiometrics);
+                      _useBiometricState != _hasBiometrics ||
+                          (changePassword && _hasBiometrics);
 
                   if (changePassword) {
                     assert(_newPassword != null, '_newPassword is null');
 
                     final metaInfo = widget.repositories.currentRepo!.metaInfo;
-                    final changePasswordResult = await widget.repositories
-                        .setReadWritePassword(metaInfo, _newPassword!, null);
+                    final changePasswordResult =
+                        await Dialogs.executeFutureWithLoadingDialog(context,
+                            f: widget.repositories.setReadWritePassword(
+                                metaInfo, _newPassword!, null));
 
                     if (!changePasswordResult) {
                       showSnackBar(context,
@@ -332,14 +325,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   if (updateBiometrics) {
                     assert(_password != null, '_password is null');
 
-                    final biometricsResult = _addBiometricState
+                    _useBiometricState
                         ? await _addPasswordToBiometricStorage(
                             password: _password!)
                         : await _removeRepoBiometrics();
-
-                    if (biometricsResult == null) return;
-
-                    if (!biometricsResult) return;
                   }
                 }))
           ])));
@@ -348,8 +337,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final passwordChangedChunk =
         ((_newPassword?.isNotEmpty ?? false) ? '- Change password\n' : '')
             .trimLeft();
-    final biometricsChunk = (_addBiometricState != _usesBiometrics
-            ? _addBiometricState
+    final biometricsChunk = (_useBiometricState != _hasBiometrics
+            ? _useBiometricState
                 ? '- Secure using biometrics'
                 : '- Remove biometrics'
             : '')
@@ -389,7 +378,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     setState(() {
-      _addBiometricState = true;
+      _useBiometricState = true;
       _showRemoveBiometricsWarning = false;
 
       _previewPassword = false;
@@ -419,7 +408,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         content: Text(S.current.messageBiometricValidationRemoved));
 
     setState(() {
-      _addBiometricState = false;
+      _useBiometricState = false;
       _showRemoveBiometricsWarning = true;
 
       _previewPassword = false;
@@ -450,8 +439,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   void _showActionSection() {
     final show = (_newPassword?.isNotEmpty ?? false) ||
-        (_addBiometricState != _usesBiometrics);
+        (_useBiometricState != _hasBiometrics);
 
-    setState(() => _unsavedChanges = show);
+    setState(() => _hasUnsavedChanges = show);
   }
 }
