@@ -67,8 +67,6 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
       _setPassword(password);
 
       if (!generated) {
-        _passwordFocus.requestFocus();
-
         _passwordController.text.isEmpty
             ? _scrollToVisible(_passwordFocus)
             : _retypePasswordFocus.requestFocus();
@@ -95,49 +93,57 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
             Fields.constrainedText('"${widget.repositoryName}"',
                 flex: 0, fontWeight: FontWeight.w400),
             Dimensions.spacingVerticalDouble,
-            _generatePassword ? _passwordLabel() : _passwordInputs(),
-            _generatePasswordSwitch(),
-            _samePasswordWarning(),
+            ..._passwordSection(),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  Widget _passwordLabel() {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Expanded(
-          flex: 1,
-          child: Fields.autosizeText(
-              _formattPassword(_password, mask: !_previewPassword))),
-      Expanded(
-          flex: 0,
-          child: IconButton(
-              onPressed: _password?.isNotEmpty ?? false
-                  ? () => setState(() => _previewPassword = !_previewPassword)
-                  : null,
-              icon: _previewPassword
-                  ? const Icon(Constants.iconVisibilityOff)
-                  : const Icon(Constants.iconVisibilityOn),
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact)),
-      Expanded(
-          flex: 0,
-          child: IconButton(
-              onPressed: _password?.isNotEmpty ?? false
-                  ? () async {
-                      if (_password == null) return;
+  List<Widget> _passwordSection() => [
+        _passwordLabel(),
+        _passwordInputs(),
+        _generatePasswordSwitch(),
+        _samePasswordWarning()
+      ];
 
-                      await copyStringToClipboard(_password!);
-                      showSnackBar(context,
-                          content:
-                              Text(S.current.messagePasswordCopiedClipboard));
-                    }
-                  : null,
-              icon: const Icon(Icons.copy_rounded),
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact))
-    ]);
-  }
+  Widget _passwordLabel() => Visibility(
+      visible: _generatePassword,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Expanded(
+            flex: 1,
+            child: Fields.autosizeText(
+                _formattPassword(_password, mask: !_previewPassword))),
+        Expanded(
+            flex: 0,
+            child: IconButton(
+                onPressed: _password?.isNotEmpty ?? false
+                    ? () => setState(() => _previewPassword = !_previewPassword)
+                    : null,
+                icon: _previewPassword
+                    ? const Icon(Constants.iconVisibilityOff)
+                    : const Icon(Constants.iconVisibilityOn),
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact)),
+        Expanded(
+            flex: 0,
+            child: IconButton(
+                onPressed: _password?.isNotEmpty ?? false
+                    ? () async {
+                        if (_password == null) return;
 
-  Widget _passwordInputs() => Container(
+                        await copyStringToClipboard(_password!);
+                        showSnackBar(context,
+                            content:
+                                Text(S.current.messagePasswordCopiedClipboard));
+                      }
+                    : null,
+                icon: const Icon(Icons.copy_rounded),
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact))
+      ]));
+
+  Widget _passwordInputs() => Visibility(
+      visible: !_generatePassword,
+      maintainState: true,
+      child: Container(
           child: Column(children: [
         Row(children: [
           Expanded(
@@ -188,7 +194,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: _retypePasswordFocus))
         ])
-      ]));
+      ])));
 
   String? retypedPasswordValidator(
       {required String password, required String? retypedPassword}) {
@@ -208,7 +214,13 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
           title:
               Text(S.current.messageGeneratePassword, textAlign: TextAlign.end),
           onChanged: (generatePassword) {
-            setState(() => _generatePassword = generatePassword);
+            setState(() {
+              _generatePassword = generatePassword;
+
+              if (!_generatePassword) {
+                _passwordFocus.requestFocus();
+              }
+            });
 
             _configureInputs(generatePassword: _generatePassword);
           },
@@ -223,7 +235,6 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
     }
 
     _setPassword(newPassword);
-    _passwordFocus.requestFocus();
 
     _passwordController.text.isEmpty
         ? _scrollToVisible(_passwordFocus)
@@ -271,6 +282,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
             onPressed: () => Navigator.of(context).pop(null)),
         PositiveButton(
             text: S.current.actionAccept,
+            focusNode: _createButtonFocus,
             onPressed: () {
               final password = _passwordController.text;
               _onSaved(widget.cubit, widget.repositoryName, password);
