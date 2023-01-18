@@ -97,7 +97,6 @@ class _ShareRepositoryState extends State<ShareRepository>
     if (accessMode == null) {
       setState(() {
         _accessMode = null;
-
         _shareToken = null;
         _displayToken = Constants.ouisyncUrl;
       });
@@ -109,10 +108,11 @@ class _ShareRepositoryState extends State<ShareRepository>
       widget.repository,
       accessMode,
     );
+
     final displayToken = formatShareLinkForDisplay(token);
+
     setState(() {
       _accessMode = accessMode;
-
       _shareToken = token;
       _displayToken = displayToken;
     });
