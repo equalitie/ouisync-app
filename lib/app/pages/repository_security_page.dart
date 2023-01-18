@@ -151,7 +151,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               Container(
                   padding: EdgeInsets.only(right: 16.0),
                   child: TextButton(
-                      child: Text('Clear'),
+                      child: Text(S.current.actionClear),
                       onPressed: (() {
                         setState(() {
                           _newPassword = null;

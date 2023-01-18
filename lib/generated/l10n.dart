@@ -2720,6 +2720,16 @@ class S {
     );
   }
 
+  /// `Clear`
+  String get actionClear {
+    return Intl.message(
+      'Clear',
+      name: 'actionClear',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Save changes`
   String get actionSaveChanges {
     return Intl.message(

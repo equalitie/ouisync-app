@@ -472,5 +472,6 @@
   "@actionLockCapital": {},
   "actionRemove":"Remove",
   "actionDiscard":"Discard",
+  "actionClear":"Clear",
   "actionSaveChanges":"Save changes"
 }
