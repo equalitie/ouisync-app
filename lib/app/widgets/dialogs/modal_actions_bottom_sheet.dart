@@ -97,8 +97,7 @@ class DirectoryActions extends StatelessWidget {
           final type = await repo.type(dstPath);
           final typeNameForMessage = _getTypeNameForMessage(type);
           showSnackBar(context,
-              content:
-                  Text(S.current.messageEntryAlreadyExist(typeNameForMessage)));
+              message: S.current.messageEntryAlreadyExist(typeNameForMessage));
           continue;
         }
 

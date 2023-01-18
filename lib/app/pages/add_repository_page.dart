@@ -79,7 +79,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         final tokenValidationError = widget.reposCubit.validateTokenLink(data);
 
         if (tokenValidationError != null) {
-          showSnackBar(context, content: Text(tokenValidationError));
+          showSnackBar(context, message: tokenValidationError);
 
           return;
         }

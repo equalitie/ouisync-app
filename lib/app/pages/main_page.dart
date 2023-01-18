@@ -230,7 +230,7 @@ class _MainPageState extends State<MainPage>
     int clickCount = exitClickCounter.registerClick();
 
     if (clickCount <= 1) {
-      showSnackBar(context, content: Text(S.current.messageExitOuiSync));
+      showSnackBar(context, message: S.current.messageExitOuiSync);
       // Don't pop => don't exit
     } else {
       exitClickCounter.reset();
@@ -307,7 +307,7 @@ class _MainPageState extends State<MainPage>
         return _selectLayoutWidget();
       }, (repo) {
         while (repo.messages.isNotEmpty) {
-          showSnackBar(context, content: Text(repo.messages.removeAt(0)));
+          showSnackBar(context, message: repo.messages.removeAt(0));
         }
       });
 
@@ -390,8 +390,7 @@ class _MainPageState extends State<MainPage>
                     /// For now, only Android can preview files.
                     if (!io.Platform.isAndroid) {
                       showSnackBar(context,
-                          content:
-                              Text(S.current.messageFilePreviewNotAvailable));
+                          message: S.current.messageFilePreviewNotAvailable);
                       return;
                     }
 
@@ -755,7 +754,7 @@ class _MainPageState extends State<MainPage>
 
     if (unlockRepoResponse == null) return;
 
-    showSnackBar(context, content: Text(unlockRepoResponse.message));
+    showSnackBar(context, message: unlockRepoResponse.message);
   }
 
   Future<AccessMode?> _unlockRepository(

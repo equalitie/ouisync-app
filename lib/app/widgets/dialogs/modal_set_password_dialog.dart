@@ -131,8 +131,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
 
                         await copyStringToClipboard(_password!);
                         showSnackBar(context,
-                            content:
-                                Text(S.current.messagePasswordCopiedClipboard));
+                            message: S.current.messagePasswordCopiedClipboard);
                       }
                     : null,
                 icon: const Icon(Icons.copy_rounded),

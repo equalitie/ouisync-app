@@ -97,10 +97,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       }
     } catch (e, st) {
       loggy.app('Extract repository token exception', e, st);
-      showSnackBar(
-        context,
-        content: Text(S.current.messageErrorTokenInvalid),
-      );
+      showSnackBar(context, message: S.current.messageErrorTokenInvalid);
 
       cleanupFormOnEmptyToken();
     }
