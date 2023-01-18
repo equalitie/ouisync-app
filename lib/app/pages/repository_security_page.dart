@@ -130,7 +130,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 showBadge: _newPassword != null,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
-                position: BadgePosition.topEnd(top: 0.0, end: 55.0),
+                position: BadgePosition.topEnd(),
                 child: Text('Change password')),
             trailing: Icon(Icons.chevron_right_rounded, color: Colors.black),
             onTap: () async => await _getNewPassword()),
@@ -257,7 +257,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 showBadge: _useBiometricState != _hasBiometrics,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
-                position: BadgePosition.topEnd(top: 0.0, end: 55.0),
+                position: BadgePosition.topEnd(),
                 child: Text(S.current.messageSecureUsingBiometrics)),
             onChanged: ((useBiometrics) {
               setState(() {
