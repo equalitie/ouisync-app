@@ -80,18 +80,10 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                 onChanged: (current) async {
                   loggy.app('Access mode: $current');
 
-                  final disabledMessage = S.current
-                      .messageAccessModeDisabled(widget.currentAccessMode.name);
-                  final isEnabled = widget.availableAccessMode.contains(mode);
-
-                  widget.onDisabledMessage(disabledMessage);
-
-                  if (!isEnabled) return;
-
-                  if (current == null) {
-                    setState(() => _selectedMode = null);
-                    await widget.onChanged(null);
-
+                  if (!widget.availableAccessMode.contains(mode)) {
+                    final message = S.current.messageAccessModeDisabled(
+                        widget.currentAccessMode.name);
+                    widget.onDisabledMessage(message);
                     return;
                   }
 
