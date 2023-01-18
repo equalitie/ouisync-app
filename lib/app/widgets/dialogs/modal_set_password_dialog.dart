@@ -282,6 +282,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
             onPressed: () => Navigator.of(context).pop(null)),
         PositiveButton(
             text: S.current.actionAccept,
+            focusNode: _createButtonFocus,
             onPressed: () {
               final password = _passwordController.text;
               _onSaved(widget.cubit, widget.repositoryName, password);
