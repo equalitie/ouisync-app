@@ -496,8 +496,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     if (exist) return;
 
-    final repoEntry = await cubit.createRepository(info,
-        password: password, setCurrent: true, token: _shareToken);
+    final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: cubit.createRepository(info,
+            password: password, setCurrent: true, token: _shareToken));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";
