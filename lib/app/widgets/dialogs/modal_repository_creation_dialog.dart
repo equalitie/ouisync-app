@@ -67,6 +67,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   String _suggestedName = '';
   bool _showSuggestedName = false;
 
+  bool _showSavePasswordWarning = false;
+
   bool _showRepositoryNameInUseWarning = false;
 
   @override
@@ -76,7 +78,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     setState(() => _isBlindReplica =
         _shareToken == null ? false : _shareToken!.mode == AccessMode.blind);
 
-    _setupBiometrics();
+    _setupBiometrics(widget.isBiometricsAvailable).then((_) {
+      _configureInputs(_generatePassword, _secureWithBiometrics);
+
+      final showWarning = _isBiometricsAvailable ? !_generatePassword : true;
+
+      setState(() => _showSavePasswordWarning = showWarning);
+    });
 
     _repositoryNameFocus.requestFocus();
     _addListeners();
@@ -142,13 +150,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     }
   }
 
-  Future<void> _setupBiometrics() async {
+  Future<void> _setupBiometrics(bool isBiometricsAvailable) async {
     setState(() {
-      _isBiometricsAvailable = widget.isBiometricsAvailable;
-      _secureWithBiometrics = widget.isBiometricsAvailable;
+      _isBiometricsAvailable = isBiometricsAvailable;
+      _secureWithBiometrics = isBiometricsAvailable;
     });
-
-    _configureInputs(_generatePassword, _secureWithBiometrics);
   }
 
   void _addListeners() {
@@ -189,6 +195,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             if (!_isBlindReplica) ..._passwordSection(),
             if (_isBiometricsAvailable && !_isBlindReplica)
               ..._biometricsSection(),
+            _manualPasswordWarning(),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
@@ -350,8 +357,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
-  List<Widget> _biometricsSection() =>
-      [_useBiometricsSwitch(), _manualPasswordWarning()];
+  List<Widget> _biometricsSection() => [_useBiometricsSwitch()];
 
   Widget _useBiometricsSwitch() => Container(
       child: SwitchListTile.adaptive(
@@ -363,12 +369,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
             _configureInputs(_generatePassword, _secureWithBiometrics,
                 preservePassword: true);
+
+            setState(() => _showSavePasswordWarning = !enableBiometrics);
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
   Widget _manualPasswordWarning() => Visibility(
-      visible: !_secureWithBiometrics,
+      visible: _showSavePasswordWarning,
       child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
           color: Colors.red,
           maxLines: 10,
