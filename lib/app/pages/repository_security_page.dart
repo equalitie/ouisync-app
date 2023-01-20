@@ -15,20 +15,16 @@ class RepositorySecurity extends StatefulWidget {
       required this.databaseId,
       required this.repositories,
       required this.password,
-      required this.hasBiometrics,
-      required this.validateManualPasswordCallback,
+      required this.isBiometricsAvailable,
+      required this.usesBiometrics,
       super.key});
 
   final String repositoryName;
   final String databaseId;
   final ReposCubit repositories;
   final String? password;
-  final bool hasBiometrics;
-
-  final Future<String?> Function(BuildContext context,
-      {required ReposCubit repositories,
-      required String databaseId,
-      required String repositoryName}) validateManualPasswordCallback;
+  final bool isBiometricsAvailable;
+  final bool usesBiometrics;
 
   @override
   State<RepositorySecurity> createState() => _RepositorySecurityState();
@@ -44,8 +40,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   bool _isNewPasswordGenerated = false;
 
-  bool _hasBiometrics = false;
-  bool _useBiometricState = false;
+  bool _isBiometricsAvailable = false;
+  bool _secureWithBiometricsState = false;
   bool _showRemoveBiometricsWarning = false;
 
   bool _isUnsavedNewPassword = false;
@@ -59,8 +55,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     setState(() {
       _password = widget.password;
 
-      _hasBiometrics = widget.hasBiometrics;
-      _useBiometricState = widget.hasBiometrics;
+      _isBiometricsAvailable = widget.isBiometricsAvailable;
+      _secureWithBiometricsState = widget.usesBiometrics;
 
       _showRemoveBiometricsWarning = false;
     });
@@ -109,8 +105,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             Divider(),
             ..._managePassword(),
             Divider(),
-            ..._manageBiometrics(),
-            Divider(),
+            if (_isBiometricsAvailable) ...[..._manageBiometrics(), Divider()],
             _securityActions()
           ])));
 
@@ -257,7 +252,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   List<Widget> _manageBiometrics() => [
         SwitchListTile.adaptive(
-            value: _useBiometricState,
+            value: _secureWithBiometricsState,
             secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
             title: Badge(
                 showBadge: _isUnsavedBiometrics,
@@ -267,12 +262,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 child: Text(S.current.messageSecureUsingBiometrics)),
             onChanged: ((useBiometrics) {
               setState(() {
-                _useBiometricState = useBiometrics;
+                _secureWithBiometricsState = useBiometrics;
 
-                _showRemoveBiometricsWarning =
-                    !useBiometrics && (!useBiometrics && _hasBiometrics);
+                _showRemoveBiometricsWarning = !useBiometrics &&
+                    (!useBiometrics && _isBiometricsAvailable);
 
-                _isUnsavedBiometrics = useBiometrics != _hasBiometrics;
+                _isUnsavedBiometrics = useBiometrics != _isBiometricsAvailable;
               });
 
               _updateUnsavedChanges();
@@ -332,7 +327,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   if (_isUnsavedBiometrics) {
                     assert(_password != null, '_password is null');
 
-                    _useBiometricState
+                    _secureWithBiometricsState
                         ? await _addPasswordToBiometricStorage(
                             password: _password!)
                         : await _removeRepoBiometrics();
@@ -345,12 +340,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             ? '${S.current.messageNewPassword}\n'
             : '')
         .trimLeft();
-    final biometricsChunk = (_useBiometricState != _hasBiometrics
-            ? _useBiometricState
-                ? S.current.messageSecureUsingBiometrics
-                : S.current.messageRemoveBiometrics
-            : '')
-        .trimLeft();
+    final biometricsChunk =
+        (_secureWithBiometricsState != _isBiometricsAvailable
+                ? _secureWithBiometricsState
+                    ? S.current.messageSecureUsingBiometrics
+                    : S.current.messageRemoveBiometrics
+                : '')
+            .trimLeft();
     final changes = '$passwordChangedChunk$biometricsChunk';
 
     final saveChanges = await Dialogs.alertDialogWithActions(
@@ -386,7 +382,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     setState(() {
-      _useBiometricState = true;
+      _secureWithBiometricsState = true;
       _showRemoveBiometricsWarning = false;
 
       _isUnsavedBiometrics = false;
@@ -416,7 +412,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         content: Text(S.current.messageBiometricValidationRemoved));
 
     setState(() {
-      _useBiometricState = false;
+      _secureWithBiometricsState = false;
       _showRemoveBiometricsWarning = true;
 
       _isUnsavedBiometrics = false;

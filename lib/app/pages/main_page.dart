@@ -3,6 +3,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
@@ -22,6 +23,8 @@ import 'pages.dart';
 
 typedef BottomSheetControllerCallback = void Function(
     PersistentBottomSheetController? controller, String entryPath);
+
+typedef CheckForBiometricsFunction = Future<bool?> Function();
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -101,7 +104,7 @@ class _MainPageState extends State<MainPage>
     widget.mediaReceiver.controller.stream.listen((media) {
       if (media is String) {
         loggy.app('mediaReceiver: String');
-        addRepoWithTokenDialog(initialTokenValue: media);
+        unawaited(addRepoWithTokenDialog(initialTokenValue: media));
       }
 
       if (media is List<SharedMediaFile>) {
@@ -121,6 +124,22 @@ class _MainPageState extends State<MainPage>
     await (await _natDetection).close();
     await _repositories.close();
     super.dispose();
+  }
+
+  Future<bool?> _checkForBiometricsCallback() async {
+    final auth = LocalAuthentication();
+
+    final isBiometricsAvailable = await auth.canCheckBiometrics;
+
+    // The device doesn't have biometrics
+    if (!isBiometricsAvailable) return null;
+
+    final availableBiometrics = await auth.getAvailableBiometrics();
+
+    // The device has biometrics capabilites, but not in use'.
+    if (availableBiometrics.isEmpty) return false;
+
+    return true;
   }
 
   void initMainPage() async {
@@ -255,6 +274,7 @@ class _MainPageState extends State<MainPage>
 
   RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
       reposCubit: _repositories,
+      checkForBiometricsCallback: _checkForBiometricsCallback,
       shareRepositoryOnTap: _showShareRepository,
       unlockRepositoryOnTap: _unlockRepositoryCallback);
 
@@ -663,12 +683,18 @@ class _MainPageState extends State<MainPage>
           });
 
   void createRepoDialog() async {
+    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(context,
+            f: _checkForBiometricsCallback()) ??
+        false;
     await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => ActionsDialog(
             title: S.current.titleCreateRepository,
-            body: RepositoryCreation(context: context, cubit: _repositories)));
+            body: RepositoryCreation(
+                context: context,
+                cubit: _repositories,
+                isBiometricsAvailable: hasBiometrics)));
   }
 
   void addRepoWithTokenDialog({String? initialTokenValue}) async {
@@ -705,6 +731,10 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
+    final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
+            context,
+            f: _checkForBiometricsCallback()) ??
+        false;
     await showDialog(
         context: context,
         barrierDismissible: false,
@@ -713,7 +743,8 @@ class _MainPageState extends State<MainPage>
             body: RepositoryCreation(
                 context: context,
                 cubit: _repositories,
-                initialTokenValue: initialTokenValue)));
+                initialTokenValue: initialTokenValue,
+                isBiometricsAvailable: isBiometricsAvailable)));
   }
 
   Future<void> _unlockRepositoryCallback(
@@ -742,6 +773,8 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _getRepositoryPasswordDialog(
       {required String databaseId, required String repositoryName}) async {
+    final hasBiometrics = await _checkForBiometricsCallback() ?? false;
+
     final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
@@ -750,6 +783,8 @@ class _MainPageState extends State<MainPage>
                   context: context,
                   databaseId: databaseId,
                   repositoryName: repositoryName,
+                  isBiometricsAvailable: hasBiometrics,
+                  isPasswordValidation: false,
                   unlockRepositoryCallback: _unlockRepository),
             ));
 
@@ -771,6 +806,11 @@ class _MainPageState extends State<MainPage>
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 
+    final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
+            context,
+            f: _checkForBiometricsCallback()) ??
+        false;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -781,6 +821,7 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
             settings: widget.settings,
             reposCubit: reposCubit,
+            isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
             panicCounter: _panicCounter,

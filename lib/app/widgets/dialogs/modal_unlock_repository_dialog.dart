@@ -12,15 +12,15 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       required this.context,
       required this.databaseId,
       required this.repositoryName,
-      this.useBiometrics = false,
-      this.isPasswordValidation = false,
+      required this.isBiometricsAvailable,
+      required this.isPasswordValidation,
       required this.unlockRepositoryCallback})
       : super(key: key);
 
   final BuildContext context;
   final String databaseId;
   final String repositoryName;
-  final bool useBiometrics;
+  final bool isBiometricsAvailable;
   final bool isPasswordValidation;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -36,15 +36,11 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   final ValueNotifier<bool> _useBiometrics = ValueNotifier<bool>(false);
 
   @override
-  Widget build(BuildContext context) {
-    _useBiometrics.value = useBiometrics;
-
-    return Form(
-      key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: _buildUnlockRepositoryWidget(this.context),
-    );
-  }
+  Widget build(BuildContext context) => Form(
+        key: formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: _buildUnlockRepositoryWidget(this.context),
+      );
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
     return Column(
@@ -92,13 +88,15 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   Widget _useBiometricsCheckbox() => ValueListenableBuilder(
       valueListenable: _useBiometrics,
       builder: (context, useBiometrics, child) {
-        return SwitchListTile.adaptive(
-            value: useBiometrics,
-            title: Text(S.current.messageSecureUsingBiometrics),
-            onChanged: (enableBiometrics) {
-              _useBiometrics.value = enableBiometrics;
-            },
-            contentPadding: EdgeInsets.zero);
+        return Visibility(
+            visible: isBiometricsAvailable,
+            child: SwitchListTile.adaptive(
+                value: useBiometrics,
+                title: Text(S.current.messageSecureUsingBiometrics),
+                onChanged: (enableBiometrics) {
+                  _useBiometrics.value = enableBiometrics;
+                },
+                contentPadding: EdgeInsets.zero));
       });
 
   Future<void> _unlockRepository(String? password) async {
@@ -106,8 +104,9 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       return;
     }
 
-    final accessMode = await unlockRepositoryCallback.call(
-        repositoryName: repositoryName, password: password!);
+    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: unlockRepositoryCallback(
+            repositoryName: repositoryName, password: password!));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(

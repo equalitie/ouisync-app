@@ -1,9 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:biometric_storage/biometric_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 
@@ -19,12 +17,14 @@ class RepositoryCreation extends StatefulWidget {
       {required this.context,
       required this.cubit,
       this.initialTokenValue,
+      required this.isBiometricsAvailable,
       Key? key})
       : super(key: key);
 
   final BuildContext context;
   final ReposCubit cubit;
   final String? initialTokenValue;
+  final bool isBiometricsAvailable;
 
   @override
   State<RepositoryCreation> createState() => _RepositoryCreationState();
@@ -55,11 +55,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   bool _showPasswordInput = false;
   bool _showRetypePasswordInput = false;
 
-  bool _requiresPassword = false;
+  bool _isBlindReplica = false;
   bool _generatePassword = true;
 
-  bool _biometricsAvailable = false;
-  bool _useBiometrics = false;
+  bool _isBiometricsAvailable = false;
+  bool _secureWithBiometrics = false;
 
   final ValueNotifier _accessModeNotifier = ValueNotifier<String>('');
   bool _showAccessModeMessage = false;
@@ -73,8 +73,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   void initState() {
     _validateToken();
 
-    setState(() => _requiresPassword =
-        _shareToken == null ? true : _shareToken!.mode != AccessMode.blind);
+    setState(() => _isBlindReplica =
+        _shareToken == null ? false : _shareToken!.mode == AccessMode.blind);
 
     _setupBiometrics();
 
@@ -146,37 +146,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   }
 
   Future<void> _setupBiometrics() async {
-    final isBiometricsAvailable = await _isBiometricsAvailable();
-
     setState(() {
-      _biometricsAvailable = isBiometricsAvailable ?? false;
-      _useBiometrics = isBiometricsAvailable ?? false;
+      _isBiometricsAvailable = widget.isBiometricsAvailable;
+      _secureWithBiometrics = widget.isBiometricsAvailable;
     });
 
-    _configureInputs(_generatePassword, _useBiometrics);
-
-    if (isBiometricsAvailable == null) return; //Device without biometrics
-
-    if (isBiometricsAvailable == false) {
-      // Show dialog asking the user to enable biometrics
-      return;
-    }
-  }
-
-  Future<bool?> _isBiometricsAvailable() async {
-    final auth = LocalAuthentication();
-
-    final isBiometricsAvaiable = await auth.canCheckBiometrics;
-    if (!isBiometricsAvaiable) {
-      return null; //The device doesn't have biometrics
-    }
-
-    final availableBiometrics = await auth.getAvailableBiometrics();
-    if (availableBiometrics.isEmpty) {
-      return false; //The device has biometrics, but the user hasn't configured them
-    }
-
-    return true;
+    _configureInputs(_generatePassword, _secureWithBiometrics);
   }
 
   void _addListeners() {
@@ -214,8 +189,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             if (widget.initialTokenValue?.isNotEmpty ?? false)
               ..._buildTokenLabel(),
             ..._repositoryName(),
-            if (_requiresPassword) ..._passwordSection(),
-            if (_biometricsAvailable && _requiresPassword)
+            if (!_isBlindReplica) ..._passwordSection(),
+            if (_isBiometricsAvailable && !_isBlindReplica)
               ..._biometricsSection(),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
@@ -373,7 +348,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           onChanged: (generatePassword) {
             setState(() => _generatePassword = generatePassword);
 
-            _configureInputs(_generatePassword, _useBiometrics);
+            _configureInputs(_generatePassword, _secureWithBiometrics);
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
@@ -383,37 +358,37 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   Widget _useBiometricsSwitch() => Container(
       child: SwitchListTile.adaptive(
-          value: _useBiometrics,
+          value: _secureWithBiometrics,
           title: Text(S.current.messageSecureUsingBiometrics,
               textAlign: TextAlign.end),
           onChanged: (enableBiometrics) {
-            setState(() => _useBiometrics = enableBiometrics);
+            setState(() => _secureWithBiometrics = enableBiometrics);
 
-            _configureInputs(_generatePassword, _useBiometrics,
+            _configureInputs(_generatePassword, _secureWithBiometrics,
                 preservePassword: true);
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
   Widget _manualPasswordWarning() => Visibility(
-      visible: !_useBiometrics,
+      visible: !_secureWithBiometrics,
       child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
           color: Colors.red,
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
 
-  _configureInputs(bool generatePassword, bool useBiometrics,
+  void _configureInputs(bool generatePassword, bool secureWithBiometrics,
       {bool preservePassword = false}) {
     setState(() {
-      _showPasswordInput = !(generatePassword && useBiometrics);
+      _showPasswordInput = !(generatePassword && secureWithBiometrics);
       _showRetypePasswordInput = !generatePassword && _showPasswordInput;
 
       // If for some reason the user decides to keep the autogenerated password,
       // but not to use biometrics, we make the password visible to signal the user
       // that the password need to be saved manually -just as it is stated in the
       // message explaning this, made visible at the same time.
-      if (generatePassword && !useBiometrics) {
+      if (generatePassword && !secureWithBiometrics) {
         _obscurePassword = false;
       }
     });
@@ -461,8 +436,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             text: S.current.actionCreate,
             onPressed: () {
               final name = _nameController.text;
-              final password =
-                  _requiresPassword ? _passwordController.text : '';
+              final password = _isBlindReplica ? '' : _passwordController.text;
 
               _onSaved(widget.cubit, name, password);
             })
@@ -478,7 +452,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     if (!isRepoNameOk) return;
     _repositoryNameInputKey.currentState!.save();
 
-    if (_requiresPassword) {
+    // A blind replica has no password
+    if (!_isBlindReplica) {
+      // We created the password, no need for checking equality
       if (!_generatePassword) {
         if (!(isPasswordOk && isRetypePasswordOk)) return;
 
@@ -522,7 +498,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     // If instead we first create the repo, then add biometrics and there is an
     // exception  (most likely the user canceling the validation), we would
     // have the repo, but no biometrics, which would be confusiong for the user.
-    if (_useBiometrics) {
+    if (_secureWithBiometrics) {
       final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
           context,
           f: Biometrics.addRepositoryPassword(
