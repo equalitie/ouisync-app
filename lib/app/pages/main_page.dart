@@ -280,7 +280,7 @@ class _MainPageState extends State<MainPage>
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: showSettings,
+        onPressed: () async => await showSettings(),
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface);
     return BlocBuilder<UpgradeExistsCubit, bool>(
@@ -682,7 +682,7 @@ class _MainPageState extends State<MainPage>
             );
           });
 
-  void createRepoDialog() async {
+  Future<void> createRepoDialog() async {
     final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(context,
             f: _checkForBiometricsCallback()) ??
         false;
@@ -697,7 +697,7 @@ class _MainPageState extends State<MainPage>
                 isBiometricsAvailable: hasBiometrics)));
   }
 
-  void addRepoWithTokenDialog({String? initialTokenValue}) async {
+  Future<void> addRepoWithTokenDialog({String? initialTokenValue}) async {
     initialTokenValue ??= await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -767,8 +767,9 @@ class _MainPageState extends State<MainPage>
     }
 
     // Unlock using biometrics
-    await _unlockRepository(
-        repositoryName: repositoryName, password: biometricsResult.value!);
+    await Dialogs.executeFutureWithLoadingDialog(context,
+        f: _unlockRepository(
+            repositoryName: repositoryName, password: biometricsResult.value!));
   }
 
   Future<void> _getRepositoryPasswordDialog(
@@ -795,14 +796,14 @@ class _MainPageState extends State<MainPage>
 
   Future<AccessMode?> _unlockRepository(
           {required String repositoryName, required String password}) async =>
-      await _repositories.unlockRepository(repositoryName, password: password);
+      _repositories.unlockRepository(repositoryName, password: password);
 
   void deleteRepository(RepoMetaInfo repoInfo) =>
       _repositories.deleteRepository(repoInfo);
 
   void reloadRepository() => _repositories.init();
 
-  void showSettings() {
+  Future<void> showSettings() async {
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 

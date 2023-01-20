@@ -278,7 +278,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                       icon: Icons.add,
                       iconSize: Dimensions.sizeIconSmall,
                       iconColor: Constants.primaryColor(context),
-                      onTap: () => createRepoDialog(context),
+                      onTap: () async => await createRepoDialog(context),
                     ),
                     Fields.paddedActionText(
                         S.current.iconAddExistingRepository.toUpperCase(),
@@ -297,7 +297,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
                       if (shareLink == null) return;
 
-                      addRepoWithTokenDialog(context, shareLink: shareLink);
+                      await addRepoWithTokenDialog(context,
+                          shareLink: shareLink);
                     }),
                   ]));
         },
@@ -479,7 +480,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     );
   }
 
-  void createRepoDialog(BuildContext context) async {
+  Future<void> createRepoDialog(BuildContext context) async {
     final isBiometricsAvailable =
         await _isBiometricsAvailable(context) ?? false;
     final newRepo = await showDialog<String>(
@@ -498,7 +499,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     await updateSettingsAndPop(context, newRepo!);
   }
 
-  void addRepoWithTokenDialog(BuildContext context,
+  Future<void> addRepoWithTokenDialog(BuildContext context,
       {required String shareLink}) async {
     final isBiometricsAvailable =
         await _isBiometricsAvailable(context) ?? false;
