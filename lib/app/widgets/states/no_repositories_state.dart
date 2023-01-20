@@ -8,8 +8,8 @@ class NoRepositoriesState extends StatelessWidget {
       {required this.onNewRepositoryPressed,
       required this.onAddRepositoryPressed});
 
-  final Function() onNewRepositoryPressed;
-  final Function() onAddRepositoryPressed;
+  final Future<void> Function() onNewRepositoryPressed;
+  final Future<void> Function() onAddRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class NoRepositoriesState extends StatelessWidget {
                   tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
-              onPressed: () => onNewRepositoryPressed(),
+              onPressed: () async => await onNewRepositoryPressed(),
               leadingIcon: const Icon(Icons.add),
               text: S.current.actionCreateRepository,
               size: Dimensions.sizeInPageButtonLong,
@@ -49,7 +49,7 @@ class NoRepositoriesState extends StatelessWidget {
               autofocus: true),
           Dimensions.spacingVertical,
           Fields.inPageButton(
-            onPressed: () => onAddRepositoryPressed(),
+            onPressed: () async => await onAddRepositoryPressed(),
             leadingIcon: const Icon(Icons.add),
             text: S.current.actionAddRepositoryWithToken,
             size: Dimensions.sizeInPageButtonLong,

@@ -14,9 +14,13 @@ import 'repository_selector.dart';
 
 class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   final ReposCubit repos;
+  final bool isBiometricsAvailable;
   final void Function(RepoCubit) onShareRepository;
 
-  RepositorySection({required this.repos, required this.onShareRepository});
+  RepositorySection(
+      {required this.repos,
+      required this.isBiometricsAvailable,
+      required this.onShareRepository});
 
   @override
   Widget build(BuildContext context) => repos.builder(
@@ -110,26 +114,30 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
-            final biometricsResult = await _tryGetBiometricPassword(context,
-                databaseId: repo.databaseId);
+            if (isBiometricsAvailable) {
+              final biometricsResult = await _tryGetBiometricPassword(context,
+                  databaseId: repo.databaseId);
 
-            if (biometricsResult == null) return;
+              if (biometricsResult == null) return;
 
-            if (biometricsResult.value?.isNotEmpty ?? false) {
-              await _pushRepositorySecurityPage(context,
-                  repositories: repos,
-                  databaseId: repo.databaseId,
-                  repositoryName: repo.name,
-                  password: biometricsResult.value!,
-                  usesBiometrics: true);
+              if (biometricsResult.value?.isNotEmpty ?? false) {
+                await _pushRepositorySecurityPage(context,
+                    repositories: repos,
+                    databaseId: repo.databaseId,
+                    repositoryName: repo.name,
+                    password: biometricsResult.value!,
+                    isBiometricsAvailable: true,
+                    usesBiometrics: true);
 
-              return;
+                return;
+              }
             }
 
             final password = await _validateManualPassword(parentContext,
                 repositories: repos,
                 databaseId: repo.databaseId,
-                repositoryName: repo.name);
+                repositoryName: repo.name,
+                isBiometricsAvailable: isBiometricsAvailable);
 
             if (password == null) return;
 
@@ -138,6 +146,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
                 databaseId: repo.databaseId,
                 repositoryName: repo.name,
                 password: password,
+                isBiometricsAvailable: isBiometricsAvailable,
                 usesBiometrics: false);
           });
 
@@ -158,7 +167,8 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   Future<String?> _validateManualPassword(BuildContext context,
       {required ReposCubit repositories,
       required String databaseId,
-      required String repositoryName}) async {
+      required String repositoryName,
+      required bool isBiometricsAvailable}) async {
     final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
@@ -167,7 +177,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
                 context: context,
                 databaseId: databaseId,
                 repositoryName: repositoryName,
-                useBiometrics: false,
+                isBiometricsAvailable: isBiometricsAvailable,
                 isPasswordValidation: true,
                 unlockRepositoryCallback: _unlockRepository)));
 
@@ -193,6 +203,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       required String databaseId,
       required String repositoryName,
       required String password,
+      required bool isBiometricsAvailable,
       required bool usesBiometrics}) async {
     await Navigator.push(
         context,
@@ -202,8 +213,8 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               repositoryName: repositoryName,
               repositories: repositories,
               password: password,
-              hasBiometrics: usesBiometrics,
-              validateManualPasswordCallback: _validateManualPassword),
+              isBiometricsAvailable: isBiometricsAvailable,
+              usesBiometrics: usesBiometrics),
         ));
   }
 

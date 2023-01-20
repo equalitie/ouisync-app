@@ -13,6 +13,7 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({
     required this.settings,
     required this.reposCubit,
+    required this.isBiometricsAvailable,
     required this.powerControl,
     required this.onShareRepository,
     required this.panicCounter,
@@ -21,6 +22,7 @@ class SettingsPage extends StatelessWidget {
 
   final Settings settings;
   final ReposCubit reposCubit;
+  final bool isBiometricsAvailable;
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
   final StateMonitorIntValue panicCounter;
@@ -55,6 +57,7 @@ class SettingsPage extends StatelessWidget {
               sections: [
                 RepositorySection(
                   repos: reposCubit,
+                  isBiometricsAvailable: isBiometricsAvailable,
                   onShareRepository: onShareRepository,
                 ),
                 NetworkSection(natDetection),

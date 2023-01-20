@@ -15,10 +15,12 @@ typedef UnlockRepoFunction = Future<void> Function(
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar(
       {required this.reposCubit,
+      required this.checkForBiometricsCallback,
       required this.shareRepositoryOnTap,
       required this.unlockRepositoryOnTap});
 
   final ReposCubit reposCubit;
+  final CheckForBiometricsFunction checkForBiometricsCallback;
   final void Function(RepoCubit) shareRepositoryOnTap;
   final UnlockRepoFunction unlockRepositoryOnTap;
 
@@ -40,6 +42,7 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
             Expanded(
               child: _Picker(
                 reposCubit: reposCubit,
+                checkForBiometricsCallback: checkForBiometricsCallback,
                 shareRepositoryOnTap: shareRepositoryOnTap,
                 unlockRepositoryOnTap: unlockRepositoryOnTap,
                 borderColor: Colors.white,
@@ -73,12 +76,14 @@ class _Picker extends StatelessWidget {
 
   const _Picker({
     required this.reposCubit,
+    required this.checkForBiometricsCallback,
     required this.shareRepositoryOnTap,
     required this.unlockRepositoryOnTap,
     required this.borderColor,
   });
 
   final ReposCubit reposCubit;
+  final CheckForBiometricsFunction checkForBiometricsCallback;
   final void Function(RepoCubit) shareRepositoryOnTap;
   final UnlockRepoFunction unlockRepositoryOnTap;
   final Color borderColor;
@@ -184,19 +189,24 @@ class _Picker extends StatelessWidget {
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           builder: (context) {
-            return _List(
-                reposCubit, shareRepositoryOnTap, unlockRepositoryOnTap);
+            return _List(reposCubit, checkForBiometricsCallback,
+                shareRepositoryOnTap, unlockRepositoryOnTap);
           });
 }
 
 class _List extends StatelessWidget with OuiSyncAppLogger {
-  _List(ReposCubit repositories, void Function(RepoCubit) shareRepositoryOnTap,
+  _List(
+      ReposCubit repositories,
+      CheckForBiometricsFunction checkForBiometricsCallback,
+      void Function(RepoCubit) shareRepositoryOnTap,
       UnlockRepoFunction unlockRepositoryOnTap)
       : _repositories = repositories,
+        _checkForBiometricsCallback = checkForBiometricsCallback,
         _shareRepositoryOnTap = shareRepositoryOnTap,
         _unlockRepositoryOnTap = unlockRepositoryOnTap;
 
   final ReposCubit _repositories;
+  final CheckForBiometricsFunction _checkForBiometricsCallback;
   final void Function(RepoCubit) _shareRepositoryOnTap;
   final UnlockRepoFunction _unlockRepositoryOnTap;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
@@ -268,7 +278,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                       icon: Icons.add,
                       iconSize: Dimensions.sizeIconSmall,
                       iconColor: Constants.primaryColor(context),
-                      onTap: () => createRepoDialog(context),
+                      onTap: () async => await createRepoDialog(context),
                     ),
                     Fields.paddedActionText(
                         S.current.iconAddExistingRepository.toUpperCase(),
@@ -287,7 +297,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
                       if (shareLink == null) return;
 
-                      addRepoWithTokenDialog(context, shareLink: shareLink);
+                      await addRepoWithTokenDialog(context,
+                          shareLink: shareLink);
                     }),
                   ]));
         },
@@ -469,13 +480,18 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     );
   }
 
-  void createRepoDialog(BuildContext context) async {
+  Future<void> createRepoDialog(BuildContext context) async {
+    final isBiometricsAvailable =
+        await _isBiometricsAvailable(context) ?? false;
     final newRepo = await showDialog<String>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => ActionsDialog(
               title: S.current.titleCreateRepository,
-              body: RepositoryCreation(context: context, cubit: _repositories),
+              body: RepositoryCreation(
+                  context: context,
+                  cubit: _repositories,
+                  isBiometricsAvailable: isBiometricsAvailable),
             ));
 
     if (newRepo?.isEmpty ?? true) return;
@@ -483,8 +499,10 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     await updateSettingsAndPop(context, newRepo!);
   }
 
-  void addRepoWithTokenDialog(BuildContext context,
+  Future<void> addRepoWithTokenDialog(BuildContext context,
       {required String shareLink}) async {
+    final isBiometricsAvailable =
+        await _isBiometricsAvailable(context) ?? false;
     final addedRepo = await showDialog(
         context: context,
         barrierDismissible: false,
@@ -493,12 +511,17 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             body: RepositoryCreation(
                 context: context,
                 cubit: _repositories,
-                initialTokenValue: shareLink)));
+                initialTokenValue: shareLink,
+                isBiometricsAvailable: isBiometricsAvailable)));
 
     if (addedRepo?.isEmpty ?? true) return;
 
     await updateSettingsAndPop(context, addedRepo);
   }
+
+  Future<bool?> _isBiometricsAvailable(BuildContext context) async =>
+      Dialogs.executeFutureWithLoadingDialog(context,
+          f: _checkForBiometricsCallback());
 
   Future<void> updateSettingsAndPop(
       BuildContext context, String repositoryName) async {
