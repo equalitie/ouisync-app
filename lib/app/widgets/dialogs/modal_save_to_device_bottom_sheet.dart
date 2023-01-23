@@ -297,7 +297,9 @@ class _PickLocationAndroidState extends State<PickLocationAndroid> {
     if (path.isEmpty) return;
 
     setState(() {
-      drive.trySetDefaultDir(path);
+      if (drive.trySetDefaultDir(path)) {
+        _onDestinationSelected(drive.defaultDir().path);
+      }
     });
   }
 
