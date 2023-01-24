@@ -200,9 +200,6 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
     return null;
   }
 
-  String _formattPassword(String? password, {bool mask = true}) =>
-      (mask ? "*" * (password ?? '').length : password) ?? '';
-
   Widget _generatePasswordButton() =>
       Row(mainAxisAlignment: MainAxisAlignment.end, children: [
         TextButton.icon(
