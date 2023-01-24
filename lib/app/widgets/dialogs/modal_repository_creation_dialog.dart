@@ -52,11 +52,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   bool _obscurePassword = true;
   bool _obscureRetypePassword = true;
 
-  bool _showPasswordInput = false;
-  bool _showRetypePasswordInput = false;
-
   bool _isBlindReplica = false;
-  bool _generatePassword = true;
 
   bool _isBiometricsAvailable = false;
   bool _secureWithBiometrics = false;
@@ -78,14 +74,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     setState(() => _isBlindReplica =
         _shareToken == null ? false : _shareToken!.mode == AccessMode.blind);
 
-    _setupBiometrics(widget.isBiometricsAvailable).then((_) {
-      _configureInputs(_generatePassword, _secureWithBiometrics);
-
-      final showWarning = _isBiometricsAvailable ? !_generatePassword : true;
-
-      setState(() => _showSavePasswordWarning = showWarning);
-    });
-
+    if (!_isBlindReplica) {
+      _setupBiometrics(widget.isBiometricsAvailable);
+    }
     _repositoryNameFocus.requestFocus();
     _addListeners();
 
@@ -154,6 +145,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     setState(() {
       _isBiometricsAvailable = isBiometricsAvailable;
       _secureWithBiometrics = isBiometricsAvailable;
+
+      _showSavePasswordWarning = !isBiometricsAvailable;
     });
   }
 
@@ -277,63 +270,94 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           textOverflow: TextOverflow.ellipsis));
 
   List<Widget> _passwordSection() =>
-      [_passwordInputs(), _generatePasswordSwitch()];
+      [_passwordInputs(), _generatePasswordButton()];
 
   Widget _passwordInputs() => Container(
           child: Column(children: [
-        Visibility(
-            visible: _showPasswordInput,
-            child: Row(children: [
-              Expanded(
-                  child: Fields.formTextField(
-                      key: _passwordInputKey,
-                      context: context,
-                      textEditingController: _passwordController,
-                      obscureText: _obscurePassword,
-                      label: S.current.labelPassword,
-                      subffixIcon: Fields.actionIcon(
-                          Icon(
-                              _obscurePassword
-                                  ? Constants.iconVisibilityOn
-                                  : Constants.iconVisibilityOff,
-                              size: Dimensions.sizeIconSmall), onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      }),
-                      hint: S.current.messageRepositoryPassword,
-                      onSaved: (_) {},
-                      validator: validateNoEmpty(
-                          Strings.messageErrorRepositoryPasswordValidation),
-                      autovalidateMode: AutovalidateMode.disabled,
-                      focusNode: _passwordFocus))
-            ])),
-        Visibility(
-            visible: _showRetypePasswordInput,
-            child: Row(children: [
-              Expanded(
-                  child: Fields.formTextField(
-                      key: _retypePasswordInputKey,
-                      context: context,
-                      textEditingController: _retypedPasswordController,
-                      obscureText: _obscureRetypePassword,
-                      label: S.current.labelRetypePassword,
-                      subffixIcon: Fields.actionIcon(
-                          Icon(
-                              _obscureRetypePassword
-                                  ? Constants.iconVisibilityOn
-                                  : Constants.iconVisibilityOff,
-                              size: Dimensions.sizeIconSmall), onPressed: () {
-                        setState(() =>
-                            _obscureRetypePassword = !_obscureRetypePassword);
-                      }),
-                      hint: S.current.messageRepositoryPassword,
-                      onSaved: (_) {},
-                      validator: (retypedPassword) => retypedPasswordValidator(
-                            password: _passwordController.text,
-                            retypedPassword: retypedPassword,
-                          ),
-                      autovalidateMode: AutovalidateMode.disabled))
-            ]))
+        Row(children: [
+          Expanded(
+              child: Fields.formTextField(
+                  key: _passwordInputKey,
+                  context: context,
+                  textEditingController: _passwordController,
+                  obscureText: _obscurePassword,
+                  label: S.current.labelPassword,
+                  subffixIcon: _passwordActions(),
+                  hint: S.current.messageRepositoryPassword,
+                  onSaved: (_) {},
+                  validator: validateNoEmpty(
+                      Strings.messageErrorRepositoryPasswordValidation),
+                  autovalidateMode: AutovalidateMode.disabled,
+                  focusNode: _passwordFocus))
+        ]),
+        Row(children: [
+          Expanded(
+              child: Fields.formTextField(
+                  key: _retypePasswordInputKey,
+                  context: context,
+                  textEditingController: _retypedPasswordController,
+                  obscureText: _obscureRetypePassword,
+                  label: S.current.labelRetypePassword,
+                  subffixIcon: _retypePasswordActions(),
+                  hint: S.current.messageRepositoryPassword,
+                  onSaved: (_) {},
+                  validator: (retypedPassword) => retypedPasswordValidator(
+                        password: _passwordController.text,
+                        retypedPassword: retypedPassword,
+                      ),
+                  autovalidateMode: AutovalidateMode.disabled))
+        ])
       ]));
+
+  Widget _passwordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+            icon: _obscurePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final password = _passwordController.text;
+              if (password.isEmpty) return;
+
+              await copyStringToClipboard(password);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
+
+  Widget _retypePasswordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () => setState(
+                () => _obscureRetypePassword = !_obscureRetypePassword),
+            icon: _obscureRetypePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final retypedPassword = _retypedPasswordController.text;
+              if (retypedPassword.isEmpty) return;
+
+              await copyStringToClipboard(retypedPassword);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
 
   String? retypedPasswordValidator(
       {required String password, required String? retypedPassword}) {
@@ -344,18 +368,18 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     return null;
   }
 
-  Widget _generatePasswordSwitch() => Container(
-      child: SwitchListTile.adaptive(
-          value: _generatePassword,
-          title:
-              Text(S.current.messageGeneratePassword, textAlign: TextAlign.end),
-          onChanged: (generatePassword) {
-            setState(() => _generatePassword = generatePassword);
+  Widget _generatePasswordButton() =>
+      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        TextButton.icon(
+            onPressed: () {
+              final autoPassword = _generateRandomPassword();
 
-            _configureInputs(_generatePassword, _secureWithBiometrics);
-          },
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact));
+              _passwordController.text = autoPassword;
+              _retypedPasswordController.text = autoPassword;
+            },
+            icon: const Icon(Icons.casino_outlined),
+            label: Text(S.current.messageGeneratePassword))
+      ]);
 
   List<Widget> _biometricsSection() => [_useBiometricsSwitch()];
 
@@ -365,12 +389,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           title: Text(S.current.messageSecureUsingBiometrics,
               textAlign: TextAlign.end),
           onChanged: (enableBiometrics) {
-            setState(() => _secureWithBiometrics = enableBiometrics);
+            setState(() {
+              _secureWithBiometrics = enableBiometrics;
 
-            _configureInputs(_generatePassword, _secureWithBiometrics,
-                preservePassword: true);
-
-            setState(() => _showSavePasswordWarning = !enableBiometrics);
+              _showSavePasswordWarning = !enableBiometrics;
+            });
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
@@ -383,37 +406,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
 
-  void _configureInputs(bool generatePassword, bool secureWithBiometrics,
-      {bool preservePassword = false}) {
-    setState(() {
-      _showPasswordInput = !(generatePassword && secureWithBiometrics);
-      _showRetypePasswordInput = !generatePassword && _showPasswordInput;
-
-      // If for some reason the user decides to keep the autogenerated password,
-      // but not to use biometrics, we make the password visible to signal the user
-      // that the password need to be saved manually -just as it is stated in the
-      // message explaning this, made visible at the same time.
-      if (generatePassword && !secureWithBiometrics) {
-        _obscurePassword = false;
-      }
-    });
-
-    if (!preservePassword) {
-      // Generate password or clean controllers if manual was selected by the user
-      final password = _generatePassword ? _generateRandomPassword() : '';
-
-      _passwordController.text = password;
-      _retypedPasswordController.text = password;
-    }
-
-    // Set the fos and scroll to make the focused input visible
-    generatePassword
-        ? _scrollToVisible(_repositoryNameFocus)
-        : _nameController.text.isEmpty
-            ? _scrollToVisible(_repositoryNameFocus)
-            : _passwordFocus.requestFocus();
-  }
-
   String _generateRandomPassword() {
     final password = RandomPasswordGenerator();
     final autogeneratedPassword = password.randomPassword(
@@ -425,13 +417,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     return autogeneratedPassword;
   }
-
-  void _scrollToVisible(FocusNode focusNode) => WidgetsBinding.instance
-      .addPostFrameCallback((_) => Scrollable.ensureVisible(
-            focusNode.context!,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeIn,
-          ));
 
   List<Widget> _actions(context) => [
         NegativeButton(
@@ -459,13 +444,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     // A blind replica has no password
     if (!_isBlindReplica) {
-      // We created the password, no need for checking equality
-      if (!_generatePassword) {
-        if (!(isPasswordOk && isRetypePasswordOk)) return;
+      if (!(isPasswordOk && isRetypePasswordOk)) return;
 
-        _passwordInputKey.currentState!.save();
-        _retypePasswordInputKey.currentState!.save();
-      }
+      _passwordInputKey.currentState!.save();
+      _retypePasswordInputKey.currentState!.save();
     }
 
     final info = RepoMetaInfo.fromDirAndName(

@@ -688,12 +688,17 @@ class _MainPageState extends State<MainPage>
     await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleCreateRepository,
-            body: RepositoryCreation(
-                context: context,
-                cubit: _repositories,
-                isBiometricsAvailable: hasBiometrics)));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                      title: S.current.titleCreateRepository,
+                      body: RepositoryCreation(
+                          context: context,
+                          cubit: _repositories,
+                          isBiometricsAvailable: hasBiometrics)));
+            }))));
   }
 
   Future<void> addRepoWithTokenDialog({String? initialTokenValue}) async {
@@ -737,13 +742,18 @@ class _MainPageState extends State<MainPage>
     await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleAddRepository,
-            body: RepositoryCreation(
-                context: context,
-                cubit: _repositories,
-                initialTokenValue: initialTokenValue,
-                isBiometricsAvailable: isBiometricsAvailable)));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                      title: S.current.titleAddRepository,
+                      body: RepositoryCreation(
+                          context: context,
+                          cubit: _repositories,
+                          initialTokenValue: initialTokenValue,
+                          isBiometricsAvailable: isBiometricsAvailable)));
+            }))));
   }
 
   Future<void> _unlockRepositoryCallback(
@@ -777,16 +787,21 @@ class _MainPageState extends State<MainPage>
 
     final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
         context: context,
-        builder: (BuildContext context) => ActionsDialog(
-              title: S.current.messageUnlockRepository,
-              body: UnlockRepository(
-                  context: context,
-                  databaseId: databaseId,
-                  repositoryName: repositoryName,
-                  isBiometricsAvailable: hasBiometrics,
-                  isPasswordValidation: false,
-                  unlockRepositoryCallback: _unlockRepository),
-            ));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                    title: S.current.messageUnlockRepository,
+                    body: UnlockRepository(
+                        context: context,
+                        databaseId: databaseId,
+                        repositoryName: repositoryName,
+                        isBiometricsAvailable: hasBiometrics,
+                        isPasswordValidation: false,
+                        unlockRepositoryCallback: _unlockRepository),
+                  ));
+            }))));
 
     if (unlockRepoResponse == null) return;
 

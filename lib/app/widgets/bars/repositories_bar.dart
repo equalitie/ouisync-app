@@ -486,13 +486,18 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     final newRepo = await showDialog<String>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-              title: S.current.titleCreateRepository,
-              body: RepositoryCreation(
-                  context: context,
-                  cubit: _repositories,
-                  isBiometricsAvailable: isBiometricsAvailable),
-            ));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                    title: S.current.titleCreateRepository,
+                    body: RepositoryCreation(
+                        context: context,
+                        cubit: _repositories,
+                        isBiometricsAvailable: isBiometricsAvailable),
+                  ));
+            }))));
 
     if (newRepo?.isEmpty ?? true) return;
 
@@ -506,13 +511,18 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
     final addedRepo = await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleAddRepository,
-            body: RepositoryCreation(
-                context: context,
-                cubit: _repositories,
-                initialTokenValue: shareLink,
-                isBiometricsAvailable: isBiometricsAvailable)));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                      title: S.current.titleAddRepository,
+                      body: RepositoryCreation(
+                          context: context,
+                          cubit: _repositories,
+                          initialTokenValue: shareLink,
+                          isBiometricsAvailable: isBiometricsAvailable)));
+            }))));
 
     if (addedRepo?.isEmpty ?? true) return;
 
