@@ -38,8 +38,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   String? _newPassword;
   bool _previewNewPassword = false;
 
-  bool _isNewPasswordGenerated = false;
-
   bool _isBiometricsAvailable = false;
   bool _secureWithBiometricsState = false;
   bool _showRemoveBiometricsWarning = false;
@@ -195,6 +193,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     if (_password == null) return;
 
+    final usesBiometrics =
+        _isBiometricsAvailable ? _secureWithBiometricsState : false;
+
     final setPasswordResult = await showDialog<SetPasswordResult?>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
@@ -205,7 +206,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 repositoryName: widget.repositoryName,
                 currentPassword: _password!,
                 newPassword: _newPassword,
-                generated: _isNewPasswordGenerated)));
+                usesBiometrics: usesBiometrics)));
 
     if (setPasswordResult == null) return;
 
@@ -213,7 +214,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     setState(() {
       _newPassword = setPasswordResult.newPassword;
-      _isNewPasswordGenerated = setPasswordResult.generated;
 
       _previewNewPassword = false;
       _isUnsavedNewPassword = true;

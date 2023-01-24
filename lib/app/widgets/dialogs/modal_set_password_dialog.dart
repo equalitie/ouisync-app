@@ -14,7 +14,7 @@ class SetPassword extends StatefulWidget {
       required this.repositoryName,
       required this.currentPassword,
       required this.newPassword,
-      required this.generated,
+      required this.usesBiometrics,
       Key? key})
       : super(key: key);
 
@@ -23,7 +23,7 @@ class SetPassword extends StatefulWidget {
   final String repositoryName;
   final String currentPassword;
   final String? newPassword;
-  final bool generated;
+  final bool usesBiometrics;
 
   @override
   State<SetPassword> createState() => _SetPasswordState();
@@ -45,33 +45,35 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
   bool _obscurePassword = true;
   bool _obscureRetypePassword = true;
 
-  bool _generatePassword = true;
-  String? _password;
-  bool _previewPassword = false;
-
   bool _samePassword = false;
+  bool _showSavePasswordWarning = false;
 
   @override
   void initState() {
-    widget.newPassword?.isEmpty ?? true
-        ? _configureInputs(generatePassword: true)
-        : _initStateValues(widget.newPassword!, widget.generated);
-
     super.initState();
+
+    setState((() => _showSavePasswordWarning = !widget.usesBiometrics));
+
+    if (widget.newPassword == null) return;
+
+    if (widget.newPassword!.isNotEmpty) {
+      _initStateValues(widget.newPassword!);
+    }
   }
 
-  void _initStateValues(String password, bool generated) {
+  void _initStateValues(String password) {
     setState(() {
-      _generatePassword = generated;
-
       _setPassword(password);
 
-      if (!generated) {
-        _passwordController.text.isEmpty
-            ? _scrollToVisible(_passwordFocus)
-            : _retypePasswordFocus.requestFocus();
-      }
+      _passwordController.text.isEmpty
+          ? _scrollToVisible(_passwordFocus)
+          : _retypePasswordFocus.requestFocus();
     });
+  }
+
+  void _setPassword(String newPassword) {
+    _passwordController.text = newPassword;
+    _retypedPasswordController.text = newPassword;
   }
 
   @override
@@ -94,55 +96,14 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                 flex: 0, fontWeight: FontWeight.w400),
             Dimensions.spacingVerticalDouble,
             ..._passwordSection(),
+            _manualPasswordWarning(),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  List<Widget> _passwordSection() => [
-        _passwordLabel(),
-        _passwordInputs(),
-        _generatePasswordSwitch(),
-        _samePasswordWarning()
-      ];
+  List<Widget> _passwordSection() =>
+      [_passwordInputs(), _samePasswordWarning(), _generatePasswordButton()];
 
-  Widget _passwordLabel() => Visibility(
-      visible: _generatePassword,
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Expanded(
-            flex: 1,
-            child: Fields.autosizeText(
-                _formattPassword(_password, mask: !_previewPassword))),
-        Expanded(
-            flex: 0,
-            child: IconButton(
-                onPressed: _password?.isNotEmpty ?? false
-                    ? () => setState(() => _previewPassword = !_previewPassword)
-                    : null,
-                icon: _previewPassword
-                    ? const Icon(Constants.iconVisibilityOff)
-                    : const Icon(Constants.iconVisibilityOn),
-                padding: EdgeInsets.zero,
-                visualDensity: VisualDensity.compact)),
-        Expanded(
-            flex: 0,
-            child: IconButton(
-                onPressed: _password?.isNotEmpty ?? false
-                    ? () async {
-                        if (_password == null) return;
-
-                        await copyStringToClipboard(_password!);
-                        showSnackBar(context,
-                            message: S.current.messagePasswordCopiedClipboard);
-                      }
-                    : null,
-                icon: const Icon(Icons.copy_rounded),
-                padding: EdgeInsets.zero,
-                visualDensity: VisualDensity.compact))
-      ]));
-
-  Widget _passwordInputs() => Visibility(
-      visible: !_generatePassword,
-      maintainState: true,
-      child: Container(
+  Widget _passwordInputs() => Container(
           child: Column(children: [
         Row(children: [
           Expanded(
@@ -152,14 +113,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   textEditingController: _passwordController,
                   obscureText: _obscurePassword,
                   label: S.current.labelPassword,
-                  subffixIcon: Fields.actionIcon(
-                      Icon(
-                          _obscurePassword
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall), onPressed: () {
-                    setState(() => _obscurePassword = !_obscurePassword);
-                  }),
+                  subffixIcon: _passwordActions(),
                   hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: validateNoEmpty(
@@ -175,15 +129,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   textEditingController: _retypedPasswordController,
                   obscureText: _obscureRetypePassword,
                   label: S.current.labelRetypePassword,
-                  subffixIcon: Fields.actionIcon(
-                      Icon(
-                          _obscureRetypePassword
-                              ? Constants.iconVisibilityOn
-                              : Constants.iconVisibilityOff,
-                          size: Dimensions.sizeIconSmall), onPressed: () {
-                    setState(
-                        () => _obscureRetypePassword = !_obscureRetypePassword);
-                  }),
+                  subffixIcon: _retypePasswordActions(),
                   hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: (retypedPassword) => retypedPasswordValidator(
@@ -193,7 +139,57 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: _retypePasswordFocus))
         ])
-      ])));
+      ]));
+
+  Widget _passwordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+            icon: _obscurePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final password = _passwordController.text;
+              if (password.isEmpty) return;
+
+              await copyStringToClipboard(password);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
+
+  Widget _retypePasswordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () => setState(
+                () => _obscureRetypePassword = !_obscureRetypePassword),
+            icon: _obscureRetypePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final retypedPassword = _retypedPasswordController.text;
+              if (retypedPassword.isEmpty) return;
+
+              await copyStringToClipboard(retypedPassword);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
 
   String? retypedPasswordValidator(
       {required String password, required String? retypedPassword}) {
@@ -207,38 +203,18 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
   String _formattPassword(String? password, {bool mask = true}) =>
       (mask ? "*" * (password ?? '').length : password) ?? '';
 
-  Widget _generatePasswordSwitch() => Container(
-      child: SwitchListTile.adaptive(
-          value: _generatePassword,
-          title:
-              Text(S.current.messageGeneratePassword, textAlign: TextAlign.end),
-          onChanged: (generatePassword) {
-            setState(() {
-              _generatePassword = generatePassword;
+  Widget _generatePasswordButton() =>
+      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        TextButton.icon(
+            onPressed: () {
+              final autoPassword = _generateRandomPassword();
 
-              if (!_generatePassword) {
-                _passwordFocus.requestFocus();
-              }
-            });
-
-            _configureInputs(generatePassword: _generatePassword);
-          },
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact));
-
-  void _configureInputs({required bool generatePassword}) {
-    String newPassword = '';
-    if (generatePassword) {
-      newPassword = _generatePassword ? _generateRandomPassword() : '';
-      _createButtonFocus.requestFocus();
-    }
-
-    _setPassword(newPassword);
-
-    _passwordController.text.isEmpty
-        ? _scrollToVisible(_passwordFocus)
-        : _retypePasswordFocus.requestFocus();
-  }
+              _passwordController.text = autoPassword;
+              _retypedPasswordController.text = autoPassword;
+            },
+            icon: const Icon(Icons.casino_outlined),
+            label: Text(S.current.messageGeneratePassword))
+      ]);
 
   String _generateRandomPassword() {
     final password = RandomPasswordGenerator();
@@ -252,13 +228,6 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
     return autogeneratedPassword;
   }
 
-  void _setPassword(String newPassword) {
-    setState(() => _password = newPassword);
-
-    _passwordController.text = newPassword;
-    _retypedPasswordController.text = newPassword;
-  }
-
   void _scrollToVisible(FocusNode focusNode) => WidgetsBinding.instance
       .addPostFrameCallback((_) => Scrollable.ensureVisible(
             focusNode.context!,
@@ -270,6 +239,14 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
       visible: _samePassword,
       child: Fields.autosizeText(
           S.current.messageErrorNewPasswordSameOldPassword,
+          color: Colors.red,
+          maxLines: 10,
+          softWrap: true,
+          textOverflow: TextOverflow.ellipsis));
+
+  Widget _manualPasswordWarning() => Visibility(
+      visible: _showSavePasswordWarning,
+      child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
           color: Colors.red,
           maxLines: 10,
           softWrap: true,
@@ -294,12 +271,10 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
     final isRetypePasswordOk =
         _retypePasswordInputKey.currentState?.validate() ?? false;
 
-    if (!_generatePassword) {
-      if (!(isPasswordOk && isRetypePasswordOk)) return;
+    if (!(isPasswordOk && isRetypePasswordOk)) return;
 
-      _passwordInputKey.currentState!.save();
-      _retypePasswordInputKey.currentState!.save();
-    }
+    _passwordInputKey.currentState!.save();
+    _retypePasswordInputKey.currentState!.save();
 
     final isSamePassword =
         widget.currentPassword == _retypedPasswordController.text;
@@ -308,10 +283,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
     if (_samePassword) return;
 
     final result = SetPasswordResult(
-        repositoryName: repositoryName,
-        newPassword: newPassword,
-        generated: _generatePassword,
-        message: '');
+        repositoryName: repositoryName, newPassword: newPassword, message: '');
     Navigator.of(widget.context).pop(result);
   }
 
@@ -330,11 +302,9 @@ class SetPasswordResult {
   SetPasswordResult(
       {required this.repositoryName,
       required this.newPassword,
-      required this.generated,
       required this.message});
 
   final String repositoryName;
   final String newPassword;
-  final bool generated;
   final String message;
 }
