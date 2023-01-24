@@ -291,14 +291,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                       textEditingController: _passwordController,
                       obscureText: _obscurePassword,
                       label: S.current.labelPassword,
-                      subffixIcon: Fields.actionIcon(
-                          Icon(
-                              _obscurePassword
-                                  ? Constants.iconVisibilityOn
-                                  : Constants.iconVisibilityOff,
-                              size: Dimensions.sizeIconSmall), onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      }),
+                      subffixIcon: _passwordActions(),
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
                       validator: validateNoEmpty(
@@ -316,15 +309,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                       textEditingController: _retypedPasswordController,
                       obscureText: _obscureRetypePassword,
                       label: S.current.labelRetypePassword,
-                      subffixIcon: Fields.actionIcon(
-                          Icon(
-                              _obscureRetypePassword
-                                  ? Constants.iconVisibilityOn
-                                  : Constants.iconVisibilityOff,
-                              size: Dimensions.sizeIconSmall), onPressed: () {
-                        setState(() =>
-                            _obscureRetypePassword = !_obscureRetypePassword);
-                      }),
+                      subffixIcon: _retypePasswordActions(),
                       hint: S.current.messageRepositoryPassword,
                       onSaved: (_) {},
                       validator: (retypedPassword) => retypedPasswordValidator(
@@ -334,6 +319,56 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                       autovalidateMode: AutovalidateMode.disabled))
             ]))
       ]));
+
+  Widget _passwordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+            icon: _obscurePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final password = _passwordController.text;
+              if (password.isEmpty) return;
+
+              await copyStringToClipboard(password);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
+
+  Widget _retypePasswordActions() => Wrap(children: [
+        IconButton(
+            onPressed: () => setState(
+                () => _obscureRetypePassword = !_obscureRetypePassword),
+            icon: _obscureRetypePassword
+                ? const Icon(Constants.iconVisibilityOff)
+                : const Icon(Constants.iconVisibilityOn),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black),
+        IconButton(
+            onPressed: () async {
+              final retypedPassword = _retypedPasswordController.text;
+              if (retypedPassword.isEmpty) return;
+
+              await copyStringToClipboard(retypedPassword);
+              showSnackBar(context,
+                  message: S.current.messagePasswordCopiedClipboard);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: Colors.black)
+      ]);
 
   String? retypedPasswordValidator(
       {required String password, required String? retypedPassword}) {
