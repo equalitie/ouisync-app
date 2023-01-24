@@ -74,8 +74,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     setState(() => _isBlindReplica =
         _shareToken == null ? false : _shareToken!.mode == AccessMode.blind);
 
-    _setupBiometrics(widget.isBiometricsAvailable);
-
+    if (!_isBlindReplica) {
+      _setupBiometrics(widget.isBiometricsAvailable);
+    }
     _repositoryNameFocus.requestFocus();
     _addListeners();
 
