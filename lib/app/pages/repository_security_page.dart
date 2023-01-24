@@ -198,15 +198,20 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     final setPasswordResult = await showDialog<SetPasswordResult?>(
         context: context,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleSetPasswordFor,
-            body: SetPassword(
-                context: context,
-                cubit: widget.repositories,
-                repositoryName: widget.repositoryName,
-                currentPassword: _password!,
-                newPassword: _newPassword,
-                usesBiometrics: usesBiometrics)));
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                      title: S.current.titleSetPasswordFor,
+                      body: SetPassword(
+                          context: context,
+                          cubit: widget.repositories,
+                          repositoryName: widget.repositoryName,
+                          currentPassword: _password!,
+                          newPassword: _newPassword,
+                          usesBiometrics: usesBiometrics)));
+            }))));
 
     if (setPasswordResult == null) return;
 
