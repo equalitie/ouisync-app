@@ -15,6 +15,7 @@ class PlatformBackgroundManagerMobile
       notificationText: S.current.messageBackgroundNotificationAndroid,
       notificationIcon: const AndroidResource(name: 'notification_icon'),
       notificationImportance: AndroidNotificationImportance.Default,
+      showBadge: false,
       enableWifiLock: true,
     );
 
@@ -36,9 +37,25 @@ class PlatformBackgroundManagerMobile
           });
     }
 
-    hasPermissions = await FlutterBackground.initialize(androidConfig: config);
+    // On recent Android versions (13), the first time the plugin is initialized,
+    // it fails -even after the user granted permissions. Then on the second run
+    // it works as expected.
+    //
+    // There is curently an issue referencing this in the plugin's repository,
+    // and the workaround for it:
+    // https://github.com/JulianAssmann/flutter_background/issues/56#issuecomment-1218307725
+    final initializationOk =
+        await FlutterBackground.initialize(androidConfig: config)
+            .then((initialized) async {
+      final permissionsOk = await FlutterBackground.hasPermissions;
+      if (!initialized && permissionsOk) {
+        return await FlutterBackground.initialize(androidConfig: config);
+      }
 
-    if (hasPermissions) {
+      return initialized;
+    });
+
+    if (initializationOk) {
       final backgroundExecution =
           await FlutterBackground.enableBackgroundExecution();
 
