@@ -418,7 +418,7 @@ packages:
       name: flutter_background
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.2.0"
   flutter_bloc:
     dependency: "direct main"
     description:
