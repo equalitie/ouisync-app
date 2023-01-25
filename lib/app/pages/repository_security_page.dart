@@ -39,6 +39,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   bool _previewNewPassword = false;
 
   bool _isBiometricsAvailable = false;
+  bool _usesBiometrics = false;
   bool _secureWithBiometricsState = false;
   bool _showRemoveBiometricsWarning = false;
 
@@ -54,6 +55,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       _password = widget.password;
 
       _isBiometricsAvailable = widget.isBiometricsAvailable;
+      _usesBiometrics = widget.usesBiometrics;
       _secureWithBiometricsState = widget.usesBiometrics;
 
       _showRemoveBiometricsWarning = false;
@@ -267,10 +269,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               setState(() {
                 _secureWithBiometricsState = useBiometrics;
 
-                _showRemoveBiometricsWarning = !useBiometrics &&
-                    (!useBiometrics && _isBiometricsAvailable);
+                _showRemoveBiometricsWarning =
+                    !useBiometrics && _usesBiometrics;
 
-                _isUnsavedBiometrics = useBiometrics != _isBiometricsAvailable;
+                _isUnsavedBiometrics = useBiometrics != _usesBiometrics;
               });
 
               _updateUnsavedChanges();
@@ -321,6 +323,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       _previewNewPassword = false;
 
                       _isUnsavedNewPassword = false;
+
+                      if (_usesBiometrics && !_isUnsavedBiometrics) {
+                        _isUnsavedBiometrics = true;
+                      }
                     });
 
                     _updateUnsavedChanges();
@@ -342,13 +348,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             ? '${S.current.messageNewPassword}\n'
             : '')
         .trimLeft();
-    final biometricsChunk =
-        (_secureWithBiometricsState != _isBiometricsAvailable
-                ? _secureWithBiometricsState
-                    ? S.current.messageSecureUsingBiometrics
-                    : S.current.messageRemoveBiometrics
-                : '')
-            .trimLeft();
+    final biometricsChunk = (_secureWithBiometricsState != _usesBiometrics
+            ? _secureWithBiometricsState
+                ? S.current.messageSecureUsingBiometrics
+                : S.current.messageRemoveBiometrics
+            : '')
+        .trimLeft();
     final changes = '$passwordChangedChunk$biometricsChunk';
 
     final saveChanges = await Dialogs.alertDialogWithActions(
