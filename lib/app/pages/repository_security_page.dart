@@ -296,52 +296,64 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 onPressed: (() async {
                   final saveChanges = await _confirmSaveChanges();
 
-                  if (saveChanges == null) return;
-
-                  if (!saveChanges) return;
+                  if (saveChanges == null || !saveChanges) return;
 
                   if (_isUnsavedNewPassword) {
                     assert(_newPassword != null, '_newPassword is null');
 
-                    final metaInfo = widget.repositories.currentRepo!.metaInfo;
-                    final changePasswordResult =
-                        await Dialogs.executeFutureWithLoadingDialog(context,
-                            f: widget.repositories.setReadWritePassword(
-                                metaInfo, _newPassword!, null));
+                    final success = await _savePasswordChanges(_newPassword!);
 
-                    if (!changePasswordResult) {
-                      showSnackBar(context,
-                          message: S.current.messageErrorChangingPassword);
-                      return;
+                    if (!success) return;
+
+                    // If the repository was using biometrics originally, we need
+                    // to update the password in the biometric storage.
+                    if (_usesBiometrics && !_isUnsavedBiometrics) {
+                      setState(() => _isUnsavedBiometrics = true);
                     }
-
-                    setState(() {
-                      _password = _newPassword;
-                      _previewPassword = false;
-
-                      _newPassword = null;
-                      _previewNewPassword = false;
-
-                      _isUnsavedNewPassword = false;
-
-                      if (_usesBiometrics && !_isUnsavedBiometrics) {
-                        _isUnsavedBiometrics = true;
-                      }
-                    });
-
-                    _updateUnsavedChanges();
                   }
 
                   if (_isUnsavedBiometrics) {
                     assert(_password != null, '_password is null');
 
-                    _secureWithBiometricsState
-                        ? await _addPasswordToBiometricStorage(
-                            password: _password!)
-                        : await _removeRepoBiometrics();
+                    await _saveBiometricsChanges(_password!);
                   }
                 }))
           ])));
+
+  Future<bool> _savePasswordChanges(String newPassword) async {
+    final metaInfo = widget.repositories.currentRepo!.metaInfo;
+    final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: widget.repositories
+            .setReadWritePassword(metaInfo, newPassword, null));
+
+    if (!changePasswordResult) {
+      showSnackBar(context, message: S.current.messageErrorChangingPassword);
+      return false;
+    }
+
+    setState(() {
+      _password = newPassword;
+      _previewPassword = false;
+
+      _newPassword = null;
+      _previewNewPassword = false;
+
+      _isUnsavedNewPassword = false;
+    });
+
+    _updateUnsavedChanges();
+
+    return true;
+  }
+
+  Future<void> _saveBiometricsChanges(String password) async {
+    _secureWithBiometricsState
+        ? await _addPasswordToBiometricStorage(password: password)
+        : await _removeRepoBiometrics();
+
+    _updateUnsavedChanges();
+  }
 
   Future<bool?> _confirmSaveChanges() async {
     final passwordChangedChunk = ((_newPassword?.isNotEmpty ?? false)
@@ -397,8 +409,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       _previewPassword = false;
       _password = password;
     });
-
-    _updateUnsavedChanges();
   }
 
   Future<void> _removeRepoBiometrics() async {
@@ -425,8 +435,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
       _previewPassword = false;
     });
-
-    _updateUnsavedChanges();
   }
 
   Future<bool?> _removeBiometricsConfirmationDialog() async =>
