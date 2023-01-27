@@ -100,13 +100,12 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       });
 
   Future<void> _unlockRepository(String? password) async {
-    if (password?.isEmpty ?? true) {
+    if (password == null || password.isEmpty) {
       return;
     }
 
-    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: unlockRepositoryCallback(
-            repositoryName: repositoryName, password: password!));
+    final accessMode = await unlockRepositoryCallback(
+        repositoryName: repositoryName, password: password);
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(

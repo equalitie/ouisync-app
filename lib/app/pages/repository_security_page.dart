@@ -12,17 +12,13 @@ import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
-      {required this.repositoryName,
-      required this.databaseId,
-      required this.repo,
+      {required this.repo,
       required this.password,
       required this.shareToken,
       required this.isBiometricsAvailable,
       required this.usesBiometrics,
       super.key});
 
-  final String repositoryName;
-  final String databaseId;
   final RepoCubit repo;
   final String password;
   final ShareToken shareToken;
@@ -116,7 +112,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Widget _repositoryName() => ListTile(
         title: Text(S.current.titleRepositoryName),
-        subtitle: Text(widget.repositoryName),
+        subtitle: Text(widget.repo.name),
       );
 
   List<Widget> _managePassword() => [
@@ -207,7 +203,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       title: S.current.titleSetPasswordFor,
                       body: SetPassword(
                           context: context,
-                          repositoryName: widget.repositoryName,
+                          repositoryName: widget.repo.name,
                           currentPassword: _password,
                           newPassword: _newPassword,
                           usesBiometrics: usesBiometrics)));
@@ -392,7 +388,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
         f: Biometrics.addRepositoryPassword(
-            databaseId: widget.databaseId, password: password));
+            databaseId: widget.repo.databaseId, password: password));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -417,7 +413,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResultDeletePassword =
         await Dialogs.executeFutureWithLoadingDialog(context,
             f: Biometrics.deleteRepositoryPassword(
-                databaseId: widget.databaseId));
+                databaseId: widget.repo.databaseId));
 
     if (biometricsResultDeletePassword.exception != null) {
       loggy.app(biometricsResultDeletePassword.exception);
