@@ -114,6 +114,19 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
+            final repo = repos.currentRepo;
+
+            if (repo == null) {
+              showSnackBar(context, message: S.current.messageNoRepoIsSelected);
+              return;
+            }
+
+            if (repo is! OpenRepoEntry) {
+              showSnackBar(context,
+                  message: S.current.messageRepositoryIsNotOpen);
+              return;
+            }
+
             if (isBiometricsAvailable) {
               final biometricsResult = await _tryGetBiometricPassword(context,
                   databaseId: repo.databaseId);
@@ -122,7 +135,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
 
               if (biometricsResult.value?.isNotEmpty ?? false) {
                 await _pushRepositorySecurityPage(context,
-                    repositories: repos,
+                    repo: repo.cubit,
                     databaseId: repo.databaseId,
                     repositoryName: repo.name,
                     password: biometricsResult.value!,
@@ -142,7 +155,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             if (password == null) return;
 
             await _pushRepositorySecurityPage(parentContext,
-                repositories: repos,
+                repo: repo.cubit,
                 databaseId: repo.databaseId,
                 repositoryName: repo.name,
                 password: password,
@@ -199,7 +212,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       await repos.unlockRepository(repositoryName, password: password);
 
   Future<void> _pushRepositorySecurityPage(BuildContext context,
-      {required ReposCubit repositories,
+      {required RepoCubit repo,
       required String databaseId,
       required String repositoryName,
       required String password,
@@ -211,7 +224,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           builder: (context) => RepositorySecurity(
               databaseId: databaseId,
               repositoryName: repositoryName,
-              repositories: repositories,
+              repo: repo,
               password: password,
               isBiometricsAvailable: isBiometricsAvailable,
               usesBiometrics: usesBiometrics),

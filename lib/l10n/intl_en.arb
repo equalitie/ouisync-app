@@ -120,6 +120,8 @@
   "@labelQRCode": {},
   "labelLockAllRepos": "Lock all",
   "@labelLockAllRepos": {},
+  "messageNoRepoIsSelected": "No repository is selected",
+  "messageRepositoryIsNotOpen": "The repository is not open",
   "messageLoadingDefault": "Loading…",
   "@messageLoadingDefault": {},
   "messageLibraryPanic": "Internal crash detected.",

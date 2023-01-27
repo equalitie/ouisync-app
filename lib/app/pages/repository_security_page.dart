@@ -4,7 +4,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repos.dart';
+import '../cubits/repo.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -13,7 +13,7 @@ class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
       {required this.repositoryName,
       required this.databaseId,
-      required this.repositories,
+      required this.repo,
       required this.password,
       required this.isBiometricsAvailable,
       required this.usesBiometrics,
@@ -21,7 +21,7 @@ class RepositorySecurity extends StatefulWidget {
 
   final String repositoryName;
   final String databaseId;
-  final ReposCubit repositories;
+  final RepoCubit repo;
   final String password;
   final bool isBiometricsAvailable;
   final bool usesBiometrics;
@@ -312,11 +312,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           ])));
 
   Future<bool> _savePasswordChanges(String newPassword) async {
-    final metaInfo = widget.repositories.currentRepo!.metaInfo;
+    final repo = widget.repo;
+    final metaInfo = repo.metaInfo;
+
     final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: widget.repositories
-            .setReadWritePassword(metaInfo, newPassword, null));
+        f: repo.setReadWritePassword(metaInfo, newPassword, null));
 
     if (!changePasswordResult) {
       showSnackBar(context, message: S.current.messageErrorChangingPassword);
