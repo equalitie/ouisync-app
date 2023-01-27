@@ -135,8 +135,8 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               final password = await _tryGetBiometricPassword(context, repo);
 
               if (password != null) {
-                final shareToken = await repo.createShareToken(AccessMode.write,
-                    password: password);
+                final shareToken =
+                    await _loadShareToken(context, repo, password);
 
                 if (shareToken.mode == AccessMode.blind) {
                   showSnackBar(context,
@@ -180,16 +180,15 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
 
   Future<String?> _tryGetBiometricPassword(
       BuildContext context, RepoCubit repo) async {
-    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        f: Biometrics.getRepositoryPassword(databaseId: repo.databaseId));
+    final biometricsResult =
+        await Biometrics.getRepositoryPassword(databaseId: repo.databaseId);
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
       return null;
     }
 
-    return biometricsResult?.value;
+    return biometricsResult.value;
   }
 
   Future<Result<UnlockResult, String?>> _validateManualPassword(
@@ -202,7 +201,8 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
             body: UnlockDialog<UnlockResult>(
                 context: context,
                 repo: repo,
-                unlockCallback: _unlockShareToken)));
+                unlockCallback: (repo, {required String password}) =>
+                    _unlockShareToken(context, repo, password))));
 
     if (result == null) {
       // User cancelled
@@ -216,12 +216,16 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
     return Success(result);
   }
 
-  Future<UnlockResult> _unlockShareToken(RepoCubit repo,
-      {required String password}) async {
-    final token =
-        await repo.createShareToken(AccessMode.write, password: password);
+  Future<UnlockResult> _unlockShareToken(
+      BuildContext context, RepoCubit repo, String password) async {
+    final token = await _loadShareToken(context, repo, password);
     return UnlockResult(password: password, shareToken: token);
   }
+
+  Future<ShareToken> _loadShareToken(
+          BuildContext context, RepoCubit repo, String password) =>
+      Dialogs.executeFutureWithLoadingDialog(context,
+          f: repo.createShareToken(AccessMode.write, password: password));
 
   Future<void> _pushRepositorySecurityPage(BuildContext context,
       {required RepoCubit repo,
