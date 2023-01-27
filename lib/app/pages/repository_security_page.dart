@@ -22,17 +22,17 @@ class RepositorySecurity extends StatefulWidget {
   final String repositoryName;
   final String databaseId;
   final ReposCubit repositories;
-  final String? password;
+  final String password;
   final bool isBiometricsAvailable;
   final bool usesBiometrics;
 
   @override
-  State<RepositorySecurity> createState() => _RepositorySecurityState();
+  State<RepositorySecurity> createState() => _RepositorySecurityState(password);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
-  String? _password;
+  String _password;
   bool _previewPassword = false;
 
   String? _newPassword;
@@ -47,13 +47,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   bool _isUnsavedBiometrics = false;
   bool _hasUnsavedChanges = false;
 
+  _RepositorySecurityState(this._password);
+
   @override
   void initState() {
     super.initState();
 
     setState(() {
-      _password = widget.password;
-
       _isBiometricsAvailable = widget.isBiometricsAvailable;
       _usesBiometrics = widget.usesBiometrics;
       _secureWithBiometricsState = widget.usesBiometrics;
@@ -172,18 +172,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 : const Icon(Constants.iconVisibilityOn),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password?.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty ?? false
                 ? () => setState(() => _previewPassword = !_previewPassword)
                 : null),
         IconButton(
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password?.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty ?? false
                 ? () async {
-                    if (_password == null) return;
-
-                    await copyStringToClipboard(_password!);
+                    await copyStringToClipboard(_password);
                     showSnackBar(context,
                         message: S.current.messagePasswordCopiedClipboard);
                   }
@@ -191,10 +189,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       ]);
 
   Future<void> _getNewPassword() async {
-    assert(_password != null, 'The password is null');
-
-    if (_password == null) return;
-
     final usesBiometrics =
         _isBiometricsAvailable ? _secureWithBiometricsState : false;
 
@@ -210,7 +204,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           context: context,
                           cubit: widget.repositories,
                           repositoryName: widget.repositoryName,
-                          currentPassword: _password!,
+                          currentPassword: _password,
                           newPassword: _newPassword,
                           usesBiometrics: usesBiometrics)));
             }))));
@@ -313,9 +307,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   }
 
                   if (_isUnsavedBiometrics) {
-                    assert(_password != null, '_password is null');
-
-                    await _saveBiometricsChanges(_password!);
+                    await _saveBiometricsChanges(_password);
                   }
                 }))
           ])));
