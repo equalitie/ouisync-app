@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -10,7 +9,6 @@ import '../widgets.dart';
 class SetPassword extends StatefulWidget {
   SetPassword(
       {required this.context,
-      required this.cubit,
       required this.repositoryName,
       required this.currentPassword,
       required this.newPassword,
@@ -19,7 +17,6 @@ class SetPassword extends StatefulWidget {
       : super(key: key);
 
   final BuildContext context;
-  final ReposCubit cubit;
   final String repositoryName;
   final String currentPassword;
   final String? newPassword;
@@ -258,12 +255,11 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
             focusNode: _createButtonFocus,
             onPressed: () {
               final password = _passwordController.text;
-              _onSaved(widget.cubit, widget.repositoryName, password);
+              _onSaved(widget.repositoryName, password);
             })
       ];
 
-  void _onSaved(
-      ReposCubit cubit, String repositoryName, String newPassword) async {
+  void _onSaved(String repositoryName, String newPassword) async {
     final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
     final isRetypePasswordOk =
         _retypePasswordInputKey.currentState?.validate() ?? false;

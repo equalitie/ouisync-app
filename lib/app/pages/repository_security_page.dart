@@ -202,7 +202,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       title: S.current.titleSetPasswordFor,
                       body: SetPassword(
                           context: context,
-                          cubit: widget.repositories,
                           repositoryName: widget.repositoryName,
                           currentPassword: _password,
                           newPassword: _newPassword,
