@@ -9,6 +9,7 @@ import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/dialogs/unlock_dialog.dart';
 import 'navigation_tile.dart';
 import 'repository_selector.dart';
 
@@ -131,14 +132,23 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               final biometricsResult = await _tryGetBiometricPassword(context,
                   databaseId: repo.databaseId);
 
-              if (biometricsResult == null) return;
+              if (biometricsResult == null || biometricResult.value == null)
+                return;
+
+              final password = biometricResult.value;
+
+              final shareToken = await repo.createShareToken(AccessMode.write,
+                  password: password);
+
+              if (shareToken.mode == AccessMode.blind) return;
 
               if (biometricsResult.value?.isNotEmpty ?? false) {
                 await _pushRepositorySecurityPage(context,
                     repo: repo.cubit,
                     databaseId: repo.databaseId,
                     repositoryName: repo.name,
-                    password: biometricsResult.value!,
+                    password: password,
+                    shareToken: shareToken,
                     isBiometricsAvailable: true,
                     usesBiometrics: true);
 
@@ -146,19 +156,17 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               }
             }
 
-            final password = await _validateManualPassword(parentContext,
-                repositories: repos,
-                databaseId: repo.databaseId,
-                repositoryName: repo.name,
-                isBiometricsAvailable: isBiometricsAvailable);
+            final passwordAndToken =
+                await _validateManualPassword(parentContext, repo: repo.cubit);
 
-            if (password == null) return;
+            if (passwordAndToken == null) return;
 
             await _pushRepositorySecurityPage(parentContext,
                 repo: repo.cubit,
                 databaseId: repo.databaseId,
                 repositoryName: repo.name,
-                password: password,
+                password: passwordAndToken.password,
+                shareToken: passwordAntToken.shareToken,
                 isBiometricsAvailable: isBiometricsAvailable,
                 usesBiometrics: false);
           });
@@ -178,44 +186,40 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   }
 
   Future<String?> _validateManualPassword(BuildContext context,
-      {required ReposCubit repositories,
-      required String databaseId,
-      required String repositoryName,
-      required bool isBiometricsAvailable}) async {
-    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
+      {required RepoCubit repo}) async {
+    final result = await showDialog<UnlockResult>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
             title: S.current.messageUnlockRepository,
-            body: UnlockRepository(
+            body: UnlockDialog<UnlockResult>(
                 context: context,
-                databaseId: databaseId,
-                repositoryName: repositoryName,
-                isBiometricsAvailable: isBiometricsAvailable,
-                isPasswordValidation: true,
-                unlockRepositoryCallback: _unlockRepository)));
+                repo: repo,
+                unlockCallback: _unlockShareToken)));
 
-    if (unlockRepoResponse == null) return null;
-
-    final unlockedSuccessfully =
-        unlockRepoResponse.accessMode != AccessMode.blind;
-
-    if (!unlockedSuccessfully) {
-      showSnackBar(context, message: unlockRepoResponse.message);
+    if (result == null) {
       return null;
     }
 
-    return unlockRepoResponse.password;
+    if (result.shareToken.mode == AccessMode.blind) {
+      return null;
+    }
+
+    return result.password;
   }
 
-  Future<AccessMode?> _unlockRepository(
-          {required String repositoryName, required String password}) async =>
-      await repos.unlockRepository(repositoryName, password: password);
+  Future<UnlockResult> _unlockShareToken(RepoCubit repo,
+      {required String password}) async {
+    final token =
+        await repo.createShareToken(AccessMode.write, password: password);
+    return UnlockResult(password: password, shareToken: token);
+  }
 
   Future<void> _pushRepositorySecurityPage(BuildContext context,
       {required RepoCubit repo,
       required String databaseId,
       required String repositoryName,
       required String password,
+      required String shareToken,
       required bool isBiometricsAvailable,
       required bool usesBiometrics}) async {
     await Navigator.push(
@@ -226,6 +230,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
               repositoryName: repositoryName,
               repo: repo,
               password: password,
+              shareToken: shareToken,
               isBiometricsAvailable: isBiometricsAvailable,
               usesBiometrics: usesBiometrics),
         ));
@@ -264,4 +269,11 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           }
         },
       );
+}
+
+class UnlockResult {
+  UnlockResult({required this.password, required this.shareToken});
+
+  final String password;
+  final ShareToken shareToken;
 }

@@ -314,10 +314,11 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   Future<bool> _savePasswordChanges(String newPassword) async {
     final repo = widget.repo;
     final metaInfo = repo.metaInfo;
+    final oldPassword = _password;
 
     final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: repo.setReadWritePassword(metaInfo, newPassword, null));
+        f: repo.setReadWritePassword(metaInfo, oldPassword, newPassword, null));
 
     if (!changePasswordResult) {
       showSnackBar(context, message: S.current.messageErrorChangingPassword);
