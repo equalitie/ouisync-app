@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../cubits/repo.dart';
 import '../../../generated/l10n.dart';

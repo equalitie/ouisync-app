@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
@@ -15,6 +16,7 @@ class RepositorySecurity extends StatefulWidget {
       required this.databaseId,
       required this.repo,
       required this.password,
+      required this.shareToken,
       required this.isBiometricsAvailable,
       required this.usesBiometrics,
       super.key});
@@ -23,16 +25,19 @@ class RepositorySecurity extends StatefulWidget {
   final String databaseId;
   final RepoCubit repo;
   final String password;
+  final ShareToken shareToken;
   final bool isBiometricsAvailable;
   final bool usesBiometrics;
 
   @override
-  State<RepositorySecurity> createState() => _RepositorySecurityState(password);
+  State<RepositorySecurity> createState() =>
+      _RepositorySecurityState(password, shareToken);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
   String _password;
+  final ShareToken _shareToken;
   bool _previewPassword = false;
 
   String? _newPassword;
@@ -47,7 +52,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   bool _isUnsavedBiometrics = false;
   bool _hasUnsavedChanges = false;
 
-  _RepositorySecurityState(this._password);
+  _RepositorySecurityState(this._password, this._shareToken);
 
   @override
   void initState() {
@@ -172,14 +177,14 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 : const Icon(Constants.iconVisibilityOn),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty
                 ? () => setState(() => _previewPassword = !_previewPassword)
                 : null),
         IconButton(
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty
                 ? () async {
                     await copyStringToClipboard(_password);
                     showSnackBar(context,
@@ -318,7 +323,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: repo.setReadWritePassword(metaInfo, oldPassword, newPassword, null));
+        f: repo.setReadWritePassword(
+            metaInfo, oldPassword, newPassword, _shareToken));
 
     if (!changePasswordResult) {
       showSnackBar(context, message: S.current.messageErrorChangingPassword);
