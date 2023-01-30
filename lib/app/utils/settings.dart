@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import 'dart:io' as io show Directory, Platform;
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -119,7 +119,18 @@ class Settings {
 
     // This path is not accessible by the user using a file explorer and it
     // also gets deleted when the app is un/re-installed.
-    return await path_provider.getApplicationDocumentsDirectory();
+    final alternativeDir =
+        await path_provider.getApplicationDocumentsDirectory();
+    if (io.Platform.isAndroid) {
+      return alternativeDir;
+    }
+
+    final context = p.Context(style: p.Style.posix);
+    final nonAndroidAlternativePath =
+        context.join(alternativeDir.path, 'ouisync_app');
+
+    final documents = await io.Directory(nonAndroidAlternativePath).create();
+    return documents;
   }
 
   List<SettingsRepoEntry> repos() {
