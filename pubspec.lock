@@ -1015,6 +1015,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.5"
+  result_type:
+    dependency: "direct main"
+    description:
+      name: result_type
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   rxdart:
     dependency: transitive
     description:

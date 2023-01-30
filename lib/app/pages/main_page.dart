@@ -759,9 +759,8 @@ class _MainPageState extends State<MainPage>
   Future<void> _unlockRepositoryCallback(
       {required String databaseId, required String repositoryName}) async {
     final databaseId = widget.settings.getDatabaseId(repositoryName);
-    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        f: Biometrics.getRepositoryPassword(databaseId: databaseId));
+    final biometricsResult =
+        await Biometrics.getRepositoryPassword(databaseId: databaseId);
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -776,9 +775,8 @@ class _MainPageState extends State<MainPage>
     }
 
     // Unlock using biometrics
-    await Dialogs.executeFutureWithLoadingDialog(context,
-        f: _unlockRepository(
-            repositoryName: repositoryName, password: biometricsResult.value!));
+    await _unlockRepository(
+        repositoryName: repositoryName, password: biometricsResult.value!);
   }
 
   Future<void> _getRepositoryPasswordDialog(

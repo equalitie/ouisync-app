@@ -2,37 +2,38 @@ import 'dart:async';
 
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repos.dart';
+import '../cubits/repo.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity(
-      {required this.repositoryName,
-      required this.databaseId,
-      required this.repositories,
+      {required this.repo,
       required this.password,
+      required this.shareToken,
       required this.isBiometricsAvailable,
       required this.usesBiometrics,
       super.key});
 
-  final String repositoryName;
-  final String databaseId;
-  final ReposCubit repositories;
-  final String? password;
+  final RepoCubit repo;
+  final String password;
+  final ShareToken shareToken;
   final bool isBiometricsAvailable;
   final bool usesBiometrics;
 
   @override
-  State<RepositorySecurity> createState() => _RepositorySecurityState();
+  State<RepositorySecurity> createState() =>
+      _RepositorySecurityState(password, shareToken);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
-  String? _password;
+  String _password;
+  final ShareToken _shareToken;
   bool _previewPassword = false;
 
   String? _newPassword;
@@ -47,13 +48,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   bool _isUnsavedBiometrics = false;
   bool _hasUnsavedChanges = false;
 
+  _RepositorySecurityState(this._password, this._shareToken);
+
   @override
   void initState() {
     super.initState();
 
     setState(() {
-      _password = widget.password;
-
       _isBiometricsAvailable = widget.isBiometricsAvailable;
       _usesBiometrics = widget.usesBiometrics;
       _secureWithBiometricsState = widget.usesBiometrics;
@@ -111,7 +112,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Widget _repositoryName() => ListTile(
         title: Text(S.current.titleRepositoryName),
-        subtitle: Text(widget.repositoryName),
+        subtitle: Text(widget.repo.name),
       );
 
   List<Widget> _managePassword() => [
@@ -172,18 +173,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 : const Icon(Constants.iconVisibilityOn),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password?.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty
                 ? () => setState(() => _previewPassword = !_previewPassword)
                 : null),
         IconButton(
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
             color: Theme.of(context).primaryColor,
-            onPressed: _password?.isNotEmpty ?? false
+            onPressed: _password.isNotEmpty
                 ? () async {
-                    if (_password == null) return;
-
-                    await copyStringToClipboard(_password!);
+                    await copyStringToClipboard(_password);
                     showSnackBar(context,
                         message: S.current.messagePasswordCopiedClipboard);
                   }
@@ -191,10 +190,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       ]);
 
   Future<void> _getNewPassword() async {
-    assert(_password != null, 'The password is null');
-
-    if (_password == null) return;
-
     final usesBiometrics =
         _isBiometricsAvailable ? _secureWithBiometricsState : false;
 
@@ -208,9 +203,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       title: S.current.titleSetPasswordFor,
                       body: SetPassword(
                           context: context,
-                          cubit: widget.repositories,
-                          repositoryName: widget.repositoryName,
-                          currentPassword: _password!,
+                          repositoryName: widget.repo.name,
+                          currentPassword: _password,
                           newPassword: _newPassword,
                           usesBiometrics: usesBiometrics)));
             }))));
@@ -313,19 +307,29 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   }
 
                   if (_isUnsavedBiometrics) {
-                    assert(_password != null, '_password is null');
-
-                    await _saveBiometricsChanges(_password!);
+                    await _saveBiometricsChanges(_password);
                   }
                 }))
           ])));
 
   Future<bool> _savePasswordChanges(String newPassword) async {
-    final metaInfo = widget.repositories.currentRepo!.metaInfo;
+    final repo = widget.repo;
+    final metaInfo = repo.metaInfo;
+    final oldPassword = _password;
+
+    final changePassword = () async {
+      if (_shareToken.mode == AccessMode.write) {
+        await repo.setReadWritePassword(
+            metaInfo, oldPassword, newPassword, _shareToken);
+      } else {
+        assert(_shareToken.mode == AccessMode.read);
+        await repo.setReadPassword(metaInfo, newPassword, _shareToken);
+      }
+    }();
+
     final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: widget.repositories
-            .setReadWritePassword(metaInfo, newPassword, null));
+        f: changePassword);
 
     if (!changePasswordResult) {
       showSnackBar(context, message: S.current.messageErrorChangingPassword);
@@ -393,7 +397,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
         f: Biometrics.addRepositoryPassword(
-            databaseId: widget.databaseId, password: password));
+            databaseId: widget.repo.databaseId, password: password));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -418,7 +422,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final biometricsResultDeletePassword =
         await Dialogs.executeFutureWithLoadingDialog(context,
             f: Biometrics.deleteRepositoryPassword(
-                databaseId: widget.databaseId));
+                databaseId: widget.repo.databaseId));
 
     if (biometricsResultDeletePassword.exception != null) {
       loggy.app(biometricsResultDeletePassword.exception);

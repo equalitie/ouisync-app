@@ -355,6 +355,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("A new version is available."),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding files, you need to create a repository"),
+        "messageNoRepoIsSelected":
+            MessageLookupByLibrary.simpleMessage("No repository is selected"),
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No repositories found"),
         "messageNone": MessageLookupByLibrary.simpleMessage("None"),
@@ -395,6 +397,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepoMissingErrorDescription": m13,
         "messageRepositoryAccessMode": m14,
         "messageRepositoryAlreadyExist": m15,
+        "messageRepositoryIsNotOpen":
+            MessageLookupByLibrary.simpleMessage("The repository is not open"),
         "messageRepositoryName":
             MessageLookupByLibrary.simpleMessage("Give the repository a name"),
         "messageRepositoryNewName":
