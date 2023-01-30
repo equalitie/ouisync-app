@@ -74,7 +74,7 @@ dependencies:
   settings_ui: ^2.0.2
   share_plus: ^4.5.3
   shared_preferences: ^2.0.13
-  styled_text: ^5.0.0+1
+  styled_text: ^7.0.0
   system_tray: ^2.0.2
   tray_manager: ^0.1.8
   udp: ^5.0.3
