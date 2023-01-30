@@ -99,8 +99,10 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   bool get canRead => accessMode != oui.AccessMode.blind;
   bool get canWrite => accessMode == oui.AccessMode.write;
 
-  Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode) async {
-    return await handle.createShareToken(accessMode: accessMode, name: name);
+  Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode,
+      {String? password}) async {
+    return await handle.createShareToken(
+        accessMode: accessMode, name: name, password: password);
   }
 
   Future<bool> exists(String path) async {
@@ -251,6 +253,38 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
 
     return content;
+  }
+
+  Future<bool> setReadWritePassword(RepoMetaInfo info, String oldPassword,
+      String newPassword, oui.ShareToken? shareToken) async {
+    final name = info.name;
+
+    try {
+      await _handle.setReadWriteAccess(
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+          shareToken: shareToken);
+    } catch (e, st) {
+      loggy.app('Password change for repository $name failed', e, st);
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> setReadPassword(
+      RepoMetaInfo info, String newPassword, oui.ShareToken? shareToken) async {
+    final name = info.name;
+
+    try {
+      await _handle.setReadAccess(
+          newPassword: newPassword, shareToken: shareToken);
+    } catch (e, st) {
+      loggy.app('Password change for repository $name failed', e, st);
+      return false;
+    }
+
+    return true;
   }
 
   Future<int> _getFileSize(String path) async {

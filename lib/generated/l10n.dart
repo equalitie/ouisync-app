@@ -690,6 +690,26 @@ class S {
     );
   }
 
+  /// `No repository is selected`
+  String get messageNoRepoIsSelected {
+    return Intl.message(
+      'No repository is selected',
+      name: 'messageNoRepoIsSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository is not open`
+  String get messageRepositoryIsNotOpen {
+    return Intl.message(
+      'The repository is not open',
+      name: 'messageRepositoryIsNotOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading…`
   String get messageLoadingDefault {
     return Intl.message(

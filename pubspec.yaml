@@ -71,6 +71,7 @@ dependencies:
   r_get_ip: ^0.1.1
   random_password_generator: ^0.2.1
   receive_sharing_intent: ^1.4.5
+  result_type: ^0.2.0
   settings_ui: ^2.0.2
   share_plus: ^4.5.3
   shared_preferences: ^2.0.13
