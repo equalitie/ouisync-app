@@ -317,10 +317,19 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final metaInfo = repo.metaInfo;
     final oldPassword = _password;
 
+    final changePassword = () async {
+      if (_shareToken.mode == AccessMode.write) {
+        await repo.setReadWritePassword(
+            metaInfo, oldPassword, newPassword, _shareToken);
+      } else {
+        assert(_shareToken.mode == AccessMode.read);
+        await repo.setReadPassword(metaInfo, newPassword, _shareToken);
+      }
+    }();
+
     final changePasswordResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: repo.setReadWritePassword(
-            metaInfo, oldPassword, newPassword, _shareToken));
+        f: changePassword);
 
     if (!changePasswordResult) {
       showSnackBar(context, message: S.current.messageErrorChangingPassword);

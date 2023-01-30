@@ -272,6 +272,21 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     return true;
   }
 
+  Future<bool> setReadPassword(
+      RepoMetaInfo info, String newPassword, oui.ShareToken? shareToken) async {
+    final name = info.name;
+
+    try {
+      await _handle.setReadAccess(
+          newPassword: newPassword, shareToken: shareToken);
+    } catch (e, st) {
+      loggy.app('Password change for repository $name failed', e, st);
+      return false;
+    }
+
+    return true;
+  }
+
   Future<int> _getFileSize(String path) async {
     oui.File file;
     var length = 0;
