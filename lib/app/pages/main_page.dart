@@ -127,6 +127,8 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool?> _checkForBiometricsCallback() async {
+    if (!io.Platform.isAndroid || !io.Platform.isIOS) return null;
+
     final auth = LocalAuthentication();
 
     final isBiometricsAvailable = await auth.canCheckBiometrics;
