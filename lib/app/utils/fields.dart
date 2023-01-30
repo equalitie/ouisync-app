@@ -1,5 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as b;
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
@@ -14,15 +14,15 @@ class Fields {
       Color color = Colors.red,
       double moveRight = 0,
       double moveDownwards = 0}) {
-    return Badge(
+    return b.Badge(
         showBadge: show,
         ignorePointer: true,
         badgeContent: SizedBox(width: 10, height: 10),
         badgeColor: color,
         position:
-            BadgePosition(bottom: 12 - moveDownwards, end: 10 - moveRight),
+            b.BadgePosition(bottom: 12 - moveDownwards, end: 10 - moveRight),
         padding: const EdgeInsets.all(0.0),
-        shape: BadgeShape.circle,
+        shape: b.BadgeShape.circle,
         child: child);
   }
 
