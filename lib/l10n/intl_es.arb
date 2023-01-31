@@ -545,5 +545,9 @@
   "actionClear": "Limpiar",
   "@actionClear": {},
   "actionSaveChanges": "Guardar los cambios",
-  "@actionSaveChanges": {}
+  "@actionSaveChanges": {},
+  "messageRepositoryIsNotOpen": "El repositorio no está abierto",
+  "@messageRepositoryIsNotOpen": {},
+  "messageNoRepoIsSelected": "No hay ningún repositorio seleccionado",
+  "@messageNoRepoIsSelected": {}
 }
