@@ -537,5 +537,7 @@
   "actionSaveChanges": "Зберегти зміни",
   "@actionSaveChanges": {},
   "actionClear": "Очистити",
-  "@actionClear": {}
+  "@actionClear": {},
+  "messageNoRepoIsSelected": "Жодний репозиторій не вибрано",
+  "@messageNoRepoIsSelected": {}
 }
