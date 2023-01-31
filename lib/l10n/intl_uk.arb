@@ -539,5 +539,7 @@
   "actionClear": "Очистити",
   "@actionClear": {},
   "messageNoRepoIsSelected": "Жодний репозиторій не вибрано",
-  "@messageNoRepoIsSelected": {}
+  "@messageNoRepoIsSelected": {},
+  "messageRepositoryIsNotOpen": "Репозиторій не відкритий",
+  "@messageRepositoryIsNotOpen": {}
 }
