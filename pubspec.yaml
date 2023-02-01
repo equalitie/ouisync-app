@@ -29,7 +29,7 @@ dependencies:
   bloc_test: ^9.0.3
   build_runner: ^2.1.7
   collection: ^1.16.0
-  connectivity_plus: ^2.2.1
+  connectivity_plus: ^3.0.2
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.3.3
@@ -62,7 +62,7 @@ dependencies:
   network_info_plus: ^3.0.1
   ouisync_plugin:
     path: ./ouisync-plugin
-  package_info_plus: ^1.4.2
+  package_info_plus: ^3.0.2
   path: ^1.8.2
   path_provider: ^2.0.9
   percent_indicator: ^4.2.2
@@ -72,7 +72,7 @@ dependencies:
   random_password_generator: ^0.2.1
   receive_sharing_intent: ^1.4.5
   settings_ui: ^2.0.2
-  share_plus: ^4.5.3
+  share_plus: ^6.3.0
   shared_preferences: ^2.0.13
   styled_text: ^7.0.0
   system_tray: ^2.0.2
