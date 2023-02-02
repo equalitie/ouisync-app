@@ -58,18 +58,26 @@ class _MainPageState extends State<MainPage>
       ValueNotifier<double>(0.0);
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
-  late final StateMonitorIntValue _panicCounter;
+  final Future<StateMonitorIntValue> _panicCounter;
 
-  _MainPageState(Session session, Settings settings)
-      : _repositories = ReposCubit(
-          session: session,
-          settings: settings,
-        ),
-        _powerControl = PowerControl(session, settings) {
-    _panicCounter = _repositories
-        .rootStateMonitor()
-        .child(oui.MonitorId.expectUnique("Session"))
-        .intValue("panic_counter");
+  _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
+
+  factory _MainPageState(Session session, Settings settings) {
+    final repositories = ReposCubit(
+      session: session,
+      settings: settings,
+    );
+    final powerControl = PowerControl(session, settings);
+    final panicCounter = repositories.rootStateMonitor().then((root) async {
+      final child = await root.child(oui.MonitorId.expectUnique("Session"));
+      if (child != null) {
+        return child.intValue("panic_counter");
+      } else {
+        return null;
+      }
+    });
+
+    return _MainPageState._(repositories, powerControl, panicCounter);
   }
 
   RepoEntry? get _currentRepo => _repositories.currentRepo;
@@ -80,14 +88,14 @@ class _MainPageState extends State<MainPage>
   void initState() {
     super.initState();
 
-    widget.session.networkEvents.listen((event) {
+    widget.session.networkEvents.listen((event) async {
       switch (event) {
         case NetworkEvent.peerSetChange:
           break;
         case NetworkEvent.protocolVersionMismatch:
           {
-            final highest = widget.session.highestSeenProtocolVersion;
-            _upgradeExistsCubit.foundVersion(highest);
+            final highest = await widget.session.highestSeenProtocolVersion;
+            await _upgradeExistsCubit.foundVersion(highest);
           }
           break;
       }
@@ -243,7 +251,7 @@ class _MainPageState extends State<MainPage>
     if (currentRepo is OpenRepoEntry) {
       final currentFolder = currentRepo.cubit.currentFolder;
       if (!currentFolder.isRoot()) {
-        currentRepo.cubit.navigateTo(currentFolder.parent);
+        await currentRepo.cubit.navigateTo(currentFolder.parent);
         return false;
       }
     }
@@ -263,7 +271,7 @@ class _MainPageState extends State<MainPage>
       // and threads stay alive. If the user at that point tried to open
       // the app again, this widget would try to reinitialize all those
       // variables without previously properly closing them.
-      MoveToBackground.moveTaskToBack();
+      await MoveToBackground.moveTaskToBack();
     }
 
     return false;
@@ -285,17 +293,25 @@ class _MainPageState extends State<MainPage>
         onPressed: () async => await showSettings(),
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface);
+
     return BlocBuilder<UpgradeExistsCubit, bool>(
-        builder: (context, updateExists) {
-      return _panicCounter.builder((context, panicCount) {
-        return BlocBuilder<PowerControl, PowerControlState>(
-            bloc: _powerControl,
-            builder: (context, state) {
+      builder: (context, updateExists) =>
+          BlocBuilder<PowerControl, PowerControlState>(
+        bloc: _powerControl,
+        builder: (context, powerControlState) => FutureBuilder(
+          future: _panicCounter,
+          builder: (context, snapshot) {
+            final panicCounter = snapshot.data;
+            if (panicCounter == null) {
+              return button;
+            }
+
+            return panicCounter.builder((context, panicCount) {
               Color? color;
 
               if (updateExists || ((panicCount ?? 0) > 0)) {
                 color = Constants.errorColor;
-              } else if (!(state.isNetworkEnabled ?? true)) {
+              } else if (!(powerControlState.isNetworkEnabled ?? true)) {
                 color = Constants.warningColor;
               }
 
@@ -305,23 +321,32 @@ class _MainPageState extends State<MainPage>
                 return button;
               }
             });
-      });
-    });
+          },
+        ),
+      ),
+    );
   }
 
-  StatelessWidget _buildFAB(BuildContext context, RepoEntry? current) {
+  Widget _buildFAB(BuildContext context, RepoEntry? current) {
     if (current is! OpenRepoEntry) {
       return Container();
     }
 
-    if (!current.cubit.canWrite) {
-      return Container();
-    }
+    return FutureBuilder<bool>(
+      future: current.cubit.canWrite,
+      builder: (context, snapshot) {
+        final canWrite = snapshot.data ?? false;
 
-    return FloatingActionButton(
-      heroTag: Constants.heroTagMainPageActions,
-      child: const Icon(Icons.add_rounded),
-      onPressed: () => _showDirectoryActions(context, current),
+        if (!canWrite) {
+          return Container();
+        }
+
+        return FloatingActionButton(
+          heroTag: Constants.heroTagMainPageActions,
+          child: const Icon(Icons.add_rounded),
+          onPressed: () => _showDirectoryActions(context, current),
+        );
+      },
     );
   }
 
@@ -333,7 +358,7 @@ class _MainPageState extends State<MainPage>
         }
       });
 
-  _selectLayoutWidget() {
+  Widget _selectLayoutWidget() {
     final current = _currentRepo;
 
     if (current == null || current is LoadingRepoEntry) {
@@ -343,14 +368,21 @@ class _MainPageState extends State<MainPage>
     }
 
     if (current is OpenRepoEntry) {
-      if (!current.cubit.canRead) {
-        return LockedRepositoryState(
-            databaseId: current.databaseId,
-            repositoryName: current.name,
-            unlockRepositoryCallback: _unlockRepositoryCallback);
-      }
+      return FutureBuilder(
+        future: current.cubit.canRead,
+        builder: (context, snapshot) {
+          final canRead = snapshot.data ?? false;
 
-      return _contentBrowser(current.cubit);
+          if (!canRead) {
+            return LockedRepositoryState(
+                databaseId: current.databaseId,
+                repositoryName: current.name,
+                unlockRepositoryCallback: _unlockRepositoryCallback);
+          }
+
+          return _contentBrowser(current.cubit);
+        },
+      );
     }
 
     return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -473,20 +505,24 @@ class _MainPageState extends State<MainPage>
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           constraints: BoxConstraints(maxHeight: 390.0),
-          builder: (_) => ScaffoldMessenger(child: Builder(builder: (context) {
-                final accessModes = repository.accessMode == AccessMode.write
-                    ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-                    : repository.accessMode == AccessMode.read
-                        ? [AccessMode.blind, AccessMode.read]
-                        : [AccessMode.blind];
+          builder: (_) => ScaffoldMessenger(
+              child: FutureBuilder(
+                  future: repository.accessMode,
+                  builder: (context, snapshot) {
+                    final accessMode = snapshot.data ?? AccessMode.blind;
+                    final accessModes = accessMode == AccessMode.write
+                        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+                        : accessMode == AccessMode.read
+                            ? [AccessMode.blind, AccessMode.read]
+                            : [AccessMode.blind];
 
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ShareRepository(
-                      repository: repository,
-                      availableAccessModes: accessModes,
-                    ));
-              })));
+                    return Scaffold(
+                        backgroundColor: Colors.transparent,
+                        body: ShareRepository(
+                          repository: repository,
+                          availableAccessModes: accessModes,
+                        ));
+                  })));
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
@@ -589,7 +625,7 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
 
-    currentRepo.moveEntry(
+    await currentRepo.moveEntry(
       source: path,
       destination: destination,
     );
@@ -617,9 +653,9 @@ class _MainPageState extends State<MainPage>
       return false;
     }
 
-    String? accessModeMessage = currentRepo.cubit.canRead == false
+    String? accessModeMessage = await currentRepo.cubit.canRead == false
         ? S.current.messageAddingFileToLockedRepository
-        : !currentRepo.cubit.canWrite
+        : !(await currentRepo.cubit.canWrite)
             ? S.current.messageAddingFileToReadRepository
             : null;
 
@@ -714,9 +750,9 @@ class _MainPageState extends State<MainPage>
     if (initialTokenValue == null) return;
 
     final tokenValidationError =
-        _repositories.validateTokenLink(initialTokenValue);
+        await _repositories.validateTokenLink(initialTokenValue);
     if (tokenValidationError != null) {
-      showDialog(
+      await showDialog(
           context: context,
           barrierDismissible: true,
           builder: (BuildContext context) {
@@ -837,7 +873,9 @@ class _MainPageState extends State<MainPage>
             f: _checkForBiometricsCallback()) ??
         false;
 
-    Navigator.push(
+    final panicCounter = await _panicCounter;
+
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(
@@ -850,7 +888,7 @@ class _MainPageState extends State<MainPage>
             isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
-            panicCounter: _panicCounter,
+            panicCounter: panicCounter,
             natDetection: _natDetection,
           ),
         ),

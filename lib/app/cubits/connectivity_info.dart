@@ -70,10 +70,10 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
 
   Future<void> update() async {
     emit(state.copyWith(
-      tcpListenerV4: _session.tcpListenerLocalAddressV4 ?? "",
-      tcpListenerV6: _session.tcpListenerLocalAddressV6 ?? "",
-      quicListenerV4: _session.quicListenerLocalAddressV4 ?? "",
-      quicListenerV6: _session.quicListenerLocalAddressV6 ?? "",
+      tcpListenerV4: await _session.tcpListenerLocalAddressV4 ?? "",
+      tcpListenerV6: await _session.tcpListenerLocalAddressV6 ?? "",
+      quicListenerV4: await _session.quicListenerLocalAddressV4 ?? "",
+      quicListenerV6: await _session.quicListenerLocalAddressV6 ?? "",
     ));
 
     // This really works only when connected using WiFi.

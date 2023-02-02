@@ -69,14 +69,14 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
       onPressed: () async {
         final data =
             await Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const QRScanner();
+          return QRScanner(widget.reposCubit.session);
         }));
 
         if (!mounted) return;
-
         if (data == null) return;
 
-        final tokenValidationError = widget.reposCubit.validateTokenLink(data);
+        final tokenValidationError =
+            await widget.reposCubit.validateTokenLink(data);
 
         if (tokenValidationError != null) {
           showSnackBar(context, message: tokenValidationError);
@@ -127,32 +127,35 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
                     BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
                 color: Constants.inputBackgroundColor),
             child: Fields.formTextField(
-                context: context,
-                textEditingController: _tokenController,
-                label: S.current.labelRepositoryLink,
-                subffixIcon: const Icon(Icons.key_rounded),
-                hint: S.current.messageRepositoryToken,
-                onSaved: (value) {},
-                validator: _repositoryTokenValidator)),
+              context: context,
+              textEditingController: _tokenController,
+              label: S.current.labelRepositoryLink,
+              subffixIcon: const Icon(Icons.key_rounded),
+              hint: S.current.messageRepositoryToken,
+              onSaved: (value) {},
+              // FIXME: figure out how to have async validators
+              // validator: _repositoryTokenValidator
+            )),
         _builAddRepositoryButton(context),
       ],
     );
   }
 
-  String? _repositoryTokenValidator(String? value, {String? error}) {
+  // FIXME: figure out how to have async validators
+  Future<String?> _repositoryTokenValidator(
+    String? value, {
+    String? error,
+  }) async {
     if (value == null || value.isEmpty) {
       return S.current.messageErrorTokenEmpty;
     }
 
     try {
-      final shareToken = ShareToken.fromString(value);
-
-      if (shareToken == null) {
-        return S.current.messageErrorTokenValidator;
-      }
+      final shareToken =
+          await ShareToken.fromString(widget.reposCubit.session, value);
 
       final existingRepo =
-          widget.reposCubit.findByInfoHash(shareToken.infoHash);
+          await widget.reposCubit.findByInfoHash(await shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);

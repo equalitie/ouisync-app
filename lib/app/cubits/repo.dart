@@ -51,37 +51,39 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
   }
 
-  bool get isDhtEnabled => handle.isDhtEnabled;
+  Future<bool> get isDhtEnabled => handle.isDhtEnabled;
 
-  void setDhtEnabled(bool value) {
-    if (isDhtEnabled == value) {
+  Future<void> setDhtEnabled(bool value) async {
+    if (await isDhtEnabled == value) {
       return;
     }
 
     if (value) {
-      handle.enableDht();
+      await handle.enableDht();
     } else {
-      handle.disableDht();
+      await handle.disableDht();
     }
 
-    unawaited(_settings.setDhtEnabled(name, value));
+    await _settings.setDhtEnabled(name, value);
+
     changed();
   }
 
-  bool get isPexEnabled => handle.isPexEnabled;
+  Future<bool> get isPexEnabled => handle.isPexEnabled;
 
-  void setPexEnabled(bool value) {
-    if (isPexEnabled == value) {
+  Future<void> setPexEnabled(bool value) async {
+    if (await isPexEnabled == value) {
       return;
     }
 
     if (value) {
-      handle.enablePex();
+      await handle.enablePex();
     } else {
-      handle.disablePex();
+      await handle.disablePex();
     }
 
-    unawaited(_settings.setPexEnabled(name, true));
+    await _settings.setPexEnabled(name, true);
+
     changed();
   }
 
@@ -96,10 +98,12 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     return other is RepoCubit && infoHash == other.infoHash;
   }
 
-  oui.AccessMode get accessMode => handle.accessMode;
-  String get infoHash => handle.infoHash;
-  bool get canRead => accessMode != oui.AccessMode.blind;
-  bool get canWrite => accessMode == oui.AccessMode.write;
+  Future<oui.AccessMode> get accessMode => handle.accessMode;
+  Future<String> get infoHash => handle.infoHash;
+  Future<bool> get canRead =>
+      accessMode.then((mode) => mode != oui.AccessMode.blind);
+  Future<bool> get canWrite =>
+      accessMode.then((mode) => mode == oui.AccessMode.write);
 
   Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode,
       {String? password}) async {
@@ -113,15 +117,13 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   Future<oui.EntryType?> type(String path) => handle.type(path);
 
-  Future<oui.Progress> syncProgress() async {
-    return await handle.syncProgress();
-  }
+  Future<oui.Progress> get syncProgress => handle.syncProgress;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  cubits.StateMonitor stateMonitor() {
-    return cubits.StateMonitor(handle.stateMonitor());
-  }
+  Future<cubits.StateMonitor?> stateMonitor() => handle
+      .stateMonitor()
+      .then((inner) => (inner != null) ? cubits.StateMonitor(inner) : null);
 
   Future<void> navigateTo(String destination) async {
     update((state) {
@@ -231,7 +233,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       while (iterator.moveNext()) {
         var size = 0;
         final entryName = iterator.current.name;
-        final entryType = iterator.current.type;
+        final entryType = iterator.current.entryType;
         final entryPath = buildDestinationPath(path, entryName);
 
         if (entryType == oui.EntryType.file) {
@@ -246,8 +248,6 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     } catch (e, st) {
       loggy.app('Traversing directory $path exception', e, st);
       error = e.toString();
-    } finally {
-      directory.close();
     }
 
     if (error != null) {
@@ -306,7 +306,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       loggy.app("Get file size $path exception", e, st);
     }
 
-    file.close();
+    await file.close();
 
     return length;
   }
@@ -409,7 +409,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     bool errorShown = false;
 
     try {
-      while (canRead) {
+      while (await canRead) {
         bool success = await _currentFolder.refresh();
 
         if (success) break;

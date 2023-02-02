@@ -116,7 +116,8 @@ class LogsSection extends AbstractSettingsSection {
       sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
       sink.writeln("\n");
 
-      await dumpAll(sink, repos.session.getRootStateMonitor());
+      final stateMonitor = await repos.session.getRootStateMonitor();
+      await dumpAll(sink, stateMonitor);
     } finally {
       await sink.close();
     }

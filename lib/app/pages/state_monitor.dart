@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
@@ -15,31 +17,42 @@ class StateMonitorPage extends StatefulWidget {
 
 class _State extends State<StateMonitorPage> {
   final oui.Session session;
-  late final Subscription subscription;
-  late final StateMonitor root;
+  final Future<StateMonitor> root;
+  Subscription? subscription;
 
-  _State(this.session) {
-    root = session.getRootStateMonitor()!;
-    subscription = root.subscribe()!;
-  }
+  _State(this.session) : root = session.getRootStateMonitor();
 
   @override
   void dispose() {
-    subscription.close();
+    if (subscription != null) {
+      unawaited(subscription!.close());
+      subscription = null;
+    }
+
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.titleStateMonitor)),
-        body: StreamBuilder<void>(
-            stream: subscription.broadcastStream,
-            builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
-              root.refresh();
-              return Container(child: _NodeWidget(root));
-            }));
-  }
+        body: FutureBuilder(
+            future: root,
+            builder: (context, snapshot) {
+              final root = snapshot.data;
+              if (root == null) {
+                return Container();
+              }
+
+              subscription ??= root.subscribe();
+
+              return StreamBuilder<void>(
+                  stream: subscription!.stream.asBroadcastStream(),
+                  builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
+                    root.refresh();
+                    return Container(child: _NodeWidget(root));
+                  });
+            }),
+      );
 }
 
 class _NodeWidget extends StatelessWidget {
@@ -115,9 +128,11 @@ class _ChildWidgetState extends State<_ChildWidget> {
     }
   }
 
-  void expand() {
+  void expand() async {
+    final child = await widget.parent.child(widget.id);
+
     setState(() {
-      monitor = widget.parent.child(widget.id);
+      monitor = child;
     });
   }
 

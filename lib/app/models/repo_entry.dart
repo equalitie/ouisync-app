@@ -11,9 +11,18 @@ abstract class RepoEntry extends Equatable {
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
   oui.Repository? get maybeHandle;
-  String? get infoHash;
+  Future<String?> get infoHash;
   Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
+
+  Future<oui.AccessMode> get accessMode {
+    final future = maybeHandle?.accessMode;
+    if (future != null) {
+      return future;
+    } else {
+      return Future.value(oui.AccessMode.blind);
+    }
+  }
 
   @override
   List<Object> get props => [name, runtimeType];
@@ -40,7 +49,7 @@ class LoadingRepoEntry extends RepoEntry {
   oui.Repository? get maybeHandle => null;
 
   @override
-  String? get infoHash => null;
+  Future<String?> get infoHash => Future.value(null);
 
   @override
   Folder? get currentFolder => null;
@@ -77,7 +86,7 @@ class OpenRepoEntry extends RepoEntry {
   oui.Repository? get maybeHandle => _cubit.handle;
 
   @override
-  String? get infoHash => _cubit.infoHash;
+  Future<String?> get infoHash => _cubit.infoHash;
 
   @override
   Folder? get currentFolder => _cubit.currentFolder;
@@ -101,7 +110,7 @@ class MissingRepoEntry extends RepoEntry {
   Folder? get currentFolder => null;
 
   @override
-  String? get infoHash => null;
+  Future<String?> get infoHash => Future.value(null);
 
   @override
   oui.Repository? get maybeHandle => null;
@@ -128,7 +137,7 @@ class ErrorRepoEntry extends RepoEntry {
   Folder? get currentFolder => null;
 
   @override
-  String? get infoHash => null;
+  Future<String?> get infoHash => Future.value(null);
 
   @override
   oui.Repository? get maybeHandle => null;

@@ -6,7 +6,9 @@ import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
 class QRScanner extends StatefulWidget {
-  const QRScanner({Key? key}) : super(key: key);
+  final plugin.Session session;
+
+  const QRScanner(this.session, {Key? key}) : super(key: key);
 
   @override
   State<QRScanner> createState() => _QRScannerState();
@@ -70,7 +72,7 @@ class _QRScannerState extends State<QRScanner> {
     return MobileScanner(
         allowDuplicates: false,
         controller: cameraController,
-        onDetect: (barcode, args) {
+        onDetect: (barcode, args) async {
           final code = barcode.rawValue;
 
           if (code == null) {
@@ -81,7 +83,9 @@ class _QRScannerState extends State<QRScanner> {
               return;
             }
 
-            if (plugin.ShareToken.fromString(code) == null) {
+            try {
+              await plugin.ShareToken.fromString(widget.session, code);
+            } catch (_) {
               debugPrint('Barcode found! $code (invalid)');
               return;
             }

@@ -41,133 +41,145 @@ class _FileDetailState extends State<FileDetail> {
     return SingleChildScrollView(
       child: Container(
         padding: Dimensions.paddingBottomSheet,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Fields.bottomSheetHandle(context),
-            Fields.bottomSheetTitle(S.current.titleFileDetails),
-            EntryActionItem(
-              iconData: Icons.download,
-              title: S.current.iconDownload,
-              dense: true,
-              onTap: () async {
-                Navigator.of(context, rootNavigator: false).pop();
+        child: FutureBuilder(
+          future: widget.cubit.accessMode,
+          builder: (context, snapshot) {
+            final accessMode = snapshot.data ?? AccessMode.blind;
 
-                await showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return ActionsDialog(
-                      title: S.current.titleDownloadToDevice,
-                      body:
-                          SaveToDevice(data: widget.data, cubit: widget.cubit),
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Fields.bottomSheetHandle(context),
+                Fields.bottomSheetTitle(S.current.titleFileDetails),
+                EntryActionItem(
+                  iconData: Icons.download,
+                  title: S.current.iconDownload,
+                  dense: true,
+                  onTap: () async {
+                    Navigator.of(context, rootNavigator: false).pop();
+
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return ActionsDialog(
+                          title: S.current.titleDownloadToDevice,
+                          body: SaveToDevice(
+                              data: widget.data, cubit: widget.cubit),
+                        );
+                      },
                     );
                   },
-                );
-              },
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.accessMode, EntryAction.download),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
-            if (io.Platform.isAndroid)
-              EntryActionItem(
-                iconData: Icons.preview_rounded,
-                title: S.current.iconPreview,
-                dense: true,
-                onTap: () async => await NativeChannels.previewOuiSyncFile(
-                    F.authority, widget.data.path, widget.data.size),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.preview),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-            if (io.Platform.isAndroid)
-              EntryActionItem(
-                iconData: Icons.share_rounded,
-                title: S.current.iconShare,
-                dense: true,
-                onTap: () async => await NativeChannels.shareOuiSyncFile(
-                    F.authority, widget.data.path, widget.data.size),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.share),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-            EntryActionItem(
-              iconData: Icons.edit,
-              title: S.current.iconRename,
-              dense: true,
-              onTap: () async => _showRenameDialog(widget.data),
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.accessMode, EntryAction.rename),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
-            EntryActionItem(
-              iconData: Icons.drive_file_move_outlined,
-              title: S.current.iconMove,
-              dense: true,
-              onTap: () async => _showMoveEntryBottomSheet(
-                widget.data.path,
-                EntryType.file,
-                widget.onMoveEntry,
-                widget.onBottomSheetOpen,
-              ),
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.accessMode, EntryAction.move),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
-            EntryActionItem(
-                iconData: Icons.delete_outlined,
-                title: S.current.iconDelete,
-                dense: true,
-                onTap: () async {
-                  showDialog<String>(
-                    context: widget.context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (BuildContext context) {
-                      final fileName = getBasename(widget.data.path);
-                      final parent = getDirname(widget.data.path);
+                  enabledValidation: () => widget.isActionAvailableValidator(
+                      accessMode, EntryAction.download),
+                  disabledMessage: S.current.messageActionNotAvailable,
+                  disabledMessageDuration:
+                      Constants.notAvailableActionMessageDuration,
+                ),
+                if (io.Platform.isAndroid)
+                  EntryActionItem(
+                    iconData: Icons.preview_rounded,
+                    title: S.current.iconPreview,
+                    dense: true,
+                    onTap: () async => await NativeChannels.previewOuiSyncFile(
+                        F.authority, widget.data.path, widget.data.size),
+                    enabledValidation: () => widget.isActionAvailableValidator(
+                        accessMode, EntryAction.preview),
+                    disabledMessage: S.current.messageActionNotAvailable,
+                    disabledMessageDuration:
+                        Constants.notAvailableActionMessageDuration,
+                  ),
+                if (io.Platform.isAndroid)
+                  EntryActionItem(
+                    iconData: Icons.share_rounded,
+                    title: S.current.iconShare,
+                    dense: true,
+                    onTap: () async => await NativeChannels.shareOuiSyncFile(
+                        F.authority, widget.data.path, widget.data.size),
+                    enabledValidation: () => widget.isActionAvailableValidator(
+                        accessMode, EntryAction.share),
+                    disabledMessage: S.current.messageActionNotAvailable,
+                    disabledMessageDuration:
+                        Constants.notAvailableActionMessageDuration,
+                  ),
+                EntryActionItem(
+                  iconData: Icons.edit,
+                  title: S.current.iconRename,
+                  dense: true,
+                  onTap: () async => _showRenameDialog(widget.data),
+                  enabledValidation: () => widget.isActionAvailableValidator(
+                      accessMode, EntryAction.rename),
+                  disabledMessage: S.current.messageActionNotAvailable,
+                  disabledMessageDuration:
+                      Constants.notAvailableActionMessageDuration,
+                ),
+                EntryActionItem(
+                  iconData: Icons.drive_file_move_outlined,
+                  title: S.current.iconMove,
+                  dense: true,
+                  onTap: () async => _showMoveEntryBottomSheet(
+                    widget.data.path,
+                    EntryType.file,
+                    widget.onMoveEntry,
+                    widget.onBottomSheetOpen,
+                  ),
+                  enabledValidation: () => widget.isActionAvailableValidator(
+                      accessMode, EntryAction.move),
+                  disabledMessage: S.current.messageActionNotAvailable,
+                  disabledMessageDuration:
+                      Constants.notAvailableActionMessageDuration,
+                ),
+                EntryActionItem(
+                    iconData: Icons.delete_outlined,
+                    title: S.current.iconDelete,
+                    dense: true,
+                    onTap: () => showDialog<String>(
+                          context: widget.context,
+                          barrierDismissible: false, // user must tap button!
+                          builder: (BuildContext context) {
+                            final fileName = getBasename(widget.data.path);
+                            final parent = getDirname(widget.data.path);
 
-                      return Dialogs.buildDeleteFileAlertDialog(widget.cubit,
-                          widget.data.path, context, fileName, parent);
-                    },
-                  ).then((fileName) {
-                    // If the user canceled the dialog, no file name is returned
-                    if (fileName?.isNotEmpty ?? false) {
-                      Navigator.of(context).pop();
-                    }
-                  });
-                },
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.delete),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration),
-            const Divider(
-                height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-            Fields.iconLabel(
-                icon: Icons.info_rounded, text: S.current.iconInformation),
-            Fields.autosizedLabeledText(
-                label: S.current.labelName, text: widget.data.name),
-            Fields.labeledText(
-                label: S.current.labelLocation,
-                text: widget.data.path
-                    .replaceAll(widget.data.name, '')
-                    .trimRight()),
-            Fields.labeledText(
-                label: S.current.labelSize,
-                text: formatSize(widget.data.size, units: true)),
-          ],
+                            return Dialogs.buildDeleteFileAlertDialog(
+                                widget.cubit,
+                                widget.data.path,
+                                context,
+                                fileName,
+                                parent);
+                          },
+                        ).then((fileName) {
+                          // If the user canceled the dialog, no file name is returned
+                          if (fileName?.isNotEmpty ?? false) {
+                            Navigator.of(context).pop();
+                          }
+                        }),
+                    enabledValidation: () => widget.isActionAvailableValidator(
+                        accessMode, EntryAction.delete),
+                    disabledMessage: S.current.messageActionNotAvailable,
+                    disabledMessageDuration:
+                        Constants.notAvailableActionMessageDuration),
+                const Divider(
+                    height: 10.0,
+                    thickness: 2.0,
+                    indent: 20.0,
+                    endIndent: 20.0),
+                Fields.iconLabel(
+                    icon: Icons.info_rounded, text: S.current.iconInformation),
+                Fields.autosizedLabeledText(
+                    label: S.current.labelName, text: widget.data.name),
+                Fields.labeledText(
+                    label: S.current.labelLocation,
+                    text: widget.data.path
+                        .replaceAll(widget.data.name, '')
+                        .trimRight()),
+                Fields.labeledText(
+                    label: S.current.labelSize,
+                    text: formatSize(widget.data.size, units: true)),
+              ],
+            );
+          },
         ),
       ),
     );

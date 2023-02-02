@@ -54,26 +54,32 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
     BuildContext context,
     RepoCubit repo,
   ) =>
-      SettingsTile.switchTile(
-        initialValue: repo.isDhtEnabled,
-        title: Text(S.current.labelBitTorrentDHT),
-        leading: Icon(Icons.hub),
-        onToggle: (value) {
-          repo.setDhtEnabled(value);
-        },
+      FutureBuilder<bool>(
+        future: repo.isDhtEnabled,
+        builder: (context, snapshot) => SettingsTile.switchTile(
+          initialValue: snapshot.data ?? false,
+          title: Text(S.current.labelBitTorrentDHT),
+          leading: Icon(Icons.hub),
+          onToggle: (value) {
+            repo.setDhtEnabled(value);
+          },
+        ),
       );
 
   Widget _buildPexSwitch(
     BuildContext context,
     RepoCubit repo,
   ) =>
-      SettingsTile.switchTile(
-        initialValue: repo.isPexEnabled,
-        title: Text(S.current.messagePeerExchange),
-        leading: Icon(Icons.group_add),
-        onToggle: (value) {
-          repo.setPexEnabled(value);
-        },
+      FutureBuilder<bool>(
+        future: repo.isPexEnabled,
+        builder: (context, snapshot) => SettingsTile.switchTile(
+          initialValue: snapshot.data ?? false,
+          title: Text(S.current.messagePeerExchange),
+          leading: Icon(Icons.group_add),
+          onToggle: (value) {
+            repo.setPexEnabled(value);
+          },
+        ),
       );
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
@@ -138,7 +144,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
                 final shareToken =
                     await _loadShareToken(context, repo, password);
 
-                if (shareToken.mode == AccessMode.blind) {
+                if (await shareToken.mode == AccessMode.blind) {
                   showSnackBar(context,
                       message: S.current.messageUnlockRepoFailed);
                   return;
@@ -192,8 +198,9 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   }
 
   Future<Result<UnlockResult, String?>> _validateManualPassword(
-      BuildContext context,
-      {required RepoCubit repo}) async {
+    BuildContext context, {
+    required RepoCubit repo,
+  }) async {
     final result = await showDialog<UnlockResult>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
@@ -209,7 +216,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       return Failure(null);
     }
 
-    if (result.shareToken.mode == AccessMode.blind) {
+    if (await result.shareToken.mode == AccessMode.blind) {
       return Failure(S.current.messageUnlockRepoFailed);
     }
 
@@ -274,7 +281,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           );
 
           if (delete ?? false) {
-            repos.deleteRepository(repo.metaInfo);
+            await repos.deleteRepository(repo.metaInfo);
           }
         },
       );

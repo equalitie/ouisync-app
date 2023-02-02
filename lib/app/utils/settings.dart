@@ -342,7 +342,7 @@ class Settings {
       repos[info.name] = info.dir.path;
     }
 
-    prefs.setBool(_legacyReposIncluded, true);
+    await prefs.setBool(_legacyReposIncluded, true);
     return true;
   }
 }

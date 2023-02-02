@@ -6,8 +6,10 @@ class StateMonitor {
 
   StateMonitor(this._inner);
 
-  StateMonitor child(oui.MonitorId childId) =>
-      StateMonitor(_inner?.child(childId));
+  Future<StateMonitor?> child(oui.MonitorId childId) async {
+    final child = await _inner?.child(childId);
+    return (child != null) ? StateMonitor(child) : null;
+  }
 
   StateMonitorIntValue intValue(String valueName) =>
       StateMonitorIntValue(_inner, valueName);
@@ -61,13 +63,16 @@ class _WidgetState extends State<_Widget> {
     if (subscription == null) return widget._buildFn(context, null);
 
     return StreamBuilder<void>(
-        stream: subscription.broadcastStream,
-        builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
-          if (!monitor.refresh()) {
-            return widget._buildFn(ctx, null);
-          }
+        stream: subscription.stream.asBroadcastStream(),
+        builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) =>
+            FutureBuilder<bool>(
+                future: monitor.refresh(),
+                builder: (context, snapshot) {
+                  if (!(snapshot.data ?? false)) {
+                    return widget._buildFn(ctx, null);
+                  }
 
-          return widget._buildFn(ctx, monitor);
-        });
+                  return widget._buildFn(ctx, monitor);
+                }));
   }
 }

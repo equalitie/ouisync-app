@@ -9,7 +9,7 @@ Future<void> dumpAll(IOSink sink, StateMonitor? rootMonitor) async {
   sink.writeln(
       "------------------------- State Monitor -------------------------\n\n");
 
-  _dumpStateMonitor(sink, rootMonitor, 0);
+  await _dumpStateMonitor(sink, rootMonitor, 0);
 
   sink.writeln(
       "\n\n---------------------------- LogCat -----------------------------\n\n");
@@ -34,7 +34,11 @@ Future<void> _dumpLogs(IOSink sink) async {
 }
 
 /// Dump content of the state monitor
-void _dumpStateMonitor(IOSink sink, StateMonitor? node, int depth) {
+Future<void> _dumpStateMonitor(
+  IOSink sink,
+  StateMonitor? node,
+  int depth,
+) async {
   final pad = '  ' * depth;
   if (node == null) {
     sink.writeln("${pad}null");
@@ -47,6 +51,6 @@ void _dumpStateMonitor(IOSink sink, StateMonitor? node, int depth) {
 
   for (MonitorId child in node.children.keys) {
     sink.writeln("$pad$child");
-    _dumpStateMonitor(sink, node.child(child), depth + 1);
+    await _dumpStateMonitor(sink, await node.child(child), depth + 1);
   }
 }

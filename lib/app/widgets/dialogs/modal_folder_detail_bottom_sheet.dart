@@ -37,8 +37,13 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: Dimensions.paddingBottomSheet,
-        child: Column(
+      padding: Dimensions.paddingBottomSheet,
+      child: FutureBuilder(
+        future: widget.cubit.accessMode,
+        builder: (context, snapshot) {
+          final accessMode = snapshot.data ?? AccessMode.blind;
+
+          return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,7 +56,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                 dense: true,
                 onTap: () async => _showRenameDialog(widget.data),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.rename),
+                    accessMode, EntryAction.rename),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -66,7 +71,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                     widget.onMoveEntry,
                     widget.onBottomSheetOpen),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.accessMode, EntryAction.move),
+                    accessMode, EntryAction.move),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -96,7 +101,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                     });
                   },
                   enabledValidation: () => widget.isActionAvailableValidator(
-                      widget.cubit.accessMode, EntryAction.delete),
+                      accessMode, EntryAction.delete),
                   disabledMessage: S.current.messageActionNotAvailable,
                   disabledMessageDuration:
                       Constants.notAvailableActionMessageDuration),
@@ -120,7 +125,11 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                       .replaceAll(widget.data.name, '')
                       .trimRight(),
                   textAlign: TextAlign.start),
-            ]));
+            ],
+          );
+        },
+      ),
+    );
   }
 
   AlertDialog buildDeleteFolderAlertDialog(

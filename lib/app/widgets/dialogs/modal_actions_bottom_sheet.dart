@@ -101,10 +101,11 @@ class DirectoryActions extends StatelessWidget {
           continue;
         }
 
-        repo.saveFile(
-            filePath: dstPath,
-            length: srcFile.size,
-            fileByteStream: srcFile.readStream!);
+        await repo.saveFile(
+          filePath: dstPath,
+          length: srcFile.size,
+          fileByteStream: srcFile.readStream!,
+        );
       }
     }
 

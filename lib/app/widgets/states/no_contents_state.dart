@@ -43,17 +43,20 @@ class NoContentsState extends StatelessWidget {
                 Dimensions.spacingVertical,
                 Align(
                   alignment: Alignment.center,
-                  child: Fields.inPageSecondaryMessage(
-                      repository.accessMode == oui.AccessMode.write
-                          ? S.current.messageCreateAddNewItem
-                          : S.current.messageReadOnlyContents,
-                      tags: {
-                        Constants.inlineTextBold: InlineTextStyles.bold,
-                        Constants.inlineTextIcon: InlineTextStyles.icon(
-                            Icons.add_circle,
-                            size: Dimensions.sizeIconBig,
-                            color: Theme.of(context).primaryColor)
-                      }),
+                  child: FutureBuilder(
+                      future: repository.accessMode,
+                      builder: (context, snapshot) =>
+                          Fields.inPageSecondaryMessage(
+                              snapshot.data == oui.AccessMode.write
+                                  ? S.current.messageCreateAddNewItem
+                                  : S.current.messageReadOnlyContents,
+                              tags: {
+                                Constants.inlineTextBold: InlineTextStyles.bold,
+                                Constants.inlineTextIcon: InlineTextStyles.icon(
+                                    Icons.add_circle,
+                                    size: Dimensions.sizeIconBig,
+                                    color: Theme.of(context).primaryColor)
+                              })),
                 ),
               ],
             )));

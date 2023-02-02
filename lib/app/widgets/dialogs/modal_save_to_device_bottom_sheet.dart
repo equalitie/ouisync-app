@@ -80,8 +80,10 @@ class _SaveToDeviceState extends State<SaveToDevice> {
 
       print("Storing file to $destinationPath");
 
-      widget.cubit.downloadFile(
-          sourcePath: widget.data.path, destinationPath: destinationPath);
+      await widget.cubit.downloadFile(
+        sourcePath: widget.data.path,
+        destinationPath: destinationPath,
+      );
 
       Navigator.of(context, rootNavigator: false).pop();
     }

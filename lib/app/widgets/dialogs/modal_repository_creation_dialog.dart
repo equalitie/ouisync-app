@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'dart:async';
 
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
@@ -69,10 +70,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   @override
   void initState() {
-    _validateToken();
-
-    setState(() => _isBlindReplica =
-        _shareToken == null ? false : _shareToken!.mode == AccessMode.blind);
+    unawaited(_init());
 
     if (!_isBlindReplica) {
       _setupBiometrics(widget.isBiometricsAvailable);
@@ -83,13 +81,24 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     super.initState();
   }
 
-  void _validateToken() {
-    final token = widget.initialTokenValue;
+  Future<void> _init() async {
+    await _validateToken();
 
+    final accessModeFuture = _shareToken?.mode;
+    final accessMode =
+        (accessModeFuture != null) ? await accessModeFuture : null;
+
+    setState(() {
+      _isBlindReplica = accessMode == AccessMode.blind;
+    });
+  }
+
+  Future<void> _validateToken() async {
+    final token = widget.initialTokenValue;
     if (token == null) return;
 
     try {
-      _shareToken = ShareToken.fromString(token);
+      _shareToken = await ShareToken.fromString(widget.cubit.session, token);
 
       if (_shareToken == null) {
         throw "Failed to construct the token from \"$token\"";
@@ -103,8 +112,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     if (_shareToken == null) return;
 
-    _suggestedName = _shareToken!.suggestedName;
-    _accessModeNotifier.value = _shareToken!.mode.name;
+    _suggestedName = await _shareToken!.suggestedName;
+    _accessModeNotifier.value = (await _shareToken!.mode).name;
 
     _updateNameController(_suggestedName);
 
