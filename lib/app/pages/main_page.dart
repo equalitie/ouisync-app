@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage>
       ValueNotifier<double>(0.0);
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
-  final Future<StateMonitorIntValue> _panicCounter;
+  final Future<StateMonitorIntValue?> _panicCounter;
 
   _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
 
@@ -873,8 +873,6 @@ class _MainPageState extends State<MainPage>
             f: _checkForBiometricsCallback()) ??
         false;
 
-    final panicCounter = await _panicCounter;
-
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -888,7 +886,7 @@ class _MainPageState extends State<MainPage>
             isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
-            panicCounter: panicCounter,
+            panicCounter: _panicCounter,
             natDetection: _natDetection,
           ),
         ),

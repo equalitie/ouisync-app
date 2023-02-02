@@ -25,7 +25,7 @@ class SettingsPage extends StatelessWidget {
   final bool isBiometricsAvailable;
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
-  final StateMonitorIntValue panicCounter;
+  final Future<StateMonitorIntValue?> panicCounter;
   final Future<NatDetection> natDetection;
 
   @override

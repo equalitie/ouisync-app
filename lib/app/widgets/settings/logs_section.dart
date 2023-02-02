@@ -19,7 +19,7 @@ import 'navigation_tile.dart';
 class LogsSection extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
-  final StateMonitorIntValue panicCounter;
+  final Future<StateMonitorIntValue?> panicCounter;
   final Future<NatDetection> natDetection;
 
   LogsSection({
@@ -52,20 +52,32 @@ class LogsSection extends AbstractSettingsSection {
                   builder: (context) => LogViewPage(settings: settings),
                 )),
           ),
-          CustomSettingsTile(child: panicCounter.builder((context, count) {
-            if ((count ?? 0) > 0) {
-              final color = Theme.of(context).colorScheme.error;
-              return SettingsTile(
-                title: Text(
-                  S.current.messageLibraryPanic,
-                  style: TextStyle(color: color),
-                ),
-                leading: Icon(Icons.error, color: color),
-              );
-            } else {
-              return SizedBox.shrink();
-            }
-          })),
+          CustomSettingsTile(
+            child: FutureBuilder(
+              future: panicCounter,
+              builder: (context, snapshot) {
+                final panicCounter = snapshot.data;
+                if (panicCounter == null) {
+                  return SizedBox.shrink();
+                }
+
+                return panicCounter.builder((context, count) {
+                  if ((count ?? 0) > 0) {
+                    final color = Theme.of(context).colorScheme.error;
+                    return SettingsTile(
+                      title: Text(
+                        S.current.messageLibraryPanic,
+                        style: TextStyle(color: color),
+                      ),
+                      leading: Icon(Icons.error, color: color),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                });
+              },
+            ),
+          ),
         ],
       );
 
