@@ -127,7 +127,7 @@ class Settings {
 
     final context = p.Context(style: p.Style.posix);
     final nonAndroidAlternativePath =
-        context.join(alternativeDir.path, 'ouisync_app');
+        context.join(alternativeDir.path, 'ouisync');
 
     final documents = await io.Directory(nonAndroidAlternativePath).create();
     return documents;
