@@ -80,7 +80,24 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
     final localIPv4 = await _networkInfo.getWifiIP();
     emit(state.copyWith(localIPv4: localIPv4 ?? ""));
 
-    final localIPv6 = await _networkInfo.getWifiIPv6();
+    /// The plugin network_info_plus is currently (2023-02-01) missing the
+    /// implementation for this method on desktop platforms (except macOS).
+    ///
+    /// The native implementation doesn't have a method for IPv6, just the one
+    /// for the WiFi IP (getWifiIP), which uses the address family AF_INET
+    /// (Return only IPv4 addresses associated with adapters with IPv4 enabled.),
+    /// or AF_UNSPEC (Return both IPv4 and IPv6 addresses associated with adapters
+    /// with IPv4 or IPv6 enabled.), which doesn't guarantee an IPv6 address can
+    /// be retrieved, and most likely only IPv4 would be available.
+    ///
+    /// The native implementation in the Windows project for the method getWifiIP
+    /// (and where the getWifiIPv6 should be located) can be found here:
+    /// https://github.com/fluttercommunity/plus_plugins/blob/a8d38112e069d738c91dc590d1866a8afc6a4bbd/packages/network_info_plus/network_info_plus/windows/network_info.cpp#L74
+    String? localIPv6;
+    if (Platform.isAndroid || Platform.isIOS) {
+      localIPv6 = await _networkInfo.getWifiIPv6();
+    }
+
     emit(state.copyWith(localIPv6: localIPv6 ?? ""));
 
     // This works also when on mobile network, but doesn't show IPv6 address if
