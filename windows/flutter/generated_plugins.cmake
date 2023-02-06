@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  connectivity_plus_windows
+  connectivity_plus
   desktop_drop
   local_auth_windows
   network_info_plus
@@ -11,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   r_get_ip
   screen_retriever
+  share_plus
   system_tray
   tray_manager
   url_launcher_windows

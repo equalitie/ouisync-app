@@ -108,10 +108,15 @@ class Dimensions {
   static const double radiusMicro = 2.0;
 
   static const double aspectRatioModalDialogButton = 13 / 5;
+  static const double aspectRatioModalDialogButtonDesktop = 34 / 2;
+
   static const double aspectRatioBottomDialogButton = 11 / 3;
 
   static const BoxConstraints sizeConstrainsDialogAction =
       BoxConstraints(minWidth: 98, minHeight: 46.0);
+  static const BoxConstraints sizeConstrainsBottomDialogAction =
+      BoxConstraints(minWidth: 98, minHeight: 46.0);
+
   static const double elevationDialogAction = 0.0;
 
   static const TextStyle textStyleDialogNegativeButton = TextStyle(

@@ -7,12 +7,14 @@ class NegativeButton extends StatelessWidget {
       {required this.text,
       required this.onPressed,
       this.buttonsAspectRatio = Dimensions.aspectRatioModalDialogButton,
+      this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
       Key? key})
       : super(key: key);
 
   final String? text;
   final GestureTapCallback? onPressed;
   final double buttonsAspectRatio;
+  final BoxConstraints buttonConstrains;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class NegativeButton extends StatelessWidget {
                 child: RawMaterialButton(
                   onPressed: onPressed,
                   child: Text((text ?? '').toUpperCase()),
-                  constraints: Dimensions.sizeConstrainsDialogAction,
+                  constraints: buttonConstrains,
                   elevation: Dimensions.elevationDialogAction,
                   textStyle: Dimensions.textStyleDialogNegativeButton,
                 ),

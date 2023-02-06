@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as b;
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -124,11 +124,11 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             trailing: _passwordActions()),
         ListTile(
             leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
-            title: Badge(
+            title: b.Badge(
                 showBadge: _isUnsavedNewPassword,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
-                position: BadgePosition.topEnd(),
+                position: b.BadgePosition.topEnd(),
                 child: Text(S.current.titleChangePassword)),
             trailing: Icon(Icons.chevron_right_rounded, color: Colors.black),
             onTap: () async => await _getNewPassword()),
@@ -253,11 +253,11 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         SwitchListTile.adaptive(
             value: _secureWithBiometricsState,
             secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
-            title: Badge(
+            title: b.Badge(
                 showBadge: _isUnsavedBiometrics,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
-                position: BadgePosition.topEnd(),
+                position: b.BadgePosition.topEnd(),
                 child: Text(S.current.messageSecureUsingBiometrics)),
             onChanged: ((useBiometrics) {
               setState(() {
