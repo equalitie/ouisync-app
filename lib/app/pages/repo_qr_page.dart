@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -42,7 +44,12 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
   }
 
   Widget _getQRCodeImage(String tokenLink) {
-    final qrCodeSize = MediaQuery.of(context).size.width * 0.6;
+    double qrCodeSize = 0.0;
+    qrCodeSize = (Platform.isAndroid || Platform.isIOS
+            ? MediaQuery.of(context).size.width
+            : MediaQuery.of(context).size.height) *
+        0.6;
+
     final qrCodeImage = QrImage(
       data: tokenLink,
       errorCorrectionLevel: QrErrorCorrectLevel.M,
