@@ -446,15 +446,16 @@ class Fields {
               if (icon != null)
                 _iconBase(icon, size: iconSize, color: iconColor),
               Dimensions.spacingHorizontal,
-              Expanded(child: Text(text,
-                  textAlign: textAlign,
-                  overflow: textOverflow,
-                  softWrap: textSoftWrap,
-                  maxLines: textMaxLines,
-                  style: TextStyle(
-                      fontSize: textFontSize,
-                      fontWeight: textFontWeight,
-                      color: textColor)))
+              Expanded(
+                  child: Text(text,
+                      textAlign: textAlign,
+                      overflow: textOverflow,
+                      softWrap: textSoftWrap,
+                      maxLines: textMaxLines,
+                      style: TextStyle(
+                          fontSize: textFontSize,
+                          fontWeight: textFontWeight,
+                          color: textColor)))
             ],
           ));
 
