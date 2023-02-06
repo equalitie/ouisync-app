@@ -7,6 +7,7 @@ class PositiveButton extends StatelessWidget {
       {required this.text,
       required this.onPressed,
       this.buttonsAspectRatio = Dimensions.aspectRatioModalDialogButton,
+      this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
       this.focusNode,
       Key? key})
       : super(key: key);
@@ -14,6 +15,7 @@ class PositiveButton extends StatelessWidget {
   final String? text;
   final GestureTapCallback? onPressed;
   final double buttonsAspectRatio;
+  final BoxConstraints buttonConstrains;
   final FocusNode? focusNode;
 
   @override
@@ -30,7 +32,7 @@ class PositiveButton extends StatelessWidget {
                         child: RawMaterialButton(
                             onPressed: onPressed,
                             child: Text((text ?? '').toUpperCase()),
-                            constraints: Dimensions.sizeConstrainsDialogAction,
+                            constraints: buttonConstrains,
                             elevation: Dimensions.elevationDialogAction,
                             fillColor: _fillColorStatus(context),
                             shape: const RoundedRectangleBorder(
