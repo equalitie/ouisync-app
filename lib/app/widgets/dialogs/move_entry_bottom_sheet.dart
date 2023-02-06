@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -10,7 +12,7 @@ import '../widgets.dart';
 typedef MoveEntryCallback = void Function(
     String origin, String path, EntryType type);
 
-class MoveEntryDialog extends StatelessWidget {
+class MoveEntryDialog extends StatefulWidget {
   const MoveEntryDialog(
     this._repo, {
     required this.origin,
@@ -28,8 +30,25 @@ class MoveEntryDialog extends StatelessWidget {
   final MoveEntryCallback onMoveEntry;
 
   @override
+  State<MoveEntryDialog> createState() => _MoveEntryDialogState();
+}
+
+class _MoveEntryDialogState extends State<MoveEntryDialog> {
+  final bodyKey = GlobalKey();
+
+  Size? widgetSize;
+  Size? screenSize;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => afterBuild(context));
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
+      key: bodyKey,
       padding: Dimensions.paddingBottomSheet,
       height: 160.0,
       decoration: Dimensions.decorationBottomSheetAlternative,
@@ -39,9 +58,10 @@ class MoveEntryDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.iconLabel(
-              icon: Icons.drive_file_move_outlined, text: getBasename(path)),
+              icon: Icons.drive_file_move_outlined,
+              text: getBasename(widget.path)),
           Fields.constrainedText(
-              S.current.messageMoveEntryOrigin(getDirname(path)),
+              S.current.messageMoveEntryOrigin(getDirname(widget.path)),
               fontWeight: FontWeight.w800),
           _selectActions(context)
         ],
@@ -49,56 +69,67 @@ class MoveEntryDialog extends StatelessWidget {
     );
   }
 
-  _selectActions(context) => _repo.builder((state) {
-        bool canMove = false;
-        final folder = _repo.currentFolder;
+  void afterBuild(BuildContext context) {
+    screenSize = MediaQuery.of(context).size;
 
-        if (folder.path != origin && folder.path != path) {
+    final widgetContext = bodyKey.currentContext;
+    if (widgetContext == null) return;
+
+    widgetSize = widgetContext.size;
+  }
+
+  _selectActions(context) => widget._repo.builder((state) {
+        bool canMove = false;
+        final folder = widget._repo.currentFolder;
+
+        if (folder.path != widget.origin && folder.path != widget.path) {
           canMove = true;
         }
 
+        final aspectRatio = _getButtonAspectRatio();
         return Fields.dialogActions(context,
-            buttons: _actions(context, canMove),
+            buttons: _actions(context, canMove, aspectRatio),
             padding: const EdgeInsets.only(top: 0.0),
             mainAxisAlignment: MainAxisAlignment.end);
       });
 
-  //_selectActions(context) {
-  //  return BlocBuilder(
-  //    bloc: BlocProvider.of<DirectoryCubit>(context),
-  //    builder: (context, state) {
-  //      bool canMove = false;
-
-  //      if (state is DirectoryReloaded) {
-  //        if (state.path != origin && state.path != path) {
-  //          canMove = true;
-  //        }
-  //      }
-
-  //      return Fields.dialogActions(context,
-  //        buttons: _actions(context, canMove),
-  //        padding: const EdgeInsets.only(top: 0.0),
-  //        mainAxisAlignment: MainAxisAlignment.end
-  //      );
-  //    }
-  //  );
-  //}
-
-  List<Widget> _actions(context, canMove) => [
+  List<Widget> _actions(
+          BuildContext context, bool canMove, double aspectRatio) =>
+      [
         NegativeButton(
+            buttonsAspectRatio: aspectRatio,
+            buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
             text: S.current.actionCancel,
             onPressed: () => _cancelMoving(context)),
         PositiveButton(
+            buttonsAspectRatio: aspectRatio,
+            buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
             text: S.current.actionMove,
-            onPressed:
-                canMove ? () => onMoveEntry.call(origin, path, type) : null)
+            onPressed: canMove
+                ? () => widget.onMoveEntry
+                    .call(widget.origin, widget.path, widget.type)
+                : null)
 
         /// If the entry can't be moved (the user selected the same entry/path, for example)
         /// Then null is used instead of the function, which disable the button.
       ];
 
+  double _getButtonAspectRatio() {
+    if (Platform.isWindows || Platform.isLinux) {
+      if (widgetSize == null) {
+        return Dimensions.aspectRatioModalDialogButtonDesktop;
+      }
+
+      final height = widgetSize!.height * 0.6;
+      final width = widgetSize!.width;
+      return width / height;
+    }
+
+    return Dimensions.aspectRatioBottomDialogButton;
+  }
+
   void _cancelMoving(context) {
-    onBottomSheetOpen.call(null, '');
+    widget.onBottomSheetOpen.call(null, '');
     Navigator.of(context).pop('');
   }
 }
