@@ -761,26 +761,35 @@ class _MainPageState extends State<MainPage>
   Future<void> _unlockRepositoryCallback(
       {required String databaseId, required String repositoryName}) async {
     final databaseId = widget.settings.getDatabaseId(repositoryName);
-    final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        f: Biometrics.getRepositoryPassword(databaseId: databaseId));
 
-    if (biometricsResult.exception != null) {
-      loggy.app(biometricsResult.exception);
+    BiometricsResult biometricsResult = BiometricsResult(value: null);
+
+    // Currently, only Android and iOS support biometrics, no desktop platforms.
+    if (io.Platform.isAndroid || io.Platform.isIOS) {
+      biometricsResult =
+          await Dialogs.executeFutureWithLoadingDialog<BiometricsResult>(
+              context,
+              f: Biometrics.getRepositoryPassword(databaseId: databaseId));
+
+      if (biometricsResult.exception != null) {
+        loggy.app(biometricsResult.exception);
+        return;
+      }
+    }
+
+    if (biometricsResult.value != null && biometricsResult.value!.isNotEmpty) {
+      // Unlock using biometrics
+      await Dialogs.executeFutureWithLoadingDialog(context,
+          f: _unlockRepository(
+              repositoryName: repositoryName,
+              password: biometricsResult.value!));
+
       return;
     }
 
-    if (biometricsResult.value?.isEmpty ?? true) {
-      // Unlock manually
-      await _getRepositoryPasswordDialog(
-          databaseId: databaseId, repositoryName: repositoryName);
-      return;
-    }
-
-    // Unlock using biometrics
-    await Dialogs.executeFutureWithLoadingDialog(context,
-        f: _unlockRepository(
-            repositoryName: repositoryName, password: biometricsResult.value!));
+    // Unlock manually
+    await _getRepositoryPasswordDialog(
+        databaseId: databaseId, repositoryName: repositoryName);
   }
 
   Future<void> _getRepositoryPasswordDialog(
