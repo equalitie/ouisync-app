@@ -20,10 +20,10 @@ jobs:
           toolchain: stable
       - name: Adding windows target (x86_64-pc-windows-gnu)
         run: rustup target add x86_64-pc-windows-gnu
-      - name: Building OuiSync library
-        run: |
-         cd ouisync-plugin\ouisync
-         cargo build --release -p ouisync-ffi
+      # - name: Building OuiSync library
+      #   run: |
+      #    cd ouisync-plugin\ouisync
+      #    cargo build --release -p ouisync-ffi
       - name: Generating Rust FFI bindings for the library, to be used in the OuiSync plugin.
         run: |
          cd ouisync-plugin\ouisync
@@ -45,7 +45,8 @@ jobs:
 
       - name: Run tests
         env:
-          OUISYNC_LIB: 'D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll'
+          # OUISYNC_LIB: 'D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll'
+          OUISYNC_LIB: 'D:\a\ouisync-app\ouisync-app\build\windows\plugins\ouisync-plugin\Release\ouisync_ffi.dll'
         run: |
           flutter test
 
