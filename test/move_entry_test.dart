@@ -11,33 +11,33 @@ import 'package:path/path.dart' as p;
 // TODO Convert from unit test to integration test
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  // TestWidgetsFlutterBinding.ensureInitialized();
 
-  late Session session;
-  late RepoCubit repository;
+  // late Session session;
+  // late RepoCubit repository;
 
-  setUp(() async {
-    final dir = await io.Directory.systemTemp.createTemp();
-    final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
-    session = await Session.open(dir.path);
+  // setUp(() async {
+  //   final dir = await io.Directory.systemTemp.createTemp();
+  //   final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
+  //   session = await Session.open(dir.path);
 
-    final pluginRepo = await Repository.create(session,
-        store: info.path(), readPassword: null, writePassword: null);
+  //   final pluginRepo = await Repository.create(session,
+  //       store: info.path(), readPassword: null, writePassword: null);
 
-    final settings = await Settings.init();
-    final settingsRepoEntry =
-        SettingsRepoEntry(await pluginRepo.hexDatabaseId(), info);
+  //   final settings = await Settings.init();
+  //   final settingsRepoEntry =
+  //       SettingsRepoEntry(await pluginRepo.hexDatabaseId(), info);
 
-    repository = RepoCubit(
-        settingsRepoEntry: settingsRepoEntry,
-        handle: pluginRepo,
-        settings: settings);
-  });
+  //   repository = RepoCubit(
+  //       settingsRepoEntry: settingsRepoEntry,
+  //       handle: pluginRepo,
+  //       settings: settings);
+  // });
 
-  tearDown(() async {
-    await repository.close();
-    session.close();
-  });
+  // tearDown(() async {
+  //   await repository.close();
+  //   session.close();
+  // });
 
   // test('Move folder ok when folder to move is empty', () async {
   //   const folder1Path = '/folder1';
