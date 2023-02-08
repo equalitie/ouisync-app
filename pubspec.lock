@@ -1072,7 +1072,8 @@ packages:
     dependency: "direct main"
     description:
       name: result_type
-      url: "https://pub.dartlang.org"
+      sha256: "6805648c4d01425409e1f0a3c15898ad36c7f1fa6428eddf64c3e06d82a356d1"
+      url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
   rxdart:
