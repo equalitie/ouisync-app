@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+enum ScreenType { handset, tablet, desktop, watch }
+
+enum ScreenSize { small, normal, large, extraLarge }
+
 class PlatformValues {
   static bool get isMobileDevice =>
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
@@ -15,10 +19,6 @@ class PlatformValues {
   static ScreenType getFormFactor(BuildContext context) =>
       _FormFactor.getFormFactor(context);
 }
-
-enum ScreenType { handset, tablet, desktop, watch }
-
-enum ScreenSize { small, normal, large, extraLarge }
 
 class _FormFactor {
   static double desktop = 900;
