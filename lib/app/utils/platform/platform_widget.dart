@@ -7,11 +7,11 @@ abstract class PlatformWidget<M extends Widget, D extends Widget>
   @override
   Widget build(BuildContext context) {
     if (PlatformValues.isMobileDevice) {
-      return mobileWidget(context);
+      return buildMobileWidget(context);
     }
-    return desktopWidget(context);
+    return buildDesktopWidget(context);
   }
 
-  M mobileWidget(BuildContext context);
-  D desktopWidget(BuildContext context);
+  M buildMobileWidget(BuildContext context);
+  D buildDesktopWidget(BuildContext context);
 }
