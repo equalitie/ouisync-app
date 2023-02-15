@@ -14,15 +14,15 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
-import 'navigation_tile.dart';
+import 'navigation_tile_mobile.dart';
 
-class LogsSection extends AbstractSettingsSection {
+class LogsSectionMobile extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntValue panicCounter;
   final Future<NatDetection> natDetection;
 
-  LogsSection({
+  LogsSectionMobile({
     required this.settings,
     required this.repos,
     required this.panicCounter,
@@ -33,17 +33,17 @@ class LogsSection extends AbstractSettingsSection {
   Widget build(BuildContext context) => SettingsSection(
         title: Text(S.current.titleLogs),
         tiles: [
-          NavigationTile(
+          NavigationTileMobile(
             title: Text(S.current.actionSave),
             leading: Icon(Icons.save),
             onPressed: _saveLogs,
           ),
-          NavigationTile(
+          NavigationTileMobile(
             title: Text(S.current.actionShare),
             leading: Icon(Icons.share),
             onPressed: _shareLogs,
           ),
-          NavigationTile(
+          NavigationTileMobile(
             title: Text(S.current.messageView),
             leading: Icon(Icons.visibility),
             onPressed: (context) => Navigator.push(

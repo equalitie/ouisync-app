@@ -11,15 +11,16 @@ import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
 import '../../widgets/dialogs/unlock_dialog.dart';
-import 'navigation_tile.dart';
+import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
 
-class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
+class RepositorySectionMobile extends AbstractSettingsSection
+    with OuiSyncAppLogger {
   final ReposCubit repos;
   final bool isBiometricsAvailable;
   final void Function(RepoCubit) onShareRepository;
 
-  RepositorySection(
+  RepositorySectionMobile(
       {required this.repos,
       required this.isBiometricsAvailable,
       required this.onShareRepository});
@@ -77,7 +78,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       );
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
-      NavigationTile(
+      NavigationTileMobile(
           title: Text(S.current.actionRename),
           leading: Icon(Icons.edit),
           onPressed: (context) async {
@@ -103,7 +104,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
           });
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
-      NavigationTile(
+      NavigationTileMobile(
         title: Text(S.current.actionShare),
         leading: Icon(Icons.share),
         onPressed: (context) {
@@ -112,7 +113,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       );
 
   Widget _buildSecurityTile(BuildContext parentContext, RepoCubit repo) =>
-      NavigationTile(
+      NavigationTileMobile(
           title: Text(S.current.titleSecurity),
           leading: Icon(Icons.password),
           onPressed: (context) async {
@@ -246,7 +247,7 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
   }
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repo) =>
-      NavigationTile(
+      NavigationTileMobile(
         title: Text(S.current.actionDelete,
             style: const TextStyle(color: Constants.dangerColor)),
         leading: Icon(Icons.delete, color: Constants.dangerColor),

@@ -9,12 +9,12 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peer_list.dart';
 import '../../utils/utils.dart';
-import 'navigation_tile.dart';
+import 'navigation_tile_mobile.dart';
 
-class NetworkSection extends AbstractSettingsSection {
+class NetworkSectionMobile extends AbstractSettingsSection {
   final Future<NatDetection> _natDetection;
 
-  NetworkSection(this._natDetection);
+  NetworkSectionMobile(this._natDetection);
 
   @override
   Widget build(BuildContext context) => SettingsSection(
@@ -161,7 +161,7 @@ class NetworkSection extends AbstractSettingsSection {
   AbstractSettingsTile _buildPeerListTile(BuildContext context) =>
       CustomSettingsTile(
         child: BlocBuilder<PeerSetCubit, PeerSet>(
-          builder: (context, state) => NavigationTile(
+          builder: (context, state) => NavigationTileMobile(
               leading: Icon(Icons.people),
               title: Text(S.current.labelPeers),
               value: Text(state.stats()),

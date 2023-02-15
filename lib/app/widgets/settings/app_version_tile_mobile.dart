@@ -9,18 +9,19 @@ import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/click_counter.dart';
 
-class AppVersionTile extends StatefulWidget {
+class AppVersionTileMobile extends StatefulWidget {
   final Session session;
   final Widget title;
   final Widget? leading;
 
-  AppVersionTile({required this.session, required this.title, this.leading});
+  AppVersionTileMobile(
+      {required this.session, required this.title, this.leading});
 
   @override
-  State<AppVersionTile> createState() => _AppVersionTileState();
+  State<AppVersionTileMobile> createState() => _AppVersionTileMobileState();
 }
 
-class _AppVersionTileState extends State<AppVersionTile> {
+class _AppVersionTileMobileState extends State<AppVersionTileMobile> {
   late Future<String> _version;
   final _clickCounter = ClickCounter(timeoutMs: 3000);
 

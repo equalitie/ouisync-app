@@ -40,9 +40,9 @@ export 'states/missing_repo_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 
-export 'settings/about_section.dart';
-export 'settings/logs_section.dart';
-export 'settings/network_section.dart';
-export 'settings/repository_section.dart';
+export 'settings/about_section_mobile.dart';
+export 'settings/logs_section_mobile.dart';
+export 'settings/network_section_mobile.dart';
+export 'settings/repository_section_mobile.dart';
 
 export 'log_view.dart';

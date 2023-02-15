@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../utils/platform/platform_widget.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../generated/l10n.dart';
@@ -30,11 +31,11 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(S.current.titleSettings),
-          elevation: 0.0,
-        ),
-        body: MultiBlocProvider(
+      appBar: AppBar(
+        title: Text(S.current.titleSettings),
+        elevation: 0.0,
+      ),
+      body: MultiBlocProvider(
           providers: [
             BlocProvider<PowerControl>.value(value: powerControl),
             BlocProvider<ConnectivityInfo>(
@@ -53,23 +54,54 @@ class SettingsPage extends StatelessWidget {
             listener: (context, state) {
               unawaited(context.read<ConnectivityInfo>().update());
             },
-            child: SettingsList(
-              sections: [
-                RepositorySection(
-                  repos: reposCubit,
-                  isBiometricsAvailable: isBiometricsAvailable,
-                  onShareRepository: onShareRepository,
-                ),
-                NetworkSection(natDetection),
-                LogsSection(
-                    settings: settings,
-                    repos: reposCubit,
-                    panicCounter: panicCounter,
-                    natDetection: natDetection),
-                AboutSection(repos: reposCubit),
-              ],
+            child: SettingsPlatformBody(
+              reposCubit: reposCubit,
+              settings: settings,
+              isBiometricsAvailable: isBiometricsAvailable,
+              panicCounter: panicCounter,
+              natDetection: natDetection,
+              onShareRepository: onShareRepository,
             ),
-          ),
+          )));
+}
+
+class SettingsPlatformBody extends PlatformWidget<Widget, Widget> {
+  SettingsPlatformBody(
+      {required this.reposCubit,
+      required this.settings,
+      required this.isBiometricsAvailable,
+      required this.panicCounter,
+      required this.natDetection,
+      required this.onShareRepository});
+
+  final ReposCubit reposCubit;
+  final Settings settings;
+  final bool isBiometricsAvailable;
+  final StateMonitorIntValue panicCounter;
+  final Future<NatDetection> natDetection;
+
+  final void Function(RepoCubit) onShareRepository;
+
+  @override
+  Widget buildDesktopWidget(BuildContext context) {
+    // TODO: implement buildDesktopWidget
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildMobileWidget(BuildContext context) =>
+      SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
+        RepositorySectionMobile(
+          repos: reposCubit,
+          isBiometricsAvailable: isBiometricsAvailable,
+          onShareRepository: onShareRepository,
         ),
-      );
+        NetworkSectionMobile(natDetection),
+        LogsSectionMobile(
+            settings: settings,
+            repos: reposCubit,
+            panicCounter: panicCounter,
+            natDetection: natDetection),
+        AboutSectionMobile(repos: reposCubit)
+      ]);
 }
