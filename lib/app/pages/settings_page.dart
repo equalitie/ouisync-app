@@ -54,7 +54,7 @@ class SettingsPage extends StatelessWidget {
             listener: (context, state) {
               unawaited(context.read<ConnectivityInfo>().update());
             },
-            child: SettingsPlatformBody(
+            child: SettingsContainer(
               reposCubit: reposCubit,
               settings: settings,
               isBiometricsAvailable: isBiometricsAvailable,
@@ -63,45 +63,4 @@ class SettingsPage extends StatelessWidget {
               onShareRepository: onShareRepository,
             ),
           )));
-}
-
-class SettingsPlatformBody extends PlatformWidget<Widget, Widget> {
-  SettingsPlatformBody(
-      {required this.reposCubit,
-      required this.settings,
-      required this.isBiometricsAvailable,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.onShareRepository});
-
-  final ReposCubit reposCubit;
-  final Settings settings;
-  final bool isBiometricsAvailable;
-  final StateMonitorIntValue panicCounter;
-  final Future<NatDetection> natDetection;
-
-  final void Function(RepoCubit) onShareRepository;
-
-  @override
-  Widget buildDesktopWidget(BuildContext context) {
-    // TODO: implement buildDesktopWidget
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildMobileWidget(BuildContext context) =>
-      SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
-        RepositorySectionMobile(
-          repos: reposCubit,
-          isBiometricsAvailable: isBiometricsAvailable,
-          onShareRepository: onShareRepository,
-        ),
-        NetworkSectionMobile(natDetection),
-        LogsSectionMobile(
-            settings: settings,
-            repos: reposCubit,
-            panicCounter: panicCounter,
-            natDetection: natDetection),
-        AboutSectionMobile(repos: reposCubit)
-      ]);
 }
