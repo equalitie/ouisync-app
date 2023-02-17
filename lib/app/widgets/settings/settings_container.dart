@@ -63,6 +63,15 @@ class _SettingsContainerState extends State<SettingsContainer>
                   loggy.app('Selected item: ${_selected?.setting.name}');
                 },
                 selectedItem: _selected)),
-        Flexible(flex: 3, child: SettingsDesktopDetail(item: _selected))
+        Flexible(
+            flex: 3,
+            child: SettingsDesktopDetail(
+                item: _selected,
+                reposCubit: widget.reposCubit,
+                settings: widget.settings,
+                panicCounter: widget.panicCounter,
+                natDetection: widget.natDetection,
+                isBiometricsAvailable: widget.isBiometricsAvailable,
+                onShareRepository: widget.onShareRepository))
       ]);
 }

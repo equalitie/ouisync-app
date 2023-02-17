@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 
+import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
+import '../../../utils/utils.dart';
 import 'desktop_settings.dart';
 
 class SettingsDesktopDetail extends StatefulWidget {
-  const SettingsDesktopDetail({required this.item});
+  const SettingsDesktopDetail(
+      {required this.item,
+      required this.reposCubit,
+      required this.settings,
+      required this.panicCounter,
+      required this.natDetection,
+      required this.isBiometricsAvailable,
+      required this.onShareRepository});
 
   final SettingItem? item;
+  final ReposCubit reposCubit;
+  final Settings settings;
+  final StateMonitorIntValue panicCounter;
+  final Future<NatDetection> natDetection;
+  final bool isBiometricsAvailable;
+  final void Function(RepoCubit) onShareRepository;
 
   @override
   State<SettingsDesktopDetail> createState() => _SettingsDesktopDetailState();
@@ -29,7 +44,11 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
 
     switch (setting) {
       case Setting.repository:
-        return RepositoryDesktopDetail(item: widget.item!);
+        return RepositoryDesktopDetail(
+            item: widget.item!,
+            reposCubit: widget.reposCubit,
+            isBiometricsAvailable: widget.isBiometricsAvailable,
+            onShareRepository: widget.onShareRepository);
       case Setting.network:
         return NetworkDesktopDetail(item: widget.item!);
       case Setting.log:
