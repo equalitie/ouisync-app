@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:settings_ui/settings_ui.dart';
 import 'package:result_type/result_type.dart';
+import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -9,8 +9,8 @@ import '../../models/repo_entry.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../widgets/widgets.dart';
 import '../../widgets/dialogs/unlock_dialog.dart';
+import '../../widgets/widgets.dart';
 import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
 
@@ -55,14 +55,10 @@ class RepositorySectionMobile extends AbstractSettingsSection
     BuildContext context,
     RepoCubit repo,
   ) =>
-      SettingsTile.switchTile(
-        initialValue: repo.isDhtEnabled,
-        title: Text(S.current.labelBitTorrentDHT),
-        leading: Icon(Icons.hub),
-        onToggle: (value) {
-          repo.setDhtEnabled(value);
-        },
-      );
+      PlatformDhtSwitch(
+          repository: repo,
+          title: S.current.labelBitTorrentDHT,
+          icon: Icons.hub);
 
   Widget _buildPexSwitch(
     BuildContext context,
