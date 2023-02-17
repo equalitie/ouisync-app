@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
+import '../../../models/models.dart';
 import '../../widgets.dart';
+import '../repository_selector.dart';
 
 class RepositoryDesktopDetail extends StatelessWidget {
   RepositoryDesktopDetail(
@@ -16,11 +19,32 @@ class RepositoryDesktopDetail extends StatelessWidget {
   final void Function(RepoCubit) onShareRepository;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Expanded(
-          child: SizedBox.expand(
-              child: Container(color: Colors.yellow, child: Text(item.name))))
-    ]);
+  Widget build(BuildContext context) => Column(children: [
+        RepositorySelector(reposCubit),
+        _buildTile(context, _buildDhtSwitch),
+        _buildTile(context, _buildPeerExchangeSwitch)
+      ]);
+
+  Widget _buildTile(
+      BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
+    final currentRepo = reposCubit.currentRepo;
+    final widget = currentRepo is OpenRepoEntry
+        ? currentRepo.cubit.builder((repo) => builder(context, repo))
+        : SizedBox.shrink();
+
+    return widget;
   }
+
+  Widget _buildDhtSwitch(BuildContext context, RepoCubit repository) =>
+      PlatformDhtSwitch(
+          repository: repository,
+          title: S.current.labelBitTorrentDHT,
+          icon: Icons.hub);
+
+  Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
+      SwitchListTile.adaptive(
+          value: repository.isPexEnabled,
+          secondary: Icon(Icons.group_add),
+          title: Text(S.current.messagePeerExchange),
+          onChanged: (value) => repository.setPexEnabled(value));
 }
