@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets.dart';
+import 'desktop_settings.dart';
 
 class SettingDesktopItem extends StatelessWidget {
   const SettingDesktopItem(
