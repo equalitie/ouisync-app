@@ -13,6 +13,7 @@ class SettingsDesktopDetail extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
+      required this.onRenameRepository,
       required this.onShareRepository});
 
   final SettingItem? item;
@@ -21,6 +22,8 @@ class SettingsDesktopDetail extends StatefulWidget {
   final StateMonitorIntValue panicCounter;
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
+
+  final Future<void> Function(dynamic context) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
 
   @override
@@ -48,6 +51,7 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             item: widget.item!,
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable,
+            onRenameRepository: widget.onRenameRepository,
             onShareRepository: widget.onShareRepository);
       case Setting.network:
         return NetworkDesktopDetail(item: widget.item!);

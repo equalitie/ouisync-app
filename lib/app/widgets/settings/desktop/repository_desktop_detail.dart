@@ -11,18 +11,22 @@ class RepositoryDesktopDetail extends StatelessWidget {
       {required this.item,
       required this.reposCubit,
       required this.isBiometricsAvailable,
+      required this.onRenameRepository,
       required this.onShareRepository});
 
   final SettingItem item;
   final ReposCubit reposCubit;
   final bool isBiometricsAvailable;
+
+  final Future<void> Function(dynamic context) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
 
   @override
   Widget build(BuildContext context) => Column(children: [
         RepositorySelector(reposCubit),
         _buildTile(context, _buildDhtSwitch),
-        _buildTile(context, _buildPeerExchangeSwitch)
+        _buildTile(context, _buildPeerExchangeSwitch),
+        _buildTile(context, _buildRenameTile)
       ]);
 
   Widget _buildTile(
@@ -46,4 +50,12 @@ class RepositoryDesktopDetail extends StatelessWidget {
           repository: repository,
           title: S.current.messagePeerExchange,
           icon: Icons.group_add);
+
+  Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
+      PlatformRenameTile(
+          reposCubit: reposCubit,
+          repoName: repository.name,
+          title: S.current.actionRename,
+          icon: Icons.edit,
+          onRenameRepository: onRenameRepository);
 }

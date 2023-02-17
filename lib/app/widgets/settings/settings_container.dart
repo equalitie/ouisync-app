@@ -1,7 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../models/models.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
@@ -42,6 +44,7 @@ class _SettingsContainerState extends State<SettingsContainer>
         RepositorySectionMobile(
           repos: widget.reposCubit,
           isBiometricsAvailable: widget.isBiometricsAvailable,
+          onRenameRepository: _renameRepo,
           onShareRepository: widget.onShareRepository,
         ),
         NetworkSectionMobile(widget.natDetection),
@@ -72,6 +75,36 @@ class _SettingsContainerState extends State<SettingsContainer>
                 panicCounter: widget.panicCounter,
                 natDetection: widget.natDetection,
                 isBiometricsAvailable: widget.isBiometricsAvailable,
+                onRenameRepository: _renameRepo,
                 onShareRepository: widget.onShareRepository))
       ]);
+
+  Future<void> _renameRepo(context) async {
+    final currentRepo = widget.reposCubit.currentRepo;
+    final repository = currentRepo is OpenRepoEntry ? currentRepo.cubit : null;
+
+    if (repository == null) {
+      return;
+    }
+
+    final newName = await showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          final formKey = GlobalKey<FormState>();
+
+          return ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(
+                context: context,
+                formKey: formKey,
+                repositoryName: repository.name),
+          );
+        });
+
+    if (newName == null || newName.isEmpty) {
+      return;
+    }
+
+    widget.reposCubit.renameRepository(repository.name, newName);
+  }
 }

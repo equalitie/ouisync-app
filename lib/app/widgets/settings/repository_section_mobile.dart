@@ -18,11 +18,13 @@ class RepositorySectionMobile extends AbstractSettingsSection
     with OuiSyncAppLogger {
   final ReposCubit repos;
   final bool isBiometricsAvailable;
+  final Future<void> Function(BuildContext) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
 
   RepositorySectionMobile(
       {required this.repos,
       required this.isBiometricsAvailable,
+      required this.onRenameRepository,
       required this.onShareRepository});
 
   @override
@@ -70,30 +72,12 @@ class RepositorySectionMobile extends AbstractSettingsSection
           icon: Icons.group_add);
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
-      NavigationTileMobile(
-          title: Text(S.current.actionRename),
-          leading: Icon(Icons.edit),
-          onPressed: (context) async {
-            final newName = await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) {
-                  final formKey = GlobalKey<FormState>();
-
-                  return ActionsDialog(
-                    title: S.current.messageRenameRepository,
-                    body: RenameRepository(
-                        context: context,
-                        formKey: formKey,
-                        repositoryName: repo.name),
-                  );
-                });
-
-            if (newName == null || newName.isEmpty) {
-              return;
-            }
-
-            repos.renameRepository(repo.name, newName);
-          });
+      PlatformRenameTile(
+          reposCubit: repos,
+          repoName: repo.name,
+          title: S.current.actionRename,
+          icon: Icons.edit,
+          onRenameRepository: onRenameRepository);
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
       NavigationTileMobile(
