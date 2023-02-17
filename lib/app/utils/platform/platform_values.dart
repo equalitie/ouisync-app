@@ -18,6 +18,9 @@ class PlatformValues {
 
   static ScreenType getFormFactor(BuildContext context) =>
       _FormFactor.getFormFactor(context);
+
+  static double getFormFactorMaxWidth(BuildContext context) =>
+      _FormFactor.getFormFactorMaxWidth(context);
 }
 
 class _FormFactor {
@@ -40,5 +43,13 @@ class _FormFactor {
     if (deviceWidth > _FormFactor.tablet) return ScreenSize.large;
     if (deviceWidth > _FormFactor.handset) return ScreenSize.normal;
     return ScreenSize.small;
+  }
+
+  static double getFormFactorMaxWidth(BuildContext context) {
+    double deviceWidth = MediaQuery.of(context).size.shortestSide;
+    if (deviceWidth > _FormFactor.desktop) return desktop;
+    if (deviceWidth > _FormFactor.tablet) return tablet;
+    if (deviceWidth > _FormFactor.handset) return handset;
+    return handset;
   }
 }
