@@ -10,25 +10,26 @@ class PlatformTappableTile extends PlatformWidget {
       required this.repoName,
       required this.title,
       required this.icon,
-      required this.onTap});
+      this.onTap});
 
   final ReposCubit reposCubit;
   final String repoName;
   final String title;
   final IconData icon;
 
-  final Future<void> Function(BuildContext) onTap;
+  final Future<void> Function(BuildContext)? onTap;
 
   @override
   Widget buildDesktopWidget(BuildContext context) => ListTile(
       title: Text(title),
       leading: Icon(icon),
-      trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: () async => await onTap(context));
+      trailing: onTap != null ? const Icon(Icons.keyboard_arrow_right) : null,
+      onTap: onTap != null ? () async => await onTap!(context) : null);
 
   @override
   Widget buildMobileWidget(BuildContext context) => NavigationTileMobile(
       title: Text(title),
       leading: Icon(icon),
-      onPressed: (context) async => await onTap(context));
+      onPressed:
+          onTap != null ? (context) async => await onTap!(context) : null);
 }
