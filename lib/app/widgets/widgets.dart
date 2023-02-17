@@ -49,4 +49,6 @@ export 'settings/network_section_mobile.dart';
 export 'settings/repository_section_mobile.dart';
 export 'settings/settings_container.dart';
 
+export 'settings/platform/platform_dht_switch.dart';
+
 export 'log_view.dart';
