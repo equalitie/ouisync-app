@@ -72,12 +72,12 @@ class RepositorySectionMobile extends AbstractSettingsSection
           icon: Icons.group_add);
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
-      PlatformRenameTile(
+      PlatformTappableTile(
           reposCubit: repos,
           repoName: repo.name,
           title: S.current.actionRename,
           icon: Icons.edit,
-          onRenameRepository: onRenameRepository);
+          onTap: onRenameRepository);
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
       NavigationTileMobile(

@@ -52,10 +52,10 @@ class RepositoryDesktopDetail extends StatelessWidget {
           icon: Icons.group_add);
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
-      PlatformRenameTile(
+      PlatformTappableTile(
           reposCubit: reposCubit,
           repoName: repository.name,
           title: S.current.actionRename,
           icon: Icons.edit,
-          onRenameRepository: onRenameRepository);
+          onTap: onRenameRepository);
 }

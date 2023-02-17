@@ -4,31 +4,31 @@ import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
 import '../navigation_tile_mobile.dart';
 
-class PlatformRenameTile extends PlatformWidget {
-  PlatformRenameTile(
+class PlatformTappableTile extends PlatformWidget {
+  PlatformTappableTile(
       {required this.reposCubit,
       required this.repoName,
       required this.title,
       required this.icon,
-      required this.onRenameRepository});
+      required this.onTap});
 
   final ReposCubit reposCubit;
   final String repoName;
   final String title;
   final IconData icon;
 
-  final Future<void> Function(BuildContext) onRenameRepository;
+  final Future<void> Function(BuildContext) onTap;
 
   @override
   Widget buildDesktopWidget(BuildContext context) => ListTile(
       title: Text(title),
       leading: Icon(icon),
       trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: () async => await onRenameRepository(context));
+      onTap: () async => await onTap(context));
 
   @override
   Widget buildMobileWidget(BuildContext context) => NavigationTileMobile(
       title: Text(title),
       leading: Icon(icon),
-      onPressed: (context) async => await onRenameRepository(context));
+      onPressed: (context) async => await onTap(context));
 }
