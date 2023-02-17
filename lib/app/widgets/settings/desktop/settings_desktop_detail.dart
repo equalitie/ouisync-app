@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../utils/platform/platform.dart';
 import 'desktop_settings.dart';
 
 class SettingsDesktopDetail extends StatefulWidget {
@@ -13,8 +14,13 @@ class SettingsDesktopDetail extends StatefulWidget {
 
 class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
   @override
-  Widget build(BuildContext context) =>
-      Center(child: _selectDetailWidget(widget.item?.setting));
+  Widget build(BuildContext context) => Container(
+      height: double.infinity,
+      constraints: BoxConstraints(
+          maxWidth: PlatformValues.getFormFactorMaxWidth(context)),
+      child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+          child: Center(child: _selectDetailWidget(widget.item?.setting))));
 
   Widget _selectDetailWidget(Setting? setting) {
     if (setting == null) {
