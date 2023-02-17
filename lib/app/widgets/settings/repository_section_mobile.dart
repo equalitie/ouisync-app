@@ -57,19 +57,21 @@ class RepositorySectionMobile extends AbstractSettingsSection
     BuildContext context,
     RepoCubit repo,
   ) =>
-      PlatformDhtSwitch(
+      PlatformSwitch(
           repository: repo,
           title: S.current.labelBitTorrentDHT,
-          icon: Icons.hub);
+          icon: Icons.hub,
+          onToggle: (value) => repo.setDhtEnabled(value));
 
   Widget _buildPexSwitch(
     BuildContext context,
     RepoCubit repo,
   ) =>
-      PlatformPeerExchangeSwitch(
+      PlatformSwitch(
           repository: repo,
           title: S.current.messagePeerExchange,
-          icon: Icons.group_add);
+          icon: Icons.group_add,
+          onToggle: (value) => repo.setPexEnabled(value));
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
       PlatformTappableTile(

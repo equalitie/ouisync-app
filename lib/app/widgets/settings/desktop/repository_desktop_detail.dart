@@ -40,16 +40,18 @@ class RepositoryDesktopDetail extends StatelessWidget {
   }
 
   Widget _buildDhtSwitch(BuildContext context, RepoCubit repository) =>
-      PlatformDhtSwitch(
+      PlatformSwitch(
           repository: repository,
           title: S.current.labelBitTorrentDHT,
-          icon: Icons.hub);
+          icon: Icons.hub,
+          onToggle: (value) => repository.setDhtEnabled(value));
 
   Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
-      PlatformPeerExchangeSwitch(
+      PlatformSwitch(
           repository: repository,
           title: S.current.messagePeerExchange,
-          icon: Icons.group_add);
+          icon: Icons.group_add,
+          onToggle: (value) => repository.setPexEnabled(value));
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
       PlatformTappableTile(
