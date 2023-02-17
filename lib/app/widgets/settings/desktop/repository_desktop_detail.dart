@@ -59,5 +59,5 @@ class RepositoryDesktopDetail extends StatelessWidget {
           repoName: repository.name,
           title: S.current.actionRename,
           icon: Icons.edit,
-          onTap: () async => await onRenameRepository(context));
+          onTap: (context) async => await onRenameRepository(context));
 }

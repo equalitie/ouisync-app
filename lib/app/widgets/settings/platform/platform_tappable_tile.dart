@@ -24,9 +24,11 @@ class PlatformTappableTile extends PlatformWidget {
       title: Text(title),
       leading: Icon(icon),
       trailing: onTap != null ? const Icon(Icons.keyboard_arrow_right) : null,
-      onTap: () => onTap);
+      onTap: () => onTap?.call());
 
   @override
   Widget buildMobileWidget(BuildContext context) => NavigationTileMobile(
-      title: Text(title), leading: Icon(icon), onPressed: (context) => onTap);
+      title: Text(title),
+      leading: Icon(icon),
+      onPressed: (param) => onTap?.call(param));
 }
