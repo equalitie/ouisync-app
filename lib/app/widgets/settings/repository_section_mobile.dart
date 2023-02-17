@@ -79,7 +79,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
           repoName: repo.name,
           title: S.current.actionRename,
           icon: Icons.edit,
-          onTap: onRenameRepository);
+          onTap: () async => await onRenameRepository(context));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
       NavigationTileMobile(

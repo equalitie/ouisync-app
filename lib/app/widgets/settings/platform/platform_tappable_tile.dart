@@ -17,19 +17,16 @@ class PlatformTappableTile extends PlatformWidget {
   final String title;
   final IconData icon;
 
-  final Future<void> Function(BuildContext)? onTap;
+  final Function? onTap;
 
   @override
   Widget buildDesktopWidget(BuildContext context) => ListTile(
       title: Text(title),
       leading: Icon(icon),
       trailing: onTap != null ? const Icon(Icons.keyboard_arrow_right) : null,
-      onTap: onTap != null ? () async => await onTap!(context) : null);
+      onTap: () => onTap);
 
   @override
   Widget buildMobileWidget(BuildContext context) => NavigationTileMobile(
-      title: Text(title),
-      leading: Icon(icon),
-      onPressed:
-          onTap != null ? (context) async => await onTap!(context) : null);
+      title: Text(title), leading: Icon(icon), onPressed: (context) => onTap);
 }
