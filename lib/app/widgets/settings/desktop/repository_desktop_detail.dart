@@ -42,9 +42,8 @@ class RepositoryDesktopDetail extends StatelessWidget {
           icon: Icons.hub);
 
   Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
-      SwitchListTile.adaptive(
-          value: repository.isPexEnabled,
-          secondary: Icon(Icons.group_add),
-          title: Text(S.current.messagePeerExchange),
-          onChanged: (value) => repository.setPexEnabled(value));
+      PlatformPeerExchangeSwitch(
+          repository: repository,
+          title: S.current.messagePeerExchange,
+          icon: Icons.group_add);
 }

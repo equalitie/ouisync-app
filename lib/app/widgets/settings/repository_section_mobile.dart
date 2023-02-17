@@ -64,14 +64,10 @@ class RepositorySectionMobile extends AbstractSettingsSection
     BuildContext context,
     RepoCubit repo,
   ) =>
-      SettingsTile.switchTile(
-        initialValue: repo.isPexEnabled,
-        title: Text(S.current.messagePeerExchange),
-        leading: Icon(Icons.group_add),
-        onToggle: (value) {
-          repo.setPexEnabled(value);
-        },
-      );
+      PlatformPeerExchangeSwitch(
+          repository: repo,
+          title: S.current.messagePeerExchange,
+          icon: Icons.group_add);
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
       NavigationTileMobile(
