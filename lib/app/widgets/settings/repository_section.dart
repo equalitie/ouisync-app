@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:result_type/result_type.dart';
@@ -41,10 +42,14 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
       );
 
   AbstractSettingsTile _buildCurrentTile(
-      BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
+    BuildContext context,
+    Widget Function(BuildContext, RepoCubit) builder,
+  ) {
     final currentRepo = repos.currentRepo;
     final widget = currentRepo is OpenRepoEntry
-        ? currentRepo.cubit.builder((repo) => builder(context, repo))
+        ? BlocBuilder<RepoCubit, RepoState>(
+            bloc: currentRepo.cubit,
+            builder: (context, state) => builder(context, currentRepo.cubit))
         : SizedBox.shrink();
 
     return CustomSettingsTile(child: widget);
@@ -54,32 +59,26 @@ class RepositorySection extends AbstractSettingsSection with OuiSyncAppLogger {
     BuildContext context,
     RepoCubit repo,
   ) =>
-      FutureBuilder<bool>(
-        future: repo.isDhtEnabled,
-        builder: (context, snapshot) => SettingsTile.switchTile(
-          initialValue: snapshot.data ?? false,
-          title: Text(S.current.labelBitTorrentDHT),
-          leading: Icon(Icons.hub),
-          onToggle: (value) {
-            repo.setDhtEnabled(value);
-          },
-        ),
+      SettingsTile.switchTile(
+        initialValue: repo.state.isDhtEnabled,
+        title: Text(S.current.labelBitTorrentDHT),
+        leading: Icon(Icons.hub),
+        onToggle: (value) {
+          repo.setDhtEnabled(value);
+        },
       );
 
   Widget _buildPexSwitch(
     BuildContext context,
     RepoCubit repo,
   ) =>
-      FutureBuilder<bool>(
-        future: repo.isPexEnabled,
-        builder: (context, snapshot) => SettingsTile.switchTile(
-          initialValue: snapshot.data ?? false,
-          title: Text(S.current.messagePeerExchange),
-          leading: Icon(Icons.group_add),
-          onToggle: (value) {
-            repo.setPexEnabled(value);
-          },
-        ),
+      SettingsTile.switchTile(
+        initialValue: repo.state.isPexEnabled,
+        title: Text(S.current.messagePeerExchange),
+        leading: Icon(Icons.group_add),
+        onToggle: (value) {
+          repo.setPexEnabled(value);
+        },
       );
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>

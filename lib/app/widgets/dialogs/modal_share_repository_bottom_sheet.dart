@@ -67,15 +67,12 @@ class _ShareRepositoryState extends State<ShareRepository>
                   Fields.bottomSheetHandle(context),
                   Fields.bottomSheetTitle(widget.repository.name),
                   Dimensions.spacingVertical,
-                  FutureBuilder(
-                    future: widget.repository.accessMode,
-                    builder: (context, snapshot) => AccessModeSelector(
-                      currentAccessMode: snapshot.data ?? AccessMode.blind,
-                      availableAccessMode: widget.availableAccessModes,
-                      onChanged: _onChanged,
-                      onDisabledMessage: (String message) =>
-                          showSnackBar(context, message: message),
-                    ),
+                  AccessModeSelector(
+                    currentAccessMode: widget.repository.state.accessMode,
+                    availableAccessMode: widget.availableAccessModes,
+                    onChanged: _onChanged,
+                    onDisabledMessage: (String message) =>
+                        showSnackBar(context, message: message),
                   ),
                   Dimensions.spacingVerticalHalf,
                   _buildAccessModeDescription(_accessMode),

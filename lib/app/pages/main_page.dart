@@ -175,7 +175,7 @@ class _MainPageState extends State<MainPage>
   getContent() {
     final current = _currentRepo;
     if (current is OpenRepoEntry) {
-      current.cubit.getContent();
+      current.cubit.refresh();
     }
   }
 
@@ -321,31 +321,27 @@ class _MainPageState extends State<MainPage>
       return Container();
     }
 
-    return FutureBuilder<bool>(
-      future: current.cubit.canWrite,
-      builder: (context, snapshot) {
-        final canWrite = snapshot.data ?? false;
+    if (!current.cubit.state.canWrite) {
+      return Container();
+    }
 
-        if (!canWrite) {
-          return Container();
-        }
-
-        return FloatingActionButton(
-          heroTag: Constants.heroTagMainPageActions,
-          child: const Icon(Icons.add_rounded),
-          onPressed: () => _showDirectoryActions(context, current),
-        );
-      },
+    return FloatingActionButton(
+      heroTag: Constants.heroTagMainPageActions,
+      child: const Icon(Icons.add_rounded),
+      onPressed: () => _showDirectoryActions(context, current),
     );
   }
 
-  _repositoryContentBuilder(OpenRepoEntry repo) => repo.cubit.consumer((repo) {
-        return _selectLayoutWidget();
-      }, (repo) {
-        while (repo.messages.isNotEmpty) {
-          showSnackBar(context, message: repo.messages.removeAt(0));
-        }
-      });
+  _repositoryContentBuilder(OpenRepoEntry repo) =>
+      BlocConsumer<RepoCubit, RepoState>(
+        bloc: repo.cubit,
+        builder: (context, state) => _selectLayoutWidget(),
+        listener: (context, state) {
+          if (state.message.isNotEmpty) {
+            showSnackBar(context, message: state.message);
+          }
+        },
+      );
 
   Widget _selectLayoutWidget() {
     final current = _currentRepo;
@@ -357,21 +353,14 @@ class _MainPageState extends State<MainPage>
     }
 
     if (current is OpenRepoEntry) {
-      return FutureBuilder(
-        future: current.cubit.canRead,
-        builder: (context, snapshot) {
-          final canRead = snapshot.data ?? false;
+      if (!current.cubit.state.canRead) {
+        return LockedRepositoryState(
+            databaseId: current.databaseId,
+            repositoryName: current.name,
+            unlockRepositoryCallback: _unlockRepositoryCallback);
+      }
 
-          if (!canRead) {
-            return LockedRepositoryState(
-                databaseId: current.databaseId,
-                repositoryName: current.name,
-                unlockRepositoryCallback: _unlockRepositoryCallback);
-          }
-
-          return _contentBrowser(current.cubit);
-        },
-      );
+      return _contentBrowser(current.cubit);
     }
 
     return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -383,7 +372,7 @@ class _MainPageState extends State<MainPage>
     final folder = repo.currentFolder;
 
     if (folder.content.isEmpty) {
-      child = repo.isLoading
+      child = repo.state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : NoContentsState(repository: folder.repo, path: folder.path);
     } else {
@@ -488,30 +477,30 @@ class _MainPageState extends State<MainPage>
   // space at the top, which doesn't look good).
 
   // TODO: Find a better solution
-  Future<dynamic> _showShareRepository(RepoCubit repository) =>
-      showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          constraints: BoxConstraints(maxHeight: 390.0),
-          builder: (_) => ScaffoldMessenger(
-              child: FutureBuilder(
-                  future: repository.accessMode,
-                  builder: (context, snapshot) {
-                    final accessMode = snapshot.data ?? AccessMode.blind;
-                    final accessModes = accessMode == AccessMode.write
-                        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-                        : accessMode == AccessMode.read
-                            ? [AccessMode.blind, AccessMode.read]
-                            : [AccessMode.blind];
+  Future<dynamic> _showShareRepository(RepoCubit repository) {
+    final accessMode = repository.state.accessMode;
+    final accessModes = accessMode == AccessMode.write
+        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+        : accessMode == AccessMode.read
+            ? [AccessMode.blind, AccessMode.read]
+            : [AccessMode.blind];
 
-                    return Scaffold(
-                        backgroundColor: Colors.transparent,
-                        body: ShareRepository(
-                          repository: repository,
-                          availableAccessModes: accessModes,
-                        ));
-                  })));
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: Dimensions.borderBottomSheetTop,
+      constraints: BoxConstraints(maxHeight: 390.0),
+      builder: (_) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ShareRepository(
+            repository: repository,
+            availableAccessModes: accessModes,
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
@@ -642,11 +631,11 @@ class _MainPageState extends State<MainPage>
       return false;
     }
 
-    String? accessModeMessage = await currentRepo.cubit.canRead == false
-        ? S.current.messageAddingFileToLockedRepository
-        : !(await currentRepo.cubit.canWrite)
+    final accessModeMessage = currentRepo.cubit.state.canWrite
+        ? null
+        : currentRepo.cubit.state.canRead
             ? S.current.messageAddingFileToReadRepository
-            : null;
+            : S.current.messageAddingFileToLockedRepository;
 
     if (accessModeMessage != null) {
       await showDialog<bool>(

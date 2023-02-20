@@ -1,9 +1,10 @@
 // ignore_for_file: unnecessary_overrides
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io' as io;
 
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
@@ -11,28 +12,104 @@ import '../../generated/l10n.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
-import 'cubits.dart' as cubits;
 import 'job.dart';
 
-class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
-  bool isLoading = false;
-  final Map<String, Job> uploads = HashMap();
-  final Map<String, Job> downloads = HashMap();
-  final List<String> messages = <String>[];
+class RepoState extends Equatable {
+  final bool isLoading;
+  final Map<String, Job> uploads;
+  final Map<String, Job> downloads;
+  final String message;
+  final bool isDhtEnabled;
+  final bool isPexEnabled;
+  final oui.AccessMode accessMode;
+  final String infoHash;
 
+  RepoState({
+    this.isLoading = false,
+    this.uploads = const {},
+    this.downloads = const {},
+    this.message = "",
+    this.isDhtEnabled = false,
+    this.isPexEnabled = false,
+    this.infoHash = "",
+    this.accessMode = oui.AccessMode.blind,
+  });
+
+  RepoState copyWith({
+    bool? isLoading,
+    Map<String, Job>? uploads,
+    Map<String, Job>? downloads,
+    String? message,
+    bool? isDhtEnabled,
+    bool? isPexEnabled,
+    oui.AccessMode? accessMode,
+    String? infoHash,
+  }) =>
+      RepoState(
+        isLoading: isLoading ?? this.isLoading,
+        uploads: uploads ?? this.uploads,
+        downloads: downloads ?? this.downloads,
+        message: message ?? this.message,
+        isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
+        isPexEnabled: isPexEnabled ?? this.isPexEnabled,
+        accessMode: accessMode ?? this.accessMode,
+        infoHash: infoHash ?? this.infoHash,
+      );
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        uploads,
+        downloads,
+        isDhtEnabled,
+        isPexEnabled,
+        accessMode,
+        infoHash,
+      ];
+
+  bool get canRead => accessMode != oui.AccessMode.blind;
+  bool get canWrite => accessMode == oui.AccessMode.write;
+}
+
+class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
   final Folder _currentFolder = Folder();
   final SettingsRepoEntry _settingsRepoEntry;
   final oui.Repository _handle;
   final Settings _settings;
 
-  RepoCubit({
+  RepoCubit._(
+    this._settingsRepoEntry,
+    this._handle,
+    this._settings,
+    RepoState state,
+  ) : super(state) {
+    _currentFolder.repo = this;
+  }
+
+  static Future<RepoCubit> create({
     required SettingsRepoEntry settingsRepoEntry,
     required oui.Repository handle,
     required Settings settings,
-  })  : _settingsRepoEntry = settingsRepoEntry,
-        _handle = handle,
-        _settings = settings {
-    _currentFolder.repo = this;
+  }) async {
+    var state = RepoState();
+    var name = settingsRepoEntry.name;
+
+    state = state.copyWith(
+      infoHash: await handle.infoHash,
+      accessMode: await handle.accessMode,
+    );
+
+    if (settings.getDhtEnabled(name) ?? true) {
+      await handle.enableDht();
+      state = state.copyWith(isDhtEnabled: true);
+    }
+
+    if (settings.getPexEnabled(name) ?? true) {
+      await handle.enablePex();
+      state = state.copyWith(isPexEnabled: true);
+    }
+
+    return RepoCubit._(settingsRepoEntry, handle, settings, state);
   }
 
   oui.Repository get handle => _handle;
@@ -40,131 +117,114 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
   String get name => _settingsRepoEntry.name;
   RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
   SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
+
   Folder get currentFolder => _currentFolder;
 
-  void loadSettings() {
-    if (_settings.getDhtEnabled(name) ?? true) {
-      handle.enableDht();
-    }
-
-    if (_settings.getPexEnabled(name) ?? true) {
-      handle.enablePex();
-    }
-  }
-
-  Future<bool> get isDhtEnabled => handle.isDhtEnabled;
-
   Future<void> setDhtEnabled(bool value) async {
-    if (await isDhtEnabled == value) {
+    if (state.isDhtEnabled == value) {
       return;
     }
 
     if (value) {
-      await handle.enableDht();
+      await _handle.enableDht();
     } else {
-      await handle.disableDht();
+      await _handle.disableDht();
     }
 
     await _settings.setDhtEnabled(name, value);
 
-    changed();
+    emit(state.copyWith(isDhtEnabled: value));
   }
 
-  Future<bool> get isPexEnabled => handle.isPexEnabled;
-
   Future<void> setPexEnabled(bool value) async {
-    if (await isPexEnabled == value) {
+    if (state.isPexEnabled == value) {
       return;
     }
 
     if (value) {
-      await handle.enablePex();
+      await _handle.enablePex();
     } else {
-      await handle.disablePex();
+      await _handle.disablePex();
     }
 
     await _settings.setPexEnabled(name, true);
 
-    changed();
+    emit(state.copyWith(isPexEnabled: value));
   }
 
   Future<oui.Directory> openDirectory(String path) async {
-    return await oui.Directory.open(handle, path);
+    return await oui.Directory.open(_handle, path);
   }
 
   // This operator is required for the DropdownMenuButton to show entries properly.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is RepoCubit && infoHash == other.infoHash;
+    return other is RepoCubit && state.infoHash == other.state.infoHash;
   }
 
-  Future<oui.AccessMode> get accessMode => handle.accessMode;
-  Future<String> get infoHash => handle.infoHash;
-  Future<bool> get canRead =>
-      accessMode.then((mode) => mode != oui.AccessMode.blind);
-  Future<bool> get canWrite =>
-      accessMode.then((mode) => mode == oui.AccessMode.write);
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
 
-  Future<oui.ShareToken> createShareToken(oui.AccessMode accessMode,
-      {String? password}) async {
-    return await handle.createShareToken(
-        accessMode: accessMode, name: name, password: password);
+  Future<oui.ShareToken> createShareToken(
+    oui.AccessMode accessMode, {
+    String? password,
+  }) async {
+    return await _handle.createShareToken(
+      accessMode: accessMode,
+      name: name,
+      password: password,
+    );
   }
 
   Future<bool> exists(String path) async {
-    return await handle.exists(path);
+    return await _handle.exists(path);
   }
 
-  Future<oui.EntryType?> type(String path) => handle.type(path);
+  Future<oui.EntryType?> type(String path) => _handle.type(path);
 
-  Future<oui.Progress> get syncProgress => handle.syncProgress;
+  Future<oui.Progress> get syncProgress => _handle.syncProgress;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  StateMonitor get stateMonitor => handle.stateMonitor;
+  StateMonitor get stateMonitor => _handle.stateMonitor;
 
   Future<void> navigateTo(String destination) async {
-    update((state) {
-      state.isLoading = true;
-    });
+    emit(state.copyWith(isLoading: true));
+
     _currentFolder.goTo(destination);
-    await _refreshFolder();
-    update((state) {
-      state.isLoading = false;
-    });
+    await refresh();
+
+    emit(state.copyWith(isLoading: false));
   }
 
   Future<bool> createFolder(String folderPath) async {
-    update((state) {
-      state.isLoading = true;
-    });
+    emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.create(handle, folderPath);
+      await oui.Directory.create(_handle, folderPath);
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
       loggy.app('Directory $folderPath creation failed', e, st);
       return false;
     } finally {
-      await _refreshFolder();
+      await refresh();
     }
   }
 
   Future<bool> deleteFolder(String path, bool recursive) async {
-    update((state) {
-      state.isLoading = true;
-    });
+    emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.remove(handle, path, recursive: recursive);
+      await oui.Directory.remove(_handle, path, recursive: recursive);
       return true;
     } catch (e, st) {
       loggy.app('Directory $path deletion failed', e, st);
       return false;
     } finally {
-      await _refreshFolder();
+      await refresh();
     }
   }
 
@@ -173,7 +233,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
-    if (uploads.containsKey(filePath)) {
+    if (state.uploads.containsKey(filePath)) {
       showMessage(S.current.messageFileIsDownloading);
       return;
     }
@@ -186,11 +246,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     }
 
     final job = Job(0, length);
-    update((repo) {
-      repo.uploads[filePath] = job;
-    });
+    emit(state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
 
-    await _refreshFolder();
+    await refresh();
 
     // TODO: We should try to remove the file in case of exception or user cancellation.
 
@@ -208,10 +266,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       return;
     } finally {
       await file.close();
-      await _refreshFolder();
-      update((repo) {
-        repo.uploads.remove(filePath);
-      });
+      await refresh();
+
+      emit(state.copyWith(uploads: state.uploads.withRemoved(filePath)));
     }
 
     if (job.state.cancel) {
@@ -225,7 +282,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     final content = <BaseItem>[];
 
     // If the directory does not exist, the following command will throw.
-    final directory = await oui.Directory.open(handle, path);
+    final directory = await oui.Directory.open(_handle, path);
     final iterator = directory.iterator;
 
     try {
@@ -256,34 +313,48 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     return content;
   }
 
-  Future<bool> setReadWritePassword(RepoMetaInfo info, String oldPassword,
-      String newPassword, oui.ShareToken? shareToken) async {
+  Future<bool> setReadWritePassword(
+    RepoMetaInfo info,
+    String oldPassword,
+    String newPassword,
+    oui.ShareToken? shareToken,
+  ) async {
     final name = info.name;
 
     try {
       await _handle.setReadWriteAccess(
-          oldPassword: oldPassword,
-          newPassword: newPassword,
-          shareToken: shareToken);
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        shareToken: shareToken,
+      );
     } catch (e, st) {
       loggy.app('Password change for repository $name failed', e, st);
       return false;
     }
+
+    // TODO: should we update state.accessMode here ?
 
     return true;
   }
 
   Future<bool> setReadPassword(
-      RepoMetaInfo info, String newPassword, oui.ShareToken? shareToken) async {
+    RepoMetaInfo info,
+    String newPassword,
+    oui.ShareToken? shareToken,
+  ) async {
     final name = info.name;
 
     try {
       await _handle.setReadAccess(
-          newPassword: newPassword, shareToken: shareToken);
+        newPassword: newPassword,
+        shareToken: shareToken,
+      );
     } catch (e, st) {
       loggy.app('Password change for repository $name failed', e, st);
       return false;
     }
+
+    // TODO: should we update state.accessMode here ?
 
     return true;
   }
@@ -293,7 +364,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     var length = 0;
 
     try {
-      file = await oui.File.open(handle, path);
+      file = await oui.File.open(_handle, path);
     } catch (e, st) {
       loggy.app("Open file $path exception (getFileSize)", e, st);
       return length;
@@ -310,14 +381,16 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     return length;
   }
 
-  Future<void> downloadFile(
-      {required String sourcePath, required String destinationPath}) async {
-    if (downloads.containsKey(sourcePath)) {
+  Future<void> downloadFile({
+    required String sourcePath,
+    required String destinationPath,
+  }) async {
+    if (state.downloads.containsKey(sourcePath)) {
       showMessage(S.current.messageFileIsDownloading);
       return;
     }
 
-    final ouisyncFile = await oui.File.open(handle, sourcePath);
+    final ouisyncFile = await oui.File.open(_handle, sourcePath);
     final length = await ouisyncFile.length;
 
     final newFile = io.File(destinationPath);
@@ -328,9 +401,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     int offset = 0;
 
     final job = Job(0, length);
-    update((repo) {
-      repo.downloads[sourcePath] = job;
-    });
+    emit(state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)));
 
     try {
       while (job.state.cancel == false) {
@@ -357,58 +428,50 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       loggy.app('Download file $sourcePath exception', e, st);
       showMessage(S.current.messageDownloadingFileError(sourcePath));
     } finally {
-      update((repo) {
-        repo.downloads.remove(sourcePath);
-      });
+      emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
     }
   }
 
-  Future<bool> moveEntry(
-      {required String source, required String destination}) async {
-    update((state) {
-      state.isLoading = true;
-    });
+  Future<bool> moveEntry({
+    required String source,
+    required String destination,
+  }) async {
+    emit(state.copyWith(isLoading: true));
 
     try {
-      await handle.move(source, destination);
+      await _handle.move(source, destination);
       return true;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      await _refreshFolder();
+      await refresh();
     }
   }
 
   Future<bool> deleteFile(String filePath) async {
-    update((state) {
-      state.isLoading = true;
-    });
+    emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.File.remove(handle, filePath);
+      await oui.File.remove(_handle, filePath);
       return true;
     } catch (e, st) {
       loggy.app('Delete file $filePath failed', e, st);
       return false;
     } finally {
-      await _refreshFolder();
+      await refresh();
     }
   }
 
-  Future<void> getContent() async {
-    await _refreshFolder();
-  }
-
-  Future<void> _refreshFolder() async {
+  Future<void> refresh() async {
     final path = _currentFolder.path;
     bool errorShown = false;
 
     try {
-      while (await canRead) {
+      while (state.canRead) {
         bool success = await _currentFolder.refresh();
 
         if (success) break;
@@ -425,22 +488,21 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
       showMessage(e.toString());
     }
 
-    update((state) {
-      state.isLoading = false;
-    });
+    emit(state.copyWith(isLoading: false));
   }
 
+  StreamSubscription<void> autoRefresh() =>
+      _handle.events.listen((_) => refresh());
+
   void showMessage(String message) {
-    update((state) {
-      state.messages.add(message);
-    });
+    emit(state.copyWith(message: message));
   }
 
   Future<oui.File?> _createFile(String newFilePath) async {
     oui.File? newFile;
 
     try {
-      newFile = await oui.File.create(handle, newFilePath);
+      newFile = await oui.File.create(_handle, newFilePath);
     } catch (e, st) {
       loggy.app('File creation $newFilePath failed', e, st);
     }
@@ -448,12 +510,9 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
     return newFile;
   }
 
-  Future<void> close() async {
-    await handle.close();
-  }
-
   @override
-  // TODO: implement hashCode
-  // ignore: unnecessary_overrides
-  int get hashCode => super.hashCode;
+  Future<void> close() async {
+    await _handle.close();
+    await super.close();
+  }
 }

@@ -38,96 +38,88 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
   Widget build(BuildContext context) {
     return Container(
       padding: Dimensions.paddingBottomSheet,
-      child: FutureBuilder(
-        future: widget.cubit.accessMode,
-        builder: (context, snapshot) {
-          final accessMode = snapshot.data ?? AccessMode.blind;
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Fields.bottomSheetHandle(context),
-              Fields.bottomSheetTitle(S.current.titleFolderDetails),
-              EntryActionItem(
-                iconData: Icons.edit,
-                title: S.current.iconRename,
-                dense: true,
-                onTap: () async => _showRenameDialog(widget.data),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    accessMode, EntryAction.rename),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-              EntryActionItem(
-                iconData: Icons.drive_file_move_outlined,
-                title: S.current.iconMove,
-                dense: true,
-                onTap: () async => _showMoveEntryBottomSheet(
-                    widget.data.path,
-                    EntryType.directory,
-                    widget.onMoveEntry,
-                    widget.onBottomSheetOpen),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    accessMode, EntryAction.move),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-              EntryActionItem(
-                  iconData: Icons.delete_outlined,
-                  title: S.current.iconDelete,
-                  dense: true,
-                  onTap: () async {
-                    await showDialog<bool>(
-                      context: widget.context,
-                      barrierDismissible: false, // user must tap button!
-                      builder: (context) {
-                        return buildDeleteFolderAlertDialog(
-                          context,
-                          widget.cubit,
-                          widget.data.path,
-                        );
-                      },
-                    ).then((result) {
-                      if (result ?? false) {
-                        Navigator.of(context).pop(result);
-                        showSnackBar(context,
-                            message: S.current
-                                .messageFolderDeleted(widget.data.name));
-                      }
-                    });
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.bottomSheetHandle(context),
+          Fields.bottomSheetTitle(S.current.titleFolderDetails),
+          EntryActionItem(
+            iconData: Icons.edit,
+            title: S.current.iconRename,
+            dense: true,
+            onTap: () async => _showRenameDialog(widget.data),
+            enabledValidation: () => widget.isActionAvailableValidator(
+                widget.cubit.state.accessMode, EntryAction.rename),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration:
+                Constants.notAvailableActionMessageDuration,
+          ),
+          EntryActionItem(
+            iconData: Icons.drive_file_move_outlined,
+            title: S.current.iconMove,
+            dense: true,
+            onTap: () async => _showMoveEntryBottomSheet(
+                widget.data.path,
+                EntryType.directory,
+                widget.onMoveEntry,
+                widget.onBottomSheetOpen),
+            enabledValidation: () => widget.isActionAvailableValidator(
+                widget.cubit.state.accessMode, EntryAction.move),
+            disabledMessage: S.current.messageActionNotAvailable,
+            disabledMessageDuration:
+                Constants.notAvailableActionMessageDuration,
+          ),
+          EntryActionItem(
+              iconData: Icons.delete_outlined,
+              title: S.current.iconDelete,
+              dense: true,
+              onTap: () async {
+                await showDialog<bool>(
+                  context: widget.context,
+                  barrierDismissible: false, // user must tap button!
+                  builder: (context) {
+                    return buildDeleteFolderAlertDialog(
+                      context,
+                      widget.cubit,
+                      widget.data.path,
+                    );
                   },
-                  enabledValidation: () => widget.isActionAvailableValidator(
-                      accessMode, EntryAction.delete),
-                  disabledMessage: S.current.messageActionNotAvailable,
-                  disabledMessageDuration:
-                      Constants.notAvailableActionMessageDuration),
-              const Divider(
-                  height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-              Fields.iconLabel(
-                  icon: Icons.info_rounded,
-                  text: S.current.iconInformation,
-                  iconSize: Dimensions.sizeIconBig,
-                  textAlign: TextAlign.start),
-              Fields.autosizedLabeledText(
-                  label: S.current.labelName,
-                  labelFontSize: Dimensions.fontAverage,
-                  text: widget.data.name,
-                  textAlign: TextAlign.start,
-                  textMaxLines: 2),
-              Fields.labeledText(
-                  label: S.current.labelLocation,
-                  labelFontSize: Dimensions.fontAverage,
-                  text: widget.data.path
-                      .replaceAll(widget.data.name, '')
-                      .trimRight(),
-                  textAlign: TextAlign.start),
-            ],
-          );
-        },
+                ).then((result) {
+                  if (result ?? false) {
+                    Navigator.of(context).pop(result);
+                    showSnackBar(context,
+                        message:
+                            S.current.messageFolderDeleted(widget.data.name));
+                  }
+                });
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.cubit.state.accessMode, EntryAction.delete),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration),
+          const Divider(
+              height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
+          Fields.iconLabel(
+              icon: Icons.info_rounded,
+              text: S.current.iconInformation,
+              iconSize: Dimensions.sizeIconBig,
+              textAlign: TextAlign.start),
+          Fields.autosizedLabeledText(
+              label: S.current.labelName,
+              labelFontSize: Dimensions.fontAverage,
+              text: widget.data.name,
+              textAlign: TextAlign.start,
+              textMaxLines: 2),
+          Fields.labeledText(
+              label: S.current.labelLocation,
+              labelFontSize: Dimensions.fontAverage,
+              text:
+                  widget.data.path.replaceAll(widget.data.name, '').trimRight(),
+              textAlign: TextAlign.start),
+        ],
       ),
     );
   }

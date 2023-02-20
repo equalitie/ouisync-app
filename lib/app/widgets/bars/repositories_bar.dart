@@ -110,29 +110,18 @@ class _Picker extends StatelessWidget {
           );
         }
 
-        final accessMode = (repo is OpenRepoEntry)
-            ? repo.cubit.accessMode
-            : Future.value(AccessMode.blind);
+        final icon = Fields.accessModeIcon(repo.accessMode);
+        final color = repo.accessMode == AccessMode.blind
+            ? colorLockedRepo
+            : colorUnlockedRepo;
 
-        return FutureBuilder(
-          future: accessMode,
-          builder: (context, snapshot) {
-            final accessMode = snapshot.data ?? AccessMode.blind;
-
-            final icon = Fields.accessModeIcon(accessMode);
-            final color = accessMode == AccessMode.blind
-                ? colorLockedRepo
-                : colorUnlockedRepo;
-
-            return _buildState(
-              context,
-              borderColor: borderColor,
-              icon: icon,
-              iconColor: colorUnlockedRepo,
-              textColor: color,
-              repoName: name,
-            );
-          },
+        return _buildState(
+          context,
+          borderColor: borderColor,
+          icon: icon,
+          iconColor: colorUnlockedRepo,
+          textColor: color,
+          repoName: name,
         );
       });
 
@@ -172,8 +161,7 @@ class _Picker extends StatelessWidget {
                     onPressed: () async {
                       if (reposCubit.currentRepo == null) return;
 
-                      if (await reposCubit
-                              .currentRepo!.maybeHandle?.accessMode ==
+                      if (reposCubit.currentRepo?.accessMode ==
                           AccessMode.blind) return;
 
                       final repo = reposCubit.currentRepo;
@@ -315,24 +303,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
         },
       );
 
-  Future<void> _enableLockAllRepos() async {
-    bool enable = false;
-
-    for (final repo in _repositories.repos) {
-      if (await repo.accessMode != AccessMode.blind) {
-        enable = true;
-        break;
-      }
-    }
-
-    _lockAllEnable.value = enable;
+  void _enableLockAllRepos() {
+    _lockAllEnable.value =
+        _repositories.repos.any((repo) => repo.accessMode != AccessMode.blind);
   }
 
   Future<void> _lockAllRepositories(BuildContext context) async {
-    final unlockedRepos = _repositories.repos.where((repo) => [
-          AccessMode.read,
-          AccessMode.write
-        ].contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
+    final unlockedRepos = _repositories.repos.where((repo) =>
+        [AccessMode.read, AccessMode.write].contains(repo.accessMode));
 
     final lockAll = await _confirmLockAll(context,
         title: S.current.titleLockAllRepos,
@@ -425,46 +403,41 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           itemBuilder: (context, index) {
             final repo = repos[index];
             final repositoryName = repo.name;
+            final accessMode = repo.accessMode;
 
-            return FutureBuilder(
-                future: repo.accessMode,
-                builder: (context, snapshot) {
-                  final accessMode = snapshot.data ?? AccessMode.blind;
-
-                  return Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                          child: Fields.actionListTile(repositoryName,
-                              subtitle: accessMode.name,
-                              textOverflow: TextOverflow.ellipsis,
-                              textSoftWrap: false, onTap: () {
-                        _repositories.setCurrentByName(repositoryName);
-                        updateSettingsAndPop(context, repositoryName);
-                      },
-                              icon: Fields.accessModeIcon(accessMode),
-                              iconSize: Dimensions.sizeIconAverage,
-                              iconColor: repositoryName == current
-                                  ? Colors.black87
-                                  : Colors.black54,
-                              textColor: repositoryName == current
-                                  ? Colors.black87
-                                  : Colors.black54,
-                              textFontWeight: repositoryName == current
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              dense: true,
-                              visualDensity: VisualDensity.compact)),
-                      if (repo is OpenRepoEntry)
-                        _getActionByAccessMode(
-                          context,
-                          repo.databaseId,
-                          repo.name,
-                          accessMode,
-                        )
-                    ],
-                  );
-                });
+            return Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                    child: Fields.actionListTile(repositoryName,
+                        subtitle: accessMode.name,
+                        textOverflow: TextOverflow.ellipsis,
+                        textSoftWrap: false, onTap: () {
+                  _repositories.setCurrentByName(repositoryName);
+                  updateSettingsAndPop(context, repositoryName);
+                },
+                        icon: Fields.accessModeIcon(accessMode),
+                        iconSize: Dimensions.sizeIconAverage,
+                        iconColor: repositoryName == current
+                            ? Colors.black87
+                            : Colors.black54,
+                        textColor: repositoryName == current
+                            ? Colors.black87
+                            : Colors.black54,
+                        textFontWeight: repositoryName == current
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        dense: true,
+                        visualDensity: VisualDensity.compact)),
+                if (repo is OpenRepoEntry)
+                  _getActionByAccessMode(
+                    context,
+                    repo.databaseId,
+                    repo.name,
+                    accessMode,
+                  )
+              ],
+            );
           });
 
   Row _getActionByAccessMode(
@@ -496,7 +469,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
           await _repositories.lockRepository(repoCubit.settingsRepoEntry);
 
-          await _enableLockAllRepos();
+          _enableLockAllRepos();
         }, color: Colors.black87, size: Dimensions.sizeIconAverage),
         Fields.actionIcon(const Icon(Icons.share), onPressed: () {
           if (repoCubit == null) return;

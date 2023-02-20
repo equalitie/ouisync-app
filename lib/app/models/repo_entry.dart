@@ -10,19 +10,12 @@ abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
-  oui.Repository? get maybeHandle;
-  Future<String?> get infoHash;
+  String? get infoHash;
   Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
 
-  Future<oui.AccessMode> get accessMode {
-    final future = maybeHandle?.accessMode;
-    if (future != null) {
-      return future;
-    } else {
-      return Future.value(oui.AccessMode.blind);
-    }
-  }
+  oui.AccessMode get accessMode =>
+      maybeCubit?.state.accessMode ?? oui.AccessMode.blind;
 
   @override
   List<Object> get props => [name, runtimeType];
@@ -46,10 +39,7 @@ class LoadingRepoEntry extends RepoEntry {
   }
 
   @override
-  oui.Repository? get maybeHandle => null;
-
-  @override
-  Future<String?> get infoHash => Future.value(null);
+  String? get infoHash => null;
 
   @override
   Folder? get currentFolder => null;
@@ -80,13 +70,8 @@ class OpenRepoEntry extends RepoEntry {
 
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 
-  oui.Repository get handle => _cubit.handle;
-
   @override
-  oui.Repository? get maybeHandle => _cubit.handle;
-
-  @override
-  Future<String?> get infoHash => _cubit.infoHash;
+  String? get infoHash => _cubit.state.infoHash;
 
   @override
   Folder? get currentFolder => _cubit.currentFolder;
@@ -110,10 +95,7 @@ class MissingRepoEntry extends RepoEntry {
   Folder? get currentFolder => null;
 
   @override
-  Future<String?> get infoHash => Future.value(null);
-
-  @override
-  oui.Repository? get maybeHandle => null;
+  String? get infoHash => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
@@ -137,10 +119,7 @@ class ErrorRepoEntry extends RepoEntry {
   Folder? get currentFolder => null;
 
   @override
-  Future<String?> get infoHash => Future.value(null);
-
-  @override
-  oui.Repository? get maybeHandle => null;
+  String? get infoHash => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
