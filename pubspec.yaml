@@ -37,7 +37,7 @@ dependencies:
   equatable: ^2.0.3
   external_path: ^1.0.1
   ffi: ^2.0.1
-  file: ^6.1.2
+  file: ^6.1.4
   file_picker: ^5.2.5
   filesystem_picker: ^3.1.0
   firebase_core: ^2.3.0
@@ -175,11 +175,11 @@ flavorizr:
       android:
         applicationId: 'org.equalitie.ouisync'
         firebase:
-          config: './lib/firebase_options.dart' 
+          config: './lib/firebase_options.dart'
 
       ios:
         bundleId: 'org.equalitie.ouisync'
-    
+
     development:
       app:
         name: 'OuiSync-Dev'
@@ -189,7 +189,7 @@ flavorizr:
         customConfig:
           versionNameSuffix: "\"-dev\""
         firebase:
-          config: './lib/firebase_options.dart' 
-      
+          config: './lib/firebase_options.dart'
+
       ios:
         bundleId: 'org.equalitie.ouisync.dev'

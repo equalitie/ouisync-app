@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage>
       ValueNotifier<double>(0.0);
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
-  final Future<StateMonitorIntValue?> _panicCounter;
+  final StateMonitorIntCubit _panicCounter;
 
   _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
 
@@ -68,14 +68,10 @@ class _MainPageState extends State<MainPage>
       settings: settings,
     );
     final powerControl = PowerControl(session, settings);
-    final panicCounter = repositories.rootStateMonitor().then((root) async {
-      final child = await root.child(oui.MonitorId.expectUnique("Session"));
-      if (child != null) {
-        return child.intValue("panic_counter");
-      } else {
-        return null;
-      }
-    });
+    final panicCounter = StateMonitorIntCubit(
+        repositories.rootStateMonitor
+            .child(oui.MonitorId.expectUnique("Session")),
+        "panic_counter");
 
     return _MainPageState._(repositories, powerControl, panicCounter);
   }
@@ -298,31 +294,24 @@ class _MainPageState extends State<MainPage>
       builder: (context, updateExists) =>
           BlocBuilder<PowerControl, PowerControlState>(
         bloc: _powerControl,
-        builder: (context, powerControlState) => FutureBuilder(
-          future: _panicCounter,
-          builder: (context, snapshot) {
-            final panicCounter = snapshot.data;
-            if (panicCounter == null) {
-              return button;
-            }
+        builder: (context, powerControlState) =>
+            BlocBuilder<StateMonitorIntCubit, int?>(
+                bloc: _panicCounter,
+                builder: (context, panicCount) {
+                  Color? color;
 
-            return panicCounter.builder((context, panicCount) {
-              Color? color;
+                  if (updateExists || ((panicCount ?? 0) > 0)) {
+                    color = Constants.errorColor;
+                  } else if (!(powerControlState.isNetworkEnabled ?? true)) {
+                    color = Constants.warningColor;
+                  }
 
-              if (updateExists || ((panicCount ?? 0) > 0)) {
-                color = Constants.errorColor;
-              } else if (!(powerControlState.isNetworkEnabled ?? true)) {
-                color = Constants.warningColor;
-              }
-
-              if (color != null) {
-                return Fields.addBadge(button, color: color);
-              } else {
-                return button;
-              }
-            });
-          },
-        ),
+                  if (color != null) {
+                    return Fields.addBadge(button, color: color);
+                  } else {
+                    return button;
+                  }
+                }),
       ),
     );
   }

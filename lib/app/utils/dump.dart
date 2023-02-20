@@ -5,7 +5,7 @@ import 'package:ouisync_plugin/state_monitor.dart';
 
 import 'ansi_parser.dart';
 
-Future<void> dumpAll(IOSink sink, StateMonitor? rootMonitor) async {
+Future<void> dumpAll(IOSink sink, StateMonitor rootMonitor) async {
   sink.writeln(
       "------------------------- State Monitor -------------------------\n\n");
 
@@ -36,9 +36,11 @@ Future<void> _dumpLogs(IOSink sink) async {
 /// Dump content of the state monitor
 Future<void> _dumpStateMonitor(
   IOSink sink,
-  StateMonitor? node,
+  StateMonitor monitor,
   int depth,
 ) async {
+  final node = await monitor.load();
+
   final pad = '  ' * depth;
   if (node == null) {
     sink.writeln("${pad}null");
@@ -51,6 +53,6 @@ Future<void> _dumpStateMonitor(
 
   for (MonitorId child in node.children.keys) {
     sink.writeln("$pad$child");
-    await _dumpStateMonitor(sink, await node.child(child), depth + 1);
+    await _dumpStateMonitor(sink, monitor.child(child), depth + 1);
   }
 }

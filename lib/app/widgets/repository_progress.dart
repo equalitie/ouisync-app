@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../cubits/cubits.dart';
 
 class RepositoryProgress extends StatelessWidget {
-  final Future<StateMonitor?> _monitor;
+  final StateMonitorCubit? _monitor;
 
   RepositoryProgress(RepoCubit? repo)
-      : _monitor = repo != null ? repo.stateMonitor() : Future.value(null);
+      : _monitor = repo != null ? StateMonitorCubit(repo.stateMonitor) : null;
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-      future: _monitor,
-      builder: (context, snapshot) {
-        final monitor = snapshot.data;
-        if (monitor == null) return shrink();
+  Widget build(BuildContext context) {
+    final monitor = _monitor;
 
-        return monitor.builder((context, monitor) {
-          if (monitor == null) {
-            return shrink();
-          }
+    if (monitor == null) {
+      return shrink();
+    }
+
+    return BlocBuilder<StateMonitorCubit, StateMonitorNode?>(
+        bloc: monitor,
+        builder: (context, node) {
+          if (node == null) return shrink();
 
           final indexInflight =
-              monitor.parseIntValue('index_requests_inflight') ?? 0;
+              node.parseIntValue('index_requests_inflight') ?? 0;
           final blockInflight =
-              monitor.parseIntValue('block_requests_inflight') ?? 0;
+              node.parseIntValue('block_requests_inflight') ?? 0;
 
           if (indexInflight == 0 && blockInflight == 0) {
             return shrink();
@@ -42,7 +45,7 @@ class RepositoryProgress extends StatelessWidget {
             backgroundColor: Colors.white,
           );
         });
-      });
+  }
 
   Widget shrink() {
     return const SizedBox.shrink();

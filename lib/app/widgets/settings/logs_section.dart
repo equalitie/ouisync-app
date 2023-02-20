@@ -19,7 +19,7 @@ import 'navigation_tile.dart';
 class LogsSection extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
-  final Future<StateMonitorIntValue?> panicCounter;
+  final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
 
   LogsSection({
@@ -53,15 +53,9 @@ class LogsSection extends AbstractSettingsSection {
                 )),
           ),
           CustomSettingsTile(
-            child: FutureBuilder(
-              future: panicCounter,
-              builder: (context, snapshot) {
-                final panicCounter = snapshot.data;
-                if (panicCounter == null) {
-                  return SizedBox.shrink();
-                }
-
-                return panicCounter.builder((context, count) {
+            child: BlocBuilder<StateMonitorIntCubit, int?>(
+                bloc: panicCounter,
+                builder: (context, count) {
                   if ((count ?? 0) > 0) {
                     final color = Theme.of(context).colorScheme.error;
                     return SettingsTile(
@@ -74,9 +68,7 @@ class LogsSection extends AbstractSettingsSection {
                   } else {
                     return SizedBox.shrink();
                   }
-                });
-              },
-            ),
+                }),
           ),
         ],
       );
@@ -128,7 +120,8 @@ class LogsSection extends AbstractSettingsSection {
       sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
       sink.writeln("\n");
 
-      final stateMonitor = await repos.session.getRootStateMonitor();
+      final stateMonitor = repos.session.rootStateMonitor;
+
       await dumpAll(sink, stateMonitor);
     } finally {
       await sink.close();

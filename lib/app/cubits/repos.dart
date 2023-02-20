@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
@@ -60,8 +61,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   RepoEntry? get currentRepo => _currentRepo;
 
-  Future<StateMonitor> rootStateMonitor() =>
-      _session.getRootStateMonitor().then((inner) => StateMonitor(inner));
+  StateMonitor get rootStateMonitor => _session.rootStateMonitor;
 
   Folder? get currentFolder {
     return currentRepo?.currentFolder;

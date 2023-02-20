@@ -1,78 +1,67 @@
-import 'package:ouisync_plugin/state_monitor.dart' as oui;
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class StateMonitor {
-  final oui.StateMonitor? _inner;
+import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-  StateMonitor(this._inner);
+class StateMonitorCubit extends Cubit<StateMonitorNode?> {
+  final StateMonitor _monitor;
+  final Subscription _subscription;
 
-  Future<StateMonitor?> child(oui.MonitorId childId) async {
-    final child = await _inner?.child(childId);
-    return (child != null) ? StateMonitor(child) : null;
+  StateMonitorCubit(this._monitor)
+      : _subscription = _monitor.subscribe(),
+        super(null) {
+    unawaited(_init());
   }
 
-  StateMonitorIntValue intValue(String valueName) =>
-      StateMonitorIntValue(_inner, valueName);
+  Future<void> _init() async {
+    await _load();
 
-  Widget builder(Widget Function(BuildContext, oui.StateMonitor?) buildFn) {
-    return _Widget(_inner, buildFn);
+    await for (final _ in _subscription.stream) {
+      await _load();
+    }
   }
-}
 
-class StateMonitorIntValue {
-  final oui.StateMonitor? _inner;
-  final String _valueName;
-
-  StateMonitorIntValue(this._inner, this._valueName);
-
-  Widget builder(Widget Function(BuildContext, int? value) buildFn) {
-    return _Widget(_inner, (BuildContext context, oui.StateMonitor? monitor) {
-      return buildFn(context, monitor?.parseIntValue(_valueName));
-    });
-  }
-}
-
-class _Widget extends StatefulWidget {
-  final oui.StateMonitor? _monitor;
-  final Widget Function(BuildContext, oui.StateMonitor?) _buildFn;
-
-  _Widget(this._monitor, this._buildFn);
-
-  @override
-  State<_Widget> createState() => _WidgetState();
-}
-
-class _WidgetState extends State<_Widget> {
-  oui.Subscription? _subscription;
-
-  @override
-  void dispose() {
-    _subscription?.close();
-    super.dispose();
+  Future<void> _load() async {
+    emit(await _monitor.load());
   }
 
   @override
-  Widget build(BuildContext context) {
-    final monitor = widget._monitor;
-    if (monitor == null) return widget._buildFn(context, null);
+  Future<void> close() async {
+    await _subscription.close();
+    await super.close();
+  }
 
-    _subscription?.close();
-    _subscription = monitor.subscribe();
+  StateMonitorCubit child(MonitorId id) =>
+      StateMonitorCubit(_monitor.child(id));
+}
 
-    final subscription = _subscription;
-    if (subscription == null) return widget._buildFn(context, null);
+class StateMonitorIntCubit extends Cubit<int?> {
+  final StateMonitor _monitor;
+  final String _name;
+  final Subscription _subscription;
 
-    return StreamBuilder<void>(
-        stream: subscription.stream.asBroadcastStream(),
-        builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) =>
-            FutureBuilder<bool>(
-                future: monitor.refresh(),
-                builder: (context, snapshot) {
-                  if (!(snapshot.data ?? false)) {
-                    return widget._buildFn(ctx, null);
-                  }
+  StateMonitorIntCubit(this._monitor, this._name)
+      : _subscription = _monitor.subscribe(),
+        super(null) {
+    unawaited(_init());
+  }
 
-                  return widget._buildFn(ctx, monitor);
-                }));
+  Future<void> _init() async {
+    await _load();
+
+    await for (final _ in _subscription.stream) {
+      await _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final node = await _monitor.load();
+    emit(node?.parseIntValue(_name));
+  }
+
+  @override
+  Future<void> close() async {
+    await _subscription.close();
+    await super.close();
   }
 }

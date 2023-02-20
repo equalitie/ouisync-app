@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -121,9 +122,7 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  Future<cubits.StateMonitor?> stateMonitor() => handle
-      .stateMonitor()
-      .then((inner) => (inner != null) ? cubits.StateMonitor(inner) : null);
+  StateMonitor get stateMonitor => handle.stateMonitor;
 
   Future<void> navigateTo(String destination) async {
     update((state) {
@@ -455,5 +454,6 @@ class RepoCubit extends cubits.WatchSelf<RepoCubit> with OuiSyncAppLogger {
 
   @override
   // TODO: implement hashCode
+  // ignore: unnecessary_overrides
   int get hashCode => super.hashCode;
 }
