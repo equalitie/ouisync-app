@@ -1,4 +1,3 @@
 [submodule "ouisync-plugin"]
 	path = ouisync-plugin
 	url = https://github.com/equalitie/ouisync-plugin
-	branch = interface-protocol
