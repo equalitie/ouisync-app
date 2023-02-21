@@ -4,6 +4,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 
 class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
@@ -13,6 +14,10 @@ class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
 
   @override
   Widget build(BuildContext context) => Container(
+        constraints: PlatformValues.isDesktopDevice
+            ? BoxConstraints(
+                maxWidth: PlatformValues.getFormFactorMaxWidth(context) * 0.7)
+            : null,
         padding: Dimensions.paddingActionBox,
         decoration: const BoxDecoration(
             borderRadius:
