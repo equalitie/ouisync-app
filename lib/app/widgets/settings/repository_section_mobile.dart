@@ -82,13 +82,12 @@ class RepositorySectionMobile extends AbstractSettingsSection
           onTap: (context) async => await onRenameRepository(context));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
-      NavigationTileMobile(
-        title: Text(S.current.actionShare),
-        leading: Icon(Icons.share),
-        onPressed: (context) {
-          onShareRepository(repo);
-        },
-      );
+      PlatformTappableTile(
+          reposCubit: repos,
+          repoName: repo.name,
+          title: S.current.actionShare,
+          icon: Icons.share,
+          onTap: (_) => onShareRepository(repo));
 
   Widget _buildSecurityTile(BuildContext parentContext, RepoCubit repo) =>
       NavigationTileMobile(

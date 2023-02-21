@@ -23,10 +23,14 @@ class RepositoryDesktopDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(children: [
-        RepositorySelector(reposCubit),
+        Row(children: [RepositorySelector(reposCubit)]),
+        SizedBox(height: 20.0),
         _buildTile(context, _buildDhtSwitch),
+        Divider(height: 30.0),
         _buildTile(context, _buildPeerExchangeSwitch),
-        _buildTile(context, _buildRenameTile)
+        Divider(height: 30.0),
+        _buildTile(context, _buildRenameTile),
+        _buildTile(context, _buildShareTile)
       ]);
 
   Widget _buildTile(
@@ -59,5 +63,13 @@ class RepositoryDesktopDetail extends StatelessWidget {
           repoName: repository.name,
           title: S.current.actionRename,
           icon: Icons.edit,
-          onTap: (context) async => await onRenameRepository(context));
+          onTap: (_) async => await onRenameRepository(context));
+
+  Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
+      PlatformTappableTile(
+          reposCubit: reposCubit,
+          repoName: repository.name,
+          title: S.current.actionShare,
+          icon: Icons.share,
+          onTap: (_) => onShareRepository(repository));
 }
