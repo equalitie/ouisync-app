@@ -72,7 +72,8 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);
       case Setting.about:
-        return AboutDesktopDetail(item: widget.item!);
+        return AboutDesktopDetail(
+            item: widget.item!, reposCubit: widget.reposCubit);
     }
   }
 }

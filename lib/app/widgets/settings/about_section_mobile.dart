@@ -5,7 +5,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import 'app_version_tile_mobile.dart';
+import 'app_version_tile.dart';
 
 class AboutSectionMobile extends AbstractSettingsSection {
   final ReposCubit repos;
@@ -17,7 +17,7 @@ class AboutSectionMobile extends AbstractSettingsSection {
         title: Text(S.current.titleAbout),
         tiles: [
           CustomSettingsTile(
-            child: AppVersionTileMobile(
+            child: AppVersionTile(
               session: repos.session,
               leading: Icon(Icons.info_outline),
               title: Text(S.current.labelAppVersion),
