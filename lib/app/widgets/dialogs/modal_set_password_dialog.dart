@@ -110,7 +110,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   textEditingController: _passwordController,
                   obscureText: _obscurePassword,
                   label: S.current.labelPassword,
-                  subffixIcon: _passwordActions(),
+                  suffixIcon: _passwordActions(),
                   hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: validateNoEmpty(
@@ -126,7 +126,7 @@ class _SetPasswordState extends State<SetPassword> with OuiSyncAppLogger {
                   textEditingController: _retypedPasswordController,
                   obscureText: _obscureRetypePassword,
                   label: S.current.labelRetypePassword,
-                  subffixIcon: _retypePasswordActions(),
+                  suffixIcon: _retypePasswordActions(),
                   hint: S.current.messageRepositoryNewPassword,
                   onSaved: (_) {},
                   validator: (retypedPassword) => retypedPasswordValidator(

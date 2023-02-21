@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -78,20 +79,23 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     widgetSize = widgetContext.size;
   }
 
-  _selectActions(context) => widget._repo.builder((state) {
-        bool canMove = false;
-        final folder = widget._repo.currentFolder;
+  _selectActions(context) => BlocBuilder<RepoCubit, RepoState>(
+        bloc: widget._repo,
+        builder: (context, state) {
+          bool canMove = false;
+          final folder = widget._repo.currentFolder;
 
-        if (folder.path != widget.origin && folder.path != widget.path) {
-          canMove = true;
-        }
+          if (folder.path != widget.origin && folder.path != widget.path) {
+            canMove = true;
+          }
 
-        final aspectRatio = _getButtonAspectRatio();
-        return Fields.dialogActions(context,
-            buttons: _actions(context, canMove, aspectRatio),
-            padding: const EdgeInsets.only(top: 0.0),
-            mainAxisAlignment: MainAxisAlignment.end);
-      });
+          final aspectRatio = _getButtonAspectRatio();
+          return Fields.dialogActions(context,
+              buttons: _actions(context, canMove, aspectRatio),
+              padding: const EdgeInsets.only(top: 0.0),
+              mainAxisAlignment: MainAxisAlignment.end);
+        },
+      );
 
   List<Widget> _actions(
           BuildContext context, bool canMove, double aspectRatio) =>

@@ -10,10 +10,12 @@ abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
-  oui.Repository? get maybeHandle;
   String? get infoHash;
   Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
+
+  oui.AccessMode get accessMode =>
+      maybeCubit?.state.accessMode ?? oui.AccessMode.blind;
 
   @override
   List<Object> get props => [name, runtimeType];
@@ -35,9 +37,6 @@ class LoadingRepoEntry extends RepoEntry {
     // FIXME: unused_field
     //_closeAfter = true;
   }
-
-  @override
-  oui.Repository? get maybeHandle => null;
 
   @override
   String? get infoHash => null;
@@ -71,13 +70,8 @@ class OpenRepoEntry extends RepoEntry {
 
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 
-  oui.Repository get handle => _cubit.handle;
-
   @override
-  oui.Repository? get maybeHandle => _cubit.handle;
-
-  @override
-  String? get infoHash => _cubit.infoHash;
+  String? get infoHash => _cubit.state.infoHash;
 
   @override
   Folder? get currentFolder => _cubit.currentFolder;
@@ -104,9 +98,6 @@ class MissingRepoEntry extends RepoEntry {
   String? get infoHash => null;
 
   @override
-  oui.Repository? get maybeHandle => null;
-
-  @override
   RepoMetaInfo get metaInfo => _metaInfo;
 }
 
@@ -129,9 +120,6 @@ class ErrorRepoEntry extends RepoEntry {
 
   @override
   String? get infoHash => null;
-
-  @override
-  oui.Repository? get maybeHandle => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;

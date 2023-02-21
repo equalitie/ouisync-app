@@ -4,25 +4,28 @@ import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/settings.dart';
 
 class UpgradeExistsCubit extends Cubit<bool> with OuiSyncAppLogger {
-  final int _currentProtocolVersion;
+  final Future<int> _currentProtocolVersion;
   final Settings _settings;
 
   UpgradeExistsCubit(this._currentProtocolVersion, this._settings)
       : super(false) {
     Future.microtask(() async {
-      final stored =
-          _settings.getHighestSeenProtocolNumber() ?? _currentProtocolVersion;
-      foundVersion(stored);
+      final current = await _currentProtocolVersion;
+      final stored = _settings.getHighestSeenProtocolNumber() ?? current;
+
+      await foundVersion(stored);
     });
   }
 
   Future<void> foundVersion(int found) async {
-    if (_currentProtocolVersion >= found) {
+    final current = await _currentProtocolVersion;
+
+    if (current >= found) {
       return;
     }
 
     loggy.app(
-        "Detected peer with higher protocol version (our:$_currentProtocolVersion, their:$found)");
+        "Detected peer with higher protocol version (our:$current, their:$found)");
 
     await _settings.setHighestSeenProtocolNumber(found);
 

@@ -98,23 +98,22 @@ class _Picker extends StatelessWidget {
 
         final repo = state.currentRepo;
         final name = _repoName(repo);
-        final icon = Fields.accessModeIcon(repo?.maybeHandle?.accessMode);
 
         if (repo == null) {
           return _buildState(
             context,
             borderColor: borderColor,
-            icon: icon,
+            icon: Fields.accessModeIcon(null),
             iconColor: colorNoRepo,
             textColor: colorNoRepo,
             repoName: name,
           );
         }
 
-        final color =
-            repo is! OpenRepoEntry || repo.cubit.accessMode == AccessMode.blind
-                ? colorLockedRepo
-                : colorUnlockedRepo;
+        final icon = Fields.accessModeIcon(repo.accessMode);
+        final color = repo.accessMode == AccessMode.blind
+            ? colorLockedRepo
+            : colorUnlockedRepo;
 
         return _buildState(
           context,
@@ -134,7 +133,7 @@ class _Picker extends StatelessWidget {
     }
   }
 
-  _buildState(
+  Widget _buildState(
     BuildContext context, {
     required Color borderColor,
     required IconData icon,
@@ -159,16 +158,16 @@ class _Picker extends StatelessWidget {
                     icon: Icon(icon),
                     iconSize: Dimensions.sizeIconSmall,
                     color: iconColor,
-                    onPressed: () {
+                    onPressed: () async {
                       if (reposCubit.currentRepo == null) return;
 
-                      if (reposCubit.currentRepo!.maybeHandle?.accessMode ==
+                      if (reposCubit.currentRepo?.accessMode ==
                           AccessMode.blind) return;
 
                       final repo = reposCubit.currentRepo;
 
                       if (repo is OpenRepoEntry) {
-                        reposCubit.lockRepository(repo.settingsRepoEntry);
+                        await reposCubit.lockRepository(repo.settingsRepoEntry);
                       }
                     }),
                 Dimensions.spacingHorizontal,
@@ -305,16 +304,13 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
       );
 
   void _enableLockAllRepos() {
-    _lockAllEnable.value = _repositories.repos
-        .where((element) => element.maybeHandle?.accessMode != AccessMode.blind)
-        .isNotEmpty;
+    _lockAllEnable.value =
+        _repositories.repos.any((repo) => repo.accessMode != AccessMode.blind);
   }
 
   Future<void> _lockAllRepositories(BuildContext context) async {
-    final unlockedRepos = _repositories.repos.where((repo) => [
-          AccessMode.read,
-          AccessMode.write
-        ].contains(repo.maybeHandle?.accessMode ?? AccessMode.blind));
+    final unlockedRepos = _repositories.repos.where((repo) =>
+        [AccessMode.read, AccessMode.write].contains(repo.accessMode));
 
     final lockAll = await _confirmLockAll(context,
         title: S.current.titleLockAllRepos,
@@ -337,8 +333,11 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
 
     final indicator =
         _getLinearProgressIndicator(S.current.messageLockingAllRepos);
-    Dialogs.executeFutureWithLoadingDialog(context,
-        f: Future.wait(futures), widget: indicator);
+    await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: Future.wait(futures),
+      widget: indicator,
+    );
   }
 
   Future<dynamic> _confirmLockAll(BuildContext context,
@@ -394,21 +393,24 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
   }
 
   Widget _buildRepositoryList(
-          BuildContext context, List<RepoEntry> repos, String? current) =>
+    BuildContext context,
+    List<RepoEntry> repos,
+    String? current,
+  ) =>
       ListView.builder(
           shrinkWrap: true,
           itemCount: repos.length,
           itemBuilder: (context, index) {
             final repo = repos[index];
             final repositoryName = repo.name;
-            AccessMode? accessMode = repo.maybeHandle?.accessMode;
+            final accessMode = repo.accessMode;
 
             return Row(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Expanded(
                     child: Fields.actionListTile(repositoryName,
-                        subtitle: accessMode?.name,
+                        subtitle: accessMode.name,
                         textOverflow: TextOverflow.ellipsis,
                         textSoftWrap: false, onTap: () {
                   _repositories.setCurrentByName(repositoryName);
@@ -465,7 +467,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             return;
           }
 
-          _repositories.lockRepository(repoCubit.settingsRepoEntry);
+          await _repositories.lockRepository(repoCubit.settingsRepoEntry);
 
           _enableLockAllRepos();
         }, color: Colors.black87, size: Dimensions.sizeIconAverage),

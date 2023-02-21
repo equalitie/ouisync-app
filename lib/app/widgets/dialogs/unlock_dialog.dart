@@ -54,7 +54,7 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
                           textEditingController: _passwordController,
                           obscureText: obscure,
                           label: S.current.labelTypePassword,
-                          subffixIcon: Fields.actionIcon(
+                          suffixIcon: Fields.actionIcon(
                               Icon(
                                 obscure
                                     ? Constants.iconVisibilityOn

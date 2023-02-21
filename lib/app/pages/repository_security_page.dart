@@ -318,11 +318,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final oldPassword = _password;
 
     final changePassword = () async {
-      if (_shareToken.mode == AccessMode.write) {
+      final mode = await _shareToken.mode;
+
+      if (mode == AccessMode.write) {
         await repo.setReadWritePassword(
             metaInfo, oldPassword, newPassword, _shareToken);
       } else {
-        assert(_shareToken.mode == AccessMode.read);
+        assert(mode == AccessMode.read);
         await repo.setReadPassword(metaInfo, newPassword, _shareToken);
       }
     }();

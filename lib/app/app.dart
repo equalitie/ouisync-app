@@ -35,7 +35,7 @@ Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
   // and let whoever needs seetings to await for it.
   final settings = await Settings.init();
 
-  final session = await Session.open(configDir);
+  final session = Session.create(configDir);
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -105,7 +105,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
           providers: [
             BlocProvider<UpgradeExistsCubit>(
                 create: (BuildContext context) => UpgradeExistsCubit(
-                    widget.session.currentProtocolVersion, widget.settings)),
+                      widget.session.currentProtocolVersion,
+                      widget.settings,
+                    )),
           ],
           child: DropTarget(
               onDragDone: (detail) {

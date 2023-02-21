@@ -19,7 +19,7 @@ import 'navigation_tile.dart';
 class LogsSection extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
-  final StateMonitorIntValue panicCounter;
+  final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
 
   LogsSection({
@@ -52,20 +52,24 @@ class LogsSection extends AbstractSettingsSection {
                   builder: (context) => LogViewPage(settings: settings),
                 )),
           ),
-          CustomSettingsTile(child: panicCounter.builder((context, count) {
-            if ((count ?? 0) > 0) {
-              final color = Theme.of(context).colorScheme.error;
-              return SettingsTile(
-                title: Text(
-                  S.current.messageLibraryPanic,
-                  style: TextStyle(color: color),
-                ),
-                leading: Icon(Icons.error, color: color),
-              );
-            } else {
-              return SizedBox.shrink();
-            }
-          })),
+          CustomSettingsTile(
+            child: BlocBuilder<StateMonitorIntCubit, int?>(
+                bloc: panicCounter,
+                builder: (context, count) {
+                  if ((count ?? 0) > 0) {
+                    final color = Theme.of(context).colorScheme.error;
+                    return SettingsTile(
+                      title: Text(
+                        S.current.messageLibraryPanic,
+                        style: TextStyle(color: color),
+                      ),
+                      leading: Icon(Icons.error, color: color),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                }),
+          ),
         ],
       );
 
@@ -116,7 +120,9 @@ class LogsSection extends AbstractSettingsSection {
       sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
       sink.writeln("\n");
 
-      await dumpAll(sink, repos.session.getRootStateMonitor());
+      final stateMonitor = repos.session.rootStateMonitor;
+
+      await dumpAll(sink, stateMonitor);
     } finally {
       await sink.close();
     }

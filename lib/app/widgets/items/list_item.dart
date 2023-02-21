@@ -48,8 +48,8 @@ class ListItem extends StatelessWidget {
   }
 
   Widget _buildFileItem(FileItem fileData) {
-    final uploadJob = repository.uploads[fileData.path];
-    final downloadJob = repository.downloads[fileData.path];
+    final uploadJob = repository.state.uploads[fileData.path];
+    final downloadJob = repository.state.downloads[fileData.path];
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
