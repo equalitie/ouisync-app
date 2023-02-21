@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:result_type/result_type.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
-import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../widgets/dialogs/unlock_dialog.dart';
 import '../../widgets/widgets.dart';
 import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
@@ -20,12 +17,14 @@ class RepositorySectionMobile extends AbstractSettingsSection
   final bool isBiometricsAvailable;
   final Future<void> Function(BuildContext) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
+  final Future<void> Function(dynamic context) onRepositorySecurity;
 
   RepositorySectionMobile(
       {required this.repos,
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
-      required this.onShareRepository});
+      required this.onShareRepository,
+      required this.onRepositorySecurity});
 
   @override
   Widget build(BuildContext context) => repos.builder(
@@ -90,138 +89,12 @@ class RepositorySectionMobile extends AbstractSettingsSection
           onTap: (_) => onShareRepository(repo));
 
   Widget _buildSecurityTile(BuildContext parentContext, RepoCubit repo) =>
-      NavigationTileMobile(
-          title: Text(S.current.titleSecurity),
-          leading: Icon(Icons.password),
-          onPressed: (context) async {
-            final repoEntry = repos.currentRepo;
-
-            if (repoEntry == null) {
-              showSnackBar(context, message: S.current.messageNoRepoIsSelected);
-              return;
-            }
-
-            if (repoEntry is! OpenRepoEntry) {
-              showSnackBar(context,
-                  message: S.current.messageRepositoryIsNotOpen);
-              return;
-            }
-
-            final repo = repoEntry.cubit;
-
-            if (isBiometricsAvailable) {
-              final password = await _tryGetBiometricPassword(context, repo);
-
-              if (password != null) {
-                final shareToken =
-                    await _loadShareToken(context, repo, password);
-
-                if (shareToken.mode == AccessMode.blind) {
-                  showSnackBar(context,
-                      message: S.current.messageUnlockRepoFailed);
-                  return;
-                }
-
-                await _pushRepositorySecurityPage(context,
-                    repo: repo,
-                    password: password,
-                    shareToken: shareToken,
-                    isBiometricsAvailable: true,
-                    usesBiometrics: true);
-
-                return;
-              }
-            }
-
-            final result =
-                await _validateManualPassword(parentContext, repo: repo);
-
-            if (result.isFailure) {
-              final message = result.failure;
-
-              if (message != null) {
-                showSnackBar(context, message: message);
-              }
-              return;
-            }
-
-            final password = result.success.password;
-            final shareToken = result.success.shareToken;
-
-            await _pushRepositorySecurityPage(parentContext,
-                repo: repo,
-                password: password,
-                shareToken: shareToken,
-                isBiometricsAvailable: isBiometricsAvailable,
-                usesBiometrics: false);
-          });
-
-  Future<String?> _tryGetBiometricPassword(
-      BuildContext context, RepoCubit repo) async {
-    final biometricsResult =
-        await Biometrics.getRepositoryPassword(databaseId: repo.databaseId);
-
-    if (biometricsResult.exception != null) {
-      loggy.app(biometricsResult.exception);
-      return null;
-    }
-
-    return biometricsResult.value;
-  }
-
-  Future<Result<UnlockResult, String?>> _validateManualPassword(
-      BuildContext context,
-      {required RepoCubit repo}) async {
-    final result = await showDialog<UnlockResult>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageUnlockRepository,
-            body: UnlockDialog<UnlockResult>(
-                context: context,
-                repo: repo,
-                unlockCallback: (repo, {required String password}) =>
-                    _unlockShareToken(context, repo, password))));
-
-    if (result == null) {
-      // User cancelled
-      return Failure(null);
-    }
-
-    if (result.shareToken.mode == AccessMode.blind) {
-      return Failure(S.current.messageUnlockRepoFailed);
-    }
-
-    return Success(result);
-  }
-
-  Future<UnlockResult> _unlockShareToken(
-      BuildContext context, RepoCubit repo, String password) async {
-    final token = await _loadShareToken(context, repo, password);
-    return UnlockResult(password: password, shareToken: token);
-  }
-
-  Future<ShareToken> _loadShareToken(
-          BuildContext context, RepoCubit repo, String password) =>
-      Dialogs.executeFutureWithLoadingDialog(context,
-          f: repo.createShareToken(AccessMode.write, password: password));
-
-  Future<void> _pushRepositorySecurityPage(BuildContext context,
-      {required RepoCubit repo,
-      required String password,
-      required ShareToken shareToken,
-      required bool isBiometricsAvailable,
-      required bool usesBiometrics}) async {
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepositorySecurity(
-              repo: repo,
-              password: password,
-              shareToken: shareToken,
-              isBiometricsAvailable: isBiometricsAvailable,
-              usesBiometrics: usesBiometrics),
-        ));
-  }
+      PlatformTappableTile(
+          reposCubit: repos,
+          repoName: repo.name,
+          title: S.current.titleSecurity,
+          icon: Icons.password,
+          onTap: (_) async => await onRepositorySecurity(parentContext));
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repo) =>
       NavigationTileMobile(

@@ -12,7 +12,8 @@ class RepositoryDesktopDetail extends StatelessWidget {
       required this.reposCubit,
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
-      required this.onShareRepository});
+      required this.onShareRepository,
+      required this.onRepositorySecurity});
 
   final SettingItem item;
   final ReposCubit reposCubit;
@@ -20,6 +21,7 @@ class RepositoryDesktopDetail extends StatelessWidget {
 
   final Future<void> Function(dynamic context) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
+  final Future<void> Function(dynamic context) onRepositorySecurity;
 
   @override
   Widget build(BuildContext context) => Column(children: [
@@ -30,7 +32,9 @@ class RepositoryDesktopDetail extends StatelessWidget {
         _buildTile(context, _buildPeerExchangeSwitch),
         Divider(height: 30.0),
         _buildTile(context, _buildRenameTile),
-        _buildTile(context, _buildShareTile)
+        _buildTile(context, _buildShareTile),
+        Divider(height: 30.0),
+        _buildTile(context, _buildSecurityTile)
       ]);
 
   Widget _buildTile(
@@ -72,4 +76,7 @@ class RepositoryDesktopDetail extends StatelessWidget {
           title: S.current.actionShare,
           icon: Icons.share,
           onTap: (_) => onShareRepository(repository));
+
+  Widget _buildSecurityTile(BuildContext context, RepoCubit repository) =>
+      RepositorySecurityDesktop(onRepositorySecurity: onRepositorySecurity);
 }
