@@ -230,11 +230,13 @@ class _MainPageState extends State<MainPage>
       key: _scaffoldKey,
       appBar: _buildOuiSyncBar(),
       body: WillPopScope(
-          child: Column(children: <Widget>[
-            _repositories.builder(
-                (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
-            Expanded(child: buildMainWidget()),
-          ]),
+          child: Column(
+            children: <Widget>[
+              _repositories.builder(
+                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
+              Expanded(child: buildMainWidget()),
+            ],
+          ),
           onWillPop: _onBackPressed),
       floatingActionButton: _repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),

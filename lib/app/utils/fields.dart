@@ -52,27 +52,47 @@ class Fields {
             text: '<font>$message</font>', textAlign: textAlign, tags: tags));
   }
 
-  static Widget inPageMainMessage(String message,
-          {TextAlign textAlign = TextAlign.center,
-          double fontSize = Dimensions.fontBig,
-          FontWeight fontWeight = FontWeight.bold,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.black,
-          Map<String, StyledTextTagBase>? tags,
-          EdgeInsets padding = Dimensions.paddingInPageMain}) =>
-      _styledTextBase(message, textAlign, fontSize, fontWeight, fontStyle,
-          color, tags, padding);
+  static Widget inPageMainMessage(
+    String message, {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = Dimensions.fontBig,
+    FontWeight fontWeight = FontWeight.bold,
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = Dimensions.paddingInPageMain,
+  }) =>
+      _styledTextBase(
+        message,
+        textAlign,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        color,
+        tags,
+        padding,
+      );
 
-  static Widget inPageSecondaryMessage(String message,
-          {TextAlign textAlign = TextAlign.center,
-          double fontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.black,
-          Map<String, StyledTextTagBase>? tags,
-          EdgeInsets padding = Dimensions.paddingInPageSecondary}) =>
-      _styledTextBase(message, textAlign, fontSize, fontWeight, fontStyle,
-          color, tags, padding);
+  static Widget inPageSecondaryMessage(
+    String message, {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = Dimensions.fontAverage,
+    FontWeight fontWeight = FontWeight.normal,
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = Dimensions.paddingInPageSecondary,
+  }) =>
+      _styledTextBase(
+        message,
+        textAlign,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        color,
+        tags,
+        padding,
+      );
 
   static Widget inPageButton({
     required void Function()? onPressed,
