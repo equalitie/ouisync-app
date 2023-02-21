@@ -15,7 +15,7 @@ class RepositorySecurityDesktop extends StatefulWidget {
 }
 
 class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
-  String _password = '';
+  String _password = 'dummyPassword';
   bool _previewPassword = false;
 
   @override
@@ -70,18 +70,23 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       ]);
 
   Widget _passwordActions() => Wrap(children: [
-        IconButton(
+        PopupMenuButton(
             icon: const Icon(Icons.more_horiz_rounded),
-            padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor,
-            onPressed: _password.isNotEmpty
-                ? () async {
-                    await copyStringToClipboard(_password);
-                    showSnackBar(context,
-                        message: S.current.messagePasswordCopiedClipboard);
-                  }
-                : null)
+            position: PopupMenuPosition.under,
+            itemBuilder: (context) => <PopupMenuEntry<PasswordItem>>[
+                  PopupMenuItem<PasswordItem>(
+                      value: PasswordItem.copy,
+                      child: Text('Copy password'),
+                      onTap: () {}),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<PasswordItem>(
+                      value: PasswordItem.change,
+                      child: Text('Change password'),
+                      onTap: () {})
+                ])
       ]);
 
   void _unlockSecurity() {}
 }
+
+enum PasswordItem { copy, change }
