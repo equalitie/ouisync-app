@@ -119,8 +119,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         ListTile(
             leading: const Icon(Icons.password_rounded, color: Colors.black),
             title: Text(S.current.messagePassword),
-            subtitle:
-                Text(_formattPassword(_password, mask: !_previewPassword)),
+            subtitle: Text(maskPassword(_password, mask: !_previewPassword)),
             trailing: _passwordActions()),
         ListTile(
             leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
@@ -141,7 +140,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 tileColor: Colors.blueGrey.shade100,
                 title: Text(S.current.messageNewPassword),
                 subtitle: Text(
-                    _formattPassword(_newPassword, mask: !_previewNewPassword)),
+                    maskPassword(_newPassword, mask: !_previewNewPassword)),
                 trailing: _newPasswordActions())),
         Visibility(
             visible: _newPassword?.isNotEmpty ?? false,
@@ -162,9 +161,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       })))
             ]))
       ];
-
-  String _formattPassword(String? password, {bool mask = true}) =>
-      (mask ? "*" * (password ?? '').length : password) ?? '';
 
   Widget _passwordActions() => Wrap(children: [
         IconButton(
