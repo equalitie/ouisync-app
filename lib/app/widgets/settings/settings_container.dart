@@ -72,7 +72,7 @@ class _SettingsContainerState extends State<SettingsContainer>
                 },
                 selectedItem: _selected)),
         Flexible(
-            flex: 3,
+            flex: 4,
             child: SettingsDesktopDetail(
                 item: _selected,
                 reposCubit: widget.reposCubit,
