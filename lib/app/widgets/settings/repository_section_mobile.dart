@@ -18,13 +18,15 @@ class RepositorySectionMobile extends AbstractSettingsSection
   final Future<void> Function(BuildContext) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
   final Future<void> Function(dynamic context) onRepositorySecurity;
+  final Future<void> Function(dynamic context) onDeleteRepository;
 
   RepositorySectionMobile(
       {required this.repos,
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
       required this.onShareRepository,
-      required this.onRepositorySecurity});
+      required this.onRepositorySecurity,
+      required this.onDeleteRepository});
 
   @override
   Widget build(BuildContext context) => repos.builder(
@@ -101,33 +103,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
         title: Text(S.current.actionDelete,
             style: const TextStyle(color: Constants.dangerColor)),
         leading: Icon(Icons.delete, color: Constants.dangerColor),
-        onPressed: (context) async {
-          final delete = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(S.current.titleDeleteRepository),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: [Text(S.current.messageConfirmRepositoryDeletion)],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: Text(S.current.actionCloseCapital),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                DangerButton(
-                  text: S.current.actionDeleteCapital,
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            ),
-          );
-
-          if (delete ?? false) {
-            repos.deleteRepository(repo.metaInfo);
-          }
-        },
+        onPressed: (context) async => await onDeleteRepository(context),
       );
 }
 

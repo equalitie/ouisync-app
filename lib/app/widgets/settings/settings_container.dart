@@ -46,12 +46,12 @@ class _SettingsContainerState extends State<SettingsContainer>
   Widget _buildMobileLayout() =>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
         RepositorySectionMobile(
-          repos: widget.reposCubit,
-          isBiometricsAvailable: widget.isBiometricsAvailable,
-          onRenameRepository: _renameRepo,
-          onShareRepository: widget.onShareRepository,
-          onRepositorySecurity: _repositorySecurity,
-        ),
+            repos: widget.reposCubit,
+            isBiometricsAvailable: widget.isBiometricsAvailable,
+            onRenameRepository: _renameRepo,
+            onShareRepository: widget.onShareRepository,
+            onRepositorySecurity: _repositorySecurity,
+            onDeleteRepository: _deleteRepository),
         NetworkSectionMobile(widget.natDetection),
         LogsSectionMobile(
             settings: widget.settings,
@@ -82,7 +82,8 @@ class _SettingsContainerState extends State<SettingsContainer>
                 isBiometricsAvailable: widget.isBiometricsAvailable,
                 onRenameRepository: _renameRepo,
                 onShareRepository: widget.onShareRepository,
-                onRepositorySecurity: _repositorySecurity))
+                onRepositorySecurity: _repositorySecurity,
+                onDeleteRepository: _deleteRepository))
       ]);
 
   Future<void> _renameRepo(context) async {
@@ -238,5 +239,39 @@ class _SettingsContainerState extends State<SettingsContainer>
       BuildContext context, RepoCubit repo, String password) async {
     final token = await _loadShareToken(context, repo, password);
     return UnlockResult(password: password, shareToken: token);
+  }
+
+  Future<void> _deleteRepository(context) async {
+    final currentRepo = widget.reposCubit.currentRepo;
+    final repository = currentRepo is OpenRepoEntry ? currentRepo.cubit : null;
+
+    if (repository == null) {
+      return;
+    }
+    final delete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(S.current.titleDeleteRepository),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [Text(S.current.messageConfirmRepositoryDeletion)],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          DangerButton(
+            text: S.current.actionDeleteCapital,
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (delete ?? false) {
+      widget.reposCubit.deleteRepository(repository.metaInfo);
+    }
   }
 }

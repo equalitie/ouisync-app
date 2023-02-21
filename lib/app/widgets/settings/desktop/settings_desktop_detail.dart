@@ -15,7 +15,8 @@ class SettingsDesktopDetail extends StatefulWidget {
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
       required this.onShareRepository,
-      required this.onRepositorySecurity});
+      required this.onRepositorySecurity,
+      required this.onDeleteRepository});
 
   final SettingItem? item;
   final ReposCubit reposCubit;
@@ -27,6 +28,7 @@ class SettingsDesktopDetail extends StatefulWidget {
   final Future<void> Function(dynamic) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
   final Future<void> Function(dynamic) onRepositorySecurity;
+  final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
   State<SettingsDesktopDetail> createState() => _SettingsDesktopDetailState();
@@ -55,7 +57,8 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             isBiometricsAvailable: widget.isBiometricsAvailable,
             onRenameRepository: widget.onRenameRepository,
             onShareRepository: widget.onShareRepository,
-            onRepositorySecurity: widget.onRepositorySecurity);
+            onRepositorySecurity: widget.onRepositorySecurity,
+            onDeleteRepository: widget.onDeleteRepository);
       case Setting.network:
         return NetworkDesktopDetail(item: widget.item!);
       case Setting.log:

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../../../models/models.dart';
+import '../../../utils/utils.dart';
 import '../../widgets.dart';
 import '../repository_selector.dart';
 
@@ -13,7 +14,8 @@ class RepositoryDesktopDetail extends StatelessWidget {
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
       required this.onShareRepository,
-      required this.onRepositorySecurity});
+      required this.onRepositorySecurity,
+      required this.onDeleteRepository});
 
   final SettingItem item;
   final ReposCubit reposCubit;
@@ -22,6 +24,7 @@ class RepositoryDesktopDetail extends StatelessWidget {
   final Future<void> Function(dynamic context) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
   final Future<void> Function(dynamic context) onRepositorySecurity;
+  final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
   Widget build(BuildContext context) => Column(children: [
@@ -34,7 +37,9 @@ class RepositoryDesktopDetail extends StatelessWidget {
         _buildTile(context, _buildRenameTile),
         _buildTile(context, _buildShareTile),
         Divider(height: 30.0),
-        _buildTile(context, _buildSecurityTile)
+        _buildTile(context, _buildSecurityTile),
+        Divider(height: 30.0),
+        _buildTile(context, _buildDeleteTile),
       ]);
 
   Widget _buildTile(
@@ -79,4 +84,22 @@ class RepositoryDesktopDetail extends StatelessWidget {
 
   Widget _buildSecurityTile(BuildContext context, RepoCubit repository) =>
       RepositorySecurityDesktop(onRepositorySecurity: onRepositorySecurity);
+
+  Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
+      Column(children: [
+        Row(children: [Text('Delete', textAlign: TextAlign.start)]),
+        ListTile(
+            leading: const Icon(Icons.delete, color: Constants.dangerColor),
+            title: Row(children: [
+              TextButton(
+                  onPressed: () async => await onDeleteRepository(context),
+                  child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
+                      child: Text("Delete repository")),
+                  style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white))
+            ]))
+      ]);
 }
