@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../utils/platform/platform_widget.dart';
-import 'package:settings_ui/settings_ui.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -32,7 +31,9 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        title: Text(S.current.titleSettings),
+        title: Text(PlatformValues.isMobileDevice
+            ? S.current.titleSettings
+            : S.current.messageOuiSyncDesktopTitle),
         elevation: 0.0,
       ),
       body: MultiBlocProvider(
