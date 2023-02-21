@@ -60,7 +60,8 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             onRepositorySecurity: widget.onRepositorySecurity,
             onDeleteRepository: widget.onDeleteRepository);
       case Setting.network:
-        return NetworkDesktopDetail(item: widget.item!);
+        return NetworkDesktopDetail(
+            item: widget.item!, natDetection: widget.natDetection);
       case Setting.log:
         return LogsDesktopDetail(item: widget.item!);
       case Setting.feedback:
