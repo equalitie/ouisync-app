@@ -9,10 +9,6 @@ class FeedbackDesktopDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Expanded(
-          child: SizedBox.expand(
-              child: Container(color: Colors.green, child: Text(item.name))))
-    ]);
+    return Column(children: []);
   }
 }

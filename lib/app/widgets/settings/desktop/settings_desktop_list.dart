@@ -59,10 +59,10 @@ final settingsItems = [
       platform: SettingItemPlatform.all),
   SettingItem(
       setting: Setting.log, name: "Logs", platform: SettingItemPlatform.all),
-  SettingItem(
-      setting: Setting.feedback,
-      name: "Feedback",
-      platform: SettingItemPlatform.all),
+  // SettingItem(
+  //     setting: Setting.feedback,
+  //     name: "Feedback",
+  //     platform: SettingItemPlatform.all),
   SettingItem(
       setting: Setting.about, name: "About", platform: SettingItemPlatform.all)
 ];
