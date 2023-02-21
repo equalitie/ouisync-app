@@ -63,7 +63,12 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
         return NetworkDesktopDetail(
             item: widget.item!, natDetection: widget.natDetection);
       case Setting.log:
-        return LogsDesktopDetail(item: widget.item!);
+        return LogsDesktopDetail(
+            item: widget.item!,
+            settings: widget.settings,
+            reposCubit: widget.reposCubit,
+            panicCounter: widget.panicCounter,
+            natDetection: widget.natDetection);
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);
       case Setting.about:
