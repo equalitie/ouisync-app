@@ -19,7 +19,7 @@ void main() {
     final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
     session = Session.create(dir.path);
 
-    final pluginRepo = await Repository.create(session,
+    pluginRepo = await Repository.create(session,
         store: info.path(), readPassword: null, writePassword: null);
 
     // final settings = await Settings.init();
