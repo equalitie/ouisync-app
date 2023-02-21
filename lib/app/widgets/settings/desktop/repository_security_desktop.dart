@@ -77,7 +77,11 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                   PopupMenuItem<PasswordItem>(
                       value: PasswordItem.copy,
                       child: Text('Copy password'),
-                      onTap: () {}),
+                      onTap: () async {
+                        await copyStringToClipboard(_password);
+                        showSnackBar(context,
+                            message: S.current.messagePasswordCopiedClipboard);
+                      }),
                   const PopupMenuDivider(),
                   PopupMenuItem<PasswordItem>(
                       value: PasswordItem.change,
