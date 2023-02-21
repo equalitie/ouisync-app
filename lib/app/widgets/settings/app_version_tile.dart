@@ -45,7 +45,7 @@ class _AppVersionTileState extends State<AppVersionTile> {
       leading: widget.leading,
       title: widget.title,
       subtitle: _getAppVersion(),
-      onTap: () => _onPressed);
+      onTap: () => _onPressed(context));
 
   FutureBuilder<String> _getAppVersion() => FutureBuilder<String>(
         future: _version,
