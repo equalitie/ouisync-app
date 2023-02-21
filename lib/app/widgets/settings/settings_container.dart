@@ -248,6 +248,7 @@ class _SettingsContainerState extends State<SettingsContainer>
     if (repository == null) {
       return;
     }
+
     final delete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
