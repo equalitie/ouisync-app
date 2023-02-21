@@ -291,7 +291,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                   textEditingController: _passwordController,
                   obscureText: _obscurePassword,
                   label: S.current.labelPassword,
-                  subffixIcon: _passwordActions(),
+                  suffixIcon: _passwordActions(),
                   hint: S.current.messageRepositoryPassword,
                   onSaved: (_) {},
                   validator: validateNoEmpty(
@@ -307,7 +307,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                   textEditingController: _retypedPasswordController,
                   obscureText: _obscureRetypePassword,
                   label: S.current.labelRetypePassword,
-                  subffixIcon: _retypePasswordActions(),
+                  suffixIcon: _retypePasswordActions(),
                   hint: S.current.messageRepositoryPassword,
                   onSaved: (_) {},
                   validator: (retypedPassword) => retypedPasswordValidator(

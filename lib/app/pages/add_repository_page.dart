@@ -117,35 +117,33 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
   Widget _buildUseToken(BuildContext context) {
     return Column(
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Fields.constrainedText(S.current.messageAddRepoLink, flex: 0),
-        ]),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0),
+          ],
+        ),
         Dimensions.spacingVerticalDouble,
         Container(
-            decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-                color: Constants.inputBackgroundColor),
-            child: Fields.formTextField(
+          decoration: const BoxDecoration(
+            borderRadius:
+                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            color: Constants.inputBackgroundColor,
+          ),
+          child: Fields.formTextField(
               context: context,
               textEditingController: _tokenController,
               label: S.current.labelRepositoryLink,
-              subffixIcon: const Icon(Icons.key_rounded),
+              suffixIcon: const Icon(Icons.key_rounded),
               hint: S.current.messageRepositoryToken,
-              onSaved: (value) {},
-              // FIXME: figure out how to have async validators
-              // validator: _repositoryTokenValidator
-            )),
+              validator: _repositoryTokenValidator),
+        ),
         _builAddRepositoryButton(context),
       ],
     );
   }
 
-  // FIXME: figure out how to have async validators
-  Future<String?> _repositoryTokenValidator(
-    String? value, {
-    String? error,
-  }) async {
+  Future<String?> _repositoryTokenValidator(String? value) async {
     if (value == null || value.isEmpty) {
       return S.current.messageErrorTokenEmpty;
     }
@@ -161,7 +159,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);
       }
     } catch (e) {
-      return error ?? S.current.messageErrorTokenValidator;
+      return S.current.messageErrorTokenValidator;
     }
 
     return null;
