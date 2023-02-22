@@ -10,7 +10,7 @@ import '../../utils/utils.dart';
 class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
   final ReposCubit repos;
 
-  RepositorySelector(this.repos);
+  const RepositorySelector(this.repos);
 
   @override
   Widget build(BuildContext context) => Container(

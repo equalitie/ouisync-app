@@ -8,7 +8,7 @@ import '../../widgets.dart';
 import '../repository_selector.dart';
 
 class RepositoryDesktopDetail extends StatelessWidget {
-  RepositoryDesktopDetail(
+  const RepositoryDesktopDetail(
       {required this.item,
       required this.reposCubit,
       required this.isBiometricsAvailable,
@@ -27,20 +27,21 @@ class RepositoryDesktopDetail extends StatelessWidget {
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-        Row(children: [RepositorySelector(reposCubit)]),
-        SizedBox(height: 20.0),
-        _buildTile(context, _buildDhtSwitch),
-        Divider(height: 30.0),
-        _buildTile(context, _buildPeerExchangeSwitch),
-        Divider(height: 30.0),
-        _buildTile(context, _buildRenameTile),
-        _buildTile(context, _buildShareTile),
-        Divider(height: 30.0),
-        _buildTile(context, _buildSecurityTile),
-        Divider(height: 30.0),
-        _buildTile(context, _buildDeleteTile),
-      ]);
+  Widget build(BuildContext context) =>
+      reposCubit.builder((repos) => Column(children: [
+            Row(children: [RepositorySelector(reposCubit)]),
+            SizedBox(height: 20.0),
+            _buildTile(context, _buildDhtSwitch),
+            Divider(height: 30.0),
+            _buildTile(context, _buildPeerExchangeSwitch),
+            Divider(height: 30.0),
+            _buildTile(context, _buildRenameTile),
+            _buildTile(context, _buildShareTile),
+            Divider(height: 30.0),
+            _buildTile(context, _buildSecurityTile),
+            Divider(height: 30.0),
+            _buildTile(context, _buildDeleteTile),
+          ]));
 
   Widget _buildTile(
       BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
