@@ -7,7 +7,7 @@ import '../../../utils/utils.dart';
 class RepositorySecurityDesktop extends StatefulWidget {
   const RepositorySecurityDesktop({required this.onRepositorySecurity});
 
-  final Future<void> Function(dynamic context) onRepositorySecurity;
+  final Future<String?> Function(dynamic context) onRepositorySecurity;
 
   @override
   State<RepositorySecurityDesktop> createState() =>
@@ -15,7 +15,7 @@ class RepositorySecurityDesktop extends StatefulWidget {
 }
 
 class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
-  String _password = 'dummyPassword';
+  String? _password;
   bool _previewPassword = false;
 
   @override
@@ -24,18 +24,19 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       Row(children: [Text('Security', textAlign: TextAlign.start)]),
       ListTile(
           leading: const Icon(Icons.password_rounded),
-          title: _password.isEmpty ? null : Text(S.current.messagePassword),
-          subtitle: _password.isEmpty
-              ? _authenticationPlaceholder(context)
-              : _passwordLabel(context))
+          title: _isPasswordAvailable(_password)
+              ? Text(S.current.messagePassword)
+              : null,
+          subtitle: _isPasswordAvailable(_password)
+              ? _passwordLabel(context)
+              : _authenticationPlaceholder(context))
     ]);
   }
 
   Widget _authenticationPlaceholder(BuildContext context) => Padding(
       padding: EdgeInsets.symmetric(vertical: 20.0),
       child: TextButton.icon(
-          onPressed: () =>
-              widget.onRepositorySecurity(context), //_unlockSecurity,
+          onPressed: () async => await _unlockSecurity(context),
           icon: const Icon(Icons.lock_outline_rounded),
           label: Text('Authenticate')));
 
@@ -61,7 +62,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                           : const Icon(Constants.iconVisibilityOn),
                       padding: EdgeInsets.zero,
                       color: Theme.of(context).primaryColor,
-                      onPressed: _password.isNotEmpty
+                      onPressed: _isPasswordAvailable(_password)
                           ? () => setState(
                               () => _previewPassword = !_previewPassword)
                           : null))
@@ -78,7 +79,11 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                       value: PasswordItem.copy,
                       child: Text('Copy password'),
                       onTap: () async {
-                        await copyStringToClipboard(_password);
+                        if (_password == null) return;
+
+                        if (_password!.isEmpty) return;
+
+                        await copyStringToClipboard(_password!);
                         showSnackBar(context,
                             message: S.current.messagePasswordCopiedClipboard);
                       }),
@@ -90,7 +95,13 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                 ])
       ]);
 
-  void _unlockSecurity() {}
+  bool _isPasswordAvailable(String? password) =>
+      password != null && password.isNotEmpty;
+
+  Future<void> _unlockSecurity(BuildContext context) async {
+    final password = await widget.onRepositorySecurity(context);
+    setState(() => _password = password);
+  }
 }
 
 enum PasswordItem { copy, change }

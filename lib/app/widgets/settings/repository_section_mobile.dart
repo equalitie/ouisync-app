@@ -17,7 +17,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
   final bool isBiometricsAvailable;
   final Future<void> Function(BuildContext) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
-  final Future<void> Function(dynamic context) onRepositorySecurity;
+  final Future<String?> Function(dynamic context) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   RepositorySectionMobile(

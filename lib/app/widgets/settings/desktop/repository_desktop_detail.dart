@@ -23,7 +23,7 @@ class RepositoryDesktopDetail extends StatelessWidget {
 
   final Future<void> Function(dynamic context) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
-  final Future<void> Function(dynamic context) onRepositorySecurity;
+  final Future<String?> Function(dynamic context) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override

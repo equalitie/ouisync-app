@@ -27,7 +27,7 @@ class SettingsDesktopDetail extends StatefulWidget {
 
   final Future<void> Function(dynamic) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
-  final Future<void> Function(dynamic) onRepositorySecurity;
+  final Future<String?> Function(dynamic) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override

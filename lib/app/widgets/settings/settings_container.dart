@@ -60,7 +60,7 @@ class _SettingsContainerState extends State<SettingsContainer>
             isBiometricsAvailable: widget.isBiometricsAvailable,
             onRenameRepository: _renameRepo,
             onShareRepository: widget.onShareRepository,
-            onRepositorySecurity: _repositorySecurity,
+            onRepositorySecurity: _activateOrNavigateRepositorySecurity,
             onDeleteRepository: _deleteRepository),
         NetworkSectionMobile(widget.natDetection),
         LogsSectionMobile(
@@ -92,7 +92,7 @@ class _SettingsContainerState extends State<SettingsContainer>
                 isBiometricsAvailable: widget.isBiometricsAvailable,
                 onRenameRepository: _renameRepo,
                 onShareRepository: widget.onShareRepository,
-                onRepositorySecurity: _repositorySecurity,
+                onRepositorySecurity: _activateOrNavigateRepositorySecurity,
                 onDeleteRepository: _deleteRepository))
       ]);
 
@@ -125,43 +125,78 @@ class _SettingsContainerState extends State<SettingsContainer>
     widget.reposCubit.renameRepository(repository.name, newName);
   }
 
-  Future<void> _repositorySecurity(parentContext) async {
+  Future<String?> _activateOrNavigateRepositorySecurity(parentContext) async {
     final repoEntry = widget.reposCubit.currentRepo;
 
     if (repoEntry == null) {
       showSnackBar(context, message: S.current.messageNoRepoIsSelected);
-      return;
+      return null;
     }
 
     if (repoEntry is! OpenRepoEntry) {
       showSnackBar(context, message: S.current.messageRepositoryIsNotOpen);
-      return;
+      return null;
     }
 
     final repo = repoEntry.cubit;
+    return PlatformValues.isMobileDevice
+        ? await _navigateToRepositorySecurity(parentContext, repo)
+        : await _activateRepositorySecurity(parentContext, repo);
+  }
 
+  Future<String?> _navigateToRepositorySecurity(
+      BuildContext parentContext, RepoCubit repository) async {
     if (widget.isBiometricsAvailable) {
-      final password = await _tryGetBiometricPassword(context, repo);
+      final password = await _tryGetBiometricPassword(context, repository);
 
-      if (password != null) {
-        final shareToken = await _loadShareToken(context, repo, password);
+      if (password == null) return null;
 
-        if (shareToken.mode == AccessMode.blind) {
-          showSnackBar(context, message: S.current.messageUnlockRepoFailed);
-          return;
-        }
+      final shareToken = await _loadShareToken(context, repository, password);
 
-        await _pushRepositorySecurityPage(context,
-            repo: repo,
-            password: password,
-            shareToken: shareToken,
-            isBiometricsAvailable: true,
-            usesBiometrics: true);
-
-        return;
+      if (shareToken.mode == AccessMode.blind) {
+        showSnackBar(context, message: S.current.messageUnlockRepoFailed);
+        return null;
       }
+
+      await _navigateToSecurity(
+          parentContext, repository, password, shareToken);
+
+      return password;
     }
 
+    final passwordToken =
+        await _validatePasswordManually(parentContext, repository);
+
+    if (passwordToken == null) return null;
+
+    await _navigateToSecurity(parentContext, repository, passwordToken.password,
+        passwordToken.shareToken);
+
+    return passwordToken.password;
+  }
+
+  Future<void> _navigateToSecurity(BuildContext parentContext,
+      RepoCubit repository, String password, ShareToken shareToken) async {
+    await _pushRepositorySecurityPage(parentContext,
+        repo: repository,
+        password: password,
+        shareToken: shareToken,
+        isBiometricsAvailable: widget.isBiometricsAvailable,
+        usesBiometrics: false);
+  }
+
+  Future<String?> _activateRepositorySecurity(
+      BuildContext parentContext, RepoCubit repository) async {
+    final passwordToken =
+        await _validatePasswordManually(parentContext, repository);
+
+    if (passwordToken == null) return null;
+
+    return passwordToken.password;
+  }
+
+  Future<RepositoryPasswordToken?> _validatePasswordManually(
+      BuildContext parentContext, RepoCubit repo) async {
     final result = await _validateManualPassword(parentContext, repo: repo);
 
     if (result.isFailure) {
@@ -170,18 +205,14 @@ class _SettingsContainerState extends State<SettingsContainer>
       if (message != null) {
         showSnackBar(context, message: message);
       }
-      return;
+
+      return null;
     }
 
     final password = result.success.password;
     final shareToken = result.success.shareToken;
 
-    await _pushRepositorySecurityPage(parentContext,
-        repo: repo,
-        password: password,
-        shareToken: shareToken,
-        isBiometricsAvailable: widget.isBiometricsAvailable,
-        usesBiometrics: false);
+    return RepositoryPasswordToken(password: password, shareToken: shareToken);
   }
 
   Future<String?> _tryGetBiometricPassword(
@@ -285,4 +316,11 @@ class _SettingsContainerState extends State<SettingsContainer>
       widget.reposCubit.deleteRepository(repository.metaInfo);
     }
   }
+}
+
+class RepositoryPasswordToken {
+  RepositoryPasswordToken({required this.password, required this.shareToken});
+
+  final String password;
+  final ShareToken shareToken;
 }
