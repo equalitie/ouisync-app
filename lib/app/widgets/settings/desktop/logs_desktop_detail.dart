@@ -27,7 +27,7 @@ class LogsDesktopDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      _buildDeleteTile(context),
+      _buildSaveTile(context),
       Divider(height: 30.0),
       _buildShareTile(context),
       Divider(height: 30.0),
@@ -36,13 +36,15 @@ class LogsDesktopDetail extends StatelessWidget {
     ]);
   }
 
-  Widget _buildDeleteTile(BuildContext context) => Column(children: [
+  /// TODO: Fix logs capture and sharing on desktop
+  Widget _buildSaveTile(BuildContext context) => Column(children: [
         Row(children: [Text('Save', textAlign: TextAlign.start)]),
         ListTile(
+            enabled: false,
             leading: const Icon(Icons.save),
             title: Row(children: [
               TextButton(
-                  onPressed: () {},
+                  onPressed: null,
                   child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20.0),
@@ -54,11 +56,13 @@ class LogsDesktopDetail extends StatelessWidget {
       ]);
 
   Widget _buildShareTile(BuildContext context) => ListTile(
+      enabled: false,
       title: Text(S.current.actionShare),
       leading: Icon(Icons.share),
       onTap: () => _shareLogs);
 
   Widget _buildViewTile(BuildContext context) => ListTile(
+      enabled: false,
       title: Text(S.current.messageView),
       leading: Icon(Icons.visibility),
       onTap: () => Navigator.push(

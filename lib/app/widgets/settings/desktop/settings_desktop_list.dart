@@ -58,10 +58,10 @@ final settingsItems = [
       name: "Network",
       platform: SettingItemPlatform.all),
 
-  /// TODO: Get the logs saving ans sharing to work on desktop
-  // Currently unnavailables:
-  // SettingItem(
-  //     setting: Setting.log, name: "Logs", platform: SettingItemPlatform.all),
+  /// TODO: Get the logs saving and sharing to work on desktop
+  SettingItem(
+      setting: Setting.log, name: "Logs", platform: SettingItemPlatform.all),
+  // Currently unnavailable:
   // SettingItem(
   //     setting: Setting.feedback,
   //     name: "Feedback",
