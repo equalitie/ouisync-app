@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
@@ -37,6 +38,15 @@ class SettingsContainer extends StatefulWidget {
 class _SettingsContainerState extends State<SettingsContainer>
     with OuiSyncAppLogger {
   SettingItem? _selected;
+
+  @override
+  void initState() {
+    final defaultSetting = settingsItems
+        .firstWhereOrNull((element) => element.setting == Setting.repository);
+    setState(() => _selected = defaultSetting);
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) => PlatformValues.isMobileDevice
