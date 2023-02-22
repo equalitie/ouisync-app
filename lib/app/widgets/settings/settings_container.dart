@@ -190,6 +190,7 @@ class _SettingsContainerState extends State<SettingsContainer>
         usesBiometrics: false);
   }
 
+  // ignore: unused_element
   Future<String?> _activateRepositorySecurity(
       BuildContext parentContext, RepoCubit repository) async {
     final unlockResult =
