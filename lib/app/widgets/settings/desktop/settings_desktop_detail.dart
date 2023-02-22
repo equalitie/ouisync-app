@@ -60,11 +60,9 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             onRepositorySecurity: widget.onRepositorySecurity,
             onDeleteRepository: widget.onDeleteRepository);
       case Setting.network:
-        return NetworkDesktopDetail(
-            item: widget.item!, natDetection: widget.natDetection);
+        return NetworkDesktopDetail(natDetection: widget.natDetection);
       case Setting.log:
         return LogsDesktopDetail(
-            item: widget.item!,
             settings: widget.settings,
             reposCubit: widget.reposCubit,
             panicCounter: widget.panicCounter,
@@ -72,8 +70,7 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);
       case Setting.about:
-        return AboutDesktopDetail(
-            item: widget.item!, reposCubit: widget.reposCubit);
+        return AboutDesktopDetail(reposCubit: widget.reposCubit);
     }
   }
 }

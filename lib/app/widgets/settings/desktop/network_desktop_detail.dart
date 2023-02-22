@@ -8,12 +8,10 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../../../pages/peer_list.dart';
-import 'desktop_settings.dart';
 
 class NetworkDesktopDetail extends StatelessWidget {
-  const NetworkDesktopDetail({required this.item, required this.natDetection});
+  const NetworkDesktopDetail({required this.natDetection});
 
-  final SettingItem item;
   final Future<NatDetection> natDetection;
 
   @override

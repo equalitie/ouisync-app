@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../app_version_tile.dart';
-import 'desktop_settings.dart';
 
 class AboutDesktopDetail extends StatelessWidget {
-  const AboutDesktopDetail({required this.item, required this.reposCubit});
+  const AboutDesktopDetail({required this.reposCubit});
 
-  final SettingItem item;
   final ReposCubit reposCubit;
 
   @override

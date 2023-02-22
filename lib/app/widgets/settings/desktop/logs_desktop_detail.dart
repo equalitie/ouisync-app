@@ -11,17 +11,14 @@ import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../../../pages/pages.dart';
 import '../../../utils/utils.dart';
-import 'desktop_settings.dart';
 
 class LogsDesktopDetail extends StatelessWidget {
   const LogsDesktopDetail(
-      {required this.item,
-      required this.settings,
+      {required this.settings,
       required this.reposCubit,
       required this.panicCounter,
       required this.natDetection});
 
-  final SettingItem item;
   final Settings settings;
   final ReposCubit reposCubit;
   final StateMonitorIntValue panicCounter;
