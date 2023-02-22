@@ -4,8 +4,8 @@ import 'package:settings_ui/settings_ui.dart';
 import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
 
-class PlatformSwitch extends PlatformWidget {
-  PlatformSwitch(
+class PlatformDhtSwitch extends StatelessWidget {
+  const PlatformDhtSwitch(
       {required this.repository,
       required this.title,
       required this.icon,
@@ -18,16 +18,23 @@ class PlatformSwitch extends PlatformWidget {
   final dynamic Function(bool)? onToggle;
 
   @override
+  Widget build(BuildContext context) {
+    if (PlatformValues.isMobileDevice) {
+      return buildMobileWidget(context);
+    }
+    return buildDesktopWidget(context);
+  }
+
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
       value: repository.isDhtEnabled,
       title: Text(title),
       secondary: Icon(icon),
-      onChanged: onToggle);
+      onChanged: (value) => onToggle?.call(value));
 
-  @override
-  Widget buildMobileWidget(BuildContext context) => SettingsTile.switchTile(
-      initialValue: repository.isDhtEnabled,
-      title: Text(title),
-      leading: Icon(icon),
-      onToggle: onToggle);
+  AbstractSettingsTile buildMobileWidget(BuildContext context) =>
+      SettingsTile.switchTile(
+          initialValue: repository.isDhtEnabled,
+          title: Text(title),
+          leading: Icon(icon),
+          onToggle: (value) => onToggle?.call(value));
 }

@@ -58,7 +58,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
     BuildContext context,
     RepoCubit repo,
   ) =>
-      PlatformSwitch(
+      PlatformDhtSwitch(
           repository: repo,
           title: S.current.labelBitTorrentDHT,
           icon: Icons.hub,
@@ -68,7 +68,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
     BuildContext context,
     RepoCubit repo,
   ) =>
-      PlatformSwitch(
+      PlatformPexSwitch(
           repository: repo,
           title: S.current.messagePeerExchange,
           icon: Icons.group_add,
