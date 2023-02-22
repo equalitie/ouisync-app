@@ -138,10 +138,15 @@ class _SettingsContainerState extends State<SettingsContainer>
       return null;
     }
 
+    /// We don't have yet the UI for the security item in the repo settings
+    /// on desktop; so for no we just navigate to the security page, just like
+    /// we do on mobile.
+    /// TODO: Implement the security flow specific to desktop
     final repo = repoEntry.cubit;
-    return PlatformValues.isMobileDevice
-        ? await _navigateToRepositorySecurity(parentContext, repo)
-        : await _activateRepositorySecurity(parentContext, repo);
+    return await _navigateToRepositorySecurity(parentContext, repo);
+    // return PlatformValues.isMobileDevice
+    //     ? await _navigateToRepositorySecurity(parentContext, repo)
+    //     : await _activateRepositorySecurity(parentContext, repo);
   }
 
   Future<String?> _navigateToRepositorySecurity(

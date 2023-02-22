@@ -84,7 +84,15 @@ class RepositoryDesktopDetail extends StatelessWidget {
           onTap: (_) => onShareRepository(repository));
 
   Widget _buildSecurityTile(BuildContext context, RepoCubit repository) =>
-      RepositorySecurityDesktop(onRepositorySecurity: onRepositorySecurity);
+
+      /// TODO: Replace with commented code when desktop flow is in place
+      PlatformTappableTile(
+          reposCubit: reposCubit,
+          repoName: repository.name,
+          title: S.current.titleSecurity,
+          icon: Icons.password,
+          onTap: (_) async => await onRepositorySecurity(context));
+  // RepositorySecurityDesktop(onRepositorySecurity: onRepositorySecurity);
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
       Column(children: [
