@@ -164,15 +164,15 @@ class _SettingsContainerState extends State<SettingsContainer>
       return password;
     }
 
-    final passwordToken =
+    final unlockResult =
         await _validatePasswordManually(parentContext, repository);
 
-    if (passwordToken == null) return null;
+    if (unlockResult == null) return null;
 
-    await _navigateToSecurity(parentContext, repository, passwordToken.password,
-        passwordToken.shareToken);
+    await _navigateToSecurity(parentContext, repository, unlockResult.password,
+        unlockResult.shareToken);
 
-    return passwordToken.password;
+    return unlockResult.password;
   }
 
   Future<void> _navigateToSecurity(BuildContext parentContext,
@@ -187,15 +187,15 @@ class _SettingsContainerState extends State<SettingsContainer>
 
   Future<String?> _activateRepositorySecurity(
       BuildContext parentContext, RepoCubit repository) async {
-    final passwordToken =
+    final unlockResult =
         await _validatePasswordManually(parentContext, repository);
 
-    if (passwordToken == null) return null;
+    if (unlockResult == null) return null;
 
-    return passwordToken.password;
+    return unlockResult.password;
   }
 
-  Future<RepositoryPasswordToken?> _validatePasswordManually(
+  Future<UnlockResult?> _validatePasswordManually(
       BuildContext parentContext, RepoCubit repo) async {
     final result = await _validateManualPassword(parentContext, repo: repo);
 
@@ -209,10 +209,7 @@ class _SettingsContainerState extends State<SettingsContainer>
       return null;
     }
 
-    final password = result.success.password;
-    final shareToken = result.success.shareToken;
-
-    return RepositoryPasswordToken(password: password, shareToken: shareToken);
+    return result.success;
   }
 
   Future<String?> _tryGetBiometricPassword(
@@ -316,11 +313,4 @@ class _SettingsContainerState extends State<SettingsContainer>
       widget.reposCubit.deleteRepository(repository.metaInfo);
     }
   }
-}
-
-class RepositoryPasswordToken {
-  RepositoryPasswordToken({required this.password, required this.shareToken});
-
-  final String password;
-  final ShareToken shareToken;
 }
