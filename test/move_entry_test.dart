@@ -39,7 +39,7 @@ void main() {
   });
 
   test('Placeholder test', () async {
-    final accessMode = pluginRepo.accessMode;
+    final accessMode = await pluginRepo.accessMode;
     expect(accessMode, equals(AccessMode.write));
   });
 
