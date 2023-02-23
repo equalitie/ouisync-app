@@ -33,7 +33,7 @@ class NatDetection extends Cubit<NatDetectionType> {
     _subscription = null;
 
     if (sub != null) {
-      sub.cancel();
+      await sub.cancel();
     }
 
     await super.close();
@@ -94,14 +94,17 @@ class NatDetection extends Cubit<NatDetectionType> {
 
   // https://gitlab.internal.equalit.ie/kpetku/udpechoserver/
   Future<String> _endpointEcho(
-      int currentTask, int serverId, UDP socket) async {
+    int currentTask,
+    int serverId,
+    UDP socket,
+  ) async {
     final port = 7777;
     final ips = await _dns.lookup("natdetect$serverId.ouisync.net");
     for (final ip in ips) {
       // Indicate that this is the first version of this protocol. The remote
       // doesn't currently read it, but in future if we need to change the
       // protocol we can stay backward compatible.
-      socket.send(
+      await socket.send(
           Utf8Codec().encode("p0\n"), Endpoint.unicast(ip, port: Port(port)));
 
       await for (final datagram

@@ -58,18 +58,22 @@ class _MainPageState extends State<MainPage>
       ValueNotifier<double>(0.0);
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
-  late final StateMonitorIntValue _panicCounter;
+  final StateMonitorIntCubit _panicCounter;
 
-  _MainPageState(Session session, Settings settings)
-      : _repositories = ReposCubit(
-          session: session,
-          settings: settings,
-        ),
-        _powerControl = PowerControl(session, settings) {
-    _panicCounter = _repositories
-        .rootStateMonitor()
-        .child(oui.MonitorId.expectUnique("Session"))
-        .intValue("panic_counter");
+  _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
+
+  factory _MainPageState(Session session, Settings settings) {
+    final repositories = ReposCubit(
+      session: session,
+      settings: settings,
+    );
+    final powerControl = PowerControl(session, settings);
+    final panicCounter = StateMonitorIntCubit(
+        repositories.rootStateMonitor
+            .child(oui.MonitorId.expectUnique("Session")),
+        "panic_counter");
+
+    return _MainPageState._(repositories, powerControl, panicCounter);
   }
 
   RepoEntry? get _currentRepo => _repositories.currentRepo;
@@ -80,14 +84,14 @@ class _MainPageState extends State<MainPage>
   void initState() {
     super.initState();
 
-    widget.session.networkEvents.listen((event) {
+    widget.session.networkEvents.listen((event) async {
       switch (event) {
         case NetworkEvent.peerSetChange:
           break;
         case NetworkEvent.protocolVersionMismatch:
           {
-            final highest = widget.session.highestSeenProtocolVersion;
-            _upgradeExistsCubit.foundVersion(highest);
+            final highest = await widget.session.highestSeenProtocolVersion;
+            await _upgradeExistsCubit.foundVersion(highest);
           }
           break;
       }
@@ -171,7 +175,7 @@ class _MainPageState extends State<MainPage>
   getContent() {
     final current = _currentRepo;
     if (current is OpenRepoEntry) {
-      current.cubit.getContent();
+      current.cubit.refresh();
     }
   }
 
@@ -226,11 +230,13 @@ class _MainPageState extends State<MainPage>
       key: _scaffoldKey,
       appBar: _buildOuiSyncBar(),
       body: WillPopScope(
-          child: Column(children: <Widget>[
-            _repositories.builder(
-                (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
-            Expanded(child: buildMainWidget()),
-          ]),
+          child: Column(
+            children: <Widget>[
+              _repositories.builder(
+                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
+              Expanded(child: buildMainWidget()),
+            ],
+          ),
           onWillPop: _onBackPressed),
       floatingActionButton: _repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
@@ -243,7 +249,7 @@ class _MainPageState extends State<MainPage>
     if (currentRepo is OpenRepoEntry) {
       final currentFolder = currentRepo.cubit.currentFolder;
       if (!currentFolder.isRoot()) {
-        currentRepo.cubit.navigateTo(currentFolder.parent);
+        await currentRepo.cubit.navigateTo(currentFolder.parent);
         return false;
       }
     }
@@ -263,7 +269,7 @@ class _MainPageState extends State<MainPage>
       // and threads stay alive. If the user at that point tried to open
       // the app again, this widget would try to reinitialize all those
       // variables without previously properly closing them.
-      MoveToBackground.moveTaskToBack();
+      await MoveToBackground.moveTaskToBack();
     }
 
     return false;
@@ -285,36 +291,39 @@ class _MainPageState extends State<MainPage>
         onPressed: () async => await showSettings(),
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface);
+
     return BlocBuilder<UpgradeExistsCubit, bool>(
-        builder: (context, updateExists) {
-      return _panicCounter.builder((context, panicCount) {
-        return BlocBuilder<PowerControl, PowerControlState>(
-            bloc: _powerControl,
-            builder: (context, state) {
-              Color? color;
+      builder: (context, updateExists) =>
+          BlocBuilder<PowerControl, PowerControlState>(
+        bloc: _powerControl,
+        builder: (context, powerControlState) =>
+            BlocBuilder<StateMonitorIntCubit, int?>(
+                bloc: _panicCounter,
+                builder: (context, panicCount) {
+                  Color? color;
 
-              if (updateExists || ((panicCount ?? 0) > 0)) {
-                color = Constants.errorColor;
-              } else if (!(state.isNetworkEnabled ?? true)) {
-                color = Constants.warningColor;
-              }
+                  if (updateExists || ((panicCount ?? 0) > 0)) {
+                    color = Constants.errorColor;
+                  } else if (!(powerControlState.isNetworkEnabled ?? true)) {
+                    color = Constants.warningColor;
+                  }
 
-              if (color != null) {
-                return Fields.addBadge(button, color: color);
-              } else {
-                return button;
-              }
-            });
-      });
-    });
+                  if (color != null) {
+                    return Fields.addBadge(button, color: color);
+                  } else {
+                    return button;
+                  }
+                }),
+      ),
+    );
   }
 
-  StatelessWidget _buildFAB(BuildContext context, RepoEntry? current) {
+  Widget _buildFAB(BuildContext context, RepoEntry? current) {
     if (current is! OpenRepoEntry) {
       return Container();
     }
 
-    if (!current.cubit.canWrite) {
+    if (!current.cubit.state.canWrite) {
       return Container();
     }
 
@@ -325,15 +334,18 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  _repositoryContentBuilder(OpenRepoEntry repo) => repo.cubit.consumer((repo) {
-        return _selectLayoutWidget();
-      }, (repo) {
-        while (repo.messages.isNotEmpty) {
-          showSnackBar(context, message: repo.messages.removeAt(0));
-        }
-      });
+  _repositoryContentBuilder(OpenRepoEntry repo) =>
+      BlocConsumer<RepoCubit, RepoState>(
+        bloc: repo.cubit,
+        builder: (context, state) => _selectLayoutWidget(),
+        listener: (context, state) {
+          if (state.message.isNotEmpty) {
+            showSnackBar(context, message: state.message);
+          }
+        },
+      );
 
-  _selectLayoutWidget() {
+  Widget _selectLayoutWidget() {
     final current = _currentRepo;
 
     if (current == null || current is LoadingRepoEntry) {
@@ -343,7 +355,7 @@ class _MainPageState extends State<MainPage>
     }
 
     if (current is OpenRepoEntry) {
-      if (!current.cubit.canRead) {
+      if (!current.cubit.state.canRead) {
         return LockedRepositoryState(
             databaseId: current.databaseId,
             repositoryName: current.name,
@@ -362,7 +374,7 @@ class _MainPageState extends State<MainPage>
     final folder = repo.currentFolder;
 
     if (folder.content.isEmpty) {
-      child = repo.isLoading
+      child = repo.state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : NoContentsState(repository: folder.repo, path: folder.path);
     } else {
@@ -467,26 +479,30 @@ class _MainPageState extends State<MainPage>
   // space at the top, which doesn't look good).
 
   // TODO: Find a better solution
-  Future<dynamic> _showShareRepository(RepoCubit repository) =>
-      showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          constraints: BoxConstraints(maxHeight: 390.0),
-          builder: (_) => ScaffoldMessenger(child: Builder(builder: (context) {
-                final accessModes = repository.accessMode == AccessMode.write
-                    ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-                    : repository.accessMode == AccessMode.read
-                        ? [AccessMode.blind, AccessMode.read]
-                        : [AccessMode.blind];
+  Future<dynamic> _showShareRepository(RepoCubit repository) {
+    final accessMode = repository.state.accessMode;
+    final accessModes = accessMode == AccessMode.write
+        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+        : accessMode == AccessMode.read
+            ? [AccessMode.blind, AccessMode.read]
+            : [AccessMode.blind];
 
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ShareRepository(
-                      repository: repository,
-                      availableAccessModes: accessModes,
-                    ));
-              })));
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: Dimensions.borderBottomSheetTop,
+      constraints: BoxConstraints(maxHeight: 390.0),
+      builder: (_) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ShareRepository(
+            repository: repository,
+            availableAccessModes: accessModes,
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
@@ -589,7 +605,7 @@ class _MainPageState extends State<MainPage>
     _persistentBottomSheetController!.close();
     _persistentBottomSheetController = null;
 
-    currentRepo.moveEntry(
+    await currentRepo.moveEntry(
       source: path,
       destination: destination,
     );
@@ -617,11 +633,11 @@ class _MainPageState extends State<MainPage>
       return false;
     }
 
-    String? accessModeMessage = currentRepo.cubit.canRead == false
-        ? S.current.messageAddingFileToLockedRepository
-        : !currentRepo.cubit.canWrite
+    final accessModeMessage = currentRepo.cubit.state.canWrite
+        ? null
+        : currentRepo.cubit.state.canRead
             ? S.current.messageAddingFileToReadRepository
-            : null;
+            : S.current.messageAddingFileToLockedRepository;
 
     if (accessModeMessage != null) {
       await showDialog<bool>(
@@ -714,9 +730,9 @@ class _MainPageState extends State<MainPage>
     if (initialTokenValue == null) return;
 
     final tokenValidationError =
-        _repositories.validateTokenLink(initialTokenValue);
+        await _repositories.validateTokenLink(initialTokenValue);
     if (tokenValidationError != null) {
-      showDialog(
+      await showDialog(
           context: context,
           barrierDismissible: true,
           builder: (BuildContext context) {
@@ -837,7 +853,7 @@ class _MainPageState extends State<MainPage>
             f: _checkForBiometricsCallback()) ??
         false;
 
-    Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(

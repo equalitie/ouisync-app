@@ -26,14 +26,14 @@ class PlatformPexSwitch extends StatelessWidget {
   }
 
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
-      value: repository.isPexEnabled,
+      value: repository.state.isPexEnabled,
       title: Text(title),
       secondary: Icon(icon),
       onChanged: (value) => onToggle?.call(value));
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>
       SettingsTile.switchTile(
-          initialValue: repository.isPexEnabled,
+          initialValue: repository.state.isPexEnabled,
           title: Text(title),
           leading: Icon(icon),
           onToggle: (value) => onToggle?.call(value));

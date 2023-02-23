@@ -26,14 +26,14 @@ class PlatformDhtSwitch extends StatelessWidget {
   }
 
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
-      value: repository.isDhtEnabled,
+      value: repository.state.isDhtEnabled,
       title: Text(title),
       secondary: Icon(icon),
       onChanged: (value) => onToggle?.call(value));
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>
       SettingsTile.switchTile(
-          initialValue: repository.isDhtEnabled,
+          initialValue: repository.state.isDhtEnabled,
           title: Text(title),
           leading: Icon(icon),
           onToggle: (value) => onToggle?.call(value));

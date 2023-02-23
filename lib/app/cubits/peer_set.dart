@@ -18,16 +18,16 @@ class PeerSetCubit extends Cubit<PeerSet> {
       return;
     }
 
+    unawaited(_session.peers.then((peers) => emit(PeerSet(peers))));
+
     _subscription =
         _session.onPeersChange.listen((peers) => emit(PeerSet(peers)));
-
-    emit(PeerSet(_session.peers));
   }
 
   @override
   Future<void> close() async {
-    _subscription?.cancel();
-    super.close();
+    await _subscription?.cancel();
+    await super.close();
   }
 }
 

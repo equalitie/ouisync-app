@@ -31,19 +31,21 @@ class AboutSectionMobile extends AbstractSettingsSection {
         ],
       );
 
-  Widget _getRuntimeIdForOS() {
-    final runtimeId = Text(
-      repos.session.thisRuntimeId,
-      overflow: TextOverflow.ellipsis,
-    );
+  Widget _getRuntimeIdForOS() => FutureBuilder(
+      future: repos.session.thisRuntimeId,
+      builder: (context, snapshot) {
+        final runtimeId = snapshot.data ?? '';
+        final runtimeIdWidget = Text(
+          runtimeId,
+          overflow: TextOverflow.ellipsis,
+        );
 
-    if (Platform.isIOS) {
-      return Expanded(
-          child: Row(
-        children: [Expanded(child: runtimeId)],
-      ));
-    }
+        if (Platform.isIOS) {
+          return Expanded(
+            child: Row(children: [Expanded(child: runtimeIdWidget)]),
+          );
+        }
 
-    return runtimeId;
-  }
+        return runtimeIdWidget;
+      });
 }

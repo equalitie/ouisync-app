@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
@@ -47,7 +48,9 @@ class RepositoryDesktopDetail extends StatelessWidget {
       BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
     final currentRepo = reposCubit.currentRepo;
     final widget = currentRepo is OpenRepoEntry
-        ? currentRepo.cubit.builder((repo) => builder(context, repo))
+        ? BlocBuilder<RepoCubit, RepoState>(
+            bloc: currentRepo.cubit,
+            builder: (context, state) => builder(context, currentRepo.cubit))
         : SizedBox.shrink();
 
     return widget;

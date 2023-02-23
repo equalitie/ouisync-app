@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -48,7 +49,9 @@ class RepositorySectionMobile extends AbstractSettingsSection
       BuildContext context, Widget Function(BuildContext, RepoCubit) builder) {
     final currentRepo = repos.currentRepo;
     final widget = currentRepo is OpenRepoEntry
-        ? currentRepo.cubit.builder((repo) => builder(context, repo))
+        ? BlocBuilder<RepoCubit, RepoState>(
+            bloc: currentRepo.cubit,
+            builder: (context, state) => builder(context, currentRepo.cubit))
         : SizedBox.shrink();
 
     return CustomSettingsTile(child: widget);

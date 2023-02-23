@@ -21,7 +21,7 @@ class LogsDesktopDetail extends StatelessWidget {
 
   final Settings settings;
   final ReposCubit reposCubit;
-  final StateMonitorIntValue panicCounter;
+  final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
 
   @override
@@ -112,7 +112,9 @@ class LogsDesktopDetail extends StatelessWidget {
       sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
       sink.writeln("\n");
 
-      await dumpAll(sink, reposCubit.session.getRootStateMonitor());
+      final stateMonitor = reposCubit.session.rootStateMonitor;
+
+      await dumpAll(sink, stateMonitor);
     } finally {
       await sink.close();
     }

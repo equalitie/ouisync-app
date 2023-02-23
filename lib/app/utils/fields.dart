@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart' as b;
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'utils.dart';
+import '../widgets/async_text_form_field.dart';
 
 class Fields {
   Fields._();
@@ -52,27 +55,47 @@ class Fields {
             text: '<font>$message</font>', textAlign: textAlign, tags: tags));
   }
 
-  static Widget inPageMainMessage(String message,
-          {TextAlign textAlign = TextAlign.center,
-          double fontSize = Dimensions.fontBig,
-          FontWeight fontWeight = FontWeight.bold,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.black,
-          Map<String, StyledTextTagBase>? tags,
-          EdgeInsets padding = Dimensions.paddingInPageMain}) =>
-      _styledTextBase(message, textAlign, fontSize, fontWeight, fontStyle,
-          color, tags, padding);
+  static Widget inPageMainMessage(
+    String message, {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = Dimensions.fontBig,
+    FontWeight fontWeight = FontWeight.bold,
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = Dimensions.paddingInPageMain,
+  }) =>
+      _styledTextBase(
+        message,
+        textAlign,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        color,
+        tags,
+        padding,
+      );
 
-  static Widget inPageSecondaryMessage(String message,
-          {TextAlign textAlign = TextAlign.center,
-          double fontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.black,
-          Map<String, StyledTextTagBase>? tags,
-          EdgeInsets padding = Dimensions.paddingInPageSecondary}) =>
-      _styledTextBase(message, textAlign, fontSize, fontWeight, fontStyle,
-          color, tags, padding);
+  static Widget inPageSecondaryMessage(
+    String message, {
+    TextAlign textAlign = TextAlign.center,
+    double fontSize = Dimensions.fontAverage,
+    FontWeight fontWeight = FontWeight.normal,
+    FontStyle fontStyle = FontStyle.normal,
+    Color color = Colors.black,
+    Map<String, StyledTextTagBase>? tags,
+    EdgeInsets padding = Dimensions.paddingInPageSecondary,
+  }) =>
+      _styledTextBase(
+        message,
+        textAlign,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        color,
+        tags,
+        padding,
+      );
 
   static Widget inPageButton({
     required void Function()? onPressed,
@@ -490,57 +513,69 @@ class Fields {
               iconSize: iconSize,
               iconColor: iconColor));
 
-  static Widget _textFormFieldBase(
-      {Key? key,
-      required BuildContext context,
-      TextEditingController? textEditingController,
-      Icon? icon,
-      Widget? prefixIcon,
-      Widget? subffixIcon,
-      String? label,
-      required String hint,
-      required Function(String?) onSaved,
-      required String? Function(String? value) validator,
-      AutovalidateMode? autovalidateMode,
-      bool autofocus = false,
-      FocusNode? focusNode,
-      String? initialValue,
-      bool obscureText = false,
-      int? maxLines = 1,
-      InputBorder? inputBorder,
-      Function()? onTap,
-      Function(String)? onChanged}) {
-    inputBorder ??= UnderlineInputBorder(
-        borderSide:
-            BorderSide(color: Theme.of(context).primaryColor, width: 2.0));
-
-    return TextFormField(
-      key: key,
-      controller: textEditingController,
-      autovalidateMode: autovalidateMode,
-      autofocus: autofocus,
-      focusNode: focusNode,
-      initialValue: initialValue,
-      obscureText: obscureText,
-      maxLines: maxLines,
-      keyboardType: TextInputType.text,
-      decoration: InputDecoration(
-          filled: true,
-          fillColor: Constants.inputBackgroundColor,
-          border: InputBorder.none,
-          focusedBorder: inputBorder,
-          icon: icon,
-          prefixIcon: prefixIcon,
-          suffixIcon: subffixIcon,
-          hintText: hint,
-          labelText: label,
-          labelStyle: TextStyle(color: Constants.inputLabelForeColor),
-          errorMaxLines: 2),
-      validator: validator,
-      onSaved: onSaved,
-      onTap: onTap,
-      onChanged: onChanged,
+  static Widget _textFormFieldBase({
+    Key? key,
+    required BuildContext context,
+    TextEditingController? textEditingController,
+    Icon? icon,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? label,
+    required String hint,
+    Function(String?)? onSaved,
+    FutureOr<String?> Function(String?)? validator,
+    AutovalidateMode? autovalidateMode,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    bool obscureText = false,
+  }) {
+    final inputBorder = UnderlineInputBorder(
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColor,
+        width: 2.0,
+      ),
     );
+    final decoration = InputDecoration(
+      filled: true,
+      fillColor: Constants.inputBackgroundColor,
+      border: InputBorder.none,
+      focusedBorder: inputBorder,
+      icon: icon,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      hintText: hint,
+      labelText: label,
+      labelStyle: TextStyle(color: Constants.inputLabelForeColor),
+      errorMaxLines: 2,
+    );
+
+    if (validator is Future<String?> Function(String?)) {
+      return AsyncTextFormField(
+        key: key,
+        controller: textEditingController,
+        autovalidateMode: autovalidateMode,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        obscureText: obscureText,
+        keyboardType: TextInputType.text,
+        decoration: decoration,
+        validator: validator,
+        onSaved: onSaved,
+      );
+    } else {
+      return TextFormField(
+        key: key,
+        controller: textEditingController,
+        autovalidateMode: autovalidateMode,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        obscureText: obscureText,
+        keyboardType: TextInputType.text,
+        decoration: decoration,
+        validator: validator as String? Function(String?)?,
+        onSaved: onSaved,
+      );
+    }
   }
 
   static Widget formTextField({
@@ -549,49 +584,39 @@ class Fields {
     TextEditingController? textEditingController,
     Icon? icon,
     Widget? prefixIcon,
-    Widget? subffixIcon,
+    Widget? suffixIcon,
     String? label,
     required String hint,
-    required Function(String?) onSaved,
-    required String? Function(String? value) validator,
+    Function(String?)? onSaved,
+    FutureOr<String?> Function(String? value)? validator,
     AutovalidateMode? autovalidateMode,
     bool autofocus = false,
     FocusNode? focusNode,
-    String? initialValue,
     bool obscureText = false,
-    int? maxLines = 1,
-    InputBorder? inputBorder,
-    Function()? onTap,
-    Function(String)? onChanged,
-    padding = Dimensions.paddingFormTextField,
   }) =>
       Padding(
-          padding: padding,
+          padding: Dimensions.paddingFormTextField,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               _textFormFieldBase(
-                  key: key,
-                  context: context,
-                  textEditingController: textEditingController,
-                  icon: icon,
-                  prefixIcon: prefixIcon,
-                  subffixIcon: subffixIcon,
-                  label: label,
-                  hint: hint,
-                  onSaved: onSaved,
-                  validator: validator,
-                  autovalidateMode: autovalidateMode,
-                  autofocus: autofocus,
-                  focusNode: focusNode,
-                  initialValue: initialValue,
-                  obscureText: obscureText,
-                  maxLines: maxLines,
-                  inputBorder: inputBorder,
-                  onTap: onTap,
-                  onChanged: onChanged)
+                key: key,
+                context: context,
+                textEditingController: textEditingController,
+                icon: icon,
+                prefixIcon: prefixIcon,
+                suffixIcon: suffixIcon,
+                label: label,
+                hint: hint,
+                onSaved: onSaved,
+                validator: validator,
+                autovalidateMode: autovalidateMode,
+                autofocus: autofocus,
+                focusNode: focusNode,
+                obscureText: obscureText,
+              )
             ],
           ));
 

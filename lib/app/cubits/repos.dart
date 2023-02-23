@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
 
-import 'package:collection/collection.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
@@ -18,7 +18,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   bool _isLoading = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
-  StreamSubscription<oui.RepositoryEvent>? _subscription;
+  StreamSubscription<void>? _subscription;
   final Settings _settings;
 
   ReposCubit({required session, required settings})
@@ -61,8 +61,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   RepoEntry? get currentRepo => _currentRepo;
 
-  StateMonitor rootStateMonitor() =>
-      StateMonitor(_session.getRootStateMonitor());
+  StateMonitor get rootStateMonitor => _session.rootStateMonitor;
 
   Folder? get currentFolder {
     return currentRepo?.currentFolder;
@@ -70,11 +69,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
-  oui.ShareToken? createToken(String tokenString) {
-    return oui.ShareToken.fromString(tokenString);
-  }
+  Future<oui.ShareToken> createToken(String tokenString) =>
+      oui.ShareToken.fromString(session, tokenString);
 
-  String? validateTokenLink(String tokenLink) {
+  Future<String?> validateTokenLink(String tokenLink) async {
     if (tokenLink.isEmpty) {
       return S.current.messageErrorTokenEmpty;
     }
@@ -85,13 +83,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
 
     try {
-      final shareToken = oui.ShareToken.fromString(tokenLink);
-
-      if (shareToken == null) {
-        return S.current.messageErrorTokenInvalid;
-      }
-
-      final existingRepo = findByInfoHash(shareToken.infoHash);
+      final shareToken = await oui.ShareToken.fromString(session, tokenLink);
+      final existingRepo = findByInfoHash(await shareToken.infoHash);
 
       if (existingRepo != null) {
         return S.current.messageRepositoryAlreadyExist(existingRepo.name);
@@ -103,21 +96,26 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return null;
   }
 
-  RepoEntry? findByInfoHash(String infoHash) =>
-      repos.firstWhereOrNull((repo) => repo.infoHash == infoHash);
+  RepoEntry? findByInfoHash(String infoHash) {
+    try {
+      return repos.firstWhere((repo) => repo.infoHash == infoHash);
+    } on StateError {
+      return null;
+    }
+  }
 
   Future<void> setCurrent(RepoEntry? repo) async {
     if (currentRepo == repo) {
       return;
     }
 
-    oui.NativeChannels.setRepository(repo?.maybeHandle);
+    oui.NativeChannels.setRepository(repo?.maybeCubit?.handle);
 
-    _subscription?.cancel();
+    await _subscription?.cancel();
     _subscription = null;
 
     if (repo is OpenRepoEntry) {
-      _subscription = repo.handle.events.listen((_) => repo.cubit.getContent());
+      _subscription = repo.cubit.autoRefresh();
     }
 
     await _settings.setDefaultRepo(repo?.name);
@@ -131,7 +129,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    setCurrent((repoName != null) ? _repos[repoName] : null);
+    await setCurrent((repoName != null) ? _repos[repoName] : null);
   }
 
   RepoEntry? get(String name) {
@@ -166,7 +164,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Future<String?> _forget(String name) async {
     if (currentRepoName == name) {
       loggy.app('Canceling subscription to $name');
-      _subscription?.cancel();
+      await _subscription?.cancel();
       _subscription = null;
       _currentRepo = null;
     }
@@ -188,7 +186,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     // one after another won't change it's meaning nor it will crash.
     _currentRepo = null;
 
-    _subscription?.cancel();
+    await _subscription?.cancel();
     _subscription = null;
 
     for (var repo in _repos.values) {
@@ -230,8 +228,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return repo;
   }
 
-  Future<oui.AccessMode?> unlockRepository(String repoName,
-      {required String password}) async {
+  Future<oui.AccessMode?> unlockRepository(
+    String repoName, {
+    required String password,
+  }) async {
     final wasCurrent = currentRepoName == repoName;
 
     final settingsRepoEntry = _settings.entryByName(repoName)!;
@@ -255,7 +255,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       await _put(repo, setCurrent: wasCurrent);
 
-      return repo.maybeHandle?.accessMode ?? oui.AccessMode.blind;
+      return repo.accessMode;
     } catch (e, st) {
       loggy.app(
           'Unlocking of the repository ${settingsRepoEntry.info.path()} failed',
@@ -371,7 +371,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
     final nextRepo = _repos.isNotEmpty ? _repos.values.first : null;
 
-    setCurrent(nextRepo);
+    await setCurrent(nextRepo);
     await _settings.setDefaultRepo(nextRepo?.name);
 
     changed();
@@ -393,11 +393,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final repo =
           await oui.Repository.open(_session, store: store, password: password);
 
-      final cubit = RepoCubit(
+      final cubit = await RepoCubit.create(
           settingsRepoEntry: settingsRepoEntry,
           handle: repo,
           settings: _settings);
-      cubit.loadSettings();
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
@@ -436,12 +435,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       final settingsRepoEntry =
           await _settings.addRepo(info, databaseId: await repo.hexDatabaseId());
 
-      final cubit = RepoCubit(
-          settingsRepoEntry: settingsRepoEntry!,
-          handle: repo,
-          settings: _settings);
-
-      cubit.loadSettings();
+      final cubit = await RepoCubit.create(
+        settingsRepoEntry: settingsRepoEntry!,
+        handle: repo,
+        settings: _settings,
+      );
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {

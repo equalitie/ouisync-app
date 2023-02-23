@@ -41,7 +41,7 @@ class PlatformWindowManagerDesktop
         title: 'OuiSync',
         titleBarStyle: TitleBarStyle.normal,
       );
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.show();
         await windowManager.focus();
       });
@@ -76,13 +76,12 @@ class PlatformWindowManagerDesktop
       switch (eventName) {
         case Constants.eventLeftMouseUp:
           await windowManager.isVisible()
-              ? _appWindow.hide()
-              : _appWindow.show();
+              ? await _appWindow.hide()
+              : await _appWindow.show();
 
           break;
         case Constants.eventRightMouseUp:
-          _systemTray.popUpContextMenu();
-
+          await _systemTray.popUpContextMenu();
           break;
 
         default:
@@ -116,7 +115,7 @@ class PlatformWindowManagerDesktop
   void onWindowClose() async {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose) {
-      _appWindow.hide();
+      await _appWindow.hide();
     }
   }
 

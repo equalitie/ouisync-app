@@ -17,7 +17,7 @@ void main() {
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
     final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
-    session = await Session.open(dir.path);
+    session = Session.create(dir.path);
 
     pluginRepo = await Repository.create(session,
         store: info.path(), readPassword: null, writePassword: null);
@@ -26,7 +26,7 @@ void main() {
     // final settingsRepoEntry =
     //     SettingsRepoEntry(await pluginRepo.hexDatabaseId(), info);
 
-    // repository = RepoCubit(
+    // repository = await RepoCubit.create(
     //     settingsRepoEntry: settingsRepoEntry,
     //     handle: pluginRepo,
     //     settings: settings);
@@ -35,7 +35,7 @@ void main() {
   tearDown(() async {
     // await repository.close();
     await pluginRepo.close();
-    session.close();
+    await session.dispose();
   });
 
   test('Placeholder test', () async {

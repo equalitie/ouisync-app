@@ -21,7 +21,7 @@ class SettingsDesktopDetail extends StatefulWidget {
   final SettingItem? item;
   final ReposCubit reposCubit;
   final Settings settings;
-  final StateMonitorIntValue panicCounter;
+  final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 

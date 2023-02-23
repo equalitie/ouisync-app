@@ -1,83 +1,90 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
+import '../cubits/cubits.dart';
 import '../../generated/l10n.dart';
 
 class StateMonitorPage extends StatefulWidget {
-  const StateMonitorPage(this.session);
-
   final oui.Session session;
+
+  StateMonitorPage(this.session);
 
   @override
-  State<StatefulWidget> createState() => _State(session);
+  State<StateMonitorPage> createState() => _StateMonitorState();
 }
 
-class _State extends State<StateMonitorPage> {
-  final oui.Session session;
-  late final Subscription subscription;
-  late final StateMonitor root;
+class _StateMonitorState extends State<StateMonitorPage> {
+  late final StateMonitorCubit root;
 
-  _State(this.session) {
-    root = session.getRootStateMonitor()!;
-    subscription = root.subscribe()!;
+  _StateMonitorState();
+
+  @override
+  void initState() {
+    super.initState();
+    root = StateMonitorCubit(widget.session.rootStateMonitor);
   }
 
   @override
   void dispose() {
-    subscription.close();
+    unawaited(root.close());
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.titleStateMonitor)),
-        body: StreamBuilder<void>(
-            stream: subscription.broadcastStream,
-            builder: (BuildContext ctx, AsyncSnapshot<void> snapshot) {
-              root.refresh();
-              return Container(child: _NodeWidget(root));
-            }));
-  }
+        body: _NodeWidget(root),
+      );
 }
 
 class _NodeWidget extends StatelessWidget {
-  final StateMonitor monitor;
+  final StateMonitorCubit cubit;
 
-  _NodeWidget(this.monitor);
+  _NodeWidget(this.cubit);
 
   @override
-  Widget build(BuildContext context) {
-    if (monitor.path.isEmpty) {
-      return ListView(children: buildValuesAndChildren());
-    } else {
-      return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-          child: Column(children: buildValuesAndChildren()));
-    }
-  }
+  Widget build(BuildContext context) =>
+      BlocBuilder<StateMonitorCubit, StateMonitorNode?>(
+          bloc: cubit,
+          builder: (context, node) {
+            if (node == null) {
+              return ListView(children: const []);
+            }
 
-  List<Widget> buildValuesAndChildren() => monitor.values.entries
-      .map((entry) => buildValue(entry.key, entry.value))
-      .followedBy(monitor.children.entries
-          .map((entry) => buildChild(entry.key, entry.value)))
-      .toList();
+            if (node.path.isEmpty) {
+              return ListView(children: buildValuesAndChildren(node));
+            }
+
+            return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                child: Column(children: buildValuesAndChildren(node)));
+          });
+
+  List<Widget> buildValuesAndChildren(StateMonitorNode node) =>
+      node.values.entries
+          .map((entry) => buildValue(entry.key, entry.value))
+          .followedBy(node.children.entries
+              .map((entry) => buildChild(entry.key, entry.value)))
+          .toList();
 
   Widget buildValue(String key, String value) {
     return Card(child: ListTile(dense: true, title: Text("$key: $value")));
   }
 
   Widget buildChild(MonitorId childId, int version) =>
-      _ChildWidget(monitor, childId, version);
+      _ChildWidget(cubit, childId, version);
 }
 
 class _ChildWidget extends StatefulWidget {
-  final StateMonitor parent;
+  final StateMonitorCubit parentCubit;
   final MonitorId id;
-  final int version;
+  final int version; // TODO: do we need the version?
 
-  _ChildWidget(this.parent, this.id, this.version)
+  _ChildWidget(this.parentCubit, this.id, this.version)
       : super(key: Key(id.toString()));
 
   @override
@@ -85,26 +92,26 @@ class _ChildWidget extends StatefulWidget {
 }
 
 class _ChildWidgetState extends State<_ChildWidget> {
-  StateMonitor? monitor;
+  StateMonitorCubit? cubit;
 
   @override
   Widget build(BuildContext context) {
-    final monitor = this.monitor;
+    final cubit = this.cubit;
 
-    if (monitor != null) {
-      if (monitor.version < widget.version) {
-        monitor.refresh();
-      }
-
-      return Column(children: <Widget>[
-        Card(
+    if (cubit != null) {
+      return Column(
+        children: <Widget>[
+          Card(
             child: ListTile(
-                trailing: const Icon(Icons.remove),
-                dense: true,
-                title: Text(widget.id.name),
-                onTap: collapse)),
-        _NodeWidget(monitor),
-      ]);
+              trailing: const Icon(Icons.remove),
+              dense: true,
+              title: Text(widget.id.name),
+              onTap: collapse,
+            ),
+          ),
+          _NodeWidget(cubit),
+        ],
+      );
     } else {
       return Card(
           child: ListTile(
@@ -115,15 +122,27 @@ class _ChildWidgetState extends State<_ChildWidget> {
     }
   }
 
+  @override
+  void dispose() {
+    unawaited(cubit?.close());
+    cubit = null;
+
+    super.dispose();
+  }
+
   void expand() {
+    final child = widget.parentCubit.child(widget.id);
+
     setState(() {
-      monitor = widget.parent.child(widget.id);
+      cubit = child;
     });
   }
 
-  void collapse() {
+  Future<void> collapse() async {
+    await cubit?.close();
+
     setState(() {
-      monitor = null;
+      cubit = null;
     });
   }
 }

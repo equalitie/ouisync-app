@@ -84,11 +84,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
   final Connectivity _connectivity = Connectivity();
   _Transition _networkModeTransition = _Transition.none;
 
-  PowerControl(this._session, this._settings)
-      : super(PowerControlState(
-          portForwardingEnabled: _session.isPortForwardingEnabled,
-          localDiscoveryEnabled: _session.isLocalDiscoveryEnabled,
-        ));
+  PowerControl(this._session, this._settings) : super(PowerControlState());
 
   Future<void> init() async {
     final syncOnMobile =
@@ -127,9 +123,9 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
     emit(state.copyWith(portForwardingEnabled: value));
 
     if (value) {
-      _session.enablePortForwarding();
+      await _session.enablePortForwarding();
     } else {
-      _session.disablePortForwarding();
+      await _session.disablePortForwarding();
     }
 
     await _settings.setPortForwardingEnabled(value);
@@ -143,9 +139,9 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
     emit(state.copyWith(localDiscoveryEnabled: value));
 
     if (value) {
-      _session.enableLocalDiscovery();
+      await _session.enableLocalDiscovery();
     } else {
-      _session.disableLocalDiscovery();
+      await _session.disableLocalDiscovery();
     }
 
     await _settings.setLocalDiscoveryEnabled(value);
