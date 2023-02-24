@@ -318,7 +318,7 @@ class _SettingsContainerState extends State<SettingsContainer>
     );
 
     if (delete ?? false) {
-      widget.reposCubit.deleteRepository(repository.metaInfo);
+      await widget.reposCubit.deleteRepository(repository.metaInfo);
     }
   }
 }
