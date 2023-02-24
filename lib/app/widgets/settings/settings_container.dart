@@ -157,8 +157,9 @@ class _SettingsContainerState extends State<SettingsContainer>
       if (password == null) return null;
 
       final shareToken = await _loadShareToken(context, repository, password);
+      final accessMode = await shareToken.mode;
 
-      if (shareToken.mode == AccessMode.blind) {
+      if (accessMode == AccessMode.blind) {
         showSnackBar(context, message: S.current.messageUnlockRepoFailed);
         return null;
       }
@@ -272,7 +273,8 @@ class _SettingsContainerState extends State<SettingsContainer>
       return Failure(null);
     }
 
-    if (result.shareToken.mode == AccessMode.blind) {
+    final accessMode = await result.shareToken.mode;
+    if (accessMode == AccessMode.blind) {
       return Failure(S.current.messageUnlockRepoFailed);
     }
 
