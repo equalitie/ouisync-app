@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
@@ -22,6 +23,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
   final formKey = GlobalKey<FormState>();
 
   final _tokenController = TextEditingController(text: '');
+
+  final _isDesktop = PlatformValues.isDesktopDevice;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +60,14 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     return Column(
       children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Fields.constrainedText(S.current.messageAddRepoQR, flex: 0),
+          Wrap(
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0),
+                Fields.constrainedText('(Available on mobile)',
+                    flex: 0, fontWeight: FontWeight.w200)
+              ]),
         ]),
         Dimensions.spacingVerticalDouble,
         _builScanQRButton(context),
@@ -65,27 +75,31 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
     );
   }
 
+  /// We don't support QR reading for desktop at the moment, just mobile.
+  /// TODO: Find a plugin for reading QR with support for Windows, Linux
   Widget _builScanQRButton(BuildContext context) => Fields.inPageButton(
-      onPressed: () async {
-        final data =
-            await Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return QRScanner(widget.reposCubit.session);
-        }));
+      onPressed: _isDesktop
+          ? null
+          : () async {
+              final data = await Navigator.push(context,
+                  MaterialPageRoute(builder: (context) {
+                return QRScanner(widget.reposCubit.session);
+              }));
 
-        if (!mounted) return;
-        if (data == null) return;
+              if (!mounted) return;
+              if (data == null) return;
 
-        final tokenValidationError =
-            await widget.reposCubit.validateTokenLink(data);
+              final tokenValidationError =
+                  await widget.reposCubit.validateTokenLink(data);
 
-        if (tokenValidationError != null) {
-          showSnackBar(context, message: tokenValidationError);
+              if (tokenValidationError != null) {
+                showSnackBar(context, message: tokenValidationError);
 
-          return;
-        }
+                return;
+              }
 
-        Navigator.of(context).pop(data);
-      },
+              Navigator.of(context).pop(data);
+            },
       leadingIcon: const Icon(Icons.qr_code_2_outlined),
       text: S.current.actionScanQR.toUpperCase());
 
