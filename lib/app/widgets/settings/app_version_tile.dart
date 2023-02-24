@@ -8,6 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/click_counter.dart';
+import '../../utils/platform/platform_values.dart';
 
 class AppVersionTile extends StatefulWidget {
   final Session session;
@@ -31,45 +32,55 @@ class _AppVersionTileState extends State<AppVersionTile> {
   }
 
   @override
-  Widget build(BuildContext context) => SettingsTile(
-        leading: widget.leading,
-        title: widget.title,
-        value: FutureBuilder<String>(
-          future: _version,
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            late Widget version;
+  Widget build(BuildContext context) =>
+      PlatformValues.isMobileDevice ? _buildMobileTile() : _buildDesktopTile();
 
-            if (snapshot.hasData) {
-              version = Text(snapshot.data!);
-            } else if (snapshot.hasError) {
-              version = Text("???");
-            } else {
-              version = Text("...");
-            }
+  SettingsTile _buildMobileTile() => SettingsTile(
+      leading: widget.leading,
+      title: widget.title,
+      value: _getAppVersion(),
+      onPressed: _onPressed);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                version,
-                BlocBuilder<UpgradeExistsCubit, bool>(
-                  builder: (context, state) {
-                    if (state) {
-                      return Text(
-                        S.current.messageNewVersionIsAvailable,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        ),
-        onPressed: _onPressed,
+  Widget _buildDesktopTile() => ListTile(
+      leading: widget.leading,
+      title: widget.title,
+      subtitle: _getAppVersion(),
+      onTap: () => _onPressed(context));
+
+  FutureBuilder<String> _getAppVersion() => FutureBuilder<String>(
+        future: _version,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          late Widget version;
+
+          if (snapshot.hasData) {
+            version = Text(snapshot.data!);
+          } else if (snapshot.hasError) {
+            version = Text("???");
+          } else {
+            version = Text("...");
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              version,
+              BlocBuilder<UpgradeExistsCubit, bool>(
+                builder: (context, state) {
+                  if (state) {
+                    return Text(
+                      S.current.messageNewVersionIsAvailable,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                },
+              ),
+            ],
+          );
+        },
       );
 
   void _onPressed(BuildContext context) {

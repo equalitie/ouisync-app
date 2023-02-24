@@ -7,10 +7,10 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import 'app_version_tile.dart';
 
-class AboutSection extends AbstractSettingsSection {
+class AboutSectionMobile extends AbstractSettingsSection {
   final ReposCubit repos;
 
-  AboutSection({required this.repos});
+  AboutSectionMobile({required this.repos});
 
   @override
   Widget build(BuildContext context) => SettingsSection(
