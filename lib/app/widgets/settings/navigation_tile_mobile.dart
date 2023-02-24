@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-class NavigationTile extends AbstractSettingsTile {
+class NavigationTileMobile extends AbstractSettingsTile {
   final Widget title;
   final Widget? leading;
   final Widget? value;
   final dynamic Function(BuildContext)? onPressed;
   final bool enabled;
 
-  NavigationTile({
+  NavigationTileMobile({
     required this.title,
     this.leading,
     this.value,

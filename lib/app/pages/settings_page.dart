@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settings_ui/settings_ui.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -30,11 +30,13 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(S.current.titleSettings),
-          elevation: 0.0,
-        ),
-        body: MultiBlocProvider(
+      appBar: AppBar(
+        title: Text(PlatformValues.isMobileDevice
+            ? S.current.titleSettings
+            : S.current.messageOuiSyncDesktopTitle),
+        elevation: 0.0,
+      ),
+      body: MultiBlocProvider(
           providers: [
             BlocProvider<PowerControl>.value(value: powerControl),
             BlocProvider<ConnectivityInfo>(
@@ -53,23 +55,13 @@ class SettingsPage extends StatelessWidget {
             listener: (context, state) {
               unawaited(context.read<ConnectivityInfo>().update());
             },
-            child: SettingsList(
-              sections: [
-                RepositorySection(
-                  repos: reposCubit,
-                  isBiometricsAvailable: isBiometricsAvailable,
-                  onShareRepository: onShareRepository,
-                ),
-                NetworkSection(natDetection),
-                LogsSection(
-                    settings: settings,
-                    repos: reposCubit,
-                    panicCounter: panicCounter,
-                    natDetection: natDetection),
-                AboutSection(repos: reposCubit),
-              ],
+            child: SettingsContainer(
+              reposCubit: reposCubit,
+              settings: settings,
+              isBiometricsAvailable: isBiometricsAvailable,
+              panicCounter: panicCounter,
+              natDetection: natDetection,
+              onShareRepository: onShareRepository,
             ),
-          ),
-        ),
-      );
+          )));
 }

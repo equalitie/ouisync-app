@@ -41,3 +41,6 @@ String formatShareLinkForDisplay(String shareLink) {
   final displayToken = shareTokenUri.replace(fragment: truncatedToken);
   return displayToken.toString();
 }
+
+String maskPassword(String? password, {bool mask = true}) =>
+    (mask ? "*" * (password ?? '').length : password) ?? '';

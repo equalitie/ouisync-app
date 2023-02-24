@@ -40,9 +40,18 @@ export 'states/missing_repo_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
 
-export 'settings/about_section.dart';
-export 'settings/logs_section.dart';
-export 'settings/network_section.dart';
-export 'settings/repository_section.dart';
+export 'settings/desktop/repository_security_desktop.dart';
+export 'settings/desktop/setting_desktop_item.dart';
+export 'settings/desktop/settings_desktop_detail.dart';
+export 'settings/desktop/settings_desktop_list.dart';
+export 'settings/about_section_mobile.dart';
+export 'settings/logs_section_mobile.dart';
+export 'settings/network_section_mobile.dart';
+export 'settings/repository_section_mobile.dart';
+export 'settings/settings_container.dart';
+
+export 'settings/platform/platform_dht_switch.dart';
+export 'settings/platform/platform_pex_switch.dart';
+export 'settings/platform/platform_tappable_tile.dart';
 
 export 'log_view.dart';
