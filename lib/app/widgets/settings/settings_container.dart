@@ -147,34 +147,39 @@ class _SettingsContainerState extends State<SettingsContainer>
 
   Future<String?> _navigateToRepositorySecurity(
       BuildContext parentContext, RepoCubit repository) async {
+    String? password;
+    ShareToken? shareToken;
+
     if (widget.isBiometricsAvailable) {
-      final password = await _tryGetBiometricPassword(context, repository);
+      final biometricPassword =
+          await _tryGetBiometricPassword(context, repository);
 
-      if (password == null) return null;
+      if (biometricPassword == null) return null;
 
-      final shareToken = await _loadShareToken(context, repository, password);
+      password = biometricPassword;
+      shareToken =
+          await _loadShareToken(context, repository, biometricPassword);
+
       final accessMode = await shareToken.mode;
 
       if (accessMode == AccessMode.blind) {
         showSnackBar(context, message: S.current.messageUnlockRepoFailed);
+
         return null;
       }
+    } else {
+      final unlockResult =
+          await _validatePasswordManually(parentContext, repository);
 
-      await _navigateToSecurity(
-          parentContext, repository, password, shareToken);
+      if (unlockResult == null) return null;
 
-      return password;
+      password = unlockResult.password;
+      shareToken = unlockResult.shareToken;
     }
 
-    final unlockResult =
-        await _validatePasswordManually(parentContext, repository);
+    await _navigateToSecurity(parentContext, repository, password, shareToken);
 
-    if (unlockResult == null) return null;
-
-    await _navigateToSecurity(parentContext, repository, unlockResult.password,
-        unlockResult.shareToken);
-
-    return unlockResult.password;
+    return password;
   }
 
   Future<void> _navigateToSecurity(BuildContext parentContext,
