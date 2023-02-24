@@ -135,14 +135,17 @@ class _SettingsContainerState extends State<SettingsContainer>
     }
 
     /// We don't have yet the UI for the security item in the repo settings
-    /// on desktop; so for no we just navigate to the security page, just like
+    /// on desktop; so for now we just navigate to the security page, like
     /// we do on mobile.
     /// TODO: Implement the security flow specific to desktop
-    final repo = repoEntry.cubit;
-    return await _navigateToRepositorySecurity(parentContext, repo);
-    // return PlatformValues.isMobileDevice
-    //     ? await _navigateToRepositorySecurity(parentContext, repo)
-    //     : await _activateRepositorySecurity(parentContext, repo);
+    final repository = repoEntry.cubit;
+    return await _navigateToRepositorySecurity(parentContext, repository);
+    // if (PlatformValues.isDesktopDevice) {
+    //   return (await _getPasswordFromUser(parentContext, repository))
+    //           ?.password;
+    // }
+
+    // return await _navigateToRepositorySecurity(parentContext, repository);
   }
 
   Future<String?> _navigateToRepositorySecurity(
@@ -169,7 +172,7 @@ class _SettingsContainerState extends State<SettingsContainer>
       }
     } else {
       final unlockResult =
-          await _validatePasswordManually(parentContext, repository);
+          await _getPasswordFromUser(parentContext, repository);
 
       if (unlockResult == null) return null;
 
@@ -177,33 +180,35 @@ class _SettingsContainerState extends State<SettingsContainer>
       shareToken = unlockResult.shareToken;
     }
 
-    await _navigateToSecurity(parentContext, repository, password, shareToken);
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepositorySecurity(
+              repo: repository,
+              password: password!,
+              shareToken: shareToken!,
+              isBiometricsAvailable: widget.isBiometricsAvailable,
+              usesBiometrics: false),
+        ));
 
     return password;
   }
 
-  Future<void> _navigateToSecurity(BuildContext parentContext,
-      RepoCubit repository, String password, ShareToken shareToken) async {
-    await _pushRepositorySecurityPage(parentContext,
-        repo: repository,
-        password: password,
-        shareToken: shareToken,
-        isBiometricsAvailable: widget.isBiometricsAvailable,
-        usesBiometrics: false);
+  Future<String?> _tryGetBiometricPassword(
+      BuildContext context, RepoCubit repo) async {
+    final biometricsResult =
+        await Biometrics.getRepositoryPassword(databaseId: repo.databaseId);
+
+    if (biometricsResult.exception != null) {
+      loggy.app(biometricsResult.exception);
+
+      return null;
+    }
+
+    return biometricsResult.value;
   }
 
-  // ignore: unused_element
-  Future<String?> _activateRepositorySecurity(
-      BuildContext parentContext, RepoCubit repository) async {
-    final unlockResult =
-        await _validatePasswordManually(parentContext, repository);
-
-    if (unlockResult == null) return null;
-
-    return unlockResult.password;
-  }
-
-  Future<UnlockResult?> _validatePasswordManually(
+  Future<UnlockResult?> _getPasswordFromUser(
       BuildContext parentContext, RepoCubit repo) async {
     final result = await _validateManualPassword(parentContext, repo: repo);
 
@@ -218,42 +223,6 @@ class _SettingsContainerState extends State<SettingsContainer>
     }
 
     return result.success;
-  }
-
-  Future<String?> _tryGetBiometricPassword(
-      BuildContext context, RepoCubit repo) async {
-    final biometricsResult =
-        await Biometrics.getRepositoryPassword(databaseId: repo.databaseId);
-
-    if (biometricsResult.exception != null) {
-      loggy.app(biometricsResult.exception);
-      return null;
-    }
-
-    return biometricsResult.value;
-  }
-
-  Future<ShareToken> _loadShareToken(
-          BuildContext context, RepoCubit repo, String password) =>
-      Dialogs.executeFutureWithLoadingDialog(context,
-          f: repo.createShareToken(AccessMode.write, password: password));
-
-  Future<void> _pushRepositorySecurityPage(BuildContext context,
-      {required RepoCubit repo,
-      required String password,
-      required ShareToken shareToken,
-      required bool isBiometricsAvailable,
-      required bool usesBiometrics}) async {
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepositorySecurity(
-              repo: repo,
-              password: password,
-              shareToken: shareToken,
-              isBiometricsAvailable: isBiometricsAvailable,
-              usesBiometrics: usesBiometrics),
-        ));
   }
 
   Future<Result<UnlockResult, String?>> _validateManualPassword(
@@ -281,6 +250,11 @@ class _SettingsContainerState extends State<SettingsContainer>
 
     return Success(result);
   }
+
+  Future<ShareToken> _loadShareToken(
+          BuildContext context, RepoCubit repo, String password) =>
+      Dialogs.executeFutureWithLoadingDialog(context,
+          f: repo.createShareToken(AccessMode.write, password: password));
 
   Future<UnlockResult> _unlockShareToken(
       BuildContext context, RepoCubit repo, String password) async {
