@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
+import '../../../utils/utils.dart';
 import '../app_version_tile.dart';
 
 class AboutDesktopDetail extends StatelessWidget {
@@ -13,19 +14,17 @@ class AboutDesktopDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      _buildAppVersionTile(),
-      Divider(height: 30.0),
-      _buildRuntimeID(),
-      Divider(height: 30.0)
-    ]);
+    return Column(children: [_buildAppVersionTile(), _buildRuntimeID()]);
   }
 
-  Widget _buildAppVersionTile() => AppVersionTile(
-        session: reposCubit.session,
-        leading: Icon(Icons.info_outline),
-        title: Text(S.current.labelAppVersion),
-      );
+  Widget _buildAppVersionTile() => Wrap(children: [
+        AppVersionTile(
+          session: reposCubit.session,
+          leading: Icon(Icons.info_outline),
+          title: Text(S.current.labelAppVersion),
+        ),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildRuntimeID() => ListTile(
       title: Text(S.current.messageSettingsRuntimeID),

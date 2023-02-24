@@ -28,11 +28,8 @@ class LogsDesktopDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(children: [
       _buildSaveTile(context),
-      Divider(height: 30.0),
       _buildShareTile(context),
-      Divider(height: 30.0),
-      _buildViewTile(context),
-      Divider(height: 30.0)
+      _buildViewTile(context)
     ]);
   }
 
@@ -52,14 +49,18 @@ class LogsDesktopDetail extends StatelessWidget {
                   style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white))
-            ]))
+            ])),
+        Dimensions.desktopSettingDivider
       ]);
 
-  Widget _buildShareTile(BuildContext context) => ListTile(
-      enabled: false,
-      title: Text(S.current.actionShare),
-      leading: Icon(Icons.share),
-      onTap: () => _shareLogs);
+  Widget _buildShareTile(BuildContext context) => Wrap(children: [
+        ListTile(
+            enabled: false,
+            title: Text(S.current.actionShare),
+            leading: Icon(Icons.share),
+            onTap: () => _shareLogs),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildViewTile(BuildContext context) => ListTile(
       enabled: false,

@@ -144,4 +144,6 @@ class Dimensions {
   static const BoxDecoration decorationBottomSheetAlternative = BoxDecoration(
       borderRadius: Dimensions.boderRadiusBottomSheetTop,
       color: Constants.modalBottomSheetBackgroundColor);
+
+  static const Divider desktopSettingDivider = Divider(height: 30.0);
 }

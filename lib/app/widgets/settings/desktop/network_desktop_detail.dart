@@ -18,72 +18,75 @@ class NetworkDesktopDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(children: [
       _buildConnectivityTile(context),
-      Divider(height: 30.0),
       _buildPortForwardingTile(context),
-      Divider(height: 30.0),
       _buildLocalDiscoveryTile(context),
-      Divider(height: 30.0),
       _buildSyncOnMobileSwitch(context),
-      Divider(height: 30.0),
       ..._buildConnectivityInfoTiles(context),
       _buildPeerListTile(context),
-      Divider(height: 30.0),
       _buildNatDetectionTile(context)
     ]);
   }
 
-  Widget _buildConnectivityTile(BuildContext context) => Container(
-      child: BlocBuilder<PowerControl, PowerControlState>(
-          builder: (context, state) => ListTile(
-              leading: Icon(Icons.wifi),
-              title: Text(Strings.connectionType),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_connectivityTypeName(state.connectivityType)),
-                  if (state.networkDisabledReason != null)
-                    Text('(${state.networkDisabledReason!})'),
-                ],
-              ),
-              trailing: (state.isNetworkEnabled ?? true)
-                  ? null
-                  : Icon(Icons.warning, color: Constants.warningColor))));
+  Widget _buildConnectivityTile(BuildContext context) => Wrap(children: [
+        BlocBuilder<PowerControl, PowerControlState>(
+            builder: (context, state) => ListTile(
+                leading: Icon(Icons.wifi),
+                title: Text(Strings.connectionType),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_connectivityTypeName(state.connectivityType)),
+                    if (state.networkDisabledReason != null)
+                      Text('(${state.networkDisabledReason!})'),
+                  ],
+                ),
+                trailing: (state.isNetworkEnabled ?? true)
+                    ? null
+                    : Icon(Icons.warning, color: Constants.warningColor))),
+        Dimensions.desktopSettingDivider
+      ]);
 
-  Widget _buildPortForwardingTile(BuildContext context) => Container(
-      child: BlocSelector<PowerControl, PowerControlState, bool>(
-          selector: (state) => state.portForwardingEnabled,
-          builder: (context, value) => SwitchListTile.adaptive(
-              value: value,
-              onChanged: (value) {
-                final powerControl = context.read<PowerControl>();
-                unawaited(powerControl.setPortForwardingEnabled(value));
-              },
-              title: Text('UPnP'),
-              secondary: Icon(Icons.router))));
+  Widget _buildPortForwardingTile(BuildContext context) => Wrap(children: [
+        BlocSelector<PowerControl, PowerControlState, bool>(
+            selector: (state) => state.portForwardingEnabled,
+            builder: (context, value) => SwitchListTile.adaptive(
+                value: value,
+                onChanged: (value) {
+                  final powerControl = context.read<PowerControl>();
+                  unawaited(powerControl.setPortForwardingEnabled(value));
+                },
+                title: Text('UPnP'),
+                secondary: Icon(Icons.router))),
+        Dimensions.desktopSettingDivider
+      ]);
 
-  Widget _buildLocalDiscoveryTile(BuildContext context) => Container(
-      child: BlocSelector<PowerControl, PowerControlState, bool>(
-          selector: (state) => state.localDiscoveryEnabled,
-          builder: (context, value) => SwitchListTile.adaptive(
-              value: value,
-              onChanged: (value) {
-                final powerControl = context.read<PowerControl>();
-                unawaited(powerControl.setLocalDiscoveryEnabled(value));
-              },
-              title: Text(S.current.messageLocalDiscovery),
-              secondary: Icon(Icons.broadcast_on_personal))));
+  Widget _buildLocalDiscoveryTile(BuildContext context) => Wrap(children: [
+        BlocSelector<PowerControl, PowerControlState, bool>(
+            selector: (state) => state.localDiscoveryEnabled,
+            builder: (context, value) => SwitchListTile.adaptive(
+                value: value,
+                onChanged: (value) {
+                  final powerControl = context.read<PowerControl>();
+                  unawaited(powerControl.setLocalDiscoveryEnabled(value));
+                },
+                title: Text(S.current.messageLocalDiscovery),
+                secondary: Icon(Icons.broadcast_on_personal))),
+        Dimensions.desktopSettingDivider
+      ]);
 
-  Widget _buildSyncOnMobileSwitch(BuildContext context) => Container(
-      child: BlocSelector<PowerControl, PowerControlState, bool>(
-          selector: (state) => state.syncOnMobile,
-          builder: (context, value) => SwitchListTile.adaptive(
-              value: value,
-              onChanged: (value) {
-                final powerControl = context.read<PowerControl>();
-                unawaited(powerControl.setSyncOnMobileEnabled(value));
-              },
-              title: Text(S.current.messageSyncMobileData),
-              secondary: Icon(Icons.mobile_screen_share))));
+  Widget _buildSyncOnMobileSwitch(BuildContext context) => Wrap(children: [
+        BlocSelector<PowerControl, PowerControlState, bool>(
+            selector: (state) => state.syncOnMobile,
+            builder: (context, value) => SwitchListTile.adaptive(
+                value: value,
+                onChanged: (value) {
+                  final powerControl = context.read<PowerControl>();
+                  unawaited(powerControl.setSyncOnMobileEnabled(value));
+                },
+                title: Text(S.current.messageSyncMobileData),
+                secondary: Icon(Icons.mobile_screen_share))),
+        Dimensions.desktopSettingDivider
+      ]);
 
   List<Widget> _buildConnectivityInfoTiles(BuildContext context) => [
         _buildConnectivityInfoTile(Strings.labelTcpListenerEndpointV4,
@@ -93,31 +96,26 @@ class NetworkDesktopDetail extends StatelessWidget {
           Icons.computer,
           (state) => state.tcpListenerV6,
         ),
-        // Divider(height: 30.0),
         _buildConnectivityInfoTile(
           Strings.labelQuicListenerEndpointV4,
           Icons.computer,
           (state) => state.quicListenerV4,
         ),
-        Divider(height: 30.0),
         _buildConnectivityInfoTile(
           Strings.labelQuicListenerEndpointV6,
           Icons.computer,
           (state) => state.quicListenerV6,
         ),
-        Divider(height: 30.0),
         _buildConnectivityInfoTile(
           Strings.labelExternalIP,
           Icons.cloud_outlined,
           (state) => state.externalIP,
         ),
-        Divider(height: 30.0),
         _buildConnectivityInfoTile(
           Strings.labelLocalIPv4,
           Icons.lan_outlined,
           (state) => state.localIPv4,
         ),
-        Divider(height: 30.0),
         _buildConnectivityInfoTile(
           Strings.labelLocalIPv6,
           Icons.lan_outlined,
@@ -132,18 +130,21 @@ class NetworkDesktopDetail extends StatelessWidget {
               selector: selector,
               builder: (context, value) {
                 if (value.isNotEmpty) {
-                  return ListTile(
-                    leading: Icon(icon),
-                    title: Text(title),
-                    subtitle: Text(value),
-                  );
+                  return Wrap(children: [
+                    ListTile(
+                      leading: Icon(icon),
+                      title: Text(title),
+                      subtitle: Text(value),
+                    ),
+                    Dimensions.desktopSettingDivider
+                  ]);
                 } else {
                   return SizedBox.shrink();
                 }
               }));
 
-  Widget _buildPeerListTile(BuildContext context) => Container(
-        child: BlocBuilder<PeerSetCubit, PeerSet>(
+  Widget _buildPeerListTile(BuildContext context) => Wrap(children: [
+        BlocBuilder<PeerSetCubit, PeerSet>(
           builder: (context, state) => ListTile(
               leading: Icon(Icons.people),
               title: Text(S.current.labelPeers),
@@ -160,7 +161,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                             )));
               }),
         ),
-      );
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildNatDetectionTile(BuildContext context) => Container(
       child: FutureBuilder<NatDetection>(

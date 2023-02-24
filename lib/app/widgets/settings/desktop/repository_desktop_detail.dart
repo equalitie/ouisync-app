@@ -33,14 +33,10 @@ class RepositoryDesktopDetail extends StatelessWidget {
             Row(children: [RepositorySelector(reposCubit)]),
             SizedBox(height: 20.0),
             _buildTile(context, _buildDhtSwitch),
-            Divider(height: 30.0),
             _buildTile(context, _buildPeerExchangeSwitch),
-            Divider(height: 30.0),
             _buildTile(context, _buildRenameTile),
             _buildTile(context, _buildShareTile),
-            Divider(height: 30.0),
             _buildTile(context, _buildSecurityTile),
-            Divider(height: 30.0),
             _buildTile(context, _buildDeleteTile),
           ]));
 
@@ -57,18 +53,24 @@ class RepositoryDesktopDetail extends StatelessWidget {
   }
 
   Widget _buildDhtSwitch(BuildContext context, RepoCubit repository) =>
-      PlatformDhtSwitch(
-          repository: repository,
-          title: S.current.labelBitTorrentDHT,
-          icon: Icons.hub,
-          onToggle: (value) => repository.setDhtEnabled(value));
+      Wrap(children: [
+        PlatformDhtSwitch(
+            repository: repository,
+            title: S.current.labelBitTorrentDHT,
+            icon: Icons.hub,
+            onToggle: (value) => repository.setDhtEnabled(value)),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
-      PlatformPexSwitch(
-          repository: repository,
-          title: S.current.messagePeerExchange,
-          icon: Icons.group_add,
-          onToggle: (value) => repository.setPexEnabled(value));
+      Wrap(children: [
+        PlatformPexSwitch(
+            repository: repository,
+            title: S.current.messagePeerExchange,
+            icon: Icons.group_add,
+            onToggle: (value) => repository.setPexEnabled(value)),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
       PlatformTappableTile(
@@ -79,22 +81,27 @@ class RepositoryDesktopDetail extends StatelessWidget {
           onTap: (_) async => await onRenameRepository(context));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
-      PlatformTappableTile(
-          reposCubit: reposCubit,
-          repoName: repository.name,
-          title: S.current.actionShare,
-          icon: Icons.share,
-          onTap: (_) => onShareRepository(repository));
+      Wrap(children: [
+        PlatformTappableTile(
+            reposCubit: reposCubit,
+            repoName: repository.name,
+            title: S.current.actionShare,
+            icon: Icons.share,
+            onTap: (_) => onShareRepository(repository)),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildSecurityTile(BuildContext context, RepoCubit repository) =>
-
-      /// TODO: Replace with commented code when desktop flow is in place
-      PlatformTappableTile(
-          reposCubit: reposCubit,
-          repoName: repository.name,
-          title: S.current.titleSecurity,
-          icon: Icons.password,
-          onTap: (_) async => await onRepositorySecurity(context));
+      Wrap(children: [
+        /// TODO: Replace with commented code when desktop flow is in place
+        PlatformTappableTile(
+            reposCubit: reposCubit,
+            repoName: repository.name,
+            title: S.current.titleSecurity,
+            icon: Icons.password,
+            onTap: (_) async => await onRepositorySecurity(context)),
+        Dimensions.desktopSettingDivider
+      ]);
   // RepositorySecurityDesktop(onRepositorySecurity: onRepositorySecurity);
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
