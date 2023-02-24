@@ -75,11 +75,7 @@ class _SettingsContainerState extends State<SettingsContainer>
         Flexible(
             flex: 1,
             child: SettingsDesktopList(
-                onItemTap: (setting) {
-                  setState(() => _selected = setting);
-
-                  loggy.app('Selected item: ${_selected?.setting.name}');
-                },
+                onItemTap: (setting) => setState(() => _selected = setting),
                 selectedItem: _selected)),
         Flexible(
             flex: 4,
