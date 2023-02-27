@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -9,8 +10,7 @@ import '../utils/utils.dart';
 import 'pages.dart';
 
 class AddRepositoryPage extends StatefulWidget {
-  const AddRepositoryPage({required this.reposCubit, Key? key})
-      : super(key: key);
+  const AddRepositoryPage({required this.reposCubit});
 
   final ReposCubit reposCubit;
 
@@ -65,8 +65,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Fields.constrainedText(S.current.messageAddRepoQR, flex: 0),
-                Fields.constrainedText('(Available on mobile)',
-                    flex: 0, fontWeight: FontWeight.w200)
+                if (_isDesktop)
+                  Fields.constrainedText('(Available on mobile)',
+                      flex: 0, fontWeight: FontWeight.w200)
               ]),
         ]),
         Dimensions.spacingVerticalDouble,
@@ -81,6 +82,12 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
       onPressed: _isDesktop
           ? null
           : () async {
+              final permissionName = 'Camera';
+              final permissionGranted =
+                  await _checkPermission(Permission.camera, permissionName);
+
+              if (!permissionGranted) return;
+
               final data = await Navigator.push(context,
                   MaterialPageRoute(builder: (context) {
                 return QRScanner(widget.reposCubit.session);
@@ -102,6 +109,19 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
             },
       leadingIcon: const Icon(Icons.qr_code_2_outlined),
       text: S.current.actionScanQR.toUpperCase());
+
+  Future<bool> _checkPermission(
+      Permission permission, String permissionName) async {
+    final result = await Permissions.requestPermission(
+        context, permission, permissionName);
+
+    if (result.status != PermissionStatus.granted) {
+      loggy.app(result.resultMessage);
+      return false;
+    }
+
+    return true;
+  }
 
   Widget _buildOrSeparator() {
     return Padding(
