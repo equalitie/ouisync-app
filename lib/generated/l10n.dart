@@ -140,10 +140,10 @@ class S {
     );
   }
 
-  /// `Add a repository`
+  /// `Import a repository`
   String get titleAddRepository {
     return Intl.message(
-      'Add a repository',
+      'Import a repository',
       name: 'titleAddRepository',
       desc: '',
       args: [],
@@ -310,10 +310,10 @@ class S {
     );
   }
 
-  /// `Add a repository with token`
+  /// `Import a repository with token`
   String get titleAddRepoToken {
     return Intl.message(
-      'Add a repository with token',
+      'Import a repository with token',
       name: 'titleAddRepoToken',
       desc: '',
       args: [],
@@ -890,10 +890,10 @@ class S {
     );
   }
 
-  /// `Failed to add repository {name}`
+  /// `Failed to import repository {name}`
   String messsageFailedAddRepository(Object name) {
     return Intl.message(
-      'Failed to add repository $name',
+      'Failed to import repository $name',
       name: 'messsageFailedAddRepository',
       desc: '',
       args: [name],
@@ -1610,10 +1610,10 @@ class S {
     );
   }
 
-  /// `Add a repository using a QR code`
+  /// `Import a repository using a QR code`
   String get messageAddRepoQR {
     return Intl.message(
-      'Add a repository using a QR code',
+      'Import a repository using a QR code',
       name: 'messageAddRepoQR',
       desc: '',
       args: [],
@@ -1630,10 +1630,10 @@ class S {
     );
   }
 
-  /// `Add a repository using a token link`
+  /// `Import a repository using a token link`
   String get messageAddRepoLink {
     return Intl.message(
-      'Add a repository using a token link',
+      'Import a repository using a token link',
       name: 'messageAddRepoLink',
       desc: '',
       args: [],
@@ -2490,10 +2490,10 @@ class S {
     );
   }
 
-  /// `Add an existing repository`
+  /// `Import a repository`
   String get iconAddExistingRepository {
     return Intl.message(
-      'Add an existing repository',
+      'Import a repository',
       name: 'iconAddExistingRepository',
       desc: '',
       args: [],
@@ -2530,20 +2530,20 @@ class S {
     );
   }
 
-  /// `Add Repository`
+  /// `Import a Repository`
   String get actionAddRepository {
     return Intl.message(
-      'Add Repository',
+      'Import a Repository',
       name: 'actionAddRepository',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add a Shared Repository`
+  /// `Import a Repository`
   String get actionAddRepositoryWithToken {
     return Intl.message(
-      'Add a Shared Repository',
+      'Import a Repository',
       name: 'actionAddRepositoryWithToken',
       desc: '',
       args: [],
