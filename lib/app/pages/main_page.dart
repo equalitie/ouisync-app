@@ -398,7 +398,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  _contentsList(RepoCubit currentRepo) => ValueListenableBuilder(
+  Widget _contentsList(RepoCubit currentRepo) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
           onRefresh: () async => getContent(),

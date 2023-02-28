@@ -21,6 +21,12 @@ class FileItem extends BaseItem {
   }) : super(name, path);
 
   final int size;
+
+  @override
+  List<Object> get props => [
+        ...super.props,
+        size,
+      ];
 }
 
 class FolderItem extends BaseItem {
