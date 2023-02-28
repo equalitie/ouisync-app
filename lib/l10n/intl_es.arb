@@ -549,5 +549,11 @@
   "messageRepositoryIsNotOpen": "El repositorio no está abierto",
   "@messageRepositoryIsNotOpen": {},
   "messageNoRepoIsSelected": "No hay ningún repositorio seleccionado",
-  "@messageNoRepoIsSelected": {}
+  "@messageNoRepoIsSelected": {},
+  "titleRequiredPermission": "Permiso requerido",
+  "@titleRequiredPermission": {},
+  "messageSaveLogFile": "Guardar el archivo de registro",
+  "@messageSaveLogFile": {},
+  "messageGranted": "Concedido",
+  "@messageGranted": {}
 }
