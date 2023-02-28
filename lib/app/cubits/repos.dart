@@ -63,10 +63,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   StateMonitor get rootStateMonitor => _session.rootStateMonitor;
 
-  Folder? get currentFolder {
-    return currentRepo?.currentFolder;
-  }
-
   Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
   Future<oui.ShareToken> createToken(String tokenString) =>

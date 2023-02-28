@@ -3,16 +3,15 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/settings.dart';
-import 'folder.dart';
 import 'repo_meta_info.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
-  String? get infoHash;
-  Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
+
+  String? get infoHash => maybeCubit?.state.infoHash;
 
   oui.AccessMode get accessMode =>
       maybeCubit?.state.accessMode ?? oui.AccessMode.blind;
@@ -39,12 +38,6 @@ class LoadingRepoEntry extends RepoEntry {
   }
 
   @override
-  String? get infoHash => null;
-
-  @override
-  Folder? get currentFolder => null;
-
-  @override
   RepoCubit? get maybeCubit => null;
 }
 
@@ -69,12 +62,6 @@ class OpenRepoEntry extends RepoEntry {
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
-
-  @override
-  String? get infoHash => _cubit.state.infoHash;
-
-  @override
-  Folder? get currentFolder => _cubit.currentFolder;
 }
 
 class MissingRepoEntry extends RepoEntry {
@@ -90,12 +77,6 @@ class MissingRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {}
-
-  @override
-  Folder? get currentFolder => null;
-
-  @override
-  String? get infoHash => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
@@ -114,12 +95,6 @@ class ErrorRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {}
-
-  @override
-  Folder? get currentFolder => null;
-
-  @override
-  String? get infoHash => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;

@@ -83,7 +83,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         bloc: widget._repo,
         builder: (context, state) {
           bool canMove = false;
-          final folder = widget._repo.currentFolder;
+          final folder = state.currentFolder;
 
           if (folder.path != widget.origin && folder.path != widget.path) {
             canMove = true;

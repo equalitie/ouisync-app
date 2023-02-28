@@ -23,6 +23,7 @@ class RepoState extends Equatable {
   final bool isPexEnabled;
   final oui.AccessMode accessMode;
   final String infoHash;
+  final FolderState currentFolder;
 
   RepoState({
     this.isLoading = false,
@@ -33,6 +34,7 @@ class RepoState extends Equatable {
     this.isPexEnabled = false,
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
+    this.currentFolder = const FolderState(),
   });
 
   RepoState copyWith({
@@ -44,6 +46,7 @@ class RepoState extends Equatable {
     bool? isPexEnabled,
     oui.AccessMode? accessMode,
     String? infoHash,
+    FolderState? currentFolder,
   }) =>
       RepoState(
         isLoading: isLoading ?? this.isLoading,
@@ -54,6 +57,7 @@ class RepoState extends Equatable {
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
+        currentFolder: currentFolder ?? this.currentFolder,
       );
 
   @override
@@ -61,10 +65,12 @@ class RepoState extends Equatable {
         isLoading,
         uploads,
         downloads,
+        // TODO: message ?
         isDhtEnabled,
         isPexEnabled,
         accessMode,
         infoHash,
+        currentFolder,
       ];
 
   bool get canRead => accessMode != oui.AccessMode.blind;
@@ -117,8 +123,6 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
   String get name => _settingsRepoEntry.name;
   RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
   SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
-
-  Folder get currentFolder => _currentFolder;
 
   Future<void> setDhtEnabled(bool value) async {
     if (state.isDhtEnabled == value) {
@@ -467,7 +471,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
   }
 
   Future<void> refresh() async {
-    final path = _currentFolder.path;
+    final path = state.currentFolder.path;
     bool errorShown = false;
 
     try {
@@ -475,7 +479,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
         bool success = await _currentFolder.refresh();
 
         if (success) break;
-        if (_currentFolder.isRoot()) break;
+        if (_currentFolder.state.isRoot) break;
 
         _currentFolder.goUp();
 
@@ -488,7 +492,10 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       showMessage(e.toString());
     }
 
-    emit(state.copyWith(isLoading: false));
+    emit(state.copyWith(
+      currentFolder: _currentFolder.state,
+      isLoading: false,
+    ));
   }
 
   StreamSubscription<void> autoRefresh() =>

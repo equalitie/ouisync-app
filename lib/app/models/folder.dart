@@ -1,35 +1,41 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
+
 import 'item.dart';
 import '../utils/strings.dart';
 import '../utils/actions.dart';
 import '../cubits/repo.dart';
 
-class Folder {
-  late final RepoCubit repo;
-  String path = Strings.root;
+class FolderState extends Equatable {
+  final String path;
+  final List<BaseItem> content;
 
-  List<BaseItem> content = <BaseItem>[];
+  const FolderState({this.path = Strings.root, this.content = const []});
+
+  bool get isRoot => path == Strings.root;
+  String get parent => getDirname(path);
+
+  @override
+  List<Object?> get props => [path, content];
+}
+
+class Folder {
+  FolderState state = FolderState();
+  late final RepoCubit repo;
   final _Refresher _refresher = _Refresher();
 
   Folder() {
     _refresher.folder = this;
   }
 
-  bool isRoot() {
-    return path == Strings.root;
-  }
-
-  String get parent => getDirname(path);
-
   void goUp() {
-    path = parent;
+    state = FolderState(path: state.parent, content: state.content);
   }
 
   void goTo(String path) {
-    if (path != this.path) {
-      content.clear();
-      this.path = path;
+    if (path != state.path) {
+      state = FolderState(path: path);
     }
   }
 
@@ -73,7 +79,7 @@ class _Refresher {
 
         // Remember which path we're getting the content for to avoid claiming
         // another folder has that content.
-        final path = folder.path;
+        final path = folder.state.path;
 
         bool success = true;
 
@@ -81,12 +87,13 @@ class _Refresher {
           final content = await folder.repo.getFolderContents(path);
           content.sort((a, b) => _typeId(a).compareTo(_typeId(b)));
 
-          if (path == folder.path) {
-            folder.content = content;
+          if (path == folder.state.path) {
+            folder.state =
+                FolderState(path: folder.state.path, content: content);
           }
         } catch (_) {
-          if (path == folder.path) {
-            folder.content.clear();
+          if (path == folder.state.path) {
+            folder.state = FolderState(path: folder.state.path);
           }
           success = false;
         }

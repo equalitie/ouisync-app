@@ -89,7 +89,7 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
 
     if (!permissionGranted) return;
 
-    final dstDir = repo.currentFolder.path;
+    final dstDir = repo.state.currentFolder.path;
 
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
