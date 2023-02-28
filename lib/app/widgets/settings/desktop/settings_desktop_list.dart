@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../../generated/l10n.dart';
 import '../../../utils/platform/platform.dart';
 import 'setting_desktop_item.dart';
 
@@ -51,21 +52,25 @@ class SettingItem {
 final settingsItems = [
   SettingItem(
       setting: Setting.repository,
-      name: "Repository",
+      name: S.current.menuItemRepository,
       platform: SettingItemPlatform.all),
   SettingItem(
       setting: Setting.network,
-      name: "Network",
+      name: S.current.menuItemNetwork,
       platform: SettingItemPlatform.all),
 
   /// TODO: Get the logs saving and sharing to work on desktop
   SettingItem(
-      setting: Setting.log, name: "Logs", platform: SettingItemPlatform.all),
+      setting: Setting.log,
+      name: S.current.menuItemLogs,
+      platform: SettingItemPlatform.all),
   // Currently unnavailable:
   // SettingItem(
   //     setting: Setting.feedback,
   //     name: "Feedback",
   //     platform: SettingItemPlatform.all),
   SettingItem(
-      setting: Setting.about, name: "About", platform: SettingItemPlatform.all)
+      setting: Setting.about,
+      name: S.current.menuItemAbout,
+      platform: SettingItemPlatform.all)
 ];

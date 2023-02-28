@@ -21,7 +21,9 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Row(children: [Text('Security', textAlign: TextAlign.start)]),
+      Row(children: [
+        Text(S.current.titleSecurity, textAlign: TextAlign.start)
+      ]),
       ListTile(
           leading: const Icon(Icons.password_rounded),
           title: _isPasswordAvailable(_password)
@@ -77,7 +79,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
             itemBuilder: (context) => <PopupMenuEntry<PasswordItem>>[
                   PopupMenuItem<PasswordItem>(
                       value: PasswordItem.copy,
-                      child: Text('Copy password'),
+                      child: Text(S.current.popupMenuItemCopyPassword),
                       onTap: () async {
                         if (_password == null) return;
 
@@ -90,7 +92,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                   const PopupMenuDivider(),
                   PopupMenuItem<PasswordItem>(
                       value: PasswordItem.change,
-                      child: Text('Change password'),
+                      child: Text(S.current.popupMenuItemChangePassword),
                       onTap: () {})
                 ])
       ]);

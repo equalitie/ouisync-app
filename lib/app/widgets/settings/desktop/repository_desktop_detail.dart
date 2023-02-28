@@ -106,7 +106,9 @@ class RepositoryDesktopDetail extends StatelessWidget {
 
   Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
       Column(children: [
-        Row(children: [Text('Delete', textAlign: TextAlign.start)]),
+        Row(children: [
+          Text(S.current.actionDelete, textAlign: TextAlign.start)
+        ]),
         ListTile(
             leading: const Icon(Icons.delete, color: Constants.dangerColor),
             title: Row(children: [
@@ -115,7 +117,7 @@ class RepositoryDesktopDetail extends StatelessWidget {
                   child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20.0),
-                      child: Text("Delete repository")),
+                      child: Text(S.current.actionDeleteRepository)),
                   style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white))

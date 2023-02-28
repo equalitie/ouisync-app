@@ -193,6 +193,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Type password: "),
         "labelUseExternalStorage":
             MessageLookupByLibrary.simpleMessage("Use external storage"),
+        "menuItemAbout": MessageLookupByLibrary.simpleMessage("About"),
+        "menuItemLogs": MessageLookupByLibrary.simpleMessage("Logs"),
+        "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Network"),
+        "menuItemRepository":
+            MessageLookupByLibrary.simpleMessage("Repository"),
         "mesageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("There is no media present."),
         "messageAccessModeDisabled": m0,
@@ -423,6 +428,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m16,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the link here"),
+        "messageSaveLogFile":
+            MessageLookupByLibrary.simpleMessage("Save log file"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
             "Save the file to this folder"),
         "messageSavingChanges": m17,
@@ -470,6 +477,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWritingFileError": m20,
         "messsageFailedAddRepository": m21,
         "messsageFailedCreateRepository": m22,
+        "popupMenuItemChangePassword":
+            MessageLookupByLibrary.simpleMessage("Change password"),
+        "popupMenuItemCopyPassword":
+            MessageLookupByLibrary.simpleMessage("Copy password"),
         "replacementAccess": m23,
         "replacementChanges": m24,
         "replacementEntry": m25,
