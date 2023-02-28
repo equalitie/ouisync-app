@@ -1,13 +1,15 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class DirectoryActions extends StatelessWidget {
+class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
   const DirectoryActions({
     required this.context,
     required this.cubit,
@@ -81,6 +83,12 @@ class DirectoryActions extends StatelessWidget {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
+    final permissionName = S.current.messageStorage;
+    final permissionGranted =
+        await _checkPermission(Permission.storage, permissionName);
+
+    if (!permissionGranted) return;
+
     final dstDir = repo.currentFolder.path;
 
     final result = await FilePicker.platform.pickFiles(
@@ -110,6 +118,19 @@ class DirectoryActions extends StatelessWidget {
     }
 
     Navigator.of(context).pop();
+  }
+
+  Future<bool> _checkPermission(
+      Permission permission, String permissionName) async {
+    final result = await Permissions.requestPermission(
+        context, permission, permissionName);
+
+    if (result.status != PermissionStatus.granted) {
+      loggy.app(result.resultMessage);
+      return false;
+    }
+
+    return true;
   }
 
   String _getTypeNameForMessage(EntryType? type) {

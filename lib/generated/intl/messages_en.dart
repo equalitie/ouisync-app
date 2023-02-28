@@ -114,6 +114,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
+        "actionGoToSettings":
+            MessageLookupByLibrary.simpleMessage("Go to settings"),
         "actionHide": MessageLookupByLibrary.simpleMessage("Hide"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
@@ -223,6 +225,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "The provided <bold>password</bold> does not grant you access to view the content of this repository."),
         "messageBluetooth": MessageLookupByLibrary.simpleMessage("Bluetooth"),
+        "messageCamera": MessageLookupByLibrary.simpleMessage("Camera"),
+        "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
+            "We need this permission to use the camera and read the QR code"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Changing the extension of a file can make it unusable"),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
@@ -313,6 +318,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("Generate password"),
+        "messageGranted": MessageLookupByLibrary.simpleMessage("Granted"),
+        "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
+            "Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications"),
+        "messageIgnoreBatteryOptimizationsPermission":
+            MessageLookupByLibrary.simpleMessage(
+                "Allows the app to keep syncing in the background"),
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
@@ -370,6 +381,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password copied to the clipboard"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Peer Exchange"),
+        "messagePermissionRequired":
+            MessageLookupByLibrary.simpleMessage("This permission is required"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -427,6 +440,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "You need to select one permission to create a repository link first"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("Share with QR Code"),
+        "messageStorage": MessageLookupByLibrary.simpleMessage("Storage"),
+        "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
+            "Needed for getting access to the files"),
         "messageSyncMobileData": MessageLookupByLibrary.simpleMessage(
             "Sync while using mobile data"),
         "messageSyncingIsDisabledOnMobileInternet":
@@ -515,6 +531,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
         "titleRepositoryName":
             MessageLookupByLibrary.simpleMessage("Repository name"),
+        "titleRequiredPermission":
+            MessageLookupByLibrary.simpleMessage("Required permission"),
         "titleSaveChanges":
             MessageLookupByLibrary.simpleMessage("Save changes"),
         "titleScanRepoQR":
