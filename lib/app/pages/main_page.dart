@@ -247,8 +247,8 @@ class _MainPageState extends State<MainPage>
     final currentRepo = _currentRepo;
 
     if (currentRepo is OpenRepoEntry) {
-      final currentFolder = currentRepo.cubit.currentFolder;
-      if (!currentFolder.isRoot()) {
+      final currentFolder = currentRepo.cubit.state.currentFolder;
+      if (!currentFolder.isRoot) {
         await currentRepo.cubit.navigateTo(currentFolder.parent);
         return false;
       }
@@ -334,7 +334,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  _repositoryContentBuilder(OpenRepoEntry repo) =>
+  Widget _repositoryContentBuilder(OpenRepoEntry repo) =>
       BlocConsumer<RepoCubit, RepoState>(
         bloc: repo.cubit,
         builder: (context, state) => _selectLayoutWidget(),
@@ -368,20 +368,20 @@ class _MainPageState extends State<MainPage>
     return Center(child: Text(S.current.messageErrorUnhandledState));
   }
 
-  _contentBrowser(RepoCubit repo) {
+  Widget _contentBrowser(RepoCubit repo) {
     Widget child;
     Widget navigationBar;
-    final folder = repo.currentFolder;
+    final folder = repo.state.currentFolder;
 
     if (folder.content.isEmpty) {
       child = repo.state.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : NoContentsState(repository: folder.repo, path: folder.path);
+          : NoContentsState(repository: repo, path: folder.path);
     } else {
       child = _contentsList(repo);
     }
 
-    if (folder.isRoot()) {
+    if (folder.isRoot) {
       navigationBar = const SizedBox.shrink();
     } else {
       navigationBar = FolderNavigationBar(repo);
@@ -406,9 +406,9 @@ class _MainPageState extends State<MainPage>
               padding: EdgeInsets.only(bottom: value),
               separatorBuilder: (context, index) =>
                   const Divider(height: 1, color: Colors.transparent),
-              itemCount: currentRepo.currentFolder.content.length,
+              itemCount: currentRepo.state.currentFolder.content.length,
               itemBuilder: (context, index) {
-                final item = currentRepo.currentFolder.content[index];
+                final item = currentRepo.state.currentFolder.content[index];
                 Function actionByType;
 
                 if (item is FileItem) {
@@ -598,7 +598,7 @@ class _MainPageState extends State<MainPage>
   ) async {
     final basename = getBasename(path);
     final destination = buildDestinationPath(
-      currentRepo.currentFolder.path,
+      currentRepo.state.currentFolder.path,
       basename,
     );
 
@@ -672,7 +672,7 @@ class _MainPageState extends State<MainPage>
     final fileName = getBasename(path);
     final length = (await file.stat()).size;
     final filePath = buildDestinationPath(
-      currentRepo.currentFolder.path,
+      currentRepo.state.currentFolder.path,
       fileName,
     );
     final fileByteStream = file.openRead();
