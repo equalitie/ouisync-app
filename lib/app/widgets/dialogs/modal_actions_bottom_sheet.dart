@@ -83,7 +83,7 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    final permissionName = 'Storage';
+    final permissionName = S.current.messageStorage;
     final permissionGranted =
         await _checkPermission(Permission.storage, permissionName);
 

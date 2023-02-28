@@ -15,19 +15,18 @@ class Permissions with OuiSyncAppLogger {
 
     switch (status) {
       case PermissionStatus.granted:
-        message = 'Granted';
+        message = S.current.messageGranted;
         break;
 
       case PermissionStatus.permanentlyDenied:
         message =
-            '${ouiSyncPermissions[permission] ?? 'This permission is required'}.'
-            '\n\nGranting this permission requires navigating to the app settings:'
-            '\n\n Settings > Apps & notifications';
+            '${ouiSyncPermissions[permission] ?? S.current.messagePermissionRequired}'
+            '\n\n${S.current.messageGrantingRequiresSettings}';
         break;
 
       default:
-        message =
-            ouiSyncPermissions[permission] ?? 'This permission is required';
+        message = ouiSyncPermissions[permission] ??
+            S.current.messagePermissionRequired;
         break;
     }
 
@@ -40,7 +39,7 @@ class Permissions with OuiSyncAppLogger {
                     Navigator.of(context, rootNavigator: true).pop(false),
               ),
               TextButton(
-                  child: Text('APP SETTINGS'),
+                  child: Text(S.current.actionGoToSettings.toUpperCase()),
                   onPressed: () {
                     openAppSettings();
 
@@ -57,7 +56,7 @@ class Permissions with OuiSyncAppLogger {
 
       await Dialogs.alertDialogWithActions(
           context: context,
-          title: 'Required permission',
+          title: S.current.titleRequiredPermission,
           body: [
             Text(name,
                 style: TextStyle(
@@ -83,13 +82,8 @@ class PermissionResult {
 }
 
 final ouiSyncPermissions = {
-  // Permission.accessMediaLocation, //not in manifest (denied)
-  Permission.camera:
-      'We need this permission to use the camera an read the QR code', //mobile_scanner //granted
+  Permission.camera: S.current.messageCameraPermission,
   Permission.ignoreBatteryOptimizations:
-      'Allows the app to keep syncing in the background', //flutter_background //granted
-  // Permission.manageExternalStorage, //not in manifest (restricted)
-  // Permission.mediaLibrary, //no needed (granted)
-  // Permission.photos, //not in manifest (denied)
-  Permission.storage: 'Needed for getting access to the files' //denied
+      S.current.messageIgnoreBatteryOptimizationsPermission,
+  Permission.storage: S.current.messageStoragePermission
 };

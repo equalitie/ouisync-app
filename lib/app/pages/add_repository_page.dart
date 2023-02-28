@@ -82,7 +82,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
       onPressed: _isDesktop
           ? null
           : () async {
-              final permissionName = 'Camera';
+              final permissionName = S.current.messageCamera;
               final permissionGranted =
                   await _checkPermission(Permission.camera, permissionName);
 
