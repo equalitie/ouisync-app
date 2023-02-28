@@ -35,7 +35,7 @@ class LogsDesktopDetail extends StatelessWidget {
 
   /// TODO: Fix logs capture and sharing on desktop
   Widget _buildSaveTile(BuildContext context) => Column(children: [
-        Row(children: [Text('Save', textAlign: TextAlign.start)]),
+        Row(children: [Text(S.current.actionSave, textAlign: TextAlign.start)]),
         ListTile(
             enabled: false,
             leading: const Icon(Icons.save),
@@ -45,7 +45,7 @@ class LogsDesktopDetail extends StatelessWidget {
                   child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20.0),
-                      child: Text('Save log file')),
+                      child: Text(S.current.messageSaveLogFile)),
                   style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white))

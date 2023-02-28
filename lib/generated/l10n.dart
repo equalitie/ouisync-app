@@ -1840,6 +1840,16 @@ class S {
     );
   }
 
+  /// `Save log file`
+  String get messageSaveLogFile {
+    return Intl.message(
+      'Save log file',
+      name: 'messageSaveLogFile',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Error: unhandled state`
   String get messageErrorUnhandledState {
     return Intl.message(
@@ -2245,6 +2255,66 @@ class S {
     return Intl.message(
       'Camera',
       name: 'messageCamera',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy password`
+  String get popupMenuItemCopyPassword {
+    return Intl.message(
+      'Copy password',
+      name: 'popupMenuItemCopyPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get popupMenuItemChangePassword {
+    return Intl.message(
+      'Change password',
+      name: 'popupMenuItemChangePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository`
+  String get menuItemRepository {
+    return Intl.message(
+      'Repository',
+      name: 'menuItemRepository',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network`
+  String get menuItemNetwork {
+    return Intl.message(
+      'Network',
+      name: 'menuItemNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logs`
+  String get menuItemLogs {
+    return Intl.message(
+      'Logs',
+      name: 'menuItemLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `About`
+  String get menuItemAbout {
+    return Intl.message(
+      'About',
+      name: 'menuItemAbout',
       desc: '',
       args: [],
     );
