@@ -59,17 +59,19 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
   Widget _buildScanQrCode(BuildContext context) {
     return Column(
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Wrap(
-              direction: Axis.vertical,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0),
-                if (_isDesktop)
+        Wrap(
+            direction: Axis.vertical,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(children: [
+                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0)
+              ]),
+              if (_isDesktop)
+                Row(children: [
                   Fields.constrainedText('(Available on mobile)',
                       flex: 0, fontWeight: FontWeight.w200)
-              ]),
-        ]),
+                ])
+            ]),
         Dimensions.spacingVerticalDouble,
         _builScanQRButton(context),
       ],
