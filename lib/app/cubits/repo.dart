@@ -65,7 +65,7 @@ class RepoState extends Equatable {
         isLoading,
         uploads,
         downloads,
-        // TODO: message ?
+        message,
         isDhtEnabled,
         isPexEnabled,
         accessMode,
