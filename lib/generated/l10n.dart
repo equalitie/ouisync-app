@@ -430,6 +430,16 @@ class S {
     );
   }
 
+  /// `Required permission`
+  String get titleRequiredPermission {
+    return Intl.message(
+      'Required permission',
+      name: 'titleRequiredPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -2160,6 +2170,86 @@ class S {
     );
   }
 
+  /// `Granted`
+  String get messageGranted {
+    return Intl.message(
+      'Granted',
+      name: 'messageGranted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This permission is required`
+  String get messagePermissionRequired {
+    return Intl.message(
+      'This permission is required',
+      name: 'messagePermissionRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications`
+  String get messageGrantingRequiresSettings {
+    return Intl.message(
+      'Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications',
+      name: 'messageGrantingRequiresSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We need this permission to use the camera and read the QR code`
+  String get messageCameraPermission {
+    return Intl.message(
+      'We need this permission to use the camera and read the QR code',
+      name: 'messageCameraPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allows the app to keep syncing in the background`
+  String get messageIgnoreBatteryOptimizationsPermission {
+    return Intl.message(
+      'Allows the app to keep syncing in the background',
+      name: 'messageIgnoreBatteryOptimizationsPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Needed for getting access to the files`
+  String get messageStoragePermission {
+    return Intl.message(
+      'Needed for getting access to the files',
+      name: 'messageStoragePermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Storage`
+  String get messageStorage {
+    return Intl.message(
+      'Storage',
+      name: 'messageStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Camera`
+  String get messageCamera {
+    return Intl.message(
+      'Camera',
+      name: 'messageCamera',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name}`
   String replacementName(Object name) {
     return Intl.message(
@@ -2755,6 +2845,16 @@ class S {
     return Intl.message(
       'Save changes',
       name: 'actionSaveChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go to settings`
+  String get actionGoToSettings {
+    return Intl.message(
+      'Go to settings',
+      name: 'actionGoToSettings',
       desc: '',
       args: [],
     );

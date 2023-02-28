@@ -68,6 +68,7 @@
   "titleChangePassword":"Change password",
   "titleSetPasswordFor":"Set password for",
   "titleSaveChanges":"Save changes",
+  "titleRequiredPermission":"Required permission",
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -363,6 +364,14 @@
   "messageUnsavedChanges":"You have unsaved changes.\n\nDo you want to discard them?",
   "messageSavingChanges":"Saving the following changes:\n\n{changes}",
   "messageNewPassword":"New password",
+  "messageGranted":"Granted",
+  "messagePermissionRequired": "This permission is required",
+  "messageGrantingRequiresSettings":"Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications",
+  "messageCameraPermission":"We need this permission to use the camera and read the QR code",
+  "messageIgnoreBatteryOptimizationsPermission":"Allows the app to keep syncing in the background",
+  "messageStoragePermission":"Needed for getting access to the files",
+  "messageStorage":"Storage",
+  "messageCamera":"Camera",
   "replacementName": "{name}",
   "@replacementName": {},
   "replacementPath": "{path}",
@@ -475,5 +484,6 @@
   "actionRemove":"Remove",
   "actionDiscard":"Discard",
   "actionClear":"Clear",
-  "actionSaveChanges":"Save changes"
+  "actionSaveChanges":"Save changes",
+  "actionGoToSettings":"Go to settings"
 }
