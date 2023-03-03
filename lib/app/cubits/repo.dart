@@ -21,6 +21,8 @@ class RepoState extends Equatable {
   final String message;
   final bool isDhtEnabled;
   final bool isPexEnabled;
+  final bool requestPassword;
+  final bool authenticationRequired; // = use biometrics
   final oui.AccessMode accessMode;
   final String infoHash;
 
@@ -31,6 +33,8 @@ class RepoState extends Equatable {
     this.message = "",
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
+    this.requestPassword = false,
+    this.authenticationRequired = false,
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
   });
@@ -42,6 +46,8 @@ class RepoState extends Equatable {
     String? message,
     bool? isDhtEnabled,
     bool? isPexEnabled,
+    bool? requestPassword,
+    bool? authenticationRequired,
     oui.AccessMode? accessMode,
     String? infoHash,
   }) =>
@@ -52,6 +58,9 @@ class RepoState extends Equatable {
         message: message ?? this.message,
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
+        requestPassword: requestPassword ?? this.requestPassword,
+        authenticationRequired:
+            authenticationRequired ?? this.authenticationRequired,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
       );
@@ -63,6 +72,8 @@ class RepoState extends Equatable {
         downloads,
         isDhtEnabled,
         isPexEnabled,
+        requestPassword,
+        authenticationRequired,
         accessMode,
         infoHash,
       ];
@@ -107,6 +118,14 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     if (settings.getPexEnabled(name) ?? true) {
       await handle.enablePex();
       state = state.copyWith(isPexEnabled: true);
+    }
+
+    if (settings.getRequestPassword(name) ?? true) {
+      state = state.copyWith(requestPassword: true);
+    }
+
+    if (settings.getAuthenticationRequired(name) ?? false) {
+      state = state.copyWith(authenticationRequired: true);
     }
 
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
@@ -154,6 +173,26 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
 
   Future<oui.Directory> openDirectory(String path) async {
     return await oui.Directory.open(_handle, path);
+  }
+
+  Future<void> setRequestPassword(bool value) async {
+    if (state.requestPassword == value) {
+      return;
+    }
+
+    await _settings.setRequestPassword(name, value);
+
+    emit(state.copyWith(requestPassword: value));
+  }
+
+  Future<void> setAuthenticationRequired(bool value) async {
+    if (state.authenticationRequired == value) {
+      return;
+    }
+
+    await _settings.setAuthenticationRequired(name, value);
+
+    emit(state.copyWith(authenticationRequired: value));
   }
 
   // This operator is required for the DropdownMenuButton to show entries properly.

@@ -11,6 +11,8 @@ abstract class RepoEntry extends Equatable {
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
   String? get infoHash;
+  bool? get requestPassword;
+  bool? get authenticateWithBiometrics;
   Folder? get currentFolder;
   RepoCubit? get maybeCubit => null;
 
@@ -40,6 +42,12 @@ class LoadingRepoEntry extends RepoEntry {
 
   @override
   String? get infoHash => null;
+
+  @override
+  bool? get requestPassword => null;
+
+  @override
+  bool? get authenticateWithBiometrics => null;
 
   @override
   Folder? get currentFolder => null;
@@ -74,6 +82,12 @@ class OpenRepoEntry extends RepoEntry {
   String? get infoHash => _cubit.state.infoHash;
 
   @override
+  bool? get requestPassword => _cubit.state.requestPassword;
+
+  @override
+  bool? get authenticateWithBiometrics => _cubit.state.authenticationRequired;
+
+  @override
   Folder? get currentFolder => _cubit.currentFolder;
 }
 
@@ -90,6 +104,12 @@ class MissingRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {}
+
+  @override
+  bool? get requestPassword => null;
+
+  @override
+  bool? get authenticateWithBiometrics => null;
 
   @override
   Folder? get currentFolder => null;
@@ -114,6 +134,12 @@ class ErrorRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {}
+
+  @override
+  bool? get requestPassword => null;
+
+  @override
+  bool? get authenticateWithBiometrics => null;
 
   @override
   Folder? get currentFolder => null;
