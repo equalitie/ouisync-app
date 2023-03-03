@@ -214,10 +214,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Future<RepoEntry> createRepository(RepoMetaInfo info,
       {required String password,
       oui.ShareToken? token,
+      required bool requestPassword,
+      required bool authenticateWithBiometrics,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
-    final repo = await _create(info, password: password, token: token);
+    final repo = await _create(info,
+        password: password,
+        token: token,
+        requestPassword: requestPassword,
+        authenticateWithBiometrics: authenticateWithBiometrics);
 
     if (repo is! OpenRepoEntry) {
       loggy.app('Failed to create repository ${info.name}');
@@ -343,8 +349,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final wasCurrent = currentRepoName == repoName;
     final databaseId = _settings.getDatabaseId(repoName);
 
-    final biometricsResult =
-        await Biometrics.deleteRepositoryPassword(databaseId: databaseId);
+    final biometricsResult = await SecureStorage.deleteRepositoryPassword(
+        databaseId: databaseId, authenticationRequired: false);
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -413,6 +419,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     RepoMetaInfo info, {
     required String password,
     oui.ShareToken? token,
+    required bool requestPassword,
+    required bool authenticateWithBiometrics,
   }) async {
     final name = info.name;
     final store = info.path();
@@ -432,8 +440,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
           writePassword: password,
           shareToken: token);
 
-      final settingsRepoEntry =
-          await _settings.addRepo(info, databaseId: await repo.hexDatabaseId());
+      final settingsRepoEntry = await _settings.addRepo(info,
+          databaseId: await repo.hexDatabaseId(),
+          requestPassword: requestPassword,
+          authenticateWithBiometrics: authenticateWithBiometrics);
 
       final cubit = await RepoCubit.create(
         settingsRepoEntry: settingsRepoEntry!,

@@ -203,7 +203,9 @@ class Settings {
   }
 
   Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
-      {required String databaseId}) async {
+      {required String databaseId,
+      required bool requestPassword,
+      required bool authenticateWithBiometrics}) async {
     if (_repos.containsKey(info.name)) {
       print("Settings already contains a repo with the name \"${info.name}\"");
       return null;
