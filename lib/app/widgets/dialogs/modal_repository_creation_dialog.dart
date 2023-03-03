@@ -524,8 +524,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     /// If the user doesn't want a local password, biometrics validation is not
     /// an option.
-    final requestPassword = _addPassword && !_secureWithBiometrics;
-    final authenticateWithBiometrics = _addPassword && _secureWithBiometrics;
+    ///
+    /// Also, if a repo is a blind replica (imported), we request password,
+    /// no biometrics, to mantain consistency.
+    final requestPassword =
+        _isBlindReplica ? true : _addPassword && !_secureWithBiometrics;
+    final authenticateWithBiometrics =
+        _isBlindReplica ? false : _addPassword && _secureWithBiometrics;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
         f: cubit.createRepository(info,
@@ -550,7 +555,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       return;
     }
 
-    /// MANUAL PASSWORD - NO BIOMETRICS
+    /// MANUAL PASSWORD - NO BIOMETRICS (ALSO: BLIND REPLICAS)
     /// ====================================================
     if (requestPassword) {
       Navigator.of(widget.context).pop(name);
