@@ -456,7 +456,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 ? _updatePasswordSection(false)
                 : Navigator.of(context).pop('')),
         PositiveButton(
-            text: S.current.actionCreate,
+            text: _shareToken == null ? S.current.actionCreate : 'Import',
             onPressed: () {
               final name = _nameController.text;
               final password = _isBlindReplica ? '' : _passwordController.text;
