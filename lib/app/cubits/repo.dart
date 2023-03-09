@@ -9,9 +9,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../generated/l10n.dart';
+import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import '../models/models.dart';
 import 'job.dart';
 
 class RepoState extends Equatable {
@@ -120,11 +120,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       state = state.copyWith(isPexEnabled: true);
     }
 
-    if (settings.getRequestPassword(name) ?? true) {
-      state = state.copyWith(requestPassword: true);
-    }
-
-    if (settings.getAuthenticationRequired(name) ?? false) {
+    if (settings.getAuthenticationRequired(name) ?? true) {
       state = state.copyWith(authenticationRequired: true);
     }
 
@@ -173,16 +169,6 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
 
   Future<oui.Directory> openDirectory(String path) async {
     return await oui.Directory.open(_handle, path);
-  }
-
-  Future<void> setRequestPassword(bool value) async {
-    if (state.requestPassword == value) {
-      return;
-    }
-
-    await _settings.setRequestPassword(name, value);
-
-    emit(state.copyWith(requestPassword: value));
   }
 
   Future<void> setAuthenticationRequired(bool value) async {

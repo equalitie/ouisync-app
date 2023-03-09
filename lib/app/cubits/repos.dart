@@ -199,9 +199,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   Future<void> _openRepository(SettingsRepoEntry settingsRepoEntry,
-      {String? password, bool setCurrent = false}) async {
+      {bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(settingsRepoEntry.info),
         setCurrent: setCurrent);
+
+    final password = await _tryGetSecurePassword(
+        settingsRepoEntry.name, settingsRepoEntry.databaseId);
 
     final repo = await _open(settingsRepoEntry, password: password);
     if (repo is! OpenRepoEntry) {
@@ -211,10 +214,31 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     await _put(repo, setCurrent: setCurrent);
   }
 
+  Future<String?> _tryGetSecurePassword(
+      String repoName, String databaseId) async {
+    final authenticationRequired = settings.getAuthenticationRequired(repoName);
+
+    if (authenticationRequired != null && authenticationRequired == false) {
+      final secureStorageResult = await SecureStorage.getRepositoryPassword(
+          databaseId: databaseId, authenticationRequired: false);
+
+      if (secureStorageResult.exception != null) {
+        loggy.app(secureStorageResult.exception);
+
+        return null;
+      }
+
+      final password = secureStorageResult.value;
+
+      return password;
+    }
+
+    return null;
+  }
+
   Future<RepoEntry> createRepository(RepoMetaInfo info,
       {required String password,
       oui.ShareToken? token,
-      required bool requestPassword,
       required bool authenticateWithBiometrics,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
@@ -222,7 +246,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final repo = await _create(info,
         password: password,
         token: token,
-        requestPassword: requestPassword,
         authenticateWithBiometrics: authenticateWithBiometrics);
 
     if (repo is! OpenRepoEntry) {
@@ -419,7 +442,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     RepoMetaInfo info, {
     required String password,
     oui.ShareToken? token,
-    required bool requestPassword,
     required bool authenticateWithBiometrics,
   }) async {
     final name = info.name;
@@ -442,7 +464,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
       final settingsRepoEntry = await _settings.addRepo(info,
           databaseId: await repo.hexDatabaseId(),
-          requestPassword: requestPassword,
           authenticateWithBiometrics: authenticateWithBiometrics);
 
       final cubit = await RepoCubit.create(

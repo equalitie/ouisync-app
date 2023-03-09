@@ -153,10 +153,16 @@ class _SettingsContainerState extends State<SettingsContainer>
     String? password;
     ShareToken? shareToken;
 
-    final requestPassword =
-        widget.settings.getRequestPassword(repository.name) ?? true;
+    final authenticateWithBiometrics =
+        widget.settings.getAuthenticationRequired(repository.name) ?? true;
 
-    if (requestPassword) {
+    final securePassword = await _tryGetSecurePassword(
+        context, repository, authenticateWithBiometrics);
+
+    if (securePassword != null) {
+      password = securePassword;
+      shareToken = await _loadShareToken(context, repository, password);
+    } else {
       final unlockResult =
           await _getPasswordFromUser(parentContext, repository);
 
@@ -164,24 +170,14 @@ class _SettingsContainerState extends State<SettingsContainer>
 
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
-    } else {
-      final authenticateWithBiometrics =
-          widget.settings.getAuthenticationRequired(repository.name) ?? false;
+    }
 
-      password = await _tryGetSecurePassword(
-          context, repository, authenticateWithBiometrics);
+    final accessMode = await shareToken.mode;
 
-      if (password == null) return null;
+    if (accessMode == AccessMode.blind) {
+      showSnackBar(context, message: S.current.messageUnlockRepoFailed);
 
-      shareToken = await _loadShareToken(context, repository, password);
-
-      final accessMode = await shareToken.mode;
-
-      if (accessMode == AccessMode.blind) {
-        showSnackBar(context, message: S.current.messageUnlockRepoFailed);
-
-        return null;
-      }
+      return null;
     }
 
     await Navigator.push(
