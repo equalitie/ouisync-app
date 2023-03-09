@@ -26,6 +26,9 @@ typedef BottomSheetControllerCallback = void Function(
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
+typedef SecureRepoWithBiometricsFunction = Function(
+    {required String repositoryName, required bool value});
+
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.session,
@@ -131,7 +134,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool?> _checkForBiometricsCallback() async {
-    if (!io.Platform.isAndroid || !io.Platform.isIOS) return null;
+    if (!io.Platform.isAndroid && !io.Platform.isIOS) return null;
 
     final auth = LocalAuthentication();
 
@@ -776,68 +779,221 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _unlockRepositoryCallback(
       {required String databaseId, required String repositoryName}) async {
-    final databaseId = widget.settings.getDatabaseId(repositoryName);
+    final isBiometricsAvailable = await _checkForBiometricsCallback() ?? false;
 
-    BiometricsResult biometricsResult = BiometricsResult(value: null);
+    bool? authenticateWithBiometrics =
+        widget.settings.getAuthenticationRequired(repositoryName);
 
-    // Currently, only Android and iOS support biometrics, no desktop platforms.
-    if (io.Platform.isAndroid || io.Platform.isIOS) {
-      biometricsResult =
-          await Dialogs.executeFutureWithLoadingDialog<BiometricsResult>(
-              context,
-              f: Biometrics.getRepositoryPassword(databaseId: databaseId));
+    String? password;
 
-      if (biometricsResult.exception != null) {
-        loggy.app(biometricsResult.exception);
+    /// Runs once per password (if needed): before adding to the app the
+    /// possibility of create a repository without a local password, any entry
+    /// to the secure storage (biometric_storage) required biometric validation
+    /// (authenticationRequired=true, by default).
+    ///
+    /// With the option of not having a local password, we now save the password,
+    /// for both this option and biometrics, in the secure storage, and only in
+    /// the latest case we require biometric validation.
+    ///
+    /// Any repo that doesn't have this setting is considered from a version
+    /// before this implementation, and we need to determine the value for this
+    /// setting right after the update.
+    ///
+    /// Trying to get the password from the secure storage using biometric
+    /// validation can tell us this:
+    ///
+    /// IF securePassword != null
+    ///   The repo password exist and it was secured using biometrics.
+    /// ELSE
+    ///   The repo password doesn't exist and it was manually input by the user.
+    ///
+    /// (If the password is empty, something wrong happened in the previous
+    /// version of the app saving its value and it is considered non existent
+    /// in the secure storage, this is, not secured with biometrics).
+    if (authenticateWithBiometrics == null) {
+      final securePassword = await _getSecurePassword(databaseId, true);
+
+      if (securePassword == null) {
+        /// There was an exception getting the value from the secure storage.
         return;
       }
+
+      password = securePassword;
+
+      final requireAuthentication = password.isNotEmpty;
+
+      await widget.settings
+          .setAuthenticationRequired(repositoryName, requireAuthentication);
+
+      authenticateWithBiometrics = requireAuthentication;
     }
 
-    if (biometricsResult.value != null && biometricsResult.value!.isNotEmpty) {
-      // Unlock using biometrics
-      await Dialogs.executeFutureWithLoadingDialog(context,
+    /// If we have the password, it means it was already in the secure storage,
+    /// this is, was protected by biometrics. We can just unlock the repo.
+    if (password != null && password.isNotEmpty) {
+      final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
           f: _unlockRepository(
-              repositoryName: repositoryName,
-              password: biometricsResult.value!));
+              repositoryName: repositoryName, password: password));
+
+      final message = (accessMode != null && accessMode != AccessMode.blind)
+          ? S.current.messageUnlockRepoOk(accessMode.name)
+          : S.current.messageUnlockRepoFailed;
+
+      showSnackBar(context, message: message);
 
       return;
     }
 
+    /// It was using biometrics, but biometrics is not available in the device
+    /// TODO: Implement master password and fix
+    if (isBiometricsAvailable == false && authenticateWithBiometrics == true) {
+      // await _replaceSecurePasswordAndUnlock(repositoryName, databaseId,
+      //     isBiometricsAvailable, authenticateWithBiometrics);
+
+      final message = 'This password was secured using biometrics, but there '
+          'are not biometic methods available in this device.';
+      showSnackBar(context, message: message);
+
+      return;
+    }
+
+    /// If the authenticateWithBiometrics is already known, no validation is
+    /// needed. We try to get the password from the secure storage,
+    /// using biometrics validation or not (according to the value of
+    /// authenticateWithBiometrics).
+    ///
+    /// IF authenticateWithBiometrics==true
+    ///   Repo secured using biometrics
+    /// ELSE
+    ///   No local password
+    final securePassword =
+        await _getSecurePassword(databaseId, authenticateWithBiometrics);
+
+    if (securePassword == null) {
+      /// There was an exception getting the value from the secure storage.
+      return;
+    }
+
+    password = securePassword;
+
+    if (password.isNotEmpty) {
+      final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
+          f: _unlockRepository(
+              repositoryName: repositoryName, password: password));
+
+      final message = (accessMode != null && accessMode != AccessMode.blind)
+          ? S.current.messageUnlockRepoOk(accessMode.name)
+          : S.current.messageUnlockRepoFailed;
+
+      showSnackBar(context, message: message);
+
+      return;
+    }
+
+    /// If the password is not in the secure storage, we just get it from the
+    /// user.
+    final unlockResult = await _getRepositoryPasswordDialog(
+        databaseId: databaseId,
+        repositoryName: repositoryName,
+        isBiometricsAvailable: isBiometricsAvailable);
+
+    if (unlockResult == null) return;
+
+    showSnackBar(context, message: unlockResult.message);
+  }
+
+  Future<String?> _getSecurePassword(
+      String databaseId, bool authenticationRequired) async {
+    SecureStorageResult secureStorageResult =
+        await Dialogs.executeFutureWithLoadingDialog<SecureStorageResult>(
+            context,
+            f: SecureStorage.getRepositoryPassword(
+                databaseId: databaseId,
+                authenticationRequired: authenticationRequired));
+
+    if (secureStorageResult.exception != null) {
+      loggy.app(secureStorageResult.exception);
+      return null;
+    }
+
+    return secureStorageResult.value ?? '';
+  }
+
+  Future<void> _replaceSecurePasswordAndUnlock(
+      String repositoryName,
+      String databaseId,
+      bool isBiometricsAvailable,
+      bool authenticateWithBiometrics) async {
+    final unlockResult = await _getRepositoryPasswordDialog(
+        databaseId: databaseId,
+        repositoryName: repositoryName,
+        isBiometricsAvailable: isBiometricsAvailable);
+
+    if (unlockResult == null) return;
+
+    final password = unlockResult.password;
+
     // Unlock manually
-    await _getRepositoryPasswordDialog(
-        databaseId: databaseId, repositoryName: repositoryName);
+    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: _unlockRepository(
+            repositoryName: repositoryName, password: password));
+
+    if (accessMode != AccessMode.blind) {
+      final deleteOld = await SecureStorage.deleteRepositoryPassword(
+          databaseId: databaseId, authenticationRequired: false);
+
+      if (deleteOld.exception != null) {
+        loggy.app(deleteOld.exception);
+        return;
+      }
+
+      final replacementSecureStorageResult =
+          await SecureStorage.addRepositoryPassword(
+              databaseId: databaseId,
+              password: password,
+              authenticationRequired: authenticateWithBiometrics);
+
+      if (replacementSecureStorageResult.exception != null) {
+        loggy.app(replacementSecureStorageResult.exception);
+        return;
+      }
+
+      await widget.settings.setAuthenticationRequired(repositoryName, false);
+    }
   }
 
-  Future<void> _getRepositoryPasswordDialog(
-      {required String databaseId, required String repositoryName}) async {
-    final hasBiometrics = await _checkForBiometricsCallback() ?? false;
-
-    final unlockRepoResponse = await showDialog<UnlockRepositoryResult?>(
-        context: context,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                    title: S.current.messageUnlockRepository,
-                    body: UnlockRepository(
-                        context: context,
-                        databaseId: databaseId,
-                        repositoryName: repositoryName,
-                        isBiometricsAvailable: hasBiometrics,
-                        isPasswordValidation: false,
-                        unlockRepositoryCallback: _unlockRepository),
-                  ));
-            }))));
-
-    if (unlockRepoResponse == null) return;
-
-    showSnackBar(context, message: unlockRepoResponse.message);
-  }
+  Future<UnlockRepositoryResult?> _getRepositoryPasswordDialog(
+          {required String databaseId,
+          required String repositoryName,
+          required bool isBiometricsAvailable}) async =>
+      showDialog<UnlockRepositoryResult?>(
+          context: context,
+          builder: (BuildContext context) =>
+              ScaffoldMessenger(child: Builder(builder: ((context) {
+                return Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: ActionsDialog(
+                      title: S.current.messageUnlockRepository,
+                      body: UnlockRepository(
+                          context: context,
+                          databaseId: databaseId,
+                          repositoryName: repositoryName,
+                          isBiometricsAvailable: isBiometricsAvailable,
+                          isPasswordValidation: false,
+                          unlockRepositoryCallback: _unlockRepository,
+                          onSecureRepositoryWithBiometricsCallback:
+                              _secureRepositoryWithBiometrics),
+                    ));
+              }))));
 
   Future<AccessMode?> _unlockRepository(
           {required String repositoryName, required String password}) async =>
       _repositories.unlockRepository(repositoryName, password: password);
+
+  void _secureRepositoryWithBiometrics(
+      {required String repositoryName, required bool value}) {
+    widget.settings.setAuthenticationRequired(repositoryName, value);
+  }
 
   void deleteRepository(RepoMetaInfo repoInfo) =>
       _repositories.deleteRepository(repoInfo);

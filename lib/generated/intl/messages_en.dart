@@ -68,7 +68,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m20(name) => "${name} - writing failed";
 
-  static String m21(name) => "Failed to add repository ${name}";
+  static String m21(name) => "Failed to import repository ${name}";
 
   static String m22(name) => "Failed to create repository ${name}";
 
@@ -93,9 +93,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionAccept": MessageLookupByLibrary.simpleMessage("Accept"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACCEPT"),
         "actionAddRepository":
-            MessageLookupByLibrary.simpleMessage("Add Repository"),
+            MessageLookupByLibrary.simpleMessage("Import a Repository"),
         "actionAddRepositoryWithToken":
-            MessageLookupByLibrary.simpleMessage("Add a Shared Repository"),
+            MessageLookupByLibrary.simpleMessage("Import a Repository"),
         "actionCancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCEL"),
         "actionClear": MessageLookupByLibrary.simpleMessage("Clear"),
@@ -146,7 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
-            MessageLookupByLibrary.simpleMessage("Add an existing repository"),
+            MessageLookupByLibrary.simpleMessage("Import a repository"),
         "iconCreateRepository":
             MessageLookupByLibrary.simpleMessage("Create a new repository"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -205,9 +205,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "This option is not available on read-only repositories"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
-            "Add a repository using a token link"),
+            "Import a repository using a token link"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
-            "Add a repository using a QR code"),
+            "Import a repository using a QR code"),
         "messageAddingFileToLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This repository is locked or is a blind replica.\n\nIf you have the password, unlock it and try again."),
         "messageAddingFileToReadRepository":
@@ -494,10 +494,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAbout": MessageLookupByLibrary.simpleMessage("About"),
         "titleAddFile":
             MessageLookupByLibrary.simpleMessage("Add file to OuiSync"),
-        "titleAddRepoToken":
-            MessageLookupByLibrary.simpleMessage("Add a repository with token"),
+        "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(
+            "Import a repository with token"),
         "titleAddRepository":
-            MessageLookupByLibrary.simpleMessage("Add a repository"),
+            MessageLookupByLibrary.simpleMessage("Import a repository"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions needed"),

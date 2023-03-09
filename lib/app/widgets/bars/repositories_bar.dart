@@ -74,13 +74,12 @@ class _Picker extends StatelessWidget {
   static const Color colorLockedRepo = Colors.grey;
   static const Color colorUnlockedRepo = Colors.black;
 
-  const _Picker({
-    required this.reposCubit,
-    required this.checkForBiometricsCallback,
-    required this.shareRepositoryOnTap,
-    required this.unlockRepositoryOnTap,
-    required this.borderColor,
-  });
+  const _Picker(
+      {required this.reposCubit,
+      required this.checkForBiometricsCallback,
+      required this.shareRepositoryOnTap,
+      required this.unlockRepositoryOnTap,
+      required this.borderColor});
 
   final ReposCubit reposCubit;
   final CheckForBiometricsFunction checkForBiometricsCallback;

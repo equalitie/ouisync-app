@@ -153,23 +153,15 @@ class _SettingsContainerState extends State<SettingsContainer>
     String? password;
     ShareToken? shareToken;
 
-    if (widget.isBiometricsAvailable) {
-      final biometricPassword =
-          await _tryGetBiometricPassword(context, repository);
+    final authenticateWithBiometrics =
+        widget.settings.getAuthenticationRequired(repository.name) ?? true;
 
-      if (biometricPassword == null) return null;
+    final securePassword = await _tryGetSecurePassword(
+        context, repository, authenticateWithBiometrics);
 
-      password = biometricPassword;
-      shareToken =
-          await _loadShareToken(context, repository, biometricPassword);
-
-      final accessMode = await shareToken.mode;
-
-      if (accessMode == AccessMode.blind) {
-        showSnackBar(context, message: S.current.messageUnlockRepoFailed);
-
-        return null;
-      }
+    if (securePassword != null) {
+      password = securePassword;
+      shareToken = await _loadShareToken(context, repository, password);
     } else {
       final unlockResult =
           await _getPasswordFromUser(parentContext, repository);
@@ -178,6 +170,14 @@ class _SettingsContainerState extends State<SettingsContainer>
 
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
+    }
+
+    final accessMode = await shareToken.mode;
+
+    if (accessMode == AccessMode.blind) {
+      showSnackBar(context, message: S.current.messageUnlockRepoFailed);
+
+      return null;
     }
 
     await Navigator.push(
@@ -194,18 +194,19 @@ class _SettingsContainerState extends State<SettingsContainer>
     return password;
   }
 
-  Future<String?> _tryGetBiometricPassword(
-      BuildContext context, RepoCubit repo) async {
-    final biometricsResult =
-        await Biometrics.getRepositoryPassword(databaseId: repo.databaseId);
+  Future<String?> _tryGetSecurePassword(BuildContext context, RepoCubit repo,
+      bool authenticateWithBiometrics) async {
+    final secureStorageResult = await SecureStorage.getRepositoryPassword(
+        databaseId: repo.databaseId,
+        authenticationRequired: authenticateWithBiometrics);
 
-    if (biometricsResult.exception != null) {
-      loggy.app(biometricsResult.exception);
+    if (secureStorageResult.exception != null) {
+      loggy.app(secureStorageResult.exception);
 
       return null;
     }
 
-    return biometricsResult.value;
+    return secureStorageResult.value;
   }
 
   Future<UnlockResult?> _getPasswordFromUser(
