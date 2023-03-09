@@ -919,6 +919,7 @@ class _MainPageState extends State<MainPage>
     return secureStorageResult.value ?? '';
   }
 
+  // ignore: unused_element
   Future<void> _replaceSecurePasswordAndUnlock(
       String repositoryName,
       String databaseId,
