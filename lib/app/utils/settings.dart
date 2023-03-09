@@ -34,6 +34,10 @@ class Settings {
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
 
+  /// If true, when using the secured storage (biometric_storage), biometrics
+  /// will be used.
+  static const String _authenticationRequired = "AUTH_REQUIRED";
+
   // List of all repositories this app is concerned about
   static const String _knownRepositoriesKey = "KNOWN_REPOSITORIES";
 
@@ -198,7 +202,8 @@ class Settings {
   }
 
   Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
-      {required String databaseId}) async {
+      {required String databaseId,
+      required bool authenticateWithBiometrics}) async {
     if (_repos.containsKey(info.name)) {
       print("Settings already contains a repo with the name \"${info.name}\"");
       return null;
@@ -207,6 +212,7 @@ class Settings {
     _repos[info.name] = info.dir.path;
     await _setDatabaseId(info.name, databaseId);
     await _storeRepos(_prefs, _repos);
+    await setAuthenticationRequired(info.name, authenticateWithBiometrics);
 
     return SettingsRepoEntry(databaseId, info);
   }
@@ -274,6 +280,12 @@ class Settings {
   Future<void> setLogViewFilter(LogLevel value) async {
     await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
+
+  bool? getAuthenticationRequired(String repoName) =>
+      _prefs.getBool(_repositoryKey(repoName, _authenticationRequired));
+
+  Future<void> setAuthenticationRequired(String repoName, bool? value) async =>
+      _setRepositoryBool(repoName, _authenticationRequired, value);
 
   Future<void> _setRepositoryBool(
       String repoName, String key, bool? value) async {

@@ -9,6 +9,7 @@ abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo get metaInfo;
   String get name => metaInfo.name;
+  bool? get authenticateWithBiometrics;
   RepoCubit? get maybeCubit => null;
 
   String? get infoHash => maybeCubit?.state.infoHash;
@@ -38,6 +39,9 @@ class LoadingRepoEntry extends RepoEntry {
   }
 
   @override
+  bool? get authenticateWithBiometrics => null;
+
+  @override
   RepoCubit? get maybeCubit => null;
 }
 
@@ -61,6 +65,9 @@ class OpenRepoEntry extends RepoEntry {
   @override
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
+  @override
+  bool? get authenticateWithBiometrics => _cubit.state.authenticationRequired;
+
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 }
 
@@ -79,6 +86,9 @@ class MissingRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
+  bool? get authenticateWithBiometrics => null;
+
+  @override
   RepoMetaInfo get metaInfo => _metaInfo;
 }
 
@@ -95,6 +105,9 @@ class ErrorRepoEntry extends RepoEntry {
 
   @override
   Future<void> close() async {}
+
+  @override
+  bool? get authenticateWithBiometrics => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;

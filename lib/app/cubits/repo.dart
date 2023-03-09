@@ -9,9 +9,9 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../generated/l10n.dart';
+import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import '../models/models.dart';
 import 'job.dart';
 
 class RepoState extends Equatable {
@@ -21,6 +21,8 @@ class RepoState extends Equatable {
   final String message;
   final bool isDhtEnabled;
   final bool isPexEnabled;
+  final bool requestPassword;
+  final bool authenticationRequired; // = use biometrics
   final oui.AccessMode accessMode;
   final String infoHash;
   final FolderState currentFolder;
@@ -32,6 +34,8 @@ class RepoState extends Equatable {
     this.message = "",
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
+    this.requestPassword = false,
+    this.authenticationRequired = false,
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
     this.currentFolder = const FolderState(),
@@ -44,6 +48,8 @@ class RepoState extends Equatable {
     String? message,
     bool? isDhtEnabled,
     bool? isPexEnabled,
+    bool? requestPassword,
+    bool? authenticationRequired,
     oui.AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
@@ -55,6 +61,9 @@ class RepoState extends Equatable {
         message: message ?? this.message,
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
+        requestPassword: requestPassword ?? this.requestPassword,
+        authenticationRequired:
+            authenticationRequired ?? this.authenticationRequired,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
         currentFolder: currentFolder ?? this.currentFolder,
@@ -68,6 +77,8 @@ class RepoState extends Equatable {
         message,
         isDhtEnabled,
         isPexEnabled,
+        requestPassword,
+        authenticationRequired,
         accessMode,
         infoHash,
         currentFolder,
@@ -115,6 +126,10 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       state = state.copyWith(isPexEnabled: true);
     }
 
+    if (settings.getAuthenticationRequired(name) ?? true) {
+      state = state.copyWith(authenticationRequired: true);
+    }
+
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
   }
 
@@ -158,6 +173,16 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
 
   Future<oui.Directory> openDirectory(String path) async {
     return await oui.Directory.open(_handle, path);
+  }
+
+  Future<void> setAuthenticationRequired(bool value) async {
+    if (state.authenticationRequired == value) {
+      return;
+    }
+
+    await _settings.setAuthenticationRequired(name, value);
+
+    emit(state.copyWith(authenticationRequired: value));
   }
 
   // This operator is required for the DropdownMenuButton to show entries properly.

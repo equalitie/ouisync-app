@@ -394,8 +394,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       {required String password}) async {
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: Biometrics.addRepositoryPassword(
-            databaseId: widget.repo.databaseId, password: password));
+        f: SecureStorage.addRepositoryPassword(
+            databaseId: widget.repo.databaseId,
+            password: password,
+            authenticationRequired: true));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -417,13 +419,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final removeBiometrics = await _removeBiometricsConfirmationDialog();
     if (!(removeBiometrics ?? false)) return;
 
-    final biometricsResultDeletePassword =
-        await Dialogs.executeFutureWithLoadingDialog(context,
-            f: Biometrics.deleteRepositoryPassword(
-                databaseId: widget.repo.databaseId));
+    final secureStorageResult = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: SecureStorage.deleteRepositoryPassword(
+            databaseId: widget.repo.databaseId, authenticationRequired: false));
 
-    if (biometricsResultDeletePassword.exception != null) {
-      loggy.app(biometricsResultDeletePassword.exception);
+    if (secureStorageResult.exception != null) {
+      loggy.app(secureStorageResult.exception);
       return;
     }
 

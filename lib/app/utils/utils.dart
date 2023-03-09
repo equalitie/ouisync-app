@@ -1,6 +1,5 @@
 export 'actions.dart';
 export 'ansi_parser.dart';
-export 'biometrics.dart';
 export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
@@ -12,6 +11,7 @@ export 'hotspot.dart';
 export 'inline_text_styles.dart';
 export 'log_reader.dart';
 export 'permissions.dart';
+export 'secure_storage.dart';
 export 'settings.dart';
 export 'spinning_icon.dart';
 export 'strings.dart';
