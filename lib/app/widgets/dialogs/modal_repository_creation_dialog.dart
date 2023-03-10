@@ -78,9 +78,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   void initState() {
     unawaited(_init());
 
-    if (!_isBlindReplica) {
-      _setupBiometrics(widget.isBiometricsAvailable);
-    }
     _repositoryNameFocus.requestFocus();
     _addListeners();
 
@@ -96,6 +93,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     setState(() {
       _isBlindReplica = accessMode == AccessMode.blind;
+      _isBiometricsAvailable = widget.isBiometricsAvailable;
     });
 
     _populatePasswordControllers(generatePassword: true);
@@ -156,15 +154,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       Scrollable.ensureVisible(targetContext,
           alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
     }
-  }
-
-  Future<void> _setupBiometrics(bool isBiometricsAvailable) async {
-    setState(() {
-      _isBiometricsAvailable = isBiometricsAvailable;
-      _secureWithBiometrics = isBiometricsAvailable;
-
-      _showSavePasswordWarning = !isBiometricsAvailable;
-    });
   }
 
   void _addListeners() {
@@ -469,14 +458,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     setState(() {
       _addPassword = addPassword;
 
-      // We want the user to use biometrics by default.
-      _secureWithBiometrics = _isBiometricsAvailable;
-      _showSavePasswordWarning = !_isBiometricsAvailable;
+      // We used make biometrics the default; now we let the user enable it.
+      _secureWithBiometrics = false;
+      _showSavePasswordWarning = addPassword;
     });
 
-    final generatePassword = addPassword ? _secureWithBiometrics : true;
-
-    _populatePasswordControllers(generatePassword: generatePassword);
+    _populatePasswordControllers(generatePassword: !addPassword);
   }
 
   void _populatePasswordControllers({required bool generatePassword}) {
