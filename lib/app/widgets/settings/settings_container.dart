@@ -118,7 +118,14 @@ class _SettingsContainerState extends State<SettingsContainer>
       return;
     }
 
-    widget.reposCubit.renameRepository(repository.name, newName);
+    if (widget.reposCubit.currentRepo == null) {
+      return;
+    }
+
+    final reopenToken = await widget.reposCubit.currentRepo?.maybeCubit?.handle
+        .createReopenToken();
+
+    widget.reposCubit.renameRepository(repository.name, newName, reopenToken);
   }
 
   Future<String?> _activateOrNavigateRepositorySecurity(parentContext) async {

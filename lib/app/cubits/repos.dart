@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
@@ -315,7 +316,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
-  void renameRepository(String oldName, String newName) async {
+  void renameRepository(
+      String oldName, String newName, Uint8List? reopenToken) async {
     if (!_repos.containsKey(oldName)) {
       print("Error renaming repository \"$oldName\": Does not exist");
       return;
@@ -338,7 +340,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
 
-      final repo = await _open(settingsRepoEntry);
+      final repo = await _open(settingsRepoEntry, reopenToken: reopenToken);
 
       if (repo is ErrorRepoEntry) {
         await setCurrent(null);
@@ -352,7 +354,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final newSettingsRepoEntry =
         await _settings.renameRepository(oldName, newName);
 
-    final repo = await _open(newSettingsRepoEntry!);
+    final repo = await _open(newSettingsRepoEntry!, reopenToken: reopenToken);
 
     if (repo is ErrorRepoEntry) {
       await setCurrent(null);
@@ -403,7 +405,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   }
 
   Future<RepoEntry> _open(SettingsRepoEntry settingsRepoEntry,
-      {String? password}) async {
+      {String? password, Uint8List? reopenToken}) async {
     final name = settingsRepoEntry.name;
     final store = settingsRepoEntry.info.path();
 
@@ -415,8 +417,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
             S.current.messageRepoMissingErrorDescription(name));
       }
 
-      final repo =
-          await oui.Repository.open(_session, store: store, password: password);
+      final repo = reopenToken == null
+          ? await oui.Repository.open(_session,
+              store: store, password: password)
+          : await oui.Repository.reopen(session,
+              store: store, token: reopenToken);
 
       final cubit = await RepoCubit.create(
           settingsRepoEntry: settingsRepoEntry,
