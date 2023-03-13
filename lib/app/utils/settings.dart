@@ -194,6 +194,8 @@ class Settings {
     await _setDatabaseId(newName, databaseId);
     await setDhtEnabled(newName, getDhtEnabled(oldName));
     await setPexEnabled(newName, getPexEnabled(oldName));
+    await setAuthenticationRequired(
+        newName, getAuthenticationRequired(oldName));
 
     await forgetRepository(oldName);
 
@@ -225,6 +227,7 @@ class Settings {
     await _setDatabaseId(repoName, null);
     await setDhtEnabled(repoName, null);
     await setPexEnabled(repoName, null);
+    await setAuthenticationRequired(repoName, null);
 
     _repos.remove(repoName);
     await _storeRepos(_prefs, _repos);
