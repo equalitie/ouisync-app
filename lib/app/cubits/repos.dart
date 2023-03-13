@@ -316,8 +316,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     }
   }
 
-  void renameRepository(
-      String oldName, String newName, Uint8List? reopenToken) async {
+  Future<void> renameRepository(
+      String oldName, String newName, Uint8List reopenToken) async {
     if (!_repos.containsKey(oldName)) {
       print("Error renaming repository \"$oldName\": Does not exist");
       return;
@@ -340,7 +340,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
 
-      final repo = await _open(settingsRepoEntry, reopenToken: reopenToken);
+      final repo = await _open(settingsRepoEntry);
 
       if (repo is ErrorRepoEntry) {
         await setCurrent(null);
@@ -354,7 +354,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final newSettingsRepoEntry =
         await _settings.renameRepository(oldName, newName);
 
-    final repo = await _open(newSettingsRepoEntry!, reopenToken: reopenToken);
+    await _put(LoadingRepoEntry(newSettingsRepoEntry!.info),
+        setCurrent: wasCurrent);
+
+    final repo = await _open(newSettingsRepoEntry, reopenToken: reopenToken);
 
     if (repo is ErrorRepoEntry) {
       await setCurrent(null);
