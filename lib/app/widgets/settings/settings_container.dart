@@ -96,9 +96,15 @@ class _SettingsContainerState extends State<SettingsContainer>
     final currentRepo = widget.reposCubit.currentRepo;
     final repository = currentRepo is OpenRepoEntry ? currentRepo.cubit : null;
 
+    if (currentRepo == null) {
+      return;
+    }
+
     if (repository == null) {
       return;
     }
+
+    final currentRepoName = repository.name;
 
     final newName = await showDialog<String>(
         context: context,
@@ -110,7 +116,7 @@ class _SettingsContainerState extends State<SettingsContainer>
             body: RenameRepository(
                 context: context,
                 formKey: formKey,
-                repositoryName: repository.name),
+                repositoryName: currentRepoName),
           );
         });
 
@@ -118,7 +124,16 @@ class _SettingsContainerState extends State<SettingsContainer>
       return;
     }
 
-    widget.reposCubit.renameRepository(repository.name, newName);
+    final reopenToken =
+        await currentRepo.maybeCubit?.handle.createReopenToken();
+
+    if (reopenToken == null) {
+      loggy.app('Failed creating reopen token for repo $currentRepoName.');
+      return;
+    }
+
+    await widget.reposCubit
+        .renameRepository(currentRepoName, newName, reopenToken);
   }
 
   Future<String?> _activateOrNavigateRepositorySecurity(parentContext) async {
