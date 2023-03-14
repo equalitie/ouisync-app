@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 abstract class BaseItem extends Equatable {
-  BaseItem(this.name, this.path);
+  const BaseItem(this.name, this.path);
 
   @override
   List<Object> get props => [
@@ -14,7 +14,7 @@ abstract class BaseItem extends Equatable {
 }
 
 class FileItem extends BaseItem {
-  FileItem({
+  const FileItem({
     required String name,
     required String path,
     required this.size,
@@ -30,7 +30,7 @@ class FileItem extends BaseItem {
 }
 
 class FolderItem extends BaseItem {
-  FolderItem({
+  const FolderItem({
     required String name,
     required String path,
   }) : super(name, path);
