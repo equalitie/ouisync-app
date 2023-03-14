@@ -466,6 +466,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
           writePassword: password,
           shareToken: token);
 
+      // Enable DHT and PEX by default
+      await repo.enableDht();
+      await repo.enablePex();
+
       final settingsRepoEntry = await _settings.addRepo(info,
           databaseId: await repo.hexDatabaseId(),
           authenticateWithBiometrics: authenticateWithBiometrics);
