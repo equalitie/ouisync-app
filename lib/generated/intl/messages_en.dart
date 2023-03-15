@@ -118,11 +118,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Go to settings"),
         "actionHide": MessageLookupByLibrary.simpleMessage("Hide"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
+        "actionImportRepo":
+            MessageLookupByLibrary.simpleMessage("Import repository"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
-        "actionNewFile": MessageLookupByLibrary.simpleMessage("Add file"),
-        "actionNewFolder":
-            MessageLookupByLibrary.simpleMessage("Create folder"),
+        "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),
+        "actionNewFolder": MessageLookupByLibrary.simpleMessage("Folder"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Create repository"),
         "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
@@ -526,7 +527,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("File extension changed"),
         "titleFileExtensionMissing":
             MessageLookupByLibrary.simpleMessage("File extension missing"),
-        "titleFolderActions": MessageLookupByLibrary.simpleMessage("Create"),
+        "titleFolderActions": MessageLookupByLibrary.simpleMessage("Add"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Folder details"),
         "titleLockAllRepos":

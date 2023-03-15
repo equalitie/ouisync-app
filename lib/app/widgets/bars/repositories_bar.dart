@@ -125,7 +125,7 @@ class _Picker extends StatelessWidget {
   Widget _buildRepoListState(BuildContext context) => Container(
       padding: Dimensions.paddingRepositoryPicker,
       child: Row(children: [
-        Expanded(child: Text('OuiSync')),
+        Expanded(child: Text(S.current.titleAppTitle)),
         Fields.actionIcon(
           const Icon(Icons.search_rounded),
           onPressed: () {},

@@ -77,7 +77,6 @@ class RepoListState extends StatelessWidget {
 
                     await reposCubit.setCurrentByName(repoName);
                     reposCubit.pushRepoList(false);
-                    // await reposCubit.settings.setDefaultRepo(repoName);
                   },
                   folderDotsAction: () async {},
                 );

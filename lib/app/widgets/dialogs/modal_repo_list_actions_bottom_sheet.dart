@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -27,12 +28,12 @@ class RepoListActions extends StatelessWidget with OuiSyncAppLogger {
           Fields.bottomSheetHandle(context),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _buildAction(
-                name: 'Create repository',
+                name: S.current.actionNewRepo,
                 icon: Icons.archive_outlined,
                 action: () async =>
                     await _addRepoAndNavigate(context, onNewRepositoryPressed)),
             _buildAction(
-                name: 'Import repository',
+                name: S.current.actionImportRepo,
                 icon: Icons.unarchive_outlined,
                 action: () async =>
                     await _addRepoAndNavigate(context, onAddRepositoryPressed))
