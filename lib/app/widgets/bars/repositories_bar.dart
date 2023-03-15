@@ -126,12 +126,14 @@ class _Picker extends StatelessWidget {
       padding: Dimensions.paddingRepositoryPicker,
       child: Row(children: [
         Expanded(child: Text(S.current.titleAppTitle)),
-        Fields.actionIcon(
-          const Icon(Icons.search_rounded),
-          onPressed: () {},
-          size: Dimensions.sizeIconSmall,
-          color: Colors.white,
-        )
+
+        /// TODO: Implement search repos in list
+        // Fields.actionIcon(
+        //   const Icon(Icons.search_rounded),
+        //   onPressed: () {},
+        //   size: Dimensions.sizeIconSmall,
+        //   color: Colors.white,
+        // )
       ]));
 
   Widget _buildState(
