@@ -30,33 +30,29 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _buildAction(
                 name: S.current.actionNewFolder,
-                icon: Icons.folder_outlined,
+                icon: Icons.create_new_folder_outlined,
                 action: () => createFolderDialog(context, cubit)),
             _buildAction(
                 name: S.current.actionNewFile,
-                icon: Icons.insert_drive_file_outlined,
+                icon: Icons.upload_file_outlined,
                 action: () async => await addFile(context, cubit))
           ]),
         ]);
   }
 
   Widget _buildAction({name, icon, action}) => Padding(
-        padding: Dimensions.paddingBottomSheetActions,
-        child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: action,
-            child: Column(
-              children: [
-                Icon(
-                  icon,
-                  size: Dimensions.sizeIconExtraBig,
-                ),
-                Dimensions.spacingVertical,
-                Text(name,
-                    style: const TextStyle(fontSize: Dimensions.fontAverage))
-              ],
-            )),
-      );
+      padding: Dimensions.paddingBottomSheetActions,
+      child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: action,
+          child: Column(children: [
+            Icon(
+              icon,
+              size: Dimensions.sizeIconBig,
+            ),
+            Dimensions.spacingVertical,
+            Text(name, style: const TextStyle(fontSize: Dimensions.fontSmall))
+          ])));
 
   void createFolderDialog(context, RepoCubit cubit) async {
     await showDialog(
