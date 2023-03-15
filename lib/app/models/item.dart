@@ -39,10 +39,14 @@ class FolderItem extends BaseItem {
 
 class RepoItem extends BaseItem {
   const RepoItem(
-      {required String name, required String path, required this.accessMode})
+      {required String name,
+      required String path,
+      required this.accessMode,
+      required this.isDefault})
       : super(name, path);
 
   final AccessMode accessMode;
+  final bool isDefault;
 
   @override
   List<Object> get props => [...super.props, accessMode];
