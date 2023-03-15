@@ -111,7 +111,7 @@ class _MainPageState extends State<MainPage>
     widget.mediaReceiver.controller.stream.listen((media) {
       if (media is String) {
         loggy.app('mediaReceiver: String');
-        unawaited(addRepoWithTokenDialog(initialTokenValue: media));
+        unawaited(addRepoWithTokenDialog(context, initialTokenValue: media));
       }
 
       if (media is List<SharedMediaFile>) {
@@ -187,7 +187,9 @@ class _MainPageState extends State<MainPage>
       if (repos.showList) {
         return RepoListState(
             reposCubit: repos,
-            bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet);
+            bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
+            onNewRepositoryPressed: addRepository,
+            onImportRepositoryPressed: importRepository);
       }
 
       final current = repos.currentRepo;
@@ -225,8 +227,8 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
-                onNewRepositoryPressed: createRepoDialog,
-                onAddRepositoryPressed: addRepoWithTokenDialog);
+                onNewRepositoryPressed: addRepository,
+                onImportRepositoryPressed: importRepository);
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -330,7 +332,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
 
-    if (_repositories.showList) {
+    if (_repositories.showList && _repositories.repos.isNotEmpty) {
       return FloatingActionButton(
         heroTag: Constants.heroTagRepoListActions,
         child: icon,
@@ -367,8 +369,8 @@ class _MainPageState extends State<MainPage>
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
-          onNewRepositoryPressed: createRepoDialog,
-          onAddRepositoryPressed: addRepoWithTokenDialog);
+          onNewRepositoryPressed: addRepository,
+          onImportRepositoryPressed: importRepository);
     }
 
     if (current is OpenRepoEntry) {
@@ -725,12 +727,32 @@ class _MainPageState extends State<MainPage>
             return RepoListActions(
                 context: context,
                 reposCubit: _repositories,
-                onNewRepositoryPressed: createRepoDialog,
-                onAddRepositoryPressed: addRepoWithTokenDialog);
+                onNewRepositoryPressed: addRepository,
+                onImportRepositoryPressed: importRepository);
           });
 
-  Future<String?> createRepoDialog() async {
-    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(context,
+  Future<String?> addRepository() async =>
+      _addRepoAndNavigate(createRepoDialog(context));
+
+  Future<String?> importRepository() async =>
+      _addRepoAndNavigate(addRepoWithTokenDialog(context));
+
+  Future<String?> _addRepoAndNavigate(Future<String?> repoFunction) async {
+    final newRepoName = await repoFunction;
+
+    if (newRepoName == null || newRepoName.isEmpty) {
+      return null;
+    }
+
+    await _repositories.setCurrentByName(newRepoName);
+    _repositories.pushRepoList(false);
+
+    return newRepoName;
+  }
+
+  Future<String?> createRepoDialog(BuildContext parentContext) async {
+    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(
+            parentContext,
             f: _checkForBiometricsCallback()) ??
         false;
     return showDialog<String>(
@@ -749,7 +771,8 @@ class _MainPageState extends State<MainPage>
             }))));
   }
 
-  Future<String?> addRepoWithTokenDialog({String? initialTokenValue}) async {
+  Future<String?> addRepoWithTokenDialog(BuildContext parentContext,
+      {String? initialTokenValue}) async {
     initialTokenValue ??= await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -784,7 +807,7 @@ class _MainPageState extends State<MainPage>
     }
 
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            context,
+            parentContext,
             f: _checkForBiometricsCallback()) ??
         false;
 

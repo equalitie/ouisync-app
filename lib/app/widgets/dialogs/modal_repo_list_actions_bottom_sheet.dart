@@ -10,13 +10,13 @@ class RepoListActions extends StatelessWidget with OuiSyncAppLogger {
       {required this.context,
       required this.reposCubit,
       required this.onNewRepositoryPressed,
-      required this.onAddRepositoryPressed});
+      required this.onImportRepositoryPressed});
 
   final BuildContext context;
   final ReposCubit reposCubit;
 
   final Future<String?> Function() onNewRepositoryPressed;
-  final Future<String?> Function() onAddRepositoryPressed;
+  final Future<String?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +30,28 @@ class RepoListActions extends StatelessWidget with OuiSyncAppLogger {
             _buildAction(
                 name: S.current.actionNewRepo,
                 icon: Icons.archive_outlined,
-                action: () async =>
-                    await _addRepoAndNavigate(context, onNewRepositoryPressed)),
+                action: () async {
+                  final newRepoName = await onNewRepositoryPressed.call();
+
+                  if (newRepoName == null) {
+                    return;
+                  }
+
+                  Navigator.of(context).pop();
+                }),
             _buildAction(
                 name: S.current.actionImportRepo,
                 icon: Icons.unarchive_outlined,
-                action: () async =>
-                    await _addRepoAndNavigate(context, onAddRepositoryPressed))
+                action: () async {
+                  final importedRepoName =
+                      await onImportRepositoryPressed.call();
+
+                  if (importedRepoName == null) {
+                    return;
+                  }
+
+                  Navigator.of(context).pop();
+                })
           ]),
         ]);
   }
@@ -51,18 +66,4 @@ class RepoListActions extends StatelessWidget with OuiSyncAppLogger {
             Dimensions.spacingVertical,
             Text(name, style: const TextStyle(fontSize: Dimensions.fontSmall))
           ])));
-
-  Future<void> _addRepoAndNavigate(
-      BuildContext context, Future<String?> Function() repoFunction) async {
-    final newRepoName = await repoFunction.call();
-
-    if (newRepoName == null || newRepoName.isEmpty) {
-      return;
-    }
-
-    Navigator.of(context).pop(newRepoName);
-
-    await reposCubit.setCurrentByName(newRepoName);
-    reposCubit.pushRepoList(false);
-  }
 }

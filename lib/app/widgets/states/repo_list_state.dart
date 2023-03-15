@@ -1,56 +1,38 @@
 import 'package:flutter/material.dart';
 
-import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget {
   const RepoListState(
-      {required this.reposCubit, required this.bottomPaddingWithBottomSheet});
+      {required this.reposCubit,
+      required this.bottomPaddingWithBottomSheet,
+      required this.onNewRepositoryPressed,
+      required this.onImportRepositoryPressed});
 
   final ReposCubit reposCubit;
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
+  final Future<String?> Function() onNewRepositoryPressed;
+  final Future<String?> Function() onImportRepositoryPressed;
+
   @override
   Widget build(BuildContext context) {
-    final emptyFolderImageHeight = MediaQuery.of(context).size.height *
-        Constants.statePlaceholderImageHeightFactor;
-
     if (reposCubit.currentRepo is LoadingRepoEntry) {
       return Container();
     }
 
     final repoList = reposCubit.repos.toList();
 
-    return reposCubit.repos.isEmpty
-        ? _buildPlaceholder(emptyFolderImageHeight)
-        : _buildRepoList(repoList, reposCubit.currentRepoName);
-  }
+    if (repoList.isNotEmpty) {
+      return _buildRepoList(repoList, reposCubit.currentRepoName);
+    }
 
-  Widget _buildPlaceholder(double emptyFolderImageHeight) => Center(
-        child: SingleChildScrollView(
-          reverse: false,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Align(
-                  alignment: Alignment.center,
-                  child: Fields.placeholderWidget(
-                      assetName: Constants.assetEmptyFolder,
-                      assetHeight: emptyFolderImageHeight)),
-              Dimensions.spacingVerticalDouble,
-              Align(
-                alignment: Alignment.center,
-                child:
-                    Fields.inPageMainMessage(S.current.messageNothingHereYet),
-              )
-            ],
-          ),
-        ),
-      );
+    return NoRepositoriesState(
+        onNewRepositoryPressed: onNewRepositoryPressed,
+        onImportRepositoryPressed: onImportRepositoryPressed);
+  }
 
   Widget _buildRepoList(List<RepoEntry> reposList, String? currentRepoName) =>
       ValueListenableBuilder(
