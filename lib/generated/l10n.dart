@@ -2520,10 +2520,10 @@ class S {
     );
   }
 
-  /// `Create a New Repository`
+  /// `Create Repository`
   String get actionCreateRepository {
     return Intl.message(
-      'Create a New Repository',
+      'Create Repository',
       name: 'actionCreateRepository',
       desc: '',
       args: [],
@@ -2540,10 +2540,10 @@ class S {
     );
   }
 
-  /// `Import a Repository`
+  /// `Import Repository`
   String get actionAddRepositoryWithToken {
     return Intl.message(
-      'Import a Repository',
+      'Import Repository',
       name: 'actionAddRepositoryWithToken',
       desc: '',
       args: [],

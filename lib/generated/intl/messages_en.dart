@@ -95,14 +95,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("Import a Repository"),
         "actionAddRepositoryWithToken":
-            MessageLookupByLibrary.simpleMessage("Import a Repository"),
+            MessageLookupByLibrary.simpleMessage("Import Repository"),
         "actionCancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCEL"),
         "actionClear": MessageLookupByLibrary.simpleMessage("Clear"),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CLOSE"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Create"),
         "actionCreateRepository":
-            MessageLookupByLibrary.simpleMessage("Create a New Repository"),
+            MessageLookupByLibrary.simpleMessage("Create Repository"),
         "actionDelete": MessageLookupByLibrary.simpleMessage("Delete"),
         "actionDeleteCapital": MessageLookupByLibrary.simpleMessage("DELETE"),
         "actionDeleteFile": MessageLookupByLibrary.simpleMessage("Delete file"),
