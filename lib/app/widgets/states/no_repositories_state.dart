@@ -8,8 +8,8 @@ class NoRepositoriesState extends StatelessWidget {
       {required this.onNewRepositoryPressed,
       required this.onAddRepositoryPressed});
 
-  final Future<void> Function() onNewRepositoryPressed;
-  final Future<void> Function() onAddRepositoryPressed;
+  final Future<String?> Function() onNewRepositoryPressed;
+  final Future<String?> Function() onAddRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {

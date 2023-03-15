@@ -17,6 +17,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;
+  bool _showList = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
   StreamSubscription<void>? _subscription;
@@ -46,11 +47,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       futures.add(_openRepository(repo, setCurrent: repoName == defaultRepo));
     }
 
+    await Future.wait(futures);
+
     _update(() {
       _isLoading = false;
     });
 
-    await Future.wait(futures);
+    /// The repos list (landing page) is not avilable on desktop.
+    if (io.Platform.isAndroid || io.Platform.isIOS) {
+      _putRepoList(RepoListEntry(reposCubit: this));
+    }
   }
 
   bool get isLoading => _isLoading;
@@ -58,13 +64,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   String? get currentRepoName => currentRepo?.name;
 
-  Iterable<String> repositoryNames() => _repos.keys;
+  Iterable<String> repositoryNames() =>
+      _repos.keys.where((key) => key != Constants.repoListEntryName);
+
+  bool get showList => _showList;
 
   RepoEntry? get currentRepo => _currentRepo;
 
   StateMonitor get rootStateMonitor => _session.rootStateMonitor;
 
-  Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
+  Iterable<RepoEntry> get repos => _repos.entries
+      .map((entry) => entry.value)
+      .where((entry) => entry.name != Constants.repoListEntryName);
 
   Future<oui.ShareToken> createToken(String tokenString) =>
       oui.ShareToken.fromString(session, tokenString);
@@ -133,6 +144,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     return _repos[name];
   }
 
+  void _putRepoList(RepoEntry repoList) {
+    _repos[repoList.name] = repoList;
+    _showList = true;
+
+    changed();
+  }
+
+  void pushRepoList(bool showList) {
+    _showList = showList;
+    changed();
+  }
+
   Future<void> _put(RepoEntry newRepo, {bool setCurrent = false}) async {
     RepoEntry? oldRepo = _repos.remove(newRepo.name);
 
@@ -197,9 +220,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
 
   Future<void> _openRepository(SettingsRepoEntry settingsRepoEntry,
       {bool setCurrent = false}) async {
-    await _put(LoadingRepoEntry(settingsRepoEntry.info),
-        setCurrent: setCurrent);
-
     final password = await _tryGetSecurePassword(
         settingsRepoEntry.name, settingsRepoEntry.databaseId);
 

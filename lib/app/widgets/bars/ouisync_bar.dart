@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
   OuiSyncBar({
-    required this.repoList,
+    required this.repoPicker,
     required this.settingsButton,
   });
 
-  final PreferredSizeWidget repoList;
+  final PreferredSizeWidget repoPicker;
   final Widget settingsButton;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
         shadowColor: Colors.black26,
-        title: repoList,
+        title: repoPicker,
         // Make the `repoList` have no spacing on the horizontal axis.
         titleSpacing: 0.0,
         actions: [settingsButton]);
@@ -21,5 +21,5 @@ class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
 
   @override
   Size get preferredSize =>
-      Size(repoList.preferredSize.width, repoList.preferredSize.height);
+      Size(repoPicker.preferredSize.width, repoPicker.preferredSize.height);
 }
