@@ -6,10 +6,10 @@ import '../../utils/utils.dart';
 class NoRepositoriesState extends StatelessWidget {
   const NoRepositoriesState(
       {required this.onNewRepositoryPressed,
-      required this.onAddRepositoryPressed});
+      required this.onImportRepositoryPressed});
 
-  final Future<void> Function() onNewRepositoryPressed;
-  final Future<void> Function() onAddRepositoryPressed;
+  final Future<String?> Function() onNewRepositoryPressed;
+  final Future<String?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -40,21 +40,19 @@ class NoRepositoriesState extends StatelessWidget {
                   S.current.messageCreateNewRepo,
                   tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
+          Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
-              onPressed: () async => await onNewRepositoryPressed(),
-              leadingIcon: const Icon(Icons.add),
+              onPressed: () async => await onNewRepositoryPressed.call(),
               text: S.current.actionCreateRepository,
-              size: Dimensions.sizeInPageButtonLong,
-              alignment: Alignment.centerLeft,
+              fontSize: Dimensions.fontMicro,
+              size: Dimensions.sizeInPageButtonRegular,
               autofocus: true),
           Dimensions.spacingVertical,
           Fields.inPageButton(
-            onPressed: () async => await onAddRepositoryPressed(),
-            leadingIcon: const Icon(Icons.add),
-            text: S.current.actionAddRepositoryWithToken,
-            size: Dimensions.sizeInPageButtonLong,
-            alignment: Alignment.centerLeft,
-          ),
+              onPressed: () async => await onImportRepositoryPressed.call(),
+              text: S.current.actionAddRepositoryWithToken,
+              fontSize: Dimensions.fontMicro,
+              size: Dimensions.sizeInPageButtonRegular),
         ],
       ),
     ));

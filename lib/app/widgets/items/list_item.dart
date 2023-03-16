@@ -35,6 +35,10 @@ class ListItem extends StatelessWidget {
   Widget _buildItem() {
     final data = itemData;
 
+    if (data is RepoItem) {
+      return _buildRepoItem(data);
+    }
+
     if (data is FileItem) {
       return _buildFileItem(data);
     }
@@ -45,6 +49,25 @@ class ListItem extends StatelessWidget {
 
     assert(false, "Item must be either FileItem or FolderItem");
     return SizedBox.shrink();
+  }
+
+  Widget _buildRepoItem(RepoItem repoItem) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+            flex: 1,
+            child: Icon(Fields.accessModeIcon(repoItem.accessMode),
+                size: Dimensions.sizeIconAverage,
+                color: Constants.folderIconColor)),
+        Expanded(
+            flex: 9,
+            child: Padding(
+                padding: Dimensions.paddingItem,
+                child: RepoDescription(repoData: repoItem))),
+        _getVerticalMenuAction(),
+      ],
+    );
   }
 
   Widget _buildFileItem(FileItem fileData) {
