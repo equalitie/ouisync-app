@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class BaseItem extends Equatable {
-  BaseItem(this.name, this.path);
+  const BaseItem(this.name, this.path);
 
   @override
   List<Object> get props => [
@@ -14,7 +15,7 @@ abstract class BaseItem extends Equatable {
 }
 
 class FileItem extends BaseItem {
-  FileItem({
+  const FileItem({
     required String name,
     required String path,
     required this.size,
@@ -30,8 +31,23 @@ class FileItem extends BaseItem {
 }
 
 class FolderItem extends BaseItem {
-  FolderItem({
+  const FolderItem({
     required String name,
     required String path,
   }) : super(name, path);
+}
+
+class RepoItem extends BaseItem {
+  const RepoItem(
+      {required String name,
+      required String path,
+      required this.accessMode,
+      required this.isDefault})
+      : super(name, path);
+
+  final AccessMode accessMode;
+  final bool isDefault;
+
+  @override
+  List<Object> get props => [...super.props, accessMode];
 }

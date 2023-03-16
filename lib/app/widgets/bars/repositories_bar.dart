@@ -37,29 +37,15 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
           ),
         ),
         padding: Dimensions.paddingRepositoryBar,
-        child: Row(
-          children: [
-            Expanded(
+        child: Row(children: [
+          Expanded(
               child: _Picker(
-                reposCubit: reposCubit,
-                checkForBiometricsCallback: checkForBiometricsCallback,
-                shareRepositoryOnTap: shareRepositoryOnTap,
-                unlockRepositoryOnTap: unlockRepositoryOnTap,
-                borderColor: Colors.white,
-              ),
-            ),
-            Fields.actionIcon(
-              const Icon(Icons.share_outlined),
-              onPressed: () {
-                final current = reposCubit.currentRepo;
-                if (current is! OpenRepoEntry) return;
-                shareRepositoryOnTap(current.cubit);
-              },
-              size: Dimensions.sizeIconSmall,
-              color: Colors.white,
-            )
-          ],
-        ));
+                  reposCubit: reposCubit,
+                  checkForBiometricsCallback: checkForBiometricsCallback,
+                  shareRepositoryOnTap: shareRepositoryOnTap,
+                  unlockRepositoryOnTap: unlockRepositoryOnTap,
+                  borderColor: Colors.white))
+        ]));
   }
 
   @override
@@ -93,6 +79,10 @@ class _Picker extends StatelessWidget {
           return Column(
             children: const [CircularProgressIndicator(color: Colors.white)],
           );
+        }
+
+        if (reposCubit.showList) {
+          return _buildRepoListState(context);
         }
 
         final repo = state.currentRepo;
@@ -132,6 +122,20 @@ class _Picker extends StatelessWidget {
     }
   }
 
+  Widget _buildRepoListState(BuildContext context) => Container(
+      padding: Dimensions.paddingRepositoryPicker,
+      child: Row(children: [
+        Expanded(child: Text(S.current.titleAppTitle)),
+
+        /// TODO: Implement search repos in list
+        // Fields.actionIcon(
+        //   const Icon(Icons.search_rounded),
+        //   onPressed: () {},
+        //   size: Dimensions.sizeIconSmall,
+        //   color: Colors.white,
+        // )
+      ]));
+
   Widget _buildState(
     BuildContext context, {
     required Color borderColor,
@@ -140,46 +144,57 @@ class _Picker extends StatelessWidget {
     required Color textColor,
     required String repoName,
   }) =>
-      Container(
-          padding: Dimensions.paddingRepositoryPicker,
-          decoration: BoxDecoration(
-            borderRadius:
-                const BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-            border: Border.all(color: borderColor, style: BorderStyle.solid),
-            color: Colors.white,
-          ),
-          child: InkWell(
-              onTap: () async {
-                await _showRepositorySelector(context);
-              },
-              child: Row(children: [
-                IconButton(
-                    icon: Icon(icon),
-                    iconSize: Dimensions.sizeIconSmall,
-                    color: iconColor,
-                    onPressed: () async {
-                      if (reposCubit.currentRepo == null) return;
+      Row(children: [
+        Fields.actionIcon(
+          const Icon(Icons.arrow_back_rounded),
+          onPressed: () => reposCubit.pushRepoList(true),
+          size: Dimensions.sizeIconSmall,
+          color: Colors.white,
+        ),
+        Expanded(
+            child: Container(
+                padding: Dimensions.paddingRepositoryPicker,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                      Radius.circular(Dimensions.radiusSmall)),
+                  border:
+                      Border.all(color: borderColor, style: BorderStyle.solid),
+                  color: Colors.white,
+                ),
+                child: InkWell(
+                    onTap: () async {
+                      await _showRepositorySelector(context);
+                    },
+                    child: Row(children: [
+                      IconButton(
+                          icon: Icon(icon),
+                          iconSize: Dimensions.sizeIconSmall,
+                          color: iconColor,
+                          onPressed: () async {
+                            if (reposCubit.currentRepo == null) return;
 
-                      if (reposCubit.currentRepo?.accessMode ==
-                          AccessMode.blind) return;
+                            if (reposCubit.currentRepo?.accessMode ==
+                                AccessMode.blind) return;
 
-                      final repo = reposCubit.currentRepo;
+                            final repo = reposCubit.currentRepo;
 
-                      if (repo is OpenRepoEntry) {
-                        await reposCubit.lockRepository(repo.settingsRepoEntry);
-                      }
-                    }),
-                Dimensions.spacingHorizontal,
-                Fields.constrainedText(repoName,
-                    softWrap: false,
-                    textOverflow: TextOverflow.fade,
-                    color: textColor),
-                SizedBox(
-                    width: 44,
-                    height: 44,
-                    child: Icon(Icons.keyboard_arrow_down_outlined,
-                        color: iconColor)),
-              ])));
+                            if (repo is OpenRepoEntry) {
+                              await reposCubit
+                                  .lockRepository(repo.settingsRepoEntry);
+                            }
+                          }),
+                      Dimensions.spacingHorizontal,
+                      Fields.constrainedText(repoName,
+                          softWrap: false,
+                          textOverflow: TextOverflow.fade,
+                          color: textColor),
+                      SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(Icons.keyboard_arrow_down_outlined,
+                              color: iconColor))
+                    ]))))
+      ]);
 
   Future<dynamic> _showRepositorySelector(BuildContext context) =>
       showModalBottomSheet(

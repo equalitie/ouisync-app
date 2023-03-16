@@ -90,10 +90,10 @@ class S {
     );
   }
 
-  /// `Create`
+  /// `Add`
   String get titleFolderActions {
     return Intl.message(
-      'Create',
+      'Add',
       name: 'titleFolderActions',
       desc: '',
       args: [],
@@ -2520,10 +2520,10 @@ class S {
     );
   }
 
-  /// `Create a New Repository`
+  /// `Create Repository`
   String get actionCreateRepository {
     return Intl.message(
-      'Create a New Repository',
+      'Create Repository',
       name: 'actionCreateRepository',
       desc: '',
       args: [],
@@ -2540,10 +2540,10 @@ class S {
     );
   }
 
-  /// `Import a Repository`
+  /// `Import Repository`
   String get actionAddRepositoryWithToken {
     return Intl.message(
-      'Import a Repository',
+      'Import Repository',
       name: 'actionAddRepositoryWithToken',
       desc: '',
       args: [],
@@ -2570,6 +2570,16 @@ class S {
     );
   }
 
+  /// `Import repository`
+  String get actionImportRepo {
+    return Intl.message(
+      'Import repository',
+      name: 'actionImportRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Reload repository`
   String get actionReloadRepo {
     return Intl.message(
@@ -2590,20 +2600,20 @@ class S {
     );
   }
 
-  /// `Create folder`
+  /// `Folder`
   String get actionNewFolder {
     return Intl.message(
-      'Create folder',
+      'Folder',
       name: 'actionNewFolder',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add file`
+  /// `File`
   String get actionNewFile {
     return Intl.message(
-      'Add file',
+      'File',
       name: 'actionNewFile',
       desc: '',
       args: [],

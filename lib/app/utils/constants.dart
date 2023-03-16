@@ -34,6 +34,9 @@ class Constants {
   // Hero tags
 
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
+  static const String heroTagRepoListActions = 'REPO_LIST_ACTIONS';
+
+  static const String repoListEntryName = 'repo_list';
 
   static const IconData iconVisibilityOn = Icons.visibility;
   static const IconData iconVisibilityOff = Icons.visibility_off;

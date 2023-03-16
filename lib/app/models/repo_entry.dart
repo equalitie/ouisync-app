@@ -2,13 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
-import '../utils/settings.dart';
+import '../utils/utils.dart';
 import 'repo_meta_info.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
-  RepoMetaInfo get metaInfo;
-  String get name => metaInfo.name;
+  RepoMetaInfo? get metaInfo;
+  String get name => metaInfo?.name ?? '';
   bool? get authenticateWithBiometrics;
   RepoCubit? get maybeCubit => null;
 
@@ -43,6 +43,24 @@ class LoadingRepoEntry extends RepoEntry {
 
   @override
   RepoCubit? get maybeCubit => null;
+}
+
+class RepoListEntry extends RepoEntry {
+  RepoListEntry({required this.reposCubit});
+
+  final ReposCubit reposCubit;
+
+  @override
+  String get name => Constants.repoListEntryName;
+
+  @override
+  bool? get authenticateWithBiometrics => null;
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  RepoMetaInfo? get metaInfo => null;
 }
 
 class OpenRepoEntry extends RepoEntry {

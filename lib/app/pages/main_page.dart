@@ -111,7 +111,7 @@ class _MainPageState extends State<MainPage>
     widget.mediaReceiver.controller.stream.listen((media) {
       if (media is String) {
         loggy.app('mediaReceiver: String');
-        unawaited(addRepoWithTokenDialog(initialTokenValue: media));
+        unawaited(addRepoWithTokenDialog(context, initialTokenValue: media));
       }
 
       if (media is List<SharedMediaFile>) {
@@ -184,6 +184,14 @@ class _MainPageState extends State<MainPage>
 
   Widget buildMainWidget() {
     return _repositories.builder((repos) {
+      if (repos.showList) {
+        return RepoListState(
+            reposCubit: repos,
+            bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
+            onNewRepositoryPressed: addRepository,
+            onImportRepositoryPressed: importRepository);
+      }
+
       final current = repos.currentRepo;
 
       if (repos.isLoading || current is LoadingRepoEntry) {
@@ -219,8 +227,8 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
-                onNewRepositoryPressed: createRepoDialog,
-                onAddRepositoryPressed: addRepoWithTokenDialog);
+                onNewRepositoryPressed: addRepository,
+                onImportRepositoryPressed: importRepository);
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -279,7 +287,7 @@ class _MainPageState extends State<MainPage>
   }
 
   _buildOuiSyncBar() => OuiSyncBar(
-        repoList: _buildRepositoriesBar(),
+        repoPicker: _buildRepositoriesBar(),
         settingsButton: _buildSettingsIcon(),
       );
 
@@ -322,19 +330,27 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
-    if (current is! OpenRepoEntry) {
-      return Container();
+    final icon = const Icon(Icons.add_rounded);
+
+    if (_repositories.showList && _repositories.repos.isNotEmpty) {
+      return FloatingActionButton(
+        heroTag: Constants.heroTagRepoListActions,
+        child: icon,
+        onPressed: () => _showRepoListActions(context),
+      );
     }
 
-    if (!current.cubit.state.canWrite) {
-      return Container();
+    if (current is OpenRepoEntry &&
+        current.cubit.state.canWrite &&
+        !_repositories.showList) {
+      return FloatingActionButton(
+        heroTag: Constants.heroTagMainPageActions,
+        child: icon,
+        onPressed: () => _showDirectoryActions(context, current),
+      );
     }
 
-    return FloatingActionButton(
-      heroTag: Constants.heroTagMainPageActions,
-      child: const Icon(Icons.add_rounded),
-      onPressed: () => _showDirectoryActions(context, current),
-    );
+    return Container();
   }
 
   Widget _repositoryContentBuilder(OpenRepoEntry repo) =>
@@ -353,8 +369,8 @@ class _MainPageState extends State<MainPage>
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
-          onNewRepositoryPressed: createRepoDialog,
-          onAddRepositoryPressed: addRepoWithTokenDialog);
+          onNewRepositoryPressed: addRepository,
+          onImportRepositoryPressed: importRepository);
     }
 
     if (current is OpenRepoEntry) {
@@ -702,11 +718,44 @@ class _MainPageState extends State<MainPage>
             );
           });
 
-  Future<void> createRepoDialog() async {
-    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(context,
+  Future<dynamic> _showRepoListActions(BuildContext context) =>
+      showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (context) {
+            return RepoListActions(
+                context: context,
+                reposCubit: _repositories,
+                onNewRepositoryPressed: addRepository,
+                onImportRepositoryPressed: importRepository);
+          });
+
+  Future<String?> addRepository() async =>
+      _addRepoAndNavigate(createRepoDialog(context));
+
+  Future<String?> importRepository() async =>
+      _addRepoAndNavigate(addRepoWithTokenDialog(context));
+
+  Future<String?> _addRepoAndNavigate(Future<String?> repoFunction) async {
+    final newRepoName = await repoFunction;
+
+    if (newRepoName == null || newRepoName.isEmpty) {
+      return null;
+    }
+
+    await _repositories.setCurrentByName(newRepoName);
+    _repositories.pushRepoList(false);
+
+    return newRepoName;
+  }
+
+  Future<String?> createRepoDialog(BuildContext parentContext) async {
+    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(
+            parentContext,
             f: _checkForBiometricsCallback()) ??
         false;
-    await showDialog(
+    return showDialog<String>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) =>
@@ -722,7 +771,8 @@ class _MainPageState extends State<MainPage>
             }))));
   }
 
-  Future<void> addRepoWithTokenDialog({String? initialTokenValue}) async {
+  Future<String?> addRepoWithTokenDialog(BuildContext parentContext,
+      {String? initialTokenValue}) async {
     initialTokenValue ??= await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -730,7 +780,7 @@ class _MainPageState extends State<MainPage>
       }),
     );
 
-    if (initialTokenValue == null) return;
+    if (initialTokenValue == null) return null;
 
     final tokenValidationError =
         await _repositories.validateTokenLink(initialTokenValue);
@@ -753,14 +803,15 @@ class _MainPageState extends State<MainPage>
             );
           });
 
-      return;
+      return null;
     }
 
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            context,
+            parentContext,
             f: _checkForBiometricsCallback()) ??
         false;
-    await showDialog(
+
+    return showDialog<String>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) =>
