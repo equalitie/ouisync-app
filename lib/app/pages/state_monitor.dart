@@ -52,13 +52,16 @@ class _NodeWidget extends StatelessWidget {
           bloc: cubit,
           builder: (context, node) {
             if (node == null) {
-              return ListView(children: const []);
+              // node not loaded yet
+              return SizedBox.shrink();
             }
 
             if (node.path.isEmpty) {
+              // root node - use `ListView` to enable scrolling
               return ListView(children: buildValuesAndChildren(node));
             }
 
+            // child node - use regular `Column` because we are already inside `ListView`.
             return Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                 child: Column(children: buildValuesAndChildren(node)));
