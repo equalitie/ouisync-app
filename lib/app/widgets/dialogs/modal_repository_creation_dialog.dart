@@ -196,7 +196,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 'repository needs to be deleted.');
           }
 
-          await widget.cubit.deleteRepository(_repositoryMetaInfo!);
+          final repoName = _repositoryMetaInfo!.name;
+          final authMode =
+              widget.cubit.settings.getAuthenticationMode(repoName) ??
+                  Constants.authModeVersion1;
+
+          await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
         }
 
         return true;
@@ -526,12 +531,18 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     final authenticationRequired = _addPassword ? _secureWithBiometrics : false;
 
+    final authenticationMode = authenticationRequired
+        ? Constants.authModeVersion2
+        : savePasswordToSecureStorage
+            ? Constants.authModeNoLocalPassword
+            : Constants.authModeManual;
+
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
         f: cubit.createRepository(info,
             password: password,
             setCurrent: true,
             token: _shareToken,
-            authenticateWithBiometrics: authenticationRequired));
+            authenticationMode: authenticationMode));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";
@@ -578,7 +589,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         f: SecureStorage.addRepositoryPassword(
             databaseId: repoEntry.databaseId,
             password: password,
-            authenticationRequired: authenticationRequired));
+            authMode: authenticationMode));
 
     if (secureStorageResult.exception != null) {
       loggy.app(secureStorageResult.exception);

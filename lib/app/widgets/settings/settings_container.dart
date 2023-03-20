@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -168,13 +169,14 @@ class _SettingsContainerState extends State<SettingsContainer>
     String? password;
     ShareToken? shareToken;
 
-    final authenticateWithBiometrics =
-        widget.settings.getAuthenticationRequired(repository.name) ?? true;
+    final authenticationMode =
+        widget.settings.getAuthenticationMode(repository.name) ??
+            Constants.authModeVersion1;
 
     final securePassword = await _tryGetSecurePassword(
-        context, repository, authenticateWithBiometrics);
+        context, repository.databaseId, authenticationMode);
 
-    if (securePassword != null) {
+    if (securePassword != null && securePassword.isNotEmpty) {
       password = securePassword;
       shareToken = await _loadShareToken(context, repository, password);
     } else {
@@ -209,11 +211,30 @@ class _SettingsContainerState extends State<SettingsContainer>
     return password;
   }
 
-  Future<String?> _tryGetSecurePassword(BuildContext context, RepoCubit repo,
-      bool authenticateWithBiometrics) async {
+  Future<String?> _tryGetSecurePassword(BuildContext context, String databaseId,
+      String authenticationMode) async {
+    if (authenticationMode == Constants.authModeManual) {
+      return null;
+    }
+
+    if (authenticationMode == Constants.authModeVersion2) {
+      final auth = LocalAuthentication();
+      final localizedReason = 'Authentication required';
+
+      final authorized =
+          await auth.authenticate(localizedReason: localizedReason);
+
+      if (authorized == false) {
+        return null;
+      }
+    }
+
+    return _readSecureStorage(databaseId, authenticationMode);
+  }
+
+  Future<String?> _readSecureStorage(String databaseId, String authMode) async {
     final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: repo.databaseId,
-        authenticationRequired: authenticateWithBiometrics);
+        databaseId: databaseId, authMode: authMode);
 
     if (secureStorageResult.exception != null) {
       loggy.app(secureStorageResult.exception);
@@ -221,7 +242,7 @@ class _SettingsContainerState extends State<SettingsContainer>
       return null;
     }
 
-    return secureStorageResult.value;
+    return secureStorageResult.value ?? '';
   }
 
   Future<UnlockResult?> _getPasswordFromUser(
@@ -309,7 +330,10 @@ class _SettingsContainerState extends State<SettingsContainer>
     );
 
     if (delete ?? false) {
-      await widget.reposCubit.deleteRepository(repository.metaInfo);
+      final authMode = widget.settings.getAuthenticationMode(repository.name) ??
+          Constants.authModeVersion1;
+
+      await widget.reposCubit.deleteRepository(repository.metaInfo, authMode);
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:biometric_storage/biometric_storage.dart';
 
+import 'constants.dart';
+
 class SecureStorage {
   static final BiometricStorage _storage = BiometricStorage();
 
@@ -13,13 +15,32 @@ class SecureStorage {
     return _storage.getStorage(key, options: initOptions);
   }
 
+  static _getKey(String databaseId, String authMode) {
+    if (authMode == Constants.authModeVersion2) {
+      return '$databaseId-v2';
+    }
+
+    return databaseId;
+  }
+
+  static _isAuthenticationRequired(String authMode) {
+    if (authMode == Constants.authModeVersion1) {
+      return true;
+    }
+
+    return false;
+  }
+
   static Future<SecureStorageResult> addRepositoryPassword(
       {required String databaseId,
       required String password,
-      required bool authenticationRequired}) async {
+      required String authMode}) async {
+    final key = _getKey(databaseId, authMode);
+    final authenticationRequired = _isAuthenticationRequired(authMode);
+
     try {
       final storageFile =
-          await _getStorageFileForKey(databaseId, authenticationRequired);
+          await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.write(password);
     } on Exception catch (e) {
@@ -30,12 +51,15 @@ class SecureStorage {
   }
 
   static Future<SecureStorageResult> getRepositoryPassword(
-      {required String databaseId,
-      required bool authenticationRequired}) async {
+      {required String databaseId, required String authMode}) async {
+    final key = _getKey(databaseId, authMode);
+    final authenticationRequired = _isAuthenticationRequired(authMode);
+
     String? password;
+
     try {
       final storageFile =
-          await _getStorageFileForKey(databaseId, authenticationRequired);
+          await _getStorageFileForKey(key, authenticationRequired);
 
       password = await storageFile.read();
     } on Exception catch (e) {
@@ -47,10 +71,13 @@ class SecureStorage {
 
   static Future<SecureStorageResult> deleteRepositoryPassword(
       {required String databaseId,
+      required String authMode,
       required bool authenticationRequired}) async {
+    final key = _getKey(databaseId, authMode);
+
     try {
       final storageFile =
-          await _getStorageFileForKey(databaseId, authenticationRequired);
+          await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.delete();
     } on Exception catch (e) {
