@@ -34,9 +34,29 @@ class Settings {
   static const String _dhtEnabledKey = "DHT_ENABLED";
   static const String _pexEnabledKey = "PEX_ENABLED";
 
-  /// If true, when using the secured storage (biometric_storage), biometrics
-  /// will be used.
-  static const String _authenticationRequired = "AUTH_REQUIRED";
+  /// When securing the password using biometrics, we used the biometric_storage
+  /// plugin, and its built in biometrics authentication (by default:
+  /// authenticationRequired=true).
+  ///
+  /// Now we are still using the biometric_storage, but not its built in
+  /// biometrics authentication. The biometric authentication it's done using
+  /// the Dart package, local_auth.
+  ///
+  /// AUTH_MODE is null, if the repository was created before this update,
+  /// in which case the value is determined as follow:
+  ///
+  /// manual = Manual password input by the user.
+  ///
+  /// version1 = Password secured with biometrics, using built in validation
+  /// in biometrics_storage. (authenticationRequired=true)
+  ///
+  /// version2 = Password secured with biometrics, using biometrics_storage for
+  /// storage, and local_auth for biometric validation.
+  /// (authenticationRequired=false)
+  ///
+  /// no_local_password = Password saved to biometric_storage, no biometric
+  /// validation for retrieving. It's equivalent to automatic unlocking.
+  static const String _authenticationMode = "AUTH_MODE";
 
   // List of all repositories this app is concerned about
   static const String _knownRepositoriesKey = "KNOWN_REPOSITORIES";
@@ -194,8 +214,7 @@ class Settings {
     await _setDatabaseId(newName, databaseId);
     await setDhtEnabled(newName, getDhtEnabled(oldName));
     await setPexEnabled(newName, getPexEnabled(oldName));
-    await setAuthenticationRequired(
-        newName, getAuthenticationRequired(oldName));
+    await setAuthenticationMode(newName, getAuthenticationMode(oldName));
 
     await forgetRepository(oldName);
 
@@ -204,8 +223,7 @@ class Settings {
   }
 
   Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
-      {required String databaseId,
-      required bool authenticateWithBiometrics}) async {
+      {required String databaseId, required String authenticationMode}) async {
     if (_repos.containsKey(info.name)) {
       print("Settings already contains a repo with the name \"${info.name}\"");
       return null;
@@ -214,7 +232,7 @@ class Settings {
     _repos[info.name] = info.dir.path;
     await _setDatabaseId(info.name, databaseId);
     await _storeRepos(_prefs, _repos);
-    await setAuthenticationRequired(info.name, authenticateWithBiometrics);
+    await setAuthenticationMode(info.name, authenticationMode);
 
     return SettingsRepoEntry(databaseId, info);
   }
@@ -227,7 +245,7 @@ class Settings {
     await _setDatabaseId(repoName, null);
     await setDhtEnabled(repoName, null);
     await setPexEnabled(repoName, null);
-    await setAuthenticationRequired(repoName, null);
+    await setAuthenticationMode(repoName, null);
 
     _repos.remove(repoName);
     await _storeRepos(_prefs, _repos);
@@ -284,11 +302,11 @@ class Settings {
     await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
 
-  bool? getAuthenticationRequired(String repoName) =>
-      _prefs.getBool(_repositoryKey(repoName, _authenticationRequired));
+  String? getAuthenticationMode(String repoName) =>
+      _prefs.getString(_repositoryKey(repoName, _authenticationMode));
 
-  Future<void> setAuthenticationRequired(String repoName, bool? value) async =>
-      _setRepositoryBool(repoName, _authenticationRequired, value);
+  Future<void> setAuthenticationMode(String repoName, String? value) async =>
+      _setRepositoryString(repoName, _authenticationMode, value);
 
   Future<void> _setRepositoryBool(
       String repoName, String key, bool? value) async {

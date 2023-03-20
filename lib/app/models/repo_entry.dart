@@ -9,7 +9,7 @@ abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo? get metaInfo;
   String get name => metaInfo?.name ?? '';
-  bool? get authenticateWithBiometrics;
+  String? get authenticationMode;
   RepoCubit? get maybeCubit => null;
 
   String? get infoHash => maybeCubit?.state.infoHash;
@@ -39,7 +39,7 @@ class LoadingRepoEntry extends RepoEntry {
   }
 
   @override
-  bool? get authenticateWithBiometrics => null;
+  String? get authenticationMode => null;
 
   @override
   RepoCubit? get maybeCubit => null;
@@ -54,7 +54,7 @@ class RepoListEntry extends RepoEntry {
   String get name => Constants.repoListEntryName;
 
   @override
-  bool? get authenticateWithBiometrics => null;
+  String? get authenticationMode => null;
 
   @override
   Future<void> close() async {}
@@ -84,7 +84,7 @@ class OpenRepoEntry extends RepoEntry {
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
   @override
-  bool? get authenticateWithBiometrics => _cubit.state.authenticationRequired;
+  String? get authenticationMode => _cubit.state.authenticationMode;
 
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 }
@@ -104,7 +104,7 @@ class MissingRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  bool? get authenticateWithBiometrics => null;
+  String? get authenticationMode => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
@@ -125,7 +125,7 @@ class ErrorRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  bool? get authenticateWithBiometrics => null;
+  String? get authenticationMode => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;

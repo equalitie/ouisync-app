@@ -22,7 +22,8 @@ class RepoState extends Equatable {
   final bool isDhtEnabled;
   final bool isPexEnabled;
   final bool requestPassword;
-  final bool authenticationRequired; // = use biometrics
+  final String
+      authenticationMode; // manual, version1 (built in biometrics validation on package biometrics_storage), version2 (local_atuh for biometric validation), no local password
   final oui.AccessMode accessMode;
   final String infoHash;
   final FolderState currentFolder;
@@ -35,7 +36,7 @@ class RepoState extends Equatable {
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
     this.requestPassword = false,
-    this.authenticationRequired = false,
+    this.authenticationMode = "",
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
     this.currentFolder = const FolderState(),
@@ -49,7 +50,7 @@ class RepoState extends Equatable {
     bool? isDhtEnabled,
     bool? isPexEnabled,
     bool? requestPassword,
-    bool? authenticationRequired,
+    String? authenticationMode,
     oui.AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
@@ -62,8 +63,7 @@ class RepoState extends Equatable {
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
         requestPassword: requestPassword ?? this.requestPassword,
-        authenticationRequired:
-            authenticationRequired ?? this.authenticationRequired,
+        authenticationMode: authenticationMode ?? this.authenticationMode,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
         currentFolder: currentFolder ?? this.currentFolder,
@@ -78,7 +78,7 @@ class RepoState extends Equatable {
         isDhtEnabled,
         isPexEnabled,
         requestPassword,
-        authenticationRequired,
+        authenticationMode,
         accessMode,
         infoHash,
         currentFolder,
@@ -126,8 +126,8 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       state = state.copyWith(isPexEnabled: true);
     }
 
-    if (settings.getAuthenticationRequired(name) ?? true) {
-      state = state.copyWith(authenticationRequired: true);
+    if (settings.getAuthenticationMode(name)?.isEmpty ?? true) {
+      state = state.copyWith(authenticationMode: Constants.authModeVersion1);
     }
 
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
@@ -175,14 +175,14 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     return await oui.Directory.open(_handle, path);
   }
 
-  Future<void> setAuthenticationRequired(bool value) async {
-    if (state.authenticationRequired == value) {
+  Future<void> setAuthenticationMode(String value) async {
+    if (state.authenticationMode == value) {
       return;
     }
 
-    await _settings.setAuthenticationRequired(name, value);
+    await _settings.setAuthenticationMode(name, value);
 
-    emit(state.copyWith(authenticationRequired: value));
+    emit(state.copyWith(authenticationMode: value));
   }
 
   // This operator is required for the DropdownMenuButton to show entries properly.

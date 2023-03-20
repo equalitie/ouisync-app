@@ -303,7 +303,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   }
 
                   if (_isUnsavedBiometrics) {
-                    await _saveBiometricsChanges(_password);
+                    final authMode = widget.repo.state.authenticationMode;
+                    await _saveBiometricsChanges(
+                        widget.repo.databaseId, _password, authMode);
                   }
                 }))
           ])));
@@ -349,10 +351,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     return true;
   }
 
-  Future<void> _saveBiometricsChanges(String password) async {
+  Future<void> _saveBiometricsChanges(
+      String databaseId, String password, String authMode) async {
     _secureWithBiometricsState
-        ? await _addPasswordToBiometricStorage(password: password)
-        : await _removeRepoBiometrics();
+        ? await _addPasswordToBiometricStorage(
+            databaseId: databaseId, password: password, authMode: authMode)
+        : await _removeRepoBiometrics(authMode);
 
     _updateUnsavedChanges();
   }
@@ -391,13 +395,15 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   Future<void> _addPasswordToBiometricStorage(
-      {required String password}) async {
+      {required String databaseId,
+      required String password,
+      required String authMode}) async {
     final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
         f: SecureStorage.addRepositoryPassword(
             databaseId: widget.repo.databaseId,
             password: password,
-            authenticationRequired: true));
+            authMode: authMode));
 
     if (biometricsResult.exception != null) {
       loggy.app(biometricsResult.exception);
@@ -415,14 +421,16 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     });
   }
 
-  Future<void> _removeRepoBiometrics() async {
+  Future<void> _removeRepoBiometrics(String authMode) async {
     final removeBiometrics = await _removeBiometricsConfirmationDialog();
     if (!(removeBiometrics ?? false)) return;
 
     final secureStorageResult = await Dialogs.executeFutureWithLoadingDialog(
         context,
         f: SecureStorage.deleteRepositoryPassword(
-            databaseId: widget.repo.databaseId, authenticationRequired: false));
+            databaseId: widget.repo.databaseId,
+            authMode: authMode,
+            authenticationRequired: false));
 
     if (secureStorageResult.exception != null) {
       loggy.app(secureStorageResult.exception);
