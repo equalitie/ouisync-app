@@ -27,9 +27,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final Future<AccessMode?> Function(
-      {required String repositoryName,
-      required String password}) unlockRepositoryCallback;
+  final Future<AccessMode?> Function(String repositoryName,
+      {required String password}) unlockRepositoryCallback;
 
   final SecureRepoWithBiometricsFunction
       onSecureRepositoryWithBiometricsCallback;
@@ -109,8 +108,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       return;
     }
 
-    final accessMode = await unlockRepositoryCallback(
-        repositoryName: repositoryName, password: password);
+    final accessMode =
+        await unlockRepositoryCallback(repositoryName, password: password);
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
@@ -126,14 +125,14 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
     assert(accessMode != null, 'Error: accessMode is null');
 
     // Only if the password successfuly unlocked the repo, then we add it
-    // to the biometrics store -if the user selected the option.
+    // to the secure storage -if the user selected the option.
     if (_useBiometrics.value) {
       final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
           context,
           f: SecureStorage.addRepositoryPassword(
               databaseId: databaseId,
               password: password,
-              authenticationRequired: true));
+              authMode: Constants.authModeVersion2));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);
@@ -141,7 +140,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       }
 
       onSecureRepositoryWithBiometricsCallback.call(
-          repositoryName: repositoryName, value: true);
+          repositoryName: repositoryName, value: Constants.authModeVersion2);
     }
 
     final message = _useBiometrics.value
