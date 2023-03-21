@@ -118,18 +118,15 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   List<Widget> _managePassword() => [
         ListTile(
             leading: const Icon(Icons.password_rounded, color: Colors.black),
-            title: Text(S.current.messagePassword),
-            subtitle: Text(maskPassword(_password, mask: !_previewPassword)),
-            trailing: _passwordActions()),
-        ListTile(
-            leading: Icon(Icons.lock_reset_rounded, color: Colors.black),
             title: b.Badge(
                 showBadge: _isUnsavedNewPassword,
                 padding: EdgeInsets.all(2.0),
                 alignment: Alignment.centerLeft,
                 position: b.BadgePosition.topEnd(),
-                child: Text(S.current.titleChangePassword)),
-            trailing: Icon(Icons.chevron_right_rounded, color: Colors.black),
+                child: Text(S.current.messagePassword)),
+            subtitle: Fields.autosizeText(
+                maskPassword(_password, mask: !_previewPassword)),
+            trailing: _passwordActions(),
             onTap: () async => await _getNewPassword()),
         Visibility(
             visible: _newPassword?.isNotEmpty ?? false,
