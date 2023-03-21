@@ -1067,6 +1067,7 @@ class _MainPageState extends State<MainPage>
             isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
+            onTryGetSecurePassword: _tryGetSecurePassword,
             panicCounter: _panicCounter,
             natDetection: _natDetection,
           ),

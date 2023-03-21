@@ -16,6 +16,7 @@ class SettingsPage extends StatelessWidget {
     required this.isBiometricsAvailable,
     required this.powerControl,
     required this.onShareRepository,
+    required this.onTryGetSecurePassword,
     required this.panicCounter,
     required this.natDetection,
   });
@@ -25,6 +26,8 @@ class SettingsPage extends StatelessWidget {
   final bool isBiometricsAvailable;
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
+  final Future<String?> Function(BuildContext, String, String)
+      onTryGetSecurePassword;
   final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
 
@@ -59,6 +62,7 @@ class SettingsPage extends StatelessWidget {
               reposCubit: reposCubit,
               settings: settings,
               isBiometricsAvailable: isBiometricsAvailable,
+              onTryGetSecurePassword: onTryGetSecurePassword,
               panicCounter: panicCounter,
               natDetection: natDetection,
               onShareRepository: onShareRepository,

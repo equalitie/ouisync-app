@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -22,7 +21,8 @@ class SettingsContainer extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
-      required this.onShareRepository});
+      required this.onShareRepository,
+      required this.onTryGetSecurePassword});
 
   final ReposCubit reposCubit;
   final Settings settings;
@@ -31,6 +31,8 @@ class SettingsContainer extends StatefulWidget {
   final bool isBiometricsAvailable;
 
   final void Function(RepoCubit) onShareRepository;
+  final Future<String?> Function(BuildContext, String, String)
+      onTryGetSecurePassword;
 
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
@@ -173,8 +175,8 @@ class _SettingsContainerState extends State<SettingsContainer>
         widget.settings.getAuthenticationMode(repository.name) ??
             Constants.authModeVersion1;
 
-    final securePassword = await _tryGetSecurePassword(
-        context, repository.databaseId, authenticationMode);
+    final securePassword = await widget.onTryGetSecurePassword
+        .call(context, repository.databaseId, authenticationMode);
 
     if (securePassword != null && securePassword.isNotEmpty) {
       password = securePassword;
@@ -209,40 +211,6 @@ class _SettingsContainerState extends State<SettingsContainer>
         ));
 
     return password;
-  }
-
-  Future<String?> _tryGetSecurePassword(BuildContext context, String databaseId,
-      String authenticationMode) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    if (authenticationMode == Constants.authModeVersion2) {
-      final auth = LocalAuthentication();
-      final localizedReason = 'Authentication required';
-
-      final authorized =
-          await auth.authenticate(localizedReason: localizedReason);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    return _readSecureStorage(databaseId, authenticationMode);
-  }
-
-  Future<String?> _readSecureStorage(String databaseId, String authMode) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
   }
 
   Future<UnlockResult?> _getPasswordFromUser(
