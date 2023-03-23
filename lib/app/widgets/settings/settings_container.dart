@@ -175,6 +175,45 @@ class _SettingsContainerState extends State<SettingsContainer>
         widget.settings.getAuthenticationMode(repository.name) ??
             Constants.authModeVersion1;
 
+    if (authenticationMode == Constants.authModeNoLocalPassword) {
+      final auth = LocalAuthentication();
+      final isSupported = await auth.isDeviceSupported();
+
+      /// LocalAuthentication can tell us three (3) things:
+      ///
+      /// - canCheck: If the device has biometrics capabilities, maybe even just
+      ///   PIN, pattern or password protection, it returns TRUE. Basically, it
+      ///   always returns TRUE.
+      ///
+      ///   NOTE: This needs to be confirmed on a phone without any biometric
+      ///   capability
+      ///
+      /// - available: The list of enrolled biometrics.
+      ///   If the user has PIN (Password, pattern, even?), but no biometric
+      ///   method in use, it returns an empty list.
+      ///   If the user has a biometric method in use, it returns a list with
+      ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
+      ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
+      ///
+      /// - isSupported: Only if the user doesn't use any screen lock method
+      ///   (Pattern, PIN, password), which also means it doesn't use any
+      ///   biometric method, it returns FALSE.
+      ///
+      /// We don't use isBiometricsAvailable here because it only validates that
+      /// the user has at least one biometric method enrolled
+      /// (BiometricType.STRONG); if the user only uses weak methods
+      /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
+      if (isSupported) {
+        final localizedReason = 'Authentication required';
+        final authorized =
+            await auth.authenticate(localizedReason: localizedReason);
+
+        if (authorized == false) {
+          return null;
+        }
+      }
+    }
+
     final securePassword = await widget.onTryGetSecurePassword
         .call(context, repository.databaseId, authenticationMode);
 
