@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -171,7 +172,7 @@ class _SettingsContainerState extends State<SettingsContainer>
     String? password;
     ShareToken? shareToken;
 
-    final authenticationMode =
+    String authenticationMode =
         widget.settings.getAuthenticationMode(repository.name) ??
             Constants.authModeVersion1;
 
@@ -221,6 +222,8 @@ class _SettingsContainerState extends State<SettingsContainer>
       password = securePassword;
       shareToken = await _loadShareToken(context, repository, password);
     } else {
+      authenticationMode = Constants.authModeManual;
+
       final unlockResult =
           await _getPasswordFromUser(parentContext, repository);
 
@@ -246,7 +249,7 @@ class _SettingsContainerState extends State<SettingsContainer>
               password: password!,
               shareToken: shareToken!,
               isBiometricsAvailable: widget.isBiometricsAvailable,
-              usesBiometrics: false),
+              authenticationMode: authenticationMode),
         ));
 
     return password;
