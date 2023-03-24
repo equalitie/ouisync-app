@@ -41,7 +41,7 @@ export 'states/locked_repository_state.dart';
 export 'states/missing_repo_state.dart';
 export 'states/no_contents_state.dart';
 export 'states/no_repositories_state.dart';
-export 'states/password_state.dart';
+export 'states/get_password_state.dart';
 export 'states/repo_list_state.dart';
 
 export 'settings/desktop/repository_security_desktop.dart';
