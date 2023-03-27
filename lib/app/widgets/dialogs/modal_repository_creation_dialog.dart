@@ -401,7 +401,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       child: Row(children: [
         TextButton(
             onPressed: () => _updatePasswordSection(true),
-            child: Text('Add a local password'))
+            child: Text(S.current.messageAddLocalPassword))
       ]));
 
   Widget _useBiometricsSwitch() => Container(
@@ -432,12 +432,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   List<Widget> _actions(context) => [
         NegativeButton(
-            text: _addPassword ? 'Back' : S.current.actionCancel,
+            text: _addPassword ? S.current.actionBack : S.current.actionCancel,
             onPressed: () => _addPassword
                 ? _updatePasswordSection(false)
                 : Navigator.of(context).pop('')),
         PositiveButton(
-            text: _shareToken == null ? S.current.actionCreate : 'Import',
+            text: _shareToken == null
+                ? S.current.actionCreate
+                : S.current.actionImport,
             onPressed: () {
               final name = _nameController.text;
               final password = _isBlindReplica ? '' : _passwordController.text;

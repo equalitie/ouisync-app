@@ -96,8 +96,8 @@ class _GetPasswordStateState extends State<GetPasswordState> {
 
   Widget _title() {
     final title = _state.mode == Constants.addPasswordMode
-        ? 'Add local password'
-        : 'Change local password';
+        ? S.current.messageAddLocalPassword
+        : S.current.messageChangeLocalPassword;
 
     return Container(
         padding: Dimensions.paddingDialog,
@@ -151,8 +151,8 @@ class _GetPasswordStateState extends State<GetPasswordState> {
 
   List<Widget> _savePassword(BuildContext context) {
     final actionText = _state.mode == Constants.addPasswordMode
-        ? 'Add password'
-        : 'Change password';
+        ? S.current.messageAddLocalPassword
+        : S.current.messageChangeLocalPassword;
 
     return [
       Fields.inPageButton(

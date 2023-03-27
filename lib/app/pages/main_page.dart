@@ -954,10 +954,9 @@ class _MainPageState extends State<MainPage>
 
     if (authenticationMode == Constants.authModeVersion2) {
       final auth = LocalAuthentication();
-      final localizedReason = 'Authentication required';
 
-      final authorized =
-          await auth.authenticate(localizedReason: localizedReason);
+      final authorized = await auth.authenticate(
+          localizedReason: S.current.messageAccessingSecureStorage);
 
       if (authorized == false) {
         return null;

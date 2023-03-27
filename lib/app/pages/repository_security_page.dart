@@ -97,7 +97,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                     ListTile(
                         leading: const Icon(Icons.password_rounded,
                             color: Colors.black),
-                        title: Text("Add local password"),
+                        title: Text(S.current.messageAddLocalPassword),
                         onTap: state.useBiometrics
                             ? null
                             : () async {
@@ -158,10 +158,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                         position: b.BadgePosition.topEnd(),
                         child: Text(
                             state.currentAuthMode != Constants.authModeManual
-                                ? 'New password'
+                                ? S.current.messageNewPassword
                                 : S.current.messagePassword)),
                     subtitle: Fields.autosizeText(state.removePassword
-                        ? '<removed>'
+                        ? S.current.messageRemovedInBrackets
                         : maskPassword(password, mask: !state.previewPassword)),
                     trailing: state.removePassword
                         ? SizedBox()
@@ -200,7 +200,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   Container(
                       padding: EdgeInsets.only(right: 16.0),
                       child: TextButton(
-                          child: Text(state.removePassword ? 'Undo' : 'Remove'),
+                          child: Text(state.removePassword
+                              ? S.current.actionUndo
+                              : S.current.actionRemove),
                           onPressed: canRemove
                               ? () {
                                   final value = !state.removePassword;
@@ -223,7 +225,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                             Container(
                                 padding: EdgeInsets.only(right: 16.0),
                                 child: TextButton(
-                                    child: Text('Undo'),
+                                    child: Text(S.current.actionUndo),
                                     onPressed: (() {
                                       security.clearNewPassword();
                                       security.setNewAuthMode('');
@@ -283,7 +285,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       padding: EdgeInsets.all(2.0),
                       alignment: Alignment.centerLeft,
                       position: b.BadgePosition.topEnd(),
-                      child: Text('Unlock using biometrics')),
+                      child: Text(S.current.messageUnlockUsingBiometrics)),
                   onChanged: (useBiometrics) {
                     String authMode = useBiometrics
                         ? Constants.authModeVersion2
@@ -348,7 +350,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           await security.changeRepositoryPassword(state.newPassword);
 
       if (changed == false) {
-        final errorMessage = 'Adding a local password failed';
+        final errorMessage = S.current.messageErrorAddingLocalPassword;
         showSnackBar(context, message: errorMessage);
 
         return;
@@ -388,7 +390,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       final changed = await security.changeRepositoryPassword(password);
 
       if (changed == false) {
-        final errorMessage = 'Changing local password failed';
+        final errorMessage = S.current.messageErrorChangingLocalPassword;
         showSnackBar(context, message: errorMessage);
 
         return;
@@ -400,7 +402,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           await security.addPasswordToSecureStorage(password, authMode);
 
       if (addedToSecureStorage == false) {
-        showSnackBar(context, message: 'Removing the password failed.');
+        showSnackBar(context, message: S.current.messageErrorRemovingPassword);
 
         return;
       }
@@ -438,7 +440,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           await security.changeRepositoryPassword(state.newPassword);
 
       if (changed == false) {
-        final errorMessage = 'Adding a local password failed';
+        final errorMessage = S.current.messageErrorAddingSecureStorge;
         showSnackBar(context, message: errorMessage);
 
         return;
@@ -451,9 +453,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             state.newPassword, authMode);
 
         if (updated == false) {
-          final errorMessage =
-              'Updating the password in the secure storage failed';
-          showSnackBar(context, message: errorMessage);
+          showSnackBar(context,
+              message: S.current.messageErrorUpdatingSecureStorage);
 
           security.setCurrentUnlockWithBiometrics(false);
           security.setCurrentPassword(state.newPassword);
@@ -473,9 +474,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             .removePasswordFromSecureStorage(state.currentAuthMode);
 
         if (deleted == false) {
-          final errorMessage =
-              'Removing the password from the secure storage failed';
-          showSnackBar(context, message: errorMessage);
+          showSnackBar(context,
+              message: S.current.messageErrorRemovingSecureStorage);
 
           security.setCurrentUnlockWithBiometrics(false);
           security.setCurrentPassword(state.newPassword);
@@ -499,27 +499,11 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Future<bool?> _confirmSaveChanges(
       BuildContext context, SecurityState currentState) async {
-    // final passwordChangedChunk = (currentState.isUnsavedNewPassword
-    //         ? '${S.current.messageNewPassword}\n'
-    //         : '')
-    //     .trimLeft();
-
-    // final biometricsChunk = (currentState.currentUnlockWithBiometrics !=
-    //             currentState.unlockWithBiometrics
-    //         ? currentState.currentUnlockWithBiometrics
-    //             ? S.current.messageSecureUsingBiometrics
-    //             : S.current.messageRemoveBiometrics
-    //         : '')
-    //     .trimLeft();
-
-    // final changes = '$passwordChangedChunk$biometricsChunk';
-    final changes = 'Do you want to save the current changes?';
-
     final saveChanges = await Dialogs.alertDialogWithActions(
         context: context,
         title: S.current.titleSaveChanges,
         body: [
-          Text(changes) //Text(S.current.messageSavingChanges(changes))
+          Text(S.current.messageSavingChanges)
         ],
         actions: [
           TextButton(
