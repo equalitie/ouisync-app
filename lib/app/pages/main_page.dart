@@ -864,7 +864,8 @@ class _MainPageState extends State<MainPage>
     /// (If the password is empty, something wrong happened in the previous
     /// version of the app saving its value and it is considered non existent
     /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == null) {
+    if (authenticationMode == null ||
+        authenticationMode == Constants.authModeVersion1) {
       final securedPassword = await _getPasswordAndUnlock(
           context, databaseId, repositoryName, Constants.authModeVersion1);
 
@@ -885,15 +886,22 @@ class _MainPageState extends State<MainPage>
         final upgraded =
             await _upgradeBiometricEntryToVersion2(databaseId, securedPassword);
 
-        if (upgraded != null && upgraded == true) {
-          await widget.settings.setAuthenticationMode(
-              repositoryName, Constants.authModeVersion2);
+        if (upgraded == null) {
+          loggy.app(
+              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
 
           return;
         }
 
-        loggy.app(
-            'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
+        if (upgraded == false) {
+          loggy.app(
+              'Removing the old entry (version1) for $repositoryName in the '
+              'secure storage failed, but the creating the new entry (version2) '
+              'was successful.');
+        }
+
+        await widget.settings
+            .setAuthenticationMode(repositoryName, Constants.authModeVersion2);
 
         return;
       }
@@ -975,7 +983,7 @@ class _MainPageState extends State<MainPage>
   Future<bool?> _upgradeBiometricEntryToVersion2(
       String databaseId, String password) async {
     final addTempResult = await SecureStorage.addRepositoryPassword(
-        databaseId: '$databaseId-v2',
+        databaseId: databaseId,
         password: password,
         authMode: Constants.authModeVersion2);
 
@@ -993,18 +1001,7 @@ class _MainPageState extends State<MainPage>
     if (deleteOldResult.exception != null) {
       loggy.app(deleteOldResult.exception);
 
-      return null;
-    }
-
-    final addNewResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
-        password: password,
-        authMode: Constants.authModeVersion2);
-
-    if (addNewResult.exception != null) {
-      loggy.app(addNewResult.exception);
-
-      return null;
+      return false;
     }
 
     return true;
