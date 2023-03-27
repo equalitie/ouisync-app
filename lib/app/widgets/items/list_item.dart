@@ -64,8 +64,7 @@ class ListItem extends StatelessWidget {
             flex: 9,
             child: Padding(
                 padding: Dimensions.paddingItem,
-                child: RepoDescription(repoData: repoItem))),
-        _getVerticalMenuAction(),
+                child: RepoDescription(repoData: repoItem)))
       ],
     );
   }
