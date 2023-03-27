@@ -127,7 +127,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     }
 
     if (settings.getAuthenticationMode(name)?.isEmpty ?? true) {
-      state = state.copyWith(authenticationMode: Constants.authModeVersion1);
+      state = state.copyWith(authenticationMode: Constants.authModeVersion2);
     }
 
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
