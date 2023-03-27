@@ -22,7 +22,8 @@ class SettingsContainer extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
-      required this.onShareRepository});
+      required this.onShareRepository,
+      required this.onTryGetSecurePassword});
 
   final ReposCubit reposCubit;
   final Settings settings;
@@ -31,6 +32,8 @@ class SettingsContainer extends StatefulWidget {
   final bool isBiometricsAvailable;
 
   final void Function(RepoCubit) onShareRepository;
+  final Future<String?> Function(BuildContext, String, String)
+      onTryGetSecurePassword;
 
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
@@ -169,17 +172,58 @@ class _SettingsContainerState extends State<SettingsContainer>
     String? password;
     ShareToken? shareToken;
 
-    final authenticationMode =
+    String authenticationMode =
         widget.settings.getAuthenticationMode(repository.name) ??
             Constants.authModeVersion1;
 
-    final securePassword = await _tryGetSecurePassword(
-        context, repository.databaseId, authenticationMode);
+    if (authenticationMode == Constants.authModeNoLocalPassword) {
+      final auth = LocalAuthentication();
+      final isSupported = await auth.isDeviceSupported();
+
+      /// LocalAuthentication can tell us three (3) things:
+      ///
+      /// - canCheck: If the device has biometrics capabilities, maybe even just
+      ///   PIN, pattern or password protection, it returns TRUE. Basically, it
+      ///   always returns TRUE.
+      ///
+      ///   NOTE: This needs to be confirmed on a phone without any biometric
+      ///   capability
+      ///
+      /// - available: The list of enrolled biometrics.
+      ///   If the user has PIN (Password, pattern, even?), but no biometric
+      ///   method in use, it returns an empty list.
+      ///   If the user has a biometric method in use, it returns a list with
+      ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
+      ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
+      ///
+      /// - isSupported: Only if the user doesn't use any screen lock method
+      ///   (Pattern, PIN, password), which also means it doesn't use any
+      ///   biometric method, it returns FALSE.
+      ///
+      /// We don't use isBiometricsAvailable here because it only validates that
+      /// the user has at least one biometric method enrolled
+      /// (BiometricType.STRONG); if the user only uses weak methods
+      /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
+      if (isSupported) {
+        final localizedReason = 'Authentication required';
+        final authorized =
+            await auth.authenticate(localizedReason: localizedReason);
+
+        if (authorized == false) {
+          return null;
+        }
+      }
+    }
+
+    final securePassword = await widget.onTryGetSecurePassword
+        .call(context, repository.databaseId, authenticationMode);
 
     if (securePassword != null && securePassword.isNotEmpty) {
       password = securePassword;
       shareToken = await _loadShareToken(context, repository, password);
     } else {
+      authenticationMode = Constants.authModeManual;
+
       final unlockResult =
           await _getPasswordFromUser(parentContext, repository);
 
@@ -205,44 +249,10 @@ class _SettingsContainerState extends State<SettingsContainer>
               password: password!,
               shareToken: shareToken!,
               isBiometricsAvailable: widget.isBiometricsAvailable,
-              usesBiometrics: false),
+              authenticationMode: authenticationMode),
         ));
 
     return password;
-  }
-
-  Future<String?> _tryGetSecurePassword(BuildContext context, String databaseId,
-      String authenticationMode) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    if (authenticationMode == Constants.authModeVersion2) {
-      final auth = LocalAuthentication();
-      final localizedReason = 'Authentication required';
-
-      final authorized =
-          await auth.authenticate(localizedReason: localizedReason);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    return _readSecureStorage(databaseId, authenticationMode);
-  }
-
-  Future<String?> _readSecureStorage(String databaseId, String authMode) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
   }
 
   Future<UnlockResult?> _getPasswordFromUser(
