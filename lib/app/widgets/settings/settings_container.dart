@@ -205,9 +205,8 @@ class _SettingsContainerState extends State<SettingsContainer>
       /// (BiometricType.STRONG); if the user only uses weak methods
       /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
       if (isSupported) {
-        final localizedReason = 'Authentication required';
-        final authorized =
-            await auth.authenticate(localizedReason: localizedReason);
+        final authorized = await auth.authenticate(
+            localizedReason: S.current.messageAccessingSecureStorage);
 
         if (authorized == false) {
           return null;

@@ -2160,13 +2160,83 @@ class S {
     );
   }
 
-  /// `Saving the following changes:\n\n{changes}`
-  String messageSavingChanges(Object changes) {
+  /// `Accessing secure storage`
+  String get messageAccessingSecureStorage {
     return Intl.message(
-      'Saving the following changes:\n\n$changes',
+      'Accessing secure storage',
+      name: 'messageAccessingSecureStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to save the current changes?`
+  String get messageSavingChanges {
+    return Intl.message(
+      'Do you want to save the current changes?',
       name: 'messageSavingChanges',
       desc: '',
-      args: [changes],
+      args: [],
+    );
+  }
+
+  /// `Adding a local password failed`
+  String get messageErrorAddingSecureStorge {
+    return Intl.message(
+      'Adding a local password failed',
+      name: 'messageErrorAddingSecureStorge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Updating the password in the secure storage failed`
+  String get messageErrorUpdatingSecureStorage {
+    return Intl.message(
+      'Updating the password in the secure storage failed',
+      name: 'messageErrorUpdatingSecureStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removing the password from the secure storage failed`
+  String get messageErrorRemovingSecureStorage {
+    return Intl.message(
+      'Removing the password from the secure storage failed',
+      name: 'messageErrorRemovingSecureStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adding a local password failed`
+  String get messageErrorAddingLocalPassword {
+    return Intl.message(
+      'Adding a local password failed',
+      name: 'messageErrorAddingLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changing local password failed`
+  String get messageErrorChangingLocalPassword {
+    return Intl.message(
+      'Changing local password failed',
+      name: 'messageErrorChangingLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removing the password failed`
+  String get messageErrorRemovingPassword {
+    return Intl.message(
+      'Removing the password failed',
+      name: 'messageErrorRemovingPassword',
+      desc: '',
+      args: [],
     );
   }
 
@@ -2175,6 +2245,36 @@ class S {
     return Intl.message(
       'New password',
       name: 'messageNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add local password`
+  String get messageAddLocalPassword {
+    return Intl.message(
+      'Add local password',
+      name: 'messageAddLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change local password`
+  String get messageChangeLocalPassword {
+    return Intl.message(
+      'Change local password',
+      name: 'messageChangeLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `<removed>`
+  String get messageRemovedInBrackets {
+    return Intl.message(
+      '<removed>',
+      name: 'messageRemovedInBrackets',
       desc: '',
       args: [],
     );
@@ -2935,6 +3035,36 @@ class S {
     return Intl.message(
       'Go to settings',
       name: 'actionGoToSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Undo`
+  String get actionUndo {
+    return Intl.message(
+      'Undo',
+      name: 'actionUndo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back`
+  String get actionBack {
+    return Intl.message(
+      'Back',
+      name: 'actionBack',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import`
+  String get actionImport {
+    return Intl.message(
+      'Import',
+      name: 'actionImport',
       desc: '',
       args: [],
     );
