@@ -59,7 +59,7 @@ class SecurityState extends Equatable {
           ? newPassword.isEmpty
               ? false
               : currentPassword != newPassword
-          : false;
+          : newPassword.isNotEmpty;
     }
     return newPassword.isEmpty ? false : currentPassword != newPassword;
   }
@@ -157,7 +157,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     return SecurityCubit._(repoCubit, shareToken, initialState);
   }
 
-  Future<void> addPasswordToSecureStorage(
+  Future<bool> addPasswordToSecureStorage(
       String password, String authMode) async {
     final secureStorageResult = await SecureStorage.addRepositoryPassword(
         databaseId: _repoCubit.databaseId,
@@ -166,7 +166,28 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
 
     if (secureStorageResult.exception != null) {
       loggy.app(secureStorageResult.exception);
+      return false;
     }
+
+    return true;
+  }
+
+  Future<bool> updatePasswordInSecureStorage(
+      String newPassword, String authMode) async {
+    final secureStorageResult = await SecureStorage.addRepositoryPassword(
+        databaseId: _repoCubit.databaseId,
+        password: state.currentPassword,
+        authMode: authMode);
+
+    if (secureStorageResult.exception != null) {
+      loggy.app(secureStorageResult.exception);
+
+      return false;
+    }
+
+    emit(state.copyWith(currentPassword: newPassword));
+
+    return true;
   }
 
   Future<bool> removePasswordFromSecureStorage(String authMode) async {
@@ -188,14 +209,13 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     return true;
   }
 
-  Future<bool> changeRepositoryPassword(
-      String oldPassword, String newPassword) async {
+  Future<bool> changeRepositoryPassword(String newPassword) async {
     final mode = await _shareToken.mode;
     final metaInfo = _repoCubit.metaInfo;
 
     if (mode == AccessMode.write) {
       return _repoCubit.setReadWritePassword(
-          metaInfo, oldPassword, newPassword, _shareToken);
+          metaInfo, state.currentPassword, newPassword, _shareToken);
     } else {
       assert(mode == AccessMode.read);
       return _repoCubit.setReadPassword(metaInfo, newPassword, _shareToken);
@@ -207,6 +227,12 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       newPassword: '',
       previewPassword: false,
       previewNewPassword: false));
+
+  void setCurrentUnlockWithBiometrics(bool value) =>
+      emit(state.copyWith(currentUnlockWithBiometrics: value));
+
+  void setCurrentPassword(String password) =>
+      emit(state.copyWith(currentPassword: password));
 
   void setCurrentAuthMode(String authMode) {
     if (state.currentAuthMode == authMode) {
@@ -235,7 +261,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   }
 
   void setRemovePassword(bool value) =>
-      emit(state.copyWith(removePassword: value, newPassword: ''));
+      emit(state.copyWith(removePassword: value));
 
   void clearNewPassword() =>
       emit(state.copyWith(newPassword: '', previewNewPassword: false));
@@ -256,6 +282,6 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   void previewNewPassword(bool value) =>
       emit(state.copyWith(previewNewPassword: value));
 
-  void unlockWithBiometrics(value) =>
+  void setUnlockWithBiometrics(value) =>
       emit(state.copyWith(unlockWithBiometrics: value));
 }
