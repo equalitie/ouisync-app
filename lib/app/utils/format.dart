@@ -43,4 +43,4 @@ String formatShareLinkForDisplay(String shareLink) {
 }
 
 String maskPassword(String? password, {bool mask = true}) =>
-    (mask ? "*" * (password ?? '').length : password) ?? '';
+    (mask ? "●" * (password ?? '').length : password) ?? '';

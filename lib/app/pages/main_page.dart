@@ -974,13 +974,13 @@ class _MainPageState extends State<MainPage>
 
   Future<bool?> _upgradeBiometricEntryToVersion2(
       String databaseId, String password) async {
-    final addNewResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
+    final addTempResult = await SecureStorage.addRepositoryPassword(
+        databaseId: '$databaseId-v2',
         password: password,
         authMode: Constants.authModeVersion2);
 
-    if (addNewResult.exception != null) {
-      loggy.app(addNewResult.exception);
+    if (addTempResult.exception != null) {
+      loggy.app(addTempResult.exception);
 
       return null;
     }
@@ -992,6 +992,17 @@ class _MainPageState extends State<MainPage>
 
     if (deleteOldResult.exception != null) {
       loggy.app(deleteOldResult.exception);
+
+      return null;
+    }
+
+    final addNewResult = await SecureStorage.addRepositoryPassword(
+        databaseId: databaseId,
+        password: password,
+        authMode: Constants.authModeVersion2);
+
+    if (addNewResult.exception != null) {
+      loggy.app(addNewResult.exception);
 
       return null;
     }
@@ -1067,6 +1078,7 @@ class _MainPageState extends State<MainPage>
             isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
             onShareRepository: _showShareRepository,
+            onTryGetSecurePassword: _tryGetSecurePassword,
             panicCounter: _panicCounter,
             natDetection: _natDetection,
           ),
