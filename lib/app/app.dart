@@ -37,6 +37,11 @@ Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
 
   final session = Session.create(configDir);
 
+  await session.initNetwork(
+    defaultPortForwardingEnabled: true,
+    defaultLocalDiscoveryEnabled: true,
+  );
+
   return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(appBarTheme: AppBarTheme(color: themePrimaryColor)),

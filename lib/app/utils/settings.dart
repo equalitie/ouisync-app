@@ -24,8 +24,6 @@ class Settings {
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
-  static const String _portForwardingEnabledKey = "PORT_FORWARDING_ENABLED";
-  static const String _localDiscoveryEnabledKey = "LOCAL_DISCOVERY_ENABLED";
   static const String _logViewFilterKey = "LOG_VIEW/FILTER";
 
   // Per repository settings
@@ -270,16 +268,6 @@ class Settings {
 
   Future<void> setPexEnabled(String repoName, bool? value) =>
       _setRepositoryBool(repoName, _pexEnabledKey, value);
-
-  bool? getPortForwardingEnabled() => _prefs.getBool(_portForwardingEnabledKey);
-
-  Future<void> setPortForwardingEnabled(bool value) =>
-      _prefs.setBool(_portForwardingEnabledKey, value);
-
-  bool? getLocalDiscoveryEnabled() => _prefs.getBool(_localDiscoveryEnabledKey);
-
-  Future<void> setLocalDiscoveryEnabled(bool value) =>
-      _prefs.setBool(_localDiscoveryEnabledKey, value);
 
   bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
 
