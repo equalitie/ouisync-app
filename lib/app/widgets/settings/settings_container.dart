@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
@@ -176,7 +178,8 @@ class _SettingsContainerState extends State<SettingsContainer>
         widget.settings.getAuthenticationMode(repository.name) ??
             Constants.authModeVersion1;
 
-    if (authenticationMode == Constants.authModeNoLocalPassword) {
+    if (authenticationMode == Constants.authModeNoLocalPassword &&
+        (Platform.isAndroid || Platform.isIOS)) {
       final auth = LocalAuthentication();
       final isSupported = await auth.isDeviceSupported();
 
