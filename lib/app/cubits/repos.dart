@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
@@ -422,7 +423,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       return;
     }
 
-    final nextRepo = _repos.isNotEmpty ? _repos.values.first : null;
+    final nextRepo = _repos.values.firstWhereOrNull(
+        (element) => element.name != Constants.repoListEntryName);
 
     await setCurrent(nextRepo);
     await _settings.setDefaultRepo(nextRepo?.name);
