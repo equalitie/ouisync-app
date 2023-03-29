@@ -29,8 +29,6 @@ class Settings {
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
   static const String _databaseId = "DATABASE_ID";
-  static const String _dhtEnabledKey = "DHT_ENABLED";
-  static const String _pexEnabledKey = "PEX_ENABLED";
 
   /// When securing the password using biometrics, we used the biometric_storage
   /// plugin, and its built in biometrics authentication (by default:
@@ -210,8 +208,6 @@ class Settings {
 
     final databaseId = getDatabaseId(oldName);
     await _setDatabaseId(newName, databaseId);
-    await setDhtEnabled(newName, getDhtEnabled(oldName));
-    await setPexEnabled(newName, getPexEnabled(oldName));
     await setAuthenticationMode(newName, getAuthenticationMode(oldName));
 
     await forgetRepository(oldName);
@@ -241,8 +237,6 @@ class Settings {
     }
 
     await _setDatabaseId(repoName, null);
-    await setDhtEnabled(repoName, null);
-    await setPexEnabled(repoName, null);
     await setAuthenticationMode(repoName, null);
 
     _repos.remove(repoName);
@@ -256,18 +250,6 @@ class Settings {
 
   Future<void> _setDatabaseId(String repoName, String? databaseId) =>
       _setRepositoryString(repoName, _databaseId, databaseId);
-
-  bool? getDhtEnabled(String repoName) =>
-      _prefs.getBool(_repositoryKey(repoName, _dhtEnabledKey));
-
-  Future<void> setDhtEnabled(String repoName, bool? value) =>
-      _setRepositoryBool(repoName, _dhtEnabledKey, value);
-
-  bool? getPexEnabled(String repoName) =>
-      _prefs.getBool(_repositoryKey(repoName, _pexEnabledKey));
-
-  Future<void> setPexEnabled(String repoName, bool? value) =>
-      _setRepositoryBool(repoName, _pexEnabledKey, value);
 
   bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
 
@@ -296,15 +278,13 @@ class Settings {
   Future<void> setAuthenticationMode(String repoName, String? value) async =>
       _setRepositoryString(repoName, _authenticationMode, value);
 
-  Future<void> _setRepositoryBool(
-      String repoName, String key, bool? value) async {
+  // Read and remove a bool property. This functions exists to facilitate migration to the new
+  // repository config system where config values are stored in the repository metadata.
+  bool? takeRepositoryBool(String repoName, String key) {
     final fullKey = _repositoryKey(repoName, key);
-
-    if (value != null) {
-      await _prefs.setBool(fullKey, value);
-    } else {
-      await _prefs.remove(fullKey);
-    }
+    final value = _prefs.getBool(fullKey);
+    _prefs.remove(fullKey);
+    return value;
   }
 
   Future<void> _setRepositoryString(

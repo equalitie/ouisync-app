@@ -117,11 +117,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
     emit(state.copyWith(portForwardingEnabled: value));
 
-    if (value) {
-      await _session.enablePortForwarding();
-    } else {
-      await _session.disablePortForwarding();
-    }
+    await _session.setPortForwardingEnabled(value);
   }
 
   Future<void> setLocalDiscoveryEnabled(bool value) async {
@@ -131,11 +127,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
     emit(state.copyWith(localDiscoveryEnabled: value));
 
-    if (value) {
-      await _session.enableLocalDiscovery();
-    } else {
-      await _session.disableLocalDiscovery();
-    }
+    await _session.setLocalDiscoveryEnabled(value);
   }
 
   Future<void> _listen() async {
