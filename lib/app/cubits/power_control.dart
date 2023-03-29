@@ -10,8 +10,6 @@ import '../utils/settings.dart';
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
 const bool _syncOnMobileDefault = true;
-const bool _portForwardingEnabledDefault = true;
-const bool _localDiscoveryEnabledDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
@@ -91,13 +89,10 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
         _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
     await setSyncOnMobileEnabled(syncOnMobile);
 
-    final portForwardingEnabled =
-        _settings.getPortForwardingEnabled() ?? _portForwardingEnabledDefault;
-    await setPortForwardingEnabled(portForwardingEnabled);
-
-    final localDiscoveryEnabled =
-        _settings.getLocalDiscoveryEnabled() ?? _localDiscoveryEnabledDefault;
-    await setLocalDiscoveryEnabled(localDiscoveryEnabled);
+    emit(state.copyWith(
+      portForwardingEnabled: await _session.isPortForwardingEnabled,
+      localDiscoveryEnabled: await _session.isLocalDiscoveryEnabled,
+    ));
 
     await _refresh();
 
@@ -122,13 +117,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
     emit(state.copyWith(portForwardingEnabled: value));
 
-    if (value) {
-      await _session.enablePortForwarding();
-    } else {
-      await _session.disablePortForwarding();
-    }
-
-    await _settings.setPortForwardingEnabled(value);
+    await _session.setPortForwardingEnabled(value);
   }
 
   Future<void> setLocalDiscoveryEnabled(bool value) async {
@@ -138,13 +127,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
 
     emit(state.copyWith(localDiscoveryEnabled: value));
 
-    if (value) {
-      await _session.enableLocalDiscovery();
-    } else {
-      await _session.disableLocalDiscovery();
-    }
-
-    await _settings.setLocalDiscoveryEnabled(value);
+    await _session.setLocalDiscoveryEnabled(value);
   }
 
   Future<void> _listen() async {

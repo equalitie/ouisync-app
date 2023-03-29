@@ -111,20 +111,23 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     var state = RepoState();
     var name = settingsRepoEntry.name;
 
+    // Migrate settings
+    final legacyDhtEnabled = settings.takeRepositoryBool(name, 'DHT_ENABLED');
+    if (legacyDhtEnabled != null) {
+      await handle.setDhtEnabled(legacyDhtEnabled);
+    }
+
+    final legacyPexEnabled = settings.takeRepositoryBool(name, 'PEX_ENABLED');
+    if (legacyPexEnabled != null) {
+      await handle.setPexEnabled(legacyPexEnabled);
+    }
+
     state = state.copyWith(
       infoHash: await handle.infoHash,
       accessMode: await handle.accessMode,
+      isDhtEnabled: await handle.isDhtEnabled,
+      isPexEnabled: await handle.isPexEnabled,
     );
-
-    if (settings.getDhtEnabled(name) ?? true) {
-      await handle.enableDht();
-      state = state.copyWith(isDhtEnabled: true);
-    }
-
-    if (settings.getPexEnabled(name) ?? true) {
-      await handle.enablePex();
-      state = state.copyWith(isPexEnabled: true);
-    }
 
     if (settings.getAuthenticationMode(name)?.isEmpty ?? true) {
       state = state.copyWith(authenticationMode: Constants.authModeVersion2);
@@ -144,13 +147,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       return;
     }
 
-    if (value) {
-      await _handle.enableDht();
-    } else {
-      await _handle.disableDht();
-    }
-
-    await _settings.setDhtEnabled(name, value);
+    await _handle.setDhtEnabled(value);
 
     emit(state.copyWith(isDhtEnabled: value));
   }
@@ -160,13 +157,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       return;
     }
 
-    if (value) {
-      await _handle.enablePex();
-    } else {
-      await _handle.disablePex();
-    }
-
-    await _settings.setPexEnabled(name, true);
+    await _handle.setPexEnabled(value);
 
     emit(state.copyWith(isPexEnabled: value));
   }
