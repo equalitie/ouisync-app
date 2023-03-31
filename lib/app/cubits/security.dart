@@ -190,6 +190,32 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     return true;
   }
 
+  Future<bool?> addOrRemoveVersion2InSecureStorage(String newAuthMode) async {
+    final newEntryResult = await SecureStorage.addRepositoryPassword(
+        databaseId: _repoCubit.databaseId,
+        password: state.currentPassword,
+        authMode: newAuthMode);
+
+    if (newEntryResult.exception != null) {
+      loggy.app(newEntryResult.exception);
+
+      return null;
+    }
+
+    final oldVersion2EntryResult = await SecureStorage.deleteRepositoryPassword(
+        databaseId: _repoCubit.databaseId,
+        authMode: state.currentAuthMode,
+        authenticationRequired: false);
+
+    if (oldVersion2EntryResult.exception != null) {
+      loggy.app(oldVersion2EntryResult.exception);
+
+      return false;
+    }
+
+    return true;
+  }
+
   Future<bool> removePasswordFromSecureStorage(String authMode) async {
     final secureStorageResult = await SecureStorage.deleteRepositoryPassword(
         databaseId: _repoCubit.databaseId,
