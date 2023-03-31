@@ -359,14 +359,26 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       security.setCurrentPassword(state.newPassword);
     }
 
+    security.clearNewPassword();
+
     if (state.useBiometrics) {
+      final addedOrRemoved =
+          await security.addOrRemoveVersion2InSecureStorage(authMode);
+
+      if (addedOrRemoved == null) {
+        return;
+      }
+
+      if (addedOrRemoved == false) {
+        return;
+      }
+
       security.setCurrentUnlockWithBiometrics(true);
     }
 
-    security.setNewAuthMode('');
-    security.clearNewPassword();
-
     security.setCurrentAuthMode(authMode);
+
+    security.setNewAuthMode('');
   }
 
   Future<void> _saveManualPasswordChanges(SecurityState state) async {
@@ -429,6 +441,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   Future<void> _saveBiometricChanges(SecurityState state) async {
+    bool passwordChanged = false;
+
     final authMode = state.useBiometrics
         ? Constants.authModeVersion2
         : state.newPassword.isEmpty
@@ -446,6 +460,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         return;
       }
 
+      passwordChanged = true;
       security.setCurrentPassword(state.newPassword);
 
       if (state.useBiometrics) {
@@ -469,7 +484,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     if (state.useBiometrics == false) {
-      if (state.newPassword.isNotEmpty) {
+      if (passwordChanged) {
         final deleted = await security
             .removePasswordFromSecureStorage(state.currentAuthMode);
 
@@ -484,6 +499,17 @@ class _RepositorySecurityState extends State<RepositorySecurity>
           security.clearNewPassword();
           security.setNewAuthMode('');
 
+          return;
+        }
+      } else {
+        final addedOrRemoved =
+            await security.addOrRemoveVersion2InSecureStorage(authMode);
+
+        if (addedOrRemoved == null) {
+          return;
+        }
+
+        if (addedOrRemoved == false) {
           return;
         }
       }
