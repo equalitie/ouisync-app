@@ -77,27 +77,20 @@ class RepositorySectionMobile extends AbstractSettingsSection
           icon: Icons.group_add,
           onToggle: (value) => repo.setPexEnabled(value));
 
-  Widget _buildRenameTile(BuildContext context, RepoCubit repo) =>
-      PlatformTappableTile(
-          reposCubit: repos,
-          repoName: repo.name,
-          title: S.current.actionRename,
-          icon: Icons.edit,
-          onTap: (context) async => await onRenameRepository(context));
+  Widget _buildRenameTile(BuildContext context, _) => PlatformTappableTile(
+      title: Text(S.current.actionRename),
+      icon: Icons.edit,
+      onTap: (context) async => await onRenameRepository(context));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repo) =>
       PlatformTappableTile(
-          reposCubit: repos,
-          repoName: repo.name,
-          title: S.current.actionShare,
+          title: Text(S.current.actionShare),
           icon: Icons.share,
           onTap: (_) => onShareRepository(repo));
 
-  Widget _buildSecurityTile(BuildContext parentContext, RepoCubit repo) =>
+  Widget _buildSecurityTile(BuildContext parentContext, _) =>
       PlatformTappableTile(
-          reposCubit: repos,
-          repoName: repo.name,
-          title: S.current.titleSecurity,
+          title: Text(S.current.titleSecurity),
           icon: Icons.password,
           onTap: (_) async => await onRepositorySecurity(parentContext));
 
