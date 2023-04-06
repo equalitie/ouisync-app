@@ -611,5 +611,7 @@
   "actionImport": "Importar",
   "@actionImport": {},
   "messageChangeLocalPassword": "Cambiar la contraseña local",
-  "@messageChangeLocalPassword": {}
+  "@messageChangeLocalPassword": {},
+  "messageRemovaLocalPassword": "Eliminar la contraseña local",
+  "@messageRemovaLocalPassword": {}
 }
