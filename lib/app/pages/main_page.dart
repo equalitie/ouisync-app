@@ -134,7 +134,11 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool?> _checkForBiometricsCallback() async {
-    if (!io.Platform.isAndroid && !io.Platform.isIOS) return null;
+    if (!io.Platform.isAndroid &&
+        !io.Platform.isIOS &&
+        !io.Platform.isWindows) {
+      return null;
+    }
 
     final auth = LocalAuthentication();
 
@@ -908,7 +912,7 @@ class _MainPageState extends State<MainPage>
     }
 
     if (authenticationMode == Constants.authModeManual) {
-      final unlockResult = await _getRepositoryPasswordDialog(
+      final unlockResult = await _getManualPasswordAndUnlock(
           databaseId: databaseId,
           repositoryName: repositoryName,
           isBiometricsAvailable: isBiometricsAvailable);
@@ -930,8 +934,10 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    final securePassword =
-        await _tryGetSecurePassword(context, databaseId, authenticationMode);
+    final securePassword = await _tryGetSecurePassword(
+        context: context,
+        databaseId: databaseId,
+        authenticationMode: authenticationMode);
 
     if (securePassword == null) {
       /// There was an exception getting the value from the secure storage.
@@ -946,8 +952,10 @@ class _MainPageState extends State<MainPage>
     return securePassword;
   }
 
-  Future<String?> _tryGetSecurePassword(BuildContext context, String databaseId,
-      String authenticationMode) async {
+  Future<String?> _tryGetSecurePassword(
+      {required BuildContext context,
+      required String databaseId,
+      required String authenticationMode}) async {
     if (authenticationMode == Constants.authModeManual) {
       return null;
     }
@@ -1017,7 +1025,7 @@ class _MainPageState extends State<MainPage>
     showSnackBar(context, message: message);
   }
 
-  Future<UnlockRepositoryResult?> _getRepositoryPasswordDialog(
+  Future<UnlockRepositoryResult?> _getManualPasswordAndUnlock(
           {required String databaseId,
           required String repositoryName,
           required bool isBiometricsAvailable}) async =>
