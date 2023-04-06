@@ -2270,6 +2270,16 @@ class S {
     );
   }
 
+  /// `Remove local password`
+  String get messageRemovaLocalPassword {
+    return Intl.message(
+      'Remove local password',
+      name: 'messageRemovaLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `<removed>`
   String get messageRemovedInBrackets {
     return Intl.message(
