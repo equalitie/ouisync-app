@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
+import '../../widgets.dart';
 import 'desktop_settings.dart';
 
 class SettingsDesktopDetail extends StatefulWidget {
@@ -13,9 +14,10 @@ class SettingsDesktopDetail extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
+      required this.onTryGetSecurePassword,
+      required this.onGetPasswordFromUser,
       required this.onRenameRepository,
       required this.onShareRepository,
-      required this.onRepositorySecurity,
       required this.onDeleteRepository});
 
   final SettingItem? item;
@@ -25,9 +27,14 @@ class SettingsDesktopDetail extends StatefulWidget {
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
+  final Future<String?> Function(
+      {required BuildContext context,
+      required String databaseId,
+      required String authenticationMode}) onTryGetSecurePassword;
+  final Future<UnlockResult?> Function(
+      BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
   final Future<void> Function(dynamic) onRenameRepository;
   final void Function(RepoCubit) onShareRepository;
-  final Future<String?> Function(dynamic) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
@@ -55,9 +62,10 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             item: widget.item!,
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable,
+            onTryGetSecurePassword: widget.onTryGetSecurePassword,
+            onGetPasswordFromUser: widget.onGetPasswordFromUser,
             onRenameRepository: widget.onRenameRepository,
             onShareRepository: widget.onShareRepository,
-            onRepositorySecurity: widget.onRepositorySecurity,
             onDeleteRepository: widget.onDeleteRepository);
       case Setting.network:
         return NetworkDesktopDetail(natDetection: widget.natDetection);

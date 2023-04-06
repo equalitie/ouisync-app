@@ -26,8 +26,10 @@ class SettingsPage extends StatelessWidget {
   final bool isBiometricsAvailable;
   final PowerControl powerControl;
   final void Function(RepoCubit) onShareRepository;
-  final Future<String?> Function(BuildContext, String, String)
-      onTryGetSecurePassword;
+  final Future<String?> Function(
+      {required BuildContext context,
+      required String databaseId,
+      required String authenticationMode}) onTryGetSecurePassword;
   final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
 

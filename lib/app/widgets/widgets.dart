@@ -19,7 +19,7 @@ export 'dialogs/modal_rename_repository_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repository_creation_dialog.dart';
 export 'dialogs/modal_save_to_device_bottom_sheet.dart';
-export 'dialogs/modal_set_password_dialog.dart';
+export 'dialogs/modal_manage_desktop_password_dialog.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';

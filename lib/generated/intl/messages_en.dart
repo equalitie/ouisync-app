@@ -417,6 +417,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cannot be modified, just access the contents"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Remember to securely save the password; if you forget it, there is no way to retrieve it."),
+        "messageRemovaLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Remove local password"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":

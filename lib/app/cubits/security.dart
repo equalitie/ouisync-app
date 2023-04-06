@@ -132,11 +132,13 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       : super(state);
 
   final RepoCubit _repoCubit;
-  final ShareToken _shareToken;
+  ShareToken? _shareToken;
+
+  void setShareToken(ShareToken shareToken) => _shareToken = shareToken;
 
   static SecurityCubit create(
       {required RepoCubit repoCubit,
-      required ShareToken shareToken,
+      required ShareToken? shareToken,
       required bool isBiometricsAvailable,
       required String authenticationMode,
       required String password}) {
@@ -236,7 +238,14 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   }
 
   Future<bool> changeRepositoryPassword(String newPassword) async {
-    final mode = await _shareToken.mode;
+    assert(_shareToken != null, 'ERROR: shareToken is null');
+    assert(state.currentPassword.isNotEmpty, 'ERROR: currentPassword is empty');
+
+    if (_shareToken == null || state.currentPassword.isEmpty) {
+      return false;
+    }
+
+    final mode = await _shareToken?.mode;
     final metaInfo = _repoCubit.metaInfo;
 
     if (mode == AccessMode.write) {
