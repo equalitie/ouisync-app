@@ -34,8 +34,10 @@ class SettingsContainer extends StatefulWidget {
   final bool isBiometricsAvailable;
 
   final void Function(RepoCubit) onShareRepository;
-  final Future<String?> Function(BuildContext, String, String)
-      onTryGetSecurePassword;
+  final Future<String?> Function(
+      {required BuildContext context,
+      required String databaseId,
+      required String authenticationMode}) onTryGetSecurePassword;
 
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
@@ -92,9 +94,10 @@ class _SettingsContainerState extends State<SettingsContainer>
                 panicCounter: widget.panicCounter,
                 natDetection: widget.natDetection,
                 isBiometricsAvailable: widget.isBiometricsAvailable,
+                onTryGetSecurePassword: widget.onTryGetSecurePassword,
+                onGetPasswordFromUser: _getPasswordFromUser,
                 onRenameRepository: _renameRepo,
                 onShareRepository: widget.onShareRepository,
-                onRepositorySecurity: _activateOrNavigateRepositorySecurity,
                 onDeleteRepository: _deleteRepository))
       ]);
 
@@ -155,18 +158,8 @@ class _SettingsContainerState extends State<SettingsContainer>
       return null;
     }
 
-    /// We don't have yet the UI for the security item in the repo settings
-    /// on desktop; so for now we just navigate to the security page, like
-    /// we do on mobile.
-    /// TODO: Implement the security flow specific to desktop
     final repository = repoEntry.cubit;
     return await _navigateToRepositorySecurity(parentContext, repository);
-    // if (PlatformValues.isDesktopDevice) {
-    //   return (await _getPasswordFromUser(parentContext, repository))
-    //           ?.password;
-    // }
-
-    // return await _navigateToRepositorySecurity(parentContext, repository);
   }
 
   Future<String?> _navigateToRepositorySecurity(
@@ -217,8 +210,10 @@ class _SettingsContainerState extends State<SettingsContainer>
       }
     }
 
-    final securePassword = await widget.onTryGetSecurePassword
-        .call(context, repository.databaseId, authenticationMode);
+    final securePassword = await widget.onTryGetSecurePassword.call(
+        context: context,
+        databaseId: repository.databaseId,
+        authenticationMode: authenticationMode);
 
     if (securePassword != null && securePassword.isNotEmpty) {
       password = securePassword;

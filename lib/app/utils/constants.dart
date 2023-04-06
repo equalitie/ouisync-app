@@ -49,6 +49,7 @@ class Constants {
 
   static const String addPasswordMode = 'add';
   static const String changePasswordMode = 'change';
+  static const String removePasswordMode = 'remove';
 
   static const String repoListEntryName = 'repo_list';
 
