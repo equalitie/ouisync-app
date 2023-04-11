@@ -122,16 +122,15 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       await handle.setPexEnabled(legacyPexEnabled);
     }
 
-    state = state.copyWith(
-      infoHash: await handle.infoHash,
-      accessMode: await handle.accessMode,
-      isDhtEnabled: await handle.isDhtEnabled,
-      isPexEnabled: await handle.isPexEnabled,
-    );
+    final authMode =
+        settings.getAuthenticationMode(name) ?? Constants.authModeVersion1;
 
-    if (settings.getAuthenticationMode(name)?.isEmpty ?? true) {
-      state = state.copyWith(authenticationMode: Constants.authModeVersion2);
-    }
+    state = state.copyWith(
+        infoHash: await handle.infoHash,
+        accessMode: await handle.accessMode,
+        isDhtEnabled: await handle.isDhtEnabled,
+        isPexEnabled: await handle.isPexEnabled,
+        authenticationMode: authMode);
 
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
   }
