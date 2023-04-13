@@ -24,9 +24,9 @@ class RepositoryProgress extends StatelessWidget {
           if (node == null) return shrink();
 
           final indexInflight =
-              node.parseIntValue('index_requests_inflight') ?? 0;
+              node.parseIntValue('index requests inflight') ?? 0;
           final blockInflight =
-              node.parseIntValue('block_requests_inflight') ?? 0;
+              node.parseIntValue('block requests inflight') ?? 0;
 
           if (indexInflight == 0 && blockInflight == 0) {
             return shrink();
