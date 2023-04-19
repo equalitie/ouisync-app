@@ -32,7 +32,7 @@ dependencies:
   connectivity_plus: ^3.0.2
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
-  desktop_drop: ^0.3.3
+  desktop_drop: ^0.4.1
   dns_client: ^0.2.1
   equatable: ^2.0.3
   external_path: ^1.0.1
@@ -68,9 +68,11 @@ dependencies:
   percent_indicator: ^4.2.2
   permission_handler: ^10.2.0
   qr_flutter: ^4.0.0
-  r_get_ip: ^0.1.1
+  r_get_ip: 
+    git: https://github.com/J-Pabon/r_get_ip
   random_password_generator: ^0.2.1
-  receive_sharing_intent: ^1.4.5
+  receive_sharing_intent: 
+    git: https://github.com/J-Pabon/receive_sharing_intent
   result_type: ^0.2.0
   settings_ui: ^2.0.2
   share_plus: ^6.3.0

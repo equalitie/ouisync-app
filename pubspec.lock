@@ -293,10 +293,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_drop
-      sha256: "0cd056191b701a2b5ba040f2306349e461fafdaa5df4569b2228cdf87b58eced"
+      sha256: "4ca4d960f4b11c032e9adfd2a0a8ac615bc3fddb4cbe73dcf840dd8077582186"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.4.1"
   diff_match_patch:
     dependency: transitive
     description:
@@ -1047,10 +1047,11 @@ packages:
   r_get_ip:
     dependency: "direct main"
     description:
-      name: r_get_ip
-      sha256: bc9c6442c1251fc9e554f9cdb438cc4a5b497cab65153e2ca0c203447c2cf0e9
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "1a125da6993354545790ef7d54176ff80c3adbe3"
+      url: "https://github.com/J-Pabon/r_get_ip"
+    source: git
     version: "0.1.1"
   random_password_generator:
     dependency: "direct main"
@@ -1063,10 +1064,11 @@ packages:
   receive_sharing_intent:
     dependency: "direct main"
     description:
-      name: receive_sharing_intent
-      sha256: "912bebb551bce75a14098891fd750305b30d53eba0d61cc70cd9973be9866e8d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "08fcc2eab71c50803389ea722119f3f5aa09155e"
+      url: "https://github.com/J-Pabon/receive_sharing_intent"
+    source: git
     version: "1.4.5"
   result_type:
     dependency: "direct main"
