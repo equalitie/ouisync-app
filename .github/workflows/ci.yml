@@ -37,20 +37,8 @@ jobs:
       - name: Setting up the Android NDK environment
         uses: nttld/setup-ndk@v1
         with:
-            ndk-version: r21e
-
-      - name: Setting the directory for the Android NDK, and the ABI filter for x86_64 in `android/local.properties`
-        # Note: we should be able to get the NDK directory value from
-        #
-        # ${{ steps.setup-ndk.outputs.ndk-path }}
-        #
-        # as described here
-        #
-        # https://github.com/marketplace/actions/setup-android-ndk
-        #
-        # but that doesn't seem to work.
-        run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
-
+            ndk-version: r25c
+            
       - name: Set the ABI filter for x86_64
         run: echo "ndk.abiFilters=x86_64" >> android/local.properties
 
