@@ -76,11 +76,27 @@ Or you can use the official app store for each platform in your different device
 
 # Using this repository
 
-If you are a developer and want to checkout the code, there are two things that you need to do before being able to run the code: Get [Flutter](https://flutter.dev/) installed in your computer, and clone this repository (this includes initializing its submodules).
+If you are a developer and want to checkout and build the code, you have two options:
 
-For the first step, you can use the [Get started](https://docs.flutter.dev/get-started/install) guides provided by Flutter for each operating system: [Windows](https://docs.flutter.dev/get-started/install/windows), [macOS](https://docs.flutter.dev/get-started/install/macos), [Linux](https://docs.flutter.dev/get-started/install/linux), or [ChromeOS](https://docs.flutter.dev/get-started/install/chromeos).
+1. Get [**Flutter**](https://flutter.dev/) installed on your computer, the **Andriod SDK**, **Android NDK**, and **Rust**; then clone this repository (this includes        initializing its submodules) and follow the instructions in the following sections for building the app.
 
-**NOTE:** Unless otherwise specified, we use the latest version of the Flutter SDK in the `stable` channel.
+   **For installing Flutter (includes Android setup):** You can use the [Get started](https://docs.flutter.dev/get-started/install) guides provided by **Flutter** for      each operating system: [**Windows**](https://docs.flutter.dev/get-started/install/windows), [**macOS**](https://docs.flutter.dev/get-started/install/macos),              [**Linux**](https://docs.flutter.dev/get-started/install/linux), or [**ChromeOS**](https://docs.flutter.dev/get-started/install/chromeos).
+
+   **For installing Rust:** Just follow the instructions from the official website for [**Rust**](https://www.rust-lang.org/), on the [Install](https://www.rust-lang.org/tools/install) section.
+
+2. Use one of the available *Dockerfile*(s), for **Linux** or **Windows**, which already contains the development environment required for building the app.
+
+   - If your development platform is **Linux**, you can use the resulting image for creating a container from which you can launch the **Android** app, or the desktop        app.
+   
+     Also, if you are using **Visual Studio Code** as your **IDE**, you can use the **Visual Studio Code Dev Containers** extension for developing inside the                  container.
+
+   - Unfortunatelly there are some limitations for **Windows** containers, and they are not supported by the **Visual Studio Code Dev Containers** extension; this means      that you can only launch the **Android** app from the container, not the desktop app.
+     
+     To achieve this, use `adb` to connect your device or emulator via **TCP/IP**. 
+
+   If this is the path you choose, you can skip the following sections and go to **Use Docker for building the app** for instructions on how to do this.  
+
+**NOTE:** Unless otherwise specified, we use the latest version of the **Flutter SDK** in the `stable` channel.
 
 <br />
 
