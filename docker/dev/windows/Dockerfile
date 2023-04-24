@@ -40,7 +40,7 @@ WORKDIR C:/TEMP
 # Download rustup (Rust)
 ADD https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe .
 
-# Installing rustup
+# Install rustup
 RUN powershell.exe -Command \
         C:\TEMP\rustup-init.exe -y
 
@@ -78,9 +78,6 @@ RUN mkdir C:\src && \
 # Update PATH with the Flutter and Dart locations
 RUN setx path "%path%;C:\src\flutter\bin\;C:\src\flutter\bin\cache\dart-sdk\bin"
 
-# Remove all the installers
-RUN rm C:\TEMP -r
-
 # Flutter configurations
 RUN flutter config --no-analytics
 RUN flutter config --enable-windows-desktop
@@ -90,7 +87,7 @@ RUN flutter doctor
 
 FROM flutter as ouisync-code
 
-# Folder for the ouisync-app code
+# Create folder for the ouisync-app code
 RUN mkdir C:\code
 
 WORKDIR C:/code
@@ -119,7 +116,7 @@ RUN cd C:\code\ouisync-app\ouisync-plugin && \
 RUN cd C:\code\ouisync-app && \
         flutter pub get
 
-# If you want to the hability to SSH into this container, uncomment the following section
+# If you want the hability to SSH into this container, uncomment the following section
 
 # FROM ouisync-code as SSHLogLevel
 
@@ -134,5 +131,8 @@ RUN cd C:\code\ouisync-app && \
 
 # # OpenSSH Server
 # EXPOSE 22/tcp
+
+# Remove all the installers
+RUN rm C:\TEMP -r
 
 WORKDIR C:/code/ouisync-app
