@@ -78,13 +78,15 @@ Or you can use the official app store for each platform in your different device
 
 If you are a developer and want to checkout and build the code, you have two options:
 
-1. Get [**Flutter**](https://flutter.dev/) installed on your computer, the **Andriod SDK**, **Android NDK**, and **Rust**; then clone this repository (this includes        initializing its submodules) and follow the instructions in the following sections for building the app.
+1. Get [**Flutter**](https://flutter.dev/) installed on your computer, the **Andriod SDK**, **Android NDK**, and **Rust**; then clone this repository (this includes        initializing its submodules).
 
-   **For installing Flutter (includes Android setup):** You can use the [Get started](https://docs.flutter.dev/get-started/install) guides provided by **Flutter** for      each operating system: [**Windows**](https://docs.flutter.dev/get-started/install/windows), [**macOS**](https://docs.flutter.dev/get-started/install/macos),              [**Linux**](https://docs.flutter.dev/get-started/install/linux), or [**ChromeOS**](https://docs.flutter.dev/get-started/install/chromeos).
+   **For installing Flutter (including Android setup):** You can use the [Get started](https://docs.flutter.dev/get-started/install) guides provided by **Flutter** for      each operating system: [**Windows**](https://docs.flutter.dev/get-started/install/windows), [**macOS**](https://docs.flutter.dev/get-started/install/macos),              [**Linux**](https://docs.flutter.dev/get-started/install/linux), or [**ChromeOS**](https://docs.flutter.dev/get-started/install/chromeos).
 
    **For installing Rust:** Just follow the instructions from the official website for [**Rust**](https://www.rust-lang.org/), on the [Install](https://www.rust-lang.org/tools/install) section.
+   
+   You can use the *Dockerfile* for [**Linux**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/linux/Dockerfile) or [**Windows**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/windows/Dockerfile), located at [docker/dev](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/), to check all the requierments for building the app and how to do it.
 
-2. Use one of the available *Dockerfile*(s), for **Linux** or **Windows**, which already contains the development environment required for building the app.
+2. Use one of the available *Dockerfile*, for [**Linux**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/linux/Dockerfile) or [**Windows**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/windows/Dockerfile), which already contains the development environment required for building the app.
 
    - If your development platform is **Linux**, you can use the resulting image for creating a container from which you can launch the **Android** app, or the desktop        app.
    
@@ -92,9 +94,12 @@ If you are a developer and want to checkout and build the code, you have two opt
 
    - Unfortunatelly there are some limitations for **Windows** containers, and they are not supported by the **Visual Studio Code Dev Containers** extension; this means      that you can only launch the **Android** app from the container, not the desktop app.
      
-     To achieve this, use `adb` to connect your device or emulator via **TCP/IP**. 
+     To achieve this, use **adb** to connect your device or emulator via **TCP/IP**. 
 
-   If this is the path you choose, you can skip the following sections and go to **Use Docker for building the app** for instructions on how to do this.  
+     Here are some resources for using **Visual Studio Code** with Docker, and use **adb** for connecting to an Android device using **TCP/IP**: 
+
+     - [How to dockerize Flutter apps](https://blog.codemagic.io/how-to-dockerize-flutter-apps/)
+     - [Developing inside a Container](https://code.visualstudio.com/docs/devcontainers/containers)
 
 **NOTE:** Unless otherwise specified, we use the latest version of the **Flutter SDK** in the `stable` channel.
 
@@ -259,16 +264,6 @@ rust.cargoCommand=<path-to-user-folder>/.cargo/bin/cargo
 Don't forget to replace `<path-to-user-folder>` with the path to your user folder.
 
 <br />
-
-### Specify the path to the **NDK**
-
-**Rust** needs the Android toolsets in orden to compile properly.
-
-For this add the path to the `NDK` installation to the `local.properties` file:
-
-```
-ndk.dir=<path-to-ndk-installation>
-```
 
 ## How to add localized strings
 
