@@ -976,8 +976,8 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _unlockRepository(String repositoryName, String password) async {
-    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: _repositories.unlockRepository(repositoryName, password: password));
+    final accessMode = await _repositories.unlockRepository(repositoryName,
+        password: password);
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
