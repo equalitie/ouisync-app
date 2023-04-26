@@ -9,15 +9,13 @@ import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   UnlockRepository(
-      {Key? key,
-      required this.context,
+      {required this.context,
       required this.databaseId,
       required this.repositoryName,
       required this.isBiometricsAvailable,
       required this.isPasswordValidation,
       required this.unlockRepositoryCallback,
-      required this.onSecureRepositoryWithBiometricsCallback})
-      : super(key: key);
+      required this.onSecureRepositoryWithBiometricsCallback});
 
   final BuildContext context;
   final String databaseId;
@@ -68,11 +66,11 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
                           label: S.current.labelTypePassword,
                           suffixIcon: Fields.actionIcon(
                               Icon(
-                                obscure
-                                    ? Constants.iconVisibilityOn
-                                    : Constants.iconVisibilityOff,
-                                size: Dimensions.sizeIconSmall,
-                              ), onPressed: () {
+                                  obscure
+                                      ? Constants.iconVisibilityOn
+                                      : Constants.iconVisibilityOff,
+                                  size: Dimensions.sizeIconSmall),
+                              onPressed: () {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
                           hint: S.current.messageRepositoryPassword,
@@ -108,8 +106,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       return;
     }
 
-    final accessMode =
-        await unlockRepositoryCallback(repositoryName, password: password);
+    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: unlockRepositoryCallback(repositoryName, password: password));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
