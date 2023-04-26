@@ -12,22 +12,18 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class FileDetail extends StatefulWidget {
-  const FileDetail({
-    required this.context,
-    required this.cubit,
-    required this.data,
-    required this.scaffoldKey,
-    required this.onBottomSheetOpen,
-    required this.onMoveEntry,
-    required this.isActionAvailableValidator,
-    Key? key,
-  }) : super(key: key);
+  const FileDetail(
+      {required this.context,
+      required this.cubit,
+      required this.data,
+      required this.onUpdateBottomSheet,
+      required this.onMoveEntry,
+      required this.isActionAvailableValidator});
 
   final BuildContext context;
   final RepoCubit cubit;
   final FileItem data;
-  final GlobalKey<ScaffoldState> scaffoldKey;
-  final BottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetCallback onUpdateBottomSheet;
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
@@ -118,7 +114,7 @@ class _FileDetailState extends State<FileDetail> {
                 widget.data.path,
                 EntryType.file,
                 widget.onMoveEntry,
-                widget.onBottomSheetOpen,
+                widget.onUpdateBottomSheet,
               ),
               enabledValidation: () => widget.isActionAvailableValidator(
                   widget.cubit.state.accessMode, EntryAction.move),
@@ -175,24 +171,19 @@ class _FileDetailState extends State<FileDetail> {
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
-    BottomSheetControllerCallback bottomSheetControllerCallback,
+    BottomSheetCallback bottomSheetControllerCallback,
   ) {
     Navigator.of(context).pop();
 
     final origin = getDirname(path);
-    final controller = widget.scaffoldKey.currentState?.showBottomSheet(
-      (context) => MoveEntryDialog(
-        widget.cubit,
+    final bottomSheetMoveEntry = MoveEntryDialog(widget.cubit,
         origin: origin,
         path: path,
         type: type,
         onBottomSheetOpen: bottomSheetControllerCallback,
-        onMoveEntry: moveEntryCallback,
-      ),
-      enableDrag: false,
-    );
+        onMoveEntry: moveEntryCallback);
 
-    widget.onBottomSheetOpen(controller!, path);
+    widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
   }
 
   void _showRenameDialog(FileItem data) async {

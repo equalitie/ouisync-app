@@ -14,18 +14,14 @@ class FolderDetail extends StatefulWidget {
       {required this.context,
       required this.cubit,
       required this.data,
-      required this.scaffoldKey,
-      required this.onBottomSheetOpen,
+      required this.onUpdateBottomSheet,
       required this.onMoveEntry,
-      required this.isActionAvailableValidator,
-      Key? key})
-      : super(key: key);
+      required this.isActionAvailableValidator});
 
   final BuildContext context;
   final RepoCubit cubit;
   final FolderItem data;
-  final GlobalKey<ScaffoldState> scaffoldKey;
-  final BottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetCallback onUpdateBottomSheet;
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
@@ -46,31 +42,29 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
           Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(S.current.titleFolderDetails),
           EntryActionItem(
-            iconData: Icons.edit,
-            title: S.current.iconRename,
-            dense: true,
-            onTap: () async => _showRenameDialog(widget.data),
-            enabledValidation: () => widget.isActionAvailableValidator(
-                widget.cubit.state.accessMode, EntryAction.rename),
-            disabledMessage: S.current.messageActionNotAvailable,
-            disabledMessageDuration:
-                Constants.notAvailableActionMessageDuration,
-          ),
+              iconData: Icons.edit,
+              title: S.current.iconRename,
+              dense: true,
+              onTap: () async => _showRenameDialog(widget.data),
+              enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.cubit.state.accessMode, EntryAction.rename),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration),
           EntryActionItem(
-            iconData: Icons.drive_file_move_outlined,
-            title: S.current.iconMove,
-            dense: true,
-            onTap: () async => _showMoveEntryBottomSheet(
-                widget.data.path,
-                EntryType.directory,
-                widget.onMoveEntry,
-                widget.onBottomSheetOpen),
-            enabledValidation: () => widget.isActionAvailableValidator(
-                widget.cubit.state.accessMode, EntryAction.move),
-            disabledMessage: S.current.messageActionNotAvailable,
-            disabledMessageDuration:
-                Constants.notAvailableActionMessageDuration,
-          ),
+              iconData: Icons.drive_file_move_outlined,
+              title: S.current.iconMove,
+              dense: true,
+              onTap: () async => _showMoveEntryBottomSheet(
+                  widget.data.path,
+                  EntryType.directory,
+                  widget.onMoveEntry,
+                  widget.onUpdateBottomSheet),
+              enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.cubit.state.accessMode, EntryAction.move),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration),
           EntryActionItem(
               iconData: Icons.delete_outlined,
               title: S.current.iconDelete,
@@ -81,10 +75,7 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
                   barrierDismissible: false, // user must tap button!
                   builder: (context) {
                     return buildDeleteFolderAlertDialog(
-                      context,
-                      widget.cubit,
-                      widget.data.path,
-                    );
+                        context, widget.cubit, widget.data.path);
                   },
                 ).then((result) {
                   if (result ?? false) {
@@ -215,21 +206,18 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
       String path,
       EntryType type,
       MoveEntryCallback moveEntryCallback,
-      BottomSheetControllerCallback bottomSheetControllerCallback) {
+      BottomSheetCallback bottomSheetControllerCallback) {
     Navigator.of(context).pop();
 
     final origin = getDirname(path);
-    final controller = widget.scaffoldKey.currentState?.showBottomSheet(
-      (context) => MoveEntryDialog(widget.cubit,
-          origin: origin,
-          path: path,
-          type: type,
-          onBottomSheetOpen: bottomSheetControllerCallback,
-          onMoveEntry: moveEntryCallback),
-      enableDrag: false,
-    );
+    final bottomSheetMoveEntry = MoveEntryDialog(widget.cubit,
+        origin: origin,
+        path: path,
+        type: type,
+        onBottomSheetOpen: bottomSheetControllerCallback,
+        onMoveEntry: moveEntryCallback);
 
-    widget.onBottomSheetOpen.call(controller!, path);
+    widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
   }
 
   void _showRenameDialog(FolderItem data) async {

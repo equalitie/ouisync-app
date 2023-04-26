@@ -21,8 +21,10 @@ import '../widgets/repository_progress.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
-typedef BottomSheetControllerCallback = void Function(
-    PersistentBottomSheetController? controller, String entryPath);
+typedef BottomSheetCallback = void Function(Widget? widget, String entryPath);
+
+typedef MoveEntryCallback = void Function(
+    String origin, String path, EntryType type);
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
@@ -30,11 +32,10 @@ typedef SecureRepoWithBiometricsFunction = Function(
     {required String repositoryName, required String value});
 
 class MainPage extends StatefulWidget {
-  const MainPage({
-    required this.session,
-    required this.mediaReceiver,
-    required this.settings,
-  });
+  const MainPage(
+      {required this.session,
+      required this.mediaReceiver,
+      required this.settings});
 
   final Session session;
   final MediaReceiver mediaReceiver;
@@ -50,10 +51,8 @@ class _MainPageState extends State<MainPage>
   final PowerControl _powerControl;
   final Future<NatDetection> _natDetection = NatDetection.init();
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-
   String _pathEntryToMove = '';
-  PersistentBottomSheetController? _persistentBottomSheetController;
+  Widget? _bottomSheet;
 
   final double defaultBottomPadding = kFloatingActionButtonMargin +
       Dimensions.paddingBottomWithFloatingButtonExtra;
@@ -167,16 +166,13 @@ class _MainPageState extends State<MainPage>
     _bottomPaddingWithBottomSheet.value =
         defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
 
-    _scaffoldKey.currentState?.showBottomSheet(
-      enableDrag: false,
-      (context) {
-        return SaveSharedMedia(
-            sharedMedia: payload,
-            onBottomSheetOpen: retrieveBottomSheetController,
-            onSaveFile: saveMedia,
-            validationFunction: canSaveMedia);
-      },
-    );
+    final bottomSheetSaveMedia = SaveSharedMedia(
+        sharedMedia: payload,
+        onUpdateBottomSheet: updateBottomSheet,
+        onSaveFile: saveMedia,
+        validationFunction: canSaveMedia);
+
+    setState(() => _bottomSheet = bottomSheetSaveMedia);
   }
 
   getContent() {
@@ -246,20 +242,19 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: _buildOuiSyncBar(),
-      body: WillPopScope(
-          child: Column(
-            children: <Widget>[
-              _repositories.builder(
-                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
-              Expanded(child: buildMainWidget()),
-            ],
-          ),
-          onWillPop: _onBackPressed),
-      floatingActionButton: _repositories
-          .builder((repos) => _buildFAB(context, repos.currentRepo)),
-    );
+        appBar: _buildOuiSyncBar(),
+        body: WillPopScope(
+            child: Column(
+              children: <Widget>[
+                _repositories.builder((repos) =>
+                    RepositoryProgress(repos.currentRepo?.maybeCubit)),
+                Expanded(child: buildMainWidget()),
+              ],
+            ),
+            onWillPop: _onBackPressed),
+        floatingActionButton: _repositories
+            .builder((repos) => _buildFAB(context, repos.currentRepo)),
+        bottomSheet: _bottomSheet);
   }
 
   Future<bool> _onBackPressed() async {
@@ -440,7 +435,7 @@ class _MainPageState extends State<MainPage>
 
                 if (item is FileItem) {
                   actionByType = () async {
-                    if (_persistentBottomSheetController != null) {
+                    if (_bottomSheet != null) {
                       await Dialogs.simpleAlertDialog(
                           context: context,
                           title: S.current.titleMovingEntry,
@@ -461,8 +456,7 @@ class _MainPageState extends State<MainPage>
                   };
                 } else if (item is FolderItem) {
                   actionByType = () {
-                    if (_persistentBottomSheetController != null &&
-                        _pathEntryToMove == item.path) {
+                    if (_bottomSheet != null && _pathEntryToMove == item.path) {
                       return;
                     }
 
@@ -477,7 +471,7 @@ class _MainPageState extends State<MainPage>
                   itemData: item,
                   mainAction: actionByType,
                   folderDotsAction: () async {
-                    if (_persistentBottomSheetController != null) {
+                    if (_bottomSheet != null) {
                       await Dialogs.simpleAlertDialog(
                           context: context,
                           title: S.current.titleMovingEntry,
@@ -488,13 +482,9 @@ class _MainPageState extends State<MainPage>
 
                     item is FileItem
                         ? await _showFileDetails(
-                            repoCubit: currentRepo,
-                            scaffoldKey: _scaffoldKey,
-                            data: item)
+                            repoCubit: currentRepo, data: item)
                         : await _showFolderDetails(
-                            repoCubit: currentRepo,
-                            scaffoldKey: _scaffoldKey,
-                            data: item);
+                            repoCubit: currentRepo, data: item);
                   },
                 );
 
@@ -533,7 +523,6 @@ class _MainPageState extends State<MainPage>
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
-    required GlobalKey<ScaffoldState> scaffoldKey,
     required BaseItem data,
   }) =>
       showModalBottomSheet(
@@ -545,26 +534,15 @@ class _MainPageState extends State<MainPage>
               context: context,
               cubit: repoCubit,
               data: data as FileItem,
-              scaffoldKey: scaffoldKey,
-              onBottomSheetOpen: retrieveBottomSheetController,
-              onMoveEntry: (
-                origin,
-                path,
-                type,
-              ) =>
-                  moveEntry(
-                repoCubit,
-                origin,
-                path,
-                type,
-              ),
+              onUpdateBottomSheet: updateBottomSheet,
+              onMoveEntry: (origin, path, type) =>
+                  moveEntry(repoCubit, origin, path, type),
               isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
   Future<dynamic> _showFolderDetails({
     required RepoCubit repoCubit,
-    required GlobalKey<ScaffoldState> scaffoldKey,
     required BaseItem data,
   }) =>
       showModalBottomSheet(
@@ -576,30 +554,18 @@ class _MainPageState extends State<MainPage>
               context: context,
               cubit: repoCubit,
               data: data as FolderItem,
-              scaffoldKey: scaffoldKey,
-              onBottomSheetOpen: retrieveBottomSheetController,
-              onMoveEntry: (
-                origin,
-                path,
-                type,
-              ) =>
-                  moveEntry(
-                repoCubit,
-                origin,
-                path,
-                type,
-              ),
+              onUpdateBottomSheet: updateBottomSheet,
+              onMoveEntry: (origin, path, type) =>
+                  moveEntry(repoCubit, origin, path, type),
               isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
 
-  void retrieveBottomSheetController(
-    PersistentBottomSheetController? controller,
-    String entryPath,
-  ) {
-    _persistentBottomSheetController = controller;
+  void updateBottomSheet(Widget? widget, String entryPath) {
     _pathEntryToMove = entryPath;
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
+
+    setState(() => _bottomSheet = widget);
   }
 
   bool _isEntryActionAvailable(
@@ -618,19 +584,14 @@ class _MainPageState extends State<MainPage>
   }
 
   void moveEntry(
-    RepoCubit currentRepo,
-    origin,
-    path,
-    type,
-  ) async {
+      RepoCubit currentRepo, String origin, String path, EntryType type) async {
     final basename = getBasename(path);
     final destination = buildDestinationPath(
       currentRepo.state.currentFolder.path,
       basename,
     );
 
-    _persistentBottomSheetController!.close();
-    _persistentBottomSheetController = null;
+    _bottomSheet = null;
 
     await currentRepo.moveEntry(
       source: path,
