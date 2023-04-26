@@ -10,24 +10,19 @@ import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-typedef MoveEntryCallback = void Function(
-    String origin, String path, EntryType type);
-
 class MoveEntryDialog extends StatefulWidget {
-  const MoveEntryDialog(
-    this._repo, {
-    required this.origin,
-    required this.path,
-    required this.type,
-    required this.onBottomSheetOpen,
-    required this.onMoveEntry,
-  });
+  const MoveEntryDialog(this._repo,
+      {required this.origin,
+      required this.path,
+      required this.type,
+      required this.onBottomSheetOpen,
+      required this.onMoveEntry});
 
   final RepoCubit _repo;
   final String origin;
   final String path;
   final EntryType type;
-  final BottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetCallback onBottomSheetOpen;
   final MoveEntryCallback onMoveEntry;
 
   @override
@@ -104,7 +99,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
             buttonsAspectRatio: aspectRatio,
             buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
             text: S.current.actionCancel,
-            onPressed: () => _cancelMoving(context)),
+            onPressed: () => widget.onBottomSheetOpen.call(null, '')),
         PositiveButton(
             buttonsAspectRatio: aspectRatio,
             buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
@@ -130,10 +125,5 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     }
 
     return Dimensions.aspectRatioBottomDialogButton;
-  }
-
-  void _cancelMoving(context) {
-    widget.onBottomSheetOpen.call(null, '');
-    Navigator.of(context).pop('');
   }
 }

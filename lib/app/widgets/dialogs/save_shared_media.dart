@@ -9,15 +9,14 @@ import '../widgets.dart';
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class SaveSharedMedia extends StatefulWidget {
-  const SaveSharedMedia({
-    required this.sharedMedia,
-    required this.onBottomSheetOpen,
-    required this.onSaveFile,
-    required this.validationFunction,
-  });
+  const SaveSharedMedia(
+      {required this.sharedMedia,
+      required this.onUpdateBottomSheet,
+      required this.onSaveFile,
+      required this.validationFunction});
 
   final List<SharedMediaFile> sharedMedia;
-  final BottomSheetControllerCallback onBottomSheetOpen;
+  final BottomSheetCallback onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
   final Future<bool> Function() validationFunction;
 
@@ -131,7 +130,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => _cancelSaveFile(context),
+            onPressed: () => widget.onUpdateBottomSheet.call(null, ''),
             buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton),
         PositiveButton(
             text: S.current.actionSave,
@@ -149,9 +148,4 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
             },
             buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton)
       ];
-
-  void _cancelSaveFile(context) {
-    widget.onBottomSheetOpen.call(null, '');
-    Navigator.of(context).pop('');
-  }
 }
