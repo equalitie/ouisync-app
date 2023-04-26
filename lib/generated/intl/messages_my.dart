@@ -1,5 +1,5 @@
 // DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that provides messages for a fa locale. All the
+// This is a library that provides messages for a my locale. All the
 // messages from the main program should be duplicated here with the same
 // function name.
 
@@ -18,9 +18,11 @@ final messages = new MessageLookup();
 typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 
 class MessageLookup extends MessageLookupByLibrary {
-  String get localeName => 'fa';
+  String get localeName => 'my';
 
   static String m0(access) => "";
+
+  static String m1(name) => "";
 
   static String m2(name) => "";
 
@@ -29,6 +31,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m4(entry) => "";
 
   static String m5(path) => "";
+
+  static String m6(name) => "";
 
   static String m7(path) => "";
 
@@ -40,11 +44,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(name) => "";
 
+  static String m12(name) => "";
+
+  static String m13(name) => "";
+
   static String m14(access) => "";
 
   static String m15(name) => "";
 
   static String m16(name) => "";
+
+  static String m17(access) => "";
 
   static String m18(name) => "";
 
@@ -55,6 +65,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(name) => "";
 
   static String m22(access) => "";
+
+  static String m23(changes) => "";
 
   static String m24(entry) => "";
 
@@ -75,8 +87,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionAddRepository": MessageLookupByLibrary.simpleMessage(""),
         "actionAddRepositoryWithToken":
             MessageLookupByLibrary.simpleMessage(""),
+        "actionBack": MessageLookupByLibrary.simpleMessage(""),
         "actionCancel": MessageLookupByLibrary.simpleMessage(""),
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage(""),
+        "actionClear": MessageLookupByLibrary.simpleMessage(""),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage(""),
         "actionCreate": MessageLookupByLibrary.simpleMessage(""),
         "actionCreateRepository": MessageLookupByLibrary.simpleMessage(""),
@@ -85,10 +99,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDeleteFile": MessageLookupByLibrary.simpleMessage(""),
         "actionDeleteFolder": MessageLookupByLibrary.simpleMessage(""),
         "actionDeleteRepository": MessageLookupByLibrary.simpleMessage(""),
+        "actionDiscard": MessageLookupByLibrary.simpleMessage(""),
         "actionEditRepositoryName": MessageLookupByLibrary.simpleMessage(""),
         "actionExit": MessageLookupByLibrary.simpleMessage(""),
+        "actionGoToSettings": MessageLookupByLibrary.simpleMessage(""),
         "actionHide": MessageLookupByLibrary.simpleMessage(""),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage(""),
+        "actionImport": MessageLookupByLibrary.simpleMessage(""),
+        "actionImportRepo": MessageLookupByLibrary.simpleMessage(""),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage(""),
         "actionMove": MessageLookupByLibrary.simpleMessage(""),
         "actionNewFile": MessageLookupByLibrary.simpleMessage(""),
@@ -97,13 +115,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionOK": MessageLookupByLibrary.simpleMessage(""),
         "actionPreviewFile": MessageLookupByLibrary.simpleMessage(""),
         "actionReloadContents": MessageLookupByLibrary.simpleMessage(""),
+        "actionReloadRepo": MessageLookupByLibrary.simpleMessage(""),
+        "actionRemove": MessageLookupByLibrary.simpleMessage(""),
+        "actionRemoveRepo": MessageLookupByLibrary.simpleMessage(""),
         "actionRename": MessageLookupByLibrary.simpleMessage(""),
         "actionRetry": MessageLookupByLibrary.simpleMessage(""),
         "actionSave": MessageLookupByLibrary.simpleMessage(""),
+        "actionSaveChanges": MessageLookupByLibrary.simpleMessage(""),
         "actionScanQR": MessageLookupByLibrary.simpleMessage(""),
         "actionShare": MessageLookupByLibrary.simpleMessage(""),
         "actionShareFile": MessageLookupByLibrary.simpleMessage(""),
         "actionShow": MessageLookupByLibrary.simpleMessage(""),
+        "actionUndo": MessageLookupByLibrary.simpleMessage(""),
         "actionUnlock": MessageLookupByLibrary.simpleMessage(""),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage(""),
         "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(""),
@@ -140,26 +163,42 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelTokenLink": MessageLookupByLibrary.simpleMessage(""),
         "labelTypePassword": MessageLookupByLibrary.simpleMessage(""),
         "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(""),
+        "menuItemAbout": MessageLookupByLibrary.simpleMessage(""),
+        "menuItemLogs": MessageLookupByLibrary.simpleMessage(""),
+        "menuItemNetwork": MessageLookupByLibrary.simpleMessage(""),
+        "menuItemRepository": MessageLookupByLibrary.simpleMessage(""),
         "mesageNoMediaPresent": MessageLookupByLibrary.simpleMessage(""),
         "messageAccessModeDisabled": m0,
+        "messageAccessingSecureStorage":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageAck": MessageLookupByLibrary.simpleMessage(""),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(""),
+        "messageAddLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(""),
         "messageAddingFileToLockedRepository":
             MessageLookupByLibrary.simpleMessage(""),
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(""),
+        "messageAlertSaveCopyPassword":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageBackgroundAndroidPermissions":
             MessageLookupByLibrary.simpleMessage(""),
         "messageBackgroundNotificationAndroid":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageBiometricValidationAdded": m1,
+        "messageBiometricValidationRemoved":
             MessageLookupByLibrary.simpleMessage(""),
         "messageBlindReplicaExplanation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageBlindRepositoryContent":
             MessageLookupByLibrary.simpleMessage(""),
+        "messageBluetooth": MessageLookupByLibrary.simpleMessage(""),
+        "messageCamera": MessageLookupByLibrary.simpleMessage(""),
+        "messageCameraPermission": MessageLookupByLibrary.simpleMessage(""),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(""),
+        "messageChangeLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(""),
         "messageConfirmFolderDeletion":
             MessageLookupByLibrary.simpleMessage(""),
@@ -179,6 +218,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage(""),
         "messageEntryTypeFolder": MessageLookupByLibrary.simpleMessage(""),
         "messageError": MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorAddingLocalPassword":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorAddingSecureStorge":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorAuthenticatingBiometrics":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorChangingLocalPassword":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorChangingPassword":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageErrorCharactersNotAllowed":
             MessageLookupByLibrary.simpleMessage(""),
         "messageErrorCreatingRepository":
@@ -191,7 +240,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage(""),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorNewPasswordSameOldPassword":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorOpeningRepoDescription": m6,
         "messageErrorPathNotEmpty": m7,
+        "messageErrorRemovingPassword":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorRemovingSecureStorage":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageErrorRepositoryNameExist":
             MessageLookupByLibrary.simpleMessage(""),
         "messageErrorRepositoryPasswordValidation":
@@ -200,64 +257,132 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorTokenEmpty": MessageLookupByLibrary.simpleMessage(""),
         "messageErrorTokenInvalid": MessageLookupByLibrary.simpleMessage(""),
         "messageErrorTokenValidator": MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorUnhandledState": MessageLookupByLibrary.simpleMessage(""),
+        "messageErrorUpdatingSecureStorage":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageEthernet": MessageLookupByLibrary.simpleMessage(""),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(""),
         "messageFile": MessageLookupByLibrary.simpleMessage(""),
+        "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(""),
         "messageFileName": MessageLookupByLibrary.simpleMessage(""),
         "messageFilePreviewNotAvailable":
             MessageLookupByLibrary.simpleMessage(""),
         "messageFiles": MessageLookupByLibrary.simpleMessage(""),
         "messageFolderDeleted": m8,
         "messageFolderName": MessageLookupByLibrary.simpleMessage(""),
+        "messageGeneratePassword": MessageLookupByLibrary.simpleMessage(""),
+        "messageGranted": MessageLookupByLibrary.simpleMessage(""),
+        "messageGrantingRequiresSettings":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageIgnoreBatteryOptimizationsPermission":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageInitializing": MessageLookupByLibrary.simpleMessage(""),
         "messageInputPasswordToUnlock":
             MessageLookupByLibrary.simpleMessage(""),
         "messageLibraryPanic": MessageLookupByLibrary.simpleMessage(""),
         "messageLoadingDefault": MessageLookupByLibrary.simpleMessage(""),
+        "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(""),
         "messageLockOpenRepos": m9,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(""),
+        "messageLogLevelAll": MessageLookupByLibrary.simpleMessage(""),
+        "messageLogLevelErroWarnInfoDebug":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageLogLevelError": MessageLookupByLibrary.simpleMessage(""),
+        "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(""),
+        "messageLogLevelErrorWarnInfo":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageLogViewer": MessageLookupByLibrary.simpleMessage(""),
+        "messageMobile": MessageLookupByLibrary.simpleMessage(""),
         "messageMoveEntryOrigin": m10,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(""),
+        "messageNATType": MessageLookupByLibrary.simpleMessage(""),
         "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(""),
         "messageNewFileError": m11,
+        "messageNewPassword": MessageLookupByLibrary.simpleMessage(""),
+        "messageNewPasswordCopiedClipboard":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage(""),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(""),
+        "messageNoRepoIsSelected": MessageLookupByLibrary.simpleMessage(""),
         "messageNoRepos": MessageLookupByLibrary.simpleMessage(""),
+        "messageNone": MessageLookupByLibrary.simpleMessage(""),
         "messageNothingHereYet": MessageLookupByLibrary.simpleMessage(""),
         "messageOr": MessageLookupByLibrary.simpleMessage(""),
         "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(""),
+        "messagePassword": MessageLookupByLibrary.simpleMessage(""),
+        "messagePasswordCopiedClipboard":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messagePeerExchange": MessageLookupByLibrary.simpleMessage(""),
+        "messagePermissionRequired": MessageLookupByLibrary.simpleMessage(""),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(""),
         "messageReadReplicaExplanation":
             MessageLookupByLibrary.simpleMessage(""),
+        "messageRememberSavePasswordAlert":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageRemovaLocalPassword": MessageLookupByLibrary.simpleMessage(""),
+        "messageRemoveBiometricValidation":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),
+        "messageRemoveBiometricsConfirmation":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameFile": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameFolder": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(""),
+        "messageRepoDeletionErrorDescription": m12,
+        "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(""),
+        "messageRepoMissing": MessageLookupByLibrary.simpleMessage(""),
+        "messageRepoMissingErrorDescription": m13,
         "messageRepositoryAccessMode": m14,
         "messageRepositoryAlreadyExist": m15,
+        "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryName": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryNewName": MessageLookupByLibrary.simpleMessage(""),
+        "messageRepositoryNewPassword":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositorySuggestedName": m16,
         "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(""),
+        "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(""),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(""),
+        "messageSavingChanges": MessageLookupByLibrary.simpleMessage(""),
         "messageScanQROrShare": MessageLookupByLibrary.simpleMessage(""),
+        "messageSecureUsingBiometrics":
+            MessageLookupByLibrary.simpleMessage(""),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(""),
         "messageSelectLocation": MessageLookupByLibrary.simpleMessage(""),
+        "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(""),
         "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(""),
         "messageShareWithWR": MessageLookupByLibrary.simpleMessage(""),
+        "messageStorage": MessageLookupByLibrary.simpleMessage(""),
+        "messageStoragePermission": MessageLookupByLibrary.simpleMessage(""),
+        "messageSyncMobileData": MessageLookupByLibrary.simpleMessage(""),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(""),
         "messageTokenCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage(""),
+        "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(""),
+        "messageUnlockRepoOk": m17,
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
+        "messageUnlockUsingBiometrics":
+            MessageLookupByLibrary.simpleMessage(""),
+        "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(""),
+        "messageVPN": MessageLookupByLibrary.simpleMessage(""),
+        "messageVerbosity": MessageLookupByLibrary.simpleMessage(""),
+        "messageView": MessageLookupByLibrary.simpleMessage(""),
+        "messageWiFi": MessageLookupByLibrary.simpleMessage(""),
         "messageWriteReplicaExplanation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageWritingFileCanceled": m18,
         "messageWritingFileError": m19,
         "messsageFailedAddRepository": m20,
         "messsageFailedCreateRepository": m21,
+        "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(""),
+        "popupMenuItemCopyPassword": MessageLookupByLibrary.simpleMessage(""),
         "replacementAccess": m22,
+        "replacementChanges": m23,
         "replacementEntry": m24,
         "replacementName": m25,
         "replacementNumber": m26,
@@ -269,9 +394,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddFile": MessageLookupByLibrary.simpleMessage(""),
         "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(""),
         "titleAddRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
+        "titleAppTitle": MessageLookupByLibrary.simpleMessage(""),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage(""),
+        "titleChangePassword": MessageLookupByLibrary.simpleMessage(""),
         "titleCreateFolder": MessageLookupByLibrary.simpleMessage(""),
         "titleCreateRepository": MessageLookupByLibrary.simpleMessage(""),
         "titleDeleteFile": MessageLookupByLibrary.simpleMessage(""),
@@ -290,12 +416,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleLogs": MessageLookupByLibrary.simpleMessage(""),
         "titleMovingEntry": MessageLookupByLibrary.simpleMessage(""),
         "titleNetwork": MessageLookupByLibrary.simpleMessage(""),
+        "titleRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),
         "titleRepositoriesList": MessageLookupByLibrary.simpleMessage(""),
         "titleRepository": MessageLookupByLibrary.simpleMessage(""),
+        "titleRepositoryName": MessageLookupByLibrary.simpleMessage(""),
+        "titleRequiredPermission": MessageLookupByLibrary.simpleMessage(""),
+        "titleSaveChanges": MessageLookupByLibrary.simpleMessage(""),
         "titleScanRepoQR": MessageLookupByLibrary.simpleMessage(""),
+        "titleSecurity": MessageLookupByLibrary.simpleMessage(""),
+        "titleSetPasswordFor": MessageLookupByLibrary.simpleMessage(""),
         "titleSettings": MessageLookupByLibrary.simpleMessage(""),
         "titleShareRepository": m29,
+        "titleStateMonitor": MessageLookupByLibrary.simpleMessage(""),
         "titleUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
+        "titleUnsavedChanges": MessageLookupByLibrary.simpleMessage(""),
         "typeFile": MessageLookupByLibrary.simpleMessage(""),
         "typeFolder": MessageLookupByLibrary.simpleMessage("")
       };
