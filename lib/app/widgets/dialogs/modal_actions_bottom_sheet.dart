@@ -94,6 +94,8 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
     );
 
     if (result != null) {
+      Navigator.of(context).pop();
+
       for (final srcFile in result.files) {
         String fileName = srcFile.name;
         String dstPath = buildDestinationPath(dstDir, fileName);
@@ -116,8 +118,6 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
               fileByteStream: srcFile.readStream!,
             );
 
-            Navigator.of(context).pop();
-
             return;
           }
 
@@ -132,8 +132,6 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
         );
       }
     }
-
-    Navigator.of(context).pop();
   }
 
   Future<String> _renameFile(String dstPath, int versions) async {
