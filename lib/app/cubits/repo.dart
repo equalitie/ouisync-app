@@ -247,17 +247,17 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     }
   }
 
-  Future<void> saveFile({
-    required String filePath,
-    required int length,
-    required Stream<List<int>> fileByteStream,
-  }) async {
+  Future<void> saveFile(
+      {required String filePath,
+      required int length,
+      required Stream<List<int>> fileByteStream,
+      oui.File? currentFile}) async {
     if (state.uploads.containsKey(filePath)) {
       showMessage(S.current.messageFileIsDownloading);
       return;
     }
 
-    final file = await _createFile(filePath);
+    final file = currentFile ?? await _createFile(filePath);
 
     if (file == null) {
       showMessage(S.current.messageNewFileError(filePath));
@@ -293,6 +293,26 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     if (job.state.cancel) {
       showMessage(S.current.messageWritingFileCanceled(filePath));
     }
+  }
+
+  Future<void> replaceFile(
+      {required String filePath,
+      required int length,
+      required Stream<List<int>> fileByteStream}) async {
+    final file = await _openFile(filePath);
+
+    if (file == null) {
+      showMessage('Error opening file $filePath');
+      return;
+    }
+
+    await file.truncate(length);
+
+    await saveFile(
+        filePath: filePath,
+        length: length,
+        fileByteStream: fileByteStream,
+        currentFile: file);
   }
 
   Future<List<BaseItem>> getFolderContents(String path) async {
@@ -530,6 +550,18 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     }
 
     return newFile;
+  }
+
+  Future<oui.File?> _openFile(String filePath) async {
+    oui.File? file;
+
+    try {
+      file = await oui.File.open(_handle, filePath);
+    } catch (e, st) {
+      loggy.app('File open $filePath failed', e, st);
+    }
+
+    return file;
   }
 
   @override

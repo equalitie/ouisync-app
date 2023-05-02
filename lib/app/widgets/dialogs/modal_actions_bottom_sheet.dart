@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
@@ -95,14 +95,34 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
 
     if (result != null) {
       for (final srcFile in result.files) {
-        final dstPath = buildDestinationPath(dstDir, srcFile.name);
+        String fileName = srcFile.name;
+        String dstPath = buildDestinationPath(dstDir, fileName);
 
         if (await repo.exists(dstPath)) {
-          final type = await repo.type(dstPath);
-          final typeNameForMessage = _getTypeNameForMessage(type);
-          showSnackBar(context,
-              message: S.current.messageEntryAlreadyExist(typeNameForMessage));
-          continue;
+          final action = await showDialog<FileAction>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                  title: Text(S.current.titleAddFile),
+                  content: ReplaceFile(context: context, fileName: fileName)));
+
+          if (action == null) {
+            return;
+          }
+
+          if (action == FileAction.replace) {
+            await repo.replaceFile(
+              filePath: dstPath,
+              length: srcFile.size,
+              fileByteStream: srcFile.readStream!,
+            );
+
+            Navigator.of(context).pop();
+
+            return;
+          }
+
+          fileName = await _renameFile(dstPath, 0);
+          dstPath = buildDestinationPath(dstDir, fileName);
         }
 
         await repo.saveFile(
@@ -114,6 +134,19 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
     }
 
     Navigator.of(context).pop();
+  }
+
+  Future<String> _renameFile(String dstPath, int versions) async {
+    final name = p.basenameWithoutExtension(dstPath);
+    final extension = p.extension(dstPath);
+
+    final newFileName = '$name (${versions += 1})$extension';
+
+    if (await cubit.exists(newFileName)) {
+      return await _renameFile(dstPath, versions);
+    }
+
+    return newFileName;
   }
 
   Future<bool> _checkPermission(
@@ -129,13 +162,13 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
     return true;
   }
 
-  String _getTypeNameForMessage(EntryType? type) {
-    if (type == null) {
-      return S.current.messageEntryTypeDefault;
-    }
+  // String _getTypeNameForMessage(EntryType? type) {
+  //   if (type == null) {
+  //     return S.current.messageEntryTypeDefault;
+  //   }
 
-    return type == EntryType.directory
-        ? S.current.messageEntryTypeFolder
-        : S.current.messageEntryTypeFile;
-  }
+  //   return type == EntryType.directory
+  //       ? S.current.messageEntryTypeFolder
+  //       : S.current.messageEntryTypeFile;
+  // }
 }
