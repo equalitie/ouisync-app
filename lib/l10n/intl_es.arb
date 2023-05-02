@@ -613,5 +613,13 @@
   "messageChangeLocalPassword": "Cambiar la contraseña local",
   "@messageChangeLocalPassword": {},
   "messageRemovaLocalPassword": "Eliminar la contraseña local",
-  "@messageRemovaLocalPassword": {}
+  "@messageRemovaLocalPassword": {},
+  "messageOpenFileError": "Error al abrir el archivo {name}",
+  "@messageOpenFileError": {},
+  "messageReplaceExistingFile": "Sustituir el archivo existente",
+  "@messageReplaceExistingFile": {},
+  "messageKeepBothFiles": "Guarde ambos archivos",
+  "@messageKeepBothFiles": {},
+  "messageFileAlreadyExist": "{name} ya existe en esta ubicación.\n\n¿Qué deseas hacer?",
+  "@messageFileAlreadyExist": {}
 }
