@@ -161,14 +161,4 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
 
     return true;
   }
-
-  // String _getTypeNameForMessage(EntryType? type) {
-  //   if (type == null) {
-  //     return S.current.messageEntryTypeDefault;
-  //   }
-
-  //   return type == EntryType.directory
-  //       ? S.current.messageEntryTypeFolder
-  //       : S.current.messageEntryTypeFile;
-  // }
 }
