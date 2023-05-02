@@ -295,15 +295,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                     security.setNewAuthMode(authMode);
                     security.setUnlockWithBiometrics(useBiometrics);
-                  }),
-              Visibility(
-                  visible: state.showRemoveBiometricsWarning,
-                  child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
-                      child: Text(S.current.messageAlertSaveCopyPassword,
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(color: Colors.red))))
+                  })
             ])
           : SizedBox());
 

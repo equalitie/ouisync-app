@@ -48,9 +48,6 @@ class SecurityState extends Equatable {
   bool get useBiometrics =>
       isBiometricsAvailable ? unlockWithBiometrics : false;
 
-  bool get showRemoveBiometricsWarning =>
-      currentUnlockWithBiometrics && !unlockWithBiometrics;
-
   bool get isUnsavedNewPassword {
     if ([Constants.authModeNoLocalPassword, Constants.authModeManual]
             .contains(currentAuthMode) ==
