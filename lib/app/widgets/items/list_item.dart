@@ -73,6 +73,8 @@ class ListItem extends StatelessWidget {
     final uploadJob = repository.state.uploads[fileData.path];
     final downloadJob = repository.state.downloads[fileData.path];
 
+    final isUploading = uploadJob != null;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -82,7 +84,7 @@ class ListItem extends StatelessWidget {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: FileDescription(repository, fileData, uploadJob))),
-        _getVerticalMenuAction(),
+        _getVerticalMenuAction(isUploading),
       ],
     );
   }
@@ -101,15 +103,15 @@ class ListItem extends StatelessWidget {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: FolderDescription(folderData: itemData))),
-        _getVerticalMenuAction(),
+        _getVerticalMenuAction(false),
       ],
     );
   }
 
-  Widget _getVerticalMenuAction() {
+  Widget _getVerticalMenuAction(bool isUploading) {
     return IconButton(
         icon:
             const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-        onPressed: () async => await folderDotsAction());
+        onPressed: isUploading ? null : () async => await folderDotsAction());
   }
 }
