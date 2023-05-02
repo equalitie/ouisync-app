@@ -16,6 +16,7 @@ export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_folder_detail_bottom_sheet.dart';
 export 'dialogs/modal_rename_dialog.dart';
 export 'dialogs/modal_rename_repository_dialog.dart';
+export 'dialogs/modal_replace_file_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repository_creation_dialog.dart';
 export 'dialogs/modal_save_to_device_bottom_sheet.dart';
