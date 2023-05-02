@@ -840,6 +840,16 @@ class S {
     );
   }
 
+  /// `Error opening file {name}`
+  String messageOpenFileError(Object name) {
+    return Intl.message(
+      'Error opening file $name',
+      name: 'messageOpenFileError',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `{name} - writing failed`
   String messageWritingFileError(Object name) {
     return Intl.message(
@@ -2365,6 +2375,36 @@ class S {
     return Intl.message(
       'Camera',
       name: 'messageCamera',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{name} already exist in this location.\n\nWhat do you want to do?`
+  String messageFileAlreadyExist(Object name) {
+    return Intl.message(
+      '$name already exist in this location.\n\nWhat do you want to do?',
+      name: 'messageFileAlreadyExist',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Replace existing file`
+  String get messageReplaceExistingFile {
+    return Intl.message(
+      'Replace existing file',
+      name: 'messageReplaceExistingFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep both files`
+  String get messageKeepBothFiles {
+    return Intl.message(
+      'Keep both files',
+      name: 'messageKeepBothFiles',
       desc: '',
       args: [],
     );

@@ -19,8 +19,7 @@ class ReplaceFile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Dimensions.spacingVerticalDouble,
-            Text('$fileName already exist in this location.'
-                '\n\nWant do you want to do?'),
+            Text(S.current.messageFileAlreadyExist(fileName)),
             Dimensions.spacingVertical,
             ValueListenableBuilder(
               valueListenable: _fileAction,
@@ -29,14 +28,14 @@ class ReplaceFile extends StatelessWidget {
                   RadioListTile<FileAction>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Replace existing file'),
+                      title: Text(S.current.messageReplaceExistingFile),
                       value: FileAction.replace,
                       groupValue: value,
                       onChanged: _onFileActionChanged),
                   RadioListTile<FileAction>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Keep both files'),
+                      title: Text(S.current.messageKeepBothFiles),
                       value: FileAction.keep,
                       groupValue: value,
                       onChanged: _onFileActionChanged),

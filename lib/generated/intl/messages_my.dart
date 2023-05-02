@@ -36,49 +36,49 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(path) => "";
 
-  static String m8(name) => "";
+  static String m9(name) => "";
 
-  static String m9(number) => "";
+  static String m10(number) => "";
 
-  static String m10(path) => "";
-
-  static String m11(name) => "";
+  static String m11(path) => "";
 
   static String m12(name) => "";
 
-  static String m13(name) => "";
-
-  static String m14(access) => "";
+  static String m14(name) => "";
 
   static String m15(name) => "";
 
-  static String m16(name) => "";
+  static String m16(access) => "";
 
-  static String m17(access) => "";
+  static String m17(name) => "";
 
   static String m18(name) => "";
 
-  static String m19(name) => "";
+  static String m19(access) => "";
 
   static String m20(name) => "";
 
   static String m21(name) => "";
 
-  static String m22(access) => "";
+  static String m22(name) => "";
 
-  static String m23(changes) => "";
+  static String m23(name) => "";
 
-  static String m24(entry) => "";
+  static String m24(access) => "";
 
-  static String m25(name) => "";
+  static String m25(changes) => "";
 
-  static String m26(number) => "";
+  static String m26(entry) => "";
 
-  static String m27(path) => "";
+  static String m27(name) => "";
 
-  static String m28(status) => "";
+  static String m28(number) => "";
 
-  static String m29(name) => "";
+  static String m29(path) => "";
+
+  static String m30(status) => "";
+
+  static String m31(name) => "";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -268,7 +268,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFilePreviewNotAvailable":
             MessageLookupByLibrary.simpleMessage(""),
         "messageFiles": MessageLookupByLibrary.simpleMessage(""),
-        "messageFolderDeleted": m8,
+        "messageFolderDeleted": m9,
         "messageFolderName": MessageLookupByLibrary.simpleMessage(""),
         "messageGeneratePassword": MessageLookupByLibrary.simpleMessage(""),
         "messageGranted": MessageLookupByLibrary.simpleMessage(""),
@@ -282,7 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLibraryPanic": MessageLookupByLibrary.simpleMessage(""),
         "messageLoadingDefault": MessageLookupByLibrary.simpleMessage(""),
         "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(""),
-        "messageLockOpenRepos": m9,
+        "messageLockOpenRepos": m10,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(""),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage(""),
@@ -294,11 +294,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(""),
         "messageLogViewer": MessageLookupByLibrary.simpleMessage(""),
         "messageMobile": MessageLookupByLibrary.simpleMessage(""),
-        "messageMoveEntryOrigin": m10,
+        "messageMoveEntryOrigin": m11,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(""),
         "messageNATType": MessageLookupByLibrary.simpleMessage(""),
         "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(""),
-        "messageNewFileError": m11,
+        "messageNewFileError": m12,
         "messageNewPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(""),
@@ -331,19 +331,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRenameFile": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameFolder": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(""),
-        "messageRepoDeletionErrorDescription": m12,
+        "messageRepoDeletionErrorDescription": m14,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(""),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(""),
-        "messageRepoMissingErrorDescription": m13,
-        "messageRepositoryAccessMode": m14,
-        "messageRepositoryAlreadyExist": m15,
+        "messageRepoMissingErrorDescription": m15,
+        "messageRepositoryAccessMode": m16,
+        "messageRepositoryAlreadyExist": m17,
         "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryName": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryNewName": MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryNewPassword":
             MessageLookupByLibrary.simpleMessage(""),
         "messageRepositoryPassword": MessageLookupByLibrary.simpleMessage(""),
-        "messageRepositorySuggestedName": m16,
+        "messageRepositorySuggestedName": m18,
         "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(""),
         "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(""),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(""),
@@ -364,7 +364,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageTokenCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage(""),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(""),
-        "messageUnlockRepoOk": m17,
+        "messageUnlockRepoOk": m19,
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage(""),
@@ -375,19 +375,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage(""),
         "messageWriteReplicaExplanation":
             MessageLookupByLibrary.simpleMessage(""),
-        "messageWritingFileCanceled": m18,
-        "messageWritingFileError": m19,
-        "messsageFailedAddRepository": m20,
-        "messsageFailedCreateRepository": m21,
+        "messageWritingFileCanceled": m20,
+        "messageWritingFileError": m21,
+        "messsageFailedAddRepository": m22,
+        "messsageFailedCreateRepository": m23,
         "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(""),
         "popupMenuItemCopyPassword": MessageLookupByLibrary.simpleMessage(""),
-        "replacementAccess": m22,
-        "replacementChanges": m23,
-        "replacementEntry": m24,
-        "replacementName": m25,
-        "replacementNumber": m26,
-        "replacementPath": m27,
-        "replacementStatus": m28,
+        "replacementAccess": m24,
+        "replacementChanges": m25,
+        "replacementEntry": m26,
+        "replacementName": m27,
+        "replacementNumber": m28,
+        "replacementPath": m29,
+        "replacementStatus": m30,
         "statusSync": MessageLookupByLibrary.simpleMessage(""),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage(""),
         "titleAbout": MessageLookupByLibrary.simpleMessage(""),
@@ -426,7 +426,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSecurity": MessageLookupByLibrary.simpleMessage(""),
         "titleSetPasswordFor": MessageLookupByLibrary.simpleMessage(""),
         "titleSettings": MessageLookupByLibrary.simpleMessage(""),
-        "titleShareRepository": m29,
+        "titleShareRepository": m31,
         "titleStateMonitor": MessageLookupByLibrary.simpleMessage(""),
         "titleUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
         "titleUnsavedChanges": MessageLookupByLibrary.simpleMessage(""),

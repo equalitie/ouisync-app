@@ -302,7 +302,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     final file = await _openFile(filePath);
 
     if (file == null) {
-      showMessage('Error opening file $filePath');
+      showMessage(S.current.messageOpenFileError(filePath));
       return;
     }
 
