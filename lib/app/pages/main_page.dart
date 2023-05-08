@@ -12,6 +12,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../mixins/mixins.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -43,7 +44,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, OuiSyncAppLogger {
+    with TickerProviderStateMixin, RepositoryActionsMixin, OuiSyncAppLogger {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
   final Future<NatDetection> _natDetection = NatDetection.init();
