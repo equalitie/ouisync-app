@@ -20,7 +20,7 @@ mixin RepositoryActionsMixin {
   Future<void> renameRepository(BuildContext context,
       {required RepoCubit repository,
       required Future<void> Function(String, String, Uint8List) rename,
-      required void Function() popDialog}) async {
+      void Function()? popDialog}) async {
     final currentName = repository.name;
 
     final newName = await showDialog<String>(
@@ -46,7 +46,9 @@ mixin RepositoryActionsMixin {
     await Dialogs.executeFutureWithLoadingDialog(context,
         f: rename(currentName, newName, reopenToken));
 
-    popDialog();
+    if (popDialog != null) {
+      popDialog();
+    }
   }
 
   Future<dynamic> shareRepository(BuildContext context,

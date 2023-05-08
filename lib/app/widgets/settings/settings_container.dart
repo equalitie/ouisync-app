@@ -85,53 +85,8 @@ class _SettingsContainerState extends State<SettingsContainer>
                 natDetection: widget.natDetection,
                 isBiometricsAvailable: widget.isBiometricsAvailable,
                 onGetPasswordFromUser: _getPasswordFromUser,
-                onRenameRepository: _renameRepo,
                 onDeleteRepository: _deleteRepository))
       ]);
-
-  Future<void> _renameRepo(context) async {
-    final currentRepo = widget.reposCubit.currentRepo;
-    final repository = currentRepo is OpenRepoEntry ? currentRepo.cubit : null;
-
-    if (currentRepo == null) {
-      return;
-    }
-
-    if (repository == null) {
-      return;
-    }
-
-    final currentRepoName = repository.name;
-
-    final newName = await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
-
-          return ActionsDialog(
-            title: S.current.messageRenameRepository,
-            body: RenameRepository(
-                context: context,
-                formKey: formKey,
-                repositoryName: currentRepoName),
-          );
-        });
-
-    if (newName == null || newName.isEmpty) {
-      return;
-    }
-
-    final reopenToken =
-        await currentRepo.maybeCubit?.handle.createReopenToken();
-
-    if (reopenToken == null) {
-      loggy.app('Failed creating reopen token for repo $currentRepoName.');
-      return;
-    }
-
-    await widget.reposCubit
-        .renameRepository(currentRepoName, newName, reopenToken);
-  }
 
   Future<String?> _activateOrNavigateRepositorySecurity(parentContext) async {
     final repoEntry = widget.reposCubit.currentRepo;

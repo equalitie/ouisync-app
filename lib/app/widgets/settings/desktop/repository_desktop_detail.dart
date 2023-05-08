@@ -17,7 +17,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
       required this.reposCubit,
       required this.isBiometricsAvailable,
       required this.onGetPasswordFromUser,
-      required this.onRenameRepository,
       required this.onDeleteRepository});
 
   final SettingItem item;
@@ -26,7 +25,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
 
   final Future<UnlockResult?> Function(
       BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
-  final Future<void> Function(dynamic context) onRenameRepository;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
@@ -96,10 +94,13 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
         Dimensions.desktopSettingDivider
       ]);
 
-  Widget _buildRenameTile(BuildContext context, _) => PlatformTappableTile(
-      title: Text(S.current.actionRename),
-      icon: Icons.edit,
-      onTap: (_) async => await widget.onRenameRepository(context));
+  Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
+      PlatformTappableTile(
+          title: Text(S.current.actionRename),
+          icon: Icons.edit,
+          onTap: (_) async => await renameRepository(context,
+              repository: repository,
+              rename: widget.reposCubit.renameRepository));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
       Wrap(children: [
