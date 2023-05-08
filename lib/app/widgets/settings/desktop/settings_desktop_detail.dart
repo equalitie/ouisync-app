@@ -17,7 +17,6 @@ class SettingsDesktopDetail extends StatefulWidget {
       required this.onTryGetSecurePassword,
       required this.onGetPasswordFromUser,
       required this.onRenameRepository,
-      required this.onShareRepository,
       required this.onDeleteRepository});
 
   final SettingItem? item;
@@ -34,7 +33,6 @@ class SettingsDesktopDetail extends StatefulWidget {
   final Future<UnlockResult?> Function(
       BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
   final Future<void> Function(dynamic) onRenameRepository;
-  final void Function(RepoCubit) onShareRepository;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
@@ -65,7 +63,6 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             onTryGetSecurePassword: widget.onTryGetSecurePassword,
             onGetPasswordFromUser: widget.onGetPasswordFromUser,
             onRenameRepository: widget.onRenameRepository,
-            onShareRepository: widget.onShareRepository,
             onDeleteRepository: widget.onDeleteRepository);
       case Setting.network:
         return NetworkDesktopDetail(natDetection: widget.natDetection);

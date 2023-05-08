@@ -5,6 +5,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/repo_entry.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
@@ -13,11 +14,10 @@ import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
 
 class RepositorySectionMobile extends AbstractSettingsSection
-    with OuiSyncAppLogger {
+    with RepositoryActionsMixin, OuiSyncAppLogger {
   final ReposCubit repos;
   final bool isBiometricsAvailable;
   final Future<void> Function(BuildContext) onRenameRepository;
-  final void Function(RepoCubit) onShareRepository;
   final Future<String?> Function(dynamic context) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
@@ -25,7 +25,6 @@ class RepositorySectionMobile extends AbstractSettingsSection
       {required this.repos,
       required this.isBiometricsAvailable,
       required this.onRenameRepository,
-      required this.onShareRepository,
       required this.onRepositorySecurity,
       required this.onDeleteRepository});
 
@@ -86,7 +85,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
       PlatformTappableTile(
           title: Text(S.current.actionShare),
           icon: Icons.share,
-          onTap: (_) => onShareRepository(repo));
+          onTap: (_) async => shareRepository(context, repository: repo));
 
   Widget _buildSecurityTile(BuildContext parentContext, _) =>
       PlatformTappableTile(

@@ -23,7 +23,6 @@ class SettingsContainer extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
-      required this.onShareRepository,
       required this.onTryGetSecurePassword});
 
   final ReposCubit reposCubit;
@@ -32,7 +31,6 @@ class SettingsContainer extends StatefulWidget {
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
-  final void Function(RepoCubit) onShareRepository;
   final Future<String?> Function(
       {required BuildContext context,
       required String databaseId,
@@ -66,7 +64,6 @@ class _SettingsContainerState extends State<SettingsContainer>
             repos: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable,
             onRenameRepository: _renameRepo,
-            onShareRepository: widget.onShareRepository,
             onRepositorySecurity: _activateOrNavigateRepositorySecurity,
             onDeleteRepository: _deleteRepository),
         NetworkSectionMobile(widget.natDetection),
@@ -96,7 +93,6 @@ class _SettingsContainerState extends State<SettingsContainer>
                 onTryGetSecurePassword: widget.onTryGetSecurePassword,
                 onGetPasswordFromUser: _getPasswordFromUser,
                 onRenameRepository: _renameRepo,
-                onShareRepository: widget.onShareRepository,
                 onDeleteRepository: _deleteRepository))
       ]);
 

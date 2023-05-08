@@ -27,8 +27,6 @@ typedef BottomSheetCallback = void Function(Widget? widget, String entryPath);
 typedef MoveEntryCallback = void Function(
     String origin, String path, EntryType type);
 
-typedef CheckForBiometricsFunction = Future<bool?> Function();
-
 class MainPage extends StatefulWidget {
   const MainPage(
       {required this.session,
@@ -298,8 +296,7 @@ class _MainPageState extends State<MainPage>
       reposCubit: _repositories,
       checkForBiometricsCallback: _checkForBiometricsCallback,
       getAuthenticationModeCallback: widget.settings.getAuthenticationMode,
-      setAuthenticationModeCallback: widget.settings.setAuthenticationMode,
-      shareRepositoryOnTap: _showShareRepository);
+      setAuthenticationModeCallback: widget.settings.setAuthenticationMode);
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -860,7 +857,6 @@ class _MainPageState extends State<MainPage>
             reposCubit: reposCubit,
             isBiometricsAvailable: isBiometricsAvailable,
             powerControl: _powerControl,
-            onShareRepository: _showShareRepository,
             onTryGetSecurePassword: _tryGetSecurePassword,
             panicCounter: _panicCounter,
             natDetection: _natDetection,

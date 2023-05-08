@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../../../cubits/security.dart';
+import '../../../mixins/mixins.dart';
 import '../../../models/models.dart';
 import '../../../utils/utils.dart';
 import '../../widgets.dart';
@@ -18,7 +19,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
       required this.onTryGetSecurePassword,
       required this.onGetPasswordFromUser,
       required this.onRenameRepository,
-      required this.onShareRepository,
       required this.onDeleteRepository});
 
   final SettingItem item;
@@ -32,7 +32,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
   final Future<UnlockResult?> Function(
       BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
   final Future<void> Function(dynamic context) onRenameRepository;
-  final void Function(RepoCubit) onShareRepository;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
@@ -40,7 +39,8 @@ class RepositoryDesktopDetail extends StatefulWidget {
       _RepositoryDesktopDetailState();
 }
 
-class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
+class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
+    with RepositoryActionsMixin {
   SecurityCubit? _security;
 
   @override
@@ -111,7 +111,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
         PlatformTappableTile(
             title: Text(S.current.actionShare),
             icon: Icons.share,
-            onTap: (_) => widget.onShareRepository(repository)),
+            onTap: (_) async =>
+                shareRepository(context, repository: repository)),
         Dimensions.desktopSettingDivider
       ]);
 

@@ -13,6 +13,8 @@ import '../pages/pages.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
+typedef CheckForBiometricsFunction = Future<bool?> Function();
+
 mixin RepositoryActionsMixin {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(BuildContext context,

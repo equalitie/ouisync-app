@@ -14,7 +14,6 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar(
       {required this.reposCubit,
       required this.checkForBiometricsCallback,
-      required this.shareRepositoryOnTap,
       required this.getAuthenticationModeCallback,
       required this.setAuthenticationModeCallback});
 
@@ -24,7 +23,6 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   final String? Function(String repoName) getAuthenticationModeCallback;
   final Future<void> Function(String repoName, String? value)
       setAuthenticationModeCallback;
-  final void Function(RepoCubit) shareRepositoryOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +44,6 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
                   checkForBiometricsCallback: checkForBiometricsCallback,
                   getAuthenticationModeCallback: getAuthenticationModeCallback,
                   setAuthenticationModeCallback: setAuthenticationModeCallback,
-                  shareRepositoryOnTap: shareRepositoryOnTap,
                   borderColor: Colors.white))
         ]));
   }
@@ -68,7 +65,6 @@ class _Picker extends StatelessWidget {
       required this.checkForBiometricsCallback,
       required this.getAuthenticationModeCallback,
       required this.setAuthenticationModeCallback,
-      required this.shareRepositoryOnTap,
       required this.borderColor});
 
   final ReposCubit reposCubit;
@@ -76,7 +72,6 @@ class _Picker extends StatelessWidget {
   final String? Function(String repoName) getAuthenticationModeCallback;
   final Future<void> Function(String repoName, String? value)
       setAuthenticationModeCallback;
-  final void Function(RepoCubit) shareRepositoryOnTap;
   final Color borderColor;
 
   @override
@@ -208,12 +203,8 @@ class _Picker extends StatelessWidget {
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           builder: (context) {
-            return _List(
-                reposCubit,
-                checkForBiometricsCallback,
-                getAuthenticationModeCallback,
-                setAuthenticationModeCallback,
-                shareRepositoryOnTap);
+            return _List(reposCubit, checkForBiometricsCallback,
+                getAuthenticationModeCallback, setAuthenticationModeCallback);
           });
 }
 
@@ -224,20 +215,17 @@ class _List extends StatelessWidget
       CheckForBiometricsFunction checkForBiometricsCallback,
       String? Function(String repoName) getAuthenticationModeCallback,
       Future<void> Function(String repoName, String? value)
-          setAuthenticationModeCallback,
-      void Function(RepoCubit) shareRepositoryOnTap)
+          setAuthenticationModeCallback)
       : _repositories = repositories,
         _checkForBiometricsCallback = checkForBiometricsCallback,
         _getAuthenticationModeCallback = getAuthenticationModeCallback,
-        _setAuthenticationModeCallback = setAuthenticationModeCallback,
-        _shareRepositoryOnTap = shareRepositoryOnTap;
+        _setAuthenticationModeCallback = setAuthenticationModeCallback;
 
   final ReposCubit _repositories;
   final CheckForBiometricsFunction _checkForBiometricsCallback;
   final String? Function(String repoName) _getAuthenticationModeCallback;
   final Future<void> Function(String repoName, String? value)
       _setAuthenticationModeCallback;
-  final void Function(RepoCubit) _shareRepositoryOnTap;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
 
   @override
@@ -507,12 +495,13 @@ class _List extends StatelessWidget
 
           _enableLockAllRepos();
         }, color: Colors.black87),
-        Fields.actionIcon(const Icon(Icons.share), onPressed: () {
+        Fields.actionIcon(const Icon(Icons.share), onPressed: () async {
           if (repoCubit == null) return;
 
           // TODO: Should we dismiss the repo list or leave it open to return to it... ?
           // Navigator.of(context).pop();
-          _shareRepositoryOnTap(repoCubit);
+
+          await shareRepository(context, repository: repoCubit);
         }, color: Colors.black87)
       ],
     );
