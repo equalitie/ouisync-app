@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -11,7 +8,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../models/models.dart';
-import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
@@ -55,11 +51,6 @@ class _SettingsContainerState extends State<SettingsContainer>
 
   Widget _buildMobileLayout() =>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
-        RepositorySectionMobile(
-            repos: widget.reposCubit,
-            onRenameRepository: _renameRepo,
-            onRepositorySecurity: _activateOrNavigateRepositorySecurity,
-            onDeleteRepository: _deleteRepository),
         NetworkSectionMobile(widget.natDetection),
         LogsSectionMobile(
             settings: widget.settings,
@@ -87,113 +78,6 @@ class _SettingsContainerState extends State<SettingsContainer>
                 onGetPasswordFromUser: _getPasswordFromUser,
                 onDeleteRepository: _deleteRepository))
       ]);
-
-  Future<String?> _activateOrNavigateRepositorySecurity(parentContext) async {
-    final repoEntry = widget.reposCubit.currentRepo;
-
-    if (repoEntry == null) {
-      showSnackBar(context, message: S.current.messageNoRepoIsSelected);
-      return null;
-    }
-
-    if (repoEntry is! OpenRepoEntry) {
-      showSnackBar(context, message: S.current.messageRepositoryIsNotOpen);
-      return null;
-    }
-
-    final repository = repoEntry.cubit;
-    return await _navigateToRepositorySecurity(parentContext, repository);
-  }
-
-  Future<String?> _navigateToRepositorySecurity(
-      BuildContext parentContext, RepoCubit repository) async {
-    String? password;
-    ShareToken? shareToken;
-
-    String authenticationMode =
-        widget.settings.getAuthenticationMode(repository.name) ??
-            Constants.authModeVersion1;
-
-    if (authenticationMode == Constants.authModeNoLocalPassword &&
-        (Platform.isAndroid || Platform.isIOS)) {
-      final auth = LocalAuthentication();
-      final isSupported = await auth.isDeviceSupported();
-
-      /// LocalAuthentication can tell us three (3) things:
-      ///
-      /// - canCheck: If the device has biometrics capabilities, maybe even just
-      ///   PIN, pattern or password protection, it returns TRUE. Basically, it
-      ///   always returns TRUE.
-      ///
-      ///   NOTE: This needs to be confirmed on a phone without any biometric
-      ///   capability
-      ///
-      /// - available: The list of enrolled biometrics.
-      ///   If the user has PIN (Password, pattern, even?), but no biometric
-      ///   method in use, it returns an empty list.
-      ///   If the user has a biometric method in use, it returns a list with
-      ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
-      ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
-      ///
-      /// - isSupported: Only if the user doesn't use any screen lock method
-      ///   (Pattern, PIN, password), which also means it doesn't use any
-      ///   biometric method, it returns FALSE.
-      ///
-      /// We don't use isBiometricsAvailable here because it only validates that
-      /// the user has at least one biometric method enrolled
-      /// (BiometricType.STRONG); if the user only uses weak methods
-      /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
-      if (isSupported) {
-        final authorized = await auth.authenticate(
-            localizedReason: S.current.messageAccessingSecureStorage);
-
-        if (authorized == false) {
-          return null;
-        }
-      }
-    }
-
-    final securePassword = await tryGetSecurePassword.call(
-        context: context,
-        databaseId: repository.databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword != null && securePassword.isNotEmpty) {
-      password = securePassword;
-      shareToken = await _loadShareToken(context, repository, password);
-    } else {
-      authenticationMode = Constants.authModeManual;
-
-      final unlockResult =
-          await _getPasswordFromUser(parentContext, repository);
-
-      if (unlockResult == null) return null;
-
-      password = unlockResult.password;
-      shareToken = unlockResult.shareToken;
-    }
-
-    final accessMode = await shareToken.mode;
-
-    if (accessMode == AccessMode.blind) {
-      showSnackBar(context, message: S.current.messageUnlockRepoFailed);
-
-      return null;
-    }
-
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepositorySecurity(
-              repo: repository,
-              password: password!,
-              shareToken: shareToken!,
-              isBiometricsAvailable: widget.isBiometricsAvailable,
-              authenticationMode: authenticationMode),
-        ));
-
-    return password;
-  }
 
   Future<UnlockResult?> _getPasswordFromUser(
       BuildContext parentContext, RepoCubit repo) async {
