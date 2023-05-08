@@ -208,15 +208,14 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current is MissingRepoEntry) {
-        final authMode = repos.settings.getAuthenticationMode(current.name) ??
-            Constants.authModeVersion1;
-
         return MissingRepositoryState(
+            repositoryName: current.name,
+            repositoryMetaInfo: current.metaInfo,
             errorMessage: current.error,
             errorDescription: current.errorDescription,
             onReloadRepository: null,
-            onDeleteRepository: () =>
-                deleteRepository(current.metaInfo, authMode));
+            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
+            onDelete: repos.deleteRepository);
       }
 
       if (current is ErrorRepoEntry) {
@@ -1010,9 +1009,6 @@ class _MainPageState extends State<MainPage>
                               widget.settings.setAuthenticationMode),
                     ));
               }))));
-
-  void deleteRepository(RepoMetaInfo repoInfo, String authMode) =>
-      _repositories.deleteRepository(repoInfo, authMode);
 
   void reloadRepository() => _repositories.init();
 

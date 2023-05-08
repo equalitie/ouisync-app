@@ -228,7 +228,7 @@ mixin RepositoryActionsMixin {
       required RepoMetaInfo repositoryMetaInfo,
       required String? Function(String) getAuthenticationMode,
       required Future<void> Function(RepoMetaInfo, String) delete,
-      required void Function() popDialog}) async {
+      void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -258,7 +258,9 @@ mixin RepositoryActionsMixin {
       await Dialogs.executeFutureWithLoadingDialog(context,
           f: delete(repositoryMetaInfo, authMode));
 
-      popDialog();
+      if (popDialog != null) {
+        popDialog();
+      }
     }
   }
 
