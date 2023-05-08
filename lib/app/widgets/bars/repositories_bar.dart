@@ -252,8 +252,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                                 children: [
                                   Fields.actionIcon(
                                     const Icon(Icons.lock_outline),
-                                    size: Dimensions.sizeIconAverage,
-                                    padding: const EdgeInsets.all(0.0),
+                                    size: Dimensions.sizeIconSmall,
+                                    padding: EdgeInsets.zero,
                                     onPressed: lockAll
                                         ? () async =>
                                             await _lockAllRepositories(context)
@@ -431,7 +431,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   updateSettingsAndPop(context, repositoryName);
                 },
                         icon: Fields.accessModeIcon(accessMode),
-                        iconSize: Dimensions.sizeIconAverage,
                         iconColor: repositoryName == current
                             ? Colors.black87
                             : Colors.black54,
@@ -454,7 +453,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             );
           });
 
-  Row _getActionByAccessMode(
+  Widget _getActionByAccessMode(
     BuildContext context,
     String databaseId,
     String repositoryName,
@@ -468,6 +467,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             : Icons.lock_outline;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Fields.actionIcon(Icon(modeIcon), onPressed: () async {
           if (repoCubit == null) return;
@@ -484,14 +485,14 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           await _repositories.lockRepository(repoCubit.settingsRepoEntry);
 
           _enableLockAllRepos();
-        }, color: Colors.black87, size: Dimensions.sizeIconAverage),
+        }, color: Colors.black87),
         Fields.actionIcon(const Icon(Icons.share), onPressed: () {
           if (repoCubit == null) return;
 
           // TODO: Should we dismiss the repo list or leave it open to return to it... ?
           // Navigator.of(context).pop();
           _shareRepositoryOnTap(repoCubit);
-        }, color: Colors.black87, size: Dimensions.sizeIconAverage)
+        }, color: Colors.black87)
       ],
     );
   }

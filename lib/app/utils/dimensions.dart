@@ -30,7 +30,8 @@ class Dimensions {
       EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
   static const EdgeInsets paddingDialog =
       EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 10.0);
-  static const EdgeInsets paddingBottomSheet = EdgeInsets.all(10.0);
+  static const EdgeInsets paddingBottomSheet =
+      EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
   static const EdgeInsets paddingBottomSheetActions =
       EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 20.0);
   static const EdgeInsets paddingIconButton = EdgeInsets.all(2.0);
