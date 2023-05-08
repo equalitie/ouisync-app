@@ -28,9 +28,6 @@ typedef MoveEntryCallback = void Function(
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
-typedef SecureRepoWithBiometricsFunction = Function(
-    {required String repositoryName, required String value});
-
 class MainPage extends StatefulWidget {
   const MainPage(
       {required this.session,
@@ -188,8 +185,11 @@ class _MainPageState extends State<MainPage>
         return RepoListState(
             reposCubit: repos,
             bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
-            onNewRepositoryPressed: addRepository,
-            onImportRepositoryPressed: importRepository);
+            onCheckForBiometrics: _checkForBiometricsCallback,
+            onNewRepositoryPressed: _addRepository,
+            onImportRepositoryPressed: _importRepository,
+            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
+            onTryGetSecurePassword: _tryGetSecurePassword);
       }
 
       final current = repos.currentRepo;
@@ -231,8 +231,8 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
-                onNewRepositoryPressed: addRepository,
-                onImportRepositoryPressed: importRepository);
+                onNewRepositoryPressed: _addRepository,
+                onImportRepositoryPressed: _importRepository);
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -372,8 +372,8 @@ class _MainPageState extends State<MainPage>
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
-          onNewRepositoryPressed: addRepository,
-          onImportRepositoryPressed: importRepository);
+          onNewRepositoryPressed: _addRepository,
+          onImportRepositoryPressed: _importRepository);
     }
 
     if (current is OpenRepoEntry) {
@@ -467,26 +467,25 @@ class _MainPageState extends State<MainPage>
                 }
 
                 final listItem = ListItem(
-                  repository: currentRepo,
-                  itemData: item,
-                  mainAction: actionByType,
-                  folderDotsAction: () async {
-                    if (_bottomSheet != null) {
-                      await Dialogs.simpleAlertDialog(
-                          context: context,
-                          title: S.current.titleMovingEntry,
-                          message: S.current.messageMovingEntry);
+                    repository: currentRepo,
+                    itemData: item,
+                    mainAction: actionByType,
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await Dialogs.simpleAlertDialog(
+                            context: context,
+                            title: S.current.titleMovingEntry,
+                            message: S.current.messageMovingEntry);
 
-                      return;
-                    }
+                        return;
+                      }
 
-                    item is FileItem
-                        ? await _showFileDetails(
-                            repoCubit: currentRepo, data: item)
-                        : await _showFolderDetails(
-                            repoCubit: currentRepo, data: item);
-                  },
-                );
+                      item is FileItem
+                          ? await _showFileDetails(
+                              repoCubit: currentRepo, data: item)
+                          : await _showFolderDetails(
+                              repoCubit: currentRepo, data: item);
+                    });
 
                 return listItem;
               })));
@@ -696,14 +695,14 @@ class _MainPageState extends State<MainPage>
             return RepoListActions(
                 context: context,
                 reposCubit: _repositories,
-                onNewRepositoryPressed: addRepository,
-                onImportRepositoryPressed: importRepository);
+                onNewRepositoryPressed: _addRepository,
+                onImportRepositoryPressed: _importRepository);
           });
 
-  Future<String?> addRepository() async =>
+  Future<String?> _addRepository() async =>
       _addRepoAndNavigate(createRepoDialog(context));
 
-  Future<String?> importRepository() async =>
+  Future<String?> _importRepository() async =>
       _addRepoAndNavigate(addRepoWithTokenDialog(context));
 
   Future<String?> _addRepoAndNavigate(Future<String?> repoFunction) async {
@@ -1006,15 +1005,10 @@ class _MainPageState extends State<MainPage>
                           isPasswordValidation: false,
                           unlockRepositoryCallback:
                               _repositories.unlockRepository,
-                          onSecureRepositoryWithBiometricsCallback:
-                              _secureRepositoryWithBiometrics),
+                          setAuthenticationModeCallback:
+                              widget.settings.setAuthenticationMode),
                     ));
               }))));
-
-  void _secureRepositoryWithBiometrics(
-      {required String repositoryName, required String value}) {
-    widget.settings.setAuthenticationMode(repositoryName, value);
-  }
 
   void deleteRepository(RepoMetaInfo repoInfo, String authMode) =>
       _repositories.deleteRepository(repoInfo, authMode);

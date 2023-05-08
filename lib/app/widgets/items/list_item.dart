@@ -10,13 +10,13 @@ class ListItem extends StatelessWidget {
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    required this.folderDotsAction,
+    required this.verticalDotsAction,
   });
 
   final RepoCubit repository;
   final BaseItem itemData;
   final Function mainAction;
-  final Function folderDotsAction;
+  final Function verticalDotsAction;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,8 @@ class ListItem extends StatelessWidget {
             flex: 9,
             child: Padding(
                 padding: Dimensions.paddingItem,
-                child: RepoDescription(repoData: repoItem)))
+                child: RepoDescription(repoData: repoItem))),
+        _getVerticalMenuAction(false)
       ],
     );
   }
@@ -84,7 +85,7 @@ class ListItem extends StatelessWidget {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: FileDescription(repository, fileData, uploadJob))),
-        _getVerticalMenuAction(isUploading),
+        _getVerticalMenuAction(isUploading)
       ],
     );
   }
@@ -103,7 +104,7 @@ class ListItem extends StatelessWidget {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: FolderDescription(folderData: itemData))),
-        _getVerticalMenuAction(false),
+        _getVerticalMenuAction(false)
       ],
     );
   }
@@ -112,6 +113,6 @@ class ListItem extends StatelessWidget {
     return IconButton(
         icon:
             const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-        onPressed: isUploading ? null : () async => await folderDotsAction());
+        onPressed: isUploading ? null : () async => await verticalDotsAction());
   }
 }

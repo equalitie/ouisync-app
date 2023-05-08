@@ -14,7 +14,6 @@ import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
-import '../dialogs/unlock_dialog.dart';
 import '../widgets.dart';
 
 class SettingsContainer extends StatefulWidget {
@@ -278,8 +277,8 @@ class _SettingsContainerState extends State<SettingsContainer>
             title: S.current.messageUnlockRepository,
             body: UnlockDialog<UnlockResult>(
                 context: context,
-                repo: repo,
-                unlockCallback: (repo, {required String password}) =>
+                repository: repo,
+                manualUnlockCallback: (repo, {required String password}) =>
                     _unlockShareToken(context, repo, password))));
 
     if (result == null) {

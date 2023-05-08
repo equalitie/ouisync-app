@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../pages/main_page.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -15,7 +14,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       required this.isBiometricsAvailable,
       required this.isPasswordValidation,
       required this.unlockRepositoryCallback,
-      required this.onSecureRepositoryWithBiometricsCallback});
+      required this.setAuthenticationModeCallback});
 
   final BuildContext context;
   final String databaseId;
@@ -28,8 +27,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
 
-  final SecureRepoWithBiometricsFunction
-      onSecureRepositoryWithBiometricsCallback;
+  final Future<void> Function(String repoName, String? value)
+      setAuthenticationModeCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -137,8 +136,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
         return;
       }
 
-      onSecureRepositoryWithBiometricsCallback.call(
-          repositoryName: repositoryName, value: Constants.authModeVersion2);
+      await setAuthenticationModeCallback(
+          repositoryName, Constants.authModeVersion2);
     }
 
     final message = _useBiometrics.value
