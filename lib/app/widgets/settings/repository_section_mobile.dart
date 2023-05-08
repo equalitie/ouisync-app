@@ -16,14 +16,12 @@ import 'repository_selector.dart';
 class RepositorySectionMobile extends AbstractSettingsSection
     with RepositoryActionsMixin, OuiSyncAppLogger {
   final ReposCubit repos;
-  final bool isBiometricsAvailable;
   final Future<void> Function(BuildContext) onRenameRepository;
   final Future<String?> Function(dynamic context) onRepositorySecurity;
   final Future<void> Function(dynamic context) onDeleteRepository;
 
   RepositorySectionMobile(
       {required this.repos,
-      required this.isBiometricsAvailable,
       required this.onRenameRepository,
       required this.onRepositorySecurity,
       required this.onDeleteRepository});

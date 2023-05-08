@@ -12,8 +12,7 @@ class RepoListState extends StatelessWidget {
       required this.onCheckForBiometrics,
       required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed,
-      required this.onGetAuthenticationMode,
-      required this.onTryGetSecurePassword});
+      required this.onGetAuthenticationMode});
 
   final ReposCubit reposCubit;
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
@@ -22,10 +21,6 @@ class RepoListState extends StatelessWidget {
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
   final String? Function(String repoName) onGetAuthenticationMode;
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +96,6 @@ class RepoListState extends StatelessWidget {
                 data: data as RepoItem,
                 checkForBiometrics: onCheckForBiometrics,
                 getAuthenticationMode: onGetAuthenticationMode,
-                tryGetSecurePassword: onTryGetSecurePassword,
                 renameRepository: reposCubit.renameRepository,
                 deleteRepository: reposCubit.deleteRepository);
           });

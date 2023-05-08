@@ -14,7 +14,6 @@ class SettingsDesktopDetail extends StatefulWidget {
       required this.panicCounter,
       required this.natDetection,
       required this.isBiometricsAvailable,
-      required this.onTryGetSecurePassword,
       required this.onGetPasswordFromUser,
       required this.onRenameRepository,
       required this.onDeleteRepository});
@@ -26,10 +25,6 @@ class SettingsDesktopDetail extends StatefulWidget {
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
   final Future<UnlockResult?> Function(
       BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
   final Future<void> Function(dynamic) onRenameRepository;
@@ -60,7 +55,6 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             item: widget.item!,
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable,
-            onTryGetSecurePassword: widget.onTryGetSecurePassword,
             onGetPasswordFromUser: widget.onGetPasswordFromUser,
             onRenameRepository: widget.onRenameRepository,
             onDeleteRepository: widget.onDeleteRepository);

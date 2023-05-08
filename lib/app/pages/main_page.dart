@@ -187,8 +187,7 @@ class _MainPageState extends State<MainPage>
             onCheckForBiometrics: _checkForBiometricsCallback,
             onNewRepositoryPressed: _addRepository,
             onImportRepositoryPressed: _importRepository,
-            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
-            onTryGetSecurePassword: _tryGetSecurePassword);
+            onGetAuthenticationMode: widget.settings.getAuthenticationMode);
       }
 
       final current = repos.currentRepo;
@@ -493,36 +492,6 @@ class _MainPageState extends State<MainPage>
                 return listItem;
               })));
 
-  // This is an empiric value that works for high resolutions, but
-  // not quite good for lower resolutions (still does, but adds extra
-  // space at the top, which doesn't look good).
-
-  // TODO: Find a better solution
-  Future<dynamic> _showShareRepository(RepoCubit repository) {
-    final accessMode = repository.state.accessMode;
-    final accessModes = accessMode == AccessMode.write
-        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-        : accessMode == AccessMode.read
-            ? [AccessMode.blind, AccessMode.read]
-            : [AccessMode.blind];
-
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      shape: Dimensions.borderBottomSheetTop,
-      constraints: BoxConstraints(maxHeight: 390.0),
-      builder: (_) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ShareRepository(
-            repository: repository,
-            availableAccessModes: accessModes,
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
     required BaseItem data,
@@ -799,41 +768,6 @@ class _MainPageState extends State<MainPage>
             }))));
   }
 
-  Future<String?> _tryGetSecurePassword(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    if (authenticationMode == Constants.authModeVersion2) {
-      final auth = LocalAuthentication();
-
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    return _readSecureStorage(databaseId, authenticationMode);
-  }
-
-  Future<String?> _readSecureStorage(String databaseId, String authMode) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
-  }
-
   void reloadRepository() => _repositories.init();
 
   Future<void> showSettings() async {
@@ -853,14 +787,12 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-            settings: widget.settings,
-            reposCubit: reposCubit,
-            isBiometricsAvailable: isBiometricsAvailable,
-            powerControl: _powerControl,
-            onTryGetSecurePassword: _tryGetSecurePassword,
-            panicCounter: _panicCounter,
-            natDetection: _natDetection,
-          ),
+              settings: widget.settings,
+              reposCubit: reposCubit,
+              powerControl: _powerControl,
+              panicCounter: _panicCounter,
+              natDetection: _natDetection,
+              isBiometricsAvailable: isBiometricsAvailable),
         ),
       ),
     );

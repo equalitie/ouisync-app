@@ -9,6 +9,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/repo_actions_mixin.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
@@ -22,8 +23,7 @@ class SettingsContainer extends StatefulWidget {
       required this.settings,
       required this.panicCounter,
       required this.natDetection,
-      required this.isBiometricsAvailable,
-      required this.onTryGetSecurePassword});
+      required this.isBiometricsAvailable});
 
   final ReposCubit reposCubit;
   final Settings settings;
@@ -31,17 +31,12 @@ class SettingsContainer extends StatefulWidget {
   final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
-
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
 }
 
 class _SettingsContainerState extends State<SettingsContainer>
-    with OuiSyncAppLogger {
+    with RepositoryActionsMixin, OuiSyncAppLogger {
   SettingItem? _selected;
 
   @override
@@ -62,7 +57,6 @@ class _SettingsContainerState extends State<SettingsContainer>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
         RepositorySectionMobile(
             repos: widget.reposCubit,
-            isBiometricsAvailable: widget.isBiometricsAvailable,
             onRenameRepository: _renameRepo,
             onRepositorySecurity: _activateOrNavigateRepositorySecurity,
             onDeleteRepository: _deleteRepository),
@@ -90,7 +84,6 @@ class _SettingsContainerState extends State<SettingsContainer>
                 panicCounter: widget.panicCounter,
                 natDetection: widget.natDetection,
                 isBiometricsAvailable: widget.isBiometricsAvailable,
-                onTryGetSecurePassword: widget.onTryGetSecurePassword,
                 onGetPasswordFromUser: _getPasswordFromUser,
                 onRenameRepository: _renameRepo,
                 onDeleteRepository: _deleteRepository))
@@ -205,7 +198,7 @@ class _SettingsContainerState extends State<SettingsContainer>
       }
     }
 
-    final securePassword = await widget.onTryGetSecurePassword.call(
+    final securePassword = await tryGetSecurePassword.call(
         context: context,
         databaseId: repository.databaseId,
         authenticationMode: authenticationMode);

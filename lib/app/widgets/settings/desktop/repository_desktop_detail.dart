@@ -16,7 +16,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
       {required this.item,
       required this.reposCubit,
       required this.isBiometricsAvailable,
-      required this.onTryGetSecurePassword,
       required this.onGetPasswordFromUser,
       required this.onRenameRepository,
       required this.onDeleteRepository});
@@ -25,10 +24,6 @@ class RepositoryDesktopDetail extends StatefulWidget {
   final ReposCubit reposCubit;
   final bool isBiometricsAvailable;
 
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
   final Future<UnlockResult?> Function(
       BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
   final Future<void> Function(dynamic context) onRenameRepository;
@@ -223,7 +218,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 currentPassword: currentPassword,
                 newPassword: newPassword,
                 usesBiometrics: useBiometrics,
-                onTryGetSecurePassword: widget.onTryGetSecurePassword,
                 onGetPasswordFromUser: widget.onGetPasswordFromUser)));
 
     if (newPasswordState == null) {

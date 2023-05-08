@@ -15,7 +15,6 @@ class RepositorySettings extends StatefulWidget {
       required this.data,
       required this.checkForBiometrics,
       required this.getAuthenticationMode,
-      required this.tryGetSecurePassword,
       required this.renameRepository,
       required this.deleteRepository});
 
@@ -25,10 +24,6 @@ class RepositorySettings extends StatefulWidget {
 
   final Future<bool?> Function() checkForBiometrics;
   final String? Function(String repoName) getAuthenticationMode;
-  final Future<String?> Function(
-      {required String authenticationMode,
-      required BuildContext context,
-      required String databaseId}) tryGetSecurePassword;
   final Future<void> Function(
       String oldName, String newName, Uint8List reopenToken) renameRepository;
   final Future<void> Function(RepoMetaInfo info, String authMode)
