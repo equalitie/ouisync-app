@@ -20,8 +20,7 @@ class ManageDesktopPassword extends StatefulWidget {
       required this.authMode,
       required this.currentPassword,
       required this.newPassword,
-      required this.usesBiometrics,
-      required this.onGetPasswordFromUser});
+      required this.usesBiometrics});
 
   final BuildContext context;
   final RepoCubit repoCubit;
@@ -31,9 +30,6 @@ class ManageDesktopPassword extends StatefulWidget {
   final String? currentPassword;
   final String? newPassword;
   final bool usesBiometrics;
-
-  final Future<UnlockResult?> Function(
-      BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
 
   @override
   State<ManageDesktopPassword> createState() => _ManageDesktopPasswordState();
