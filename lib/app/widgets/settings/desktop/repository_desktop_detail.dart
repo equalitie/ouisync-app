@@ -12,13 +12,14 @@ import '../../widgets.dart';
 import '../repository_selector.dart';
 
 class RepositoryDesktopDetail extends StatefulWidget {
-  const RepositoryDesktopDetail(
+  const RepositoryDesktopDetail(this.context,
       {required this.item,
       required this.reposCubit,
       required this.isBiometricsAvailable,
       required this.onGetPasswordFromUser,
       required this.onDeleteRepository});
 
+  final BuildContext context;
   final SettingItem item;
   final ReposCubit reposCubit;
   final bool isBiometricsAvailable;
@@ -98,7 +99,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
       PlatformTappableTile(
           title: Text(S.current.actionRename),
           icon: Icons.edit,
-          onTap: (_) async => await renameRepository(context,
+          onTap: (_) async => await renameRepository(widget.context,
               repository: repository,
               rename: widget.reposCubit.renameRepository));
 

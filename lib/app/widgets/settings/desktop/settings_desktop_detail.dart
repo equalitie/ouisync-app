@@ -49,7 +49,7 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
 
     switch (setting) {
       case Setting.repository:
-        return RepositoryDesktopDetail(
+        return RepositoryDesktopDetail(context,
             item: widget.item!,
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable,
