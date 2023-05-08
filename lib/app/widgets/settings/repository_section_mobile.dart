@@ -83,7 +83,7 @@ class RepositorySectionMobile extends AbstractSettingsSection
       PlatformTappableTile(
           title: Text(S.current.actionShare),
           icon: Icons.share,
-          onTap: (_) async => shareRepository(context, repository: repo));
+          onTap: (_) async => await shareRepository(context, repository: repo));
 
   Widget _buildSecurityTile(BuildContext parentContext, _) =>
       PlatformTappableTile(

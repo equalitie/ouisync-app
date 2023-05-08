@@ -103,7 +103,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
             title: Text(S.current.actionShare),
             icon: Icons.share,
             onTap: (_) async =>
-                shareRepository(context, repository: repository)),
+                await shareRepository(context, repository: repository)),
         Dimensions.desktopSettingDivider
       ]);
 

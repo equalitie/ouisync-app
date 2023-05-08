@@ -429,8 +429,10 @@ mixin RepositoryActionsMixin {
       }
     }
 
-    return readSecureStorage(
+    final value = await readSecureStorage(
         databaseId: databaseId, authMode: authenticationMode);
+
+    return value;
   }
 
   Future<String?> readSecureStorage(
