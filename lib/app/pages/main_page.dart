@@ -297,8 +297,9 @@ class _MainPageState extends State<MainPage>
   RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
       reposCubit: _repositories,
       checkForBiometricsCallback: _checkForBiometricsCallback,
-      shareRepositoryOnTap: _showShareRepository,
-      unlockRepositoryOnTap: _unlockRepositoryCallback);
+      getAuthenticationModeCallback: widget.settings.getAuthenticationMode,
+      setAuthenticationModeCallback: widget.settings.setAuthenticationMode,
+      shareRepositoryOnTap: _showShareRepository);
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -378,10 +379,15 @@ class _MainPageState extends State<MainPage>
 
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
-        return LockedRepositoryState(
+        return LockedRepositoryState(context,
             databaseId: current.databaseId,
             repositoryName: current.name,
-            unlockRepositoryCallback: _unlockRepositoryCallback);
+            checkForBiometricsCallback: _checkForBiometricsCallback,
+            getAuthenticationModeCallback:
+                widget.settings.getAuthenticationMode,
+            setAuthenticationModeCallback:
+                widget.settings.setAuthenticationMode,
+            unlockRepositoryCallback: _repositories.unlockRepository);
       }
 
       return _contentBrowser(current.cubit);
@@ -796,122 +802,6 @@ class _MainPageState extends State<MainPage>
             }))));
   }
 
-  Future<void> _unlockRepositoryCallback(
-      {required String databaseId, required String repositoryName}) async {
-    final isBiometricsAvailable = await _checkForBiometricsCallback() ?? false;
-
-    String? authenticationMode =
-        widget.settings.getAuthenticationMode(repositoryName);
-
-    /// Runs once per repository (if needed): before adding to the app the
-    /// possibility to create a repository without a local password, any entry
-    /// to the secure storage (biometric_storage) required biometric validation
-    /// (authenticationRequired=true, by default).
-    ///
-    /// With the option of not having a local password, we now save the password,
-    /// for both this option and biometrics, in the secure storage, and only in
-    /// the latest case we require biometric validation, using the Dart package
-    /// local_auth, instead of the biometric_storage built in validation.
-    ///
-    /// Any repo that doesn't have this setting is considered from a version
-    /// before this implementation, and we need to determine the value for this
-    /// setting right after the update, on the first unlocking.
-    ///
-    /// Trying to get the password from the secure storage using the built in
-    /// biometric validation can tell us this:
-    ///
-    /// IF securePassword != null
-    ///   The repo password exist and it was secured using biometrics. (version1)
-    /// ELSE
-    ///   The repo password doesn't exist and it was manually input by the user.
-    ///
-    /// (If the password is empty, something wrong happened in the previous
-    /// version of the app saving its value and it is considered non existent
-    /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == null ||
-        authenticationMode == Constants.authModeVersion1) {
-      final securedPassword = await _getPasswordAndUnlock(
-          context, databaseId, repositoryName, Constants.authModeVersion1);
-
-      if (securedPassword == null) {
-        return;
-      }
-
-      /// IF password.isEmpty => The password doesn't exist in the secure
-      /// storage.
-      authenticationMode = securedPassword.isEmpty
-          ? Constants.authModeManual
-          : Constants.authModeVersion1;
-
-      await widget.settings
-          .setAuthenticationMode(repositoryName, authenticationMode);
-
-      if (authenticationMode == Constants.authModeVersion1) {
-        final upgraded =
-            await _upgradeBiometricEntryToVersion2(databaseId, securedPassword);
-
-        if (upgraded == null) {
-          loggy.app(
-              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
-
-          return;
-        }
-
-        if (upgraded == false) {
-          loggy.app(
-              'Removing the old entry (version1) for $repositoryName in the '
-              'secure storage failed, but the creating the new entry (version2) '
-              'was successful.');
-        }
-
-        await widget.settings
-            .setAuthenticationMode(repositoryName, Constants.authModeVersion2);
-
-        return;
-      }
-    }
-
-    if (authenticationMode == Constants.authModeManual) {
-      final unlockResult = await _getManualPasswordAndUnlock(
-          databaseId: databaseId,
-          repositoryName: repositoryName,
-          isBiometricsAvailable: isBiometricsAvailable);
-
-      if (unlockResult == null) return;
-
-      showSnackBar(context, message: unlockResult.message);
-
-      return;
-    }
-
-    await _getPasswordAndUnlock(
-        context, databaseId, repositoryName, authenticationMode);
-  }
-
-  Future<String?> _getPasswordAndUnlock(BuildContext context, String databaseId,
-      String repositoryName, String authenticationMode) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    final securePassword = await _tryGetSecurePassword(
-        context: context,
-        databaseId: databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword == null) {
-      /// There was an exception getting the value from the secure storage.
-      return null;
-    }
-
-    if (securePassword.isEmpty) {
-      return '';
-    }
-
-    await _unlockRepository(repositoryName, securePassword);
-    return securePassword;
-  }
-
   Future<String?> _tryGetSecurePassword(
       {required BuildContext context,
       required String databaseId,
@@ -946,69 +836,6 @@ class _MainPageState extends State<MainPage>
 
     return secureStorageResult.value ?? '';
   }
-
-  Future<bool?> _upgradeBiometricEntryToVersion2(
-      String databaseId, String password) async {
-    final addTempResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
-        password: password,
-        authMode: Constants.authModeVersion2);
-
-    if (addTempResult.exception != null) {
-      loggy.app(addTempResult.exception);
-
-      return null;
-    }
-
-    final deleteOldResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: Constants.authModeVersion1,
-        authenticationRequired: false);
-
-    if (deleteOldResult.exception != null) {
-      loggy.app(deleteOldResult.exception);
-
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> _unlockRepository(String repositoryName, String password) async {
-    final accessMode = await _repositories.unlockRepository(repositoryName,
-        password: password);
-
-    final message = (accessMode != null && accessMode != AccessMode.blind)
-        ? S.current.messageUnlockRepoOk(accessMode.name)
-        : S.current.messageUnlockRepoFailed;
-
-    showSnackBar(context, message: message);
-  }
-
-  Future<UnlockRepositoryResult?> _getManualPasswordAndUnlock(
-          {required String databaseId,
-          required String repositoryName,
-          required bool isBiometricsAvailable}) async =>
-      showDialog<UnlockRepositoryResult?>(
-          context: context,
-          builder: (BuildContext context) =>
-              ScaffoldMessenger(child: Builder(builder: ((context) {
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ActionsDialog(
-                      title: S.current.messageUnlockRepository,
-                      body: UnlockRepository(
-                          context: context,
-                          databaseId: databaseId,
-                          repositoryName: repositoryName,
-                          isBiometricsAvailable: isBiometricsAvailable,
-                          isPasswordValidation: false,
-                          unlockRepositoryCallback:
-                              _repositories.unlockRepository,
-                          setAuthenticationModeCallback:
-                              widget.settings.setAuthenticationMode),
-                    ));
-              }))));
 
   void reloadRepository() => _repositories.init();
 

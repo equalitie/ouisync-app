@@ -77,7 +77,7 @@ mixin RepositoryActionsMixin {
   /// getAuthenticationMode => Settings.getAuthenticationMode
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
-      required Future<bool?> Function() checkForBiometrics,
+      required CheckForBiometricsFunction checkForBiometrics,
       required String? Function(String) getAuthenticationMode,
       required void Function() popDialog}) async {
     String? password;
@@ -267,18 +267,16 @@ mixin RepositoryActionsMixin {
   /// checkForBiometrics => main_page._checkForBiometricsCallback
   /// getAuthenticationMode => Settings.getAuthenticationMode
   /// setAuthenticationMode => Settings.setAuthenticationMode
-  /// cubitUnlockRepository => ReposCubit.cubitUnlockRepository
+  /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
       {required String databaseId,
       required String repositoryName,
-      required Future<bool?> Function() checkForBiometrics,
+      required CheckForBiometricsFunction checkForBiometrics,
       required String? Function(String) getAuthenticationMode,
       required Future<void> Function(String, String?) setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
-
     String? authenticationMode = getAuthenticationMode(repositoryName);
 
     /// Runs once per repository (if needed): before adding to the app the
@@ -352,7 +350,7 @@ mixin RepositoryActionsMixin {
       final unlockResult = await getManualPasswordAndUnlock(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
-          isBiometricsAvailable: isBiometricsAvailable,
+          checkForBiometrics: checkForBiometrics,
           cubitUnlockRepository: cubitUnlockRepository,
           setAuthenticationMode: setAuthenticationMode);
 
@@ -396,10 +394,15 @@ mixin RepositoryActionsMixin {
       return '';
     }
 
-    await _unlockRepository(context,
-        repositoryName: repositoryName,
-        password: securePassword,
-        cubitUnlockRepository: cubitUnlockRepository);
+    final accessMode =
+        await cubitUnlockRepository(repositoryName, password: securePassword);
+
+    final message = (accessMode != null && accessMode != AccessMode.blind)
+        ? S.current.messageUnlockRepoOk(accessMode.name)
+        : S.current.messageUnlockRepoFailed;
+
+    showSnackBar(context, message: message);
+
     return securePassword;
   }
 
@@ -468,50 +471,38 @@ mixin RepositoryActionsMixin {
   }
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository
-  Future<void> _unlockRepository(BuildContext context,
-      {required String repositoryName,
-      required String password,
+  /// setAuthenticationMode => Settings.setAuthenticationMode
+  Future<UnlockRepositoryResult?> getManualPasswordAndUnlock(
+      BuildContext context,
+      {required String databaseId,
+      required String repositoryName,
+      required CheckForBiometricsFunction checkForBiometrics,
+      required Future<void> Function(String repoName, String? value)
+          setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    final accessMode =
-        await cubitUnlockRepository(repositoryName, password: password);
+    final isBiometricsAvailable = await checkForBiometrics() ?? false;
 
-    final message = (accessMode != null && accessMode != AccessMode.blind)
-        ? S.current.messageUnlockRepoOk(accessMode.name)
-        : S.current.messageUnlockRepoFailed;
+    final unlockResult = await showDialog<UnlockRepositoryResult?>(
+        context: context,
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                    title: S.current.messageUnlockRepository,
+                    body: UnlockRepository(
+                        parentContext: context,
+                        databaseId: databaseId,
+                        repositoryName: repositoryName,
+                        isPasswordValidation: false,
+                        isBiometricsAvailable: isBiometricsAvailable,
+                        setAuthenticationModeCallback: setAuthenticationMode,
+                        unlockRepositoryCallback: cubitUnlockRepository),
+                  ));
+            }))));
 
-    showSnackBar(context, message: message);
+    return unlockResult;
   }
-
-  /// cubitUnlockRepository => ReposCubit.unlockRepository
-  /// setAuthenticationMode => Settings.setAuthenticationMode
-  Future<UnlockRepositoryResult?> getManualPasswordAndUnlock(
-          BuildContext context,
-          {required String databaseId,
-          required String repositoryName,
-          required bool isBiometricsAvailable,
-          required Future<AccessMode?> Function(String repositoryName,
-                  {required String password})
-              cubitUnlockRepository,
-          required Future<void> Function(String repoName, String? value)
-              setAuthenticationMode}) async =>
-      showDialog<UnlockRepositoryResult?>(
-          context: context,
-          builder: (BuildContext context) =>
-              ScaffoldMessenger(child: Builder(builder: ((context) {
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ActionsDialog(
-                      title: S.current.messageUnlockRepository,
-                      body: UnlockRepository(
-                          context: context,
-                          databaseId: databaseId,
-                          repositoryName: repositoryName,
-                          isBiometricsAvailable: isBiometricsAvailable,
-                          isPasswordValidation: false,
-                          unlockRepositoryCallback: cubitUnlockRepository,
-                          setAuthenticationModeCallback: setAuthenticationMode),
-                    ));
-              }))));
 }
