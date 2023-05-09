@@ -131,7 +131,7 @@ class Fields {
   static Widget bottomSheetHandle(BuildContext context,
           {double widthFactor = 0.25,
           double verticalMargin = 20.0,
-          double height = 5.0,
+          double height = 4.0,
           double borderRadius = 2.5}) =>
       FractionallySizedBox(
         widthFactor: widthFactor,
@@ -151,14 +151,14 @@ class Fields {
 
   static Widget bottomSheetTitle(String title,
           {EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
-          TextAlign textAlign = TextAlign.center,
+          TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
           double fontSize = Dimensions.fontBig,
-          FontWeight fontWeight = FontWeight.bold}) =>
+          FontWeight fontWeight = FontWeight.w400}) =>
       Padding(
           padding: padding,
-          child: Column(children: [
+          child: Row(children: [
             Text(
               title,
               textAlign: textAlign,
@@ -390,7 +390,7 @@ class Fields {
   static Widget actionIcon(
     Icon icon, {
     required void Function()? onPressed,
-    double size = Dimensions.sizeIconAverage,
+    double size = Dimensions.sizeIconMicro,
     EdgeInsets padding = Dimensions.paddingIconButton,
     AlignmentGeometry alignment = Dimensions.alignmentIconButton,
     Color color = Colors.black,
@@ -417,11 +417,11 @@ class Fields {
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
-    double textFontSize = Dimensions.fontBig,
+    double textFontSize = Dimensions.fontAverage,
     FontWeight textFontWeight = FontWeight.normal,
     Color textColor = Colors.black,
     IconData? icon,
-    double iconSize = Dimensions.sizeIconAverage,
+    double iconSize = Dimensions.sizeIconMicro,
     Color iconColor = Colors.black,
     bool dense = false,
     VisualDensity visualDensity = VisualDensity.compact,

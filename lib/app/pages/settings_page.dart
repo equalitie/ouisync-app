@@ -10,28 +10,20 @@ import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({
-    required this.settings,
-    required this.reposCubit,
-    required this.isBiometricsAvailable,
-    required this.powerControl,
-    required this.onShareRepository,
-    required this.onTryGetSecurePassword,
-    required this.panicCounter,
-    required this.natDetection,
-  });
+  const SettingsPage(
+      {required this.settings,
+      required this.reposCubit,
+      required this.powerControl,
+      required this.panicCounter,
+      required this.natDetection,
+      required this.isBiometricsAvailable});
 
   final Settings settings;
   final ReposCubit reposCubit;
-  final bool isBiometricsAvailable;
   final PowerControl powerControl;
-  final void Function(RepoCubit) onShareRepository;
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
   final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
+  final bool isBiometricsAvailable;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -57,17 +49,13 @@ class SettingsPage extends StatelessWidget {
             ),
           ],
           child: BlocListener<PowerControl, PowerControlState>(
-            listener: (context, state) {
-              unawaited(context.read<ConnectivityInfo>().update());
-            },
-            child: SettingsContainer(
-              reposCubit: reposCubit,
-              settings: settings,
-              isBiometricsAvailable: isBiometricsAvailable,
-              onTryGetSecurePassword: onTryGetSecurePassword,
-              panicCounter: panicCounter,
-              natDetection: natDetection,
-              onShareRepository: onShareRepository,
-            ),
-          )));
+              listener: (context, state) {
+                unawaited(context.read<ConnectivityInfo>().update());
+              },
+              child: SettingsContainer(
+                  reposCubit: reposCubit,
+                  settings: settings,
+                  panicCounter: panicCounter,
+                  natDetection: natDetection,
+                  isBiometricsAvailable: isBiometricsAvailable))));
 }

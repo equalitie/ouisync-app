@@ -51,3 +51,14 @@ class RepoItem extends BaseItem {
   @override
   List<Object> get props => [...super.props, accessMode];
 }
+
+class RepoMissingItem extends BaseItem {
+  const RepoMissingItem(
+      {required String name, required String path, required this.message})
+      : super(name, path);
+
+  final String message;
+
+  @override
+  List<Object> get props => [...super.props, message];
+}

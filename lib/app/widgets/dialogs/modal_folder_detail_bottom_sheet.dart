@@ -66,8 +66,9 @@ class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
               disabledMessageDuration:
                   Constants.notAvailableActionMessageDuration),
           EntryActionItem(
-              iconData: Icons.delete_outlined,
+              iconData: Icons.delete,
               title: S.current.iconDelete,
+              textColor: Constants.dangerColor,
               dense: true,
               onTap: () async {
                 await showDialog<bool>(

@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class ListItem extends StatelessWidget {
+class ListItem extends StatelessWidget with RepositoryActionsMixin {
   const ListItem({
     required this.repository,
     required this.itemData,
     required this.mainAction,
-    required this.folderDotsAction,
+    required this.verticalDotsAction,
   });
 
-  final RepoCubit repository;
+  final RepoCubit? repository;
   final BaseItem itemData;
   final Function mainAction;
-  final Function folderDotsAction;
+  final Function verticalDotsAction;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,12 @@ class ListItem extends StatelessWidget {
       return _buildFolderItem(data);
     }
 
-    assert(false, "Item must be either FileItem or FolderItem");
+    if (data is RepoMissingItem) {
+      return _buildRepoMissingItem(data);
+    }
+
+    assert(false,
+        "Item must be either RepoItem, FileItem, FolderItem, or RepoMissingItem");
     return SizedBox.shrink();
   }
 
@@ -64,14 +70,21 @@ class ListItem extends StatelessWidget {
             flex: 9,
             child: Padding(
                 padding: Dimensions.paddingItem,
-                child: RepoDescription(repoData: repoItem)))
+                child: RepoDescription(repoData: repoItem))),
+        _getVerticalMenuAction(false)
       ],
     );
   }
 
   Widget _buildFileItem(FileItem fileData) {
-    final uploadJob = repository.state.uploads[fileData.path];
-    final downloadJob = repository.state.downloads[fileData.path];
+    assert(repository != null, "Repository object for FileItem is null");
+
+    if (repository == null) {
+      return SizedBox.shrink();
+    }
+
+    final uploadJob = repository!.state.uploads[fileData.path];
+    final downloadJob = repository!.state.downloads[fileData.path];
 
     final isUploading = uploadJob != null;
 
@@ -83,8 +96,8 @@ class ListItem extends StatelessWidget {
             flex: 9,
             child: Padding(
                 padding: Dimensions.paddingItem,
-                child: FileDescription(repository, fileData, uploadJob))),
-        _getVerticalMenuAction(isUploading),
+                child: FileDescription(repository!, fileData, uploadJob))),
+        _getVerticalMenuAction(isUploading)
       ],
     );
   }
@@ -103,7 +116,26 @@ class ListItem extends StatelessWidget {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: FolderDescription(folderData: itemData))),
-        _getVerticalMenuAction(false),
+        _getVerticalMenuAction(false)
+      ],
+    );
+  }
+
+  Widget _buildRepoMissingItem(RepoMissingItem repoMissingItem) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+            flex: 1,
+            child: Icon(Icons.error_outline_rounded,
+                size: Dimensions.sizeIconAverage,
+                color: Constants.folderIconColor)),
+        Expanded(
+            flex: 9,
+            child: Padding(
+                padding: Dimensions.paddingItem,
+                child: RepoMissing(repoData: repoMissingItem))),
+        _getDeleteMissingRepoAction()
       ],
     );
   }
@@ -112,6 +144,13 @@ class ListItem extends StatelessWidget {
     return IconButton(
         icon:
             const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-        onPressed: isUploading ? null : () async => await folderDotsAction());
+        onPressed: isUploading ? null : () async => await verticalDotsAction());
+  }
+
+  Widget _getDeleteMissingRepoAction() {
+    return IconButton(
+        icon: const Icon(Icons.delete,
+            size: Dimensions.sizeIconMicro, color: Constants.dangerColor),
+        onPressed: () async => await verticalDotsAction());
   }
 }
