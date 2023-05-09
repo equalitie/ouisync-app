@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepoListState extends StatelessWidget {
+class RepoListState extends StatelessWidget with RepositoryActionsMixin {
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
@@ -51,6 +53,23 @@ class RepoListState extends StatelessWidget {
               itemBuilder: (context, index) {
                 final repoEntry = reposList.elementAt(index);
                 bool isDefault = currentRepoName == repoEntry.name;
+
+                if (repoEntry.maybeCubit == null) {
+                  final repoMissingItem = RepoMissingItem(
+                      name: repoEntry.name,
+                      path: '',
+                      message: S.current.messageRepoMissing);
+
+                  return ListItem(
+                      repository: null,
+                      itemData: repoMissingItem,
+                      mainAction: () {},
+                      verticalDotsAction: () async => deleteRepository(context,
+                          repositoryName: repoEntry.name,
+                          repositoryMetaInfo: repoEntry.metaInfo!,
+                          getAuthenticationMode: onGetAuthenticationMode,
+                          delete: reposCubit.deleteRepository));
+                }
 
                 final repoItem = RepoItem(
                     name: repoEntry.name,
