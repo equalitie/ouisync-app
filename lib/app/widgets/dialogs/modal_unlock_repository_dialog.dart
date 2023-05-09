@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../pages/main_page.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
-  UnlockRepository(
-      {required this.context,
-      required this.databaseId,
-      required this.repositoryName,
-      required this.isBiometricsAvailable,
-      required this.isPasswordValidation,
-      required this.unlockRepositoryCallback,
-      required this.onSecureRepositoryWithBiometricsCallback});
+  UnlockRepository({
+    required this.parentContext,
+    required this.databaseId,
+    required this.repositoryName,
+    required this.isBiometricsAvailable,
+    required this.isPasswordValidation,
+    required this.setAuthenticationModeCallback,
+    required this.unlockRepositoryCallback,
+  });
 
-  final BuildContext context;
+  final BuildContext parentContext;
   final String databaseId;
   final String repositoryName;
   final bool isBiometricsAvailable;
@@ -25,11 +25,10 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+  final Future<void> Function(String repoName, String? value)
+      setAuthenticationModeCallback;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
-
-  final SecureRepoWithBiometricsFunction
-      onSecureRepositoryWithBiometricsCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -41,7 +40,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
   Widget build(BuildContext context) => Form(
         key: formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: _buildUnlockRepositoryWidget(this.context),
+        child: _buildUnlockRepositoryWidget(parentContext),
       );
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
@@ -106,7 +105,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
       return;
     }
 
-    final accessMode = await Dialogs.executeFutureWithLoadingDialog(context,
+    final accessMode = await Dialogs.executeFutureWithLoadingDialog(
+        parentContext,
         f: unlockRepositoryCallback(repositoryName, password: password));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
@@ -116,7 +116,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
           accessMode: AccessMode.blind,
           message: S.current.messageUnlockRepoFailed);
 
-      Navigator.of(context).pop(notUnlockedResponse);
+      Navigator.of(parentContext).pop(notUnlockedResponse);
       return;
     }
 
@@ -126,7 +126,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
     // to the secure storage -if the user selected the option.
     if (_useBiometrics.value) {
       final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-          context,
+          parentContext,
           f: SecureStorage.addRepositoryPassword(
               databaseId: databaseId,
               password: password,
@@ -137,8 +137,8 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
         return;
       }
 
-      onSecureRepositoryWithBiometricsCallback.call(
-          repositoryName: repositoryName, value: Constants.authModeVersion2);
+      await setAuthenticationModeCallback(
+          repositoryName, Constants.authModeVersion2);
     }
 
     final message = _useBiometrics.value
@@ -151,7 +151,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
         accessMode: accessMode!,
         message: message);
 
-    Navigator.of(context).pop(unlockedResponse);
+    Navigator.of(parentContext).pop(unlockedResponse);
   }
 
   List<Widget> _actions(context) => [

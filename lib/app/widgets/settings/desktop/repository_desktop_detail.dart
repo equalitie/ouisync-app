@@ -5,42 +5,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
 import '../../../cubits/security.dart';
+import '../../../mixins/mixins.dart';
 import '../../../models/models.dart';
 import '../../../utils/utils.dart';
 import '../../widgets.dart';
 import '../repository_selector.dart';
 
 class RepositoryDesktopDetail extends StatefulWidget {
-  const RepositoryDesktopDetail(
+  const RepositoryDesktopDetail(this.context,
       {required this.item,
       required this.reposCubit,
-      required this.isBiometricsAvailable,
-      required this.onTryGetSecurePassword,
-      required this.onGetPasswordFromUser,
-      required this.onRenameRepository,
-      required this.onShareRepository,
-      required this.onDeleteRepository});
+      required this.isBiometricsAvailable});
 
+  final BuildContext context;
   final SettingItem item;
   final ReposCubit reposCubit;
   final bool isBiometricsAvailable;
-
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
-  final Future<UnlockResult?> Function(
-      BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
-  final Future<void> Function(dynamic context) onRenameRepository;
-  final void Function(RepoCubit) onShareRepository;
-  final Future<void> Function(dynamic context) onDeleteRepository;
 
   @override
   State<RepositoryDesktopDetail> createState() =>
       _RepositoryDesktopDetailState();
 }
 
-class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
+class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
+    with RepositoryActionsMixin {
   SecurityCubit? _security;
 
   @override
@@ -101,17 +89,21 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
         Dimensions.desktopSettingDivider
       ]);
 
-  Widget _buildRenameTile(BuildContext context, _) => PlatformTappableTile(
-      title: Text(S.current.actionRename),
-      icon: Icons.edit,
-      onTap: (_) async => await widget.onRenameRepository(context));
+  Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
+      PlatformTappableTile(
+          title: Text(S.current.actionRename),
+          icon: Icons.edit,
+          onTap: (_) async => await renameRepository(widget.context,
+              repository: repository,
+              rename: widget.reposCubit.renameRepository));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
       Wrap(children: [
         PlatformTappableTile(
             title: Text(S.current.actionShare),
             icon: Icons.share,
-            onTap: (_) => widget.onShareRepository(repository)),
+            onTap: (_) async =>
+                await shareRepository(context, repository: repository)),
         Dimensions.desktopSettingDivider
       ]);
 
@@ -125,7 +117,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
                 _saveChanges(state, repository)
               ]));
 
-  Widget _buildDeleteTile(BuildContext context, _) => Column(children: [
+  Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
+      Column(children: [
         Row(children: [
           Text(S.current.actionDelete, textAlign: TextAlign.start)
         ]),
@@ -133,8 +126,20 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
             leading: const Icon(Icons.delete, color: Constants.dangerColor),
             title: Row(children: [
               TextButton(
-                  onPressed: () async =>
-                      await widget.onDeleteRepository(context),
+                  onPressed: () async {
+                    final repoName = repository.name;
+                    final metaInfo = repository.metaInfo;
+                    final getAuthenticationModeCallback =
+                        widget.reposCubit.settings.getAuthenticationMode;
+                    final deleteRepositoryCallback =
+                        widget.reposCubit.deleteRepository;
+
+                    await deleteRepository(widget.context,
+                        repositoryName: repoName,
+                        repositoryMetaInfo: metaInfo,
+                        getAuthenticationMode: getAuthenticationModeCallback,
+                        delete: deleteRepositoryCallback);
+                  },
                   child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20.0),
@@ -221,9 +226,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail> {
                 authMode: authMode,
                 currentPassword: currentPassword,
                 newPassword: newPassword,
-                usesBiometrics: useBiometrics,
-                onTryGetSecurePassword: widget.onTryGetSecurePassword,
-                onGetPasswordFromUser: widget.onGetPasswordFromUser)));
+                usesBiometrics: useBiometrics)));
 
     if (newPasswordState == null) {
       return null;

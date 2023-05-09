@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/models.dart';
+import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepoListState extends StatelessWidget {
+class RepoListState extends StatelessWidget with RepositoryActionsMixin {
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
+      required this.onCheckForBiometrics,
       required this.onNewRepositoryPressed,
-      required this.onImportRepositoryPressed});
+      required this.onImportRepositoryPressed,
+      required this.onGetAuthenticationMode});
 
   final ReposCubit reposCubit;
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
+  final Future<bool?> Function() onCheckForBiometrics;
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
+  final String? Function(String repoName) onGetAuthenticationMode;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +33,7 @@ class RepoListState extends StatelessWidget {
     final repoList = reposCubit.repos.toList();
 
     if (repoList.isNotEmpty) {
-      return _buildRepoList(repoList, reposCubit.currentRepoName);
+      return _buildRepoList(context, repoList, reposCubit.currentRepoName);
     }
 
     return NoRepositoriesState(
@@ -34,7 +41,8 @@ class RepoListState extends StatelessWidget {
         onImportRepositoryPressed: onImportRepositoryPressed);
   }
 
-  Widget _buildRepoList(List<RepoEntry> reposList, String? currentRepoName) =>
+  Widget _buildRepoList(BuildContext parentContext, List<RepoEntry> reposList,
+          String? currentRepoName) =>
       ValueListenableBuilder(
           valueListenable: bottomPaddingWithBottomSheet,
           builder: (context, value, child) => ListView.separated(
@@ -44,25 +52,70 @@ class RepoListState extends StatelessWidget {
               itemCount: reposList.length,
               itemBuilder: (context, index) {
                 final repoEntry = reposList.elementAt(index);
-
                 bool isDefault = currentRepoName == repoEntry.name;
 
-                final listItem = ListItem(
-                  repository: repoEntry.maybeCubit!,
-                  itemData: RepoItem(
+                if (repoEntry.maybeCubit == null) {
+                  final repoMissingItem = RepoMissingItem(
                       name: repoEntry.name,
                       path: '',
-                      accessMode: repoEntry.accessMode,
-                      isDefault: isDefault),
-                  mainAction: () async {
-                    final repoName = repoEntry.name;
+                      message: S.current.messageRepoMissing);
 
-                    await reposCubit.setCurrentByName(repoName);
-                    reposCubit.pushRepoList(false);
-                  },
-                  folderDotsAction: () async {},
-                );
+                  return ListItem(
+                      repository: null,
+                      itemData: repoMissingItem,
+                      mainAction: () {},
+                      verticalDotsAction: () async => deleteRepository(context,
+                          repositoryName: repoEntry.name,
+                          repositoryMetaInfo: repoEntry.metaInfo!,
+                          getAuthenticationMode: onGetAuthenticationMode,
+                          delete: reposCubit.deleteRepository));
+                }
+
+                final repoItem = RepoItem(
+                    name: repoEntry.name,
+                    path: '',
+                    accessMode: repoEntry.accessMode,
+                    isDefault: isDefault);
+
+                final listItem = ListItem(
+                    repository: repoEntry.maybeCubit!,
+                    itemData: repoItem,
+                    mainAction: () async {
+                      final repoName = repoEntry.name;
+
+                      await reposCubit.setCurrentByName(repoName);
+                      reposCubit.pushRepoList(false);
+                    },
+                    verticalDotsAction: () async {
+                      final cubit = repoEntry.maybeCubit;
+                      if (cubit == null) {
+                        return;
+                      }
+
+                      await _showRepoSettings(parentContext,
+                          repoCubit: cubit, data: repoItem);
+                    });
 
                 return listItem;
               }));
+
+  Future<dynamic> _showRepoSettings(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+    required BaseItem data,
+  }) =>
+      showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (context) {
+            return RepositorySettings(
+                context: context,
+                cubit: repoCubit,
+                data: data as RepoItem,
+                checkForBiometrics: onCheckForBiometrics,
+                getAuthenticationMode: onGetAuthenticationMode,
+                renameRepository: reposCubit.renameRepository,
+                deleteRepository: reposCubit.deleteRepository);
+          });
 }

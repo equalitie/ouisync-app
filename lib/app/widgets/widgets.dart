@@ -18,6 +18,7 @@ export 'dialogs/modal_rename_dialog.dart';
 export 'dialogs/modal_rename_repository_dialog.dart';
 export 'dialogs/modal_replace_file_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
+export 'dialogs/modal_repo_settings_bottom_sheet.dart';
 export 'dialogs/modal_repository_creation_dialog.dart';
 export 'dialogs/modal_save_to_device_bottom_sheet.dart';
 export 'dialogs/modal_manage_desktop_password_dialog.dart';
@@ -25,6 +26,7 @@ export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
 export 'dialogs/save_shared_media.dart';
+export 'dialogs/unlock_dialog.dart';
 
 export 'items/entry_action_item.dart';
 export 'items/file_description.dart';
@@ -32,6 +34,7 @@ export 'items/folder_description.dart';
 export 'items/labeled_switch.dart';
 export 'items/list_item.dart';
 export 'items/repo_description.dart';
+export 'items/repo_missing_item.dart';
 
 export 'selectors/access_mode_dropddown_menu.dart';
 export 'selectors/access_mode_selector.dart';

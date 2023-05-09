@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
+import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
 
-class LockedRepositoryState extends StatelessWidget {
-  const LockedRepositoryState(
+class LockedRepositoryState extends StatelessWidget
+    with RepositoryActionsMixin {
+  const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
       required this.repositoryName,
-      required this.unlockRepositoryCallback,
-      Key? key})
-      : super(key: key);
+      required this.checkForBiometricsCallback,
+      required this.getAuthenticationModeCallback,
+      required this.setAuthenticationModeCallback,
+      required this.unlockRepositoryCallback});
+
+  final BuildContext parentContext;
 
   final String databaseId;
   final String repositoryName;
 
-  final Future<void> Function(
-      {required String databaseId,
-      required String repositoryName}) unlockRepositoryCallback;
+  final CheckForBiometricsFunction checkForBiometricsCallback;
+  final String? Function(String repoName) getAuthenticationModeCallback;
+  final Future<void> Function(String repoName, String? value)
+      setAuthenticationModeCallback;
+  final Future<AccessMode?> Function(String repositoryName,
+      {required String password}) unlockRepositoryCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +64,13 @@ class LockedRepositoryState extends StatelessWidget {
                 })),
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
-            onPressed: () async => await unlockRepositoryCallback(
-                databaseId: databaseId, repositoryName: repositoryName),
+            onPressed: () async => await unlockRepository(parentContext,
+                databaseId: databaseId,
+                repositoryName: repositoryName,
+                checkForBiometrics: checkForBiometricsCallback,
+                getAuthenticationMode: getAuthenticationModeCallback,
+                setAuthenticationMode: setAuthenticationModeCallback,
+                cubitUnlockRepository: unlockRepositoryCallback),
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
             autofocus: true)

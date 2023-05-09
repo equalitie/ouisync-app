@@ -6,6 +6,7 @@ import 'package:result_type/result_type.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -19,9 +20,7 @@ class ManageDesktopPassword extends StatefulWidget {
       required this.authMode,
       required this.currentPassword,
       required this.newPassword,
-      required this.usesBiometrics,
-      required this.onTryGetSecurePassword,
-      required this.onGetPasswordFromUser});
+      required this.usesBiometrics});
 
   final BuildContext context;
   final RepoCubit repoCubit;
@@ -32,20 +31,12 @@ class ManageDesktopPassword extends StatefulWidget {
   final String? newPassword;
   final bool usesBiometrics;
 
-  final Future<String?> Function(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) onTryGetSecurePassword;
-
-  final Future<UnlockResult?> Function(
-      BuildContext parentContext, RepoCubit repo) onGetPasswordFromUser;
-
   @override
   State<ManageDesktopPassword> createState() => _ManageDesktopPasswordState();
 }
 
 class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
-    with OuiSyncAppLogger {
+    with RepositoryActionsMixin, OuiSyncAppLogger {
   final _currentPasswordInputKey = GlobalKey<FormFieldState>();
   final _newPasswordInputKey = GlobalKey<FormFieldState>();
   final _retypeNewPasswordInputKey = GlobalKey<FormFieldState>();
@@ -86,7 +77,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     String currentPassword = widget.currentPassword ?? '';
 
     if (authMode != Constants.authModeManual) {
-      final securePassword = await widget.onTryGetSecurePassword(
+      final securePassword = await tryGetSecurePassword(
           context: context,
           databaseId: databaseId,
           authenticationMode: authMode);

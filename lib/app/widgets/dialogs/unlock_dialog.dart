@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../cubits/repo.dart';
 import '../../../generated/l10n.dart';
+import '../../cubits/repo.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -10,17 +10,17 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
   UnlockDialog(
       {Key? key,
       required this.context,
-      required this.repo,
-      required this.unlockCallback})
+      required this.repository,
+      required this.manualUnlockCallback})
       : super(key: key);
 
   final BuildContext context;
-  final RepoCubit repo;
+  final RepoCubit repository;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final Future<T> Function(RepoCubit repo, {required String password})
-      unlockCallback;
+  final Future<T> Function(RepoCubit repository, {required String password})
+      manualUnlockCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -40,7 +40,7 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.constrainedText('"${repo.name}"',
+          Fields.constrainedText('"${repository.name}"',
               flex: 0, fontWeight: FontWeight.w400),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
@@ -64,9 +64,8 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
                           hint: S.current.messageRepositoryPassword,
-                          onSaved: (String? password) async {
-                            await _unlockRepository(password);
-                          },
+                          onSaved: (String? password) async =>
+                              await _validatePasswordAndReturn(password),
                           validator: validateNoEmpty(
                               Strings.messageErrorRepositoryPasswordValidation),
                           autofocus: true))
@@ -76,7 +75,7 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
         ]);
   }
 
-  Future<void> _unlockRepository(String? password) async {
+  Future<void> _validatePasswordAndReturn(String? password) async {
     final pwd = password;
 
     if (pwd == null || pwd.isEmpty) {
@@ -84,7 +83,7 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
     }
 
     final result = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: unlockCallback(repo, password: pwd));
+        f: manualUnlockCallback(repository, password: pwd));
 
     Navigator.of(context).pop(result);
   }
@@ -94,10 +93,10 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
             text: S.current.actionCancel,
             onPressed: () => Navigator.of(context).pop(null)),
         PositiveButton(
-            text: S.current.actionUnlock, onPressed: _validatePassword)
+            text: S.current.actionUnlock, onPressed: _validatePasswordForm)
       ];
 
-  void _validatePassword() {
+  void _validatePasswordForm() {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
     }

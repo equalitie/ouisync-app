@@ -12,6 +12,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../mixins/mixins.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
@@ -25,11 +26,6 @@ typedef BottomSheetCallback = void Function(Widget? widget, String entryPath);
 
 typedef MoveEntryCallback = void Function(
     String origin, String path, EntryType type);
-
-typedef CheckForBiometricsFunction = Future<bool?> Function();
-
-typedef SecureRepoWithBiometricsFunction = Function(
-    {required String repositoryName, required String value});
 
 class MainPage extends StatefulWidget {
   const MainPage(
@@ -46,7 +42,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, OuiSyncAppLogger {
+    with TickerProviderStateMixin, RepositoryActionsMixin, OuiSyncAppLogger {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
   final Future<NatDetection> _natDetection = NatDetection.init();
@@ -188,8 +184,10 @@ class _MainPageState extends State<MainPage>
         return RepoListState(
             reposCubit: repos,
             bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
-            onNewRepositoryPressed: addRepository,
-            onImportRepositoryPressed: importRepository);
+            onCheckForBiometrics: _checkForBiometricsCallback,
+            onNewRepositoryPressed: _addRepository,
+            onImportRepositoryPressed: _importRepository,
+            onGetAuthenticationMode: widget.settings.getAuthenticationMode);
       }
 
       final current = repos.currentRepo;
@@ -207,15 +205,14 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current is MissingRepoEntry) {
-        final authMode = repos.settings.getAuthenticationMode(current.name) ??
-            Constants.authModeVersion1;
-
         return MissingRepositoryState(
+            repositoryName: current.name,
+            repositoryMetaInfo: current.metaInfo,
             errorMessage: current.error,
             errorDescription: current.errorDescription,
             onReloadRepository: null,
-            onDeleteRepository: () =>
-                deleteRepository(current.metaInfo, authMode));
+            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
+            onDelete: repos.deleteRepository);
       }
 
       if (current is ErrorRepoEntry) {
@@ -231,8 +228,8 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
-                onNewRepositoryPressed: addRepository,
-                onImportRepositoryPressed: importRepository);
+                onNewRepositoryPressed: _addRepository,
+                onImportRepositoryPressed: _importRepository);
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -297,8 +294,8 @@ class _MainPageState extends State<MainPage>
   RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
       reposCubit: _repositories,
       checkForBiometricsCallback: _checkForBiometricsCallback,
-      shareRepositoryOnTap: _showShareRepository,
-      unlockRepositoryOnTap: _unlockRepositoryCallback);
+      getAuthenticationModeCallback: widget.settings.getAuthenticationMode,
+      setAuthenticationModeCallback: widget.settings.setAuthenticationMode);
 
   Widget _buildSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -372,16 +369,21 @@ class _MainPageState extends State<MainPage>
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
-          onNewRepositoryPressed: addRepository,
-          onImportRepositoryPressed: importRepository);
+          onNewRepositoryPressed: _addRepository,
+          onImportRepositoryPressed: _importRepository);
     }
 
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
-        return LockedRepositoryState(
+        return LockedRepositoryState(context,
             databaseId: current.databaseId,
             repositoryName: current.name,
-            unlockRepositoryCallback: _unlockRepositoryCallback);
+            checkForBiometricsCallback: _checkForBiometricsCallback,
+            getAuthenticationModeCallback:
+                widget.settings.getAuthenticationMode,
+            setAuthenticationModeCallback:
+                widget.settings.setAuthenticationMode,
+            unlockRepositoryCallback: _repositories.unlockRepository);
       }
 
       return _contentBrowser(current.cubit);
@@ -467,59 +469,28 @@ class _MainPageState extends State<MainPage>
                 }
 
                 final listItem = ListItem(
-                  repository: currentRepo,
-                  itemData: item,
-                  mainAction: actionByType,
-                  folderDotsAction: () async {
-                    if (_bottomSheet != null) {
-                      await Dialogs.simpleAlertDialog(
-                          context: context,
-                          title: S.current.titleMovingEntry,
-                          message: S.current.messageMovingEntry);
+                    repository: currentRepo,
+                    itemData: item,
+                    mainAction: actionByType,
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await Dialogs.simpleAlertDialog(
+                            context: context,
+                            title: S.current.titleMovingEntry,
+                            message: S.current.messageMovingEntry);
 
-                      return;
-                    }
+                        return;
+                      }
 
-                    item is FileItem
-                        ? await _showFileDetails(
-                            repoCubit: currentRepo, data: item)
-                        : await _showFolderDetails(
-                            repoCubit: currentRepo, data: item);
-                  },
-                );
+                      item is FileItem
+                          ? await _showFileDetails(
+                              repoCubit: currentRepo, data: item)
+                          : await _showFolderDetails(
+                              repoCubit: currentRepo, data: item);
+                    });
 
                 return listItem;
               })));
-
-  // This is an empiric value that works for high resolutions, but
-  // not quite good for lower resolutions (still does, but adds extra
-  // space at the top, which doesn't look good).
-
-  // TODO: Find a better solution
-  Future<dynamic> _showShareRepository(RepoCubit repository) {
-    final accessMode = repository.state.accessMode;
-    final accessModes = accessMode == AccessMode.write
-        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-        : accessMode == AccessMode.read
-            ? [AccessMode.blind, AccessMode.read]
-            : [AccessMode.blind];
-
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      shape: Dimensions.borderBottomSheetTop,
-      constraints: BoxConstraints(maxHeight: 390.0),
-      builder: (_) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ShareRepository(
-            repository: repository,
-            availableAccessModes: accessModes,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
@@ -696,14 +667,14 @@ class _MainPageState extends State<MainPage>
             return RepoListActions(
                 context: context,
                 reposCubit: _repositories,
-                onNewRepositoryPressed: addRepository,
-                onImportRepositoryPressed: importRepository);
+                onNewRepositoryPressed: _addRepository,
+                onImportRepositoryPressed: _importRepository);
           });
 
-  Future<String?> addRepository() async =>
+  Future<String?> _addRepository() async =>
       _addRepoAndNavigate(createRepoDialog(context));
 
-  Future<String?> importRepository() async =>
+  Future<String?> _importRepository() async =>
       _addRepoAndNavigate(addRepoWithTokenDialog(context));
 
   Future<String?> _addRepoAndNavigate(Future<String?> repoFunction) async {
@@ -797,228 +768,6 @@ class _MainPageState extends State<MainPage>
             }))));
   }
 
-  Future<void> _unlockRepositoryCallback(
-      {required String databaseId, required String repositoryName}) async {
-    final isBiometricsAvailable = await _checkForBiometricsCallback() ?? false;
-
-    String? authenticationMode =
-        widget.settings.getAuthenticationMode(repositoryName);
-
-    /// Runs once per repository (if needed): before adding to the app the
-    /// possibility to create a repository without a local password, any entry
-    /// to the secure storage (biometric_storage) required biometric validation
-    /// (authenticationRequired=true, by default).
-    ///
-    /// With the option of not having a local password, we now save the password,
-    /// for both this option and biometrics, in the secure storage, and only in
-    /// the latest case we require biometric validation, using the Dart package
-    /// local_auth, instead of the biometric_storage built in validation.
-    ///
-    /// Any repo that doesn't have this setting is considered from a version
-    /// before this implementation, and we need to determine the value for this
-    /// setting right after the update, on the first unlocking.
-    ///
-    /// Trying to get the password from the secure storage using the built in
-    /// biometric validation can tell us this:
-    ///
-    /// IF securePassword != null
-    ///   The repo password exist and it was secured using biometrics. (version1)
-    /// ELSE
-    ///   The repo password doesn't exist and it was manually input by the user.
-    ///
-    /// (If the password is empty, something wrong happened in the previous
-    /// version of the app saving its value and it is considered non existent
-    /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == null ||
-        authenticationMode == Constants.authModeVersion1) {
-      final securedPassword = await _getPasswordAndUnlock(
-          context, databaseId, repositoryName, Constants.authModeVersion1);
-
-      if (securedPassword == null) {
-        return;
-      }
-
-      /// IF password.isEmpty => The password doesn't exist in the secure
-      /// storage.
-      authenticationMode = securedPassword.isEmpty
-          ? Constants.authModeManual
-          : Constants.authModeVersion1;
-
-      await widget.settings
-          .setAuthenticationMode(repositoryName, authenticationMode);
-
-      if (authenticationMode == Constants.authModeVersion1) {
-        final upgraded =
-            await _upgradeBiometricEntryToVersion2(databaseId, securedPassword);
-
-        if (upgraded == null) {
-          loggy.app(
-              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
-
-          return;
-        }
-
-        if (upgraded == false) {
-          loggy.app(
-              'Removing the old entry (version1) for $repositoryName in the '
-              'secure storage failed, but the creating the new entry (version2) '
-              'was successful.');
-        }
-
-        await widget.settings
-            .setAuthenticationMode(repositoryName, Constants.authModeVersion2);
-
-        return;
-      }
-    }
-
-    if (authenticationMode == Constants.authModeManual) {
-      final unlockResult = await _getManualPasswordAndUnlock(
-          databaseId: databaseId,
-          repositoryName: repositoryName,
-          isBiometricsAvailable: isBiometricsAvailable);
-
-      if (unlockResult == null) return;
-
-      showSnackBar(context, message: unlockResult.message);
-
-      return;
-    }
-
-    await _getPasswordAndUnlock(
-        context, databaseId, repositoryName, authenticationMode);
-  }
-
-  Future<String?> _getPasswordAndUnlock(BuildContext context, String databaseId,
-      String repositoryName, String authenticationMode) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    final securePassword = await _tryGetSecurePassword(
-        context: context,
-        databaseId: databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword == null) {
-      /// There was an exception getting the value from the secure storage.
-      return null;
-    }
-
-    if (securePassword.isEmpty) {
-      return '';
-    }
-
-    await _unlockRepository(repositoryName, securePassword);
-    return securePassword;
-  }
-
-  Future<String?> _tryGetSecurePassword(
-      {required BuildContext context,
-      required String databaseId,
-      required String authenticationMode}) async {
-    if (authenticationMode == Constants.authModeManual) {
-      return null;
-    }
-
-    if (authenticationMode == Constants.authModeVersion2) {
-      final auth = LocalAuthentication();
-
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    return _readSecureStorage(databaseId, authenticationMode);
-  }
-
-  Future<String?> _readSecureStorage(String databaseId, String authMode) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
-  }
-
-  Future<bool?> _upgradeBiometricEntryToVersion2(
-      String databaseId, String password) async {
-    final addTempResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
-        password: password,
-        authMode: Constants.authModeVersion2);
-
-    if (addTempResult.exception != null) {
-      loggy.app(addTempResult.exception);
-
-      return null;
-    }
-
-    final deleteOldResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: Constants.authModeVersion1,
-        authenticationRequired: false);
-
-    if (deleteOldResult.exception != null) {
-      loggy.app(deleteOldResult.exception);
-
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> _unlockRepository(String repositoryName, String password) async {
-    final accessMode = await _repositories.unlockRepository(repositoryName,
-        password: password);
-
-    final message = (accessMode != null && accessMode != AccessMode.blind)
-        ? S.current.messageUnlockRepoOk(accessMode.name)
-        : S.current.messageUnlockRepoFailed;
-
-    showSnackBar(context, message: message);
-  }
-
-  Future<UnlockRepositoryResult?> _getManualPasswordAndUnlock(
-          {required String databaseId,
-          required String repositoryName,
-          required bool isBiometricsAvailable}) async =>
-      showDialog<UnlockRepositoryResult?>(
-          context: context,
-          builder: (BuildContext context) =>
-              ScaffoldMessenger(child: Builder(builder: ((context) {
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ActionsDialog(
-                      title: S.current.messageUnlockRepository,
-                      body: UnlockRepository(
-                          context: context,
-                          databaseId: databaseId,
-                          repositoryName: repositoryName,
-                          isBiometricsAvailable: isBiometricsAvailable,
-                          isPasswordValidation: false,
-                          unlockRepositoryCallback:
-                              _repositories.unlockRepository,
-                          onSecureRepositoryWithBiometricsCallback:
-                              _secureRepositoryWithBiometrics),
-                    ));
-              }))));
-
-  void _secureRepositoryWithBiometrics(
-      {required String repositoryName, required String value}) {
-    widget.settings.setAuthenticationMode(repositoryName, value);
-  }
-
-  void deleteRepository(RepoMetaInfo repoInfo, String authMode) =>
-      _repositories.deleteRepository(repoInfo, authMode);
-
   void reloadRepository() => _repositories.init();
 
   Future<void> showSettings() async {
@@ -1038,15 +787,12 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-            settings: widget.settings,
-            reposCubit: reposCubit,
-            isBiometricsAvailable: isBiometricsAvailable,
-            powerControl: _powerControl,
-            onShareRepository: _showShareRepository,
-            onTryGetSecurePassword: _tryGetSecurePassword,
-            panicCounter: _panicCounter,
-            natDetection: _natDetection,
-          ),
+              settings: widget.settings,
+              reposCubit: reposCubit,
+              powerControl: _powerControl,
+              panicCounter: _panicCounter,
+              natDetection: _natDetection,
+              isBiometricsAvailable: isBiometricsAvailable),
         ),
       ),
     );

@@ -123,8 +123,9 @@ class _FileDetailState extends State<FileDetail> {
                   Constants.notAvailableActionMessageDuration,
             ),
             EntryActionItem(
-                iconData: Icons.delete_outlined,
+                iconData: Icons.delete,
                 title: S.current.iconDelete,
+                textColor: Constants.dangerColor,
                 dense: true,
                 onTap: () => showDialog<String>(
                       context: widget.context,

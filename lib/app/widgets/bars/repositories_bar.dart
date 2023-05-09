@@ -3,26 +3,26 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-typedef UnlockRepoFunction = Future<void> Function(
-    {required String databaseId, required String repositoryName});
-
 class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
   const RepositoriesBar(
       {required this.reposCubit,
       required this.checkForBiometricsCallback,
-      required this.shareRepositoryOnTap,
-      required this.unlockRepositoryOnTap});
+      required this.getAuthenticationModeCallback,
+      required this.setAuthenticationModeCallback});
 
   final ReposCubit reposCubit;
+
   final CheckForBiometricsFunction checkForBiometricsCallback;
-  final void Function(RepoCubit) shareRepositoryOnTap;
-  final UnlockRepoFunction unlockRepositoryOnTap;
+  final String? Function(String repoName) getAuthenticationModeCallback;
+  final Future<void> Function(String repoName, String? value)
+      setAuthenticationModeCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +42,8 @@ class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
               child: _Picker(
                   reposCubit: reposCubit,
                   checkForBiometricsCallback: checkForBiometricsCallback,
-                  shareRepositoryOnTap: shareRepositoryOnTap,
-                  unlockRepositoryOnTap: unlockRepositoryOnTap,
+                  getAuthenticationModeCallback: getAuthenticationModeCallback,
+                  setAuthenticationModeCallback: setAuthenticationModeCallback,
                   borderColor: Colors.white))
         ]));
   }
@@ -63,14 +63,15 @@ class _Picker extends StatelessWidget {
   const _Picker(
       {required this.reposCubit,
       required this.checkForBiometricsCallback,
-      required this.shareRepositoryOnTap,
-      required this.unlockRepositoryOnTap,
+      required this.getAuthenticationModeCallback,
+      required this.setAuthenticationModeCallback,
       required this.borderColor});
 
   final ReposCubit reposCubit;
   final CheckForBiometricsFunction checkForBiometricsCallback;
-  final void Function(RepoCubit) shareRepositoryOnTap;
-  final UnlockRepoFunction unlockRepositoryOnTap;
+  final String? Function(String repoName) getAuthenticationModeCallback;
+  final Future<void> Function(String repoName, String? value)
+      setAuthenticationModeCallback;
   final Color borderColor;
 
   @override
@@ -203,25 +204,28 @@ class _Picker extends StatelessWidget {
           shape: Dimensions.borderBottomSheetTop,
           builder: (context) {
             return _List(reposCubit, checkForBiometricsCallback,
-                shareRepositoryOnTap, unlockRepositoryOnTap);
+                getAuthenticationModeCallback, setAuthenticationModeCallback);
           });
 }
 
-class _List extends StatelessWidget with OuiSyncAppLogger {
+class _List extends StatelessWidget
+    with RepositoryActionsMixin, OuiSyncAppLogger {
   _List(
       ReposCubit repositories,
       CheckForBiometricsFunction checkForBiometricsCallback,
-      void Function(RepoCubit) shareRepositoryOnTap,
-      UnlockRepoFunction unlockRepositoryOnTap)
+      String? Function(String repoName) getAuthenticationModeCallback,
+      Future<void> Function(String repoName, String? value)
+          setAuthenticationModeCallback)
       : _repositories = repositories,
         _checkForBiometricsCallback = checkForBiometricsCallback,
-        _shareRepositoryOnTap = shareRepositoryOnTap,
-        _unlockRepositoryOnTap = unlockRepositoryOnTap;
+        _getAuthenticationModeCallback = getAuthenticationModeCallback,
+        _setAuthenticationModeCallback = setAuthenticationModeCallback;
 
   final ReposCubit _repositories;
   final CheckForBiometricsFunction _checkForBiometricsCallback;
-  final void Function(RepoCubit) _shareRepositoryOnTap;
-  final UnlockRepoFunction _unlockRepositoryOnTap;
+  final String? Function(String repoName) _getAuthenticationModeCallback;
+  final Future<void> Function(String repoName, String? value)
+      _setAuthenticationModeCallback;
   final ValueNotifier<bool> _lockAllEnable = ValueNotifier<bool>(false);
 
   @override
@@ -252,8 +256,8 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                                 children: [
                                   Fields.actionIcon(
                                     const Icon(Icons.lock_outline),
-                                    size: Dimensions.sizeIconAverage,
-                                    padding: const EdgeInsets.all(0.0),
+                                    size: Dimensions.sizeIconSmall,
+                                    padding: EdgeInsets.zero,
                                     onPressed: lockAll
                                         ? () async =>
                                             await _lockAllRepositories(context)
@@ -431,7 +435,6 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
                   updateSettingsAndPop(context, repositoryName);
                 },
                         icon: Fields.accessModeIcon(accessMode),
-                        iconSize: Dimensions.sizeIconAverage,
                         iconColor: repositoryName == current
                             ? Colors.black87
                             : Colors.black54,
@@ -454,7 +457,7 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             );
           });
 
-  Row _getActionByAccessMode(
+  Widget _getActionByAccessMode(
     BuildContext context,
     String databaseId,
     String repositoryName,
@@ -468,14 +471,21 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
             : Icons.lock_outline;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Fields.actionIcon(Icon(modeIcon), onPressed: () async {
           if (repoCubit == null) return;
           if (accessMode == null) return;
 
           if (accessMode == AccessMode.blind) {
-            await _unlockRepositoryOnTap(
-                databaseId: databaseId, repositoryName: repositoryName);
+            await unlockRepository(context,
+                databaseId: databaseId,
+                repositoryName: repositoryName,
+                checkForBiometrics: _checkForBiometricsCallback,
+                getAuthenticationMode: _getAuthenticationModeCallback,
+                setAuthenticationMode: _setAuthenticationModeCallback,
+                cubitUnlockRepository: _repositories.unlockRepository);
 
             _lockAllEnable.value = true;
             return;
@@ -484,14 +494,15 @@ class _List extends StatelessWidget with OuiSyncAppLogger {
           await _repositories.lockRepository(repoCubit.settingsRepoEntry);
 
           _enableLockAllRepos();
-        }, color: Colors.black87, size: Dimensions.sizeIconAverage),
-        Fields.actionIcon(const Icon(Icons.share), onPressed: () {
+        }, color: Colors.black87),
+        Fields.actionIcon(const Icon(Icons.share), onPressed: () async {
           if (repoCubit == null) return;
 
           // TODO: Should we dismiss the repo list or leave it open to return to it... ?
           // Navigator.of(context).pop();
-          _shareRepositoryOnTap(repoCubit);
-        }, color: Colors.black87, size: Dimensions.sizeIconAverage)
+
+          await shareRepository(context, repository: repoCubit);
+        }, color: Colors.black87)
       ],
     );
   }
