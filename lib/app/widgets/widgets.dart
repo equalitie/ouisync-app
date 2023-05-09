@@ -34,6 +34,7 @@ export 'items/folder_description.dart';
 export 'items/labeled_switch.dart';
 export 'items/list_item.dart';
 export 'items/repo_description.dart';
+export 'items/repo_missing_item.dart';
 
 export 'selectors/access_mode_dropddown_menu.dart';
 export 'selectors/access_mode_selector.dart';
