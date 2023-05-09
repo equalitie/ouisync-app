@@ -3,7 +3,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../mixins/mixins.dart';
-import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 
 class LockedRepositoryState extends StatelessWidget
