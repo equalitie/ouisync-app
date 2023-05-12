@@ -5,6 +5,7 @@ import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 
@@ -12,7 +13,6 @@ import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
-import 'job.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -505,13 +505,16 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh(
+      {SortBy? sortBy = SortBy.type,
+      SortDirection? sortDirection = SortDirection.asc}) async {
     final path = state.currentFolder.path;
     bool errorShown = false;
 
     try {
       while (state.canRead) {
-        bool success = await _currentFolder.refresh();
+        bool success = await _currentFolder.refresh(
+            sortBy: sortBy, sortDirection: sortDirection);
 
         if (success) break;
         if (_currentFolder.state.isRoot) break;

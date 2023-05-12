@@ -2,39 +2,31 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 abstract class BaseItem extends Equatable {
-  const BaseItem(this.name, this.path);
+  const BaseItem(this.name, this.path, this.size);
 
   @override
-  List<Object> get props => [
-        name,
-        path,
-      ];
+  List<Object> get props => [name, path, size];
 
   final String name;
   final String path;
+  final int size;
 }
 
 class FileItem extends BaseItem {
-  const FileItem({
-    required String name,
-    required String path,
-    required this.size,
-  }) : super(name, path);
-
-  final int size;
+  const FileItem(
+      {required String name, required String path, required int size})
+      : super(name, path, size);
 
   @override
-  List<Object> get props => [
-        ...super.props,
-        size,
-      ];
+  List<Object> get props => [...super.props];
 }
 
 class FolderItem extends BaseItem {
-  const FolderItem({
-    required String name,
-    required String path,
-  }) : super(name, path);
+  const FolderItem({required String name, required String path, int size = 0})
+      : super(name, path, size);
+
+  @override
+  List<Object> get props => [...super.props];
 }
 
 class RepoItem extends BaseItem {
@@ -43,7 +35,7 @@ class RepoItem extends BaseItem {
       required String path,
       required this.accessMode,
       required this.isDefault})
-      : super(name, path);
+      : super(name, path, 0);
 
   final AccessMode accessMode;
   final bool isDefault;
@@ -55,7 +47,7 @@ class RepoItem extends BaseItem {
 class RepoMissingItem extends BaseItem {
   const RepoMissingItem(
       {required String name, required String path, required this.message})
-      : super(name, path);
+      : super(name, path, 0);
 
   final String message;
 
