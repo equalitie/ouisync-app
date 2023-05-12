@@ -2,22 +2,27 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 
+import '../cubits/cubits.dart';
+import '../utils/utils.dart';
 import 'item.dart';
-import '../utils/strings.dart';
-import '../utils/actions.dart';
-import '../cubits/repo.dart';
 
 class FolderState extends Equatable {
   final String path;
   final List<BaseItem> content;
+  final SortBy sortBy;
+  final SortDirection sortDirection;
 
-  const FolderState({this.path = Strings.root, this.content = const []});
+  const FolderState(
+      {this.path = Strings.root,
+      this.content = const [],
+      this.sortBy = SortBy.name,
+      this.sortDirection = SortDirection.desc});
 
   bool get isRoot => path == Strings.root;
   String get parent => getDirname(path);
 
   @override
-  List<Object?> get props => [path, content];
+  List<Object?> get props => [path, content, sortBy, sortDirection];
 }
 
 class Folder {
@@ -40,7 +45,8 @@ class Folder {
   }
 
   // Returns true if the directory existed.
-  Future<bool> refresh() => _refresher.refresh();
+  Future<bool> refresh({SortBy? sortBy, SortDirection? sortDirection}) =>
+      _refresher.refresh(sortBy: sortBy, sortDirection: sortDirection);
 }
 
 // This class helps piling up of too many calls to refresh. It does so by first
@@ -54,7 +60,7 @@ class _Refresher {
 
   List<Completer> _completers = <Completer>[];
 
-  Future<bool> refresh() async {
+  Future<bool> refresh({SortBy? sortBy, SortDirection? sortDirection}) async {
     final completer = Completer<bool>();
     final future = completer.future;
     _completers.add(completer);
@@ -63,13 +69,14 @@ class _Refresher {
 
     if (!_running) {
       _running = true;
-      _runner(); // Spawn, don't await
+      _runner(
+          sortBy: sortBy, sortDirection: sortDirection); // Spawn, don't await
     }
 
     return future;
   }
 
-  void _runner() async {
+  void _runner({SortBy? sortBy, SortDirection? sortDirection}) async {
     try {
       while (_hasNextJob) {
         _hasNextJob = false;
@@ -85,11 +92,27 @@ class _Refresher {
 
         try {
           final content = await folder.repo.getFolderContents(path);
-          content.sort((a, b) => _typeId(a).compareTo(_typeId(b)));
+
+          switch (sortBy) {
+            case SortBy.name:
+              content.sort(_sortByName(sortDirection ?? SortDirection.asc));
+              break;
+            case SortBy.size:
+              content.sort(_sortBySize(sortDirection ?? SortDirection.asc));
+              break;
+            case SortBy.type:
+              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
+              break;
+            default:
+              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
+          }
 
           if (path == folder.state.path) {
-            folder.state =
-                FolderState(path: folder.state.path, content: content);
+            folder.state = FolderState(
+                path: folder.state.path,
+                content: content,
+                sortBy: folder.state.sortBy,
+                sortDirection: folder.state.sortDirection);
           }
         } catch (_) {
           if (path == folder.state.path) {
@@ -106,6 +129,30 @@ class _Refresher {
       _running = false;
     }
   }
+
+  int Function(BaseItem, BaseItem)? _sortByName(SortDirection direction) {
+    return direction == SortDirection.asc
+        ? (a, b) => _nameComparator(a, b)
+        : (b, a) => _nameComparator(a, b);
+  }
+
+  int _nameComparator(BaseItem a, BaseItem b) => a.name.compareTo(b.name);
+
+  int Function(BaseItem, BaseItem)? _sortBySize(SortDirection direction) {
+    return direction == SortDirection.asc
+        ? (a, b) => _sizeComparator(a, b)
+        : (b, a) => _sizeComparator(a, b);
+  }
+
+  int _sizeComparator(BaseItem a, BaseItem b) => a.size.compareTo(b.size);
+
+  int Function(BaseItem, BaseItem)? _sortByType(SortDirection direction) {
+    return direction == SortDirection.asc
+        ? (a, b) => _typeComparator(_typeId(a), _typeId(b))
+        : (b, a) => _typeComparator(_typeId(a), _typeId(b));
+  }
+
+  int _typeComparator(int a, int b) => a.compareTo(b);
 
   int _typeId(BaseItem item) {
     if (item is FolderItem) return 0;
