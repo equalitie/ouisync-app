@@ -4,6 +4,7 @@ export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repositories_bar.dart';
 export 'bars/search_bar.dart';
+export 'bars/sort_contents_bar.dart';
 
 export 'buttons/dialog_negative_button.dart';
 export 'buttons/dialog_positive_button.dart';
