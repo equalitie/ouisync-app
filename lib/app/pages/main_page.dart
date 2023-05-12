@@ -78,8 +78,15 @@ class _MainPageState extends State<MainPage>
   UpgradeExistsCubit get _upgradeExistsCubit =>
       BlocProvider.of<UpgradeExistsCubit>(context);
 
+  SortListCubit? _sortListCubit;
+
   @override
   void initState() {
+    _sortListCubit = SortListCubit.create(
+        sortBy: SortBy.name,
+        direction: SortDirection.asc,
+        listType: ListType.repos);
+
     super.initState();
 
     widget.session.networkEvents.listen((event) async {
@@ -181,6 +188,14 @@ class _MainPageState extends State<MainPage>
   Widget buildMainWidget() {
     return _repositories.builder((repos) {
       if (repos.showList) {
+        /// This needs to be structured better
+        /// TODO: Add sorting to repo list
+        // _sortListCubit?.sortBy(SortBy.name);
+
+        // final sortBy = SortBy.name;
+        // final sortDirection =
+        //     _sortListCubit?.state.direction ?? SortDirection.asc;
+
         return RepoListState(
             reposCubit: repos,
             bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
@@ -237,22 +252,22 @@ class _MainPageState extends State<MainPage>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: _buildOuiSyncBar(),
-        body: WillPopScope(
-            child: Column(
-              children: <Widget>[
-                _repositories.builder((repos) =>
-                    RepositoryProgress(repos.currentRepo?.maybeCubit)),
-                Expanded(child: buildMainWidget()),
-              ],
-            ),
-            onWillPop: _onBackPressed),
-        floatingActionButton: _repositories
-            .builder((repos) => _buildFAB(context, repos.currentRepo)),
-        bottomSheet: _bottomSheet);
-  }
+  Widget build(BuildContext context) => Scaffold(
+      appBar: _buildOuiSyncBar(),
+      body: WillPopScope(
+          child: Column(
+            children: <Widget>[
+              _repositories.builder((repos) => SortContentsBar(
+                  sortListCubit: _sortListCubit!, reposCubit: repos)),
+              _repositories.builder(
+                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
+              Expanded(child: buildMainWidget()),
+            ],
+          ),
+          onWillPop: _onBackPressed),
+      floatingActionButton: _repositories
+          .builder((repos) => _buildFAB(context, repos.currentRepo)),
+      bottomSheet: _bottomSheet);
 
   Future<bool> _onBackPressed() async {
     final currentRepo = _currentRepo;
