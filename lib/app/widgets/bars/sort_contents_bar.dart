@@ -30,20 +30,22 @@ class _SortContentsBarState extends State<SortContentsBar> {
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(
                           Radius.circular(Dimensions.radiusSmall))),
-                  child: Padding(
-                      padding: Dimensions.paddingItem,
-                      child: Row(children: [
-                        GestureDetector(
-                            child: Fields.constrainedText(
+                  child: GestureDetector(
+                      child: Padding(
+                          padding: Dimensions.paddingItem,
+                          child: Row(children: [
+                            Fields.constrainedText(
                                 state.sortBy.name.capitalize(),
                                 flex: 0,
                                 fontSize: Dimensions.fontSmall,
                                 fontWeight: FontWeight.normal),
-                            onTap: () async => await _showSortByDialog()),
-                        Dimensions.spacingHorizontalHalf,
-                        Fields.actionIcon(_getDirectionArrow(state.direction),
-                            onPressed: () => _updateSortDirection(state))
-                      ]))));
+                            Dimensions.spacingHorizontalHalf,
+                            Fields.actionIcon(
+                                _getDirectionArrow(state.direction),
+                                onPressed: () => _updateSortDirection(state))
+                          ])),
+                      onTap: () async => await _showSortByDialog()),
+                ));
 
   Icon _getDirectionArrow(SortDirection direction) {
     return direction == SortDirection.asc
