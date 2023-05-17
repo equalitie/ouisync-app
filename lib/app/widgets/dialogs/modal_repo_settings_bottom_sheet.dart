@@ -13,7 +13,6 @@ class RepositorySettings extends StatefulWidget {
   const RepositorySettings(
       {required this.context,
       required this.cubit,
-      required this.data,
       required this.checkForBiometrics,
       required this.getAuthenticationMode,
       required this.renameRepository,
@@ -21,7 +20,6 @@ class RepositorySettings extends StatefulWidget {
 
   final BuildContext context;
   final RepoCubit cubit;
-  final RepoItem data;
 
   final Future<bool?> Function() checkForBiometrics;
   final String? Function(String repoName) getAuthenticationMode;

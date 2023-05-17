@@ -4,7 +4,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
-import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget with RepositoryActionsMixin {
@@ -12,6 +11,7 @@ class RepoListState extends StatelessWidget with RepositoryActionsMixin {
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
       required this.onCheckForBiometrics,
+      required this.onShowRepoSettings,
       required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed,
       required this.onGetAuthenticationMode});
@@ -20,6 +20,8 @@ class RepoListState extends StatelessWidget with RepositoryActionsMixin {
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
   final Future<bool?> Function() onCheckForBiometrics;
+  final Future<void> Function(BuildContext context,
+      {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
   final String? Function(String repoName) onGetAuthenticationMode;
@@ -92,30 +94,9 @@ class RepoListState extends StatelessWidget with RepositoryActionsMixin {
                         return;
                       }
 
-                      await _showRepoSettings(parentContext,
-                          repoCubit: cubit, data: repoItem);
+                      await onShowRepoSettings(parentContext, repoCubit: cubit);
                     });
 
                 return listItem;
               }));
-
-  Future<dynamic> _showRepoSettings(
-    BuildContext context, {
-    required RepoCubit repoCubit,
-    required BaseItem data,
-  }) =>
-      showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return RepositorySettings(
-                context: context,
-                cubit: repoCubit,
-                data: data as RepoItem,
-                checkForBiometrics: onCheckForBiometrics,
-                getAuthenticationMode: onGetAuthenticationMode,
-                renameRepository: reposCubit.renameRepository,
-                deleteRepository: reposCubit.deleteRepository);
-          });
 }
