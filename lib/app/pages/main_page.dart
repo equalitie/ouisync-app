@@ -200,6 +200,7 @@ class _MainPageState extends State<MainPage>
             reposCubit: repos,
             bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
             onCheckForBiometrics: _checkForBiometricsCallback,
+            onShowRepoSettings: _showRepoSettings,
             onNewRepositoryPressed: _addRepository,
             onImportRepositoryPressed: _importRepository,
             onGetAuthenticationMode: widget.settings.getAuthenticationMode);
@@ -302,8 +303,10 @@ class _MainPageState extends State<MainPage>
   }
 
   _buildOuiSyncBar() => OuiSyncBar(
+        reposCubit: _repositories,
         repoPicker: _buildRepositoriesBar(),
-        settingsButton: _buildSettingsIcon(),
+        appSettingsButton: _buildAppSettingsIcon(),
+        repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
   RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
@@ -312,9 +315,9 @@ class _MainPageState extends State<MainPage>
       getAuthenticationModeCallback: widget.settings.getAuthenticationMode,
       setAuthenticationModeCallback: widget.settings.setAuthenticationMode);
 
-  Widget _buildSettingsIcon() {
+  Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: () async => await showSettings(),
+        onPressed: () async => await _showAppSettings(),
         size: Dimensions.sizeIconSmall,
         color: Theme.of(context).colorScheme.surface);
 
@@ -343,6 +346,19 @@ class _MainPageState extends State<MainPage>
       ),
     );
   }
+
+  Widget _buildRepoSettingsIcon() =>
+      Fields.actionIcon(const Icon(Icons.more_vert_rounded),
+          onPressed: () async {
+        final cubit = _currentRepo?.maybeCubit;
+        if (cubit == null) {
+          return;
+        }
+
+        await _showRepoSettings(context, repoCubit: cubit);
+      },
+          size: Dimensions.sizeIconSmall,
+          color: Theme.of(context).colorScheme.surface);
 
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
@@ -785,7 +801,7 @@ class _MainPageState extends State<MainPage>
 
   void reloadRepository() => _repositories.init();
 
-  Future<void> showSettings() async {
+  Future<void> _showAppSettings() async {
     final reposCubit = _repositories;
     final upgradeExistsCubit = _upgradeExistsCubit;
 
@@ -812,4 +828,20 @@ class _MainPageState extends State<MainPage>
       ),
     );
   }
+
+  Future<void> _showRepoSettings(BuildContext context,
+          {required RepoCubit repoCubit}) =>
+      showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (context) {
+            return RepositorySettings(
+                context: context,
+                cubit: repoCubit,
+                checkForBiometrics: _checkForBiometricsCallback,
+                getAuthenticationMode: widget.settings.getAuthenticationMode,
+                renameRepository: _repositories.renameRepository,
+                deleteRepository: _repositories.deleteRepository);
+          });
 }
