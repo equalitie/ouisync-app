@@ -19,26 +19,26 @@ class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
   final RepoCubit cubit;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(S.current.titleFolderActions),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _buildAction(
-                name: S.current.actionNewFolder,
-                icon: Icons.create_new_folder_outlined,
-                action: () => createFolderDialog(context, cubit)),
-            _buildAction(
-                name: S.current.actionNewFile,
-                icon: Icons.upload_file_outlined,
-                action: () async => await addFile(context, cubit))
-          ]),
-        ]);
-  }
+  Widget build(BuildContext context) => Container(
+      padding: Dimensions.paddingBottomSheet,
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Fields.bottomSheetTitle(S.current.titleFolderActions),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              _buildAction(
+                  name: S.current.actionNewFolder,
+                  icon: Icons.create_new_folder_outlined,
+                  action: () => createFolderDialog(context, cubit)),
+              _buildAction(
+                  name: S.current.actionNewFile,
+                  icon: Icons.upload_file_outlined,
+                  action: () async => await addFile(context, cubit))
+            ])
+          ]));
 
   Widget _buildAction({name, icon, action}) => Padding(
       padding: Dimensions.paddingBottomSheetActions,
