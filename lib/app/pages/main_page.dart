@@ -78,7 +78,7 @@ class _MainPageState extends State<MainPage>
   UpgradeExistsCubit get _upgradeExistsCubit =>
       BlocProvider.of<UpgradeExistsCubit>(context);
 
-  SortListCubit? _sortListCubit;
+  late final SortListCubit _sortListCubit;
 
   @override
   void initState() {
@@ -258,8 +258,6 @@ class _MainPageState extends State<MainPage>
       body: WillPopScope(
           child: Column(
             children: <Widget>[
-              _repositories.builder((repos) => SortContentsBar(
-                  sortListCubit: _sortListCubit!, reposCubit: repos)),
               _repositories.builder(
                   (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
               Expanded(child: buildMainWidget()),
@@ -448,6 +446,8 @@ class _MainPageState extends State<MainPage>
         navigationBar,
         // TODO: A shadow would be nicer.
         const Divider(height: 3),
+        SortContentsBar(
+            sortListCubit: _sortListCubit, reposCubit: _repositories),
         Expanded(child: child),
       ],
     );
