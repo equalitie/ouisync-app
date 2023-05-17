@@ -54,7 +54,8 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                     onPressed: _collapsableAction,
                     padding: EdgeInsets.all(0.0),
                     alignment: Alignment.center,
-                    size: Dimensions.sizeIconBig)
+                    size: Dimensions.sizeIconBig,
+                    color: Colors.black)
               ],
             ),
             Fields.autosizeText(

@@ -74,7 +74,7 @@ class _RenameState extends State<Rename> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"$_oldName"',
-              flex: 0, fontWeight: FontWeight.w400),
+              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
           Dimensions.spacingVerticalDouble,
           Fields.formTextField(
               context: context,

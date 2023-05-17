@@ -316,8 +316,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
         onPressed: () async => await _showAppSettings(),
-        size: Dimensions.sizeIconSmall,
-        color: Theme.of(context).colorScheme.surface);
+        size: Dimensions.sizeIconSmall);
 
     return BlocBuilder<UpgradeExistsCubit, bool>(
       builder: (context, updateExists) =>
@@ -354,9 +353,7 @@ class _MainPageState extends State<MainPage>
         }
 
         await _showRepoSettings(context, repoCubit: cubit);
-      },
-          size: Dimensions.sizeIconSmall,
-          color: Theme.of(context).colorScheme.surface);
+      }, size: Dimensions.sizeIconSmall);
 
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);

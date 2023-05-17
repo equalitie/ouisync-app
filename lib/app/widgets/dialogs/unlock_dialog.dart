@@ -41,7 +41,7 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"${repository.name}"',
-              flex: 0, fontWeight: FontWeight.w400),
+              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,
@@ -60,7 +60,8 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
                                     ? Constants.iconVisibilityOn
                                     : Constants.iconVisibilityOff,
                                 size: Dimensions.sizeIconSmall,
-                              ), onPressed: () {
+                              ),
+                              color: Colors.black, onPressed: () {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
                           hint: S.current.messageRepositoryPassword,
