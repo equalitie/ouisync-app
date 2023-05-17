@@ -392,7 +392,7 @@ class Fields {
     double size = Dimensions.sizeIconMicro,
     EdgeInsets padding = Dimensions.paddingIconButton,
     AlignmentGeometry alignment = Dimensions.alignmentIconButton,
-    Color color = Colors.black,
+    Color? color,
     bool autofocus = false,
     String? tooltip,
     BoxConstraints? constraints,

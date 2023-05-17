@@ -43,6 +43,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
                             Dimensions.spacingHorizontalHalf,
                             Fields.actionIcon(
                                 _getDirectionArrow(state.direction),
+                                color: Colors.black,
                                 onPressed: () => _updateSortDirection(state))
                           ])),
                       onTap: () async => await _showSortByDialog()),

@@ -60,7 +60,8 @@ class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
                                     ? Constants.iconVisibilityOn
                                     : Constants.iconVisibilityOff,
                                 size: Dimensions.sizeIconSmall,
-                              ), onPressed: () {
+                              ),
+                              color: Colors.black, onPressed: () {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
                           hint: S.current.messageRepositoryPassword,
