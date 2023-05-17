@@ -102,7 +102,8 @@ class _GetPasswordStateState extends State<GetPasswordState> {
     return Container(
         padding: Dimensions.paddingDialog,
         child: Row(children: [
-          Fields.constrainedText(title, flex: 0, fontSize: Dimensions.fontBig)
+          Fields.constrainedText(title,
+              flex: 0, fontSize: Dimensions.fontBig, color: Colors.black)
         ]));
   }
 

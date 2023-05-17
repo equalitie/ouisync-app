@@ -32,7 +32,7 @@ class RenameRepository extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"$repositoryName"',
-              flex: 0, fontWeight: FontWeight.w400),
+              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
           Fields.formTextField(
               context: context,
               label: S.current.labelRenameRepository,

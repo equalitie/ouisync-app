@@ -18,7 +18,9 @@ class _SearchBarState extends State<SearchBar> {
         textAlign: TextAlign.center,
       )),
       Fields.actionIcon(const Icon(Icons.search_outlined),
-          onPressed: () {}, size: Dimensions.sizeIconAverage)
+          onPressed: () {},
+          size: Dimensions.sizeIconAverage,
+          color: Colors.black)
     ]));
   }
 }

@@ -78,7 +78,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
                 Expanded(
                     child: Column(children: [
                   Fields.constrainedText(accessMode.name.capitalize(),
-                      fontWeight: FontWeight.normal)
+                      fontWeight: FontWeight.normal, color: Colors.black)
                 ])),
                 Container(
                     constraints: BoxConstraints(
@@ -86,7 +86,8 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
                     child: Row(children: [
                       Fields.constrainedText(_tokenDescription(accessMode),
                           fontSize: Dimensions.fontMicro,
-                          fontWeight: FontWeight.normal)
+                          fontWeight: FontWeight.normal,
+                          color: Colors.black)
                     ])),
                 Dimensions.spacingVerticalHalf
               ])
@@ -107,7 +108,7 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
           ]),
           Row(children: [
             Fields.constrainedText(accessMode.name.capitalize(),
-                fontWeight: FontWeight.normal)
+                fontWeight: FontWeight.normal, color: Colors.black)
           ])
         ],
       ));

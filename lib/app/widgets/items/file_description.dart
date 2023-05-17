@@ -46,6 +46,7 @@ class FileDescription extends StatelessWidget with OuiSyncAppLogger {
         flex: 0,
         fontSize: Dimensions.fontSmall,
         fontWeight: FontWeight.w400,
+        color: Colors.black,
         softWrap: true);
   }
 

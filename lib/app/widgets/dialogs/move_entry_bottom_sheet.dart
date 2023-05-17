@@ -58,7 +58,8 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
               text: getBasename(widget.path)),
           Fields.constrainedText(
               S.current.messageMoveEntryOrigin(getDirname(widget.path)),
-              fontWeight: FontWeight.w800),
+              fontWeight: FontWeight.w800,
+              color: Colors.black),
           _selectActions(context)
         ],
       ),

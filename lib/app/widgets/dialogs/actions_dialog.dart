@@ -52,7 +52,9 @@ class _ActionsDialogState extends State<ActionsDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Fields.constrainedText(widget.title,
-                          flex: 0, fontSize: Dimensions.fontBig),
+                          flex: 0,
+                          fontSize: Dimensions.fontBig,
+                          color: Colors.black),
                       Dimensions.spacingVertical,
                       widget.body!,
                     ],

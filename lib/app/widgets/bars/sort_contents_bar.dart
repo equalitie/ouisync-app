@@ -38,10 +38,12 @@ class _SortContentsBarState extends State<SortContentsBar> {
                                 state.sortBy.name.capitalize(),
                                 flex: 0,
                                 fontSize: Dimensions.fontSmall,
-                                fontWeight: FontWeight.normal),
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black),
                             Dimensions.spacingHorizontalHalf,
                             Fields.actionIcon(
                                 _getDirectionArrow(state.direction),
+                                color: Colors.black,
                                 onPressed: () => _updateSortDirection(state))
                           ])),
                       onTap: () async => await _showSortByDialog()),
