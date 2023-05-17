@@ -64,12 +64,12 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Row(children: [
-                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0)
+                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0, color: Colors.black)
               ]),
               if (_isDesktop)
                 Row(children: [
                   Fields.constrainedText('(Available on mobile)',
-                      flex: 0, fontWeight: FontWeight.w200)
+                      flex: 0, fontWeight: FontWeight.w200, color: Colors.black)
                 ])
             ]),
         Dimensions.spacingVerticalDouble,
@@ -156,7 +156,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0),
+            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0, color: Colors.black),
           ],
         ),
         Dimensions.spacingVerticalDouble,

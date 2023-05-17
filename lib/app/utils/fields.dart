@@ -364,7 +364,7 @@ class Fields {
           bool softWrap = true,
           double fontSize = Dimensions.fontAverage,
           FontWeight fontWeight = FontWeight.normal,
-          Color color = Colors.black,
+          Color? color,
           int maxLines = 1}) =>
       Expanded(
         key: key,
@@ -375,8 +375,7 @@ class Fields {
           softWrap: softWrap,
           overflow: textOverflow,
           maxLines: maxLines,
-          style: TextStyle(
-              fontSize: fontSize, fontWeight: fontWeight, color: color),
+          style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
         ),
       );
 

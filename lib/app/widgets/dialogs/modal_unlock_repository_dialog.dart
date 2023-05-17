@@ -50,7 +50,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"$repositoryName"',
-              flex: 0, fontWeight: FontWeight.w400),
+              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,

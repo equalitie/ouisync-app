@@ -159,8 +159,9 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Fields.constrainedText(dst),
+                Fields.constrainedText(dst, color: Colors.black),
                 Fields.actionIcon(const Icon(Icons.more_horiz),
+                    color: Colors.black,
                     onPressed: () async => await _changeDestinationPath(dst))
               ],
             )
@@ -270,7 +271,8 @@ class _PickLocationAndroidState extends State<PickLocationAndroid> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Fields.constrainedText(drive.defaultDirRelative()),
+                Fields.constrainedText(drive.defaultDirRelative(),
+                    color: Colors.black),
                 Fields.actionIcon(const Icon(Icons.more_horiz),
                     onPressed: () async => await _changeDestinationPath(drives))
               ],

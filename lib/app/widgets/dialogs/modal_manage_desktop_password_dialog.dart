@@ -152,7 +152,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Fields.constrainedText('"${widget.repositoryName}"',
-                flex: 0, fontWeight: FontWeight.w400),
+                flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
             Dimensions.spacingVerticalDouble,
             ..._passwordSection(),
             _manualPasswordWarning(),

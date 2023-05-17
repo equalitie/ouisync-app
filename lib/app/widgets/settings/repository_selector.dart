@@ -45,7 +45,8 @@ class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
                       Row(
                         children: [
                           Fields.constrainedText(repoName,
-                              fontWeight: FontWeight.normal),
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black),
                         ],
                       ),
                     ],
@@ -67,7 +68,7 @@ class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
                           color: Theme.of(context).primaryColor),
                       Dimensions.spacingHorizontalDouble,
                       Fields.constrainedText(repo.name,
-                          fontWeight: FontWeight.normal),
+                          fontWeight: FontWeight.normal, color: Colors.black),
                     ],
                   ),
                 ),
