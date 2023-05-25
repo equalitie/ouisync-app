@@ -7,7 +7,7 @@ import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
-class RepositoriesBar extends StatelessWidget with PreferredSizeWidget {
+class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   const RepositoriesBar(
       {required this.reposCubit,
       required this.checkForBiometricsCallback,
