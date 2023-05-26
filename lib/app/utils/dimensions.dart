@@ -10,8 +10,9 @@ class Dimensions {
   static const double fontSmall = 14.0;
   static const double fontMicro = 12.0;
 
-  static const Size sizeInPageButtonRegular = Size(180.0, 45.0);
-  static const Size sizeInPageButtonLong = Size(280.0, 45.0);
+  static const Size sizeInPageButtonSmall = Size(120.0, 40.0);
+  static const Size sizeInPageButtonRegular = Size(150.0, 40.0);
+  static const Size sizeInPageButtonLong = Size(240.0, 40.0);
 
   static const Size sizeCircularProgressIndicatorSmall = Size(14.0, 14.0);
   static const Size sizeCircularProgressIndicatorAverage = Size(50.0, 50.0);
