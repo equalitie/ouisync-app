@@ -7,6 +7,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/security.dart';
+import '../mixins/repo_actions_mixin.dart';
 import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -30,7 +31,7 @@ class RepositorySecurity extends StatefulWidget {
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
-    with OuiSyncAppLogger {
+    with RepositoryActionsMixin, OuiSyncAppLogger {
   final _passwordInputKey = GlobalKey<FormFieldState>();
   final _retypePasswordInputKey = GlobalKey<FormFieldState>();
 
@@ -102,7 +103,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           ' password?\n\nThe repository will unlock '
                           'automatically, unless a local password is added again';
 
-                      final saveChanges = await _confirmSaveChanges(
+                      final saveChanges = await confirmSaveChanges(
                         context,
                         positiveButtonText,
                         confirmationMessage,
@@ -117,7 +118,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Fields.inPageButton(
                     onPressed: () async {
-                      final newPassword = _validatePassword();
+                      final password = _retypedPasswordController.text;
+                      if (password.isEmpty) return;
+
+                      final newPassword = validatePassword(password,
+                          passwordInputKey: _passwordInputKey,
+                          retypePasswordInputKey: _retypePasswordInputKey);
 
                       if (newPassword == null) return;
 
@@ -125,7 +131,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       final confirmationMessage = 'Update this repository local'
                           ' password?';
 
-                      final saveChanges = await _confirmSaveChanges(
+                      final saveChanges = await confirmSaveChanges(
                           context, positiveButtonText, confirmationMessage);
 
                       if (saveChanges == null || !saveChanges) return;
@@ -142,7 +148,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               Fields.inPageButton(
                   onPressed: passwordMode == PasswordMode.none
                       ? () async {
-                          final newPassword = _validatePassword();
+                          final password = _retypedPasswordController.text;
+                          if (password.isEmpty) return;
+
+                          final newPassword = validatePassword(password,
+                              passwordInputKey: _passwordInputKey,
+                              retypePasswordInputKey: _retypePasswordInputKey);
 
                           if (newPassword == null) return;
 
@@ -151,7 +162,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                               'Add a local password for '
                               'this repository?';
 
-                          final saveChanges = await _confirmSaveChanges(
+                          final saveChanges = await confirmSaveChanges(
                               context, positiveButtonText, confirmationMessage);
 
                           if (saveChanges == null || !saveChanges) return;
@@ -167,19 +178,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   size: Dimensions.sizeInPageButtonLong,
                   focusNode: _passwordAction)
             ]);
-
-  String? _validatePassword() {
-    final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
-    final isRetypePasswordOk =
-        _retypePasswordInputKey.currentState?.validate() ?? false;
-
-    if (!(isPasswordOk && isRetypePasswordOk)) return null;
-
-    _passwordInputKey.currentState!.save();
-    _retypePasswordInputKey.currentState!.save();
-
-    return _retypedPasswordController.text;
-  }
 
   Widget _biometrics(SecurityState state) =>
       BlocBuilder<SecurityCubit, SecurityState>(
@@ -206,7 +204,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                               ' and use the biometric validation for unlocking.';
                         }
 
-                        final saveChanges = await _confirmSaveChanges(
+                        final saveChanges = await confirmSaveChanges(
                             context, positiveButtonText, confirmationMessage);
 
                         if (saveChanges == null || !saveChanges) return;
@@ -526,25 +524,5 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     // security.clearNewPassword();
     // security.setNewAuthMode('');
-  }
-
-  Future<bool?> _confirmSaveChanges(
-      BuildContext context, String positiveButtonText, String message) async {
-    final saveChanges = await Dialogs.alertDialogWithActions(
-        context: context,
-        title: S.current.titleSaveChanges,
-        body: [
-          Text(message)
-        ],
-        actions: [
-          TextButton(
-              child: Text(positiveButtonText),
-              onPressed: () => Navigator.of(context).pop(true)),
-          TextButton(
-              child: Text(S.current.actionCancel),
-              onPressed: () => Navigator.of(context).pop(false))
-        ]);
-
-    return saveChanges;
   }
 }
