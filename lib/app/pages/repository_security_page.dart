@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:badges/badges.dart' as b;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -32,7 +31,17 @@ class RepositorySecurity extends StatefulWidget {
 
 class _RepositorySecurityState extends State<RepositorySecurity>
     with OuiSyncAppLogger {
+  final _passwordInputKey = GlobalKey<FormFieldState>();
+  final _retypePasswordInputKey = GlobalKey<FormFieldState>();
+
+  final TextEditingController _passwordController =
+      TextEditingController(text: null);
+  final TextEditingController _retypedPasswordController =
+      TextEditingController(text: null);
+
   late final SecurityCubit security;
+
+  final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
 
   @override
   void initState() {
@@ -49,313 +58,245 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
-      body: WillPopScope(
-          child: SingleChildScrollView(
-              child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Column(children: [
-                    _addLocalPassword(
-                        context, security.state.isBiometricsAvailable),
-                    _password(),
-                    _biometrics(),
-                    _saveChanges()
-                  ]))),
-          onWillPop: () async => await _onBackPressed(context)));
+      body: SingleChildScrollView(
+          child: Container(
+              child: BlocBuilder<SecurityCubit, SecurityState>(
+                  bloc: security,
+                  builder: (context, state) => Column(children: [
+                        _pasword(state),
+                        Divider(height: 30.0),
+                        _biometrics(state)
+                      ])))));
 
-  Future<bool> _onBackPressed(BuildContext context) async {
-    if (security.state.hasUnsavedChanges) {
-      final discardChanges = await _discardUnsavedChangesAlert(context);
-      return discardChanges ?? false;
-    }
-
-    return true;
+  Widget _pasword(SecurityState state) {
+    return Container(
+        padding: Dimensions.paddingDialog,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(state.passwordModeTitle),
+          Dimensions.spacingVerticalDouble,
+          PasswordValidation(
+              passwordMode: state.passwordMode,
+              passwordInputKey: _passwordInputKey,
+              retypePasswordInputKey: _retypePasswordInputKey,
+              passwordController: _passwordController,
+              retypedPasswordController: _retypedPasswordController,
+              actions: _passwordActions),
+          Dimensions.spacingVertical
+        ]));
   }
 
-  Future<bool?> _discardUnsavedChangesAlert(BuildContext context) async =>
-      await Dialogs.alertDialogWithActions(
-          context: context,
-          title: S.current.titleUnsavedChanges,
-          body: [
-            Text(S.current.messageUnsavedChanges)
-          ],
-          actions: [
-            TextButton(
-                child: Text(S.current.actionDiscard),
-                onPressed: () => Navigator.of(context).pop(true)),
-            TextButton(
-                child: Text(S.current.actionCancel),
-                onPressed: () => Navigator.of(context).pop(false))
-          ]);
-
-  Widget _addLocalPassword(BuildContext context, bool isBiometricsAvailable) =>
-      BlocBuilder<SecurityCubit, SecurityState>(
-          bloc: security,
-          builder: (context, state) => state.showAddPassword
-              ? Opacity(
-                  opacity: state.useBiometrics ? 0.3 : 1,
-                  child: Column(children: [
-                    ListTile(
-                        leading: const Icon(Icons.password_rounded,
-                            color: Colors.black),
-                        title: Text(S.current.messageAddLocalPassword),
-                        onTap: state.useBiometrics
-                            ? null
-                            : () async {
-                                final passwordState = GetPasswordResult(
-                                    mode: Constants.addPasswordMode,
-                                    currentPassword: '');
-
-                                final newPasswordState =
-                                    await Navigator.push<GetPasswordResult>(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                GetPasswordState(
-                                                    passwordState:
-                                                        passwordState)));
-
-                                if (newPasswordState == null) {
-                                  return;
-                                }
-
-                                if (newPasswordState.changed) {
-                                  final newPassword =
-                                      newPasswordState.newPassword == null
-                                          ? ''
-                                          : newPasswordState.newPassword!;
-
-                                  security.setNewPassword(newPassword);
-                                  security
-                                      .setNewAuthMode(Constants.authModeManual);
-                                }
-                              }),
-                    Divider()
-                  ]))
-              : SizedBox());
-
-  Widget _password() => BlocBuilder<SecurityCubit, SecurityState>(
-      bloc: security,
-      builder: (context, state) {
-        final password = state.newPassword.isEmpty
-            ? state.currentPassword
-            : state.newPassword;
-
-        final actionsEnabled = password.isNotEmpty;
-
-        final canRemove = (state.currentAuthMode == Constants.authModeManual &&
-            state.newPassword.isEmpty);
-
-        return state.showManagePassword
-            ? Column(children: [
-                ListTile(
-                    leading:
-                        const Icon(Icons.password_rounded, color: Colors.black),
-                    title: b.Badge(
-                        showBadge:
-                            state.isUnsavedNewPassword || state.removePassword,
-                        padding: EdgeInsets.all(2.0),
-                        alignment: Alignment.centerLeft,
-                        position: b.BadgePosition.topEnd(),
-                        child: Text(
-                            state.currentAuthMode != Constants.authModeManual
-                                ? S.current.messageNewPassword
-                                : S.current.messagePassword)),
-                    subtitle: Fields.autosizeText(state.removePassword
-                        ? S.current.messageRemovedInBrackets
-                        : maskPassword(password, mask: !state.previewPassword)),
-                    trailing: state.removePassword
-                        ? SizedBox()
-                        : _passwordActions(context, password,
-                            state.previewPassword, actionsEnabled),
-                    onTap: () async {
-                      if (state.removePassword) {
-                        return;
-                      }
-
-                      final passwordMode = state.currentAuthMode ==
-                              Constants.authModeNoLocalPassword
-                          ? Constants.addPasswordMode
-                          : Constants.changePasswordMode;
-
-                      final getPasswordResult = await _getNewPassword(
-                          passwordMode,
-                          state.currentPassword,
-                          state.newPassword);
-
-                      if (getPasswordResult == null) {
-                        return;
-                      }
-
-                      if (getPasswordResult.changed) {
-                        final newPassword = getPasswordResult.newPassword ?? '';
-
-                        security.setNewPassword(newPassword);
-
-                        if (passwordMode == Constants.addPasswordMode) {
-                          security.setNewAuthMode(Constants.authModeManual);
-                        }
-                      }
-                    }),
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: TextButton(
-                          child: Text(state.removePassword
-                              ? S.current.actionUndo
-                              : S.current.actionRemove),
-                          onPressed: canRemove
-                              ? () {
-                                  final value = !state.removePassword;
-
-                                  security.setRemovePassword(value);
-
-                                  if (value == true) {
-                                    security.clearNewPassword();
-                                  }
-                                }
-                              : null)),
-                  Visibility(
-                      visible:
-                          state.currentAuthMode == Constants.authModeVersion2
-                              ? true
-                              : state.isUnsavedNewPassword,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                                padding: EdgeInsets.only(right: 16.0),
-                                child: TextButton(
-                                    child: Text(S.current.actionUndo),
-                                    onPressed: (() {
-                                      security.clearNewPassword();
-                                      security.setNewAuthMode('');
-                                    })))
-                          ]))
-                ]),
-                Divider()
-              ])
-            : SizedBox();
-      });
-
-  Widget _passwordActions(BuildContext context, String password,
-          bool previewPassword, bool enabled) =>
-      Wrap(children: [
-        IconButton(
-            icon: previewPassword
-                ? const Icon(Constants.iconVisibilityOff)
-                : const Icon(Constants.iconVisibilityOn),
-            padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor,
-            onPressed: enabled ? security.switchPreviewPassword : null),
-        IconButton(
-            icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsets.zero,
-            color: Theme.of(context).primaryColor,
-            onPressed: enabled
-                ? () async {
-                    await copyStringToClipboard(password);
-                    showSnackBar(context,
-                        message: S.current.messagePasswordCopiedClipboard);
-                  }
-                : null)
-      ]);
-
-  Future<GetPasswordResult?> _getNewPassword(
-      String mode, String currentPassword, String newPassword) async {
-    final passwordState = GetPasswordResult(
-        mode: mode, currentPassword: currentPassword, newPassword: newPassword);
-
-    return await Navigator.push<GetPasswordResult>(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                GetPasswordState(passwordState: passwordState)));
-  }
-
-  Widget _biometrics() => BlocBuilder<SecurityCubit, SecurityState>(
-      bloc: security,
-      builder: (context, state) => state.isBiometricsAvailable
-          ? Column(children: [
-              SwitchListTile.adaptive(
-                  value: state.unlockWithBiometrics,
-                  secondary:
-                      Icon(Icons.fingerprint_rounded, color: Colors.black),
-                  title: b.Badge(
-                      showBadge: state.isUnsavedBiometrics,
-                      padding: EdgeInsets.all(2.0),
-                      alignment: Alignment.centerLeft,
-                      position: b.BadgePosition.topEnd(),
-                      child: Text(S.current.messageUnlockUsingBiometrics)),
-                  onChanged: (useBiometrics) {
-                    String authMode = useBiometrics
-                        ? Constants.authModeVersion2
-                        : state.newPassword.isNotEmpty
-                            ? Constants.authModeManual
-                            : state.currentAuthMode;
-
-                    security.setNewAuthMode(authMode);
-                    security.setUnlockWithBiometrics(useBiometrics);
-                  })
-            ])
-          : SizedBox());
-
-  Widget _saveChanges() => BlocBuilder<SecurityCubit, SecurityState>(
-      bloc: security,
-      builder: (context, state) => state.hasUnsavedChanges
-          ? Container(
-              padding: EdgeInsets.only(top: 30.0, right: 18.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+  Widget _passwordActions(PasswordMode passwordMode) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: passwordMode == PasswordMode.manual
+          ? [
+              Row(children: [
                 TextButton(
-                    child: Text(S.current.actionSaveChanges),
-                    onPressed: (() async {
-                      final saveChanges =
-                          await _confirmSaveChanges(context, state);
+                    focusNode: _passwordAction,
+                    child: Text('Remove local password',
+                        style: TextStyle(
+                            fontSize: Dimensions.fontSmall,
+                            color: Constants.dangerColor)),
+                    onPressed: () async {
+                      final positiveButtonText = 'Remove';
+                      final confirmationMessage = 'Remove this repository local'
+                          ' password?\n\nThe repository will unlock '
+                          'automatically, unless a local password is added again';
+
+                      final saveChanges = await _confirmSaveChanges(
+                        context,
+                        positiveButtonText,
+                        confirmationMessage,
+                      );
 
                       if (saveChanges == null || !saveChanges) return;
 
-                      if (state.currentAuthMode ==
-                          Constants.authModeNoLocalPassword) {
-                        await Dialogs.executeFutureWithLoadingDialog(context,
-                            f: _saveNoLocalPasswordChanges(state));
-                        return;
-                      }
+                      await Dialogs.executeFutureWithLoadingDialog(context,
+                          f: _removePassword());
+                    })
+              ]),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Fields.inPageButton(
+                    onPressed: () async {
+                      final newPassword = _validatePassword();
 
-                      if (state.currentAuthMode == Constants.authModeManual) {
-                        await Dialogs.executeFutureWithLoadingDialog(context,
-                            f: _saveManualPasswordChanges(state));
-                        return;
-                      }
+                      if (newPassword == null) return;
+
+                      final positiveButtonText = 'Update';
+                      final confirmationMessage = 'Update this repository local'
+                          ' password?';
+
+                      final saveChanges = await _confirmSaveChanges(
+                          context, positiveButtonText, confirmationMessage);
+
+                      if (saveChanges == null || !saveChanges) return;
 
                       await Dialogs.executeFutureWithLoadingDialog(context,
-                          f: _saveBiometricChanges(state));
-                    }))
-              ]))
-          : SizedBox());
+                          f: _updateLocalPassword(newPassword));
+                    },
+                    text: 'Update',
+                    size: Dimensions.sizeInPageButtonLong,
+                    focusNode: _passwordAction)
+              ])
+            ]
+          : [
+              Fields.inPageButton(
+                  onPressed: passwordMode == PasswordMode.none
+                      ? () async {
+                          final newPassword = _validatePassword();
 
-  Future<void> _saveNoLocalPasswordChanges(SecurityState state) async {
-    String? authMode = state.useBiometrics
-        ? Constants.authModeVersion2
-        : Constants.authModeManual;
+                          if (newPassword == null) return;
 
-    if (state.newPassword.isNotEmpty) {
-      final changed =
-          await security.changeRepositoryPassword(state.newPassword);
+                          final positiveButtonText = 'Add';
+                          final confirmationMessage =
+                              'Add a local password for '
+                              'this repository?';
 
-      if (changed == false) {
-        final errorMessage = S.current.messageErrorAddingLocalPassword;
-        showSnackBar(context, message: errorMessage);
+                          final saveChanges = await _confirmSaveChanges(
+                              context, positiveButtonText, confirmationMessage);
 
-        return;
-      }
+                          if (saveChanges == null || !saveChanges) return;
 
-      security.setCurrentPassword(state.newPassword);
+                          _passwordController.clear();
+                          _retypedPasswordController.clear();
+
+                          await Dialogs.executeFutureWithLoadingDialog(context,
+                              f: _addLocalPassword(newPassword));
+                        }
+                      : null,
+                  text: 'Create',
+                  size: Dimensions.sizeInPageButtonLong,
+                  focusNode: _passwordAction)
+            ]);
+
+  String? _validatePassword() {
+    final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
+    final isRetypePasswordOk =
+        _retypePasswordInputKey.currentState?.validate() ?? false;
+
+    if (!(isPasswordOk && isRetypePasswordOk)) return null;
+
+    _passwordInputKey.currentState!.save();
+    _retypePasswordInputKey.currentState!.save();
+
+    return _retypedPasswordController.text;
+  }
+
+  Widget _biometrics(SecurityState state) =>
+      BlocBuilder<SecurityCubit, SecurityState>(
+          bloc: security,
+          builder: (context, state) => state.isBiometricsAvailable
+              ? Column(children: [
+                  SwitchListTile.adaptive(
+                      value: state.unlockWithBiometrics,
+                      secondary:
+                          Icon(Icons.fingerprint_rounded, color: Colors.black),
+                      title: Text(S.current.messageUnlockUsingBiometrics),
+                      onChanged: (useBiometrics) async {
+                        final positiveButtonText = 'Accept';
+                        String confirmationMessage = useBiometrics
+                            ? 'Unlock this repository using biometrics?'
+                            : 'Remove the biometrics validation for this '
+                                'repository?\n\nThe repository will unlock'
+                                ' automatically, unless a local password is added.';
+
+                        if (useBiometrics &&
+                            state.authMode == Constants.authModeManual) {
+                          confirmationMessage +=
+                              '\n\nThis will remove the repository password'
+                              ' and use the biometric validation for unlocking.';
+                        }
+
+                        final saveChanges = await _confirmSaveChanges(
+                            context, positiveButtonText, confirmationMessage);
+
+                        if (saveChanges == null || !saveChanges) return;
+
+                        await Dialogs.executeFutureWithLoadingDialog(context,
+                            f: _updateUnlockWithBiometrics(useBiometrics));
+                      })
+                ])
+              : SizedBox());
+
+  Future<void> _addLocalPassword(String newPassword) async {
+    final deleted = await security
+        .removePasswordFromSecureStorage(Constants.authModeNoLocalPassword);
+
+    if (deleted == false) {
+      showSnackBar(context,
+          message: S.current.messageErrorRemovingSecureStorage);
+
+      security.setAuthMode(Constants.authModeNoLocalPassword);
+
+      return;
     }
 
-    security.clearNewPassword();
+    final changed = await security.changeRepositoryPassword(newPassword);
 
-    if (state.useBiometrics) {
-      final addedOrRemoved =
-          await security.addOrRemoveVersion2InSecureStorage(authMode);
+    if (changed == false) {
+      final errorMessage = S.current.messageErrorAddingLocalPassword;
+      showSnackBar(context, message: errorMessage);
+
+      return;
+    }
+
+    _clearPasswordInputs();
+
+    security.setPassword(newPassword);
+    security.setAuthMode(Constants.authModeManual);
+  }
+
+  Future<void> _updateLocalPassword(String newPassword) async {
+    final changed = await security.changeRepositoryPassword(newPassword);
+
+    if (changed == false) {
+      final errorMessage = S.current.messageErrorAddingLocalPassword;
+      showSnackBar(context, message: errorMessage);
+
+      return;
+    }
+
+    _clearPasswordInputs();
+
+    security.setPassword(newPassword);
+  }
+
+  void _clearPasswordInputs() {
+    _passwordController.clear();
+    _retypedPasswordController.clear();
+
+    _passwordAction.requestFocus();
+  }
+
+  Future<void> _removePassword() async {
+    final newPassword = generateRandomPassword();
+    final passwordChanged =
+        await security.changeRepositoryPassword(newPassword);
+
+    if (passwordChanged == false) {
+      final errorMessage = S.current.messageErrorAddingSecureStorge;
+      showSnackBar(context, message: errorMessage);
+
+      return;
+    }
+
+    security.setPassword(newPassword);
+
+    final addedToSecureStorage = await security.addPasswordToSecureStorage(
+        newPassword, Constants.authModeNoLocalPassword);
+
+    if (addedToSecureStorage == false) {
+      showSnackBar(context, message: S.current.messageErrorRemovingPassword);
+
+      return;
+    }
+
+    security.setAuthMode(Constants.authModeNoLocalPassword);
+  }
+
+  Future<void> _updateUnlockWithBiometrics(bool unlockWithBiometrics) async {
+    if (unlockWithBiometrics == false) {
+      final addedOrRemoved = await security.addOrRemoveVersion2InSecureStorage(
+          Constants.authModeNoLocalPassword);
 
       if (addedOrRemoved == null) {
         return;
@@ -365,167 +306,239 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         return;
       }
 
-      security.setCurrentUnlockWithBiometrics(true);
+      security.setUnlockWithBiometrics(false);
+      security.setAuthMode(Constants.authModeNoLocalPassword);
+
+      return;
     }
 
-    security.setCurrentAuthMode(authMode);
+    final newPassword = generateRandomPassword();
+    final passwordChanged =
+        await security.changeRepositoryPassword(newPassword);
 
-    security.setNewAuthMode('');
+    if (passwordChanged == false) {
+      final errorMessage = S.current.messageErrorAddingSecureStorge;
+      showSnackBar(context, message: errorMessage);
+
+      return;
+    }
+
+    security.setPassword(newPassword);
+
+    final updated = await security.updatePasswordInSecureStorage(
+        newPassword, Constants.authModeVersion2);
+
+    if (updated == false) {
+      showSnackBar(context,
+          message: S.current.messageErrorUpdatingSecureStorage);
+
+      security.setUnlockWithBiometrics(false);
+      security.setPassword(newPassword);
+      security.setAuthMode(Constants.authModeManual);
+
+      return;
+    }
+
+    _clearPasswordInputs();
+
+    security.setUnlockWithBiometrics(true);
+    security.setAuthMode(Constants.authModeVersion2);
+  }
+
+  Future<void> _saveNoLocalPasswordChanges(SecurityState state) async {
+    // String? authMode = state.useBiometrics
+    //     ? Constants.authModeVersion2
+    //     : Constants.authModeManual;
+
+    // if (state.newPassword.isNotEmpty) {
+    //   final changed =
+    //       await security.changeRepositoryPassword(state.newPassword);
+
+    //   if (changed == false) {
+    //     final errorMessage = S.current.messageErrorAddingLocalPassword;
+    //     showSnackBar(context, message: errorMessage);
+
+    //     return;
+    //   }
+
+    //   security.setCurrentPassword(state.newPassword);
+    // }
+
+    // security.clearNewPassword();
+
+    // if (state.useBiometrics) {
+    //   final addedOrRemoved =
+    //       await security.addOrRemoveVersion2InSecureStorage(authMode);
+
+    //   if (addedOrRemoved == null) {
+    //     return;
+    //   }
+
+    //   if (addedOrRemoved == false) {
+    //     return;
+    //   }
+
+    //   security.setCurrentUnlockWithBiometrics(true);
+    // }
+
+    // security.setCurrentAuthMode(authMode);
+
+    // security.setNewAuthMode('');
   }
 
   Future<void> _saveManualPasswordChanges(SecurityState state) async {
-    String authMode = state.useBiometrics
-        ? Constants.authModeVersion2
-        : Constants.authModeManual;
+    // String authMode = state.useBiometrics
+    //     ? Constants.authModeVersion2
+    //     : Constants.authModeManual;
 
-    if (state.removePassword) {
-      authMode = state.useBiometrics
-          ? Constants.authModeVersion2
-          : Constants.authModeNoLocalPassword;
-    }
+    // if (state.removePassword) {
+    //   authMode = state.useBiometrics
+    //       ? Constants.authModeVersion2
+    //       : Constants.authModeNoLocalPassword;
+    // }
 
-    final password = state.removePassword
-        ? generateRandomPassword()
-        : state.newPassword.isNotEmpty
-            ? state.newPassword
-            : state.currentPassword;
+    // final password = state.removePassword
+    //     ? generateRandomPassword()
+    //     : state.newPassword.isNotEmpty
+    //         ? state.newPassword
+    //         : state.currentPassword;
 
-    if (password != state.currentPassword) {
-      final changed = await security.changeRepositoryPassword(password);
+    // if (password != state.currentPassword) {
+    //   final changed = await security.changeRepositoryPassword(password);
 
-      if (changed == false) {
-        final errorMessage = S.current.messageErrorChangingLocalPassword;
-        showSnackBar(context, message: errorMessage);
+    //   if (changed == false) {
+    //     final errorMessage = S.current.messageErrorChangingLocalPassword;
+    //     showSnackBar(context, message: errorMessage);
 
-        return;
-      }
-    }
+    //     return;
+    //   }
+    // }
 
-    if (state.removePassword || state.useBiometrics) {
-      final addedToSecureStorage =
-          await security.addPasswordToSecureStorage(password, authMode);
+    // if (state.removePassword || state.useBiometrics) {
+    //   final addedToSecureStorage =
+    //       await security.addPasswordToSecureStorage(password, authMode);
 
-      if (addedToSecureStorage == false) {
-        showSnackBar(context, message: S.current.messageErrorRemovingPassword);
+    //   if (addedToSecureStorage == false) {
+    //     showSnackBar(context, message: S.current.messageErrorRemovingPassword);
 
-        return;
-      }
+    //     return;
+    //   }
 
-      if (state.useBiometrics) {
-        security.setCurrentUnlockWithBiometrics(true);
-      }
+    //   if (state.useBiometrics) {
+    //     security.setCurrentUnlockWithBiometrics(true);
+    //   }
 
-      if (state.removePassword) {
-        security.setRemovePassword(false);
-      }
-    }
+    //   if (state.removePassword) {
+    //     security.setRemovePassword(false);
+    //   }
+    // }
 
-    if (password != state.currentPassword) {
-      security.setCurrentPassword(password);
-    }
+    // if (password != state.currentPassword) {
+    //   security.setCurrentPassword(password);
+    // }
 
-    if (authMode != state.currentAuthMode) {
-      security.setCurrentAuthMode(authMode);
-    }
+    // if (authMode != state.currentAuthMode) {
+    //   security.setCurrentAuthMode(authMode);
+    // }
 
-    security.setNewAuthMode('');
-    security.clearNewPassword();
+    // security.setNewAuthMode('');
+    // security.clearNewPassword();
   }
 
   Future<void> _saveBiometricChanges(SecurityState state) async {
-    bool passwordChanged = false;
+    // bool passwordChanged = false;
 
-    final authMode = state.useBiometrics
-        ? Constants.authModeVersion2
-        : state.newPassword.isEmpty
-            ? Constants.authModeNoLocalPassword
-            : Constants.authModeManual;
+    // final authMode = state.useBiometrics
+    //     ? Constants.authModeVersion2
+    //     : state.newPassword.isEmpty
+    //         ? Constants.authModeNoLocalPassword
+    //         : Constants.authModeManual;
 
-    if (state.newPassword.isNotEmpty) {
-      final changed =
-          await security.changeRepositoryPassword(state.newPassword);
+    // if (state.newPassword.isNotEmpty) {
+    //   final changed =
+    //       await security.changeRepositoryPassword(state.newPassword);
 
-      if (changed == false) {
-        final errorMessage = S.current.messageErrorAddingSecureStorge;
-        showSnackBar(context, message: errorMessage);
+    //   if (changed == false) {
+    //     final errorMessage = S.current.messageErrorAddingSecureStorge;
+    //     showSnackBar(context, message: errorMessage);
 
-        return;
-      }
+    //     return;
+    //   }
 
-      passwordChanged = true;
-      security.setCurrentPassword(state.newPassword);
+    //   passwordChanged = true;
+    //   security.setCurrentPassword(state.newPassword);
 
-      if (state.useBiometrics) {
-        final updated = await security.updatePasswordInSecureStorage(
-            state.newPassword, authMode);
+    //   if (state.useBiometrics) {
+    //     final updated = await security.updatePasswordInSecureStorage(
+    //         state.newPassword, authMode);
 
-        if (updated == false) {
-          showSnackBar(context,
-              message: S.current.messageErrorUpdatingSecureStorage);
+    //     if (updated == false) {
+    //       showSnackBar(context,
+    //           message: S.current.messageErrorUpdatingSecureStorage);
 
-          security.setCurrentUnlockWithBiometrics(false);
-          security.setCurrentPassword(state.newPassword);
-          security.setCurrentAuthMode(Constants.authModeManual);
+    //       security.setCurrentUnlockWithBiometrics(false);
+    //       security.setCurrentPassword(state.newPassword);
+    //       security.setCurrentAuthMode(Constants.authModeManual);
 
-          security.clearNewPassword();
-          security.setNewAuthMode('');
+    //       security.clearNewPassword();
+    //       security.setNewAuthMode('');
 
-          return;
-        }
-      }
-    }
+    //       return;
+    //     }
+    //   }
+    // }
 
-    if (state.useBiometrics == false) {
-      if (passwordChanged) {
-        final deleted = await security
-            .removePasswordFromSecureStorage(state.currentAuthMode);
+    // if (state.useBiometrics == false) {
+    //   if (passwordChanged) {
+    //     final deleted = await security
+    //         .removePasswordFromSecureStorage(state.currentAuthMode);
 
-        if (deleted == false) {
-          showSnackBar(context,
-              message: S.current.messageErrorRemovingSecureStorage);
+    //     if (deleted == false) {
+    //       showSnackBar(context,
+    //           message: S.current.messageErrorRemovingSecureStorage);
 
-          security.setCurrentUnlockWithBiometrics(false);
-          security.setCurrentPassword(state.newPassword);
-          security.setCurrentAuthMode(Constants.authModeManual);
+    //       security.setCurrentUnlockWithBiometrics(false);
+    //       security.setCurrentPassword(state.newPassword);
+    //       security.setCurrentAuthMode(Constants.authModeManual);
 
-          security.clearNewPassword();
-          security.setNewAuthMode('');
+    //       security.clearNewPassword();
+    //       security.setNewAuthMode('');
 
-          return;
-        }
-      } else {
-        final addedOrRemoved =
-            await security.addOrRemoveVersion2InSecureStorage(authMode);
+    //       return;
+    //     }
+    //   } else {
+    //     final addedOrRemoved =
+    //         await security.addOrRemoveVersion2InSecureStorage(authMode);
 
-        if (addedOrRemoved == null) {
-          return;
-        }
+    //     if (addedOrRemoved == null) {
+    //       return;
+    //     }
 
-        if (addedOrRemoved == false) {
-          return;
-        }
-      }
+    //     if (addedOrRemoved == false) {
+    //       return;
+    //     }
+    //   }
 
-      security.setCurrentUnlockWithBiometrics(false);
-    }
+    //   security.setCurrentUnlockWithBiometrics(false);
+    // }
 
-    security.setCurrentAuthMode(authMode);
+    // security.setCurrentAuthMode(authMode);
 
-    security.clearNewPassword();
-    security.setNewAuthMode('');
+    // security.clearNewPassword();
+    // security.setNewAuthMode('');
   }
 
   Future<bool?> _confirmSaveChanges(
-      BuildContext context, SecurityState currentState) async {
+      BuildContext context, String positiveButtonText, String message) async {
     final saveChanges = await Dialogs.alertDialogWithActions(
         context: context,
         title: S.current.titleSaveChanges,
         body: [
-          Text(S.current.messageSavingChanges)
+          Text(message)
         ],
         actions: [
           TextButton(
-              child: Text(S.current.actionSave),
+              child: Text(positiveButtonText),
               onPressed: () => Navigator.of(context).pop(true)),
           TextButton(
               child: Text(S.current.actionCancel),
