@@ -216,46 +216,27 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               : SizedBox());
 
   Future<void> _addLocalPassword(String newPassword) async {
-    final deleted = await security
-        .removePasswordFromSecureStorage(Constants.authModeNoLocalPassword);
+    final addLocalPasswordResult =
+        await security.addRepoLocalPassword(newPassword);
 
-    if (deleted == false) {
-      showSnackBar(context,
-          message: S.current.messageErrorRemovingSecureStorage);
-
-      security.setAuthMode(Constants.authModeNoLocalPassword);
-
-      return;
-    }
-
-    final changed = await security.changeRepositoryPassword(newPassword);
-
-    if (changed == false) {
-      final errorMessage = S.current.messageErrorAddingLocalPassword;
-      showSnackBar(context, message: errorMessage);
-
+    if (addLocalPasswordResult != null) {
+      showSnackBar(context, message: addLocalPasswordResult);
       return;
     }
 
     _clearPasswordInputs();
-
-    security.setPassword(newPassword);
-    security.setAuthMode(Constants.authModeManual);
   }
 
   Future<void> _updateLocalPassword(String newPassword) async {
-    final changed = await security.changeRepositoryPassword(newPassword);
+    final updateRepoLocalPasswordResult =
+        await security.updateRepoLocalPassword(newPassword);
 
-    if (changed == false) {
-      final errorMessage = S.current.messageErrorAddingLocalPassword;
-      showSnackBar(context, message: errorMessage);
-
+    if (updateRepoLocalPasswordResult != null) {
+      showSnackBar(context, message: updateRepoLocalPasswordResult);
       return;
     }
 
     _clearPasswordInputs();
-
-    security.setPassword(newPassword);
   }
 
   void _clearPasswordInputs() {
@@ -266,81 +247,24 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   Future<void> _removePassword() async {
-    final newPassword = generateRandomPassword();
-    final passwordChanged =
-        await security.changeRepositoryPassword(newPassword);
+    final removeRepoLocalPasswordResult =
+        await security.removeRepoLocalPassword();
 
-    if (passwordChanged == false) {
-      final errorMessage = S.current.messageErrorAddingSecureStorge;
-      showSnackBar(context, message: errorMessage);
-
-      return;
+    if (removeRepoLocalPasswordResult != null) {
+      showSnackBar(context, message: removeRepoLocalPasswordResult);
     }
-
-    security.setPassword(newPassword);
-
-    final addedToSecureStorage = await security.addPasswordToSecureStorage(
-        newPassword, Constants.authModeNoLocalPassword);
-
-    if (addedToSecureStorage == false) {
-      showSnackBar(context, message: S.current.messageErrorRemovingPassword);
-
-      return;
-    }
-
-    security.setAuthMode(Constants.authModeNoLocalPassword);
   }
 
   Future<void> _updateUnlockWithBiometrics(bool unlockWithBiometrics) async {
-    if (unlockWithBiometrics == false) {
-      final addedOrRemoved = await security.addOrRemoveVersion2InSecureStorage(
-          Constants.authModeNoLocalPassword);
+    final updateUnlockRepoWithBiometricsResult =
+        await security.updateUnlockRepoWithBiometrics(unlockWithBiometrics);
 
-      if (addedOrRemoved == null) {
-        return;
-      }
-
-      if (addedOrRemoved == false) {
-        return;
-      }
-
-      security.setUnlockWithBiometrics(false);
-      security.setAuthMode(Constants.authModeNoLocalPassword);
-
-      return;
-    }
-
-    final newPassword = generateRandomPassword();
-    final passwordChanged =
-        await security.changeRepositoryPassword(newPassword);
-
-    if (passwordChanged == false) {
-      final errorMessage = S.current.messageErrorAddingSecureStorge;
-      showSnackBar(context, message: errorMessage);
-
-      return;
-    }
-
-    security.setPassword(newPassword);
-
-    final updated = await security.updatePasswordInSecureStorage(
-        newPassword, Constants.authModeVersion2);
-
-    if (updated == false) {
-      showSnackBar(context,
-          message: S.current.messageErrorUpdatingSecureStorage);
-
-      security.setUnlockWithBiometrics(false);
-      security.setPassword(newPassword);
-      security.setAuthMode(Constants.authModeManual);
-
+    if (updateUnlockRepoWithBiometricsResult != null) {
+      showSnackBar(context, message: updateUnlockRepoWithBiometricsResult);
       return;
     }
 
     _clearPasswordInputs();
-
-    security.setUnlockWithBiometrics(true);
-    security.setAuthMode(Constants.authModeVersion2);
   }
 
   Future<void> _saveNoLocalPasswordChanges(SecurityState state) async {
