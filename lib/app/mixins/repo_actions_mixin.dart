@@ -511,4 +511,39 @@ mixin RepositoryActionsMixin {
 
     return unlockResult;
   }
+
+  String? validatePassword(String password,
+      {required GlobalKey<FormFieldState> passwordInputKey,
+      required GlobalKey<FormFieldState> retypePasswordInputKey}) {
+    final isPasswordOk = passwordInputKey.currentState?.validate() ?? false;
+    final isRetypePasswordOk =
+        retypePasswordInputKey.currentState?.validate() ?? false;
+
+    if (!(isPasswordOk && isRetypePasswordOk)) return null;
+
+    passwordInputKey.currentState!.save();
+    retypePasswordInputKey.currentState!.save();
+
+    return password;
+  }
+
+  Future<bool?> confirmSaveChanges(
+      BuildContext context, String positiveButtonText, String message) async {
+    final saveChanges = await Dialogs.alertDialogWithActions(
+        context: context,
+        title: S.current.titleSaveChanges,
+        body: [
+          Text(message)
+        ],
+        actions: [
+          TextButton(
+              child: Text(positiveButtonText),
+              onPressed: () => Navigator.of(context).pop(true)),
+          TextButton(
+              child: Text(S.current.actionCancel),
+              onPressed: () => Navigator.of(context).pop(false))
+        ]);
+
+    return saveChanges;
+  }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 /// Same as TextFormField but the validator function can be async.
 class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
+  final bool? enabled;
   final Function(String?)? onSaved;
   final Future<String?> Function(String?) validator;
   final AutovalidateMode? autovalidateMode;
@@ -17,6 +18,7 @@ class AsyncTextFormField extends StatefulWidget {
   const AsyncTextFormField({
     Key? key,
     this.controller,
+    this.enabled,
     this.onSaved,
     required this.validator,
     this.autovalidateMode,
@@ -40,6 +42,7 @@ class _State extends State<AsyncTextFormField> {
   Widget build(BuildContext context) => TextFormField(
         key: widget.key,
         controller: widget.controller,
+        enabled: widget.enabled,
         onSaved: widget.onSaved,
         autovalidateMode: widget.autovalidateMode,
         autofocus: widget.autofocus,

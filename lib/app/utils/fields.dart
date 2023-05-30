@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
-import 'utils.dart';
 import '../widgets/async_text_form_field.dart';
+import 'utils.dart';
 
 class Fields {
   Fields._();
@@ -97,36 +97,36 @@ class Fields {
         padding,
       );
 
-  static Widget inPageButton({
-    required void Function()? onPressed,
-    Icon? leadingIcon,
-    required String text,
-    Alignment alignment = Alignment.center,
-    Size size = Dimensions.sizeInPageButtonRegular,
-    double fontSize = Dimensions.fontSmall,
-    FontWeight fontWeight = FontWeight.normal,
-    FontStyle fontStyle = FontStyle.normal,
-    Color color = Colors.white,
-    bool autofocus = false,
-  }) =>
+  static Widget inPageButton(
+          {required void Function()? onPressed,
+          Icon? leadingIcon,
+          required String text,
+          Alignment alignment = Alignment.center,
+          Size size = Dimensions.sizeInPageButtonRegular,
+          double fontSize = Dimensions.fontMicro,
+          FontWeight fontWeight = FontWeight.normal,
+          FontStyle fontStyle = FontStyle.normal,
+          Color color = Colors.white,
+          bool autofocus = false,
+          FocusNode? focusNode}) =>
       ElevatedButton(
-        onPressed: onPressed,
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          if (leadingIcon != null) leadingIcon,
-          if (leadingIcon != null) Dimensions.spacingHorizontal,
-          Text(text.toUpperCase())
-        ]),
-        style: ButtonStyle(
-          alignment: alignment,
-          minimumSize: MaterialStateProperty.all<Size?>(size),
-          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              fontStyle: fontStyle,
-              color: color)),
-        ),
-        autofocus: autofocus,
-      );
+          onPressed: onPressed,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            if (leadingIcon != null) leadingIcon,
+            if (leadingIcon != null) Dimensions.spacingHorizontal,
+            Text(text.toUpperCase())
+          ]),
+          style: ButtonStyle(
+            alignment: alignment,
+            minimumSize: MaterialStateProperty.all<Size?>(size),
+            textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                fontStyle: fontStyle,
+                color: color)),
+          ),
+          autofocus: autofocus,
+          focusNode: focusNode);
 
   static Widget bottomSheetHandle(BuildContext context,
           {double widthFactor = 0.25,
@@ -516,6 +516,7 @@ class Fields {
     Key? key,
     required BuildContext context,
     TextEditingController? textEditingController,
+    bool? enabled = true,
     Icon? icon,
     Widget? prefixIcon,
     Widget? suffixIcon,
@@ -552,6 +553,7 @@ class Fields {
       return AsyncTextFormField(
         key: key,
         controller: textEditingController,
+        enabled: enabled,
         autovalidateMode: autovalidateMode,
         autofocus: autofocus,
         focusNode: focusNode,
@@ -565,6 +567,7 @@ class Fields {
       return TextFormField(
         key: key,
         controller: textEditingController,
+        enabled: enabled,
         autovalidateMode: autovalidateMode,
         autofocus: autofocus,
         focusNode: focusNode,
@@ -581,6 +584,7 @@ class Fields {
     Key? key,
     required BuildContext context,
     TextEditingController? textEditingController,
+    bool? enabled = true,
     Icon? icon,
     Widget? prefixIcon,
     Widget? suffixIcon,
@@ -604,6 +608,7 @@ class Fields {
                 key: key,
                 context: context,
                 textEditingController: textEditingController,
+                enabled: enabled,
                 icon: icon,
                 prefixIcon: prefixIcon,
                 suffixIcon: suffixIcon,

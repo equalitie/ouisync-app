@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
@@ -17,12 +19,19 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => reposCubit.builder((state) {
+        /// Only on mobile we separate the repository settings from the
+        /// rest of the app settings (For now at least)
+        final mobilePlatforms = Platform.isAndroid || Platform.isIOS;
+        final settingsActionButton = state.showList == false && mobilePlatforms
+            ? repoSettingsButton
+            : appSettingsButton;
+
         return AppBar(
             shadowColor: Colors.black26,
             title: repoPicker,
             // Make the `repoList` have no spacing on the horizontal axis.
             titleSpacing: 0.0,
-            actions: [state.showList ? appSettingsButton : repoSettingsButton]);
+            actions: [settingsActionButton]);
       });
 
   @override
