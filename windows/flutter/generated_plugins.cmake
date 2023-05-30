@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
+  firebase_core
   local_auth_windows
   network_info_plus
   ouisync_plugin
