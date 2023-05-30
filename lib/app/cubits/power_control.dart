@@ -171,6 +171,7 @@ class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
         // we'd keep the connection going.
         newMode = NetworkMode.full;
         break;
+      case ConnectivityResult.other:
     }
 
     await _setNetworkMode(newMode);
