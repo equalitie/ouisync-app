@@ -199,6 +199,8 @@ class NetworkDesktopDetail extends StatelessWidget {
         return S.current.messageVPN;
       case ConnectivityResult.none:
         return S.current.messageNone;
+      case ConnectivityResult.other:
+        return 'other';
     }
   }
 }

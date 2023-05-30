@@ -216,5 +216,7 @@ String _connectivityTypeName(ConnectivityResult result) {
       return S.current.messageVPN;
     case ConnectivityResult.none:
       return S.current.messageNone;
+    case ConnectivityResult.other:
+      return 'other';
   }
 }

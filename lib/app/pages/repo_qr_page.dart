@@ -50,7 +50,7 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
             : MediaQuery.of(context).size.height) *
         0.6;
 
-    final qrCodeImage = QrImage(
+    final qrCodeImage = QrImageView(
       data: tokenLink,
       errorCorrectionLevel: QrErrorCorrectLevel.M,
       size: qrCodeSize,

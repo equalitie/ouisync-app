@@ -53,7 +53,7 @@ class PlatformWindowManagerDesktop
     String path =
         Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
-    List<stray.MenuItem> menus = [
+    List<stray.MenuItemBase> menus = [
       stray.MenuItemLabel(
           label: S.current.actionExit,
           onClicked: (_) async {
