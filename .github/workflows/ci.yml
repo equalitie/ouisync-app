@@ -38,14 +38,14 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
             ndk-version: r25c
-            
+
       - name: Set the ABI filter for x86_64
         run: echo "ndk.abiFilters=x86_64" >> android/local.properties
 
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.7.2'
+          flutter-version: '3.10.1'
 
       - name: Flutter doctor
         run: flutter doctor -v

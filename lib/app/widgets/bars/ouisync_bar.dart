@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
 
-class OuiSyncBar extends StatelessWidget with PreferredSizeWidget {
+class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   OuiSyncBar({
     required this.reposCubit,
     required this.repoPicker,
