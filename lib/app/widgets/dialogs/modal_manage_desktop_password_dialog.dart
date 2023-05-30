@@ -19,7 +19,6 @@ class ManageDesktopPassword extends StatefulWidget {
       required this.repositoryName,
       required this.authMode,
       required this.currentPassword,
-      required this.newPassword,
       required this.usesBiometrics});
 
   final BuildContext context;
@@ -28,7 +27,6 @@ class ManageDesktopPassword extends StatefulWidget {
   final String repositoryName;
   final String authMode;
   final String? currentPassword;
-  final String? newPassword;
   final bool usesBiometrics;
 
   @override
@@ -61,7 +59,6 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
   bool _requiresManualAuthentication = false;
   bool _samePassword = false;
-  bool _showSavePasswordWarning = false;
 
   late final Future<bool> _buildingFuture;
 
@@ -97,21 +94,16 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       currentPassword = securePassword;
     }
 
-    _initStateValues(currentPassword, widget.newPassword ?? '');
+    _initStateValues(currentPassword);
     return true;
   }
 
-  void _initStateValues(String currentPassword, String newPassword) {
+  void _initStateValues(String currentPassword) {
     _requiresManualAuthentication =
-        widget.mode != Constants.addPasswordMode && currentPassword.isEmpty;
-
-    _showSavePasswordWarning =
-        !widget.usesBiometrics && widget.mode != Constants.removePasswordMode;
+        widget.mode == Constants.updateBiometricsMode ||
+            widget.mode != Constants.addPasswordMode && currentPassword.isEmpty;
 
     _currentPasswordController.text = currentPassword;
-
-    _newPasswordController.text = newPassword;
-    _retypedNewPasswordController.text = newPassword;
 
     if (widget.authMode == Constants.authModeManual &&
         _requiresManualAuthentication) {
@@ -155,7 +147,6 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                 flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
             Dimensions.spacingVerticalDouble,
             ..._passwordSection(),
-            _manualPasswordWarning(),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
@@ -181,7 +172,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _currentPasswordFocus))
           ]),
-        if (widget.mode != Constants.removePasswordMode)
+        if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
+                .contains(widget.mode) ==
+            false)
           Row(children: [
             Expanded(
                 child: Fields.formTextField(
@@ -198,7 +191,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _newPasswordFocus))
           ]),
-        if (widget.mode != Constants.removePasswordMode)
+        if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
+                .contains(widget.mode) ==
+            false)
           Row(children: [
             Expanded(
                 child: Fields.formTextField(
@@ -299,14 +294,6 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
 
-  Widget _manualPasswordWarning() => Visibility(
-      visible: _showSavePasswordWarning,
-      child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-          color: Colors.red,
-          maxLines: 10,
-          softWrap: true,
-          textOverflow: TextOverflow.ellipsis));
-
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
@@ -332,7 +319,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
     _currentPasswordInputKey.currentState?.save();
 
-    if (widget.mode != Constants.removePasswordMode) {
+    if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
+            .contains(widget.mode) ==
+        false) {
       final isPasswordOk =
           _newPasswordInputKey.currentState?.validate() ?? false;
       final isRetypePasswordOk =
