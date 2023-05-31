@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   firebase_core
   local_auth_windows
-  network_info_plus
   ouisync_plugin
   permission_handler_windows
   r_get_ip
