@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.1 <4.0.0"
+  sdk: ">=2.19.0 <4.0.0"
   flutter: ^3.10.1
 
 dependencies:
@@ -29,7 +29,7 @@ dependencies:
   bloc_test: ^9.0.3
   build_runner: ^2.1.7
   collection: ^1.16.0
-  connectivity_plus: ^3.0.2
+  connectivity_plus: ^4.0.1
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.4.1
@@ -60,7 +60,7 @@ dependencies:
   mobile_scanner: ^2.0.0
   mockito: ^5.1.0
   move_to_background: ^1.0.2
-  network_info_plus: ^3.0.1
+  network_info_plus: ^4.0.1
   ouisync_plugin:
     path: ./ouisync-plugin
   package_info_plus: ^3.1.2
@@ -76,7 +76,7 @@ dependencies:
     git: https://github.com/J-Pabon/receive_sharing_intent
   result_type: ^0.2.0
   settings_ui: ^2.0.2
-  share_plus: ^6.3.0
+  share_plus: ^7.0.2
   shared_preferences: ^2.0.13
   styled_text: ^7.0.0
   system_tray: ^2.0.2
@@ -84,6 +84,9 @@ dependencies:
   udp: ^5.0.3
   url_launcher: ^6.0.20
   window_manager: ^0.2.5
+
+dependency_overrides:
+  win32: ^4.0.0
 
 dev_dependencies:
   flutter_test:
