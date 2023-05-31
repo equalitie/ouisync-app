@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
@@ -71,7 +73,7 @@ class ListItem extends StatelessWidget with RepositoryActionsMixin {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: RepoDescription(repoData: repoItem))),
-        _getVerticalMenuAction(false)
+        if (Platform.isAndroid || Platform.isIOS) _getVerticalMenuAction(false)
       ],
     );
   }
