@@ -51,7 +51,7 @@ Future<void> _dumpStateMonitor(
     sink.writeln("$pad${e.key}: ${e.value}");
   }
 
-  for (MonitorId child in node.children.keys) {
+  for (MonitorId child in node.children) {
     sink.writeln("$pad$child");
     await _dumpStateMonitor(sink, monitor.child(child), depth + 1);
   }

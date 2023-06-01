@@ -37,7 +37,15 @@ class _StateMonitorState extends State<StateMonitorPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.titleStateMonitor)),
-        body: _NodeWidget(root),
+        body: Theme(
+          data: ThemeData(
+            cardTheme: CardTheme(margin: EdgeInsets.all(1.0)),
+            listTileTheme: ListTileThemeData(
+              dense: true,
+            ),
+          ),
+          child: _NodeWidget(root),
+        ),
       );
 }
 
@@ -70,25 +78,21 @@ class _NodeWidget extends StatelessWidget {
   List<Widget> buildValuesAndChildren(StateMonitorNode node) =>
       node.values.entries
           .map((entry) => buildValue(entry.key, entry.value))
-          .followedBy(node.children.entries
-              .map((entry) => buildChild(entry.key, entry.value)))
+          .followedBy(node.children.map((id) => buildChild(id)))
           .toList();
 
   Widget buildValue(String key, String value) {
-    return Card(child: ListTile(dense: true, title: Text("$key: $value")));
+    return Card(child: ListTile(title: Text("$key: $value")));
   }
 
-  Widget buildChild(MonitorId childId, int version) =>
-      _ChildWidget(cubit, childId, version);
+  Widget buildChild(MonitorId childId) => _ChildWidget(cubit, childId);
 }
 
 class _ChildWidget extends StatefulWidget {
   final StateMonitorCubit parentCubit;
   final MonitorId id;
-  final int version; // TODO: do we need the version?
 
-  _ChildWidget(this.parentCubit, this.id, this.version)
-      : super(key: Key(id.toString()));
+  _ChildWidget(this.parentCubit, this.id) : super(key: Key(id.toString()));
 
   @override
   State<_ChildWidget> createState() => _ChildWidgetState();
@@ -107,7 +111,6 @@ class _ChildWidgetState extends State<_ChildWidget> {
           Card(
             child: ListTile(
               trailing: const Icon(Icons.remove),
-              dense: true,
               title: Text(widget.id.name),
               onTap: collapse,
             ),
@@ -119,7 +122,6 @@ class _ChildWidgetState extends State<_ChildWidget> {
       return Card(
           child: ListTile(
               trailing: const Icon(Icons.add),
-              dense: true,
               title: Text(widget.id.name),
               onTap: expand));
     }
