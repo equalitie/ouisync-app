@@ -84,12 +84,6 @@ class _ShareRepositoryState extends State<ShareRepository>
   Future<String> createShareToken(RepoCubit repo, AccessMode accessMode) async {
     final shareToken = await repo.createShareToken(accessMode);
 
-    if (kDebugMode) {
-      // Print this only while debugging, tokens are secrets that shouldn't be logged otherwise.
-      loggy.app(
-          'Token for sharing repository ${repo.name}: $shareToken (${accessMode.name})');
-    }
-
     return shareToken.token;
   }
 
