@@ -79,11 +79,11 @@ dependencies:
   share_plus: ^7.0.2
   shared_preferences: ^2.0.13
   styled_text: ^7.0.0
-  system_tray: ^2.0.2
+  system_tray: ^2.0.3
   tray_manager: ^0.1.8
   udp: ^5.0.3
   url_launcher: ^6.0.20
-  window_manager: ^0.2.5
+  window_manager: ^0.3.4
 
 dependency_overrides:
   win32: ^4.0.0

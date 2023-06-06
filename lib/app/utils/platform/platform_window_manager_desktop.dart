@@ -53,15 +53,6 @@ class PlatformWindowManagerDesktop
     String path =
         Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
-    List<stray.MenuItemBase> menus = [
-      stray.MenuItemLabel(
-          label: S.current.actionExit,
-          onClicked: (_) async {
-            await windowManager.setPreventClose(false);
-            await windowManager.close();
-          }),
-    ];
-
     await _systemTray.initSystemTray(
       title: S.current.titleAppTitle,
       iconPath: path,
@@ -69,22 +60,36 @@ class PlatformWindowManagerDesktop
     );
 
     final menu = stray.Menu();
-    await menu.buildFrom(menus);
+    await menu.buildFrom([
+      stray.MenuItemLabel(
+          label: S.current.actionExit,
+          onClicked: (_) async {
+            await windowManager.setPreventClose(false);
+            await windowManager.close();
+          }),
+    ]);
+
     await _systemTray.setContextMenu(menu);
 
     _systemTray.registerSystemTrayEventHandler((eventName) async {
-      switch (eventName) {
-        case Constants.eventLeftMouseUp:
-          await windowManager.isVisible()
-              ? await _appWindow.hide()
-              : await _appWindow.show();
+      debugPrint("eventName: $eventName");
 
-          break;
-        case Constants.eventRightMouseUp:
-          await _systemTray.popUpContextMenu();
-          break;
-
-        default:
+      if (eventName == stray.kSystemTrayEventClick) {
+        Platform.isWindows
+            ? {
+                await windowManager.isVisible()
+                    ? await _appWindow.hide()
+                    : await _appWindow.show()
+              }
+            : _systemTray.popUpContextMenu();
+      } else if (eventName == stray.kSystemTrayEventRightClick) {
+        Platform.isWindows
+            ? _systemTray.popUpContextMenu()
+            : {
+                await windowManager.isVisible()
+                    ? await _appWindow.hide()
+                    : await _appWindow.show()
+              };
       }
     });
   }
@@ -104,6 +109,8 @@ class PlatformWindowManagerDesktop
   @override
   void dispose() {
     windowManager.removeListener(this);
+
+    _systemTray.destroy();
   }
 
   @override
