@@ -1,9 +1,21 @@
 import 'package:biometric_storage/biometric_storage.dart';
+import 'dart:io' show Platform;
 
 import 'constants.dart';
 
+BiometricStorage _chooseStorageByPlatform() {
+  if (Platform.isAndroid ||
+      Platform.isIOS ||
+      Platform.isMacOS ||
+      Platform.isLinux) {
+    return MethodChannelBiometricStorage();
+  } else {
+    return Win32BiometricStoragePlugin();
+  }
+}
+
 class SecureStorage {
-  static final BiometricStorage _storage = BiometricStorage();
+  static final BiometricStorage _storage = _chooseStorageByPlatform();
 
   SecureStorage._();
 
