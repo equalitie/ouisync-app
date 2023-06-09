@@ -302,7 +302,7 @@ class _MainPageState extends State<MainPage>
 
   _buildOuiSyncBar() => OuiSyncBar(
         reposCubit: _repositories,
-        repoPicker: _buildRepositoriesBar(),
+        reposBar: _buildRepositoriesBar(),
         appSettingsButton: _buildAppSettingsIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
