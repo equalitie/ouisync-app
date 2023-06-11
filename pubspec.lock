@@ -425,10 +425,11 @@ packages:
   flutter_background:
     dependency: "direct main"
     description:
-      name: flutter_background
-      sha256: "035c31a738509d67ee70bbf174e5aa7db462c371e838ec8259700c5c4e7ca17f"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: issue-69
+      resolved-ref: "318c33bfa6952b48cc72bd8d19ec8034750df21f"
+      url: "https://github.com/inetic/flutter_background"
+    source: git
     version: "1.2.0"
   flutter_bloc:
     dependency: "direct main"
