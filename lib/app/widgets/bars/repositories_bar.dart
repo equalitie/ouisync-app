@@ -40,9 +40,7 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildRepoDescription(BuildContext context) =>
       reposCubit.builder((state) {
         if (state.isLoading) {
-          return Column(
-            children: const [CircularProgressIndicator(color: Colors.white)],
-          );
+          return CircularProgressIndicator(color: Colors.white);
         }
 
         if (reposCubit.showList) {
