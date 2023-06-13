@@ -135,8 +135,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                                         repository: widget.cubit,
                                         checkForBiometrics:
                                             widget.checkForBiometrics,
-                                        getAuthenticationMode:
-                                            widget.getAuthenticationMode,
                                         popDialog: () =>
                                             Navigator.of(context).pop(),
                                       ),
