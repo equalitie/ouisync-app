@@ -22,7 +22,7 @@ class RepoState extends Equatable {
   final bool isDhtEnabled;
   final bool isPexEnabled;
   final bool requestPassword;
-  final String
+  final AuthMode
       authenticationMode; // manual, version1 (built in biometrics validation on package biometrics_storage), version2 (local_atuh for biometric validation), no local password
   final oui.AccessMode accessMode;
   final String infoHash;
@@ -36,7 +36,7 @@ class RepoState extends Equatable {
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
     this.requestPassword = false,
-    this.authenticationMode = "",
+    required this.authenticationMode,
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
     this.currentFolder = const FolderState(),
@@ -50,7 +50,7 @@ class RepoState extends Equatable {
     bool? isDhtEnabled,
     bool? isPexEnabled,
     bool? requestPassword,
-    String? authenticationMode,
+    AuthMode? authenticationMode,
     oui.AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
@@ -108,8 +108,10 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     required oui.Repository handle,
     required Settings settings,
   }) async {
-    var state = RepoState();
     var name = settingsRepoEntry.name;
+    final authMode = settings.getAuthenticationMode(name) ?? AuthMode.version1;
+
+    var state = RepoState(authenticationMode: authMode);
 
     // Migrate settings
     final legacyDhtEnabled = settings.takeRepositoryBool(name, 'DHT_ENABLED');
@@ -122,15 +124,11 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
       await handle.setPexEnabled(legacyPexEnabled);
     }
 
-    final authMode =
-        settings.getAuthenticationMode(name) ?? Constants.authModeVersion1;
-
     state = state.copyWith(
         infoHash: await handle.infoHash,
         accessMode: await handle.accessMode,
         isDhtEnabled: await handle.isDhtEnabled,
-        isPexEnabled: await handle.isPexEnabled,
-        authenticationMode: authMode);
+        isPexEnabled: await handle.isPexEnabled);
 
     return RepoCubit._(settingsRepoEntry, handle, settings, state);
   }
@@ -165,7 +163,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     return await oui.Directory.open(_handle, path);
   }
 
-  Future<void> setAuthenticationMode(String value) async {
+  Future<void> setAuthenticationMode(AuthMode value) async {
     if (state.authenticationMode == value) {
       return;
     }

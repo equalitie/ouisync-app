@@ -241,7 +241,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     final authenticationMode = settings.getAuthenticationMode(repoName);
 
     if (authenticationMode != null &&
-        authenticationMode == Constants.authModeNoLocalPassword) {
+        authenticationMode == AuthMode.no_local_password) {
       final secureStorageResult = await SecureStorage.getRepositoryPassword(
           databaseId: databaseId, authMode: authenticationMode);
 
@@ -262,7 +262,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Future<RepoEntry> createRepository(RepoMetaInfo info,
       {required String password,
       oui.ShareToken? token,
-      required String authenticationMode,
+      required AuthMode authenticationMode,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(info), setCurrent: setCurrent);
 
@@ -394,7 +394,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     changed();
   }
 
-  Future<void> deleteRepository(RepoMetaInfo info, String authMode) async {
+  Future<void> deleteRepository(RepoMetaInfo info, AuthMode authMode) async {
     final repoName = info.name;
     final wasCurrent = currentRepoName == repoName;
     final databaseId = _settings.getDatabaseId(repoName);
@@ -475,7 +475,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
     RepoMetaInfo info, {
     required String password,
     oui.ShareToken? token,
-    required String authenticationMode,
+    required AuthMode authenticationMode,
   }) async {
     final name = info.name;
     final store = info.path();

@@ -186,7 +186,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           final repoName = _repositoryMetaInfo!.name;
           final authMode =
               widget.cubit.settings.getAuthenticationMode(repoName) ??
-                  Constants.authModeVersion1;
+                  AuthMode.version1;
 
           await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
         }
@@ -521,10 +521,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     final authenticationRequired = _addPassword ? _secureWithBiometrics : false;
 
     final authenticationMode = authenticationRequired
-        ? Constants.authModeVersion2
+        ? AuthMode.version2
         : savePasswordToSecureStorage
-            ? Constants.authModeNoLocalPassword
-            : Constants.authModeManual;
+            ? AuthMode.no_local_password
+            : AuthMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
         f: cubit.createRepository(info,

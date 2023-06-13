@@ -27,16 +27,16 @@ class SecureStorage {
     return _storage.getStorage(key, options: initOptions);
   }
 
-  static _getKey(String databaseId, String authMode) {
-    if (authMode == Constants.authModeVersion2) {
+  static _getKey(String databaseId, AuthMode authMode) {
+    if (authMode == AuthMode.version2) {
       return '$databaseId-v2';
     }
 
     return databaseId;
   }
 
-  static _isAuthenticationRequired(String authMode) {
-    if (authMode == Constants.authModeVersion1) {
+  static _isAuthenticationRequired(AuthMode authMode) {
+    if (authMode == AuthMode.version1) {
       return true;
     }
 
@@ -46,7 +46,7 @@ class SecureStorage {
   static Future<SecureStorageResult> addRepositoryPassword(
       {required String databaseId,
       required String password,
-      required String authMode}) async {
+      required AuthMode authMode}) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
 
@@ -63,7 +63,7 @@ class SecureStorage {
   }
 
   static Future<SecureStorageResult> getRepositoryPassword(
-      {required String databaseId, required String authMode}) async {
+      {required String databaseId, required AuthMode authMode}) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
 
@@ -83,7 +83,7 @@ class SecureStorage {
 
   static Future<SecureStorageResult> deleteRepositoryPassword(
       {required String databaseId,
-      required String authMode,
+      required AuthMode authMode,
       required bool authenticationRequired}) async {
     final key = _getKey(databaseId, authMode);
     try {

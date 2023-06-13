@@ -217,7 +217,8 @@ class Settings {
   }
 
   Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
-      {required String databaseId, required String authenticationMode}) async {
+      {required String databaseId,
+      required AuthMode authenticationMode}) async {
     if (_repos.containsKey(info.name)) {
       print("Settings already contains a repo with the name \"${info.name}\"");
       return null;
@@ -272,11 +273,19 @@ class Settings {
     await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
 
-  String? getAuthenticationMode(String repoName) =>
-      _prefs.getString(_repositoryKey(repoName, _authenticationMode));
+  AuthMode? getAuthenticationMode(String repoName) {
+    final str = _prefs.getString(_repositoryKey(repoName, _authenticationMode));
+    if (str == null) return null;
+    return authModeFromString(str);
+  }
 
-  Future<void> setAuthenticationMode(String repoName, String? value) async =>
-      _setRepositoryString(repoName, _authenticationMode, value);
+  Future<void> setAuthenticationMode(String repoName, AuthMode? value) async {
+    String? str;
+    if (value != null) {
+      str = authModeToString(value);
+    }
+    _setRepositoryString(repoName, _authenticationMode, str);
+  }
 
   // Read and remove a bool property. This functions exists to facilitate migration to the new
   // repository config system where config values are stored in the repository metadata.
