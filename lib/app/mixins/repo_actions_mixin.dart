@@ -82,13 +82,11 @@ mixin RepositoryActionsMixin {
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
       required CheckForBiometricsFunction checkForBiometrics,
-      required AuthMode? Function(String) getAuthenticationMode,
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
 
-    AuthMode authenticationMode =
-        getAuthenticationMode(repository.name) ?? AuthMode.version1;
+    AuthMode authenticationMode = repository.state.authenticationMode;
 
     if (authenticationMode == AuthMode.no_local_password &&
         (Platform.isAndroid || Platform.isIOS)) {

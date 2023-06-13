@@ -307,11 +307,8 @@ class _MainPageState extends State<MainPage>
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
-  RepositoriesBar _buildRepositoriesBar() => RepositoriesBar(
-      reposCubit: _repositories,
-      checkForBiometricsCallback: _checkForBiometricsCallback,
-      getAuthenticationModeCallback: widget.settings.getAuthenticationMode,
-      setAuthenticationModeCallback: widget.settings.setAuthenticationMode);
+  RepositoriesBar _buildRepositoriesBar() =>
+      RepositoriesBar(reposCubit: _repositories);
 
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),

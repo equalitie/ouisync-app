@@ -9,18 +9,9 @@ import '../../utils/utils.dart';
 import '../../utils/constants.dart';
 
 class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
-  const RepositoriesBar(
-      {required this.reposCubit,
-      required this.checkForBiometricsCallback,
-      required this.getAuthenticationModeCallback,
-      required this.setAuthenticationModeCallback});
+  const RepositoriesBar({required this.reposCubit});
 
   final ReposCubit reposCubit;
-
-  final CheckForBiometricsFunction checkForBiometricsCallback;
-  final AuthMode? Function(String repoName) getAuthenticationModeCallback;
-  final Future<void> Function(String repoName, AuthMode? value)
-      setAuthenticationModeCallback;
 
   @override
   Widget build(BuildContext context) {
