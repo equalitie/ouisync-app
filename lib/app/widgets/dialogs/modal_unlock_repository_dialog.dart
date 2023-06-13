@@ -25,7 +25,7 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final Future<void> Function(String repoName, String? value)
+  final Future<void> Function(String repoName, AuthMode? value)
       setAuthenticationModeCallback;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
@@ -130,15 +130,14 @@ class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
           f: SecureStorage.addRepositoryPassword(
               databaseId: databaseId,
               password: password,
-              authMode: Constants.authModeVersion2));
+              authMode: AuthMode.version2));
 
       if (biometricsResult.exception != null) {
         loggy.app(biometricsResult.exception);
         return;
       }
 
-      await setAuthenticationModeCallback(
-          repositoryName, Constants.authModeVersion2);
+      await setAuthenticationModeCallback(repositoryName, AuthMode.version2);
     }
 
     final message = _useBiometrics.value

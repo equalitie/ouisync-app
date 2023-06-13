@@ -203,7 +203,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
       {required RepoCubit repository,
       required String mode,
       required String repoName,
-      required String authMode,
+      required AuthMode authMode,
       required String currentPassword,
       required bool useBiometrics}) async {
     final title = mode == Constants.addPasswordMode
@@ -326,7 +326,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
               onChanged: (useBiometrics) async {
                 UnlockResult? unlockResult;
 
-                if (state.authMode != Constants.authModeManual) {
+                if (state.authMode != AuthMode.manual) {
                   final securePassword = await tryGetSecurePassword(
                       context: context,
                       databaseId: repository.databaseId,
@@ -335,7 +335,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   if (securePassword == null || securePassword.isEmpty) {
                     if (securePassword != null) {
                       final userAuthenticationFailed =
-                          state.authMode == Constants.authModeNoLocalPassword
+                          state.authMode == AuthMode.no_local_password
                               ? 'Repository authentication failed'
                               : 'Biometric authentication failed';
                       showSnackBar(context, message: userAuthenticationFailed);

@@ -6,6 +6,7 @@ import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../../utils/constants.dart';
 
 class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   const RepositoriesBar(
@@ -17,8 +18,8 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   final ReposCubit reposCubit;
 
   final CheckForBiometricsFunction checkForBiometricsCallback;
-  final String? Function(String repoName) getAuthenticationModeCallback;
-  final Future<void> Function(String repoName, String? value)
+  final AuthMode? Function(String repoName) getAuthenticationModeCallback;
+  final Future<void> Function(String repoName, AuthMode? value)
       setAuthenticationModeCallback;
 
   @override

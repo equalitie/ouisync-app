@@ -9,6 +9,7 @@ import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
+import '../../utils/constants.dart';
 import '../widgets.dart';
 
 class ManageDesktopPassword extends StatefulWidget {
@@ -25,7 +26,7 @@ class ManageDesktopPassword extends StatefulWidget {
   final RepoCubit repoCubit;
   final String mode;
   final String repositoryName;
-  final String authMode;
+  final AuthMode authMode;
   final String? currentPassword;
   final bool usesBiometrics;
 
@@ -70,10 +71,10 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     super.initState();
   }
 
-  Future<bool> _userAuthentication(String databaseId, String authMode) async {
+  Future<bool> _userAuthentication(String databaseId, AuthMode authMode) async {
     String currentPassword = widget.currentPassword ?? '';
 
-    if (authMode != Constants.authModeManual) {
+    if (authMode != AuthMode.manual) {
       final securePassword = await tryGetSecurePassword(
           context: context,
           databaseId: databaseId,
@@ -82,7 +83,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       if (securePassword == null || securePassword.isEmpty) {
         if (securePassword != null) {
           final userAuthenticationFailed =
-              authMode == Constants.authModeNoLocalPassword
+              authMode == AuthMode.no_local_password
                   ? 'Repository authentication failed'
                   : 'Biometric authentication failed';
           showSnackBar(context, message: userAuthenticationFailed);
@@ -105,8 +106,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
     _currentPasswordController.text = currentPassword;
 
-    if (widget.authMode == Constants.authModeManual &&
-        _requiresManualAuthentication) {
+    if (widget.authMode == AuthMode.manual && _requiresManualAuthentication) {
       _currentPasswordFocus.requestFocus();
       return;
     }

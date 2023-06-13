@@ -82,15 +82,15 @@ mixin RepositoryActionsMixin {
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
       required CheckForBiometricsFunction checkForBiometrics,
-      required String? Function(String) getAuthenticationMode,
+      required AuthMode? Function(String) getAuthenticationMode,
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
 
-    String authenticationMode =
-        getAuthenticationMode(repository.name) ?? Constants.authModeVersion1;
+    AuthMode authenticationMode =
+        getAuthenticationMode(repository.name) ?? AuthMode.version1;
 
-    if (authenticationMode == Constants.authModeNoLocalPassword &&
+    if (authenticationMode == AuthMode.no_local_password &&
         (Platform.isAndroid || Platform.isIOS)) {
       final auth = LocalAuthentication();
       final isSupported = await auth.isDeviceSupported();
@@ -140,7 +140,7 @@ mixin RepositoryActionsMixin {
           context,
           f: repository.createShareToken(AccessMode.write, password: password));
     } else {
-      authenticationMode = Constants.authModeManual;
+      authenticationMode = AuthMode.manual;
 
       final unlockResult = await manualUnlock(context, repository);
 
@@ -230,8 +230,8 @@ mixin RepositoryActionsMixin {
   Future<void> deleteRepository(BuildContext context,
       {required String repositoryName,
       required RepoMetaInfo repositoryMetaInfo,
-      required String? Function(String) getAuthenticationMode,
-      required Future<void> Function(RepoMetaInfo, String) delete,
+      required AuthMode? Function(String) getAuthenticationMode,
+      required Future<void> Function(RepoMetaInfo, AuthMode) delete,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -257,7 +257,7 @@ mixin RepositoryActionsMixin {
 
     if (deleteRepo ?? false) {
       final authMode =
-          getAuthenticationMode(repositoryName) ?? Constants.authModeVersion1;
+          getAuthenticationMode(repositoryName) ?? AuthMode.version1;
 
       await Dialogs.executeFutureWithLoadingDialog(context,
           f: delete(repositoryMetaInfo, authMode));
@@ -276,12 +276,12 @@ mixin RepositoryActionsMixin {
       {required String databaseId,
       required String repositoryName,
       required CheckForBiometricsFunction checkForBiometrics,
-      required String? Function(String) getAuthenticationMode,
-      required Future<void> Function(String, String?) setAuthenticationMode,
+      required AuthMode? Function(String) getAuthenticationMode,
+      required Future<void> Function(String, AuthMode?) setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    String? authenticationMode = getAuthenticationMode(repositoryName);
+    AuthMode? authenticationMode = getAuthenticationMode(repositoryName);
 
     /// Runs once per repository (if needed): before adding to the app the
     /// possibility to create a repository without a local password, any entry
@@ -308,12 +308,11 @@ mixin RepositoryActionsMixin {
     /// (If the password is empty, something wrong happened in the previous
     /// version of the app saving its value and it is considered non existent
     /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == null ||
-        authenticationMode == Constants.authModeVersion1) {
+    if (authenticationMode == null || authenticationMode == AuthMode.version1) {
       final securedPassword = await getPasswordAndUnlock(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
-          authenticationMode: Constants.authModeVersion1,
+          authenticationMode: AuthMode.version1,
           cubitUnlockRepository: cubitUnlockRepository);
 
       if (securedPassword == null) {
@@ -322,13 +321,12 @@ mixin RepositoryActionsMixin {
 
       /// IF password.isEmpty => The password doesn't exist in the secure
       /// storage.
-      authenticationMode = securedPassword.isEmpty
-          ? Constants.authModeManual
-          : Constants.authModeVersion1;
+      authenticationMode =
+          securedPassword.isEmpty ? AuthMode.manual : AuthMode.version1;
 
       await setAuthenticationMode(repositoryName, authenticationMode);
 
-      if (authenticationMode == Constants.authModeVersion1) {
+      if (authenticationMode == AuthMode.version1) {
         final upgraded = await upgradeBiometricEntryToVersion2(
             databaseId: databaseId, password: securedPassword);
 
@@ -344,13 +342,13 @@ mixin RepositoryActionsMixin {
               'was successful.');
         }
 
-        await setAuthenticationMode(repositoryName, Constants.authModeVersion2);
+        await setAuthenticationMode(repositoryName, AuthMode.version2);
 
         return;
       }
     }
 
-    if (authenticationMode == Constants.authModeManual) {
+    if (authenticationMode == AuthMode.manual) {
       final unlockResult = await getManualPasswordAndUnlock(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
@@ -376,11 +374,11 @@ mixin RepositoryActionsMixin {
   Future<String?> getPasswordAndUnlock(BuildContext context,
       {required String databaseId,
       required String repositoryName,
-      required String authenticationMode,
+      required AuthMode authenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    if (authenticationMode == Constants.authModeManual) {
+    if (authenticationMode == AuthMode.manual) {
       return null;
     }
 
@@ -413,12 +411,12 @@ mixin RepositoryActionsMixin {
   Future<String?> tryGetSecurePassword(
       {required BuildContext context,
       required String databaseId,
-      required String authenticationMode}) async {
-    if (authenticationMode == Constants.authModeManual) {
+      required AuthMode authenticationMode}) async {
+    if (authenticationMode == AuthMode.manual) {
       return null;
     }
 
-    if (authenticationMode == Constants.authModeVersion2) {
+    if (authenticationMode == AuthMode.version2) {
       final auth = LocalAuthentication();
 
       final authorized = await auth.authenticate(
@@ -436,7 +434,7 @@ mixin RepositoryActionsMixin {
   }
 
   Future<String?> readSecureStorage(
-      {required String databaseId, required String authMode}) async {
+      {required String databaseId, required AuthMode authMode}) async {
     final secureStorageResult = await SecureStorage.getRepositoryPassword(
         databaseId: databaseId, authMode: authMode);
 
@@ -454,7 +452,7 @@ mixin RepositoryActionsMixin {
     final addTempResult = await SecureStorage.addRepositoryPassword(
         databaseId: databaseId,
         password: password,
-        authMode: Constants.authModeVersion2);
+        authMode: AuthMode.version2);
 
     if (addTempResult.exception != null) {
       print(addTempResult.exception);
@@ -464,7 +462,7 @@ mixin RepositoryActionsMixin {
 
     final deleteOldResult = await SecureStorage.deleteRepositoryPassword(
         databaseId: databaseId,
-        authMode: Constants.authModeVersion1,
+        authMode: AuthMode.version1,
         authenticationRequired: false);
 
     if (deleteOldResult.exception != null) {
@@ -483,7 +481,7 @@ mixin RepositoryActionsMixin {
       {required String databaseId,
       required String repositoryName,
       required CheckForBiometricsFunction checkForBiometrics,
-      required Future<void> Function(String repoName, String? value)
+      required Future<void> Function(String repoName, AuthMode? value)
           setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})

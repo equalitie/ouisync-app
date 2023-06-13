@@ -24,7 +24,7 @@ class RepositorySecurity extends StatefulWidget {
   final String password;
   final ShareToken shareToken;
   final bool isBiometricsAvailable;
-  final String authenticationMode;
+  final AuthMode authenticationMode;
 
   @override
   State<RepositorySecurity> createState() => _RepositorySecurityState();
@@ -198,7 +198,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                                 ' automatically, unless a local password is added.';
 
                         if (useBiometrics &&
-                            state.authMode == Constants.authModeManual) {
+                            state.authMode == AuthMode.manual) {
                           confirmationMessage +=
                               '\n\nThis will remove the repository password'
                               ' and use the biometric validation for unlocking.';

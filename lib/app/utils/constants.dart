@@ -1,5 +1,55 @@
 import 'package:flutter/material.dart';
 
+enum AuthMode {
+  manual,
+  version1,
+  version2,
+  no_local_password,
+}
+
+String authModeToString(AuthMode authMode) {
+  switch (authMode) {
+    case AuthMode.manual:
+      {
+        return "manual";
+      }
+    case AuthMode.version1:
+      {
+        return "version1";
+      }
+    case AuthMode.version2:
+      {
+        return "version2";
+      }
+    case AuthMode.no_local_password:
+      {
+        return "no_local_password";
+      }
+  }
+}
+
+AuthMode? authModeFromString(String authMode) {
+  switch (authMode) {
+    case "manual":
+      {
+        return AuthMode.manual;
+      }
+    case "version1":
+      {
+        return AuthMode.version1;
+      }
+    case "version2":
+      {
+        return AuthMode.version2;
+      }
+    case "no_local_password":
+      {
+        return AuthMode.no_local_password;
+      }
+  }
+  return null;
+}
+
 class Constants {
   Constants._();
 
@@ -38,12 +88,12 @@ class Constants {
 
   /// Authentication modes
 
-  static const String authModeManual = 'manual';
-  static const String authModeVersion1 =
-      'version1'; // Using built in biometric validation in biometrics_storage
-  static const String authModeVersion2 =
-      'version2'; // Using local_auth for biometric validation
-  static const String authModeNoLocalPassword = 'no_local_password';
+  //static const String authModeManual = 'manual';
+  //static const String authModeVersion1 =
+  //    'version1'; // Using built in biometric validation in biometrics_storage
+  //static const String authModeVersion2 =
+  //    'version2'; // Using local_auth for biometric validation
+  //static const String authModeNoLocalPassword = 'no_local_password';
 
   /// Password state modes
 

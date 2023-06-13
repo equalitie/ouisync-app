@@ -3,13 +3,14 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
+import '../utils/constants.dart';
 import 'repo_meta_info.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoMetaInfo? get metaInfo;
   String get name => metaInfo?.name ?? '';
-  String? get authenticationMode;
+  AuthMode? get authenticationMode;
   RepoCubit? get maybeCubit => null;
 
   String? get infoHash => maybeCubit?.state.infoHash;
@@ -39,7 +40,7 @@ class LoadingRepoEntry extends RepoEntry {
   }
 
   @override
-  String? get authenticationMode => null;
+  AuthMode? get authenticationMode => null;
 
   @override
   RepoCubit? get maybeCubit => null;
@@ -54,7 +55,7 @@ class RepoListEntry extends RepoEntry {
   String get name => Constants.repoListEntryName;
 
   @override
-  String? get authenticationMode => null;
+  AuthMode? get authenticationMode => null;
 
   @override
   Future<void> close() async {}
@@ -84,7 +85,7 @@ class OpenRepoEntry extends RepoEntry {
   RepoMetaInfo get metaInfo => _cubit.metaInfo;
 
   @override
-  String? get authenticationMode => _cubit.state.authenticationMode;
+  AuthMode? get authenticationMode => _cubit.state.authenticationMode;
 
   SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
 }
@@ -104,7 +105,7 @@ class MissingRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  String? get authenticationMode => null;
+  AuthMode? get authenticationMode => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
@@ -125,7 +126,7 @@ class ErrorRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  String? get authenticationMode => null;
+  AuthMode? get authenticationMode => null;
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;

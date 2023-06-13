@@ -4,6 +4,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
+import '../../utils/constants.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget with RepositoryActionsMixin {
@@ -24,7 +25,7 @@ class RepoListState extends StatelessWidget with RepositoryActionsMixin {
       {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
-  final String? Function(String repoName) onGetAuthenticationMode;
+  final AuthMode? Function(String repoName) onGetAuthenticationMode;
 
   @override
   Widget build(BuildContext context) {

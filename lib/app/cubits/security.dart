@@ -11,25 +11,25 @@ import 'cubits.dart';
 class SecurityState extends Equatable {
   final bool isBiometricsAvailable;
   final bool unlockWithBiometrics;
-  final String authMode;
+  final AuthMode authMode;
   final String password;
   final bool previewPassword;
   final String message;
 
-  PasswordMode get passwordMode => authMode == Constants.authModeManual
+  PasswordMode get passwordMode => authMode == AuthMode.manual
       ? PasswordMode.manual
-      : authMode == Constants.authModeNoLocalPassword
+      : authMode == AuthMode.no_local_password
           ? PasswordMode.none
           : PasswordMode.bio;
 
-  String get passwordModeTitle => authMode == Constants.authModeManual
+  String get passwordModeTitle => authMode == AuthMode.manual
       ? 'Update local password'
       : 'Add local password';
 
   SecurityState(
-      {this.isBiometricsAvailable = false,
+      {required this.authMode,
+      this.isBiometricsAvailable = false,
       this.unlockWithBiometrics = false,
-      this.authMode = '',
       this.password = '',
       this.previewPassword = false,
       this.message = ''});
@@ -37,7 +37,7 @@ class SecurityState extends Equatable {
   SecurityState copyWith(
           {bool? isBiometricsAvailable,
           bool? unlockWithBiometrics,
-          String? authMode,
+          AuthMode? authMode,
           String? password,
           bool? previewPassword,
           String? message}) =>
@@ -75,14 +75,12 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       {required RepoCubit repoCubit,
       required ShareToken? shareToken,
       required bool isBiometricsAvailable,
-      required String authenticationMode,
+      required AuthMode authenticationMode,
       required String password}) {
-    var initialState = SecurityState();
+    var initialState = SecurityState(authMode: authenticationMode);
 
-    final unlockWithBiometrics = [
-      Constants.authModeVersion1,
-      Constants.authModeVersion2
-    ].contains(authenticationMode);
+    final unlockWithBiometrics =
+        [AuthMode.version1, AuthMode.version2].contains(authenticationMode);
 
     initialState = initialState.copyWith(
         isBiometricsAvailable: isBiometricsAvailable,
@@ -94,11 +92,11 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   }
 
   Future<String?> addRepoLocalPassword(String newPassword) async {
-    final deleted = await _removePasswordFromSecureStorage(
-        Constants.authModeNoLocalPassword);
+    final deleted =
+        await _removePasswordFromSecureStorage(AuthMode.no_local_password);
 
     if (deleted == false) {
-      setAuthMode(Constants.authModeNoLocalPassword);
+      setAuthMode(AuthMode.no_local_password);
 
       return S.current.messageErrorRemovingSecureStorage;
     }
@@ -110,7 +108,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     }
 
     setPassword(newPassword);
-    setAuthMode(Constants.authModeManual);
+    setAuthMode(AuthMode.manual);
 
     return null;
   }
@@ -137,13 +135,13 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     setPassword(newPassword);
 
     final addedToSecureStorage = await _addPasswordToSecureStorage(
-        newPassword, Constants.authModeNoLocalPassword);
+        newPassword, AuthMode.no_local_password);
 
     if (addedToSecureStorage == false) {
       return S.current.messageErrorRemovingPassword;
     }
 
-    setAuthMode(Constants.authModeNoLocalPassword);
+    setAuthMode(AuthMode.no_local_password);
 
     return null;
   }
@@ -151,8 +149,8 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   Future<String?> updateUnlockRepoWithBiometrics(
       bool unlockWithBiometrics) async {
     if (unlockWithBiometrics == false) {
-      final addedOrRemoved = await _addOrRemoveVersion2InSecureStorage(
-          Constants.authModeNoLocalPassword);
+      final addedOrRemoved =
+          await _addOrRemoveVersion2InSecureStorage(AuthMode.no_local_password);
 
       if (addedOrRemoved == null) {
         return 'addedOrRemoved == null';
@@ -163,7 +161,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       }
 
       setUnlockWithBiometrics(false);
-      setAuthMode(Constants.authModeNoLocalPassword);
+      setAuthMode(AuthMode.no_local_password);
 
       return null;
     }
@@ -177,25 +175,25 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
 
     setPassword(newPassword);
 
-    final updated = await _updatePasswordInSecureStorage(
-        newPassword, Constants.authModeVersion2);
+    final updated =
+        await _updatePasswordInSecureStorage(newPassword, AuthMode.version2);
 
     if (updated == false) {
       setUnlockWithBiometrics(false);
       setPassword(newPassword);
-      setAuthMode(Constants.authModeManual);
+      setAuthMode(AuthMode.manual);
 
       return S.current.messageErrorUpdatingSecureStorage;
     }
 
     setUnlockWithBiometrics(true);
-    setAuthMode(Constants.authModeVersion2);
+    setAuthMode(AuthMode.version2);
 
     return null;
   }
 
   Future<bool> _addPasswordToSecureStorage(
-      String password, String authMode) async {
+      String password, AuthMode authMode) async {
     final secureStorageResult = await SecureStorage.addRepositoryPassword(
         databaseId: _repoCubit.databaseId,
         password: password,
@@ -210,7 +208,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
   }
 
   Future<bool> _updatePasswordInSecureStorage(
-      String newPassword, String authMode) async {
+      String newPassword, AuthMode authMode) async {
     final secureStorageResult = await SecureStorage.addRepositoryPassword(
         databaseId: _repoCubit.databaseId,
         password: state.password,
@@ -227,7 +225,8 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     return true;
   }
 
-  Future<bool?> _addOrRemoveVersion2InSecureStorage(String newAuthMode) async {
+  Future<bool?> _addOrRemoveVersion2InSecureStorage(
+      AuthMode newAuthMode) async {
     final newEntryResult = await SecureStorage.addRepositoryPassword(
         databaseId: _repoCubit.databaseId,
         password: state.password,
@@ -253,7 +252,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     return true;
   }
 
-  Future<bool> _removePasswordFromSecureStorage(String authMode) async {
+  Future<bool> _removePasswordFromSecureStorage(AuthMode authMode) async {
     final secureStorageResult = await SecureStorage.deleteRepositoryPassword(
         databaseId: _repoCubit.databaseId,
         authMode: authMode,
@@ -294,7 +293,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
 
   void setPassword(String password) => emit(state.copyWith(password: password));
 
-  void setAuthMode(String authMode) {
+  void setAuthMode(AuthMode authMode) {
     if (state.authMode == authMode) {
       return;
     }
