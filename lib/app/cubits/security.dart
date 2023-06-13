@@ -10,7 +10,6 @@ import 'cubits.dart';
 
 class SecurityState extends Equatable {
   final bool isBiometricsAvailable;
-  final bool unlockWithBiometrics;
   final AuthMode authMode;
   final String password;
   final bool previewPassword;
@@ -28,11 +27,13 @@ class SecurityState extends Equatable {
 
   SecurityState(
       {required this.authMode,
-      this.isBiometricsAvailable = false,
-      this.unlockWithBiometrics = false,
-      this.password = '',
+      required this.isBiometricsAvailable,
+      required this.password,
       this.previewPassword = false,
       this.message = ''});
+
+  bool get unlockWithBiometrics =>
+      [AuthMode.version1, AuthMode.version2].contains(authMode);
 
   SecurityState copyWith(
           {bool? isBiometricsAvailable,
@@ -44,22 +45,14 @@ class SecurityState extends Equatable {
       SecurityState(
           isBiometricsAvailable:
               isBiometricsAvailable ?? this.isBiometricsAvailable,
-          unlockWithBiometrics:
-              unlockWithBiometrics ?? this.unlockWithBiometrics,
           authMode: authMode ?? this.authMode,
           password: password ?? this.password,
           previewPassword: previewPassword ?? this.previewPassword,
           message: message ?? this.message);
 
   @override
-  List<Object?> get props => [
-        isBiometricsAvailable,
-        unlockWithBiometrics,
-        authMode,
-        password,
-        previewPassword,
-        message
-      ];
+  List<Object?> get props =>
+      [isBiometricsAvailable, authMode, password, previewPassword, message];
 }
 
 class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
@@ -77,14 +70,8 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       required bool isBiometricsAvailable,
       required AuthMode authenticationMode,
       required String password}) {
-    var initialState = SecurityState(authMode: authenticationMode);
-
-    final unlockWithBiometrics =
-        [AuthMode.version1, AuthMode.version2].contains(authenticationMode);
-
-    initialState = initialState.copyWith(
+    var initialState = SecurityState(
         isBiometricsAvailable: isBiometricsAvailable,
-        unlockWithBiometrics: unlockWithBiometrics,
         authMode: authenticationMode,
         password: password);
 
