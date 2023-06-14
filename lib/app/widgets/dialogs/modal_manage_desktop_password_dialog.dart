@@ -15,14 +15,14 @@ class ManageDesktopPassword extends StatefulWidget {
   ManageDesktopPassword(
       {required this.context,
       required this.repoCubit,
-      required this.mode,
+      required this.action,
       required this.repositoryName,
       required this.authMode,
       required this.usesBiometrics});
 
   final BuildContext context;
   final RepoCubit repoCubit;
-  final String mode;
+  final PasswordAction action;
   final String repositoryName;
   final AuthMode authMode;
   final bool usesBiometrics;
@@ -97,7 +97,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
   void _initStateValues(String currentPassword) {
     _requiresManualAuthentication =
-        widget.mode != Constants.addPasswordMode && currentPassword.isEmpty;
+        widget.action != PasswordAction.add && currentPassword.isEmpty;
 
     _currentPasswordController.text =
         _requiresManualAuthentication == false ? currentPassword : '';
@@ -168,8 +168,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _currentPasswordFocus))
           ]),
-        if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
-                .contains(widget.mode) ==
+        if ([PasswordAction.biometrics, PasswordAction.remove]
+                .contains(widget.action) ==
             false)
           Row(children: [
             Expanded(
@@ -187,8 +187,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _newPasswordFocus))
           ]),
-        if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
-                .contains(widget.mode) ==
+        if ([PasswordAction.biometrics, PasswordAction.remove]
+                .contains(widget.action) ==
             false)
           Row(children: [
             Expanded(
@@ -311,8 +311,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
     _currentPasswordInputKey.currentState?.save();
 
-    if ([Constants.addPasswordMode, Constants.changePasswordMode]
-        .contains(widget.mode)) {
+    if ([PasswordAction.add, PasswordAction.change].contains(widget.action)) {
       final isPasswordOk =
           _newPasswordInputKey.currentState?.validate() ?? false;
       final isRetypePasswordOk =

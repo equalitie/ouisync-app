@@ -95,7 +95,7 @@ class _GetPasswordStateState extends State<GetPasswordState> {
       ])));
 
   Widget _title() {
-    final title = _state.mode == Constants.addPasswordMode
+    final title = _state.action == PasswordAction.add
         ? S.current.messageAddLocalPassword
         : S.current.messageChangeLocalPassword;
 
@@ -151,7 +151,7 @@ class _GetPasswordStateState extends State<GetPasswordState> {
       ];
 
   List<Widget> _savePassword(BuildContext context) {
-    final actionText = _state.mode == Constants.addPasswordMode
+    final actionText = _state.action == PasswordAction.add
         ? S.current.messageAddLocalPassword
         : S.current.messageChangeLocalPassword;
 
@@ -289,27 +289,27 @@ class _GetPasswordStateState extends State<GetPasswordState> {
 
 class GetPasswordResult extends Equatable {
   GetPasswordResult(
-      {required this.mode,
+      {required this.action,
       required this.currentPassword,
       this.newPassword,
       this.changed = false});
 
-  final String mode;
+  final PasswordAction action;
   final String currentPassword;
   final String? newPassword;
   final bool changed;
 
   GetPasswordResult copyWith(
-          {String? mode,
+          {PasswordAction? action,
           String? currentPassword,
           String? newPassword,
           bool? changed}) =>
       GetPasswordResult(
-          mode: mode ?? this.mode,
+          action: action ?? this.action,
           currentPassword: currentPassword ?? this.currentPassword,
           newPassword: newPassword ?? this.newPassword,
           changed: changed ?? this.changed);
 
   @override
-  List<Object?> get props => [mode, currentPassword, newPassword, changed];
+  List<Object?> get props => [action, currentPassword, newPassword, changed];
 }

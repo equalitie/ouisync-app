@@ -165,7 +165,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   onTap: (_) async {
                     final setPasswordResult = await _getNewLocalPassword(
                         repository: repository,
-                        mode: Constants.addPasswordMode,
+                        action: PasswordAction.add,
                         repoName: repository.name,
                         authMode: state.authMode,
                         useBiometrics: state.unlockWithBiometrics);
@@ -201,15 +201,15 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
 
   Future<SetPasswordResult?> _getNewLocalPassword(
       {required RepoCubit repository,
-      required String mode,
+      required PasswordAction action,
       required String repoName,
       required AuthMode authMode,
       required bool useBiometrics}) async {
-    final title = mode == Constants.addPasswordMode
+    final title = action == PasswordAction.add
         ? S.current.messageAddLocalPassword
-        : mode == Constants.changePasswordMode
+        : action == PasswordAction.change
             ? S.current.messageChangeLocalPassword
-            : mode == Constants.removePasswordMode
+            : action == PasswordAction.remove
                 ? S.current.messageRemovaLocalPassword
                 : S.current.messageValidateLocalPassword;
 
@@ -220,7 +220,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
             body: ManageDesktopPassword(
                 context: context,
                 repoCubit: repository,
-                mode: mode,
+                action: action,
                 repositoryName: repoName,
                 authMode: authMode,
                 usesBiometrics: useBiometrics)));
@@ -245,7 +245,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
               onTap: (_) async {
                 final setPasswordResult = await _getNewLocalPassword(
                     repository: repository,
-                    mode: Constants.changePasswordMode,
+                    action: PasswordAction.change,
                     repoName: repository.name,
                     authMode: state.authMode,
                     useBiometrics: state.unlockWithBiometrics);
@@ -284,7 +284,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
               onTap: (_) async {
                 final setPasswordResult = await _getNewLocalPassword(
                     repository: repository,
-                    mode: Constants.removePasswordMode,
+                    action: PasswordAction.remove,
                     repoName: repository.name,
                     authMode: state.authMode,
                     useBiometrics: state.unlockWithBiometrics);
@@ -374,7 +374,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 } else {
                   final setPasswordResult = await _getNewLocalPassword(
                       repository: repository,
-                      mode: Constants.updateBiometricsMode,
+                      action: PasswordAction.biometrics,
                       repoName: repository.name,
                       authMode: state.authMode,
                       useBiometrics: state.unlockWithBiometrics);
