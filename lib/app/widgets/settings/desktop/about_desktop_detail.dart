@@ -21,13 +21,15 @@ class AboutDesktopDetail extends StatelessWidget {
         AppVersionTile(
           session: reposCubit.session,
           leading: Icon(Icons.info_outline),
-          title: Text(S.current.labelAppVersion),
+          title: Text(S.current.labelAppVersion,
+              style: TextStyle(fontSize: Dimensions.fontSmall)),
         ),
         Dimensions.desktopSettingDivider
       ]);
 
   Widget _buildRuntimeID() => ListTile(
-      title: Text(S.current.messageSettingsRuntimeID),
+      title: Text(S.current.messageSettingsRuntimeID,
+          style: TextStyle(fontSize: Dimensions.fontSmall)),
       leading: Icon(Icons.person),
       subtitle: _getRuntimeIdForOS());
 

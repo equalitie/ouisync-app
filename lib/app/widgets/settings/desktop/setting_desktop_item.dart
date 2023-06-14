@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
 import 'desktop_settings.dart';
 
@@ -48,6 +49,7 @@ class SettingDesktopItem extends StatelessWidget {
       fontWeight = FontWeight.w500;
     }
 
-    return TextStyle(color: color, fontWeight: fontWeight);
+    return TextStyle(
+        color: color, fontSize: Dimensions.fontSmall, fontWeight: fontWeight);
   }
 }

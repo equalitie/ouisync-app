@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../cubits/cubits.dart';
-import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
 import 'desktop_settings.dart';
 
