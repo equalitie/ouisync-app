@@ -9,7 +9,6 @@ import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
-import '../../utils/constants.dart';
 import '../widgets.dart';
 
 class ManageDesktopPassword extends StatefulWidget {
@@ -19,7 +18,6 @@ class ManageDesktopPassword extends StatefulWidget {
       required this.mode,
       required this.repositoryName,
       required this.authMode,
-      required this.currentPassword,
       required this.usesBiometrics});
 
   final BuildContext context;
@@ -27,7 +25,6 @@ class ManageDesktopPassword extends StatefulWidget {
   final String mode;
   final String repositoryName;
   final AuthMode authMode;
-  final String? currentPassword;
   final bool usesBiometrics;
 
   @override
@@ -72,7 +69,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
   }
 
   Future<bool> _userAuthentication(String databaseId, AuthMode authMode) async {
-    String currentPassword = widget.currentPassword ?? '';
+    String currentPassword = '';
 
     if (authMode != AuthMode.manual) {
       final securePassword = await tryGetSecurePassword(
@@ -101,10 +98,10 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
   void _initStateValues(String currentPassword) {
     _requiresManualAuthentication =
-        widget.mode == Constants.updateBiometricsMode ||
-            widget.mode != Constants.addPasswordMode && currentPassword.isEmpty;
+        widget.mode != Constants.addPasswordMode && currentPassword.isEmpty;
 
-    _currentPasswordController.text = currentPassword;
+    _currentPasswordController.text =
+        _requiresManualAuthentication == false ? currentPassword : '';
 
     if (widget.authMode == AuthMode.manual && _requiresManualAuthentication) {
       _currentPasswordFocus.requestFocus();
@@ -301,12 +298,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
         PositiveButton(
             text: S.current.actionAccept,
             focusNode: _createButtonFocus,
-            onPressed: () {
-              final currentPassword = _currentPasswordController.text;
-              final newPassword = _newPasswordController.text;
-
-              _onSaved(widget.repositoryName, currentPassword, newPassword);
-            })
+            onPressed: () => _onSaved(widget.repositoryName,
+                _currentPasswordController.text, _newPasswordController.text))
       ];
 
   void _onSaved(
@@ -319,9 +312,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
     _currentPasswordInputKey.currentState?.save();
 
-    if ([Constants.updateBiometricsMode, Constants.removePasswordMode]
-            .contains(widget.mode) ==
-        false) {
+    if ([Constants.addPasswordMode, Constants.changePasswordMode]
+        .contains(widget.mode)) {
       final isPasswordOk =
           _newPasswordInputKey.currentState?.validate() ?? false;
       final isRetypePasswordOk =
@@ -332,30 +324,28 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       _newPasswordInputKey.currentState?.save();
       _retypeNewPasswordInputKey.currentState?.save();
 
-      final isSamePassword =
-          widget.currentPassword == _retypedNewPasswordController.text;
+      final isSamePassword = currentPassword == newPassword;
       setState(() => _samePassword = isSamePassword);
 
-      if (_samePassword) return;
+      if (isSamePassword) return;
     }
 
     UnlockResult? unlockResult;
-    if (widget.currentPassword != null && widget.currentPassword!.isEmpty) {
-      final validateCurrentPassword = await _validateCurrentPassword(
-          widget.context, currentPassword, widget.repoCubit);
 
-      if (validateCurrentPassword.isFailure) {
-        final message = validateCurrentPassword.failure;
+    final validateCurrentPassword = await _validateCurrentPassword(
+        widget.context, currentPassword, widget.repoCubit);
 
-        if (message != null) {
-          showSnackBar(context, message: message);
-        }
+    if (validateCurrentPassword.isFailure) {
+      final message = validateCurrentPassword.failure;
 
-        return null;
+      if (message != null) {
+        showSnackBar(context, message: message);
       }
 
-      unlockResult = validateCurrentPassword.success;
+      return null;
     }
+
+    unlockResult = validateCurrentPassword.success;
 
     final result = SetPasswordResult(
         repositoryName: repositoryName,

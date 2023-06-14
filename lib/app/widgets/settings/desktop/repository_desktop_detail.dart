@@ -167,7 +167,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                         mode: Constants.addPasswordMode,
                         repoName: repository.name,
                         authMode: state.authMode,
-                        currentPassword: state.password,
                         useBiometrics: state.unlockWithBiometrics);
 
                     if (setPasswordResult == null) {
@@ -204,7 +203,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
       required String mode,
       required String repoName,
       required AuthMode authMode,
-      required String currentPassword,
       required bool useBiometrics}) async {
     final title = mode == Constants.addPasswordMode
         ? S.current.messageAddLocalPassword
@@ -222,7 +220,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 mode: mode,
                 repositoryName: repoName,
                 authMode: authMode,
-                currentPassword: currentPassword,
                 usesBiometrics: useBiometrics)));
 
     if (newPasswordState == null) {
@@ -248,7 +245,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                     mode: Constants.changePasswordMode,
                     repoName: repository.name,
                     authMode: state.authMode,
-                    currentPassword: state.password,
                     useBiometrics: state.unlockWithBiometrics);
 
                 if (setPasswordResult == null) {
@@ -288,7 +284,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                     mode: Constants.removePasswordMode,
                     repoName: repository.name,
                     authMode: state.authMode,
-                    currentPassword: state.password,
                     useBiometrics: state.unlockWithBiometrics);
 
                 if (setPasswordResult == null) {
@@ -365,7 +360,6 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                       mode: Constants.updateBiometricsMode,
                       repoName: repository.name,
                       authMode: state.authMode,
-                      currentPassword: state.password,
                       useBiometrics: state.unlockWithBiometrics);
 
                   if (setPasswordResult == null) {
