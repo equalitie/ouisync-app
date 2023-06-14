@@ -79,6 +79,9 @@ class SettingsPage extends StatelessWidget {
         elevation: 0.0,
       );
 
-  Widget _windowButtons() =>
-      Row(children: [MinimizeWindowButton(), CloseWindowButton()]);
+  Widget _windowButtons() => Row(children: [
+        MinimizeWindowButton(),
+        MaximizeWindowButton(),
+        CloseWindowButton()
+      ]);
 }

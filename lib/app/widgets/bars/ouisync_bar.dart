@@ -44,8 +44,11 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
         _windowButtons()
       ]));
 
-  Widget _windowButtons() =>
-      Row(children: [MinimizeWindowButton(), CloseWindowButton()]);
+  Widget _windowButtons() => Row(children: [
+        MinimizeWindowButton(),
+        MaximizeWindowButton(),
+        CloseWindowButton()
+      ]);
 
   Widget _mobileBar(Widget settingsActionButton) => AppBar(
       shadowColor: Colors.black26,
