@@ -117,7 +117,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
   double _getButtonAspectRatio() {
     if (Platform.isWindows || Platform.isLinux) {
       if (widgetSize == null) {
-        return Dimensions.aspectRatioModalDialogButtonDesktop;
+        return Dimensions.aspectRatioModalDialogButton;
       }
 
       final height = widgetSize!.height * 0.6;

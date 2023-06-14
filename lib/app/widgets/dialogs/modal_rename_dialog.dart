@@ -105,11 +105,13 @@ class _RenameState extends State<Rename> {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop('')),
+            onPressed: () => Navigator.of(context).pop(''),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionRename,
             onPressed: () async =>
-                await _validateNewName(_newNameController.text))
+                await _validateNewName(_newNameController.text),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   Future<void> _validateNewName(String newName) async {

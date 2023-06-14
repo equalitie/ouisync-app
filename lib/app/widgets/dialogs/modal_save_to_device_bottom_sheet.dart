@@ -64,13 +64,15 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     return [
       NegativeButton(
           text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context, rootNavigator: false).pop('')),
+          onPressed: () => Navigator.of(context, rootNavigator: false).pop(''),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
       if (dst != null)
         PositiveButton(
             text: S.current.actionSave,
             onPressed: () async {
               await _downloadFile(dst);
-            })
+            },
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
     ];
   }
 
