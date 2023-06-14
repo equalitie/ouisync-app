@@ -185,8 +185,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
           final repoName = _repositoryMetaInfo!.name;
           final authMode =
-              widget.cubit.settings.getAuthenticationMode(repoName) ??
-                  AuthMode.version1;
+              widget.cubit.settings.getAuthenticationMode(repoName);
 
           await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
         }

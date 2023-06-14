@@ -109,7 +109,7 @@ class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
     required Settings settings,
   }) async {
     var name = settingsRepoEntry.name;
-    final authMode = settings.getAuthenticationMode(name) ?? AuthMode.version1;
+    final authMode = settings.getAuthenticationMode(name);
 
     var state = RepoState(authenticationMode: authMode);
 

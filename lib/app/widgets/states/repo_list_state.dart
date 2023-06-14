@@ -25,7 +25,7 @@ class RepoListState extends StatelessWidget with RepositoryActionsMixin {
       {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
-  final AuthMode? Function(String repoName) onGetAuthenticationMode;
+  final AuthMode Function(String repoName) onGetAuthenticationMode;
 
   @override
   Widget build(BuildContext context) {

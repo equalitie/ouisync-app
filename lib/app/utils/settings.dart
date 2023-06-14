@@ -273,10 +273,10 @@ class Settings {
     await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
 
-  AuthMode? getAuthenticationMode(String repoName) {
+  AuthMode getAuthenticationMode(String repoName) {
     final str = _prefs.getString(_repositoryKey(repoName, _authenticationMode));
-    if (str == null) return null;
-    return authModeFromString(str);
+    if (str == null) return AuthMode.version1;
+    return authModeFromString(str)!;
   }
 
   Future<void> setAuthenticationMode(String repoName, AuthMode? value) async {

@@ -22,7 +22,7 @@ class RepositorySettings extends StatefulWidget {
   final RepoCubit cubit;
 
   final Future<bool?> Function() checkForBiometrics;
-  final AuthMode? Function(String repoName) getAuthenticationMode;
+  final AuthMode Function(String repoName) getAuthenticationMode;
   final Future<void> Function(
       String oldName, String newName, Uint8List reopenToken) renameRepository;
   final Future<void> Function(RepoMetaInfo info, AuthMode authMode)

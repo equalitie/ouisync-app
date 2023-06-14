@@ -240,8 +240,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
       String repoName, String databaseId) async {
     final authenticationMode = settings.getAuthenticationMode(repoName);
 
-    if (authenticationMode != null &&
-        authenticationMode == AuthMode.noLocalPassword) {
+    if (authenticationMode == AuthMode.noLocalPassword) {
       final secureStorageResult = await SecureStorage.getRepositoryPassword(
           databaseId: databaseId, authMode: authenticationMode);
 

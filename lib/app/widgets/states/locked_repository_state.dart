@@ -21,7 +21,7 @@ class LockedRepositoryState extends StatelessWidget
   final String repositoryName;
 
   final CheckForBiometricsFunction checkForBiometricsCallback;
-  final AuthMode? Function(String repoName) getAuthenticationModeCallback;
+  final AuthMode Function(String repoName) getAuthenticationModeCallback;
   final Future<void> Function(String repoName, AuthMode? value)
       setAuthenticationModeCallback;
   final Future<AccessMode?> Function(String repositoryName,

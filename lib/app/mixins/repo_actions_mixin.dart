@@ -228,7 +228,7 @@ mixin RepositoryActionsMixin {
   Future<void> deleteRepository(BuildContext context,
       {required String repositoryName,
       required RepoMetaInfo repositoryMetaInfo,
-      required AuthMode? Function(String) getAuthenticationMode,
+      required AuthMode Function(String) getAuthenticationMode,
       required Future<void> Function(RepoMetaInfo, AuthMode) delete,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
@@ -254,8 +254,7 @@ mixin RepositoryActionsMixin {
     );
 
     if (deleteRepo ?? false) {
-      final authMode =
-          getAuthenticationMode(repositoryName) ?? AuthMode.version1;
+      final authMode = getAuthenticationMode(repositoryName);
 
       await Dialogs.executeFutureWithLoadingDialog(context,
           f: delete(repositoryMetaInfo, authMode));
@@ -274,12 +273,12 @@ mixin RepositoryActionsMixin {
       {required String databaseId,
       required String repositoryName,
       required CheckForBiometricsFunction checkForBiometrics,
-      required AuthMode? Function(String) getAuthenticationMode,
+      required AuthMode Function(String) getAuthenticationMode,
       required Future<void> Function(String, AuthMode?) setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    AuthMode? authenticationMode = getAuthenticationMode(repositoryName);
+    AuthMode authenticationMode = getAuthenticationMode(repositoryName);
 
     /// Runs once per repository (if needed): before adding to the app the
     /// possibility to create a repository without a local password, any entry
@@ -306,7 +305,7 @@ mixin RepositoryActionsMixin {
     /// (If the password is empty, something wrong happened in the previous
     /// version of the app saving its value and it is considered non existent
     /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == null || authenticationMode == AuthMode.version1) {
+    if (authenticationMode == AuthMode.version1) {
       final securedPassword = await getPasswordAndUnlock(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
