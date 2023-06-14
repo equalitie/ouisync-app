@@ -284,7 +284,7 @@ class Settings {
     if (value != null) {
       str = authModeToString(value);
     }
-    _setRepositoryString(repoName, _authenticationMode, str);
+    await _setRepositoryString(repoName, _authenticationMode, str);
   }
 
   // Read and remove a bool property. This functions exists to facilitate migration to the new

@@ -79,10 +79,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
       if (securePassword == null || securePassword.isEmpty) {
         if (securePassword != null) {
-          final userAuthenticationFailed =
-              authMode == AuthMode.no_local_password
-                  ? 'Repository authentication failed'
-                  : 'Biometric authentication failed';
+          final userAuthenticationFailed = authMode == AuthMode.noLocalPassword
+              ? 'Repository authentication failed'
+              : 'Biometric authentication failed';
           showSnackBar(context, message: userAuthenticationFailed);
         }
 

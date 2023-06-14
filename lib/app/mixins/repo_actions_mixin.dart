@@ -88,7 +88,7 @@ mixin RepositoryActionsMixin {
 
     AuthMode authenticationMode = repository.state.authenticationMode;
 
-    if (authenticationMode == AuthMode.no_local_password &&
+    if (authenticationMode == AuthMode.noLocalPassword &&
         (Platform.isAndroid || Platform.isIOS)) {
       final auth = LocalAuthentication();
       final isSupported = await auth.isDeviceSupported();

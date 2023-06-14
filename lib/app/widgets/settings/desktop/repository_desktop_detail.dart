@@ -347,7 +347,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   if (securePassword == null || securePassword.isEmpty) {
                     if (securePassword != null) {
                       final userAuthenticationFailed =
-                          state.authMode == AuthMode.no_local_password
+                          state.authMode == AuthMode.noLocalPassword
                               ? 'Repository authentication failed'
                               : 'Biometric authentication failed';
                       showSnackBar(context, message: userAuthenticationFailed);
