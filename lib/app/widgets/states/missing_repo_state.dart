@@ -24,7 +24,7 @@ class MissingRepositoryState extends StatelessWidget
   final String? errorDescription;
 
   final void Function()? onReloadRepository;
-  final AuthMode? Function(String) onGetAuthenticationMode;
+  final AuthMode Function(String) onGetAuthenticationMode;
   final Future<void> Function(RepoMetaInfo, AuthMode) onDelete;
 
   @override
