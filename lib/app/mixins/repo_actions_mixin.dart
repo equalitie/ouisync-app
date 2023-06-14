@@ -196,7 +196,7 @@ mixin RepositoryActionsMixin {
     final result = await showDialog<UnlockResult>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageUnlockRepository,
+            title: S.current.messageValidateLocalPassword,
             body: UnlockDialog<UnlockResult>(
                 context: context,
                 repository: repository,
