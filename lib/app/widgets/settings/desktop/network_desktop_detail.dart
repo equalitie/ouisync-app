@@ -31,7 +31,8 @@ class NetworkDesktopDetail extends StatelessWidget {
         BlocBuilder<PowerControl, PowerControlState>(
             builder: (context, state) => ListTile(
                 leading: Icon(Icons.wifi),
-                title: Text(Strings.connectionType),
+                title: Text(Strings.connectionType,
+                    style: TextStyle(fontSize: Dimensions.fontSmall)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,7 +56,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                   final powerControl = context.read<PowerControl>();
                   unawaited(powerControl.setPortForwardingEnabled(value));
                 },
-                title: Text('UPnP'),
+                title: Text('UPnP',
+                    style: TextStyle(fontSize: Dimensions.fontSmall)),
                 secondary: Icon(Icons.router))),
         Dimensions.desktopSettingDivider
       ]);
@@ -69,7 +71,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                   final powerControl = context.read<PowerControl>();
                   unawaited(powerControl.setLocalDiscoveryEnabled(value));
                 },
-                title: Text(S.current.messageLocalDiscovery),
+                title: Text(S.current.messageLocalDiscovery,
+                    style: TextStyle(fontSize: Dimensions.fontSmall)),
                 secondary: Icon(Icons.broadcast_on_personal))),
         Dimensions.desktopSettingDivider
       ]);
@@ -83,7 +86,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                   final powerControl = context.read<PowerControl>();
                   unawaited(powerControl.setSyncOnMobileEnabled(value));
                 },
-                title: Text(S.current.messageSyncMobileData),
+                title: Text(S.current.messageSyncMobileData,
+                    style: TextStyle(fontSize: Dimensions.fontSmall)),
                 secondary: Icon(Icons.mobile_screen_share))),
         Dimensions.desktopSettingDivider
       ]);
@@ -133,7 +137,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                   return Wrap(children: [
                     ListTile(
                       leading: Icon(icon),
-                      title: Text(title),
+                      title: Text(title,
+                          style: TextStyle(fontSize: Dimensions.fontSmall)),
                       subtitle: Text(value),
                     ),
                     Dimensions.desktopSettingDivider
@@ -147,7 +152,8 @@ class NetworkDesktopDetail extends StatelessWidget {
         BlocBuilder<PeerSetCubit, PeerSet>(
           builder: (context, state) => ListTile(
               leading: Icon(Icons.people),
-              title: Text(S.current.labelPeers),
+              title: Text(S.current.labelPeers,
+                  style: TextStyle(fontSize: Dimensions.fontSmall)),
               subtitle: Text(state.stats()),
               onTap: () {
                 final peerSetCubit = context.read<PeerSetCubit>();
@@ -179,7 +185,8 @@ class NetworkDesktopDetail extends StatelessWidget {
                 builder: (context, type) {
                   return ListTile(
                     leading: Icon(Icons.nat),
-                    title: Text(S.current.messageNATType),
+                    title: Text(S.current.messageNATType,
+                        style: TextStyle(fontSize: Dimensions.fontSmall)),
                     subtitle: Text(type.message()),
                   );
                 });

@@ -49,10 +49,12 @@ class ReplaceFile extends StatelessWidget {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(null)),
+            onPressed: () => Navigator.of(context).pop(null),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionAccept,
-            onPressed: () => Navigator.of(context).pop(_fileAction.value))
+            onPressed: () => Navigator.of(context).pop(_fileAction.value),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   void _onFileActionChanged(FileAction? value) =>

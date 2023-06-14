@@ -52,9 +52,12 @@ class RenameRepository extends StatelessWidget {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop('')),
+            onPressed: () => Navigator.of(context).pop(''),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
-            text: S.current.actionRename, onPressed: _validateNewName)
+            text: S.current.actionRename,
+            onPressed: _validateNewName,
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   void _validateNewName() {

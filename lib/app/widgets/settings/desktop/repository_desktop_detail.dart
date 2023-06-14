@@ -92,7 +92,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
 
   Widget _buildRenameTile(BuildContext context, RepoCubit repository) =>
       PlatformTappableTile(
-          title: Text(S.current.actionRename),
+          title: Text(S.current.actionRename,
+              style: TextStyle(fontSize: Dimensions.fontSmall)),
           icon: Icons.edit,
           onTap: (_) async => await renameRepository(widget.context,
               repository: repository,
@@ -101,7 +102,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
       Wrap(children: [
         PlatformTappableTile(
-            title: Text(S.current.actionShare),
+            title: Text(S.current.actionShare,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
             icon: Icons.share,
             onTap: (_) async =>
                 await shareRepository(context, repository: repository)),
@@ -160,7 +162,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
       state.passwordMode == PasswordMode.none
           ? Column(children: [
               PlatformTappableTile(
-                  title: Text(S.current.messageAddLocalPassword),
+                  title: Text(S.current.messageAddLocalPassword,
+                      style: TextStyle(fontSize: Dimensions.fontSmall)),
                   icon: Icons.password,
                   onTap: (_) async {
                     final setPasswordResult = await _getNewLocalPassword(
@@ -239,7 +242,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
           PlatformTappableTile(
               title: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Expanded(
-                    flex: 0, child: Text(S.current.messageChangeLocalPassword))
+                    flex: 0,
+                    child: Text(S.current.messageChangeLocalPassword,
+                        style: TextStyle(fontSize: Dimensions.fontSmall)))
               ]),
               icon: Icons.change_circle_outlined,
               onTap: (_) async {
@@ -278,7 +283,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
           PlatformTappableTile(
               title: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Expanded(
-                    flex: 0, child: Text(S.current.messageRemovaLocalPassword))
+                    flex: 0,
+                    child: Text(S.current.messageRemovaLocalPassword,
+                        style: TextStyle(fontSize: Dimensions.fontSmall)))
               ]),
               icon: Icons.remove,
               onTap: (_) async {
@@ -405,7 +412,8 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   return;
                 }
               },
-              title: Text(S.current.messageUnlockUsingBiometrics),
+              title: Text(S.current.messageUnlockUsingBiometrics,
+                  style: TextStyle(fontSize: Dimensions.fontSmall)),
               secondary: Icon(Icons.fingerprint_outlined)),
           Dimensions.desktopSettingDivider
         ])

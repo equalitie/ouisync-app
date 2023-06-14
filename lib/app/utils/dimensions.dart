@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'constants.dart';
+import 'platform/platform_values.dart';
 
 class Dimensions {
   Dimensions._();
@@ -10,9 +11,9 @@ class Dimensions {
   static const double fontSmall = 14.0;
   static const double fontMicro = 12.0;
 
-  static const Size sizeInPageButtonSmall = Size(120.0, 40.0);
-  static const Size sizeInPageButtonRegular = Size(150.0, 40.0);
-  static const Size sizeInPageButtonLong = Size(240.0, 40.0);
+  static const Size sizeInPageButtonSmall = Size(120.0, 50.0);
+  static const Size sizeInPageButtonRegular = Size(150.0, 50.0);
+  static const Size sizeInPageButtonLong = Size(240.0, 50.0);
 
   static const Size sizeCircularProgressIndicatorSmall = Size(14.0, 14.0);
   static const Size sizeCircularProgressIndicatorAverage = Size(50.0, 50.0);
@@ -26,6 +27,16 @@ class Dimensions {
   static const double sizeIconBadge = 12.0;
 
   static const double sizeModalDialogWidthDesktop = 400.0;
+
+  static final double aspectRatioModalDialogButton =
+      PlatformValues.isMobileDevice ? 13 / 5 : 10 / 3;
+
+  static const double aspectRatioBottomDialogButton = 11 / 3;
+
+  static const BoxConstraints sizeConstrainsDialogAction =
+      BoxConstraints(minWidth: 98, minHeight: 40.0);
+  static const BoxConstraints sizeConstrainsBottomDialogAction =
+      BoxConstraints(minWidth: 98, minHeight: 46.0);
 
   static const EdgeInsets paddingContents =
       EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
@@ -107,16 +118,6 @@ class Dimensions {
   static const double radiusAverage = 16.0;
   static const double radiusSmall = 5.0;
   static const double radiusMicro = 2.0;
-
-  static const double aspectRatioModalDialogButton = 13 / 5;
-  static const double aspectRatioModalDialogButtonDesktop = 34 / 2;
-
-  static const double aspectRatioBottomDialogButton = 11 / 3;
-
-  static const BoxConstraints sizeConstrainsDialogAction =
-      BoxConstraints(minWidth: 98, minHeight: 46.0);
-  static const BoxConstraints sizeConstrainsBottomDialogAction =
-      BoxConstraints(minWidth: 98, minHeight: 46.0);
 
   static const double elevationDialogAction = 0.0;
 

@@ -3,7 +3,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
-import '../utils/constants.dart';
 import 'repo_meta_info.dart';
 
 abstract class RepoEntry extends Equatable {
