@@ -208,7 +208,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
         ? S.current.messageAddLocalPassword
         : mode == Constants.changePasswordMode
             ? S.current.messageChangeLocalPassword
-            : S.current.messageRemovaLocalPassword;
+            : mode == Constants.removePasswordMode
+                ? S.current.messageRemovaLocalPassword
+                : S.current.messageValidateLocalPassword;
 
     final newPasswordState = await showDialog<SetPasswordResult>(
         context: context,

@@ -506,6 +506,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "You have unsaved changes.\n\nDo you want to discard them?"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
+        "messageValidateLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Validate local password"),
         "messageVerbosity":
             MessageLookupByLibrary.simpleMessage("Log verbosity"),
         "messageView": MessageLookupByLibrary.simpleMessage("View"),
