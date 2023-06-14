@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -324,6 +325,20 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 UnlockResult? unlockResult;
 
                 if (state.authMode != AuthMode.manual) {
+                  /// If we are switching from a no local password situation
+                  /// to a biometric validation, we first do a biometric check
+                  if (useBiometrics) {
+                    final auth = LocalAuthentication();
+
+                    final authorized = await auth.authenticate(
+                        localizedReason:
+                            S.current.messageAccessingSecureStorage);
+
+                    if (authorized == false) {
+                      return;
+                    }
+                  }
+
                   final securePassword = await tryGetSecurePassword(
                       context: context,
                       databaseId: repository.databaseId,
