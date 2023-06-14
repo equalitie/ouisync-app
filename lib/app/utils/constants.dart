@@ -4,7 +4,7 @@ enum AuthMode {
   manual,
   version1,
   version2,
-  no_local_password,
+  noLocalPassword,
 }
 
 String authModeToString(AuthMode authMode) {
@@ -21,9 +21,9 @@ String authModeToString(AuthMode authMode) {
       {
         return "version2";
       }
-    case AuthMode.no_local_password:
+    case AuthMode.noLocalPassword:
       {
-        return "no_local_password";
+        return "noLocalPassword";
       }
   }
 }
@@ -42,13 +42,15 @@ AuthMode? authModeFromString(String authMode) {
       {
         return AuthMode.version2;
       }
-    case "no_local_password":
+    case "noLocalPassword":
       {
-        return AuthMode.no_local_password;
+        return AuthMode.noLocalPassword;
       }
   }
   return null;
 }
+
+enum PasswordAction { add, change, remove, biometrics }
 
 class Constants {
   Constants._();
@@ -94,13 +96,6 @@ class Constants {
   //static const String authModeVersion2 =
   //    'version2'; // Using local_auth for biometric validation
   //static const String authModeNoLocalPassword = 'no_local_password';
-
-  /// Password state modes
-
-  static const String addPasswordMode = 'add';
-  static const String changePasswordMode = 'change';
-  static const String removePasswordMode = 'remove';
-  static const String updateBiometricsMode = 'biometrics';
 
   static const String repoListEntryName = 'repo_list';
 

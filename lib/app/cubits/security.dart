@@ -18,7 +18,7 @@ class SecurityState extends Equatable {
 
   PasswordMode get passwordMode => authMode == AuthMode.manual
       ? PasswordMode.manual
-      : authMode == AuthMode.no_local_password
+      : authMode == AuthMode.noLocalPassword
           ? PasswordMode.none
           : PasswordMode.bio;
 
@@ -93,10 +93,10 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
 
   Future<String?> addRepoLocalPassword(String newPassword) async {
     final deleted =
-        await _removePasswordFromSecureStorage(AuthMode.no_local_password);
+        await _removePasswordFromSecureStorage(AuthMode.noLocalPassword);
 
     if (deleted == false) {
-      setAuthMode(AuthMode.no_local_password);
+      setAuthMode(AuthMode.noLocalPassword);
 
       return S.current.messageErrorRemovingSecureStorage;
     }
@@ -135,13 +135,13 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
     setPassword(newPassword);
 
     final addedToSecureStorage = await _addPasswordToSecureStorage(
-        newPassword, AuthMode.no_local_password);
+        newPassword, AuthMode.noLocalPassword);
 
     if (addedToSecureStorage == false) {
       return S.current.messageErrorRemovingPassword;
     }
 
-    setAuthMode(AuthMode.no_local_password);
+    setAuthMode(AuthMode.noLocalPassword);
 
     return null;
   }
@@ -150,7 +150,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       bool unlockWithBiometrics) async {
     if (unlockWithBiometrics == false) {
       final addedOrRemoved =
-          await _addOrRemoveVersion2InSecureStorage(AuthMode.no_local_password);
+          await _addOrRemoveVersion2InSecureStorage(AuthMode.noLocalPassword);
 
       if (addedOrRemoved == null) {
         return 'addedOrRemoved == null';
@@ -161,7 +161,7 @@ class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
       }
 
       setUnlockWithBiometrics(false);
-      setAuthMode(AuthMode.no_local_password);
+      setAuthMode(AuthMode.noLocalPassword);
 
       return null;
     }

@@ -88,7 +88,7 @@ mixin RepositoryActionsMixin {
 
     AuthMode authenticationMode = repository.state.authenticationMode;
 
-    if (authenticationMode == AuthMode.no_local_password &&
+    if (authenticationMode == AuthMode.noLocalPassword &&
         (Platform.isAndroid || Platform.isIOS)) {
       final auth = LocalAuthentication();
       final isSupported = await auth.isDeviceSupported();
@@ -196,7 +196,7 @@ mixin RepositoryActionsMixin {
     final result = await showDialog<UnlockResult>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageUnlockRepository,
+            title: S.current.messageValidateLocalPassword,
             body: UnlockDialog<UnlockResult>(
                 context: context,
                 repository: repository,

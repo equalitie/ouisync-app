@@ -2290,6 +2290,16 @@ class S {
     );
   }
 
+  /// `Validate local password`
+  String get messageValidateLocalPassword {
+    return Intl.message(
+      'Validate local password',
+      name: 'messageValidateLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `<removed>`
   String get messageRemovedInBrackets {
     return Intl.message(
