@@ -56,7 +56,8 @@ class LogsDesktopDetail extends StatelessWidget {
   Widget _buildShareTile(BuildContext context) => Wrap(children: [
         ListTile(
             enabled: false,
-            title: Text(S.current.actionShare),
+            title: Text(S.current.actionShare,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
             leading: Icon(Icons.share),
             onTap: () => _shareLogs),
         Dimensions.desktopSettingDivider
@@ -64,7 +65,8 @@ class LogsDesktopDetail extends StatelessWidget {
 
   Widget _buildViewTile(BuildContext context) => ListTile(
       enabled: false,
-      title: Text(S.current.messageView),
+      title: Text(S.current.messageView,
+          style: TextStyle(fontSize: Dimensions.fontSmall)),
       leading: Icon(Icons.visibility),
       onTap: () => Navigator.push(
           context,

@@ -434,7 +434,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             text: _addPassword ? S.current.actionBack : S.current.actionCancel,
             onPressed: () => _addPassword
                 ? _updatePasswordSection(false)
-                : Navigator.of(context).pop('')),
+                : Navigator.of(context).pop(''),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: _shareToken == null
                 ? S.current.actionCreate
@@ -444,7 +445,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
               final password = _isBlindReplica ? '' : _passwordController.text;
 
               _onSaved(widget.cubit, name, password);
-            })
+            },
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   void _updatePasswordSection(bool addPassword) {

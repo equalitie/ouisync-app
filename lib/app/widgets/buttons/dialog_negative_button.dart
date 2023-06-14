@@ -6,7 +6,7 @@ class NegativeButton extends StatelessWidget {
   const NegativeButton(
       {required this.text,
       required this.onPressed,
-      this.buttonsAspectRatio = Dimensions.aspectRatioModalDialogButton,
+      required this.buttonsAspectRatio,
       this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
       Key? key})
       : super(key: key);

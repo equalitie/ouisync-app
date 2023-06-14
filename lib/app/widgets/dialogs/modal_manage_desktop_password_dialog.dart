@@ -293,12 +293,14 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(null)),
+            onPressed: () => Navigator.of(context).pop(null),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionAccept,
             focusNode: _createButtonFocus,
             onPressed: () => _onSaved(widget.repositoryName,
-                _currentPasswordController.text, _newPasswordController.text))
+                _currentPasswordController.text, _newPasswordController.text),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   void _onSaved(

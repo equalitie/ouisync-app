@@ -3,6 +3,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
+import '../../../utils/utils.dart';
 
 class PlatformPexSwitch extends StatelessWidget {
   const PlatformPexSwitch(
@@ -27,7 +28,7 @@ class PlatformPexSwitch extends StatelessWidget {
 
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
       value: repository.state.isPexEnabled,
-      title: Text(title),
+      title: Text(title, style: TextStyle(fontSize: Dimensions.fontSmall)),
       secondary: Icon(icon),
       onChanged: (value) => onToggle?.call(value));
 

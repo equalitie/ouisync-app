@@ -31,7 +31,6 @@ class PlatformWindowManagerDesktop
     doWhenWindowReady(() {
       const initialSize = Size(width, height);
 
-      appWindow.maxSize = initialSize;
       appWindow.minSize = initialSize;
       appWindow.size = initialSize;
 

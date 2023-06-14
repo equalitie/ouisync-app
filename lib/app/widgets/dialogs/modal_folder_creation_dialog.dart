@@ -57,9 +57,12 @@ class FolderCreation extends StatelessWidget {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop('')),
+            onPressed: () => Navigator.of(context).pop(''),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
-            text: S.current.actionCreate, onPressed: _validateFolderName)
+            text: S.current.actionCreate,
+            onPressed: _validateFolderName,
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
       ];
 
   void _validateFolderName() {
