@@ -80,8 +80,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       if (securePassword == null || securePassword.isEmpty) {
         if (securePassword != null) {
           final userAuthenticationFailed = authMode == AuthMode.noLocalPassword
-              ? 'Repository authentication failed'
-              : 'Biometric authentication failed';
+              ? S.current.messageRepoAuthFailed
+              : S.current.messageBioAuthFailed;
           showSnackBar(context, message: userAuthenticationFailed);
         }
 
@@ -159,9 +159,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     context: context,
                     textEditingController: _currentPasswordController,
                     obscureText: _obscureCurrentPassword,
-                    label: 'Current password',
+                    label: S.current.labelRepositoryCurrentPassword,
                     suffixIcon: _currentPasswordActions(),
-                    hint: 'The current password',
+                    hint: S.current.messageRepositoryCurrentPassword,
                     onSaved: (_) {},
                     validator: validateNoEmpty(
                         Strings.messageErrorRepositoryPasswordValidation),

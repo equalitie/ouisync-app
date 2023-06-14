@@ -182,6 +182,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelQRCode": MessageLookupByLibrary.simpleMessage("QR code"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
+        "labelRepositoryCurrentPassword":
+            MessageLookupByLibrary.simpleMessage("Current password"),
         "labelRepositoryLink":
             MessageLookupByLibrary.simpleMessage("Repository link: "),
         "labelRetypePassword":
@@ -230,6 +232,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground"),
         "messageBackgroundNotificationAndroid":
             MessageLookupByLibrary.simpleMessage("OuiSync is running"),
+        "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
+            "Biometric authentication failed"),
         "messageBiometricValidationAdded": m1,
         "messageBiometricValidationRemoved":
             MessageLookupByLibrary.simpleMessage(
@@ -445,6 +449,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Rename repository"),
         "messageReplaceExistingFile":
             MessageLookupByLibrary.simpleMessage("Replace existing file"),
+        "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
+            "Repository authentication failed"),
         "messageRepoDeletionErrorDescription": m14,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "The repository deletion failed"),
@@ -453,6 +459,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepoMissingErrorDescription": m15,
         "messageRepositoryAccessMode": m16,
         "messageRepositoryAlreadyExist": m17,
+        "messageRepositoryCurrentPassword":
+            MessageLookupByLibrary.simpleMessage("The current password"),
         "messageRepositoryIsNotOpen":
             MessageLookupByLibrary.simpleMessage("The repository is not open"),
         "messageRepositoryName":
