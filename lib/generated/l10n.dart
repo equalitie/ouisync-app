@@ -700,6 +700,16 @@ class S {
     );
   }
 
+  /// `Current password`
+  String get labelRepositoryCurrentPassword {
+    return Intl.message(
+      'Current password',
+      name: 'labelRepositoryCurrentPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `No repository is selected`
   String get messageNoRepoIsSelected {
     return Intl.message(
@@ -907,6 +917,26 @@ class S {
       name: 'messsageFailedAddRepository',
       desc: '',
       args: [name],
+    );
+  }
+
+  /// `Repository authentication failed`
+  String get messageRepoAuthFailed {
+    return Intl.message(
+      'Repository authentication failed',
+      name: 'messageRepoAuthFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Biometric authentication failed`
+  String get messageBioAuthFailed {
+    return Intl.message(
+      'Biometric authentication failed',
+      name: 'messageBioAuthFailed',
+      desc: '',
+      args: [],
     );
   }
 
@@ -1215,6 +1245,16 @@ class S {
     return Intl.message(
       'New password',
       name: 'messageRepositoryNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The current password`
+  String get messageRepositoryCurrentPassword {
+    return Intl.message(
+      'The current password',
+      name: 'messageRepositoryCurrentPassword',
       desc: '',
       args: [],
     );
