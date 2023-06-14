@@ -29,8 +29,6 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
   @override
   Widget build(BuildContext context) => Container(
       height: double.infinity,
-      constraints: BoxConstraints(
-          maxWidth: PlatformValues.getFormFactorMaxWidth(context)),
       child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
           child: Center(child: _selectDetailWidget(widget.item?.setting))));
