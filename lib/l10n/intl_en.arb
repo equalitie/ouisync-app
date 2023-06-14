@@ -376,6 +376,7 @@
   "messageAddLocalPassword":"Add local password",
   "messageChangeLocalPassword":"Change local password",
   "messageRemovaLocalPassword":"Remove local password",
+  "messageValidateLocalPassword":"Validate local password",
   "messageRemovedInBrackets":"<removed>",
   "messageGranted":"Granted",
   "messagePermissionRequired": "This permission is required",

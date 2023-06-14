@@ -523,7 +523,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     final authenticationMode = authenticationRequired
         ? AuthMode.version2
         : savePasswordToSecureStorage
-            ? AuthMode.no_local_password
+            ? AuthMode.noLocalPassword
             : AuthMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,

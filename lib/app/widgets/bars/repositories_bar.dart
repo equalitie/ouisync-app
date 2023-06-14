@@ -3,10 +3,8 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
-import '../../utils/constants.dart';
 
 class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   const RepositoriesBar({required this.reposCubit});

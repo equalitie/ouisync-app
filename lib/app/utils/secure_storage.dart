@@ -10,7 +10,7 @@ BiometricStorage _chooseStorageByPlatform() {
       Platform.isLinux) {
     return MethodChannelBiometricStorage();
   } else {
-    return Win32BiometricStoragePlugin();
+    return Win32BiometricStoragePlugin() as BiometricStorage;
   }
 }
 

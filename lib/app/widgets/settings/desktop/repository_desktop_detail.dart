@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -164,10 +165,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   onTap: (_) async {
                     final setPasswordResult = await _getNewLocalPassword(
                         repository: repository,
-                        mode: Constants.addPasswordMode,
+                        action: PasswordAction.add,
                         repoName: repository.name,
                         authMode: state.authMode,
-                        currentPassword: state.password,
                         useBiometrics: state.unlockWithBiometrics);
 
                     if (setPasswordResult == null) {
@@ -201,16 +201,17 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
 
   Future<SetPasswordResult?> _getNewLocalPassword(
       {required RepoCubit repository,
-      required String mode,
+      required PasswordAction action,
       required String repoName,
       required AuthMode authMode,
-      required String currentPassword,
       required bool useBiometrics}) async {
-    final title = mode == Constants.addPasswordMode
+    final title = action == PasswordAction.add
         ? S.current.messageAddLocalPassword
-        : mode == Constants.changePasswordMode
+        : action == PasswordAction.change
             ? S.current.messageChangeLocalPassword
-            : S.current.messageRemovaLocalPassword;
+            : action == PasswordAction.remove
+                ? S.current.messageRemovaLocalPassword
+                : S.current.messageValidateLocalPassword;
 
     final newPasswordState = await showDialog<SetPasswordResult>(
         context: context,
@@ -219,10 +220,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
             body: ManageDesktopPassword(
                 context: context,
                 repoCubit: repository,
-                mode: mode,
+                action: action,
                 repositoryName: repoName,
                 authMode: authMode,
-                currentPassword: currentPassword,
                 usesBiometrics: useBiometrics)));
 
     if (newPasswordState == null) {
@@ -245,10 +245,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
               onTap: (_) async {
                 final setPasswordResult = await _getNewLocalPassword(
                     repository: repository,
-                    mode: Constants.changePasswordMode,
+                    action: PasswordAction.change,
                     repoName: repository.name,
                     authMode: state.authMode,
-                    currentPassword: state.password,
                     useBiometrics: state.unlockWithBiometrics);
 
                 if (setPasswordResult == null) {
@@ -285,10 +284,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
               onTap: (_) async {
                 final setPasswordResult = await _getNewLocalPassword(
                     repository: repository,
-                    mode: Constants.removePasswordMode,
+                    action: PasswordAction.remove,
                     repoName: repository.name,
                     authMode: state.authMode,
-                    currentPassword: state.password,
                     useBiometrics: state.unlockWithBiometrics);
 
                 if (setPasswordResult == null) {
@@ -327,6 +325,20 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 UnlockResult? unlockResult;
 
                 if (state.authMode != AuthMode.manual) {
+                  /// If we are switching from a no local password situation
+                  /// to a biometric validation, we first do a biometric check
+                  if (useBiometrics) {
+                    final auth = LocalAuthentication();
+
+                    final authorized = await auth.authenticate(
+                        localizedReason:
+                            S.current.messageAccessingSecureStorage);
+
+                    if (authorized == false) {
+                      return;
+                    }
+                  }
+
                   final securePassword = await tryGetSecurePassword(
                       context: context,
                       databaseId: repository.databaseId,
@@ -335,7 +347,7 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                   if (securePassword == null || securePassword.isEmpty) {
                     if (securePassword != null) {
                       final userAuthenticationFailed =
-                          state.authMode == AuthMode.no_local_password
+                          state.authMode == AuthMode.noLocalPassword
                               ? 'Repository authentication failed'
                               : 'Biometric authentication failed';
                       showSnackBar(context, message: userAuthenticationFailed);
@@ -362,10 +374,9 @@ class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
                 } else {
                   final setPasswordResult = await _getNewLocalPassword(
                       repository: repository,
-                      mode: Constants.updateBiometricsMode,
+                      action: PasswordAction.biometrics,
                       repoName: repository.name,
                       authMode: state.authMode,
-                      currentPassword: state.password,
                       useBiometrics: state.unlockWithBiometrics);
 
                   if (setPasswordResult == null) {
