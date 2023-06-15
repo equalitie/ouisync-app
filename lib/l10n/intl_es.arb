@@ -621,5 +621,15 @@
   "messageKeepBothFiles": "Guarde ambos archivos",
   "@messageKeepBothFiles": {},
   "messageFileAlreadyExist": "{name} ya existe en esta ubicación.\n\n¿Qué deseas hacer?",
-  "@messageFileAlreadyExist": {}
+  "@messageFileAlreadyExist": {},
+  "messageRepoAuthFailed": "Fallo en la autentificación del repositorio",
+  "@messageRepoAuthFailed": {},
+  "messageRepositoryCurrentPassword": "La contraseña actual",
+  "@messageRepositoryCurrentPassword": {},
+  "labelRepositoryCurrentPassword": "Contraseña actual",
+  "@labelRepositoryCurrentPassword": {},
+  "messageBioAuthFailed": "Fallo en la autentificación biométrica",
+  "@messageBioAuthFailed": {},
+  "messageValidateLocalPassword": "Validar la contraseña localmente",
+  "@messageValidateLocalPassword": {}
 }
