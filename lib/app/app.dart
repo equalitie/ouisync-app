@@ -25,14 +25,16 @@ Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
 
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
+  final logPath = await LogUtils.path;
 
   if (kDebugMode) {
-    print(appDir);
+    print('app dir: ${appDir.path}');
+    print('log dir: ${io.File(logPath).parent.path}');
   }
 
   final session = Session.create(
     configPath: configPath,
-    logPath: await logPath(),
+    logPath: logPath,
   );
   await session.initNetwork(
     defaultPortForwardingEnabled: true,

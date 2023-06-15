@@ -59,8 +59,6 @@ class LogsDesktopDetail extends StatelessWidget {
       ]);
 
   Widget _buildViewTile(BuildContext context) => ListTile(
-        // TODO: enable this on desktop as well
-        enabled: false,
         title: Text(S.current.messageView, 
             style: TextStyle(fontSize: Dimensions.fontSmall)),
         leading: Icon(Icons.visibility),

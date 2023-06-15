@@ -8,53 +8,31 @@ import '../widgets/widgets.dart';
 
 class LogViewPage extends StatefulWidget {
   final Settings settings;
+  final LogReader reader = LogReader();
 
-  const LogViewPage({required this.settings});
+  LogViewPage({required this.settings});
 
   @override
   State<LogViewPage> createState() => _LogViewPageState();
 }
 
 class _LogViewPageState extends State<LogViewPage> {
-  late Future<LogReader> _readerFuture;
-
   @override
   void initState() {
     super.initState();
-    _readerFuture = LogReader.open().then((reader) {
-      reader.filter = widget.settings.getLogViewFilter();
-      return reader;
-    });
+    widget.reader.filter = widget.settings.getLogViewFilter();
   }
 
   @override
-  void dispose() {
-    unawaited(_readerFuture.then((reader) => reader.close()));
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => FutureBuilder<LogReader>(
-        future: _readerFuture,
-        builder: (context, snapshot) {
-          final reader = snapshot.data;
-          if (reader != null) {
-            return _buildContent(context, reader);
-          } else {
-            return SizedBox.shrink();
-          }
-        },
-      );
-
-  Widget _buildContent(BuildContext context, LogReader reader) => Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(S.current.messageLogViewer),
-          actions: [_buildSettingsButton(context, reader)],
+          actions: [_buildSettingsButton(context, widget.reader)],
           elevation: 0.0,
         ),
         body: Padding(
           padding: Dimensions.paddingContents,
-          child: LogView(reader, theme: LogViewTheme.system(context)),
+          child: LogView(widget.reader, theme: LogViewTheme.system(context)),
         ),
       );
 

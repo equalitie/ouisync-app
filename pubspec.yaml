@@ -90,6 +90,7 @@ dependencies:
   tray_manager: ^0.1.8
   udp: ^5.0.3
   url_launcher: ^6.0.20
+  watcher: ^1.1.0
   window_manager: ^0.3.4
 
 dependency_overrides:

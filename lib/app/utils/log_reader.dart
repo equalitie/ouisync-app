@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 import 'dart:convert';
 
 import 'ansi_parser.dart';
+import 'log.dart';
 
 enum LogLevel {
   verbose,
@@ -69,44 +69,24 @@ class LogMessage {
   //            timestamp    |           tag and PID (ignored)             content
   //                         log level
   //
+  // TODO: on desktop the format is different
   static final _regexp =
       RegExp(r'(\d+-\d+-\d+\s\d+:\d+:\d+)\.\d*\s([EWIDV])\/[^:]*:(.*)');
 }
 
 /// Reader of messages from the system logger (logcat)
 class LogReader {
-  final Process _logcat;
-  late final Stream<LogMessage> _messages;
-  LogLevel filter = LogLevel.verbose;
+  final Stream<LogMessage> messages;
+  LogLevel filter;
 
-  static Future<LogReader> open() async {
-    final logcat = await Process.start(
-      'logcat',
-      [
-        '-vtime',
-        '-vyear',
-        '*:S',
-        'flutter:V',
-        'flutter-ouisync:V',
-      ],
-    );
+  LogReader() : this._(LogUtils.watch);
 
-    return LogReader._(logcat);
-  }
-
-  LogReader._(this._logcat) {
-    _messages = _logcat.stdout
-        .asBroadcastStream()
-        .map((line) => utf8.decode(line))
-        .expand((line) => LogMessage.parse(line))
-        .where((message) => message.level >= filter);
-  }
-
-  Stream<LogMessage> get messages => _messages;
-
-  void close() {
-    _logcat.kill();
-  }
+  LogReader._(Stream<List<int>> input, {this.filter = LogLevel.verbose})
+      : messages = input
+            .asBroadcastStream()
+            .map((chunk) => utf8.decode(chunk))
+            .expand((chunk) => LogMessage.parse(chunk))
+            .where((message) => message.level >= filter);
 }
 
 /// Rolling window of the most recent log messages

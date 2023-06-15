@@ -55,7 +55,7 @@ Future<File> dumpAll(
 
     sink.writeln(
         "\n\n------------------------- Logs ----------------------------------\n\n");
-    await dumpLogs(sink);
+    await LogUtils.dump(sink);
   } finally {
     await sink.close();
   }
