@@ -53,6 +53,7 @@ dependencies:
       url: https://github.com/inetic/flutter_background
       ref: issue-69
   flutter_bloc: ^8.0.1
+  flutter_faq: 1.0.1+1
   flutter_file_dialog: ^2.3.0
   flutter_flavorizr: ^2.1.5
   flutter_hooks: ^0.18.2+1
