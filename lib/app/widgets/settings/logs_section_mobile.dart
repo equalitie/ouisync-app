@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -14,14 +12,12 @@ class LogsSectionMobile extends AbstractSettingsSection {
   final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final LogsActions actions;
 
   LogsSectionMobile({
     required this.settings,
     required this.repos,
     required this.panicCounter,
-    required this.natDetection,
   }) : actions = LogsActions(
           settings: settings,
           stateMonitor: repos.session.rootStateMonitor,

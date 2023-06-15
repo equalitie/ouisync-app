@@ -10,7 +10,6 @@ class LogsDesktopDetail extends StatelessWidget {
     required this.settings,
     required this.repos,
     required this.panicCounter,
-    required this.natDetection,
   }) : actions = LogsActions(
           settings: settings,
           stateMonitor: repos.session.rootStateMonitor,
@@ -19,7 +18,6 @@ class LogsDesktopDetail extends StatelessWidget {
   final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final LogsActions actions;
 
   @override

@@ -10,7 +10,6 @@ class SettingsDesktopDetail extends StatefulWidget {
     required this.reposCubit,
     required this.settings,
     required this.panicCounter,
-    required this.natDetection,
     required this.isBiometricsAvailable,
   });
 
@@ -18,7 +17,6 @@ class SettingsDesktopDetail extends StatefulWidget {
   final ReposCubit reposCubit;
   final Settings settings;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
   @override
@@ -45,13 +43,13 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable);
       case Setting.network:
-        return NetworkDesktopDetail(natDetection: widget.natDetection);
+        return NetworkDesktopDetail();
       case Setting.log:
         return LogsDesktopDetail(
-            settings: widget.settings,
-            repos: widget.reposCubit,
-            panicCounter: widget.panicCounter,
-            natDetection: widget.natDetection);
+          settings: widget.settings,
+          repos: widget.reposCubit,
+          panicCounter: widget.panicCounter,
+        );
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);
       case Setting.about:

@@ -6,36 +6,25 @@ import 'package:dns_client/dns_client.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NatDetection extends Cubit<NatDetectionType> {
-  int _nextTask = 0;
-  int? _highestRunningTask;
-  final DnsClient _dns;
+  int _nextTask = 1;
+  int _highestRunningTask = 0;
+  final DnsClient _dns = DnsOverHttps.google();
   StreamSubscription<ConnectivityResult>? _subscription;
 
-  static Future<NatDetection> init() async {
+  NatDetection() : super(_NatDetectionTypeWorking()) {
     final connectivity = Connectivity();
-    final initialConnection = await connectivity.checkConnectivity();
-    return NatDetection._(connectivity, initialConnection);
-  }
-
-  NatDetection._(
-    Connectivity connectivity,
-    ConnectivityResult initialConnection,
-  )   : _dns = DnsOverHttps.google(),
-        super(_NatDetectionTypeWorking()) {
     _subscription = connectivity.onConnectivityChanged
         .listen((result) => _startTask(result));
 
-    _startTask(initialConnection);
+    unawaited(
+      connectivity.checkConnectivity().then((result) => _startTask(result)),
+    );
   }
 
   @override
   Future<void> close() async {
-    final sub = _subscription;
+    await _subscription?.cancel();
     _subscription = null;
-
-    if (sub != null) {
-      await sub.cancel();
-    }
 
     await super.close();
   }
@@ -86,7 +75,7 @@ class NatDetection extends Cubit<NatDetectionType> {
   }
 
   void _emit(int currentTask, NatDetectionType natType) {
-    if (_highestRunningTask! > currentTask) {
+    if (_highestRunningTask > currentTask) {
       // A new task started and this is an old result.
       return;
     }

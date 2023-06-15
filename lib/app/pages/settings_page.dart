@@ -16,7 +16,6 @@ class SettingsPage extends StatelessWidget {
     required this.reposCubit,
     required this.powerControl,
     required this.panicCounter,
-    required this.natDetection,
     required this.isBiometricsAvailable,
   });
 
@@ -24,7 +23,6 @@ class SettingsPage extends StatelessWidget {
   final ReposCubit reposCubit;
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
   @override
@@ -44,6 +42,9 @@ class SettingsPage extends StatelessWidget {
               create: (context) =>
                   PeerSetCubit(session: reposCubit.session)..init(),
             ),
+            BlocProvider<NatDetection>(
+              create: (context) => NatDetection(),
+            )
           ],
           child: BlocListener<PowerControl, PowerControlState>(
               listener: (context, state) {
@@ -53,7 +54,6 @@ class SettingsPage extends StatelessWidget {
                   reposCubit: reposCubit,
                   settings: settings,
                   panicCounter: panicCounter,
-                  natDetection: natDetection,
                   isBiometricsAvailable: isBiometricsAvailable))));
 
   PreferredSizeWidget _appBar() =>
