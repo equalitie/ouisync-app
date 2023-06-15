@@ -18,8 +18,9 @@ class NatDetection extends Cubit<NatDetectionType> {
   }
 
   NatDetection._(
-      Connectivity connectivity, ConnectivityResult initialConnection)
-      : _dns = DnsOverHttps.google(),
+    Connectivity connectivity,
+    ConnectivityResult initialConnection,
+  )   : _dns = DnsOverHttps.google(),
         super(_NatDetectionTypeWorking()) {
     _subscription = connectivity.onConnectivityChanged
         .listen((result) => _startTask(result));

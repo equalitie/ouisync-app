@@ -5,13 +5,14 @@ import '../../../utils/utils.dart';
 import 'desktop_settings.dart';
 
 class SettingsDesktopDetail extends StatefulWidget {
-  const SettingsDesktopDetail(
-      {required this.item,
-      required this.reposCubit,
-      required this.settings,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.isBiometricsAvailable});
+  const SettingsDesktopDetail({
+    required this.item,
+    required this.reposCubit,
+    required this.settings,
+    required this.panicCounter,
+    required this.natDetection,
+    required this.isBiometricsAvailable,
+  });
 
   final SettingItem? item;
   final ReposCubit reposCubit;
@@ -48,7 +49,7 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
       case Setting.log:
         return LogsDesktopDetail(
             settings: widget.settings,
-            reposCubit: widget.reposCubit,
+            repos: widget.reposCubit,
             panicCounter: widget.panicCounter,
             natDetection: widget.natDetection);
       case Setting.feedback:

@@ -11,13 +11,14 @@ import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage(
-      {required this.settings,
-      required this.reposCubit,
-      required this.powerControl,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.isBiometricsAvailable});
+  const SettingsPage({
+    required this.settings,
+    required this.reposCubit,
+    required this.powerControl,
+    required this.panicCounter,
+    required this.natDetection,
+    required this.isBiometricsAvailable,
+  });
 
   final Settings settings;
   final ReposCubit reposCubit;

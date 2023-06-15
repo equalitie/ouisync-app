@@ -1,19 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_file_dialog/flutter_file_dialog.dart';
-import 'package:intl/intl.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../pages/pages.dart';
 import '../../utils/utils.dart';
+import 'logs_actions.dart';
 import 'navigation_tile_mobile.dart';
 
 class LogsSectionMobile extends AbstractSettingsSection {
@@ -21,13 +15,17 @@ class LogsSectionMobile extends AbstractSettingsSection {
   final ReposCubit repos;
   final StateMonitorIntCubit panicCounter;
   final Future<NatDetection> natDetection;
+  final LogsActions actions;
 
   LogsSectionMobile({
     required this.settings,
     required this.repos,
     required this.panicCounter,
     required this.natDetection,
-  });
+  }) : actions = LogsActions(
+          settings: settings,
+          stateMonitor: repos.session.rootStateMonitor,
+        );
 
   @override
   Widget build(BuildContext context) => SettingsSection(
@@ -36,21 +34,17 @@ class LogsSectionMobile extends AbstractSettingsSection {
           NavigationTileMobile(
             title: Text(S.current.actionSave),
             leading: Icon(Icons.save),
-            onPressed: _saveLogs,
+            onPressed: actions.saveLogs,
           ),
           NavigationTileMobile(
             title: Text(S.current.actionShare),
             leading: Icon(Icons.share),
-            onPressed: _shareLogs,
+            onPressed: actions.shareLogs,
           ),
           NavigationTileMobile(
             title: Text(S.current.messageView),
             leading: Icon(Icons.visibility),
-            onPressed: (context) => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LogViewPage(settings: settings),
-                )),
+            onPressed: actions.viewLogs,
           ),
           CustomSettingsTile(
             child: BlocBuilder<StateMonitorIntCubit, int?>(
@@ -72,61 +66,4 @@ class LogsSectionMobile extends AbstractSettingsSection {
           ),
         ],
       );
-
-  Future<void> _saveLogs(BuildContext context) async {
-    final tempPath = await _dumpInfo(context);
-    final params = SaveFileDialogParams(sourceFilePath: tempPath);
-    await FlutterFileDialog.saveFile(params: params);
-  }
-
-  Future<void> _shareLogs(BuildContext context) async {
-    final tempPath = await _dumpInfo(context);
-    await Share.shareXFiles([XFile(tempPath, mimeType: 'text/plain')]);
-  }
-
-  Future<String> _dumpInfo(BuildContext context) async {
-    final dir = await getTemporaryDirectory();
-    final info = await PackageInfo.fromPlatform();
-    final name = info.appName.toLowerCase();
-
-    final connType = context.read<PowerControl>().state.connectivityType;
-    final connInfo = context.read<ConnectivityInfo>().state;
-
-    // TODO: Add time zone, at time of this writing, time zones have not yet
-    // been implemented by DateFormat.
-    final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
-    final timestamp = formatter.format(DateTime.now());
-    final path = buildDestinationPath(dir.path, '$name--$timestamp.log');
-    final outFile = File(path);
-
-    final sink = outFile.openWrite();
-
-    final natType = (await natDetection).state.message();
-
-    try {
-      sink.writeln("appName: ${info.appName}");
-      sink.writeln("packageName: ${info.packageName}");
-      sink.writeln("version: ${info.version}");
-      sink.writeln("buildNumber: ${info.buildNumber}");
-
-      sink.writeln("connectionType: $connType");
-      sink.writeln("externalIP: ${connInfo.externalIP}");
-      sink.writeln("localIPv4: ${connInfo.localIPv4}");
-      sink.writeln("localIPv6: ${connInfo.localIPv6}");
-      sink.writeln("NAT type: $natType");
-      sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
-      sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");
-      sink.writeln("quicListenerV4: ${connInfo.quicListenerV4}");
-      sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
-      sink.writeln("\n");
-
-      final stateMonitor = repos.session.rootStateMonitor;
-
-      await dumpAll(sink, stateMonitor);
-    } finally {
-      await sink.close();
-    }
-
-    return path;
-  }
 }
