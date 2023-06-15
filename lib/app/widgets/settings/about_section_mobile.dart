@@ -5,6 +5,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../pages/pages.dart';
 import 'app_version_tile.dart';
 
 class AboutSectionMobile extends AbstractSettingsSection {
@@ -16,6 +17,12 @@ class AboutSectionMobile extends AbstractSettingsSection {
   Widget build(BuildContext context) => SettingsSection(
         title: Text(S.current.titleAbout),
         tiles: [
+          SettingsTile(
+              title: Text("FAQ"),
+              leading: Icon(Icons.question_answer_rounded),
+              value: Text('Frequently Asked Questions'),
+              onPressed: (context) => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => FAQPage()))),
           CustomSettingsTile(
             child: AppVersionTile(
               session: repos.session,
@@ -27,7 +34,7 @@ class AboutSectionMobile extends AbstractSettingsSection {
             title: Text(S.current.messageSettingsRuntimeID),
             leading: Icon(Icons.person),
             value: _getRuntimeIdForOS(),
-          ),
+          )
         ],
       );
 
