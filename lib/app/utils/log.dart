@@ -19,12 +19,22 @@ class LogUtils {
 
   /// Dump logs to the given sink
   static Future<void> dump(IOSink sink) async {
-    final file = File(await path);
-    final stream = file
-        .openRead()
-        .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk))));
+    final main = File(await path);
+    final all = await main.parent
+        .list()
+        .map((entry) => entry.absolute.path)
+        .where((path) => path.startsWith(main.path))
+        .toList();
 
-    await sink.addStream(stream);
+    // The logs files are named 'ouisync.log', 'ouisync.log.1', 'ouisync.log.2', ... so sorting
+    // them in reverse lexigographical order yields them from the oldest to the newest.
+    all.sort((a, b) => b.compareTo(a));
+
+    for (final path in all) {
+      await sink.addStream(File(path)
+          .openRead()
+          .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk)))));
+    }
   }
 
   /// Watch the log
