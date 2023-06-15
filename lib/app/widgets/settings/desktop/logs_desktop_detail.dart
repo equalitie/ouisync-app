@@ -49,6 +49,8 @@ class LogsDesktopDetail extends StatelessWidget {
 
   Widget _buildShareTile(BuildContext context) => Wrap(children: [
         ListTile(
+            // TODO: enable this on desktop as well (if possible)
+            enabled: false,
             title: Text(S.current.actionShare,
                 style: TextStyle(fontSize: Dimensions.fontSmall)),
             leading: Icon(Icons.share),

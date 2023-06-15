@@ -13,7 +13,7 @@ import '../cubits/connectivity_info.dart';
 import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
 
-Future<String> dumpAll(
+Future<File> dumpAll(
   BuildContext context,
   StateMonitor rootMonitor,
 ) async {
@@ -30,8 +30,8 @@ Future<String> dumpAll(
   final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
   final timestamp = formatter.format(DateTime.now());
   final path = buildDestinationPath(dir.path, '$name--$timestamp.log');
-  final outFile = File(path);
-  final sink = outFile.openWrite();
+  final file = File(path);
+  final sink = file.openWrite();
 
   try {
     sink.writeln("appName: ${info.appName}");
@@ -60,7 +60,7 @@ Future<String> dumpAll(
     await sink.close();
   }
 
-  return path;
+  return file;
 }
 
 /// Dump content of the state monitor
