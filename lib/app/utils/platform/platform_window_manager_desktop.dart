@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
@@ -13,7 +12,10 @@ class PlatformWindowManagerDesktop
     with WindowListener
     implements PlatformWindowManager {
   PlatformWindowManagerDesktop() {
-    initialize();
+    initialize().then((_) async {
+      windowManager.addListener(this);
+      await windowManager.setPreventClose(true);
+    });
   }
 
   final _systemTray = stray.SystemTray();
@@ -22,22 +24,28 @@ class PlatformWindowManagerDesktop
   Future<void> initialize() async {
     await windowManager.ensureInitialized();
 
-    windowManager.addListener(this);
-    await windowManager.setPreventClose(true);
-
-    const width = 700.0;
-    const height = width * 1.3;
-
-    doWhenWindowReady(() {
-      const initialSize = Size(width, height);
-
-      appWindow.minSize = initialSize;
-      appWindow.size = initialSize;
-
-      appWindow.alignment = Alignment.center;
-
-      appWindow.show();
-    });
+    /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
+    /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
+    /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
+    /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
+    if (!Platform.isLinux) {
+      /// For some reason, if we use a constant value for the title in the
+      /// WindowsOptions, the app hangs. This is true for the localized strings,
+      /// or a regular constant value in Constants.
+      /// So we use a harcoded string to start, then we use the localized string
+      /// in app.dart -for now.
+      WindowOptions windowOptions = const WindowOptions(
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        title: 'OuiSync',
+        titleBarStyle: TitleBarStyle.normal,
+      );
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
   }
 
   @override
