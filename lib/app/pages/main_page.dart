@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
@@ -271,24 +270,18 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: _buildOuiSyncBar(),
-      body: WillPopScope(child: _mainBody(), onWillPop: _onBackPressed),
+      body: WillPopScope(
+          child: Column(
+            children: <Widget>[
+              _repositories.builder(
+                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
+              Expanded(child: buildMainWidget()),
+            ],
+          ),
+          onWillPop: _onBackPressed),
       floatingActionButton: _repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
       bottomSheet: _bottomSheet);
-
-  Widget _mainBody() =>
-      PlatformValues.isDesktopDevice ? _desktopBody() : _mobileBody();
-
-  Widget _desktopBody() =>
-      WindowBorder(child: _mobileBody(), color: Colors.black);
-
-  Widget _mobileBody() => Column(
-        children: <Widget>[
-          _repositories.builder(
-              (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
-          Expanded(child: buildMainWidget()),
-        ],
-      );
 
   Future<bool> _onBackPressed() async {
     final currentRepo = _currentRepo;
