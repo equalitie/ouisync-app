@@ -1,21 +1,19 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
-import '../../utils/platform/platform.dart';
 
 class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   OuiSyncBar({
     required this.reposCubit,
-    required this.reposBar,
+    required this.repoPicker,
     required this.appSettingsButton,
     required this.repoSettingsButton,
   });
 
   final ReposCubit reposCubit;
-  final PreferredSizeWidget reposBar;
+  final PreferredSizeWidget repoPicker;
   final Widget appSettingsButton;
   final Widget repoSettingsButton;
 
@@ -28,36 +26,15 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
             ? repoSettingsButton
             : appSettingsButton;
 
-        if (PlatformValues.isDesktopDevice) {
-          return AppBar(
-              shadowColor: Colors.black26,
-              title: _desktopTitleBar(settingsActionButton));
-        }
-
-        return _mobileBar(settingsActionButton);
+        return AppBar(
+            shadowColor: Colors.black26,
+            title: repoPicker,
+            // Make the `repoList` have no spacing on the horizontal axis.
+            titleSpacing: 0.0,
+            actions: [settingsActionButton]);
       });
-
-  Widget _desktopTitleBar(Widget settingsActionButton) => WindowTitleBarBox(
-          child: Row(children: [
-        Expanded(child: MoveWindow(child: reposBar)),
-        settingsActionButton,
-        _windowButtons()
-      ]));
-
-  Widget _windowButtons() => Row(children: [
-        MinimizeWindowButton(),
-        MaximizeWindowButton(),
-        CloseWindowButton()
-      ]);
-
-  Widget _mobileBar(Widget settingsActionButton) => AppBar(
-      shadowColor: Colors.black26,
-      title: reposBar,
-      // Make the `repoList` have no spacing on the horizontal axis.
-      titleSpacing: 0.0,
-      actions: [settingsActionButton]);
 
   @override
   Size get preferredSize =>
-      Size(reposBar.preferredSize.width, reposBar.preferredSize.height);
+      Size(repoPicker.preferredSize.width, repoPicker.preferredSize.height);
 }

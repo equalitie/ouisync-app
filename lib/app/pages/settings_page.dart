@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,7 +27,12 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: _appBar(),
+      appBar: AppBar(
+        title: Text(PlatformValues.isMobileDevice
+            ? S.current.titleSettings
+            : S.current.messageOuiSyncDesktopTitle),
+        elevation: 0.0,
+      ),
       body: MultiBlocProvider(
           providers: [
             BlocProvider<PowerControl>.value(value: powerControl),
@@ -54,34 +58,4 @@ class SettingsPage extends StatelessWidget {
                   panicCounter: panicCounter,
                   natDetection: natDetection,
                   isBiometricsAvailable: isBiometricsAvailable))));
-
-  PreferredSizeWidget _appBar() =>
-      PlatformValues.isDesktopDevice ? _desktopBar() : _mobileBar();
-
-  PreferredSizeWidget _mobileBar() => AppBar(
-        title: Text(PlatformValues.isMobileDevice
-            ? S.current.titleSettings
-            : S.current.messageOuiSyncDesktopTitle),
-        elevation: 0.0,
-      );
-
-  PreferredSizeWidget _desktopBar() => AppBar(
-        title: WindowTitleBarBox(
-            child: Row(children: [
-          Expanded(
-              child: MoveWindow(
-            child: Text(PlatformValues.isMobileDevice
-                ? S.current.titleSettings
-                : S.current.messageOuiSyncDesktopTitle),
-          )),
-          _windowButtons()
-        ])),
-        elevation: 0.0,
-      );
-
-  Widget _windowButtons() => Row(children: [
-        MinimizeWindowButton(),
-        MaximizeWindowButton(),
-        CloseWindowButton()
-      ]);
 }
