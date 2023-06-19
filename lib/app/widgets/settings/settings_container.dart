@@ -6,21 +6,17 @@ import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
-import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class SettingsContainer extends StatefulWidget {
-  const SettingsContainer(
-      {required this.reposCubit,
-      required this.settings,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.isBiometricsAvailable});
+  const SettingsContainer({
+    required this.reposCubit,
+    required this.panicCounter,
+    required this.isBiometricsAvailable,
+  });
 
   final ReposCubit reposCubit;
-  final Settings settings;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
   @override
@@ -47,29 +43,29 @@ class _SettingsContainerState extends State<SettingsContainer>
 
   Widget _buildMobileLayout() =>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
-        NetworkSectionMobile(widget.natDetection),
+        NetworkSectionMobile(),
         LogsSectionMobile(
-            settings: widget.settings,
-            repos: widget.reposCubit,
-            panicCounter: widget.panicCounter,
-            natDetection: widget.natDetection),
+          repos: widget.reposCubit,
+          panicCounter: widget.panicCounter,
+        ),
         AboutSectionMobile(repos: widget.reposCubit)
       ]);
 
   Widget _buildDesktopLayout() => Row(children: [
         Flexible(
-            flex: 1,
-            child: SettingsDesktopList(
-                onItemTap: (setting) => setState(() => _selected = setting),
-                selectedItem: _selected)),
+          flex: 1,
+          child: SettingsDesktopList(
+              onItemTap: (setting) => setState(() => _selected = setting),
+              selectedItem: _selected),
+        ),
         Flexible(
-            flex: 4,
-            child: SettingsDesktopDetail(
-                item: _selected,
-                reposCubit: widget.reposCubit,
-                settings: widget.settings,
-                panicCounter: widget.panicCounter,
-                natDetection: widget.natDetection,
-                isBiometricsAvailable: widget.isBiometricsAvailable))
+          flex: 4,
+          child: SettingsDesktopDetail(
+            item: _selected,
+            reposCubit: widget.reposCubit,
+            panicCounter: widget.panicCounter,
+            isBiometricsAvailable: widget.isBiometricsAvailable,
+          ),
+        )
       ]);
 }

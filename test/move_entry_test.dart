@@ -17,7 +17,7 @@ void main() {
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
     final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
-    session = Session.create(dir.path);
+    session = Session.create(configPath: dir.path);
 
     pluginRepo = await Repository.create(session,
         store: info.path(), readPassword: null, writePassword: null);

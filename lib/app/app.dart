@@ -23,24 +23,27 @@ Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
 
   Loggy.initLoggy();
 
-  final appDir = (await getApplicationSupportDirectory()).path;
-  final configDir = p.join(appDir, Constants.configuratiosDirName);
+  final appDir = await getApplicationSupportDirectory();
+  final configPath = p.join(appDir.path, Constants.configDirName);
+  final logPath = await LogUtils.path;
 
   if (kDebugMode) {
-    print(appDir);
-    print(configDir);
+    print('app dir: ${appDir.path}');
+    print('log dir: ${io.File(logPath).parent.path}');
   }
 
-  // TODO: Maybe we don't need to await for this, instead just get the future
-  // and let whoever needs seetings to await for it.
-  final settings = await Settings.init();
-
-  final session = Session.create(configDir);
-
+  final session = Session.create(
+    configPath: configPath,
+    logPath: logPath,
+  );
   await session.initNetwork(
     defaultPortForwardingEnabled: true,
     defaultLocalDiscoveryEnabled: true,
   );
+
+  // TODO: Maybe we don't need to await for this, instead just get the future
+  // and let whoever needs seetings to await for it.
+  final settings = await Settings.init();
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,

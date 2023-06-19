@@ -10,9 +10,7 @@ import '../../../cubits/cubits.dart';
 import '../../../pages/peer_list.dart';
 
 class NetworkDesktopDetail extends StatelessWidget {
-  const NetworkDesktopDetail({required this.natDetection});
-
-  final Future<NatDetection> natDetection;
+  const NetworkDesktopDetail();
 
   @override
   Widget build(BuildContext context) {
@@ -171,26 +169,15 @@ class NetworkDesktopDetail extends StatelessWidget {
       ]);
 
   Widget _buildNatDetectionTile(BuildContext context) => Container(
-      child: FutureBuilder<NatDetection>(
-          future: natDetection,
-          builder:
-              (BuildContext context, AsyncSnapshot<NatDetection> snapshot) {
-            final natDetection = snapshot.data;
-            if (natDetection == null) {
-              return SizedBox.shrink();
-            }
-
-            return BlocBuilder<NatDetection, NatDetectionType>(
-                bloc: natDetection,
-                builder: (context, type) {
-                  return ListTile(
-                    leading: Icon(Icons.nat),
-                    title: Text(S.current.messageNATType,
-                        style: TextStyle(fontSize: Dimensions.fontSmall)),
-                    subtitle: Text(type.message()),
-                  );
-                });
-          }));
+        child: BlocBuilder<NatDetection, NatDetectionType>(
+          builder: (context, type) => ListTile(
+            leading: Icon(Icons.nat),
+            title: Text(S.current.messageNATType,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
+            subtitle: Text(type.message()),
+          ),
+        ),
+      );
 
   String _connectivityTypeName(ConnectivityResult result) {
     switch (result) {

@@ -45,7 +45,6 @@ class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, RepositoryActionsMixin, OuiSyncAppLogger {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
-  final Future<NatDetection> _natDetection = NatDetection.init();
 
   String _pathEntryToMove = '';
   Widget? _bottomSheet;
@@ -132,7 +131,6 @@ class _MainPageState extends State<MainPage>
 
   @override
   void dispose() async {
-    await (await _natDetection).close();
     await _repositories.close();
     super.dispose();
   }
@@ -827,11 +825,9 @@ class _MainPageState extends State<MainPage>
             BlocProvider.value(value: upgradeExistsCubit),
           ],
           child: SettingsPage(
-              settings: widget.settings,
               reposCubit: reposCubit,
               powerControl: _powerControl,
               panicCounter: _panicCounter,
-              natDetection: _natDetection,
               isBiometricsAvailable: isBiometricsAvailable),
         ),
       ),
