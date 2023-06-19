@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -102,7 +103,13 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
 
     // This works also when on mobile network, but doesn't show IPv6 address if
     // IPv4 is used as primary.
-    final internalIPStr = await RGetIp.internalIP;
+    String? internalIPStr;
+
+    try {
+      internalIPStr = await RGetIp.internalIP;
+    } on MissingPluginException {
+      // the method is not implemented on some platforms (e.g. linux), ignore it.
+    }
 
     if (internalIPStr != null) {
       final internalIP = InternetAddress.tryParse(internalIPStr);

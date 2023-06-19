@@ -7,23 +7,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage(
-      {required this.settings,
-      required this.reposCubit,
-      required this.powerControl,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.isBiometricsAvailable});
+  const SettingsPage({
+    required this.reposCubit,
+    required this.powerControl,
+    required this.panicCounter,
+    required this.isBiometricsAvailable,
+  });
 
-  final Settings settings;
   final ReposCubit reposCubit;
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
   @override
@@ -43,6 +39,9 @@ class SettingsPage extends StatelessWidget {
               create: (context) =>
                   PeerSetCubit(session: reposCubit.session)..init(),
             ),
+            BlocProvider<NatDetection>(
+              create: (context) => NatDetection(),
+            )
           ],
           child: BlocListener<PowerControl, PowerControlState>(
               listener: (context, state) {
@@ -50,9 +49,7 @@ class SettingsPage extends StatelessWidget {
               },
               child: SettingsContainer(
                   reposCubit: reposCubit,
-                  settings: settings,
                   panicCounter: panicCounter,
-                  natDetection: natDetection,
                   isBiometricsAvailable: isBiometricsAvailable))));
 
   PreferredSizeWidget _appBar() =>

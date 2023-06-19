@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../cubits/cubits.dart';
-import '../../../utils/utils.dart';
 import 'desktop_settings.dart';
 
 class SettingsDesktopDetail extends StatefulWidget {
-  const SettingsDesktopDetail(
-      {required this.item,
-      required this.reposCubit,
-      required this.settings,
-      required this.panicCounter,
-      required this.natDetection,
-      required this.isBiometricsAvailable});
+  const SettingsDesktopDetail({
+    required this.item,
+    required this.reposCubit,
+    required this.panicCounter,
+    required this.isBiometricsAvailable,
+  });
 
   final SettingItem? item;
   final ReposCubit reposCubit;
-  final Settings settings;
   final StateMonitorIntCubit panicCounter;
-  final Future<NatDetection> natDetection;
   final bool isBiometricsAvailable;
 
   @override
@@ -44,13 +40,12 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
             reposCubit: widget.reposCubit,
             isBiometricsAvailable: widget.isBiometricsAvailable);
       case Setting.network:
-        return NetworkDesktopDetail(natDetection: widget.natDetection);
+        return NetworkDesktopDetail();
       case Setting.log:
         return LogsDesktopDetail(
-            settings: widget.settings,
-            reposCubit: widget.reposCubit,
-            panicCounter: widget.panicCounter,
-            natDetection: widget.natDetection);
+          repos: widget.reposCubit,
+          panicCounter: widget.panicCounter,
+        );
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);
       case Setting.about:

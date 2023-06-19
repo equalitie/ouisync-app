@@ -11,11 +11,10 @@ class LogView extends StatefulWidget {
   LogView(this.reader, {super.key, this.theme = LogViewTheme.light});
 
   @override
-  State<LogView> createState() => _LogViewState(reader);
+  State<LogView> createState() => _LogViewState();
 }
 
 class _LogViewState extends State<LogView> {
-  final LogReader _reader;
   final _buffer = LogBuffer();
   StreamSubscription<LogMessage>? _subscription;
 
@@ -23,7 +22,7 @@ class _LogViewState extends State<LogView> {
   var _follow = true;
   var _onScrollEnabled = true;
 
-  _LogViewState(this._reader);
+  _LogViewState();
 
   @override
   void initState() {
@@ -124,7 +123,7 @@ class _LogViewState extends State<LogView> {
   }
 
   void _subscribe() {
-    _subscription = _reader.messages.listen(_onMessage);
+    _subscription = widget.reader.messages.listen(_onMessage);
   }
 
   void _unsubscribe() {
