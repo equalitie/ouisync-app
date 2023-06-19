@@ -9,6 +9,7 @@
 #include <bitsdojo_window_windows/bitsdojo_window_plugin.h>
 #include <connectivity_plus/connectivity_plus_windows_plugin.h>
 #include <desktop_drop/desktop_drop_plugin.h>
+#include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <firebase_core/firebase_core_plugin_c_api.h>
 #include <local_auth_windows/local_auth_plugin.h>
 #include <ouisync_plugin/ouisync_plugin.h>
@@ -28,6 +29,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("ConnectivityPlusWindowsPlugin"));
   DesktopDropPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopDropPlugin"));
+  DesktopWebviewWindowPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("DesktopWebviewWindowPlugin"));
   FirebaseCorePluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
   LocalAuthPluginRegisterWithRegistrar(
