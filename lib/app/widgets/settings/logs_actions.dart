@@ -7,14 +7,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../utils/dump.dart';
-import '../../utils/settings.dart';
 import '../../pages/log_view_page.dart';
 
 class LogsActions {
-  final Settings settings;
   final StateMonitor stateMonitor;
 
-  LogsActions({required this.settings, required this.stateMonitor});
+  LogsActions({required this.stateMonitor});
 
   Future<void> saveLogs(BuildContext context) async {
     final tempFile = await _dumpInfo(context);
@@ -49,7 +47,7 @@ class LogsActions {
   void viewLogs(BuildContext context) => Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LogViewPage(settings: settings),
+        builder: (context) => LogViewPage(),
       ));
 
   Future<File> _dumpInfo(

@@ -7,19 +7,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({
-    required this.settings,
     required this.reposCubit,
     required this.powerControl,
     required this.panicCounter,
     required this.isBiometricsAvailable,
   });
 
-  final Settings settings;
   final ReposCubit reposCubit;
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
@@ -52,7 +49,6 @@ class SettingsPage extends StatelessWidget {
               },
               child: SettingsContainer(
                   reposCubit: reposCubit,
-                  settings: settings,
                   panicCounter: panicCounter,
                   isBiometricsAvailable: isBiometricsAvailable))));
 

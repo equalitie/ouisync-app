@@ -6,19 +6,16 @@ import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
-import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class SettingsContainer extends StatefulWidget {
   const SettingsContainer({
     required this.reposCubit,
-    required this.settings,
     required this.panicCounter,
     required this.isBiometricsAvailable,
   });
 
   final ReposCubit reposCubit;
-  final Settings settings;
   final StateMonitorIntCubit panicCounter;
   final bool isBiometricsAvailable;
 
@@ -48,7 +45,6 @@ class _SettingsContainerState extends State<SettingsContainer>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
         NetworkSectionMobile(),
         LogsSectionMobile(
-          settings: widget.settings,
           repos: widget.reposCubit,
           panicCounter: widget.panicCounter,
         ),
@@ -67,7 +63,6 @@ class _SettingsContainerState extends State<SettingsContainer>
           child: SettingsDesktopDetail(
             item: _selected,
             reposCubit: widget.reposCubit,
-            settings: widget.settings,
             panicCounter: widget.panicCounter,
             isBiometricsAvailable: widget.isBiometricsAvailable,
           ),

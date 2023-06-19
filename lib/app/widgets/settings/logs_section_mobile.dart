@@ -4,22 +4,18 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/utils.dart';
 import 'logs_actions.dart';
 import 'navigation_tile_mobile.dart';
 
 class LogsSectionMobile extends AbstractSettingsSection {
-  final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntCubit panicCounter;
   final LogsActions actions;
 
   LogsSectionMobile({
-    required this.settings,
     required this.repos,
     required this.panicCounter,
   }) : actions = LogsActions(
-          settings: settings,
           stateMonitor: repos.session.rootStateMonitor,
         );
 

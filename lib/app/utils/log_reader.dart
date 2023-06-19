@@ -5,88 +5,28 @@ import 'dart:convert';
 import 'ansi_parser.dart';
 import 'log.dart';
 
-enum LogLevel {
-  verbose,
-  debug,
-  info,
-  warn,
-  error;
-
-  bool operator <(LogLevel other) => index < other.index;
-  bool operator >(LogLevel other) => index > other.index;
-  bool operator <=(LogLevel other) => index <= other.index;
-  bool operator >=(LogLevel other) => index >= other.index;
-
-  static LogLevel parse(String input) {
-    switch (input.trim().toUpperCase()) {
-      case 'E':
-        return LogLevel.error;
-      case 'W':
-        return LogLevel.warn;
-      case 'I':
-        return LogLevel.info;
-      case 'D':
-        return LogLevel.debug;
-      case 'V':
-        return LogLevel.verbose;
-      default:
-        return LogLevel.verbose;
-    }
-  }
-
-  String toShortString() => name[0].toUpperCase();
-}
-
 class LogMessage {
-  final DateTime timestamp;
-  final LogLevel level;
   final List<AnsiSpan> content;
 
-  LogMessage({
-    required this.timestamp,
-    required this.level,
-    required this.content,
-  });
+  LogMessage(
+    this.content,
+  );
 
-  static Iterable<LogMessage> parse(String input) =>
-      _regexp.allMatches(input).map((match) {
-        final timestamp = DateTime.tryParse(match.group(1)!) ?? DateTime.now();
-        final level = LogLevel.parse(match.group(2)!);
-        final content = parseAnsi(match.group(3)!).toList();
-
-        return LogMessage(
-          timestamp: timestamp,
-          level: level,
-          content: content,
-        );
-      });
-
-  // The log messages have this format:
-  //
-  // 2022-10-19 09:52:00.079 D/flutter-ouisync( 7653):  2022-10-19T07:52:00.079Z  INFO  DHT IPv6 bootstrap complete
-  // <----------+----------> | <---------+---------->   <------------------+-------------------------------------->
-  //            |            |           |                                 |
-  //            timestamp    |           tag and PID (ignored)             content
-  //                         log level
-  //
-  // TODO: on desktop the format is different
-  static final _regexp =
-      RegExp(r'(\d+-\d+-\d+\s\d+:\d+:\d+)\.\d*\s([EWIDV])\/[^:]*:(.*)');
+  static LogMessage parse(String input) =>
+      LogMessage(parseAnsi(input).toList());
 }
 
 /// Reader of messages from the system logger (logcat)
 class LogReader {
   final Stream<LogMessage> messages;
-  LogLevel filter;
 
   LogReader() : this._(LogUtils.watch);
 
-  LogReader._(Stream<List<int>> input, {this.filter = LogLevel.verbose})
+  LogReader._(Stream<List<int>> input)
       : messages = input
             .asBroadcastStream()
             .map((chunk) => utf8.decode(chunk))
-            .expand((chunk) => LogMessage.parse(chunk))
-            .where((message) => message.level >= filter);
+            .map((chunk) => LogMessage.parse(chunk));
 }
 
 /// Rolling window of the most recent log messages

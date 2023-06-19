@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/repo_meta_info.dart';
 import 'constants.dart';
-import 'log_reader.dart';
 
 class SettingsRepoEntry {
   String databaseId;
@@ -24,7 +23,6 @@ class Settings {
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
-  static const String _logViewFilterKey = "LOG_VIEW/FILTER";
 
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
@@ -264,13 +262,6 @@ class Settings {
 
   int? getHighestSeenProtocolNumber() {
     return _prefs.getInt(_highestSeenProtocolNumberKey);
-  }
-
-  LogLevel getLogViewFilter() =>
-      LogLevel.parse(_prefs.getString(_logViewFilterKey) ?? '');
-
-  Future<void> setLogViewFilter(LogLevel value) async {
-    await _prefs.setString(_logViewFilterKey, value.toShortString());
   }
 
   AuthMode getAuthenticationMode(String repoName) {

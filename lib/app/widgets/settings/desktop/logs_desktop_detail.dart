@@ -7,15 +7,12 @@ import '../../../../generated/l10n.dart';
 
 class LogsDesktopDetail extends StatelessWidget {
   LogsDesktopDetail({
-    required this.settings,
     required this.repos,
     required this.panicCounter,
   }) : actions = LogsActions(
-          settings: settings,
           stateMonitor: repos.session.rootStateMonitor,
         );
 
-  final Settings settings;
   final ReposCubit repos;
   final StateMonitorIntCubit panicCounter;
   final LogsActions actions;
