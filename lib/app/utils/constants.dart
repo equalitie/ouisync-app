@@ -109,6 +109,9 @@ class Constants {
   static const Color inputBackgroundColor = Color.fromARGB(255, 224, 224, 224);
   static const Color inputLabelForeColor = Color.fromARGB(255, 117, 117, 117);
 
+  static const String faqUrl =
+      'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
+
   static const String appIcon = './assets/Ouisync-icon-blue.png';
   static const String windowsAppIcon = './assets/Ouisync-icon-blue.ico';
 
