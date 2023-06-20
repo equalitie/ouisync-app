@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../generated/l10n.dart';
 import '../../../cubits/cubits.dart';
+import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
 import '../app_version_tile.dart';
 
@@ -14,8 +15,26 @@ class AboutDesktopDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [_buildAppVersionTile(), _buildRuntimeID()]);
+    return Column(children: [
+      _buildFAQTile(context),
+      _buildAppVersionTile(),
+      _buildRuntimeID()
+    ]);
   }
+
+  Widget _buildFAQTile(BuildContext context) => Wrap(children: [
+        ListTile(
+          title: Text('FAQ', style: TextStyle(fontSize: Dimensions.fontSmall)),
+          leading: Icon(Icons.question_answer_rounded),
+          subtitle: Text('Frequently Asked Questions'),
+          onTap: () async {
+            await PlatformWebView().loadUrl(context, Constants.faqUrl);
+          },
+        ),
+        // onTap: () => Navigator.push(
+        //     context, MaterialPageRoute(builder: (context) => FAQPage()))),
+        Dimensions.desktopSettingDivider
+      ]);
 
   Widget _buildAppVersionTile() => Wrap(children: [
         AppVersionTile(
