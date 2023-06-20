@@ -13,4 +13,6 @@ abstract class PlatformWebView {
   }
 
   Future<Widget> loadUrl(BuildContext context, String url);
+
+  Future<bool> launchUrl(String url);
 }

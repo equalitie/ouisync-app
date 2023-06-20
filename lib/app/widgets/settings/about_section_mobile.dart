@@ -20,11 +20,11 @@ class AboutSectionMobile extends AbstractSettingsSection {
         title: Text(S.current.titleAbout),
         tiles: [
           SettingsTile(
-              title: Text("FAQ"),
+              title: Text(S.current.titleFAQShort),
               leading: Icon(Icons.question_answer_rounded),
-              value: Text('Frequently Asked Questions'),
+              value: Text(S.current.messageFAQ),
               onPressed: (context) async {
-                final title = Text('FAQ');
+                final title = Text(S.current.titleFAQShort);
                 final content = await Dialogs.executeFutureWithLoadingDialog(
                     context,
                     f: PlatformWebView().loadUrl(context, Constants.faqUrl));

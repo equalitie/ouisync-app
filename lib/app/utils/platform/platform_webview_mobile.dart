@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-import '../loggers/ouisync_app_logger.dart';
 import 'platform.dart';
 
-class PlatformWebViewMobile with OuiSyncAppLogger implements PlatformWebView {
+class PlatformWebViewMobile implements PlatformWebView {
   PlatformWebViewMobile();
 
   @override
@@ -39,4 +39,7 @@ class PlatformWebViewMobile with OuiSyncAppLogger implements PlatformWebView {
 
     return WebViewWidget(controller: controller);
   }
+
+  @override
+  Future<bool> launchUrl(String url) => launcher.launchUrl(Uri.parse(url));
 }

@@ -24,15 +24,13 @@ class AboutDesktopDetail extends StatelessWidget {
 
   Widget _buildFAQTile(BuildContext context) => Wrap(children: [
         ListTile(
-          title: Text('FAQ', style: TextStyle(fontSize: Dimensions.fontSmall)),
-          leading: Icon(Icons.question_answer_rounded),
-          subtitle: Text('Frequently Asked Questions'),
-          onTap: () async {
-            await PlatformWebView().loadUrl(context, Constants.faqUrl);
-          },
-        ),
-        // onTap: () => Navigator.push(
-        //     context, MaterialPageRoute(builder: (context) => FAQPage()))),
+            title: Text(S.current.titleFAQShort,
+                style: const TextStyle(fontSize: Dimensions.fontSmall)),
+            leading: const Icon(Icons.question_answer_rounded),
+            subtitle: Text(S.current.messageFAQ),
+            trailing: const Icon(Icons.launch_rounded),
+            onTap: () async =>
+                await PlatformWebView().launchUrl(Constants.faqUrl)),
         Dimensions.desktopSettingDivider
       ]);
 

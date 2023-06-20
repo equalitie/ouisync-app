@@ -1,17 +1,15 @@
-import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
-import '../loggers/ouisync_app_logger.dart';
 import 'platform.dart';
 
-class PlatformWebViewDesktop with OuiSyncAppLogger implements PlatformWebView {
-  Future<dynamic> loadwebView(String url) async {}
+class PlatformWebViewDesktop implements PlatformWebView {
+  @override
+  Future<bool> launchUrl(String url) async =>
+      launcher.launchUrl(Uri.parse(url));
 
   @override
-  Future<Widget> loadUrl(BuildContext context, String url) async {
-    final webView = await WebviewWindow.create();
-    webView.launch(url);
-
-    return SizedBox.shrink();
+  Future<Widget> loadUrl(BuildContext context, String url) {
+    throw UnimplementedError();
   }
 }
