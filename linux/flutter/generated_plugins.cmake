@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   biometric_storage
-  bitsdojo_window_linux
   desktop_drop
   ouisync_plugin
   screen_retriever
