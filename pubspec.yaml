@@ -1,5 +1,5 @@
 name: ouisync_app
-description: OuiSync Flutter application.
+description: Ouisync Flutter application.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -155,7 +155,7 @@ flutter_intl:
   enabled: true
 
 msix_config:
-  display_name: OuiSync
+  display_name: Ouisync
   publisher_name: eQualitie
   certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
   certificate_password: _ball$*watch17
@@ -177,7 +177,7 @@ flavorizr:
   flavors:
     vanilla:
       app:
-        name: 'OuiSync'
+        name: 'Ouisync'
 
       android:
         applicationId: 'org.equalitie.ouisync'
@@ -187,7 +187,7 @@ flavorizr:
 
     analytics:
       app:
-        name: 'OuiSync'
+        name: 'Ouisync'
 
       android:
         applicationId: 'org.equalitie.ouisync'
@@ -199,7 +199,7 @@ flavorizr:
 
     development:
       app:
-        name: 'OuiSync-Dev'
+        name: 'Ouisync-Dev'
 
       android:
         applicationId: 'org.equalitie.ouisync.dev'
