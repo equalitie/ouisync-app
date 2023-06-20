@@ -7,10 +7,12 @@ import '../../../../generated/l10n.dart';
 
 class LogsDesktopDetail extends StatelessWidget {
   LogsDesktopDetail(Cubits cubits)
-      : actions = LogsActions(
+      : _cubits = cubits,
+        actions = LogsActions(
           stateMonitor: cubits.repositories.session.rootStateMonitor,
         );
 
+  final Cubits _cubits;
   final LogsActions actions;
 
   @override
@@ -18,7 +20,8 @@ class LogsDesktopDetail extends StatelessWidget {
     return Column(children: [
       _buildSaveTile(context),
       _buildShareTile(context),
-      _buildViewTile(context)
+      _buildViewTile(context),
+      _buildErrorTile(context)
     ]);
   }
 
@@ -57,4 +60,21 @@ class LogsDesktopDetail extends StatelessWidget {
         leading: Icon(Icons.visibility),
         onTap: () => actions.viewLogs(context),
       );
+
+  Widget _buildErrorTile(BuildContext context) {
+    return multiBlocBuilder([_cubits.panicCounter], () {
+      final panicCount = _cubits.panicCounter.state ?? 0;
+
+      if (panicCount == 0) {
+        return SizedBox.shrink();
+      }
+
+      return Column(children: [
+        Dimensions.desktopSettingDivider,
+        ListTile(
+            title: Text(S.current.messageLibraryPanic,
+                style: TextStyle(color: Constants.errorColor))),
+      ]);
+    });
+  }
 }
