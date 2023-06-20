@@ -6,7 +6,7 @@ import '../log.dart';
 import 'platform.dart';
 
 class PlatformBackgroundManagerMobile
-    with OuiSyncAppLogger
+    with AppLogger
     implements PlatformBackgroundManager {
   @override
   Future<void> enableBackgroundExecution(BuildContext context) async {

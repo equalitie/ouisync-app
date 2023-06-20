@@ -23,7 +23,7 @@ class AccessModeSelector extends StatefulWidget {
 }
 
 class _AccessModeSelectorState extends State<AccessModeSelector>
-    with OuiSyncAppLogger {
+    with AppLogger {
   final Map<AccessMode, String> accessModeDescriptions = {
     AccessMode.blind: S.current.messageBlindReplicaExplanation,
     AccessMode.read: S.current.messageReadReplicaExplanation,

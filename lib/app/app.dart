@@ -87,7 +87,7 @@ class OuiSyncApp extends StatefulWidget {
   State<OuiSyncApp> createState() => _OuiSyncAppState();
 }
 
-class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
+class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
   final _backgroundManager = PlatformBackgroundManager();
 

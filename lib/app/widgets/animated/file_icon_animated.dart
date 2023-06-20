@@ -5,7 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
-class FileIconAnimated extends StatelessWidget with OuiSyncAppLogger {
+class FileIconAnimated extends StatelessWidget with AppLogger {
   FileIconAnimated(this._downloadJob);
 
   final Job? _downloadJob;

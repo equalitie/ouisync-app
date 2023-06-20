@@ -24,7 +24,7 @@ class SortListState extends Equatable {
   List<Object?> get props => [sortBy, direction, listType];
 }
 
-class SortListCubit extends Cubit<SortListState> with OuiSyncAppLogger {
+class SortListCubit extends Cubit<SortListState> with AppLogger {
   SortListCubit._(SortListState state) : super(state);
 
   static SortListCubit create(

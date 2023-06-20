@@ -31,7 +31,7 @@ class ManageDesktopPassword extends StatefulWidget {
 }
 
 class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
-    with OuiSyncAppLogger, RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   final _currentPasswordInputKey = GlobalKey<FormFieldState>();
   final _newPasswordInputKey = GlobalKey<FormFieldState>();
   final _retypeNewPasswordInputKey = GlobalKey<FormFieldState>();

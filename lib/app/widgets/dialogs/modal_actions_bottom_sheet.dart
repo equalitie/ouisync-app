@@ -8,7 +8,7 @@ import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class DirectoryActions extends StatelessWidget with OuiSyncAppLogger {
+class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions({
     required this.context,
     required this.cubit,

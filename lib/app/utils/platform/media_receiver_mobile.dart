@@ -5,7 +5,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../log.dart';
 import 'platform.dart';
 
-class MediaReceiverMobile with OuiSyncAppLogger implements MediaReceiver {
+class MediaReceiverMobile with AppLogger implements MediaReceiver {
   MediaReceiverMobile() {
     _setupReceivingMediaIntents();
     _setupReceivingTextIntents();

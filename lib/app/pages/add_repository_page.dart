@@ -17,8 +17,7 @@ class AddRepositoryPage extends StatefulWidget {
   State<AddRepositoryPage> createState() => _AddRepositoryPageState();
 }
 
-class _AddRepositoryPageState extends State<AddRepositoryPage>
-    with OuiSyncAppLogger {
+class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
   final formKey = GlobalKey<FormState>();
 
   final _tokenController = TextEditingController(text: '');

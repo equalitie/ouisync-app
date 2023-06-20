@@ -18,7 +18,7 @@ class AccessModeDropDownMenu extends StatefulWidget {
 }
 
 class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
-    with OuiSyncAppLogger {
+    with AppLogger {
   AccessMode _accessMode = AccessMode.blind;
 
   final Map<AccessMode, String> accessModeDescriptions = {

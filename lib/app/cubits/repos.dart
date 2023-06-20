@@ -17,7 +17,7 @@ import 'cubits.dart';
 // TODO: This should be configurable
 const _storageServers = ["storage.ouisync.net"];
 
-class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
+class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;

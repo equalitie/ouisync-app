@@ -30,7 +30,7 @@ class RepositoryCreation extends StatefulWidget {
 }
 
 class _RepositoryCreationState extends State<RepositoryCreation>
-    with OuiSyncAppLogger {
+    with AppLogger {
   ShareToken? _shareToken;
   final _scrollKey = GlobalKey();
 

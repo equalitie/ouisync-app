@@ -6,7 +6,7 @@ import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
 
 class LockedRepositoryState extends StatelessWidget
-    with OuiSyncAppLogger, RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
       required this.repositoryName,

@@ -9,7 +9,7 @@ import '../../utils/log.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget
-    with OuiSyncAppLogger, RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,

@@ -6,7 +6,7 @@ import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
-class FileDescription extends StatelessWidget with OuiSyncAppLogger {
+class FileDescription extends StatelessWidget with AppLogger {
   FileDescription(
     this.repository,
     this.fileData,

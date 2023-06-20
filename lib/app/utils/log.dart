@@ -69,14 +69,14 @@ class _Reader {
   }
 }
 
-mixin OuiSyncAppLogger implements LoggyType {
+mixin AppLogger implements LoggyType {
   @override
-  Loggy<LoggyType> get loggy => Loggy<OuiSyncAppLogger>(runtimeType.toString());
+  Loggy<LoggyType> get loggy => Loggy<AppLogger>(runtimeType.toString());
 }
 
 const LogLevel appLevel = LogLevel('OuiSync', 2); // 2 == debug
 
-extension OuiSyncAppLoggy on Loggy {
+extension AppLoggy on Loggy {
   void app(dynamic message, [Object? error, StackTrace? stackTrace]) =>
       log(appLevel, message, error, stackTrace);
 }

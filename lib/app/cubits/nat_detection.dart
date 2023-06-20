@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../utils/log.dart';
 
-class NatDetection extends Cubit<NatDetectionType> with OuiSyncAppLogger {
+class NatDetection extends Cubit<NatDetectionType> with AppLogger {
   int _nextTask = 1;
   int _highestRunningTask = 0;
   final DnsClient _dns = DnsOverHttps.google();

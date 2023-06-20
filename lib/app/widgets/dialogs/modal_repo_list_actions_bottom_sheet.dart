@@ -4,7 +4,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
-class RepoListActions extends StatelessWidget with OuiSyncAppLogger {
+class RepoListActions extends StatelessWidget with AppLogger {
   const RepoListActions(
       {required this.context,
       required this.reposCubit,

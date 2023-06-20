@@ -5,7 +5,7 @@ import '../../cubits/repo.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class UnlockDialog<T> extends StatelessWidget with OuiSyncAppLogger {
+class UnlockDialog<T> extends StatelessWidget with AppLogger {
   UnlockDialog(
       {Key? key,
       required this.context,

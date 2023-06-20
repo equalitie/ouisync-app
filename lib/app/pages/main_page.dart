@@ -41,7 +41,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, OuiSyncAppLogger, RepositoryActionsMixin {
+    with TickerProviderStateMixin, AppLogger, RepositoryActionsMixin {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
 

@@ -22,8 +22,7 @@ class ShareRepository extends StatefulWidget {
   State<StatefulWidget> createState() => _ShareRepositoryState();
 }
 
-class _ShareRepositoryState extends State<ShareRepository>
-    with OuiSyncAppLogger {
+class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
   AccessMode? _accessMode;
 
   String? _shareToken;

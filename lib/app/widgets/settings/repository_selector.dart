@@ -6,7 +6,7 @@ import '../../models/repo_entry.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 
-class RepositorySelector extends StatelessWidget with OuiSyncAppLogger {
+class RepositorySelector extends StatelessWidget with AppLogger {
   final ReposCubit repos;
 
   const RepositorySelector(this.repos);

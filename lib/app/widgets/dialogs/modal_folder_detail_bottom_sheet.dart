@@ -28,7 +28,7 @@ class FolderDetail extends StatefulWidget {
   State<FolderDetail> createState() => _FolderDetailState();
 }
 
-class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
+class _FolderDetailState extends State<FolderDetail> with AppLogger {
   @override
   Widget build(BuildContext context) {
     return Container(

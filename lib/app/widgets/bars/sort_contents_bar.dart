@@ -81,7 +81,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
           _SortByList(widget.sortListCubit, widget.reposCubit));
 }
 
-class _SortByList extends StatelessWidget with OuiSyncAppLogger {
+class _SortByList extends StatelessWidget with AppLogger {
   _SortByList(SortListCubit sortCubit, ReposCubit reposCubit)
       : _sortCubit = sortCubit,
         _reposCubit = reposCubit;

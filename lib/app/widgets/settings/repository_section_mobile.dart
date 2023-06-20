@@ -13,7 +13,7 @@ import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
 
 class RepositorySectionMobile extends AbstractSettingsSection
-    with OuiSyncAppLogger, RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   final ReposCubit repos;
   final Future<void> Function(BuildContext) onRenameRepository;
   final Future<String?> Function(dynamic context) onRepositorySecurity;

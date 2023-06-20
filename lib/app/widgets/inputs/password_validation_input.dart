@@ -28,7 +28,7 @@ class PasswordValidation extends StatefulWidget {
 }
 
 class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
-    with OuiSyncAppLogger {
+    with AppLogger {
   final _passwordFocus = FocusNode();
   final _retypePasswordFocus = FocusNode();
 

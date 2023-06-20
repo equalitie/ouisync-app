@@ -54,7 +54,7 @@ class SecurityState extends Equatable {
       [isBiometricsAvailable, authMode, password, previewPassword, message];
 }
 
-class SecurityCubit extends Cubit<SecurityState> with OuiSyncAppLogger {
+class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   SecurityCubit._(this._repoCubit, this._shareToken, SecurityState state)
       : super(state);
 

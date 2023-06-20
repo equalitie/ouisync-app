@@ -87,7 +87,7 @@ class RepoState extends Equatable {
   bool get canWrite => accessMode == oui.AccessMode.write;
 }
 
-class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
+class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
   final SettingsRepoEntry _settingsRepoEntry;
   final oui.Repository _handle;

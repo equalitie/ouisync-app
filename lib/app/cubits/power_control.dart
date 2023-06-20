@@ -76,7 +76,7 @@ class PowerControlState {
   }
 }
 
-class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
+class PowerControl extends Cubit<PowerControlState> with AppLogger {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity = Connectivity();
