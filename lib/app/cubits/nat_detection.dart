@@ -5,7 +5,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dns_client/dns_client.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NatDetection extends Cubit<NatDetectionType> {
+import '../utils/log.dart';
+
+class NatDetection extends Cubit<NatDetectionType> with AppLogger {
   int _nextTask = 1;
   int _highestRunningTask = 0;
   final DnsClient _dns = DnsOverHttps.google();
@@ -63,7 +65,7 @@ class NatDetection extends Cubit<NatDetectionType> {
 
         return;
       } catch (e) {
-        print("Failed to get endpoint echo: $e");
+        loggy.error("Failed to get endpoint echo:", e);
         _emit(currentTask, _NatDetectionTypeError("$e"));
       } finally {
         socket?.close();

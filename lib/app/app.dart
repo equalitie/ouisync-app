@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:io' as io;
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,31 +14,37 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../flavors.dart';
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
-import 'utils/loggers/ouisync_app_logger.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
-  final windowManager = PlatformWindowManager();
+Future<Widget> initOuiSyncApp() async {
+  // When dumping log from logcat, we get logs from past ouisync runs as well,
+  // so add a line on each start of the app to know which part of the log
+  // belongs to the last app instance.
+  print("-------------------- OuiSync (${F.name}) Start --------------------");
 
-  Loggy.initLoggy();
+  final windowManager = PlatformWindowManager();
 
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
-  if (kDebugMode) {
-    print('app dir: ${appDir.path}');
-    print('log dir: ${io.File(logPath).parent.path}');
-  }
-
   final session = Session.create(
     configPath: configPath,
     logPath: logPath,
   );
+
+  Loggy.initLoggy(logPrinter: AppLogPrinter());
+
+  _setupErrorReporting();
+
+  logDebug('app dir: ${appDir.path}');
+  logDebug('log dir: ${io.File(logPath).parent.path}');
+
   await session.initNetwork(
     defaultPortForwardingEnabled: true,
     defaultLocalDiscoveryEnabled: true,
@@ -47,7 +56,7 @@ Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(appBarTheme: AppBarTheme(color: themePrimaryColor)),
+      theme: ThemeData(appBarTheme: AppBarTheme(color: F.color)),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -78,7 +87,7 @@ class OuiSyncApp extends StatefulWidget {
   State<OuiSyncApp> createState() => _OuiSyncAppState();
 }
 
-class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
+class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
   final _backgroundManager = PlatformBackgroundManager();
 
@@ -138,5 +147,31 @@ class _OuiSyncAppState extends State<OuiSyncApp> with OuiSyncAppLogger {
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );
+  }
+}
+
+void _setupErrorReporting() {
+  // Errors from flutter
+  FlutterError.onError = (details) {
+    // Invoke the default handler
+    FlutterError.presentError(details);
+
+    _onError(details);
+  };
+
+  // Errors from outside of flutter
+  PlatformDispatcher.instance.onError = (exception, stack) {
+    _onError(FlutterErrorDetails(exception: exception, stack: stack));
+
+    // Invoke the default handler
+    return false;
+  };
+}
+
+void _onError(FlutterErrorDetails details) {
+  logError("Unhandled Exception:", details.exception, details.stack);
+
+  if (Firebase.apps.isNotEmpty) {
+    unawaited(FirebaseCrashlytics.instance.recordFlutterFatalError(details));
   }
 }

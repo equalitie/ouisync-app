@@ -8,7 +8,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class ListItem extends StatelessWidget with RepositoryActionsMixin {
+class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
   const ListItem({
     required this.repository,
     required this.itemData,

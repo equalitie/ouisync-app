@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/log.dart';
 import '../utils/settings.dart';
 
-class UpgradeExistsCubit extends Cubit<bool> with OuiSyncAppLogger {
+class UpgradeExistsCubit extends Cubit<bool> with AppLogger {
   final Future<int> _currentProtocolVersion;
   final Settings _settings;
 

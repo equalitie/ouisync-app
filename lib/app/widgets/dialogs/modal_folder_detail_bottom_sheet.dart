@@ -5,7 +5,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -29,7 +28,7 @@ class FolderDetail extends StatefulWidget {
   State<FolderDetail> createState() => _FolderDetailState();
 }
 
-class _FolderDetailState extends State<FolderDetail> with OuiSyncAppLogger {
+class _FolderDetailState extends State<FolderDetail> with AppLogger {
   @override
   Widget build(BuildContext context) {
     return Container(

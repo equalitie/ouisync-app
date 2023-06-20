@@ -29,7 +29,7 @@ class RepositoryDesktopDetail extends StatefulWidget {
 }
 
 class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
-    with RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   SecurityCubit? _security;
 
   @override

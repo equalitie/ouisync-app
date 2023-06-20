@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
 import '../utils/hotspot.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/log.dart';
 import '../utils/settings.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
@@ -76,7 +76,7 @@ class PowerControlState {
   }
 }
 
-class PowerControl extends Cubit<PowerControlState> with OuiSyncAppLogger {
+class PowerControl extends Cubit<PowerControlState> with AppLogger {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity = Connectivity();

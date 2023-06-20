@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/log.dart';
 
 class SortListState extends Equatable {
   final SortBy sortBy;
@@ -24,7 +24,7 @@ class SortListState extends Equatable {
   List<Object?> get props => [sortBy, direction, listType];
 }
 
-class SortListCubit extends Cubit<SortListState> with OuiSyncAppLogger {
+class SortListCubit extends Cubit<SortListState> with AppLogger {
   SortListCubit._(SortListState state) : super(state);
 
   static SortListCubit create(

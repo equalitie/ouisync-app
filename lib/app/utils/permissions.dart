@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
-import 'loggers/ouisync_app_logger.dart';
 import 'utils.dart';
 
-class Permissions with OuiSyncAppLogger {
+class Permissions with AppLogger {
   static Future<PermissionResult> requestPermission(
       BuildContext context, Permission permission, String name) async {
     PermissionStatus status =

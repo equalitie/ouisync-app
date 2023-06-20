@@ -15,7 +15,6 @@ import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/repository_progress.dart';
@@ -42,7 +41,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, RepositoryActionsMixin, OuiSyncAppLogger {
+    with TickerProviderStateMixin, AppLogger, RepositoryActionsMixin {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
 
@@ -163,13 +162,14 @@ class _MainPageState extends State<MainPage>
 
   Future<void> mountFileSystem() async {
     if (!io.Platform.isWindows) {
-      loggy.app('File System mounting is currently supported only on Windows OS');
+      loggy.app(
+          'File System mounting is currently supported only on Windows OS');
       return;
     }
 
     try {
       await widget.session.mountAllRepositories("O:");
-    } on Error catch(error) {
+    } on Error catch (error) {
       loggy.app("Failed to mount repositories ${error.code}: ${error.message}");
     }
   }

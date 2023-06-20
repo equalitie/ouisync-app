@@ -11,7 +11,6 @@ import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 
 class RepoState extends Equatable {
@@ -88,7 +87,7 @@ class RepoState extends Equatable {
   bool get canWrite => accessMode == oui.AccessMode.write;
 }
 
-class RepoCubit extends Cubit<RepoState> with OuiSyncAppLogger {
+class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
   final SettingsRepoEntry _settingsRepoEntry;
   final oui.Repository _handle;

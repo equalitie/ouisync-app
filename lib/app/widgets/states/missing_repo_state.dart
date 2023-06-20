@@ -6,7 +6,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class MissingRepositoryState extends StatelessWidget
-    with RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   const MissingRepositoryState(
       {required this.repositoryName,
       required this.repositoryMetaInfo,

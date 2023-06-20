@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class UnlockRepository extends StatelessWidget with OuiSyncAppLogger {
+class UnlockRepository extends StatelessWidget with AppLogger {
   UnlockRepository({
     required this.parentContext,
     required this.databaseId,

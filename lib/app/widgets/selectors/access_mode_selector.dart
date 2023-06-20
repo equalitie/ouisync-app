@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class AccessModeSelector extends StatefulWidget {
@@ -24,7 +23,7 @@ class AccessModeSelector extends StatefulWidget {
 }
 
 class _AccessModeSelectorState extends State<AccessModeSelector>
-    with OuiSyncAppLogger {
+    with AppLogger {
   final Map<AccessMode, String> accessModeDescriptions = {
     AccessMode.blind: S.current.messageBlindReplicaExplanation,
     AccessMode.read: S.current.messageReadReplicaExplanation,

@@ -7,14 +7,13 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/repo_entry.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
 import 'navigation_tile_mobile.dart';
 import 'repository_selector.dart';
 
 class RepositorySectionMobile extends AbstractSettingsSection
-    with RepositoryActionsMixin, OuiSyncAppLogger {
+    with AppLogger, RepositoryActionsMixin {
   final ReposCubit repos;
   final Future<void> Function(BuildContext) onRenameRepository;
   final Future<String?> Function(dynamic context) onRepositorySecurity;

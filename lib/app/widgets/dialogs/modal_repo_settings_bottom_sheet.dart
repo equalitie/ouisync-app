@@ -33,7 +33,7 @@ class RepositorySettings extends StatefulWidget {
 }
 
 class _RepositorySettingsState extends State<RepositorySettings>
-    with RepositoryActionsMixin {
+    with AppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
         bloc: widget.cubit,

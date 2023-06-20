@@ -10,11 +10,10 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class SaveToDevice extends StatefulWidget with OuiSyncAppLogger {
+class SaveToDevice extends StatefulWidget with AppLogger {
   const SaveToDevice({required this.data, required this.cubit});
 
   final FileItem data;

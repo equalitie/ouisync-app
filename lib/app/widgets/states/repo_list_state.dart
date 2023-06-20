@@ -5,9 +5,11 @@ import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/constants.dart';
+import '../../utils/log.dart';
 import '../widgets.dart';
 
-class RepoListState extends StatelessWidget with RepositoryActionsMixin {
+class RepoListState extends StatelessWidget
+    with AppLogger, RepositoryActionsMixin {
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,

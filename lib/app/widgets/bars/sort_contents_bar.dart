@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class SortContentsBar extends StatefulWidget {
@@ -82,7 +81,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
           _SortByList(widget.sortListCubit, widget.reposCubit));
 }
 
-class _SortByList extends StatelessWidget with OuiSyncAppLogger {
+class _SortByList extends StatelessWidget with AppLogger {
   _SortByList(SortListCubit sortCubit, ReposCubit reposCubit)
       : _sortCubit = sortCubit,
         _reposCubit = reposCubit;

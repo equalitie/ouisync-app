@@ -10,7 +10,6 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -18,7 +17,7 @@ import 'cubits.dart';
 // TODO: This should be configurable
 const _storageServers = ["storage.ouisync.net"];
 
-class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
+class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;
@@ -344,12 +343,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with OuiSyncAppLogger {
   Future<void> renameRepository(
       String oldName, String newName, Uint8List reopenToken) async {
     if (!_repos.containsKey(oldName)) {
-      print("Error renaming repository \"$oldName\": Does not exist");
+      loggy.error("Error renaming repository \"$oldName\": Does not exist");
       return;
     }
 
     if (_repos.containsKey(newName)) {
-      print(
+      loggy.error(
           "Error renaming repository \"$oldName\": Repository \"$newName\" already exists");
       return;
     }

@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
 import '../../pages/pages.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -23,8 +22,7 @@ class ShareRepository extends StatefulWidget {
   State<StatefulWidget> createState() => _ShareRepositoryState();
 }
 
-class _ShareRepositoryState extends State<ShareRepository>
-    with OuiSyncAppLogger {
+class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
   AccessMode? _accessMode;
 
   String? _shareToken;

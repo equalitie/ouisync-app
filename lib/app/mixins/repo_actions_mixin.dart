@@ -15,7 +15,7 @@ import '../widgets/widgets.dart';
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
-mixin RepositoryActionsMixin {
+mixin RepositoryActionsMixin on AppLogger {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(BuildContext context,
       {required RepoCubit repository,
@@ -328,13 +328,15 @@ mixin RepositoryActionsMixin {
             databaseId: databaseId, password: securedPassword);
 
         if (upgraded == null) {
-          print('Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
+          loggy.error(
+              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
 
           return;
         }
 
         if (upgraded == false) {
-          print('Removing the old entry (version1) for $repositoryName in the '
+          loggy.warning(
+              'Removing the old entry (version1) for $repositoryName in the '
               'secure storage failed, but the creating the new entry (version2) '
               'was successful.');
         }
@@ -436,7 +438,7 @@ mixin RepositoryActionsMixin {
         databaseId: databaseId, authMode: authMode);
 
     if (secureStorageResult.exception != null) {
-      print(secureStorageResult.exception);
+      loggy.error(secureStorageResult.exception);
 
       return null;
     }
@@ -452,7 +454,7 @@ mixin RepositoryActionsMixin {
         authMode: AuthMode.version2);
 
     if (addTempResult.exception != null) {
-      print(addTempResult.exception);
+      loggy.error(addTempResult.exception);
 
       return null;
     }
@@ -463,7 +465,7 @@ mixin RepositoryActionsMixin {
         authenticationRequired: false);
 
     if (deleteOldResult.exception != null) {
-      print(deleteOldResult.exception);
+      loggy.error(deleteOldResult.exception);
 
       return false;
     }
