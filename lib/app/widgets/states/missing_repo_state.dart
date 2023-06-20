@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../models/models.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class MissingRepositoryState extends StatelessWidget

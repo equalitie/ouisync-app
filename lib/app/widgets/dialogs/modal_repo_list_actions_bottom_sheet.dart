@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class RepoListActions extends StatelessWidget with OuiSyncAppLogger {

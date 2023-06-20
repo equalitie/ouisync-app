@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_entry.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 

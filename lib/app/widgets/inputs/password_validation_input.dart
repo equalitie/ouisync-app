@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 
 class PasswordValidation extends StatefulWidget {

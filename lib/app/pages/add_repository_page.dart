@@ -4,7 +4,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
@@ -64,7 +63,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Row(children: [
-                Fields.constrainedText(S.current.messageAddRepoQR, flex: 0, color: Colors.black)
+                Fields.constrainedText(S.current.messageAddRepoQR,
+                    flex: 0, color: Colors.black)
               ]),
               if (_isDesktop)
                 Row(children: [
@@ -156,7 +156,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0, color: Colors.black),
+            Fields.constrainedText(S.current.messageAddRepoLink,
+                flex: 0, color: Colors.black),
           ],
         ),
         Dimensions.spacingVerticalDouble,

@@ -9,7 +9,6 @@ import '../../../cubits/cubits.dart';
 import '../../../mixins/mixins.dart';
 import '../../../models/models.dart';
 import '../../../utils/utils.dart';
-import '../../../utils/loggers/ouisync_app_logger.dart';
 import '../../widgets.dart';
 import '../repository_selector.dart';
 

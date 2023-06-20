@@ -18,7 +18,6 @@ import '../flavors.dart';
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
-import 'utils/loggers/ouisync_app_logger.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 

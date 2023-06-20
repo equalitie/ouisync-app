@@ -7,7 +7,6 @@ import 'package:result_type/result_type.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 

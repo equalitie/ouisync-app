@@ -8,7 +8,6 @@ import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/security.dart';
 import '../mixins/repo_actions_mixin.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 

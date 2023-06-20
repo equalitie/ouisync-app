@@ -4,7 +4,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
-import '../../utils/loggers/ouisync_app_logger.dart';
+import '../../utils/log.dart';
 import '../../utils/platform/platform.dart';
 import '../widgets.dart';
 

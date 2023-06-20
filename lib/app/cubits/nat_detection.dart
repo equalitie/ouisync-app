@@ -5,7 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dns_client/dns_client.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/loggers/ouisync_app_logger.dart';
+import '../utils/log.dart';
 
 class NatDetection extends Cubit<NatDetectionType> with OuiSyncAppLogger {
   int _nextTask = 1;

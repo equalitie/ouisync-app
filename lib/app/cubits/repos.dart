@@ -10,7 +10,6 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 

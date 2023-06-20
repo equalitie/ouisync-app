@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import '../loggers/ouisync_app_logger.dart';
+import '../log.dart';
 import 'platform.dart';
 
 class MediaReceiverWindows with OuiSyncAppLogger implements MediaReceiver {

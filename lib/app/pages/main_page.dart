@@ -15,7 +15,6 @@ import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/loggers/ouisync_app_logger.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/repository_progress.dart';

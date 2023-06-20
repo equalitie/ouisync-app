@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 import '../../../generated/l10n.dart';
-import '../loggers/ouisync_app_logger.dart';
+import '../log.dart';
 import 'platform.dart';
 
 class PlatformBackgroundManagerMobile
