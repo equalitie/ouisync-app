@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   biometric_storage
   desktop_drop
+  desktop_webview_window
   ouisync_plugin
   screen_retriever
   system_tray

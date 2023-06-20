@@ -33,6 +33,7 @@ dependencies:
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.4.1
+  desktop_webview_window: ^0.2.0
   dns_client: ^0.2.1
   equatable: ^2.0.3
   external_path: ^1.0.1
