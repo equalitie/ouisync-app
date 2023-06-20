@@ -60,20 +60,20 @@ class S {
     );
   }
 
-  /// `OuiSync`
+  /// `Ouisync`
   String get titleAppTitle {
     return Intl.message(
-      'OuiSync',
+      'Ouisync',
       name: 'titleAppTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add file to OuiSync`
+  /// `Add file to Ouisync`
   String get titleAddFile {
     return Intl.message(
-      'Add file to OuiSync',
+      'Add file to Ouisync',
       name: 'titleAddFile',
       desc: '',
       args: [],
@@ -435,6 +435,16 @@ class S {
     return Intl.message(
       'Required permission',
       name: 'titleRequiredPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FAQ`
+  String get titleFAQShort {
+    return Intl.message(
+      'FAQ',
+      name: 'titleFAQShort',
       desc: '',
       args: [],
     );
@@ -1560,10 +1570,10 @@ class S {
     );
   }
 
-  /// `OuiSync`
+  /// `Ouisync`
   String get messageOuiSyncDesktopTitle {
     return Intl.message(
-      'OuiSync',
+      'Ouisync',
       name: 'messageOuiSyncDesktopTitle',
       desc: '',
       args: [],
@@ -1580,10 +1590,10 @@ class S {
     );
   }
 
-  /// `OuiSync is running`
+  /// `Ouisync is running`
   String get messageBackgroundNotificationAndroid {
     return Intl.message(
-      'OuiSync is running',
+      'Ouisync is running',
       name: 'messageBackgroundNotificationAndroid',
       desc: '',
       args: [],
@@ -2455,6 +2465,16 @@ class S {
     return Intl.message(
       'Keep both files',
       name: 'messageKeepBothFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Frequently Asked Questions`
+  String get messageFAQ {
+    return Intl.message(
+      'Frequently Asked Questions',
+      name: 'messageFAQ',
       desc: '',
       args: [],
     );

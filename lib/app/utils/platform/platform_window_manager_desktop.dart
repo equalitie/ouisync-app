@@ -11,15 +11,15 @@ import 'platform_window_manager.dart';
 class PlatformWindowManagerDesktop
     with WindowListener
     implements PlatformWindowManager {
+  final _systemTray = stray.SystemTray();
+  final _appWindow = stray.AppWindow();
+
   PlatformWindowManagerDesktop() {
     initialize().then((_) async {
       windowManager.addListener(this);
       await windowManager.setPreventClose(true);
     });
   }
-
-  final _systemTray = stray.SystemTray();
-  final _appWindow = stray.AppWindow();
 
   Future<void> initialize() async {
     await windowManager.ensureInitialized();
@@ -34,13 +34,20 @@ class PlatformWindowManagerDesktop
       /// or a regular constant value in Constants.
       /// So we use a harcoded string to start, then we use the localized string
       /// in app.dart -for now.
+
+      const width = 700.0;
+      const height = width * 1.3;
+
+      const initialSize = Size(width, height);
+
       WindowOptions windowOptions = const WindowOptions(
-        center: true,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        title: 'OuiSync',
-        titleBarStyle: TitleBarStyle.normal,
-      );
+          center: true,
+          backgroundColor: Colors.transparent,
+          skipTaskbar: false,
+          title: 'Ouisync',
+          size: initialSize,
+          minimumSize: initialSize);
+
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.show();
         await windowManager.focus();
