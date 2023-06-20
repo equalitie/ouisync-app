@@ -8,15 +8,12 @@ import 'logs_actions.dart';
 import 'navigation_tile_mobile.dart';
 
 class LogsSectionMobile extends AbstractSettingsSection {
-  final ReposCubit repos;
-  final StateMonitorIntCubit panicCounter;
+  final Cubits _cubits;
   final LogsActions actions;
 
-  LogsSectionMobile({
-    required this.repos,
-    required this.panicCounter,
-  }) : actions = LogsActions(
-          stateMonitor: repos.session.rootStateMonitor,
+  LogsSectionMobile(this._cubits)
+      : actions = LogsActions(
+          stateMonitor: _cubits.repositories.session.rootStateMonitor,
         );
 
   @override
@@ -40,7 +37,7 @@ class LogsSectionMobile extends AbstractSettingsSection {
           ),
           CustomSettingsTile(
             child: BlocBuilder<StateMonitorIntCubit, int?>(
-                bloc: panicCounter,
+                bloc: _cubits.panicCounter,
                 builder: (context, count) {
                   if ((count ?? 0) > 0) {
                     final color = Theme.of(context).colorScheme.error;

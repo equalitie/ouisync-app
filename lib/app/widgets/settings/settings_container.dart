@@ -9,15 +9,13 @@ import '../../utils/platform/platform.dart';
 import '../widgets.dart';
 
 class SettingsContainer extends StatefulWidget {
-  const SettingsContainer({
-    required this.reposCubit,
+  const SettingsContainer(
+    this._cubits, {
     required this.isBiometricsAvailable,
-    required this.notificationBadgeBuilder,
   });
 
-  final ReposCubit reposCubit;
+  final Cubits _cubits;
   final bool isBiometricsAvailable;
-  final NotificationBadgeBuilder notificationBadgeBuilder;
 
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
@@ -44,27 +42,22 @@ class _SettingsContainerState extends State<SettingsContainer>
   Widget _buildMobileLayout() =>
       SettingsList(platform: PlatformUtils.detectPlatform(context), sections: [
         NetworkSectionMobile(),
-        LogsSectionMobile(
-          repos: widget.reposCubit,
-          panicCounter: widget.notificationBadgeBuilder.panicCounter,
-        ),
-        AboutSectionMobile(repos: widget.reposCubit)
+        LogsSectionMobile(widget._cubits),
+        AboutSectionMobile(repos: widget._cubits.repositories)
       ]);
 
   Widget _buildDesktopLayout() => Row(children: [
         Flexible(
           flex: 1,
-          child: SettingsDesktopList(
+          child: SettingsDesktopList(widget._cubits,
               onItemTap: (setting) => setState(() => _selected = setting),
-              notificationBadgeBuilder: widget.notificationBadgeBuilder,
               selectedItem: _selected),
         ),
         Flexible(
           flex: 4,
           child: SettingsDesktopDetail(
-            item: _selected,
-            reposCubit: widget.reposCubit,
-            notificationBadgeBuilder: widget.notificationBadgeBuilder,
+            widget._cubits,
+            item: _selected!,
             isBiometricsAvailable: widget.isBiometricsAvailable,
           ),
         )

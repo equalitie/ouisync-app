@@ -4,18 +4,13 @@ import '../logs_actions.dart';
 import '../../../cubits/cubits.dart';
 import '../../../utils/utils.dart';
 import '../../../../generated/l10n.dart';
-import '../../../widgets/notification_badge.dart';
 
 class LogsDesktopDetail extends StatelessWidget {
-  LogsDesktopDetail({
-    required this.repos,
-    required this.notificationBadgeBuilder,
-  }) : actions = LogsActions(
-          stateMonitor: repos.session.rootStateMonitor,
+  LogsDesktopDetail(Cubits cubits)
+      : actions = LogsActions(
+          stateMonitor: cubits.repositories.session.rootStateMonitor,
         );
 
-  final ReposCubit repos;
-  final NotificationBadgeBuilder notificationBadgeBuilder;
   final LogsActions actions;
 
   @override

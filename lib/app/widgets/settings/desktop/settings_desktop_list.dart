@@ -2,22 +2,20 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../generated/l10n.dart';
 import '../../../utils/platform/platform.dart';
-import '../../../widgets/notification_badge.dart';
+import '../../../utils/utils.dart';
+import '../../../cubits/cubits.dart';
 import 'setting_desktop_item.dart';
 
 class SettingsDesktopList extends StatelessWidget {
-  SettingsDesktopList({
+  SettingsDesktopList(
+    this._cubits, {
     required this.onItemTap,
-    required notificationBadgeBuilder,
     this.selectedItem,
-  }) : _notificationBadgeBuilder = notificationBadgeBuilder.copyWith(
-            withErrorOnLibraryPanic: true,
-            withErrorIfUpdateExists: false,
-            withWarningIfNetworkDisabled: false);
+  });
 
+  final Cubits _cubits;
   final ValueChanged<SettingItem> onItemTap;
   final SettingItem? selectedItem;
-  final NotificationBadgeBuilder _notificationBadgeBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +40,21 @@ class SettingsDesktopList extends StatelessWidget {
         selected: selectedItem?.setting == settingItemEntry.setting);
 
     if (settingItemEntry.setting == Setting.log) {
-      return _notificationBadgeBuilder.build(item);
+      return multiBlocBuilder([_cubits.panicCounter], () {
+        final panicCount = _cubits.panicCounter.state ?? 0;
+
+        Color? color;
+
+        if (panicCount > 0) {
+          color = Constants.errorColor;
+        }
+
+        if (color != null) {
+          return Fields.addBadge(item, color: color);
+        } else {
+          return item;
+        }
+      });
     } else {
       return item;
     }
