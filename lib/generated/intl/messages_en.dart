@@ -231,7 +231,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground"),
         "messageBackgroundNotificationAndroid":
-            MessageLookupByLibrary.simpleMessage("OuiSync is running"),
+            MessageLookupByLibrary.simpleMessage("Ouisync is running"),
         "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Biometric authentication failed"),
         "messageBiometricValidationAdded": m1,
@@ -343,6 +343,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
+        "messageFAQ":
+            MessageLookupByLibrary.simpleMessage("Frequently Asked Questions"),
         "messageFile": MessageLookupByLibrary.simpleMessage("file"),
         "messageFileAlreadyExist": m8,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
@@ -416,7 +418,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOpenFileError": m13,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
-            MessageLookupByLibrary.simpleMessage("OuiSync"),
+            MessageLookupByLibrary.simpleMessage("Ouisync"),
         "messagePassword": MessageLookupByLibrary.simpleMessage("Password"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Password copied to the clipboard"),
@@ -542,12 +544,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unspecified"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("About"),
         "titleAddFile":
-            MessageLookupByLibrary.simpleMessage("Add file to OuiSync"),
+            MessageLookupByLibrary.simpleMessage("Add file to Ouisync"),
         "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(
             "Import a repository with token"),
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Import a repository"),
-        "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
+        "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions needed"),
         "titleChangePassword":
@@ -569,6 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Download to device"),
         "titleEditRepository":
             MessageLookupByLibrary.simpleMessage("Edit repository"),
+        "titleFAQShort": MessageLookupByLibrary.simpleMessage("FAQ"),
         "titleFileDetails":
             MessageLookupByLibrary.simpleMessage("File details"),
         "titleFileExtensionChanged":

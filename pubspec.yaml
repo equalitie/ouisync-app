@@ -33,6 +33,7 @@ dependencies:
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.4.1
+  desktop_webview_window: ^0.2.0
   dns_client: ^0.2.1
   equatable: ^2.0.3
   external_path: ^1.0.1
@@ -90,6 +91,9 @@ dependencies:
   udp: ^5.0.3
   url_launcher: ^6.0.20
   watcher: ^1.1.0
+  webview_flutter: ^4.2.2
+  webview_flutter_android: ^3.8.0
+  webview_flutter_wkwebview: ^3.5.0
   window_manager: ^0.3.4
 
 dependency_overrides:
