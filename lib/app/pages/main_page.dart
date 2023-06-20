@@ -42,7 +42,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, RepositoryActionsMixin, OuiSyncAppLogger {
+    with TickerProviderStateMixin, OuiSyncAppLogger, RepositoryActionsMixin {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
 
@@ -163,13 +163,14 @@ class _MainPageState extends State<MainPage>
 
   Future<void> mountFileSystem() async {
     if (!io.Platform.isWindows) {
-      loggy.app('File System mounting is currently supported only on Windows OS');
+      loggy.app(
+          'File System mounting is currently supported only on Windows OS');
       return;
     }
 
     try {
       await widget.session.mountAllRepositories("O:");
-    } on Error catch(error) {
+    } on Error catch (error) {
       loggy.app("Failed to mount repositories ${error.code}: ${error.message}");
     }
   }

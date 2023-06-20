@@ -8,6 +8,7 @@ import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../../utils/loggers/ouisync_app_logger.dart';
 
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings(
@@ -33,7 +34,7 @@ class RepositorySettings extends StatefulWidget {
 }
 
 class _RepositorySettingsState extends State<RepositorySettings>
-    with RepositoryActionsMixin {
+    with OuiSyncAppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
         bloc: widget.cubit,

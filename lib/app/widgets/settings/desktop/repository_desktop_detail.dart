@@ -9,6 +9,7 @@ import '../../../cubits/cubits.dart';
 import '../../../mixins/mixins.dart';
 import '../../../models/models.dart';
 import '../../../utils/utils.dart';
+import '../../../utils/loggers/ouisync_app_logger.dart';
 import '../../widgets.dart';
 import '../repository_selector.dart';
 
@@ -29,7 +30,7 @@ class RepositoryDesktopDetail extends StatefulWidget {
 }
 
 class _RepositoryDesktopDetailState extends State<RepositoryDesktopDetail>
-    with RepositoryActionsMixin {
+    with OuiSyncAppLogger, RepositoryActionsMixin {
   SecurityCubit? _security;
 
   @override

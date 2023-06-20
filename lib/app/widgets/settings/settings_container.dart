@@ -24,7 +24,7 @@ class SettingsContainer extends StatefulWidget {
 }
 
 class _SettingsContainerState extends State<SettingsContainer>
-    with RepositoryActionsMixin, OuiSyncAppLogger {
+    with OuiSyncAppLogger, RepositoryActionsMixin {
   SettingItem? _selected;
 
   @override

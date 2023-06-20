@@ -31,7 +31,7 @@ class RepositorySecurity extends StatefulWidget {
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
-    with RepositoryActionsMixin, OuiSyncAppLogger {
+    with OuiSyncAppLogger, RepositoryActionsMixin {
   final _passwordInputKey = GlobalKey<FormFieldState>();
   final _retypePasswordInputKey = GlobalKey<FormFieldState>();
 
