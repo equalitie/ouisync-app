@@ -4,17 +4,18 @@ import '../logs_actions.dart';
 import '../../../cubits/cubits.dart';
 import '../../../utils/utils.dart';
 import '../../../../generated/l10n.dart';
+import '../../../widgets/notification_badge.dart';
 
 class LogsDesktopDetail extends StatelessWidget {
   LogsDesktopDetail({
     required this.repos,
-    required this.panicCounter,
+    required this.notificationBadgeBuilder,
   }) : actions = LogsActions(
           stateMonitor: repos.session.rootStateMonitor,
         );
 
   final ReposCubit repos;
-  final StateMonitorIntCubit panicCounter;
+  final NotificationBadgeBuilder notificationBadgeBuilder;
   final LogsActions actions;
 
   @override
@@ -56,7 +57,7 @@ class LogsDesktopDetail extends StatelessWidget {
       ]);
 
   Widget _buildViewTile(BuildContext context) => ListTile(
-        title: Text(S.current.messageView, 
+        title: Text(S.current.messageView,
             style: TextStyle(fontSize: Dimensions.fontSmall)),
         leading: Icon(Icons.visibility),
         onTap: () => actions.viewLogs(context),

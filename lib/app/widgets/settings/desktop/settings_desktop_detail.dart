@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/notification_badge.dart';
 import '../../../cubits/cubits.dart';
 import 'desktop_settings.dart';
 
@@ -7,13 +8,13 @@ class SettingsDesktopDetail extends StatefulWidget {
   const SettingsDesktopDetail({
     required this.item,
     required this.reposCubit,
-    required this.panicCounter,
+    required this.notificationBadgeBuilder,
     required this.isBiometricsAvailable,
   });
 
   final SettingItem? item;
   final ReposCubit reposCubit;
-  final StateMonitorIntCubit panicCounter;
+  final NotificationBadgeBuilder notificationBadgeBuilder;
   final bool isBiometricsAvailable;
 
   @override
@@ -44,7 +45,7 @@ class _SettingsDesktopDetailState extends State<SettingsDesktopDetail> {
       case Setting.log:
         return LogsDesktopDetail(
           repos: widget.reposCubit,
-          panicCounter: widget.panicCounter,
+          notificationBadgeBuilder: widget.notificationBadgeBuilder,
         );
       case Setting.feedback:
         return FeedbackDesktopDetail(item: widget.item!);

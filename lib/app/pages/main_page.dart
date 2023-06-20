@@ -44,6 +44,7 @@ class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger, RepositoryActionsMixin {
   final ReposCubit _repositories;
   final PowerControl _powerControl;
+  final NotificationBadgeBuilder _notificationBadgeBuilder;
 
   String _pathEntryToMove = '';
   Widget? _bottomSheet;
@@ -56,7 +57,12 @@ class _MainPageState extends State<MainPage>
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
   final StateMonitorIntCubit _panicCounter;
 
-  _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
+  _MainPageState._(this._repositories, this._powerControl, this._panicCounter)
+      : _notificationBadgeBuilder = NotificationBadgeBuilder(
+            _panicCounter, _powerControl,
+            withErrorIfUpdateExists: true,
+            withErrorOnLibraryPanic: true,
+            withWarningIfNetworkDisabled: true);
 
   factory _MainPageState(Session session, Settings settings) {
     final repositories = ReposCubit(
@@ -328,30 +334,31 @@ class _MainPageState extends State<MainPage>
         onPressed: () async => await _showAppSettings(),
         size: Dimensions.sizeIconSmall);
 
-    return BlocBuilder<UpgradeExistsCubit, bool>(
-      builder: (context, updateExists) =>
-          BlocBuilder<PowerControl, PowerControlState>(
-        bloc: _powerControl,
-        builder: (context, powerControlState) =>
-            BlocBuilder<StateMonitorIntCubit, int?>(
-                bloc: _panicCounter,
-                builder: (context, panicCount) {
-                  Color? color;
+    return _notificationBadgeBuilder.build(button);
+    //return BlocBuilder<UpgradeExistsCubit, bool>(
+    //  builder: (context, updateExists) =>
+    //      BlocBuilder<PowerControl, PowerControlState>(
+    //    bloc: _powerControl,
+    //    builder: (context, powerControlState) =>
+    //        BlocBuilder<StateMonitorIntCubit, int?>(
+    //            bloc: _panicCounter,
+    //            builder: (context, panicCount) {
+    //              Color? color;
 
-                  if (updateExists || ((panicCount ?? 0) > 0)) {
-                    color = Constants.errorColor;
-                  } else if (!(powerControlState.isNetworkEnabled ?? true)) {
-                    color = Constants.warningColor;
-                  }
+    //              if (updateExists || ((panicCount ?? 0) > 0)) {
+    //                color = Constants.errorColor;
+    //              } else if (!(powerControlState.isNetworkEnabled ?? true)) {
+    //                color = Constants.warningColor;
+    //              }
 
-                  if (color != null) {
-                    return Fields.addBadge(button, color: color);
-                  } else {
-                    return button;
-                  }
-                }),
-      ),
-    );
+    //              if (color != null) {
+    //                return Fields.addBadge(button, color: color);
+    //              } else {
+    //                return button;
+    //              }
+    //            }),
+    //  ),
+    //);
   }
 
   Widget _buildRepoSettingsIcon() =>
@@ -827,7 +834,7 @@ class _MainPageState extends State<MainPage>
           child: SettingsPage(
               reposCubit: reposCubit,
               powerControl: _powerControl,
-              panicCounter: _panicCounter,
+              notificationBadgeBuilder: _notificationBadgeBuilder,
               isBiometricsAvailable: isBiometricsAvailable),
         ),
       ),

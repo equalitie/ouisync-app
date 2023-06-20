@@ -12,13 +12,13 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({
     required this.reposCubit,
     required this.powerControl,
-    required this.panicCounter,
+    required this.notificationBadgeBuilder,
     required this.isBiometricsAvailable,
   });
 
   final ReposCubit reposCubit;
   final PowerControl powerControl;
-  final StateMonitorIntCubit panicCounter;
+  final NotificationBadgeBuilder notificationBadgeBuilder;
   final bool isBiometricsAvailable;
 
   @override
@@ -53,6 +53,6 @@ class SettingsPage extends StatelessWidget {
               },
               child: SettingsContainer(
                   reposCubit: reposCubit,
-                  panicCounter: panicCounter,
+                  notificationBadgeBuilder: notificationBadgeBuilder,
                   isBiometricsAvailable: isBiometricsAvailable))));
 }

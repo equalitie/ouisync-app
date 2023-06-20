@@ -2,13 +2,22 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../generated/l10n.dart';
 import '../../../utils/platform/platform.dart';
+import '../../../widgets/notification_badge.dart';
 import 'setting_desktop_item.dart';
 
 class SettingsDesktopList extends StatelessWidget {
-  SettingsDesktopList({required this.onItemTap, this.selectedItem});
+  SettingsDesktopList({
+    required this.onItemTap,
+    required notificationBadgeBuilder,
+    this.selectedItem,
+  }) : _notificationBadgeBuilder = notificationBadgeBuilder.copyWith(
+            withErrorOnLibraryPanic: true,
+            withErrorIfUpdateExists: false,
+            withWarningIfNetworkDisabled: false);
 
   final ValueChanged<SettingItem> onItemTap;
   final SettingItem? selectedItem;
+  final NotificationBadgeBuilder _notificationBadgeBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +31,21 @@ class SettingsDesktopList extends StatelessWidget {
         ].contains(settingItemEntry.platform));
 
     return ListView(
-      children: platformSettingsItems
-          .map<Widget>((settingItemEntry) => SettingDesktopItem(
-              item: settingItemEntry,
-              onTap: () => onItemTap(settingItemEntry),
-              selected: selectedItem?.setting == settingItemEntry.setting))
-          .toList(),
+      children: platformSettingsItems.map<Widget>(_buildEntry).toList(),
     );
+  }
+
+  Widget _buildEntry(SettingItem settingItemEntry) {
+    final item = SettingDesktopItem(
+        item: settingItemEntry,
+        onTap: () => onItemTap(settingItemEntry),
+        selected: selectedItem?.setting == settingItemEntry.setting);
+
+    if (settingItemEntry.setting == Setting.log) {
+      return _notificationBadgeBuilder.build(item);
+    } else {
+      return item;
+    }
   }
 }
 

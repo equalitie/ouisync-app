@@ -65,3 +65,4 @@ export 'settings/platform/platform_pex_switch.dart';
 export 'settings/platform/platform_tappable_tile.dart';
 
 export 'log_view.dart';
+export 'notification_badge.dart';

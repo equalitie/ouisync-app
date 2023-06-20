@@ -11,13 +11,13 @@ import '../widgets.dart';
 class SettingsContainer extends StatefulWidget {
   const SettingsContainer({
     required this.reposCubit,
-    required this.panicCounter,
     required this.isBiometricsAvailable,
+    required this.notificationBadgeBuilder,
   });
 
   final ReposCubit reposCubit;
-  final StateMonitorIntCubit panicCounter;
   final bool isBiometricsAvailable;
+  final NotificationBadgeBuilder notificationBadgeBuilder;
 
   @override
   State<SettingsContainer> createState() => _SettingsContainerState();
@@ -46,7 +46,7 @@ class _SettingsContainerState extends State<SettingsContainer>
         NetworkSectionMobile(),
         LogsSectionMobile(
           repos: widget.reposCubit,
-          panicCounter: widget.panicCounter,
+          panicCounter: widget.notificationBadgeBuilder.panicCounter,
         ),
         AboutSectionMobile(repos: widget.reposCubit)
       ]);
@@ -56,6 +56,7 @@ class _SettingsContainerState extends State<SettingsContainer>
           flex: 1,
           child: SettingsDesktopList(
               onItemTap: (setting) => setState(() => _selected = setting),
+              notificationBadgeBuilder: widget.notificationBadgeBuilder,
               selectedItem: _selected),
         ),
         Flexible(
@@ -63,7 +64,7 @@ class _SettingsContainerState extends State<SettingsContainer>
           child: SettingsDesktopDetail(
             item: _selected,
             reposCubit: widget.reposCubit,
-            panicCounter: widget.panicCounter,
+            notificationBadgeBuilder: widget.notificationBadgeBuilder,
             isBiometricsAvailable: widget.isBiometricsAvailable,
           ),
         )
