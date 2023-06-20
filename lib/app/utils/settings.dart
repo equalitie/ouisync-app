@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/repo_meta_info.dart';
 import 'constants.dart';
+import 'log.dart';
 
 class SettingsRepoEntry {
   String databaseId;
@@ -17,7 +18,7 @@ class SettingsRepoEntry {
   SettingsRepoEntry(this.databaseId, this.info);
 }
 
-class Settings {
+class Settings with AppLogger {
   // Per app settings
   static const String _currentRepoKey = "CURRENT_REPO";
   static const String _syncOnMobileKey = "SYNC_ON_MOBILE";
@@ -193,7 +194,7 @@ class Settings {
     }
 
     if (_repos.containsKey(newName)) {
-      print("Failed to rename repo: \"$newName\" already exists");
+      loggy.debug('Failed to rename repo: "$newName" already exists');
       return null;
     }
 
@@ -214,11 +215,14 @@ class Settings {
         databaseId, RepoMetaInfo.fromDirAndName(io.Directory(path), newName));
   }
 
-  Future<SettingsRepoEntry?> addRepo(RepoMetaInfo info,
-      {required String databaseId,
-      required AuthMode authenticationMode}) async {
+  Future<SettingsRepoEntry?> addRepo(
+    RepoMetaInfo info, {
+    required String databaseId,
+    required AuthMode authenticationMode,
+  }) async {
     if (_repos.containsKey(info.name)) {
-      print("Settings already contains a repo with the name \"${info.name}\"");
+      loggy.debug(
+          'Settings already contains a repo with the name "${info.name}"');
       return null;
     }
 

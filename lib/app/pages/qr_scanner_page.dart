@@ -14,7 +14,7 @@ class QRScanner extends StatefulWidget {
   State<QRScanner> createState() => _QRScannerState();
 }
 
-class _QRScannerState extends State<QRScanner> {
+class _QRScannerState extends State<QRScanner> with AppLogger {
   final cameraController =
       MobileScannerController(formats: [BarcodeFormat.qrCode]);
 
@@ -76,21 +76,21 @@ class _QRScannerState extends State<QRScanner> {
           final code = barcode.rawValue;
 
           if (code == null) {
-            debugPrint('Failed to scan Barcode');
+            loggy.debug('Failed to scan Barcode');
           } else {
             if (scanned == true) {
-              debugPrint('Barcode found! $code (skipped)');
+              loggy.debug('Barcode found! $code (skipped)');
               return;
             }
 
             try {
               await plugin.ShareToken.fromString(widget.session, code);
             } catch (_) {
-              debugPrint('Barcode found! $code (invalid)');
+              loggy.debug('Barcode found! $code (invalid)');
               return;
             }
 
-            debugPrint('Barcode found! $code');
+            loggy.debug('Barcode found! $code');
             scanned = true;
             Navigator.of(context).pop(code);
           }

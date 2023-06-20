@@ -23,7 +23,7 @@ class SaveToDevice extends StatefulWidget with AppLogger {
   State<SaveToDevice> createState() => _SaveToDeviceState();
 }
 
-class _SaveToDeviceState extends State<SaveToDevice> {
+class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
   String? destinationDir;
 
   @override
@@ -79,7 +79,7 @@ class _SaveToDeviceState extends State<SaveToDevice> {
     if (await Permission.storage.request().isGranted) {
       final destinationPath = p.join(destinationDir, widget.data.name);
 
-      print("Storing file to $destinationPath");
+      loggy.debug('Storing file to $destinationPath');
 
       await widget.cubit.downloadFile(
         sourcePath: widget.data.path,
