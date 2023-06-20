@@ -2,7 +2,6 @@ import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,21 +20,20 @@ import 'utils/utils.dart';
 Future<Widget> initOuiSyncApp(Color? themePrimaryColor) async {
   final windowManager = PlatformWindowManager();
 
-  Loggy.initLoggy();
-
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
-
-  if (kDebugMode) {
-    print('app dir: ${appDir.path}');
-    print('log dir: ${io.File(logPath).parent.path}');
-  }
 
   final session = Session.create(
     configPath: configPath,
     logPath: logPath,
   );
+
+  Loggy.initLoggy(logPrinter: AppLogPrinter());
+
+  logDebug('app dir: ${appDir.path}');
+  logDebug('log dir: ${io.File(logPath).parent.path}');
+
   await session.initNetwork(
     defaultPortForwardingEnabled: true,
     defaultLocalDiscoveryEnabled: true,
