@@ -59,7 +59,7 @@ final settingsItems = [
       name: S.current.menuItemNetwork,
       platform: SettingItemPlatform.all),
 
-  /// TODO: Get the logs saving and sharing to work on desktop
+  /// TODO: Get the logs sharing to work on desktop
   SettingItem(
       setting: Setting.log,
       name: S.current.menuItemLogs,

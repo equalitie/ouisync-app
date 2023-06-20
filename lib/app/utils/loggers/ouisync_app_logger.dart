@@ -21,11 +21,11 @@ class AppLogPrinter extends LoggyPrinter {
     final message = StringBuffer(record.message);
 
     if (record.error != null) {
-      message.write(', error: ${record.error}');
+      message.write(' ${record.error}');
     }
 
     if (record.stackTrace != null) {
-      message.write(', stacktrace: ${record.stackTrace}');
+      message.write('\n${record.stackTrace}');
     }
 
     o.logPrint(level, record.loggerName, message.toString());
