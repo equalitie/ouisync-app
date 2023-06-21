@@ -20,9 +20,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        title: Text(PlatformValues.isMobileDevice
-            ? S.current.titleSettings
-            : S.current.messageOuiSyncDesktopTitle),
+        title: Text(S.current.titleSettings),
         elevation: 0.0,
       ),
       body: MultiBlocProvider(

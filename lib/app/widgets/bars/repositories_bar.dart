@@ -71,7 +71,7 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildRepoListState(BuildContext context) => Container(
       padding: Dimensions.paddingRepositoryPicker,
       child: Row(children: [
-        Expanded(child: Text(S.current.titleAppTitle)),
+        Expanded(child: Text(S.current.titleRepositoriesList)),
 
         /// TODO: Implement search repos in list
         // Fields.actionIcon(
