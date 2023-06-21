@@ -29,21 +29,23 @@ typedef MoveEntryCallback = void Function(
 class MainPage extends StatefulWidget {
   const MainPage(
       {required this.session,
+      required this.upgradeExists,
       required this.mediaReceiver,
       required this.settings});
 
   final Session session;
+  final UpgradeExistsCubit upgradeExists;
   final MediaReceiver mediaReceiver;
   final Settings settings;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(session, settings);
+  State<StatefulWidget> createState() =>
+      _MainPageState(session, upgradeExists, settings);
 }
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger, RepositoryActionsMixin {
-  final ReposCubit _repositories;
-  final PowerControl _powerControl;
+  final Cubits _cubits;
 
   String _pathEntryToMove = '';
   Widget? _bottomSheet;
@@ -54,11 +56,11 @@ class _MainPageState extends State<MainPage>
       ValueNotifier<double>(0.0);
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
-  final StateMonitorIntCubit _panicCounter;
 
-  _MainPageState._(this._repositories, this._powerControl, this._panicCounter);
+  _MainPageState._(this._cubits);
 
-  factory _MainPageState(Session session, Settings settings) {
+  factory _MainPageState(
+      Session session, UpgradeExistsCubit upgradeExists, Settings settings) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
@@ -69,12 +71,11 @@ class _MainPageState extends State<MainPage>
             .child(oui.MonitorId.expectUnique("Session")),
         "panic_counter");
 
-    return _MainPageState._(repositories, powerControl, panicCounter);
+    return _MainPageState._(
+        Cubits(repositories, powerControl, panicCounter, upgradeExists));
   }
 
-  RepoEntry? get _currentRepo => _repositories.currentRepo;
-  UpgradeExistsCubit get _upgradeExistsCubit =>
-      BlocProvider.of<UpgradeExistsCubit>(context);
+  RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
 
   late final SortListCubit _sortListCubit;
 
@@ -94,19 +95,19 @@ class _MainPageState extends State<MainPage>
         case NetworkEvent.protocolVersionMismatch:
           {
             final highest = await widget.session.highestSeenProtocolVersion;
-            await _upgradeExistsCubit.foundVersion(highest);
+            await _cubits.upgradeExists.foundVersion(highest);
           }
           break;
       }
     });
 
-    unawaited(_repositories.init().then((_) {
+    unawaited(_cubits.repositories.init().then((_) {
       initMainPage();
     }));
 
     unawaited(mountFileSystem());
 
-    unawaited(_powerControl.init());
+    unawaited(_cubits.powerControl.init());
 
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
     /// or the MediaReceiverWindows (DropTarget), depending on the platform.
@@ -130,7 +131,7 @@ class _MainPageState extends State<MainPage>
 
   @override
   void dispose() async {
-    await _repositories.close();
+    await _cubits.repositories.close();
     super.dispose();
   }
 
@@ -199,7 +200,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget buildMainWidget() {
-    return _repositories.builder((repos) {
+    return _cubits.repositories.builder((repos) {
       if (repos.showList) {
         /// This needs to be structured better
         /// TODO: Add sorting to repo list
@@ -271,13 +272,13 @@ class _MainPageState extends State<MainPage>
       body: WillPopScope(
           child: Column(
             children: <Widget>[
-              _repositories.builder(
+              _cubits.repositories.builder(
                   (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
               Expanded(child: buildMainWidget()),
             ],
           ),
           onWillPop: _onBackPressed),
-      floatingActionButton: _repositories
+      floatingActionButton: _cubits.repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
       bottomSheet: _bottomSheet);
 
@@ -314,44 +315,28 @@ class _MainPageState extends State<MainPage>
   }
 
   _buildOuiSyncBar() => OuiSyncBar(
-        reposCubit: _repositories,
-        repoPicker: _buildRepositoriesBar(),
+        reposCubit: _cubits.repositories,
+        repoPicker: RepositoriesBar(_cubits),
         appSettingsButton: _buildAppSettingsIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
-
-  RepositoriesBar _buildRepositoriesBar() =>
-      RepositoriesBar(reposCubit: _repositories);
 
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
         onPressed: () async => await _showAppSettings(),
         size: Dimensions.sizeIconSmall);
 
-    return BlocBuilder<UpgradeExistsCubit, bool>(
-      builder: (context, updateExists) =>
-          BlocBuilder<PowerControl, PowerControlState>(
-        bloc: _powerControl,
-        builder: (context, powerControlState) =>
-            BlocBuilder<StateMonitorIntCubit, int?>(
-                bloc: _panicCounter,
-                builder: (context, panicCount) {
-                  Color? color;
+    return multiBlocBuilder(
+        [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
+        () {
+      Color? color = _cubits.mainNotificationBadgeColor();
 
-                  if (updateExists || ((panicCount ?? 0) > 0)) {
-                    color = Constants.errorColor;
-                  } else if (!(powerControlState.isNetworkEnabled ?? true)) {
-                    color = Constants.warningColor;
-                  }
-
-                  if (color != null) {
-                    return Fields.addBadge(button, color: color);
-                  } else {
-                    return button;
-                  }
-                }),
-      ),
-    );
+      if (color != null) {
+        return Fields.addBadge(button, color: color);
+      } else {
+        return button;
+      }
+    });
   }
 
   Widget _buildRepoSettingsIcon() =>
@@ -368,7 +353,8 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
 
-    if (_repositories.showList && _repositories.repos.isNotEmpty) {
+    if (_cubits.repositories.showList &&
+        _cubits.repositories.repos.isNotEmpty) {
       return FloatingActionButton(
         heroTag: Constants.heroTagRepoListActions,
         child: icon,
@@ -378,7 +364,7 @@ class _MainPageState extends State<MainPage>
 
     if (current is OpenRepoEntry &&
         current.cubit.state.canWrite &&
-        !_repositories.showList) {
+        !_cubits.repositories.showList) {
       return FloatingActionButton(
         heroTag: Constants.heroTagMainPageActions,
         child: icon,
@@ -419,7 +405,7 @@ class _MainPageState extends State<MainPage>
                 widget.settings.getAuthenticationMode,
             setAuthenticationModeCallback:
                 widget.settings.setAuthenticationMode,
-            unlockRepositoryCallback: _repositories.unlockRepository);
+            unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
 
       return _contentBrowser(current.cubit);
@@ -454,7 +440,7 @@ class _MainPageState extends State<MainPage>
         // TODO: A shadow would be nicer.
         const Divider(height: 3),
         SortContentsBar(
-            sortListCubit: _sortListCubit, reposCubit: _repositories),
+            sortListCubit: _sortListCubit, reposCubit: _cubits.repositories),
         Expanded(child: child),
       ],
     );
@@ -704,7 +690,7 @@ class _MainPageState extends State<MainPage>
           builder: (context) {
             return RepoListActions(
                 context: context,
-                reposCubit: _repositories,
+                reposCubit: _cubits.repositories,
                 onNewRepositoryPressed: _addRepository,
                 onImportRepositoryPressed: _importRepository);
           });
@@ -722,8 +708,8 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    await _repositories.setCurrentByName(newRepoName);
-    _repositories.pushRepoList(false);
+    await _cubits.repositories.setCurrentByName(newRepoName);
+    _cubits.repositories.pushRepoList(false);
 
     return newRepoName;
   }
@@ -744,7 +730,7 @@ class _MainPageState extends State<MainPage>
                       title: S.current.titleCreateRepository,
                       body: RepositoryCreation(
                           context: context,
-                          cubit: _repositories,
+                          cubit: _cubits.repositories,
                           isBiometricsAvailable: hasBiometrics)));
             }))));
   }
@@ -754,14 +740,14 @@ class _MainPageState extends State<MainPage>
     initialTokenValue ??= await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return AddRepositoryPage(reposCubit: _repositories);
+        return AddRepositoryPage(reposCubit: _cubits.repositories);
       }),
     );
 
     if (initialTokenValue == null) return null;
 
     final tokenValidationError =
-        await _repositories.validateTokenLink(initialTokenValue);
+        await _cubits.repositories.validateTokenLink(initialTokenValue);
     if (tokenValidationError != null) {
       await showDialog(
           context: context,
@@ -800,17 +786,16 @@ class _MainPageState extends State<MainPage>
                       title: S.current.titleAddRepository,
                       body: RepositoryCreation(
                           context: context,
-                          cubit: _repositories,
+                          cubit: _cubits.repositories,
                           initialTokenValue: initialTokenValue,
                           isBiometricsAvailable: isBiometricsAvailable)));
             }))));
   }
 
-  void reloadRepository() => _repositories.init();
+  void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() async {
-    final reposCubit = _repositories;
-    final upgradeExistsCubit = _upgradeExistsCubit;
+    final reposCubit = _cubits.repositories;
 
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
             context,
@@ -822,12 +807,9 @@ class _MainPageState extends State<MainPage>
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: upgradeExistsCubit),
+            BlocProvider.value(value: _cubits.upgradeExists),
           ],
-          child: SettingsPage(
-              reposCubit: reposCubit,
-              powerControl: _powerControl,
-              panicCounter: _panicCounter,
+          child: SettingsPage(_cubits,
               isBiometricsAvailable: isBiometricsAvailable),
         ),
       ),
@@ -846,7 +828,7 @@ class _MainPageState extends State<MainPage>
                 cubit: repoCubit,
                 checkForBiometrics: _checkForBiometricsCallback,
                 getAuthenticationMode: widget.settings.getAuthenticationMode,
-                renameRepository: _repositories.renameRepository,
-                deleteRepository: _repositories.deleteRepository);
+                renameRepository: _cubits.repositories.renameRepository,
+                deleteRepository: _cubits.repositories.deleteRepository);
           });
 }

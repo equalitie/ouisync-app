@@ -9,16 +9,12 @@ import '../utils/platform/platform.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({
-    required this.reposCubit,
-    required this.powerControl,
-    required this.panicCounter,
+  const SettingsPage(
+    this._cubits, {
     required this.isBiometricsAvailable,
   });
 
-  final ReposCubit reposCubit;
-  final PowerControl powerControl;
-  final StateMonitorIntCubit panicCounter;
+  final Cubits _cubits;
   final bool isBiometricsAvailable;
 
   @override
@@ -31,17 +27,18 @@ class SettingsPage extends StatelessWidget {
       ),
       body: MultiBlocProvider(
           providers: [
-            BlocProvider<PowerControl>.value(value: powerControl),
+            BlocProvider<PowerControl>.value(value: _cubits.powerControl),
             BlocProvider<ConnectivityInfo>(
               create: (context) {
-                final cubit = ConnectivityInfo(session: reposCubit.session);
+                final cubit =
+                    ConnectivityInfo(session: _cubits.repositories.session);
                 unawaited(cubit.update());
                 return cubit;
               },
             ),
             BlocProvider<PeerSetCubit>(
               create: (context) =>
-                  PeerSetCubit(session: reposCubit.session)..init(),
+                  PeerSetCubit(session: _cubits.repositories.session)..init(),
             ),
             BlocProvider<NatDetection>(
               create: (context) => NatDetection(),
@@ -51,9 +48,6 @@ class SettingsPage extends StatelessWidget {
               listener: (context, state) {
                 unawaited(context.read<ConnectivityInfo>().update());
               },
-              child: SettingsContainer(
-                repos: reposCubit,
-                panicCounter: panicCounter,
-                isBiometricsAvailable: isBiometricsAvailable,
-              ))));
+              child: SettingsContainer(_cubits,
+                  isBiometricsAvailable: isBiometricsAvailable))));
 }

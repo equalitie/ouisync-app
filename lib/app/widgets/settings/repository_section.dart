@@ -16,24 +16,26 @@ import 'settings_tile.dart';
 
 class RepositorySection extends SettingsSection
     with AppLogger, RepositoryActionsMixin {
-  RepositorySection({
-    required this.repos,
+  RepositorySection(
+    this._cubits, {
     required this.isBiometricsAvailable,
-  }) : super(title: S.current.titleRepository, changed: repos.stream);
+  }) : super(
+            title: S.current.titleRepository,
+            changed: _cubits.repositories.stream);
 
-  final ReposCubit repos;
+  final Cubits _cubits;
   final bool isBiometricsAvailable;
 
   @override
   List<Widget> buildTiles(BuildContext context) {
-    final currentRepo = repos.currentRepo;
+    final currentRepo = _cubits.repositories.currentRepo;
 
     if (currentRepo is! OpenRepoEntry) {
       return const [];
     }
 
     return [
-      Row(children: [RepositorySelector(repos)]),
+      Row(children: [RepositorySelector(_cubits.repositories)]),
       SizedBox(height: 20.0),
       _buildDhtSwitch(context, currentRepo.cubit),
       _buildPeerExchangeSwitch(context, currentRepo.cubit),
@@ -72,7 +74,8 @@ class RepositorySection extends SettingsSection
               style: TextStyle(fontSize: Dimensions.fontSmall)),
           leading: Icon(Icons.edit),
           onTap: () => renameRepository(context,
-              repository: repository, rename: repos.renameRepository));
+              repository: repository,
+              rename: _cubits.repositories.renameRepository));
 
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
       NavigationTile(
@@ -91,8 +94,9 @@ class RepositorySection extends SettingsSection
             final repoName = repository.name;
             final metaInfo = repository.metaInfo;
             final getAuthenticationModeCallback =
-                repos.settings.getAuthenticationMode;
-            final deleteRepositoryCallback = repos.deleteRepository;
+                _cubits.repositories.settings.getAuthenticationMode;
+            final deleteRepositoryCallback =
+                _cubits.repositories.deleteRepository;
 
             await deleteRepository(
               context,

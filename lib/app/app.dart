@@ -117,14 +117,16 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   Widget build(BuildContext context) {
+    final upgradeExists = UpgradeExistsCubit(
+        widget.session.currentProtocolVersion, widget.settings);
+
     return Scaffold(
       body: MultiBlocProvider(
           providers: [
+            // TODO: We have the Cubits class which we thread to widgets that
+            // need it, consider getting rid of this BlocProvider pattern.
             BlocProvider<UpgradeExistsCubit>(
-                create: (BuildContext context) => UpgradeExistsCubit(
-                      widget.session.currentProtocolVersion,
-                      widget.settings,
-                    )),
+                create: (BuildContext context) => upgradeExists),
           ],
           child: DropTarget(
               onDragDone: (detail) {
@@ -144,6 +146,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
               },
               child: MainPage(
                   session: widget.session,
+                  upgradeExists: upgradeExists,
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );

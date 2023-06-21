@@ -15,9 +15,9 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection({required this.repos}) : super(title: S.current.titleAbout);
+  AboutSection(this._cubits) : super(title: S.current.titleAbout);
 
-  final ReposCubit repos;
+  final Cubits _cubits;
 
   @override
   List<Widget> buildTiles(BuildContext context) => [
@@ -51,7 +51,7 @@ class AboutSection extends SettingsSection with AppLogger {
               unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
         ),
         AppVersionTile(
-          session: repos.session,
+          session: _cubits.repositories.session,
           leading: Icon(Icons.info_outline),
           title: Text(S.current.labelAppVersion),
         ),
@@ -61,6 +61,11 @@ class AboutSection extends SettingsSection with AppLogger {
           value: _getRuntimeIdForOS(),
         ),
       ];
+
+  @override
+  bool containsErrorNotification() {
+    return _cubits.upgradeExists.state;
+  }
 
   Future<void> _openFaq(BuildContext context) async {
     final webView = PlatformWebView();
@@ -93,7 +98,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (attachments.logs) {
       final logs = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: dumpAll(context, repos.rootStateMonitor),
+        f: dumpAll(context, _cubits.repositories.rootStateMonitor),
       );
 
       try {
@@ -118,7 +123,7 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: repos.session.thisRuntimeId,
+      future: _cubits.repositories.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
         final runtimeIdWidget = Text(

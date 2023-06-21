@@ -20,12 +20,10 @@ import 'settings_tile.dart';
 
 class LogsSection extends SettingsSection {
   final StateMonitor stateMonitor;
-  final StateMonitorIntCubit panicCounter;
+  final Cubits _cubits;
 
-  LogsSection({
-    required ReposCubit repos,
-    required this.panicCounter,
-  })  : stateMonitor = repos.rootStateMonitor,
+  LogsSection(this._cubits)
+      : stateMonitor = _cubits.repositories.rootStateMonitor,
         super(title: S.current.titleLogs);
 
   @override
@@ -48,7 +46,7 @@ class LogsSection extends SettingsSection {
           onTap: () => _viewLogs(context),
         ),
         BlocBuilder<StateMonitorIntCubit, int?>(
-            bloc: panicCounter,
+            bloc: _cubits.panicCounter,
             builder: (context, count) {
               if ((count ?? 0) > 0) {
                 final color = Theme.of(context).colorScheme.error;
@@ -64,6 +62,11 @@ class LogsSection extends SettingsSection {
               }
             }),
       ];
+
+  @override
+  bool containsErrorNotification() {
+    return (_cubits.panicCounter.state ?? 0) > 0;
+  }
 
   Future<void> _saveLogs(BuildContext context) async {
     final tempFile = await _dumpInfo(context);
