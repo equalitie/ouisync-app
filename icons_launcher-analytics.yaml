@@ -1,18 +1,19 @@
 icons_launcher:
-  image_path: 'assets/ouisync-beta-1024.png'
+  image_path: 'assets/Ouisync-beta-512.png'
   platforms:
     android:
       enable: true
-      image_path: 'assets/ouisync-beta-1024.png'
+      image_path: 'assets/Ouisync-beta-512.png'
       adaptive_background_image: 'assets/ic_launcher_background.png'
       adaptive_foreground_image: 'assets/ic_launcher_foreground.png'
       adaptive_round_image: 'assets/ic_launcher_round.png'
+      adaptive_monochrome_image: 'assets/ic_launcher_monochrome.png'
     ios:
       enable: true
-      image_path: 'assets/ouisync-beta-1024.png'
+      image_path: 'assets/Ouisync-beta-512.png'
     windows:
       enable: true
-      image_path: 'assets/ouisync-beta-round-1200.png'
+      image_path: 'assets/Ouisync-beta-1240-desktop.png'
     linux:
       enable: true
-      image_path: 'assets/ouisync-beta-round-1200.png'
+      image_path: 'assets/Ouisync-beta-1240-desktop.png'

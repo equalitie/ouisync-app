@@ -116,8 +116,8 @@ class Constants {
   static const String faqUrl =
       'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
 
-  static const String appIcon = './assets/Ouisync-icon-blue.png';
-  static const String windowsAppIcon = './assets/Ouisync-icon-blue.ico';
+  static const String appIcon = './assets/favicon.png';
+  static const String windowsAppIcon = './assets/favicon.ico';
 
   static const String eventLeftMouseUp = 'leftMouseUp';
   static const String eventRightMouseUp = 'rightMouseUp';

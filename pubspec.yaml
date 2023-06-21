@@ -1,5 +1,5 @@
 name: ouisync_app
-description: OuiSync Flutter application.
+description: Ouisync Flutter application.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -122,7 +122,7 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/Ouisync-icon-blue.ico
+    - assets/favicon.ico
     - assets/add_with_qr.png
     - assets/nothing_here_yet.png
     - assets/locked_repo.png
@@ -156,7 +156,7 @@ flutter_intl:
   enabled: true
 
 msix_config:
-  display_name: OuiSync
+  display_name: Ouisync
   publisher_name: eQualitie
   certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
   certificate_password: _ball$*watch17
@@ -178,7 +178,7 @@ flavorizr:
   flavors:
     vanilla:
       app:
-        name: 'OuiSync'
+        name: 'Ouisync'
 
       android:
         applicationId: 'org.equalitie.ouisync'
@@ -188,7 +188,7 @@ flavorizr:
 
     analytics:
       app:
-        name: 'OuiSync'
+        name: 'Ouisync'
 
       android:
         applicationId: 'org.equalitie.ouisync'
@@ -200,7 +200,7 @@ flavorizr:
 
     development:
       app:
-        name: 'OuiSync-Dev'
+        name: 'Ouisync-Dev'
 
       android:
         applicationId: 'org.equalitie.ouisync.dev'
