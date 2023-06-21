@@ -3,25 +3,25 @@
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=flat-squarte&logo=android&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-squarte&logo=windows&logoColor=white)
 
-# OuiSync Flutter app
+# Ouisync Flutter app
 
 **Secure file-sharing and real-time sync, with or without internet.**
 
-Flutter application that implements the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**.
+Flutter application that implements the **[Ouisync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**.
 
 <br />
 <br />
 
-![OuiSync](https://ouisync.net/assets/img/logo.png)
+![Ouisync](https://ouisync.net/assets/img/logo.png)
 
 <br />
 
-**OuiSync** is a free and open source tool enabling file sync and backups between devices, peer-to-peer.
+**Ouisync** is a free and open source tool enabling file sync and backups between devices, peer-to-peer.
 
 **Features:**
 - 😻 Easy to use: Simply install and quickly create files and folders to sync and share with trusted devices, contacts and/or groups.
 - 💸 Free for everyone: no in-app purchases, no subscriptions, no ads, and no tracking!
-- 🔆 Offline-first: OuiSync uses an innovative, synchronous, peer-to-peer design that allows users to access and share files and folders whether or not your device can connect to the internet.
+- 🔆 Offline-first: Ouisync uses an innovative, synchronous, peer-to-peer design that allows users to access and share files and folders whether or not your device can connect to the internet.
 - 🔒 Secure: End-to-end encrypted files and folders - both in transit and at rest - secured by established, state-of-the art protocols.
 - 🗝 Access Controls: Create repositories that can be shared as read-write, read-only, or blind (you store files for others, but cannot access them).
 
@@ -44,10 +44,10 @@ Flutter application that implements the **[OuiSync Flutter plugin](https://githu
 
 **Table of contents**
 
-- [Getting the OuiSync App](#getting-the-ouisync-app)
+- [Getting the Ouisync App](#getting-the-ouisync-app)
 - [Using this repository](#using-this-repository)
- - [Initialize the OuiSync plugin and OuiSync library submodules](#initialize-the-ouisync-plugin-and-ouisync-library-submodules)
-   - [Build the OuiSync library](#build-the-ouisync-library)
+ - [Initialize the Ouisync plugin and Ouisync library submodules](#initialize-the-ouisync-plugin-and-ouisync-library-submodules)
+   - [Build the Ouisync library](#build-the-ouisync-library)
    - [Run the tests](#run-the-tests)
  - [How to run the app from the command line](#how-to-run-the-app-from-the-command-line)
    - [Flutter](#flutter)
@@ -62,13 +62,13 @@ Flutter application that implements the **[OuiSync Flutter plugin](https://githu
 
 <br />
 
-# Getting the OuiSync App
+# Getting the Ouisync App
 
 You can get the app installers for the supported platforms directly from our website at https://ouisync.net/
 
 Or you can use the official app store for each platform in your different devices:
 - **Android:**
-  - **Google Play Store**: [OuiSync Peer-to-Peer File Sync](https://play.google.com/store/apps/details?id=org.equalitie.ouisync) (currently in early access)
+  - **Google Play Store**: [Ouisync Peer-to-Peer File Sync](https://play.google.com/store/apps/details?id=org.equalitie.ouisync) (currently in early access)
 - **Windows**
   - [**Windows Apps**](https://www.microsoft.com/en-us/store/apps/windows): Coming soon.
 
@@ -105,9 +105,9 @@ If you are a developer and want to checkout and build the code, you have two opt
 
 <br />
 
-## Initialize the OuiSync plugin and OuiSync library submodules
+## Initialize the Ouisync plugin and Ouisync library submodules
 
-The **OuiSync Flutter app** includes in its dependencies the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** repository as a submodule; at the same time, the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** depends on the **[OuiSync library](https://github.com/equalitie/ouisync)**, also contained as a submodule in the plugin repository.
+The **Ouisync Flutter app** includes in its dependencies the **[Ouisync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** repository as a submodule; at the same time, the **[Ouisync Flutter plugin](https://github.com/equalitie/ouisync-plugin)** depends on the **[Ouisync library](https://github.com/equalitie/ouisync)**, also contained as a submodule in the plugin repository.
 
 In order for the app to properly run, you need to make sure that both submodules are initialized and up to date. This can be achieved by executing the following command while located in the app folder: `git submodule update --init --recursive`
 
@@ -121,10 +121,10 @@ sudo apt-get install appindicator3-0.1 libsecret-1-dev
 
 <br />
 
-### Build the OuiSync library
+### Build the Ouisync library
 
-This app depends on the **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, which provides the high level `API` for the 
-**[OuiSync library](https://github.com/equalitie/ouisync)**, therefor it is required to perform the native library build and the extra initializations described 
+This app depends on the **[Ouisync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, which provides the high level `API` for the 
+**[Ouisync library](https://github.com/equalitie/ouisync)**, therefor it is required to perform the native library build and the extra initializations described 
 in the plugin README file.
 
 - [Building the native library](https://github.com/equalitie/ouisync-plugin#building-the-native-library)
@@ -150,7 +150,7 @@ You can run the app from the command line and make use of different flags to obt
 
 ### Flutter
 
-The **OuiSync Flutter app** implements some build variants, specifically product flavors, as a way to control the inclusion of some tools in its releases.
+The **Ouisync Flutter app** implements some build variants, specifically product flavors, as a way to control the inclusion of some tools in its releases.
 
 Currently, there are three (3) flavors:
 
@@ -233,7 +233,7 @@ If we want to build for **_all_** the supported ABIs, this property is not neede
 
 ### Specify paths to sub-commands: **`rustc`** and **`cargo`**
 
-The **[OuiSync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, that provides the API for using the **[OuiSync library](https://github.com/equalitie/ouisync)** that is written in **`Rust`**, uses **`Cargo`** for building it.
+The **[Ouisync Flutter plugin](https://github.com/equalitie/ouisync-plugin)**, that provides the API for using the **[Ouisync library](https://github.com/equalitie/ouisync)** that is written in **`Rust`**, uses **`Cargo`** for building it.
 
 If building the app in your computer you encounter this error:
 
