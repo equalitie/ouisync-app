@@ -12,7 +12,7 @@ Flutter application that implements the **[Ouisync Flutter plugin](https://githu
 <br />
 <br />
 
-![Ouisync](https://ouisync.net/assets/img/logo.png)
+![OuisyncFull](https://github.com/equalitie/ouisync-app/assets/13749449/5ad03ac1-b614-4726-abec-de550cd2ec91)
 
 <br />
 
