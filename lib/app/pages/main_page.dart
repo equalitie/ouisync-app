@@ -76,8 +76,6 @@ class _MainPageState extends State<MainPage>
   }
 
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
-  UpgradeExistsCubit get _upgradeExistsCubit =>
-      BlocProvider.of<UpgradeExistsCubit>(context);
 
   late final SortListCubit _sortListCubit;
 
@@ -97,7 +95,7 @@ class _MainPageState extends State<MainPage>
         case NetworkEvent.protocolVersionMismatch:
           {
             final highest = await widget.session.highestSeenProtocolVersion;
-            await _upgradeExistsCubit.foundVersion(highest);
+            await _cubits.upgradeExists.foundVersion(highest);
           }
           break;
       }
@@ -798,7 +796,6 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _showAppSettings() async {
     final reposCubit = _cubits.repositories;
-    final upgradeExistsCubit = _upgradeExistsCubit;
 
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
             context,
@@ -810,7 +807,7 @@ class _MainPageState extends State<MainPage>
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: upgradeExistsCubit),
+            BlocProvider.value(value: _cubits.upgradeExists),
           ],
           child: SettingsPage(_cubits,
               isBiometricsAvailable: isBiometricsAvailable),
