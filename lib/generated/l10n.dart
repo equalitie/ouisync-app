@@ -450,6 +450,26 @@ class S {
     );
   }
 
+  /// `Send feedback`
+  String get titleSendFeedback {
+    return Intl.message(
+      'Send feedback',
+      name: 'titleSendFeedback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Issue tracker`
+  String get titleIssueTracker {
+    return Intl.message(
+      'Issue tracker',
+      name: 'titleIssueTracker',
+      desc: 'Label for the link to github issue tracker',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -715,6 +735,16 @@ class S {
     return Intl.message(
       'Current password',
       name: 'labelRepositoryCurrentPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Attach logs`
+  String get labelAttachLogs {
+    return Intl.message(
+      'Attach logs',
+      name: 'labelAttachLogs',
       desc: '',
       args: [],
     );

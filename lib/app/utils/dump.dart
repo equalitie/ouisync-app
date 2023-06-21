@@ -5,9 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'format.dart';
 import 'log.dart';
 import '../cubits/connectivity_info.dart';
 import '../cubits/nat_detection.dart';
@@ -29,7 +29,7 @@ Future<File> dumpAll(
   // been implemented by DateFormat.
   final formatter = DateFormat('yyyy-MM-dd--HH-mm-ss');
   final timestamp = formatter.format(DateTime.now());
-  final path = buildDestinationPath(dir.path, '$name--$timestamp.log');
+  final path = join(dir.path, '$name--$timestamp.log');
   final file = File(path);
   final sink = file.openWrite();
 

@@ -6,8 +6,12 @@ import '../widgets/widgets.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
-  static Future<T> executeFutureWithLoadingDialog<T>(BuildContext context,
-      {required Future<T> f, String? text, Widget? widget}) async {
+  static Future<T> executeFutureWithLoadingDialog<T>(
+    BuildContext context, {
+    required Future<T> f,
+    String? text,
+    Widget? widget,
+  }) async {
     showLoadingDialog(context, text: text, widget: widget);
 
     var result = await f;
@@ -24,8 +28,11 @@ abstract class Dialogs {
     _hideLoadingDialog(context);
   }
 
-  static showLoadingDialog(BuildContext context,
-      {String? text, Widget? widget}) {
+  static showLoadingDialog(
+    BuildContext context, {
+    String? text,
+    Widget? widget,
+  }) {
     final defaultIndicator = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -63,11 +70,12 @@ abstract class Dialogs {
   static _hideLoadingDialog(context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
-  static Future<bool?> alertDialogWithActions(
-          {required BuildContext context,
-          required String title,
-          required List<Widget> body,
-          required List<Widget> actions}) =>
+  static Future<bool?> alertDialogWithActions({
+    required BuildContext context,
+    required String title,
+    required List<Widget> body,
+    required List<Widget> actions,
+  }) =>
       showDialog<bool?>(
           context: context,
           barrierDismissible: false,

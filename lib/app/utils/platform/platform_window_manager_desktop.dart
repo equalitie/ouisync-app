@@ -9,7 +9,7 @@ import '../utils.dart';
 import 'platform_window_manager.dart';
 
 class PlatformWindowManagerDesktop
-    with WindowListener
+    with WindowListener, AppLogger
     implements PlatformWindowManager {
   final _systemTray = stray.SystemTray();
   final _appWindow = stray.AppWindow();
@@ -79,7 +79,7 @@ class PlatformWindowManagerDesktop
     await _systemTray.setContextMenu(menu);
 
     _systemTray.registerSystemTrayEventHandler((eventName) async {
-      debugPrint("eventName: $eventName");
+      loggy.debug("eventName: $eventName");
 
       if (eventName == stray.kSystemTrayEventClick) {
         Platform.isWindows

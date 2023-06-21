@@ -526,7 +526,7 @@
   "@messageErrorChangingPassword": {},
   "messageUnsavedChanges": "У вас є незбережені зміни.\n\nВи хочете їх скасувати?",
   "@messageUnsavedChanges": {},
-  "messageSavingChanges": "Збереження наступних змін:\n\n{changes}",
+  "messageSavingChanges": "Ви хочете зберегти поточні зміни?",
   "@messageSavingChanges": {},
   "messageNewPassword": "Новий пароль",
   "@messageNewPassword": {},

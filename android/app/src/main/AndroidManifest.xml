@@ -13,7 +13,17 @@
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
+  <!-- needed by flutter_email_sender -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.SENDTO" />
+      <data android:scheme="mailto" />
+    </intent>
+  </queries>
+
   <uses-sdk tools:overrideLibrary="design.codeux.biometric_storage" />
+
   <application android:name="${applicationName}" android:label="@string/app_name" android:requestLegacyExternalStorage="true" android:allowBackup="false" android:fullBackupContent="false" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">
     <provider
       tools:replace="android:authorities"

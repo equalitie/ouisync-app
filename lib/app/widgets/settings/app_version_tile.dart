@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:settings_ui/settings_ui.dart';
 
+import 'settings_tile.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
 import '../../utils/click_counter.dart';
-import '../../utils/platform/platform_values.dart';
 
 class AppVersionTile extends StatefulWidget {
   final Session session;
   final Widget title;
-  final Widget? leading;
+  final Widget leading;
 
-  AppVersionTile({required this.session, required this.title, this.leading});
+  AppVersionTile({
+    required this.session,
+    required this.title,
+    required this.leading,
+  });
 
   @override
   State<AppVersionTile> createState() => _AppVersionTileState();
@@ -32,20 +35,12 @@ class _AppVersionTileState extends State<AppVersionTile> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      PlatformValues.isMobileDevice ? _buildMobileTile() : _buildDesktopTile();
-
-  SettingsTile _buildMobileTile() => SettingsTile(
-      leading: widget.leading,
-      title: widget.title,
-      value: _getAppVersion(),
-      onPressed: _onPressed);
-
-  Widget _buildDesktopTile() => ListTile(
-      leading: widget.leading,
-      title: widget.title,
-      subtitle: _getAppVersion(),
-      onTap: () => _onPressed(context));
+  Widget build(BuildContext context) => SettingsTile(
+        leading: widget.leading,
+        title: widget.title,
+        value: _getAppVersion(),
+        onTap: () => _onTap(context),
+      );
 
   FutureBuilder<String> _getAppVersion() => FutureBuilder<String>(
         future: _version,
@@ -83,7 +78,7 @@ class _AppVersionTileState extends State<AppVersionTile> {
         },
       );
 
-  void _onPressed(BuildContext context) {
+  void _onTap(BuildContext context) {
     if (_clickCounter.registerClick() >= 3) {
       _clickCounter.reset();
 

@@ -41,6 +41,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(path) => "${path} no está vacío";
 
+  static String m8(name) =>
+      "${name} ya existe en esta ubicación.\n\n¿Qué deseas hacer?";
+
   static String m9(name) => "Directorio borrado exitosamente: ${name}";
 
   static String m10(number) =>
@@ -49,6 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m11(path) => "desde ${path}";
 
   static String m12(name) => "Error creando archivo ${name}";
+
+  static String m13(name) => "Error al abrir el archivo ${name}";
 
   static String m14(name) => "No pudimos borrar el repositorio \"${name}\"";
 
@@ -186,6 +191,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelQRCode": MessageLookupByLibrary.simpleMessage("Código QR"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre: "),
+        "labelRepositoryCurrentPassword":
+            MessageLookupByLibrary.simpleMessage("Contraseña actual"),
         "labelRepositoryLink":
             MessageLookupByLibrary.simpleMessage("Link del repositorio: "),
         "labelRetypePassword":
@@ -235,6 +242,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente"),
         "messageBackgroundNotificationAndroid":
             MessageLookupByLibrary.simpleMessage("OuiSync está corriendo"),
+        "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
+            "Fallo en la autentificación biométrica"),
         "messageBiometricValidationAdded": m1,
         "messageBiometricValidationRemoved":
             MessageLookupByLibrary.simpleMessage(
@@ -346,6 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Presione de nuevo el botón para ir atrás para salir de la aplicación."),
         "messageFile": MessageLookupByLibrary.simpleMessage("archivo"),
+        "messageFileAlreadyExist": m8,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "El archivo ya se está subiendo"),
         "messageFileName":
@@ -368,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inicializando…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos."),
+        "messageKeepBothFiles":
+            MessageLookupByLibrary.simpleMessage("Guarde ambos archivos"),
         "messageLibraryPanic":
             MessageLookupByLibrary.simpleMessage("Fallo interno detectado."),
         "messageLoadingDefault":
@@ -415,6 +427,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNone": MessageLookupByLibrary.simpleMessage("Ninguno"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("No hay nada aún!"),
+        "messageOpenFileError": m13,
         "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("OuiSync"),
@@ -449,6 +462,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cambiar nombre de directorio"),
         "messageRenameRepository": MessageLookupByLibrary.simpleMessage(
             "Cambiar nombre de repositorio"),
+        "messageReplaceExistingFile": MessageLookupByLibrary.simpleMessage(
+            "Sustituir el archivo existente"),
+        "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
+            "Fallo en la autentificación del repositorio"),
         "messageRepoDeletionErrorDescription": m14,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "El borrado del repositorio falló"),
@@ -457,6 +474,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepoMissingErrorDescription": m15,
         "messageRepositoryAccessMode": m16,
         "messageRepositoryAlreadyExist": m17,
+        "messageRepositoryCurrentPassword":
+            MessageLookupByLibrary.simpleMessage("La contraseña actual"),
         "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(
             "El repositorio no está abierto"),
         "messageRepositoryName":
@@ -511,6 +530,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "Tienes cambios sin guardar.\n\n¿Desea descartarlos?"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
+        "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
+            "Validar la contraseña localmente"),
         "messageVerbosity":
             MessageLookupByLibrary.simpleMessage("Registro detallado"),
         "messageView": MessageLookupByLibrary.simpleMessage("Ver"),

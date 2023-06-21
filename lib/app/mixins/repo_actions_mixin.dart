@@ -544,3 +544,10 @@ mixin RepositoryActionsMixin on AppLogger {
     return saveChanges;
   }
 }
+
+class UnlockResult {
+  UnlockResult({required this.password, required this.shareToken});
+
+  final String password;
+  final ShareToken shareToken;
+}
