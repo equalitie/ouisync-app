@@ -63,6 +63,11 @@ class LogsSection extends SettingsSection {
             }),
       ];
 
+  @override
+  bool containsErrorNotification() {
+    return (_cubits.panicCounter.state ?? 0) > 0;
+  }
+
   Future<void> _saveLogs(BuildContext context) async {
     final tempFile = await _dumpInfo(context);
 

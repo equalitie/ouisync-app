@@ -8,4 +8,7 @@ abstract class SettingsSection {
   const SettingsSection({required this.title, this.changed});
 
   List<Widget> buildTiles(BuildContext context);
+
+  bool containsErrorNotification() => false;
+  bool containsWarningNotification() => false;
 }

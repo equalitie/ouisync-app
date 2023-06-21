@@ -5,6 +5,8 @@ import 'package:settings_ui/settings_ui.dart' as s;
 import '../../cubits/cubits.dart';
 import '../../utils/dimensions.dart';
 import '../../utils/platform/platform.dart';
+import '../../utils/constants.dart';
+import '../../utils/fields.dart';
 import 'about_section.dart';
 import 'logs_section.dart';
 import 'network_section.dart';
@@ -13,20 +15,19 @@ import 'settings_section.dart';
 
 class SettingsContainer extends StatelessWidget {
   SettingsContainer(
-    this._cubits, {
+    Cubits cubits, {
     required bool isBiometricsAvailable,
   }) : sections = [
           if (PlatformValues.isDesktopDevice)
             RepositorySection(
-              _cubits,
+              cubits,
               isBiometricsAvailable: isBiometricsAvailable,
             ),
           NetworkSection(),
-          LogsSection(_cubits),
-          AboutSection(_cubits.repositories),
+          LogsSection(cubits),
+          AboutSection(cubits),
         ];
 
-  final Cubits _cubits;
   final List<SettingsSection> sections;
 
   @override
@@ -77,7 +78,7 @@ class _SettingsContainerDesktopState extends State<SettingsContainerDesktop> {
                 children: widget.sections
                     .mapIndexed(
                       (index, section) => SettingsSectionTitleDesktop(
-                        title: section.title,
+                        section: section,
                         selected: selected == index,
                         onTap: () => setState(() {
                           selected = index;
@@ -98,18 +99,24 @@ class _SettingsContainerDesktopState extends State<SettingsContainerDesktop> {
 
 class SettingsSectionTitleDesktop extends StatelessWidget {
   const SettingsSectionTitleDesktop({
-    required this.title,
+    required this.section,
     required this.onTap,
     this.selected = false,
   });
 
-  final String title;
+  final SettingsSection section;
   final bool selected;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => ListTile(
-        title: Text(title, style: _getStyle()),
+        title: Row(children: [
+          // Need to put the badge in a row because wrapping the Text in Badge
+          // will make the text centered. Maybe there's a better solution
+          // though.
+          Text(section.title, style: _getStyle()),
+          _maybeBadge(section)
+        ]),
         selected: selected,
         onTap: onTap,
       );
@@ -128,6 +135,26 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
       fontSize: Dimensions.fontSmall,
       fontWeight: fontWeight,
     );
+  }
+
+  Widget _maybeBadge(SettingsSection section) {
+    Color? badgeColor;
+
+    if (section.containsErrorNotification()) {
+      badgeColor = Constants.errorColor;
+    } else if (section.containsWarningNotification()) {
+      badgeColor = Constants.warningColor;
+    }
+
+    // If we just use `null` then we `moveRight` and `moveDownwards` doesn't work.
+    final dummy = SizedBox.shrink();
+
+    if (badgeColor == null) {
+      return dummy;
+    }
+
+    return Fields.addBadge(dummy,
+        color: badgeColor, moveRight: 23, moveDownwards: 23);
   }
 }
 
