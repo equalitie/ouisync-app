@@ -5,11 +5,12 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../../utils/platform/platform.dart';
 
 class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
-  const RepositoriesBar({required this.reposCubit});
+  const RepositoriesBar(this._cubits);
 
-  final ReposCubit reposCubit;
+  final Cubits _cubits;
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +29,14 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildRepoDescription(BuildContext context) =>
-      reposCubit.builder((state) {
+      _cubits.repositories.builder((state) {
         if (state.isLoading) {
           return Column(
             children: const [CircularProgressIndicator(color: Colors.white)],
           );
         }
 
-        if (reposCubit.showList) {
+        if (_cubits.repositories.showList) {
           return _buildRepoListState(context);
         }
 
@@ -87,9 +88,7 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
     required String repoName,
   }) =>
       Row(children: [
-        Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
-            onPressed: () => reposCubit.pushRepoList(true),
-            size: Dimensions.sizeIconSmall),
+        _buildBackButton(),
         Expanded(
             child: Container(
                 padding: Dimensions.paddingRepositoryPicker,
@@ -98,15 +97,15 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
                       icon: Icon(icon),
                       iconSize: Dimensions.sizeIconSmall,
                       onPressed: () async {
-                        if (reposCubit.currentRepo == null) return;
+                        if (_cubits.repositories.currentRepo == null) return;
 
-                        if (reposCubit.currentRepo?.accessMode ==
+                        if (_cubits.repositories.currentRepo?.accessMode ==
                             AccessMode.blind) return;
 
-                        final repo = reposCubit.currentRepo;
+                        final repo = _cubits.repositories.currentRepo;
 
                         if (repo is OpenRepoEntry) {
-                          await reposCubit
+                          await _cubits.repositories
                               .lockRepository(repo.settingsRepoEntry);
                         }
                       }),
@@ -114,6 +113,33 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
                       softWrap: false, textOverflow: TextOverflow.fade)
                 ])))
       ]);
+
+  Widget _buildBackButton() {
+    return multiBlocBuilder(
+        [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
+        () {
+      final button = Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
+          onPressed: () => _cubits.repositories.pushRepoList(true),
+          size: Dimensions.sizeIconSmall);
+
+      if (PlatformValues.isDesktopDevice) {
+        // At time of writing this function we also have the gear settings
+        // button on this page which shows the badge notification, so no need
+        // to show it again on the back button.
+        return button;
+      }
+
+      Color? color = _cubits.mainNotificationBadgeColor();
+
+      if (color != null) {
+        // TODO: Why does the badge appear to move quickly after entering this screen?
+        return Fields.addBadge(button,
+            color: color, moveDownwards: 3, moveRight: 3);
+      } else {
+        return button;
+      }
+    });
+  }
 
   @override
   Size get preferredSize {

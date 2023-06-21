@@ -318,13 +318,10 @@ class _MainPageState extends State<MainPage>
 
   _buildOuiSyncBar() => OuiSyncBar(
         reposCubit: _cubits.repositories,
-        repoPicker: _buildRepositoriesBar(),
+        repoPicker: RepositoriesBar(_cubits),
         appSettingsButton: _buildAppSettingsIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
-
-  RepositoriesBar _buildRepositoriesBar() =>
-      RepositoriesBar(reposCubit: _cubits.repositories);
 
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
@@ -334,18 +331,7 @@ class _MainPageState extends State<MainPage>
     return multiBlocBuilder(
         [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
         () {
-      final upgradeExists = _cubits.upgradeExists.state;
-      final panicCount = _cubits.panicCounter.state ?? 0;
-      final isNetworkEnabled =
-          _cubits.powerControl.state.isNetworkEnabled ?? true;
-
-      Color? color;
-
-      if (upgradeExists || panicCount > 0) {
-        color = Constants.errorColor;
-      } else if (!isNetworkEnabled) {
-        color = Constants.warningColor;
-      }
+      Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
         return Fields.addBadge(button, color: color);

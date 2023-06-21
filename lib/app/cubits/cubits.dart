@@ -19,6 +19,7 @@ import 'repos.dart';
 import 'power_control.dart';
 import 'state_monitor.dart';
 import 'upgrade_exists.dart';
+import '../utils/constants.dart';
 
 class Cubits {
   final ReposCubit repositories;
@@ -28,6 +29,20 @@ class Cubits {
 
   Cubits(this.repositories, this.powerControl, this.panicCounter,
       this.upgradeExists);
+
+  Color? mainNotificationBadgeColor() {
+    final upgradeExists = this.upgradeExists.state;
+    final panicCount = panicCounter.state ?? 0;
+    final isNetworkEnabled = powerControl.state.isNetworkEnabled ?? true;
+
+    if (upgradeExists || panicCount > 0) {
+      return Constants.errorColor;
+    } else if (!isNetworkEnabled) {
+      return Constants.warningColor;
+    } else {
+      return null;
+    }
+  }
 }
 
 Widget multiBlocBuilder(
