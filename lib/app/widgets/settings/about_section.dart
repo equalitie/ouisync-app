@@ -28,7 +28,7 @@ class AboutSection extends SettingsSection with AppLogger {
             onTap: () => unawaited(_openFaq(context))),
         if (PlatformValues.isMobileDevice)
           NavigationTile(
-            title: Text('Send feedback'),
+            title: Text(S.current.titleSendFeedback),
             leading: Icon(Icons.comment),
             onTap: () => unawaited(_openFeedback(context)),
           ),
@@ -45,7 +45,7 @@ class AboutSection extends SettingsSection with AppLogger {
               launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
         ),
         NavigationTile(
-          title: Text('Issue tracker'), // TODO: localize
+          title: Text(S.current.titleIssueTracker),
           leading: Icon(Icons.bug_report),
           onTap: () =>
               unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
@@ -150,7 +150,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   Widget build(BuildContext context) => AlertDialog(
         title: Text('Go to the mail app'), // TODO: localize
         content: CheckboxListTile(
-          title: Text('Attach logs'), // TODO: localize
+          title: Text(S.current.labelAttachLogs),
           value: attachments.logs,
           onChanged: (value) {
             if (value != null) {

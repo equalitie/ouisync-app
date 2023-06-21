@@ -166,6 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconShareTokenWithPeer":
             MessageLookupByLibrary.simpleMessage("Share this with your peer"),
         "labelAppVersion": MessageLookupByLibrary.simpleMessage("App version"),
+        "labelAttachLogs": MessageLookupByLibrary.simpleMessage("Attach logs"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
@@ -581,6 +582,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Add"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Folder details"),
+        "titleIssueTracker":
+            MessageLookupByLibrary.simpleMessage("Issue tracker"),
         "titleLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Lock all repositories"),
         "titleLogs": MessageLookupByLibrary.simpleMessage("Logs"),
@@ -601,6 +604,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleScanRepoQR":
             MessageLookupByLibrary.simpleMessage("Scan Repository QR"),
         "titleSecurity": MessageLookupByLibrary.simpleMessage("Security"),
+        "titleSendFeedback":
+            MessageLookupByLibrary.simpleMessage("Send feedback"),
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("Set password for"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),

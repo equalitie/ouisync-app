@@ -446,6 +446,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Зберегти файл журналу"),
         "messageSaveToLocation":
             MessageLookupByLibrary.simpleMessage("Зберегти файл в цю папку"),
+        "messageSavingChanges": MessageLookupByLibrary.simpleMessage(
+            "Ви хочете зберегти поточні зміни?"),
         "messageScanQROrShare": MessageLookupByLibrary.simpleMessage(
             "Відскануйте його на іншому пристрої або поділіться ним з вузлами"),
         "messageSecureUsingBiometrics": MessageLookupByLibrary.simpleMessage(

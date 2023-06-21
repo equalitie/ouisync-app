@@ -70,6 +70,11 @@
   "titleSaveChanges":"Save changes",
   "titleRequiredPermission":"Required permission",
   "titleFAQShort":"FAQ",
+  "titleSendFeedback": "Send feedback",
+  "titleIssueTracker": "Issue tracker",
+  "@titleIssueTracker": {
+    "description": "link to github issue tracker in setting/about"
+  },
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -123,6 +128,7 @@
   "labelLockAllRepos": "Lock all",
   "@labelLockAllRepos": {},
   "labelRepositoryCurrentPassword":"Current password",
+  "labelAttachLogs": "Attach logs",
   "messageNoRepoIsSelected": "No repository is selected",
   "messageRepositoryIsNotOpen": "The repository is not open",
   "messageLoadingDefault": "Loading…",
