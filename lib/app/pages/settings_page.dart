@@ -52,7 +52,8 @@ class SettingsPage extends StatelessWidget {
                 unawaited(context.read<ConnectivityInfo>().update());
               },
               child: SettingsContainer(
-                  reposCubit: reposCubit,
-                  panicCounter: panicCounter,
-                  isBiometricsAvailable: isBiometricsAvailable))));
+                repos: reposCubit,
+                panicCounter: panicCounter,
+                isBiometricsAvailable: isBiometricsAvailable,
+              ))));
 }

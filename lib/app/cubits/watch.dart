@@ -35,6 +35,8 @@ class WatchSelf<Self> {
       },
     );
   }
+
+  Stream<Changed> get stream => _cubit.stream;
 }
 
 class Changed extends Equatable {
