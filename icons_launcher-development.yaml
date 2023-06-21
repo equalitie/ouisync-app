@@ -13,7 +13,7 @@ icons_launcher:
       image_path: 'assets/Ouisync-beta-512.png'
     windows:
       enable: true
-      image_path: 'assets/Ouisync-beta-512.png'
+      image_path: 'assets/Ouisync-beta-1240-desktop.png'
     linux:
       enable: true
-      image_path: 'assets/Ouisync-beta-512.png'
+      image_path: 'assets/Ouisync-beta-1240-desktop.png'
