@@ -66,7 +66,10 @@ class Constants {
   static const int bufferSize = 64000;
 
   static const int maxCharacterRepoTokenForDisplay = 8;
-  static const String ouisyncUrl = 'https://ouisync.net/';
+  static const String ouisyncUrl = 'https://ouisync.net';
+  static const String issueTrackerUrl =
+      'https://github.com/equalitie/ouisync-app/issues';
+  static const String supportEmail = 'support@ouisync.net';
 
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
