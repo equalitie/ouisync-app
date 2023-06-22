@@ -46,18 +46,20 @@ class Cubits {
 }
 
 Widget multiBlocBuilder(
-    List<StateStreamable<Object?>> blocs, Widget innerBuilder()) {
+  List<StateStreamable<Object?>> blocs,
+  Widget Function() innerBuilder,
+) {
   var builder = (a, b) => innerBuilder();
 
   for (var bloc in blocs) {
-    final new_builder = ((builder) => (a, b) {
+    final newBuilder = ((builder) => (a, b) {
           return BlocBuilder<StateStreamable<Object?>, Object?>(
             bloc: bloc,
             builder: builder,
           );
         })(builder);
 
-    builder = new_builder;
+    builder = newBuilder;
   }
 
   return builder(Object(), null);
