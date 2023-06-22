@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../generated/l10n.dart';
@@ -24,6 +25,8 @@ class AboutSection extends SettingsSection with AppLogger {
         NavigationTile(
             title: Text(S.current.titleFAQShort),
             leading: Icon(Icons.question_answer_rounded),
+            trailing:
+                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
             value: Text(S.current.messageFAQ),
             onTap: () => unawaited(_openFaq(context))),
         if (PlatformValues.isMobileDevice)
@@ -36,17 +39,20 @@ class AboutSection extends SettingsSection with AppLogger {
           title: Text(Constants.ouisyncUrl),
           // Icons.language is actually a stylized globe icon which is a good fit here:
           leading: Icon(Icons.language),
+          trailing: _externalNavigationIcon,
           onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
         ),
         NavigationTile(
           title: Text(Constants.supportEmail),
           leading: Icon(Icons.mail),
+          trailing: _externalNavigationIcon,
           onTap: () => unawaited(
               launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
         ),
         NavigationTile(
           title: Text(S.current.titleIssueTracker),
           leading: Icon(Icons.bug_report),
+          trailing: _externalNavigationIcon,
           onTap: () =>
               unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
         ),
@@ -117,7 +123,14 @@ class AboutSection extends SettingsSection with AppLogger {
       attachmentPaths: [if (logs != null) logs.path],
     );
 
-    loggy.debug('Sending feedback email');
+    if (logs != null) {
+      final name = basename(logs.path);
+      final size = formatSize(await logs.length(), units: true);
+
+      loggy.debug('Sending feedback email with attachment: $name, $size');
+    } else {
+      loggy.debug('Sending feedback email without attachments');
+    }
 
     await FlutterEmailSender.send(email);
   }
@@ -140,6 +153,8 @@ class AboutSection extends SettingsSection with AppLogger {
         return runtimeIdWidget;
       });
 }
+
+const _externalNavigationIcon = Icon(Icons.open_in_browser);
 
 class FeedbackDialog extends StatefulWidget {
   const FeedbackDialog();

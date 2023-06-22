@@ -76,17 +76,17 @@ class SwitchSettingsTile extends StatelessWidget {
 class NavigationTile extends StatelessWidget {
   final Widget title;
   final Widget? leading;
+  final Widget? trailing;
   final Widget? value;
   final VoidCallback? onTap;
-  final bool enabled;
 
   NavigationTile({
     required this.title,
     this.leading,
+    Widget? trailing,
     this.value,
     this.onTap,
-    this.enabled = true,
-  });
+  }) : trailing = trailing ?? const Icon(Icons.navigate_next);
 
   @override
   Widget build(BuildContext context) => PlatformValues.isMobileDevice
@@ -96,15 +96,14 @@ class NavigationTile extends StatelessWidget {
   Widget _buildMobile(BuildContext context) => s.SettingsTile.navigation(
         title: title,
         leading: leading,
-        trailing: Icon(Icons.navigate_next),
+        trailing: trailing,
         value: value,
         onPressed: onTap != null ? (_) => onTap!() : null,
-        enabled: enabled,
       );
 
   Widget _buildDesktop(BuildContext context) => ListTile(
         leading: leading,
-        trailing: Icon(Icons.chevron_right),
+        trailing: trailing,
         title: title,
         subtitle: value,
         onTap: onTap,
