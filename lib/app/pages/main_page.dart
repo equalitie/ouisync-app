@@ -795,8 +795,6 @@ class _MainPageState extends State<MainPage>
   void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() async {
-    final reposCubit = _cubits.repositories;
-
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
             context,
             f: _checkForBiometricsCallback()) ??

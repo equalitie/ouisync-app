@@ -22,11 +22,6 @@ import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp() async {
-  // When dumping log from logcat, we get logs from past ouisync runs as well,
-  // so add a line on each start of the app to know which part of the log
-  // belongs to the last app instance.
-  print("-------------------- OuiSync (${F.name}) Start --------------------");
-
   final windowManager = PlatformWindowManager();
 
   final appDir = await getApplicationSupportDirectory();
@@ -38,7 +33,15 @@ Future<Widget> initOuiSyncApp() async {
     logPath: logPath,
   );
 
+  // Make sure to only output logs after Session is created (which sets up the log subscriber),
+  // otherwise the logs will go nowhere.
   Loggy.initLoggy(logPrinter: AppLogPrinter());
+
+  // When dumping log from logcat, we get logs from past ouisync runs as well,
+  // so add a line on each start of the app to know which part of the log
+  // belongs to the last app instance.
+  logInfo(
+      "-------------------- OuiSync (${F.name}) Start --------------------");
 
   _setupErrorReporting();
 
