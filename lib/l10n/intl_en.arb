@@ -401,6 +401,7 @@
   "messageReplaceExistingFile":"Replace existing file",
   "messageKeepBothFiles":"Keep both files",
   "messageFAQ":"Frequently Asked Questions",
+  "messageEqualitieValues":"This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",
@@ -524,5 +525,7 @@
   "actionGoToSettings":"Go to settings",
   "actionUndo":"Undo",
   "actionBack":"Back",
-  "actionImport":"Import"
+  "actionImport":"Import",
+  "actionYes":"Yes",
+  "actionNo":"No"
 }

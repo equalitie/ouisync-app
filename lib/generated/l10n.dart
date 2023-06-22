@@ -465,7 +465,7 @@ class S {
     return Intl.message(
       'Issue tracker',
       name: 'titleIssueTracker',
-      desc: 'Label for the link to github issue tracker',
+      desc: 'link to github issue tracker in setting/about',
       args: [],
     );
   }
@@ -2510,6 +2510,16 @@ class S {
     );
   }
 
+  /// `This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.`
+  String get messageEqualitieValues {
+    return Intl.message(
+      'This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.',
+      name: 'messageEqualitieValues',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -3215,6 +3225,26 @@ class S {
     return Intl.message(
       'Import',
       name: 'actionImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get actionYes {
+    return Intl.message(
+      'Yes',
+      name: 'actionYes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No`
+  String get actionNo {
+    return Intl.message(
+      'No',
+      name: 'actionNo',
       desc: '',
       args: [],
     );
