@@ -15,6 +15,7 @@ import '../../cubits/cubits.dart';
 import '../../pages/log_view_page.dart';
 import '../../utils/dump.dart';
 import '../../utils/platform/platform.dart';
+import '../../utils/constants.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
@@ -61,11 +62,32 @@ class LogsSection extends SettingsSection {
                 return SizedBox.shrink();
               }
             }),
+        BlocBuilder<BackgroundServiceManager, BackgroundServiceManagerState>(
+            bloc: _cubits.backgroundServiceManager,
+            builder: (context, _) {
+              if (_cubits.backgroundServiceManager.showWarning()) {
+                final color = Constants.warningColor;
+                return SettingsTile(
+                  title: Text(
+                    "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization",
+                    style: TextStyle(color: color),
+                  ),
+                  leading: Icon(Icons.warning, color: color),
+                );
+              } else {
+                return SizedBox.shrink();
+              }
+            }),
       ];
 
   @override
   bool containsErrorNotification() {
     return (_cubits.panicCounter.state ?? 0) > 0;
+  }
+
+  @override
+  bool containsWarningNotification() {
+    return _cubits.backgroundServiceManager.showWarning();
   }
 
   Future<void> _saveLogs(BuildContext context) async {

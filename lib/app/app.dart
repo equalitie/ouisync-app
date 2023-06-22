@@ -100,7 +100,7 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
-  final _backgroundManager = PlatformBackgroundManager();
+  final _backgroundServiceManager = BackgroundServiceManager();
 
   @override
   void initState() {
@@ -108,8 +108,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
     NativeChannels.init();
 
-    initWindowManager().then((_) async =>
-        await _backgroundManager.enableBackgroundExecution(context));
+    initWindowManager().then((_) async => await _backgroundServiceManager
+        .maybeRequestPermissionsAndStartService(context));
   }
 
   Future<void> initWindowManager() async {
@@ -158,6 +158,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
               child: MainPage(
                   session: widget.session,
                   upgradeExists: upgradeExists,
+                  backgroundServiceManager: _backgroundServiceManager,
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );
