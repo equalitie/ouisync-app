@@ -74,7 +74,7 @@ mixin AppLogger implements LoggyType {
   Loggy<LoggyType> get loggy => Loggy<AppLogger>(runtimeType.toString());
 }
 
-const LogLevel appLevel = LogLevel('OuiSync', 2); // 2 == debug
+const LogLevel appLevel = LogLevel('Ouisync', 2); // 2 == debug
 
 extension AppLoggy on Loggy {
   void app(dynamic message, [Object? error, StackTrace? stackTrace]) =>

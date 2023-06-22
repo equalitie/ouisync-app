@@ -465,7 +465,7 @@ class S {
     return Intl.message(
       'Issue tracker',
       name: 'titleIssueTracker',
-      desc: 'Label for the link to github issue tracker',
+      desc: 'link to github issue tracker in setting/about',
       args: [],
     );
   }
@@ -785,6 +785,16 @@ class S {
     return Intl.message(
       'Internal crash detected.',
       name: 'messageLibraryPanic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization`
+  String get messageMissingBackgroundServicePermission {
+    return Intl.message(
+      'Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization',
+      name: 'messageMissingBackgroundServicePermission',
       desc: '',
       args: [],
     );

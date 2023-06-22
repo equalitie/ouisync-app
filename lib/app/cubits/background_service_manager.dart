@@ -1,15 +1,41 @@
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../generated/l10n.dart';
-import '../log.dart';
-import 'platform.dart';
+import '../../generated/l10n.dart';
+import '../utils/log.dart';
 
-class PlatformBackgroundManagerMobile
-    with AppLogger
-    implements PlatformBackgroundManager {
-  @override
-  Future<void> enableBackgroundExecution(BuildContext context) async {
+class BackgroundServiceManagerState {
+  bool isServiceRunning;
+  bool finishedInitialization;
+
+  BackgroundServiceManagerState(
+      {required this.isServiceRunning, required this.finishedInitialization});
+}
+
+class BackgroundServiceManager extends Cubit<BackgroundServiceManagerState>
+    with AppLogger {
+  BackgroundServiceManager()
+      : super(BackgroundServiceManagerState(
+            isServiceRunning: Platform.isAndroid ? false : true,
+            finishedInitialization: false));
+
+  bool showWarning() {
+    return !state.isServiceRunning && state.finishedInitialization;
+  }
+
+  bool isServiceRunning() {
+    return state.isServiceRunning;
+  }
+
+  Future<void> maybeRequestPermissionsAndStartService(
+      BuildContext context) async {
+    if (isServiceRunning()) {
+      return;
+    }
+
     final config = FlutterBackgroundAndroidConfig(
       notificationTitle: S.current.titleAppTitle,
       notificationText: S.current.messageBackgroundNotificationAndroid,
@@ -55,17 +81,23 @@ class PlatformBackgroundManagerMobile
       return initialized;
     });
 
+    var isRunning = false;
+
     if (initializationOk) {
       final backgroundExecution =
           await FlutterBackground.enableBackgroundExecution();
 
       if (backgroundExecution) {
         loggy.app("Background execution enabled");
+        isRunning = true;
       } else {
         loggy.app("Background execution NOT enabled");
       }
     } else {
       loggy.app("No permissions to enable background execution");
     }
+
+    emit(BackgroundServiceManagerState(
+        isServiceRunning: isRunning, finishedInitialization: true));
   }
 }

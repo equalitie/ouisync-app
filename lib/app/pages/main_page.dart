@@ -30,17 +30,19 @@ class MainPage extends StatefulWidget {
   const MainPage(
       {required this.session,
       required this.upgradeExists,
+      required this.backgroundServiceManager,
       required this.mediaReceiver,
       required this.settings});
 
   final Session session;
   final UpgradeExistsCubit upgradeExists;
+  final BackgroundServiceManager backgroundServiceManager;
   final MediaReceiver mediaReceiver;
   final Settings settings;
 
   @override
-  State<StatefulWidget> createState() =>
-      _MainPageState(session, upgradeExists, settings);
+  State<StatefulWidget> createState() => _MainPageState(
+      session, upgradeExists, backgroundServiceManager, settings);
 }
 
 class _MainPageState extends State<MainPage>
@@ -59,8 +61,8 @@ class _MainPageState extends State<MainPage>
 
   _MainPageState._(this._cubits);
 
-  factory _MainPageState(
-      Session session, UpgradeExistsCubit upgradeExists, Settings settings) {
+  factory _MainPageState(Session session, UpgradeExistsCubit upgradeExists,
+      BackgroundServiceManager backgroundServiceManager, Settings settings) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
@@ -71,8 +73,8 @@ class _MainPageState extends State<MainPage>
             .child(oui.MonitorId.expectUnique("Session")),
         "panic_counter");
 
-    return _MainPageState._(
-        Cubits(repositories, powerControl, panicCounter, upgradeExists));
+    return _MainPageState._(Cubits(repositories, powerControl, panicCounter,
+        upgradeExists, backgroundServiceManager));
   }
 
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
@@ -326,9 +328,12 @@ class _MainPageState extends State<MainPage>
         onPressed: () async => await _showAppSettings(),
         size: Dimensions.sizeIconSmall);
 
-    return multiBlocBuilder(
-        [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
-        () {
+    return multiBlocBuilder([
+      _cubits.upgradeExists,
+      _cubits.powerControl,
+      _cubits.panicCounter,
+      _cubits.backgroundServiceManager
+    ], () {
       Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
@@ -795,8 +800,6 @@ class _MainPageState extends State<MainPage>
   void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() async {
-    final reposCubit = _cubits.repositories;
-
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
             context,
             f: _checkForBiometricsCallback()) ??

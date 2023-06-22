@@ -22,11 +22,6 @@ import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp() async {
-  // When dumping log from logcat, we get logs from past ouisync runs as well,
-  // so add a line on each start of the app to know which part of the log
-  // belongs to the last app instance.
-  print("-------------------- OuiSync (${F.name}) Start --------------------");
-
   final windowManager = PlatformWindowManager();
 
   final appDir = await getApplicationSupportDirectory();
@@ -38,7 +33,15 @@ Future<Widget> initOuiSyncApp() async {
     logPath: logPath,
   );
 
+  // Make sure to only output logs after Session is created (which sets up the log subscriber),
+  // otherwise the logs will go nowhere.
   Loggy.initLoggy(logPrinter: AppLogPrinter());
+
+  // When dumping log from logcat, we get logs from past ouisync runs as well,
+  // so add a line on each start of the app to know which part of the log
+  // belongs to the last app instance.
+  logInfo(
+      "-------------------- OuiSync (${F.name}) Start --------------------");
 
   _setupErrorReporting();
 
@@ -49,6 +52,14 @@ Future<Widget> initOuiSyncApp() async {
     defaultPortForwardingEnabled: true,
     defaultLocalDiscoveryEnabled: true,
   );
+
+  for (final host in Constants.storageServers) {
+    try {
+      await session.addStorageServer(host);
+    } catch (e) {
+      logError('failed to add storage server $host:', e);
+    }
+  }
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
@@ -89,7 +100,7 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
-  final _backgroundManager = PlatformBackgroundManager();
+  final _backgroundServiceManager = BackgroundServiceManager();
 
   @override
   void initState() {
@@ -97,8 +108,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
     NativeChannels.init();
 
-    initWindowManager().then((_) async =>
-        await _backgroundManager.enableBackgroundExecution(context));
+    initWindowManager().then((_) async => await _backgroundServiceManager
+        .maybeRequestPermissionsAndStartService(context));
   }
 
   Future<void> initWindowManager() async {
@@ -147,6 +158,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
               child: MainPage(
                   session: widget.session,
                   upgradeExists: upgradeExists,
+                  backgroundServiceManager: _backgroundServiceManager,
                   mediaReceiver: _mediaReceiver,
                   settings: widget.settings))),
     );

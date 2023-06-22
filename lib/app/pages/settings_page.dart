@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../utils/platform/platform.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {

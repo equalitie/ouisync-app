@@ -1,3 +1,4 @@
+export 'background_service_manager.dart';
 export 'connectivity_info.dart';
 export 'job.dart';
 export 'nat_detection.dart';
@@ -15,6 +16,7 @@ export 'watch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'background_service_manager.dart';
 import 'repos.dart';
 import 'power_control.dart';
 import 'state_monitor.dart';
@@ -26,18 +28,20 @@ class Cubits {
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
+  final BackgroundServiceManager backgroundServiceManager;
 
   Cubits(this.repositories, this.powerControl, this.panicCounter,
-      this.upgradeExists);
+      this.upgradeExists, this.backgroundServiceManager);
 
   Color? mainNotificationBadgeColor() {
     final upgradeExists = this.upgradeExists.state;
     final panicCount = panicCounter.state ?? 0;
     final isNetworkEnabled = powerControl.state.isNetworkEnabled ?? true;
+    final showWarning = backgroundServiceManager.showWarning();
 
     if (upgradeExists || panicCount > 0) {
       return Constants.errorColor;
-    } else if (!isNetworkEnabled) {
+    } else if (!isNetworkEnabled || showWarning) {
       return Constants.warningColor;
     } else {
       return null;
@@ -46,18 +50,20 @@ class Cubits {
 }
 
 Widget multiBlocBuilder(
-    List<StateStreamable<Object?>> blocs, Widget innerBuilder()) {
+  List<StateStreamable<Object?>> blocs,
+  Widget Function() innerBuilder,
+) {
   var builder = (a, b) => innerBuilder();
 
   for (var bloc in blocs) {
-    final new_builder = ((builder) => (a, b) {
+    final newBuilder = ((builder) => (a, b) {
           return BlocBuilder<StateStreamable<Object?>, Object?>(
             bloc: bloc,
             builder: builder,
           );
         })(builder);
 
-    builder = new_builder;
+    builder = newBuilder;
   }
 
   return builder(Object(), null);

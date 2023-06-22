@@ -29,6 +29,9 @@ jobs:
       - name: Adding Android Platform target
         run: rustup target add x86_64-linux-android # armv7-linux-androideabi aarch64-linux-android i686-linux-android
 
+      - name: Install dependencies
+        run: sudo apt-get install libfuse-dev
+
       - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
         run: |
          cd ouisync-plugin/ouisync

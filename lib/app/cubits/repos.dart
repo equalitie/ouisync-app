@@ -13,10 +13,6 @@ import '../models/models.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
-// List of available storage servers.
-// TODO: This should be configurable
-const _storageServers = ["storage.ouisync.net"];
-
 class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
@@ -495,13 +491,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       // Enable server storage.
       // TODO: This should be configurable by the user
-      for (final host in _storageServers) {
-        try {
-          await repo.mirror(host: host);
-        } catch (e, st) {
-          loggy.app(
-              'Failed to create server mirror for repository $name', e, st);
-        }
+      try {
+        await repo.mirror();
+      } catch (e, st) {
+        loggy.error(
+            'Failed to create server mirror for repository $name:', e, st);
       }
 
       // Enable DHT and PEX by default

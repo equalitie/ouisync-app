@@ -135,6 +135,8 @@
   "@messageLoadingDefault": {},
   "messageLibraryPanic": "Internal crash detected.",
   "@messageLibraryPanic": {},
+  "messageMissingBackgroundServicePermission": "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization",
+  "@messageMissingBackgroundServicePermission": {},
   "messageSyncingIsDisabledOnMobileInternet": "Syncing is disabled while using mobile internet",
   "@messageSyncingIsDisabledOnMobileInternet": {},
   "messageNetworkIsUnavailable": "Network is unavailable",
