@@ -50,6 +50,14 @@ Future<Widget> initOuiSyncApp() async {
     defaultLocalDiscoveryEnabled: true,
   );
 
+  for (final host in Constants.storageServers) {
+    try {
+      await session.addStorageServer(host);
+    } catch (e) {
+      logError('failed to add storage server $host:', e);
+    }
+  }
+
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
   final settings = await Settings.init();
