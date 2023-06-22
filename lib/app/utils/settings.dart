@@ -25,6 +25,8 @@ class Settings with AppLogger {
   static const String _highestSeenProtocolNumberKey =
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
 
+  static const String _eqValuesKey = "EQ_VALUES";
+
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
   static const String _databaseId = "DATABASE_ID";
@@ -118,6 +120,11 @@ class Settings with AppLogger {
       SharedPreferences prefs, Map<String, String> repos) async {
     await prefs.setStringList(_knownRepositoriesKey,
         repos.entries.map((e) => p.join(e.value, e.key)).toList());
+  }
+
+  bool? getEqualitieValues() => _prefs.getBool(_eqValuesKey);
+  Future<void> setEqualitieValues(bool value) async {
+    await _prefs.setBool(_eqValuesKey, value);
   }
 
   Future<io.Directory> defaultRepoLocation() async {
