@@ -269,26 +269,13 @@ Don't forget to replace `<path-to-user-folder>` with the path to your user folde
 
 We use the package **intl_utils** for handling the localization of the strings used in the app.
 
-If you want to add a new localized string, just add a new `"key": "value"` pair at then end of the English `.arb` file, like this:
+To add a new localized string, modify the [English `.arb` file](lib/l10n/intl_en.arb), and run:
 
-
-In `/lib/l10n/intl_en.arb`
-
-```
-{
-    "@@locale": "en",
-    ... 
-    ...
-    ...
-    "hello": "Hello"
-}
-
+```bash
+dart run intl_utils:generate
 ```
 
-Then run `flutter pub run intl_utils:generate` to generate the bindings for the new localized string.
-
-Once the generated files are updated by the package (`lib/generated/l10.dart`, `lib/l10n/intl_en.arb`), you can use it in any widget, like this:
-
+Then use it as such:
 
 ```
 import '../../../generated/l10n.dart';

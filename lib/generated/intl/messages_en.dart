@@ -392,6 +392,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogLevelErrorWarnInfo":
             MessageLookupByLibrary.simpleMessage("Error, Warn and Info"),
         "messageLogViewer": MessageLookupByLibrary.simpleMessage("Log viewer"),
+        "messageMissingBackgroundServicePermission":
+            MessageLookupByLibrary.simpleMessage(
+                "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization"),
         "messageMobile": MessageLookupByLibrary.simpleMessage("Mobile"),
         "messageMoveEntryOrigin": m11,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(

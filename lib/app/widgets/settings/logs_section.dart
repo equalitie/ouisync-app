@@ -69,7 +69,7 @@ class LogsSection extends SettingsSection {
                 final color = Constants.warningColor;
                 return SettingsTile(
                   title: Text(
-                    "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization",
+                    S.current.messageMissingBackgroundServicePermission,
                     style: TextStyle(color: color),
                   ),
                   leading: Icon(Icons.warning, color: color),
