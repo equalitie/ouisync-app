@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +16,9 @@ import '../cubits/power_control.dart';
 
 Future<File> dumpAll(
   BuildContext context,
-  StateMonitor rootMonitor,
-) async {
+  StateMonitor rootMonitor, {
+  bool compress = false,
+}) async {
   final dir = await getTemporaryDirectory();
   final info = await PackageInfo.fromPlatform();
   final name = info.appName.toLowerCase();
@@ -60,7 +62,18 @@ Future<File> dumpAll(
     await sink.close();
   }
 
-  return file;
+  if (compress) {
+    final path = '${file.path}.zip';
+
+    final encoder = ZipFileEncoder();
+    encoder.create(path);
+    await encoder.addFile(file);
+    encoder.close();
+
+    return File(path);
+  } else {
+    return file;
+  }
 }
 
 /// Dump content of the state monitor

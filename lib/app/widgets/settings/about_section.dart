@@ -104,7 +104,11 @@ class AboutSection extends SettingsSection with AppLogger {
     if (attachments.logs) {
       final logs = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: dumpAll(context, _cubits.repositories.rootStateMonitor),
+        f: dumpAll(
+          context,
+          _cubits.repositories.rootStateMonitor,
+          compress: true,
+        ),
       );
 
       try {
