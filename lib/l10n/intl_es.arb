@@ -643,5 +643,7 @@
   "labelAttachLogs": "Adjuntar los registros",
   "@labelAttachLogs": {},
   "messageFAQ": "Preguntas frecuentes",
-  "@messageFAQ": {}
+  "@messageFAQ": {},
+  "messageMissingBackgroundServicePermission": "Ouisync no tiene permiso para ejecutarse en segundo plano, abrir otra aplicación puede detener la sincronización en curso",
+  "@messageMissingBackgroundServicePermission": {}
 }
