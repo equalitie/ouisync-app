@@ -87,7 +87,8 @@ Future<Widget> initOuiSyncApp() async {
       ],
       supportedLocales: S.delegate.supportedLocales,
       home: eqValuesAccepted
-          ? ouisyncAppHome
+          // ? ouisyncAppHome
+          ? OnboardingPage(ouisyncAppHome: ouisyncAppHome)
           : AcceptEqualitieValuesPage(
               settings: settings, ouisyncAppHome: ouisyncAppHome));
 }
