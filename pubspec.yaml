@@ -128,6 +128,7 @@ flutter:
     - assets/nothing_here_yet.png
     - assets/locked_repo.png
     - assets/empty_folder.png
+    - assets/eq_logo.png
     # - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see

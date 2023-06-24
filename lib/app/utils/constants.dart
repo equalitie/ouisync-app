@@ -70,6 +70,9 @@ class Constants {
   static const String issueTrackerUrl =
       'https://github.com/equalitie/ouisync-app/issues';
   static const String supportEmail = 'support@ouisync.net';
+  static const String faqUrl =
+      'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
+  static const eqValuesUrl = 'https://equalit.ie/values/';
 
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
@@ -113,8 +116,7 @@ class Constants {
   static const Color inputBackgroundColor = Color.fromARGB(255, 224, 224, 224);
   static const Color inputLabelForeColor = Color.fromARGB(255, 117, 117, 117);
 
-  static const String faqUrl =
-      'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
+  static const String eQLogo = 'assets/eq_logo.png';
 
   static const String appIcon = './assets/favicon.png';
   static const String windowsAppIcon = './assets/favicon.ico';

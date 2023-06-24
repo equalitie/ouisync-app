@@ -131,6 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("Folder"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Create repository"),
+        "actionNo": MessageLookupByLibrary.simpleMessage("No"),
         "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
         "actionPreviewFile":
             MessageLookupByLibrary.simpleMessage("Preview file"),
@@ -151,6 +152,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
+        "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("Import a repository"),
@@ -281,6 +283,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("A file"),
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
+        "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
+            "This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Adding a local password failed"),
@@ -593,6 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleMovingEntry":
             MessageLookupByLibrary.simpleMessage("Moving entry"),
         "titleNetwork": MessageLookupByLibrary.simpleMessage("Network"),
+        "titleOurValues": MessageLookupByLibrary.simpleMessage("Our values"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
         "titleRepositoriesList":
