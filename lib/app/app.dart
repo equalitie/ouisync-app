@@ -64,6 +64,17 @@ Future<Widget> initOuiSyncApp() async {
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
   final settings = await Settings.init();
+  final ouisyncAppHome = OuiSyncApp(
+    session: session,
+    windowManager: windowManager,
+    settings: settings,
+  );
+
+  var eqValuesAccepted = settings.getEqualitieValues();
+  if (eqValuesAccepted == null) {
+    eqValuesAccepted = false;
+    await settings.setEqualitieValues(eqValuesAccepted);
+  }
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -75,11 +86,10 @@ Future<Widget> initOuiSyncApp() async {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: OuiSyncApp(
-        session: session,
-        windowManager: windowManager,
-        settings: settings,
-      ));
+      home: eqValuesAccepted
+          ? ouisyncAppHome
+          : AcceptEqualitieValuesPage(
+              settings: settings, ouisyncAppHome: ouisyncAppHome));
 }
 
 class OuiSyncApp extends StatefulWidget {
