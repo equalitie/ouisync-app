@@ -594,6 +594,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleMovingEntry":
             MessageLookupByLibrary.simpleMessage("Moving entry"),
         "titleNetwork": MessageLookupByLibrary.simpleMessage("Network"),
+        "titleOurValues": MessageLookupByLibrary.simpleMessage("Our values"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
         "titleRepositoriesList":

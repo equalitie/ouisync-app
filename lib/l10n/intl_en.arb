@@ -75,6 +75,7 @@
   "@titleIssueTracker": {
     "description": "link to github issue tracker in setting/about"
   },
+  "titleOurValues":"Our values",
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",

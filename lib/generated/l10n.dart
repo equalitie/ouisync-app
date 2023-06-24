@@ -470,6 +470,16 @@ class S {
     );
   }
 
+  /// `Our values`
+  String get titleOurValues {
+    return Intl.message(
+      'Our values',
+      name: 'titleOurValues',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
