@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
 import '../../generated/l10n.dart';
-import '../app.dart';
-import '../utils/constants.dart';
+import '../utils/utils.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({required this.ouisyncAppHome});
+  const OnboardingPage({required this.settings, required this.ouisyncAppHome});
 
-  final OuiSyncApp ouisyncAppHome;
+  final Settings settings;
+  final Widget ouisyncAppHome;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -57,8 +57,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             decoration: pageDecoration,
           ),
         ],
-        onDone: () => _onIntroEnd(context),
-        onSkip: () => _onIntroEnd(context), // You can override onSkip callback
+        onDone: () async => await _onIntroEnd(context),
+        onSkip: () async => await _onIntroEnd(context), // You can override onSkip callback
         skipOrBackFlex: 0,
         nextFlex: 0,
         showBackButton: true,
@@ -79,9 +79,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ));
   }
 
-  void _onIntroEnd(context) => Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => widget.ouisyncAppHome),
-      );
+  Future<void> _onIntroEnd(context) async {
+    await widget.settings.setShowOnboarding(false);
+
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => widget.ouisyncAppHome),
+    );
+  }
 
   Widget _buildImage(String assetName, [double width = 350]) =>
       Image.asset('assets/$assetName', width: width);
