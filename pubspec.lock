@@ -678,13 +678,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.8.2"
+  intro_slider:
+    dependency: "direct main"
+    description:
+      name: intro_slider
+      sha256: c6b3e830b01859446ea008a32d753d302d19805fdf1f775fb857a1e3590aead9
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
   introduction_screen:
     dependency: "direct main"
     description:
-      name: introduction_screen
-      sha256: f39be426026785b8fea4ed93e226e7fc28ef49a4c78c3f86c958bae26dabef00
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "8e0e9e38e6bd944229b8ff193de024f4e8de6ad1"
+      url: "https://github.com/J-Pabon/introduction_screen"
+    source: git
     version: "3.1.9"
   io:
     dependency: transitive
