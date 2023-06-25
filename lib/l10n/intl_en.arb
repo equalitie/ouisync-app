@@ -76,6 +76,9 @@
     "description": "link to github issue tracker in setting/about"
   },
   "titleOurValues":"Our values",
+  "titleOnboardingShare":"Send and receive files securely",
+  "titleOnboardingPermissions":"Set permissions to collaborate, broadcast, or simply store",
+  "titleOnboardingAccess":"Access files from multiple devices",
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -405,6 +408,9 @@
   "messageKeepBothFiles":"Keep both files",
   "messageFAQ":"Frequently Asked Questions",
   "messageEqualitieValues":"This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.",
+  "messageOnboardingShare":"All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.",
+  "messageOnboardingPermissions":"Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)",
+  "messageOnboardingAccess":"Share files to all of your devices or with others and build your own secure cloud!",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",
@@ -530,5 +536,8 @@
   "actionBack":"Back",
   "actionImport":"Import",
   "actionYes":"Yes",
-  "actionNo":"No"
+  "actionNo":"No",
+  "actionSkip":"Skip",
+  "actionDone":"Done",
+  "actionNext":"Next"
 }

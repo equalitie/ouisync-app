@@ -115,6 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
         "actionDiscard": MessageLookupByLibrary.simpleMessage("Discard"),
+        "actionDone": MessageLookupByLibrary.simpleMessage("Done"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
@@ -131,6 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("Folder"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Create repository"),
+        "actionNext": MessageLookupByLibrary.simpleMessage("Next"),
         "actionNo": MessageLookupByLibrary.simpleMessage("No"),
         "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
         "actionPreviewFile":
@@ -150,6 +152,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShare": MessageLookupByLibrary.simpleMessage("Share"),
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
+        "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
@@ -423,6 +426,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNone": MessageLookupByLibrary.simpleMessage("None"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("Nothing here yet!"),
+        "messageOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Share files to all of your devices or with others and build your own secure cloud!"),
+        "messageOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)"),
+        "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest."),
         "messageOpenFileError": m13,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
@@ -597,6 +606,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleMovingEntry":
             MessageLookupByLibrary.simpleMessage("Moving entry"),
         "titleNetwork": MessageLookupByLibrary.simpleMessage("Network"),
+        "titleOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Access files from multiple devices"),
+        "titleOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Set permissions to collaborate, broadcast, or simply store"),
+        "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "Send and receive files securely"),
         "titleOurValues": MessageLookupByLibrary.simpleMessage("Our values"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
