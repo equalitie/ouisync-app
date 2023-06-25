@@ -26,6 +26,7 @@ class Settings with AppLogger {
       "HIGHEST_SEEN_PROTOCOL_NUMBER";
 
   static const String _eqValuesKey = "EQ_VALUES";
+  static const String _showOnboardingKey = "SHOW_ONBOARDING";
 
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
@@ -125,6 +126,11 @@ class Settings with AppLogger {
   bool? getEqualitieValues() => _prefs.getBool(_eqValuesKey);
   Future<void> setEqualitieValues(bool value) async {
     await _prefs.setBool(_eqValuesKey, value);
+  }
+
+  bool? getShowOnboarding() => _prefs.getBool(_showOnboardingKey);
+  Future<void> setShowOnboarding(bool value) async {
+    await _prefs.setBool(_showOnboardingKey, value);
   }
 
   Future<io.Directory> defaultRepoLocation() async {
