@@ -2570,10 +2570,10 @@ class S {
     );
   }
 
-  /// `All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.`
+  /// `All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest.`
   String get messageOnboardingShare {
     return Intl.message(
-      'All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.',
+      'All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest.',
       name: 'messageOnboardingShare',
       desc: '',
       args: [],

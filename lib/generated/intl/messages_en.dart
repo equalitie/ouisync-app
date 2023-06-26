@@ -431,7 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
             "Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
-            "All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest."),
+            "All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest."),
         "messageOpenFileError": m13,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
