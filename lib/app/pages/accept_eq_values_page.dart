@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import '../utils/platform/platform.dart';
 
 import '../../generated/l10n.dart';
-import '../app.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'pages.dart';
 
@@ -13,7 +12,7 @@ class AcceptEqualitieValuesPage extends StatelessWidget {
       {required this.settings, required this.ouisyncAppHome});
 
   final Settings settings;
-  final OuiSyncApp ouisyncAppHome;
+  final Widget ouisyncAppHome;
 
   @override
   Widget build(BuildContext context) => Scaffold(

@@ -64,17 +64,37 @@ Future<Widget> initOuiSyncApp() async {
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
   final settings = await Settings.init();
-  final ouisyncAppHome = OuiSyncApp(
-    session: session,
-    windowManager: windowManager,
-    settings: settings,
-  );
+
+  var showOnboarding = settings.getShowOnboarding();
+  if (showOnboarding == null) {
+    showOnboarding = true;
+    await settings.setShowOnboarding(showOnboarding);
+  }
 
   var eqValuesAccepted = settings.getEqualitieValues();
   if (eqValuesAccepted == null) {
     eqValuesAccepted = false;
     await settings.setEqualitieValues(eqValuesAccepted);
   }
+
+  /// We show the onboarding the first time the app starts.
+  /// Then, we show the page for accepting eQ values, until the user taps YES.
+  /// After this, just show the regular home page.
+
+  final ouisyncAppHome = OuiSyncApp(
+    session: session,
+    windowManager: windowManager,
+    settings: settings,
+  );
+
+  var root = eqValuesAccepted
+      ? ouisyncAppHome
+      : AcceptEqualitieValuesPage(
+          settings: settings, ouisyncAppHome: ouisyncAppHome);
+
+  var homePage = showOnboarding
+      ? OnboardingPage(settings: settings, ouisyncAppHome: root)
+      : root;
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -86,10 +106,7 @@ Future<Widget> initOuiSyncApp() async {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: eqValuesAccepted
-          ? ouisyncAppHome
-          : AcceptEqualitieValuesPage(
-              settings: settings, ouisyncAppHome: ouisyncAppHome));
+      home: homePage);
 }
 
 class OuiSyncApp extends StatefulWidget {

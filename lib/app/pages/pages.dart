@@ -2,6 +2,7 @@ export 'accept_eq_values_page.dart';
 export 'add_repository_page.dart';
 export 'log_view_page.dart';
 export 'main_page.dart';
+export 'onboarding_page.dart';
 export 'qr_scanner_page.dart';
 export 'repo_qr_page.dart';
 export 'repository_security_page.dart';

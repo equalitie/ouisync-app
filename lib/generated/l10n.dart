@@ -480,6 +480,36 @@ class S {
     );
   }
 
+  /// `Send and receive files securely`
+  String get titleOnboardingShare {
+    return Intl.message(
+      'Send and receive files securely',
+      name: 'titleOnboardingShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set permissions to collaborate, broadcast, or simply store`
+  String get titleOnboardingPermissions {
+    return Intl.message(
+      'Set permissions to collaborate, broadcast, or simply store',
+      name: 'titleOnboardingPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access files from multiple devices`
+  String get titleOnboardingAccess {
+    return Intl.message(
+      'Access files from multiple devices',
+      name: 'titleOnboardingAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -2540,6 +2570,36 @@ class S {
     );
   }
 
+  /// `All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.`
+  String get messageOnboardingShare {
+    return Intl.message(
+      'All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.',
+      name: 'messageOnboardingShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)`
+  String get messageOnboardingPermissions {
+    return Intl.message(
+      'Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)',
+      name: 'messageOnboardingPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share files to all of your devices or with others and build your own secure cloud!`
+  String get messageOnboardingAccess {
+    return Intl.message(
+      'Share files to all of your devices or with others and build your own secure cloud!',
+      name: 'messageOnboardingAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -3265,6 +3325,36 @@ class S {
     return Intl.message(
       'No',
       name: 'actionNo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip`
+  String get actionSkip {
+    return Intl.message(
+      'Skip',
+      name: 'actionSkip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Done`
+  String get actionDone {
+    return Intl.message(
+      'Done',
+      name: 'actionDone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next`
+  String get actionNext {
+    return Intl.message(
+      'Next',
+      name: 'actionNext',
       desc: '',
       args: [],
     );
