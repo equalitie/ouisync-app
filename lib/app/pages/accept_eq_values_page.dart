@@ -32,19 +32,37 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
                   padding: EdgeInsets.all(20.0),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Image.asset(Constants.eQLogo,
-                            width: MediaQuery.of(context).size.width * 0.4),
+                        _headerImages(),
                         const SizedBox(height: 60.0),
-                        _valuesTextBlock(context),
+                        _introTextSpan(),
+                        const SizedBox(height: 20.0),
+                        _valuesExpansionPanel(),
                         const SizedBox(height: 20.0),
                         Fields.dialogActions(context,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            buttons: _actions(context))
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            buttons: _actions())
                       ])))));
 
-  List<Widget> _actions(context) => [
-        TextButton(onPressed: () => exit(0), child: Text(S.current.actionNo)),
+  Image _headerImages() {
+    return Image.asset(Constants.eQLogo,
+        width: MediaQuery.of(context).size.width * 0.4);
+  }
+
+  Widget _introTextSpan() => RichText(
+      textAlign: TextAlign.start,
+      text: TextSpan(
+          style:
+              TextStyle(color: Colors.black87, fontSize: Dimensions.fontSmall),
+          children: [
+            _boldTextSpan(S.current.titleAppTitle),
+            TextSpan(text: ' ${S.current.messageEqualitieValues}')
+          ]));
+
+  List<Widget> _actions() => [
+        TextButton(
+            onPressed: () => exit(0), child: Text(S.current.actionIDontAgree)),
         TextButton(
             onPressed: () async {
               await widget.settings.setEqualitieValues(true);
@@ -54,15 +72,24 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
                   MaterialPageRoute(
                       builder: (context) => widget.ouisyncAppHome));
             },
-            child: Text(S.current.actionYes))
+            child: Text(S.current.actionIAgree))
       ];
 
-  Widget _valuesTextBlock(BuildContext context) =>
+  Widget _valuesExpansionPanel() {
+    return ExpansionTile(
+        childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
+        title: Text('Tap here to read our values',
+            textAlign: TextAlign.end,
+            style: TextStyle(
+                fontSize: Dimensions.fontSmall, fontStyle: FontStyle.italic)),
+        children: [_valuesTextBlock()]);
+  }
+
+  Widget _valuesTextBlock() =>
       Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         RichText(
             textAlign: TextAlign.start,
             text: TextSpan(
-                text: '${S.current.messageEqualitieValues}\n\n',
                 style: TextStyle(
                     color: Colors.black87, fontSize: Dimensions.fontSmall),
                 children: [
@@ -253,15 +280,15 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
 
   void _launchIBoHR() async {
     final title = Text('International Bill of Human Rights');
-    await _openUrl(context, title, Constants.billHumanRightsUrl);
+    await _openUrl(title, Constants.billHumanRightsUrl);
   }
 
   void _launchDfDOS() async {
     final title = Text('Declaration for Distributed Online Services');
-    await _openUrl(context, title, Constants.eqDeclarationDOS);
+    await _openUrl(title, Constants.eqDeclarationDOS);
   }
 
-  Future<void> _openUrl(BuildContext context, Widget title, String url) async {
+  Future<void> _openUrl(Widget title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isDesktopDevice) {
