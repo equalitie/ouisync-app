@@ -82,13 +82,17 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
       ];
 
   Widget _valuesExpansionPanel() {
-    return ExpansionTile(
-        childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
-        title: Text(S.current.messageTapForValues,
-            textAlign: TextAlign.end,
-            style: TextStyle(
-                fontSize: Dimensions.fontSmall, fontStyle: FontStyle.italic)),
-        children: [_valuesTextBlock()]);
+    return Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+            childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
+            title: Text(S.current.messageTapForValues,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: Dimensions.fontSmall,
+                    fontStyle: FontStyle.italic)),
+            children: [_valuesTextBlock()]));
   }
 
   Widget _valuesTextBlock() =>
