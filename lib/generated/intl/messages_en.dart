@@ -254,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "The provided <bold>password</bold> does not grant you access to view the content of this repository."),
         "messageBluetooth": MessageLookupByLibrary.simpleMessage("Bluetooth"),
+        "messageBy": MessageLookupByLibrary.simpleMessage("by"),
         "messageCamera": MessageLookupByLibrary.simpleMessage("Camera"),
         "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
             "We need this permission to use the camera and read the QR code"),
@@ -524,6 +525,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
                 "Syncing is disabled while using mobile internet"),
+        "messageTapForValues":
+            MessageLookupByLibrary.simpleMessage("Tap here to read our values"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(

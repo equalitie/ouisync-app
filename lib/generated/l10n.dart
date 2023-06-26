@@ -2600,6 +2600,26 @@ class S {
     );
   }
 
+  /// `by`
+  String get messageBy {
+    return Intl.message(
+      'by',
+      name: 'messageBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap here to read our values`
+  String get messageTapForValues {
+    return Intl.message(
+      'Tap here to read our values',
+      name: 'messageTapForValues',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

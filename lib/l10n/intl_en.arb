@@ -411,6 +411,8 @@
   "messageOnboardingShare":"All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest.",
   "messageOnboardingPermissions":"Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)",
   "messageOnboardingAccess":"Share files to all of your devices or with others and build your own secure cloud!",
+  "messageBy":"by",
+  "messageTapForValues":"Tap here to read our values",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",
