@@ -67,7 +67,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   Iterable<String> repositoryNames() =>
       _repos.keys.where((key) => key != Constants.repoListEntryName);
 
-  bool get showList => _showList;
+  bool get showList => _showList || _currentRepo == null;
 
   RepoEntry? get currentRepo => _currentRepo;
 
