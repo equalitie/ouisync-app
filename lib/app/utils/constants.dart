@@ -122,6 +122,7 @@ class Constants {
   static const Color inputBackgroundColor = Color.fromARGB(255, 224, 224, 224);
   static const Color inputLabelForeColor = Color.fromARGB(255, 117, 117, 117);
 
+  static const String ouisyncLogoFull = 'assets/OuisyncFull.png';
   static const String eQLogo = 'assets/eq_logo.png';
 
   static const String onboardingShareImage =
