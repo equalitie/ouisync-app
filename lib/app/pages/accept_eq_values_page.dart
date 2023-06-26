@@ -45,10 +45,13 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
                             buttons: _actions())
                       ])))));
 
-  Image _headerImages() {
-    return Image.asset(Constants.eQLogo,
-        width: MediaQuery.of(context).size.width * 0.4);
-  }
+  Widget _headerImages() => Column(children: [
+        Image.asset(Constants.ouisyncLogoFull,
+            width: MediaQuery.of(context).size.width * 0.6),
+        Text(S.current.messageBy, style: TextStyle(fontSize: 8.0)),
+        Image.asset(Constants.eQLogo,
+            width: MediaQuery.of(context).size.width * 0.2)
+      ]);
 
   Widget _introTextSpan() => RichText(
       textAlign: TextAlign.start,
@@ -78,7 +81,7 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
   Widget _valuesExpansionPanel() {
     return ExpansionTile(
         childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
-        title: Text('Tap here to read our values',
+        title: Text(S.current.messageTapForValues,
             textAlign: TextAlign.end,
             style: TextStyle(
                 fontSize: Dimensions.fontSmall, fontStyle: FontStyle.italic)),
