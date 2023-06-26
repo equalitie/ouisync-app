@@ -48,7 +48,10 @@ class _AcceptEqualitieValuesPageState extends State<AcceptEqualitieValuesPage> {
   Widget _headerImages() => Column(children: [
         Image.asset(Constants.ouisyncLogoFull,
             width: MediaQuery.of(context).size.width * 0.6),
-        Text(S.current.messageBy, style: TextStyle(fontSize: 8.0)),
+        Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+            child: Text(S.current.messageBy,
+                style: TextStyle(color: Colors.black54, fontSize: 8.0))),
         Image.asset(Constants.eQLogo,
             width: MediaQuery.of(context).size.width * 0.2)
       ]);
