@@ -70,17 +70,19 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildRepoListState(BuildContext context) => Container(
       padding: Dimensions.paddingRepositoryPicker,
-      child: Row(children: [
-        Expanded(child: Text(S.current.titleRepositoriesList)),
+      child: Padding(
+          padding: EdgeInsets.only(left: 4.0),
+          child: Row(children: [
+            Expanded(child: Text(S.current.titleRepositoriesList)),
 
-        /// TODO: Implement search repos in list
-        // Fields.actionIcon(
-        //   const Icon(Icons.search_rounded),
-        //   onPressed: () {},
-        //   size: Dimensions.sizeIconSmall,
-        //   color: Colors.white,
-        // )
-      ]));
+            /// TODO: Implement search repos in list
+            // Fields.actionIcon(
+            //   const Icon(Icons.search_rounded),
+            //   onPressed: () {},
+            //   size: Dimensions.sizeIconSmall,
+            //   color: Colors.white,
+            // )
+          ])));
 
   Widget _buildState(
     BuildContext context, {

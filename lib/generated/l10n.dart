@@ -210,10 +210,10 @@ class S {
     );
   }
 
-  /// `Your repositories`
+  /// `My repositories`
   String get titleRepositoriesList {
     return Intl.message(
-      'Your repositories',
+      'My repositories',
       name: 'titleRepositoriesList',
       desc: '',
       args: [],
@@ -1670,10 +1670,10 @@ class S {
     );
   }
 
-  /// `Ouisync is running`
+  /// `Is running`
   String get messageBackgroundNotificationAndroid {
     return Intl.message(
-      'Ouisync is running',
+      'Is running',
       name: 'messageBackgroundNotificationAndroid',
       desc: '',
       args: [],
