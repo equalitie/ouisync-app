@@ -123,6 +123,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Go to settings"),
         "actionHide": MessageLookupByLibrary.simpleMessage("Hide"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
+        "actionIAgree": MessageLookupByLibrary.simpleMessage("I agree"),
+        "actionIDontAgree":
+            MessageLookupByLibrary.simpleMessage("I don\'t agree"),
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
@@ -287,7 +290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
-            "This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync."),
+            "is built in line with our values.\nBy using it you agree to abide by these principles."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Adding a local password failed"),
