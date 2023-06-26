@@ -123,6 +123,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Go to settings"),
         "actionHide": MessageLookupByLibrary.simpleMessage("Hide"),
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
+        "actionIAgree": MessageLookupByLibrary.simpleMessage("I agree"),
+        "actionIDontAgree":
+            MessageLookupByLibrary.simpleMessage("I don\'t agree"),
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
@@ -251,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "The provided <bold>password</bold> does not grant you access to view the content of this repository."),
         "messageBluetooth": MessageLookupByLibrary.simpleMessage("Bluetooth"),
+        "messageBy": MessageLookupByLibrary.simpleMessage("by"),
         "messageCamera": MessageLookupByLibrary.simpleMessage("Camera"),
         "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
             "We need this permission to use the camera and read the QR code"),
@@ -287,7 +291,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
-            "This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync."),
+            "is built in line with our values.\nBy using it you agree to abide by these principles."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Adding a local password failed"),
@@ -431,7 +435,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
             "Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
-            "All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest."),
+            "All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest."),
         "messageOpenFileError": m13,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
@@ -521,6 +525,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
                 "Syncing is disabled while using mobile internet"),
+        "messageTapForValues":
+            MessageLookupByLibrary.simpleMessage("Tap here to read our values"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(

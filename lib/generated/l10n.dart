@@ -2560,20 +2560,20 @@ class S {
     );
   }
 
-  /// `This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.`
+  /// `is built in line with our values.\nBy using it you agree to abide by these principles.`
   String get messageEqualitieValues {
     return Intl.message(
-      'This software is built in line with our values.\n\nYou agree to abide by these principles when using Ouisync.',
+      'is built in line with our values.\nBy using it you agree to abide by these principles.',
       name: 'messageEqualitieValues',
       desc: '',
       args: [],
     );
   }
 
-  /// `All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.`
+  /// `All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest.`
   String get messageOnboardingShare {
     return Intl.message(
-      'All files and folders added to OuiSync are securely encrypted by default, both in transit and at rest.',
+      'All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest.',
       name: 'messageOnboardingShare',
       desc: '',
       args: [],
@@ -2595,6 +2595,26 @@ class S {
     return Intl.message(
       'Share files to all of your devices or with others and build your own secure cloud!',
       name: 'messageOnboardingAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `by`
+  String get messageBy {
+    return Intl.message(
+      'by',
+      name: 'messageBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap here to read our values`
+  String get messageTapForValues {
+    return Intl.message(
+      'Tap here to read our values',
+      name: 'messageTapForValues',
       desc: '',
       args: [],
     );
@@ -3355,6 +3375,26 @@ class S {
     return Intl.message(
       'Next',
       name: 'actionNext',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I agree`
+  String get actionIAgree {
+    return Intl.message(
+      'I agree',
+      name: 'actionIAgree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I don't agree`
+  String get actionIDontAgree {
+    return Intl.message(
+      'I don\'t agree',
+      name: 'actionIDontAgree',
       desc: '',
       args: [],
     );
