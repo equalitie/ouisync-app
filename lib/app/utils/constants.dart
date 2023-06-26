@@ -74,6 +74,12 @@ class Constants {
       'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
   static const eqValuesUrl = 'https://equalit.ie/values/';
 
+  static const billHumanRightsUrl =
+      'http://www.ohchr.org/Documents/Publications/Compilation1.1en.pdf';
+
+  static const eqDeclarationDOS =
+      'https://equalit.ie/declaration-distributed-online-services/';
+
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
   static const double repositoryBarHeight = 58.0;
