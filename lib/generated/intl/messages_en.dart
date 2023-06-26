@@ -278,6 +278,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Create a new <bold>repository</bold>, or link to one from a friend using a <bold>repository token</bold>"),
         "messageCreatingToken":
             MessageLookupByLibrary.simpleMessage("Creating the share token…"),
+        "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
+            "Declaration for Distributed Online Services"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -290,6 +292,34 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("A file"),
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("A folder"),
+        "messageEqValuesP1": MessageLookupByLibrary.simpleMessage(
+            "Basic rights and fundamental freedoms are inherent, inalienable and apply equally to everyone. Human rights are universal; protected in international law and enshrined in the "),
+        "messageEqValuesP10": MessageLookupByLibrary.simpleMessage(
+            "As an organisation, we seek to be transparent with our policies and procedures. As often as possible, our source code is open and freely available, protected by licences that encourage community-driven development, sharing and the propagation of these principles"),
+        "messageEqValuesP11": MessageLookupByLibrary.simpleMessage(
+            "The ability to express oneself freely and to access public information is the backbone of a true democracy. Public information should be in the public domain. Freedom of expression includes active and heated debate, even arguments that are inelegantly articulated, poorly constructed and that may be considered offensive to some. However, freedom of expression is not an absolute right. We stand firmly against violence and the incitement to violate the rights of others, especially the propagation of violence, hate, discrimination and disenfranchisement of any identifiable ethnic or social group"),
+        "messageEqValuesP12": MessageLookupByLibrary.simpleMessage(
+            "We operate from different countries and come from various social backgrounds. We work together towards a society that will respect and defend the rights of others in the physical and the digital world. The International Bill of Rights articulates the suite of human rights that inspires our work; we believe that people have a right and a duty to protect these rights"),
+        "messageEqValuesP13": MessageLookupByLibrary.simpleMessage(
+            "We understand that our tools and services can be abused to contravene these principles and our terms of service, and we firmly and actively condemn and forbid such usage. We neither permit our software and services to be used to further the commission of illicit activities, nor will we assist in the propagation of hate speech or the promotion of violence through the Internet"),
+        "messageEqValuesP14": MessageLookupByLibrary.simpleMessage(
+            "We have put safeguards in place to mitigate the misuse of our products and services. When we become aware of any use that violates our principles or terms of service, we take action to stop it. Guided by our internal policies, we carefully deliberate over acts that might compromise our principles. Our procedures will continue to evolve based on experience and best practices so that we can achieve the right balance between enabling open access to our products and services, and upholding our principles"),
+        "messageEqValuesP2": MessageLookupByLibrary.simpleMessage(
+            "Brave people risk life and liberty to defend human rights, to mobilise, to criticise and to expose the perpetrators of abuse. Brave people voice support for others, for ideas, and communicate their concerns to the world. These brave people exercise their human rights online"),
+        "messageEqValuesP3": MessageLookupByLibrary.simpleMessage(
+            "The Internet is a platform for free expression and self-determination. Like any communication tool, the Internet is not immune from censorship, surveillance, attacks and attempts by state actors and criminal groups to silence dissident voices. When democratic expression is criminalised, when there is ethnic and political discrimination, the Internet becomes another battleground for non-violent resistance"),
+        "messageEqValuesP4": MessageLookupByLibrary.simpleMessage(
+            "Our mission is to promote and defend fundamental freedoms and human rights, including the free flow of information online. Our goal is to create accessible technology and improve the skill set needed for defending human rights and freedoms in the digital age"),
+        "messageEqValuesP5": MessageLookupByLibrary.simpleMessage(
+            "We aim to educate and raise the capacity of our constituents to enjoy secure operations in the digital domain. We do this by building tools that enable and protect free expression, circumvent censorship, empower anonymity and protect from surveillance where and when necessary. Our tools also improve information management and analytic functions"),
+        "messageEqValuesP6": MessageLookupByLibrary.simpleMessage(
+            "We are an international group of activists of diverse backgrounds and beliefs, standing together to defend the principles common among us. We are software developers, cryptographers, security specialists, as well as educators, sociologists, historians, anthropologists and journalists. We develop open and reusable tools with a focus on privacy, online security and better information management. We finance our operations with public grants and consultancies with the private sector. We believe in an Internet that is free from intrusive and unjustified surveillance, censorship and oppression"),
+        "messageEqValuesP7": MessageLookupByLibrary.simpleMessage(
+            "Inspired by the International Bill of Human Rights, our principles apply to every individual, group and organ of society that we work with, including the beneficiaries of the software and services we release. All of our projects are designed with our principles in mind. Our knowledge, tools and services are available to these groups and individuals as long as our principles and terms of service are respected"),
+        "messageEqValuesP8": MessageLookupByLibrary.simpleMessage(
+            "The right to privacy is a fundamental right that we aim to protect whenever and wherever possible. The privacy of our direct beneficiaries is sacrosanct to our operations. Our tools, services and internal policies are designed to this effect. We will use all technical and legal resources at our disposal to protect the privacy of our beneficiaries. Please refer to our Privacy Policy and our "),
+        "messageEqValuesP9": MessageLookupByLibrary.simpleMessage(
+            "Security is a constant thematic throughout all of our software development, service provision and capacity-building projects. We design our systems and processes to improve information security on the Internet and raise the user’s security profile and experience. We try to lead by example by not compromising the security properties of a tool or system for the sake of speed, usability or cost. We do not believe in security through obscurity and we maintain transparency through open access to our code base. We always err on the side of caution and try to implement good internal operational security"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "is built in line with our values.\nBy using it you agree to abide by these principles."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
@@ -380,6 +410,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
+        "messageInternationalBillHumanRights":
+            MessageLookupByLibrary.simpleMessage(
+                "International Bill of Human Rights"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Keep both files"),
         "messageLibraryPanic":
@@ -447,6 +480,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Peer Exchange"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
+        "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
+            "“Man is born free, and everywhere he is in chains.”"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "This repository is <bold>read-only</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -497,6 +532,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m18,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the link here"),
+        "messageRousseau":
+            MessageLookupByLibrary.simpleMessage("Jean-Jacques Rousseau"),
         "messageSaveLogFile":
             MessageLookupByLibrary.simpleMessage("Save log file"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
@@ -588,12 +625,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete non-empty folder"),
         "titleDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Delete repository"),
+        "titleDigitalSecurity":
+            MessageLookupByLibrary.simpleMessage("Digital Security"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Download location"),
         "titleDownloadToDevice":
             MessageLookupByLibrary.simpleMessage("Download to device"),
         "titleEditRepository":
             MessageLookupByLibrary.simpleMessage("Edit repository"),
+        "titleEqualitiesValues":
+            MessageLookupByLibrary.simpleMessage("eQualitie’s Values"),
         "titleFAQShort": MessageLookupByLibrary.simpleMessage("FAQ"),
         "titleFileDetails":
             MessageLookupByLibrary.simpleMessage("File details"),
@@ -604,8 +645,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Add"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Folder details"),
+        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+            "Freedom of expression and access to information"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Issue tracker"),
+        "titleJustLegalSociety":
+            MessageLookupByLibrary.simpleMessage("Just and legal society"),
         "titleLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Lock all repositories"),
         "titleLogs": MessageLookupByLibrary.simpleMessage("Logs"),
@@ -618,7 +663,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Set permissions to collaborate, broadcast, or simply store"),
         "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "Send and receive files securely"),
+        "titleOpennessTransparency":
+            MessageLookupByLibrary.simpleMessage("Openness and Transparency"),
+        "titleOurMission": MessageLookupByLibrary.simpleMessage("Our mission"),
+        "titleOurPrinciples":
+            MessageLookupByLibrary.simpleMessage("Our Principles"),
         "titleOurValues": MessageLookupByLibrary.simpleMessage("Our values"),
+        "titlePrivacy": MessageLookupByLibrary.simpleMessage("Privacy"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
         "titleRepositoriesList":
@@ -645,6 +696,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unlock repository"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("Unsaved changes"),
+        "titleWeAreEq":
+            MessageLookupByLibrary.simpleMessage("We are eQualit.ie"),
         "typeFile": MessageLookupByLibrary.simpleMessage("File"),
         "typeFolder": MessageLookupByLibrary.simpleMessage("Folder")
       };

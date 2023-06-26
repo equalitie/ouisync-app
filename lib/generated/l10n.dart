@@ -510,6 +510,96 @@ class S {
     );
   }
 
+  /// `eQualitie’s Values`
+  String get titleEqualitiesValues {
+    return Intl.message(
+      'eQualitie’s Values',
+      name: 'titleEqualitiesValues',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Our mission`
+  String get titleOurMission {
+    return Intl.message(
+      'Our mission',
+      name: 'titleOurMission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We are eQualit.ie`
+  String get titleWeAreEq {
+    return Intl.message(
+      'We are eQualit.ie',
+      name: 'titleWeAreEq',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Our Principles`
+  String get titleOurPrinciples {
+    return Intl.message(
+      'Our Principles',
+      name: 'titleOurPrinciples',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Privacy`
+  String get titlePrivacy {
+    return Intl.message(
+      'Privacy',
+      name: 'titlePrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Digital Security`
+  String get titleDigitalSecurity {
+    return Intl.message(
+      'Digital Security',
+      name: 'titleDigitalSecurity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Openness and Transparency`
+  String get titleOpennessTransparency {
+    return Intl.message(
+      'Openness and Transparency',
+      name: 'titleOpennessTransparency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Freedom of expression and access to information`
+  String get titleFreedomExpresionAccessInfo {
+    return Intl.message(
+      'Freedom of expression and access to information',
+      name: 'titleFreedomExpresionAccessInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Just and legal society`
+  String get titleJustLegalSociety {
+    return Intl.message(
+      'Just and legal society',
+      name: 'titleJustLegalSociety',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -2615,6 +2705,186 @@ class S {
     return Intl.message(
       'Tap here to read our values',
       name: 'messageTapForValues',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `“Man is born free, and everywhere he is in chains.”`
+  String get messageQuoteMainIsFree {
+    return Intl.message(
+      '“Man is born free, and everywhere he is in chains.”',
+      name: 'messageQuoteMainIsFree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Jean-Jacques Rousseau`
+  String get messageRousseau {
+    return Intl.message(
+      'Jean-Jacques Rousseau',
+      name: 'messageRousseau',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Basic rights and fundamental freedoms are inherent, inalienable and apply equally to everyone. Human rights are universal; protected in international law and enshrined in the `
+  String get messageEqValuesP1 {
+    return Intl.message(
+      'Basic rights and fundamental freedoms are inherent, inalienable and apply equally to everyone. Human rights are universal; protected in international law and enshrined in the ',
+      name: 'messageEqValuesP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `International Bill of Human Rights`
+  String get messageInternationalBillHumanRights {
+    return Intl.message(
+      'International Bill of Human Rights',
+      name: 'messageInternationalBillHumanRights',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brave people risk life and liberty to defend human rights, to mobilise, to criticise and to expose the perpetrators of abuse. Brave people voice support for others, for ideas, and communicate their concerns to the world. These brave people exercise their human rights online`
+  String get messageEqValuesP2 {
+    return Intl.message(
+      'Brave people risk life and liberty to defend human rights, to mobilise, to criticise and to expose the perpetrators of abuse. Brave people voice support for others, for ideas, and communicate their concerns to the world. These brave people exercise their human rights online',
+      name: 'messageEqValuesP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Internet is a platform for free expression and self-determination. Like any communication tool, the Internet is not immune from censorship, surveillance, attacks and attempts by state actors and criminal groups to silence dissident voices. When democratic expression is criminalised, when there is ethnic and political discrimination, the Internet becomes another battleground for non-violent resistance`
+  String get messageEqValuesP3 {
+    return Intl.message(
+      'The Internet is a platform for free expression and self-determination. Like any communication tool, the Internet is not immune from censorship, surveillance, attacks and attempts by state actors and criminal groups to silence dissident voices. When democratic expression is criminalised, when there is ethnic and political discrimination, the Internet becomes another battleground for non-violent resistance',
+      name: 'messageEqValuesP3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Our mission is to promote and defend fundamental freedoms and human rights, including the free flow of information online. Our goal is to create accessible technology and improve the skill set needed for defending human rights and freedoms in the digital age`
+  String get messageEqValuesP4 {
+    return Intl.message(
+      'Our mission is to promote and defend fundamental freedoms and human rights, including the free flow of information online. Our goal is to create accessible technology and improve the skill set needed for defending human rights and freedoms in the digital age',
+      name: 'messageEqValuesP4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We aim to educate and raise the capacity of our constituents to enjoy secure operations in the digital domain. We do this by building tools that enable and protect free expression, circumvent censorship, empower anonymity and protect from surveillance where and when necessary. Our tools also improve information management and analytic functions`
+  String get messageEqValuesP5 {
+    return Intl.message(
+      'We aim to educate and raise the capacity of our constituents to enjoy secure operations in the digital domain. We do this by building tools that enable and protect free expression, circumvent censorship, empower anonymity and protect from surveillance where and when necessary. Our tools also improve information management and analytic functions',
+      name: 'messageEqValuesP5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We are an international group of activists of diverse backgrounds and beliefs, standing together to defend the principles common among us. We are software developers, cryptographers, security specialists, as well as educators, sociologists, historians, anthropologists and journalists. We develop open and reusable tools with a focus on privacy, online security and better information management. We finance our operations with public grants and consultancies with the private sector. We believe in an Internet that is free from intrusive and unjustified surveillance, censorship and oppression`
+  String get messageEqValuesP6 {
+    return Intl.message(
+      'We are an international group of activists of diverse backgrounds and beliefs, standing together to defend the principles common among us. We are software developers, cryptographers, security specialists, as well as educators, sociologists, historians, anthropologists and journalists. We develop open and reusable tools with a focus on privacy, online security and better information management. We finance our operations with public grants and consultancies with the private sector. We believe in an Internet that is free from intrusive and unjustified surveillance, censorship and oppression',
+      name: 'messageEqValuesP6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inspired by the International Bill of Human Rights, our principles apply to every individual, group and organ of society that we work with, including the beneficiaries of the software and services we release. All of our projects are designed with our principles in mind. Our knowledge, tools and services are available to these groups and individuals as long as our principles and terms of service are respected`
+  String get messageEqValuesP7 {
+    return Intl.message(
+      'Inspired by the International Bill of Human Rights, our principles apply to every individual, group and organ of society that we work with, including the beneficiaries of the software and services we release. All of our projects are designed with our principles in mind. Our knowledge, tools and services are available to these groups and individuals as long as our principles and terms of service are respected',
+      name: 'messageEqValuesP7',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The right to privacy is a fundamental right that we aim to protect whenever and wherever possible. The privacy of our direct beneficiaries is sacrosanct to our operations. Our tools, services and internal policies are designed to this effect. We will use all technical and legal resources at our disposal to protect the privacy of our beneficiaries. Please refer to our Privacy Policy and our `
+  String get messageEqValuesP8 {
+    return Intl.message(
+      'The right to privacy is a fundamental right that we aim to protect whenever and wherever possible. The privacy of our direct beneficiaries is sacrosanct to our operations. Our tools, services and internal policies are designed to this effect. We will use all technical and legal resources at our disposal to protect the privacy of our beneficiaries. Please refer to our Privacy Policy and our ',
+      name: 'messageEqValuesP8',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Declaration for Distributed Online Services`
+  String get messageDeclarationDOS {
+    return Intl.message(
+      'Declaration for Distributed Online Services',
+      name: 'messageDeclarationDOS',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security is a constant thematic throughout all of our software development, service provision and capacity-building projects. We design our systems and processes to improve information security on the Internet and raise the user’s security profile and experience. We try to lead by example by not compromising the security properties of a tool or system for the sake of speed, usability or cost. We do not believe in security through obscurity and we maintain transparency through open access to our code base. We always err on the side of caution and try to implement good internal operational security`
+  String get messageEqValuesP9 {
+    return Intl.message(
+      'Security is a constant thematic throughout all of our software development, service provision and capacity-building projects. We design our systems and processes to improve information security on the Internet and raise the user’s security profile and experience. We try to lead by example by not compromising the security properties of a tool or system for the sake of speed, usability or cost. We do not believe in security through obscurity and we maintain transparency through open access to our code base. We always err on the side of caution and try to implement good internal operational security',
+      name: 'messageEqValuesP9',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `As an organisation, we seek to be transparent with our policies and procedures. As often as possible, our source code is open and freely available, protected by licences that encourage community-driven development, sharing and the propagation of these principles`
+  String get messageEqValuesP10 {
+    return Intl.message(
+      'As an organisation, we seek to be transparent with our policies and procedures. As often as possible, our source code is open and freely available, protected by licences that encourage community-driven development, sharing and the propagation of these principles',
+      name: 'messageEqValuesP10',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The ability to express oneself freely and to access public information is the backbone of a true democracy. Public information should be in the public domain. Freedom of expression includes active and heated debate, even arguments that are inelegantly articulated, poorly constructed and that may be considered offensive to some. However, freedom of expression is not an absolute right. We stand firmly against violence and the incitement to violate the rights of others, especially the propagation of violence, hate, discrimination and disenfranchisement of any identifiable ethnic or social group`
+  String get messageEqValuesP11 {
+    return Intl.message(
+      'The ability to express oneself freely and to access public information is the backbone of a true democracy. Public information should be in the public domain. Freedom of expression includes active and heated debate, even arguments that are inelegantly articulated, poorly constructed and that may be considered offensive to some. However, freedom of expression is not an absolute right. We stand firmly against violence and the incitement to violate the rights of others, especially the propagation of violence, hate, discrimination and disenfranchisement of any identifiable ethnic or social group',
+      name: 'messageEqValuesP11',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We operate from different countries and come from various social backgrounds. We work together towards a society that will respect and defend the rights of others in the physical and the digital world. The International Bill of Rights articulates the suite of human rights that inspires our work; we believe that people have a right and a duty to protect these rights`
+  String get messageEqValuesP12 {
+    return Intl.message(
+      'We operate from different countries and come from various social backgrounds. We work together towards a society that will respect and defend the rights of others in the physical and the digital world. The International Bill of Rights articulates the suite of human rights that inspires our work; we believe that people have a right and a duty to protect these rights',
+      name: 'messageEqValuesP12',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We understand that our tools and services can be abused to contravene these principles and our terms of service, and we firmly and actively condemn and forbid such usage. We neither permit our software and services to be used to further the commission of illicit activities, nor will we assist in the propagation of hate speech or the promotion of violence through the Internet`
+  String get messageEqValuesP13 {
+    return Intl.message(
+      'We understand that our tools and services can be abused to contravene these principles and our terms of service, and we firmly and actively condemn and forbid such usage. We neither permit our software and services to be used to further the commission of illicit activities, nor will we assist in the propagation of hate speech or the promotion of violence through the Internet',
+      name: 'messageEqValuesP13',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We have put safeguards in place to mitigate the misuse of our products and services. When we become aware of any use that violates our principles or terms of service, we take action to stop it. Guided by our internal policies, we carefully deliberate over acts that might compromise our principles. Our procedures will continue to evolve based on experience and best practices so that we can achieve the right balance between enabling open access to our products and services, and upholding our principles`
+  String get messageEqValuesP14 {
+    return Intl.message(
+      'We have put safeguards in place to mitigate the misuse of our products and services. When we become aware of any use that violates our principles or terms of service, we take action to stop it. Guided by our internal policies, we carefully deliberate over acts that might compromise our principles. Our procedures will continue to evolve based on experience and best practices so that we can achieve the right balance between enabling open access to our products and services, and upholding our principles',
+      name: 'messageEqValuesP14',
       desc: '',
       args: [],
     );
