@@ -142,6 +142,18 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
   }
 
   Future<void> _onConnectivityChange(ConnectivityResult result) async {
+    if (result == state.connectivityType) {
+      // The Cubit/Bloc machinery knows not to rebuild widgets if the state
+      // doesn't change, but in this function we also call
+      // `_session.bindNetwork` which we don't necessarily want to do if the
+      // connectivity type does not change. (Although with recent patches
+      // `_session.bindNetwork` should be idempotent if local endpoints don't
+      // change).
+      loggy.app(
+          'Connectivity event: ${result.name} (ignored, same as previous)');
+      return;
+    }
+
     loggy.app('Connectivity event: ${result.name}');
 
     emit(state.copyWith(connectivityType: result));
