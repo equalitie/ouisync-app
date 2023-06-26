@@ -118,6 +118,13 @@ class Constants {
 
   static const String eQLogo = 'assets/eq_logo.png';
 
+  static const String onboardingShareImage =
+      '01_onboarding_send_receive_files.png';
+  static const String onboardingPermissionsImage =
+      '02_onboarding_permissions_collaborate.png';
+  static const String onboardingAccessImage =
+      '03_onboarding_access_multiple_devices.png';
+
   static const String appIcon = './assets/favicon.png';
   static const String windowsAppIcon = './assets/favicon.ico';
 
