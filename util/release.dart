@@ -181,24 +181,23 @@ Future<void> upload(
   final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
-    final versionString = buildVersionString(version);
+    final tagName = buildVersionString(version);
 
-    print('Creating release $versionString ($commit) ...');
+    print('Creating release $tagName ($commit) ...');
 
     final createReleaseNotes = CreateReleaseNotes(
       slug.owner,
       slug.name,
-      versionString,
-      targetCommitish: commit,
+      // Using commit instead of tag name here because the tag doesn't exist yet.
+      commit,
     );
     final releaseNotes =
         await client.repositories.generateReleaseNotes(createReleaseNotes);
 
-    final createRelease = CreateRelease(versionString)
-      ..name = 'Ouisync $versionString'
+    final createRelease = CreateRelease(tagName)
+      ..name = 'Ouisync $tagName'
       ..body = releaseNotes.body
-      ..isDraft = true
-      ..targetCommitish = commit;
+      ..isDraft = true;
     final release =
         await client.repositories.createRelease(slug, createRelease);
 
@@ -218,7 +217,7 @@ Future<void> upload(
           .uploadReleaseAssets(release, [createReleaseAsset]);
     }
 
-    print('Release $versionString ($commit) successfully created');
+    print('Release $tagName ($commit) successfully created');
 
     // Remove previous drafts
     await for (final oldRelease in client.repositories.listReleases(slug)) {
@@ -288,7 +287,7 @@ String createTag(Version version, String commit) {
 
 Future<String> getGitCommit() async {
   final result = await Process.run('git', ['rev-parse', '--short', 'HEAD']);
-  return result.stdout;
+  return result.stdout.trim();
 }
 
 Future<void> run(String command, List<String> args) async {
