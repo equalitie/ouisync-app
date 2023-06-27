@@ -272,13 +272,13 @@ class _MainPageState extends State<MainPage>
   Widget build(BuildContext context) => Scaffold(
       appBar: _buildOuiSyncBar(),
       body: WillPopScope(
-          child: Column(
-            children: <Widget>[
-              _cubits.repositories.builder(
-                  (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit)),
-              Expanded(child: buildMainWidget()),
-            ],
-          ),
+          child: Stack(
+              alignment: AlignmentDirectional.bottomEnd,
+              children: <Widget>[
+                Expanded(child: buildMainWidget()),
+                _cubits.repositories.builder((repos) =>
+                    RepositoryProgress(repos.currentRepo?.maybeCubit))
+              ]),
           onWillPop: _onBackPressed),
       floatingActionButton: _cubits.repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
@@ -458,22 +458,20 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _previewFile(RepoCubit repo, FileItem item) async {
     if (io.Platform.isAndroid) {
-      await NativeChannels.previewOuiSyncFile(
-          F.authority, item.path, item.size,
+      await NativeChannels.previewOuiSyncFile(F.authority, item.path, item.size,
           useDefaultApp: true);
     } else if (io.Platform.isWindows) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {
-        showSnackBar(context,
-            message: "The repository is not mounted");
+        showSnackBar(context, message: "The repository is not mounted");
         return;
       }
-      var result = await io.Process.run('cmd', ['/c', 'start', '', '$mountedDirectory${item.path}']);
+      var result = await io.Process.run(
+          'cmd', ['/c', 'start', '', '$mountedDirectory${item.path}']);
       loggy.app(result.stdout);
     } else {
       // Only the above platforms are supported right now.
-      showSnackBar(context,
-          message: S.current.messageFilePreviewNotAvailable);
+      showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
     }
   }
 
