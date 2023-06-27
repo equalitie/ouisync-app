@@ -24,7 +24,7 @@ Future<void> main(List<String> args) async {
 
   final token = options.token;
   if (token != null) {
-    await upload(version, [aab, apk], token);
+    await upload(version, [apk, aab], token);
   } else {
     print(
         'no GitHub API access token specified - skipping creation of GitHub release');
@@ -77,7 +77,7 @@ Future<File> buildAab(
   var outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
-    print('Not creating $outputPath already exists');
+    print('Not creating $outputPath - already exists');
     return outputFile;
   }
 
@@ -204,6 +204,20 @@ Future<void> upload(
     }
 
     print('Release $versionString successfully created');
+
+    // Remove previous drafts
+    await for (final oldRelease in client.repositories.listReleases(slug)) {
+      if (oldRelease.id == release.id) {
+        continue;
+      }
+
+      if (!(oldRelease.isDraft ?? false)) {
+        continue;
+      }
+
+      print('Removing outdated draft release ${oldRelease.name}');
+      await client.repositories.deleteRelease(slug, oldRelease);
+    }
   } finally {
     client.dispose();
   }
