@@ -34,13 +34,13 @@ packages:
     source: hosted
     version: "3.3.7"
   args:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: args
-      sha256: c372bb384f273f0c2a8aaaa226dad84dc27c8519a691b888725dec59518ad53a
+      sha256: eef6c46b622e0494a36c5a12d10d77fb4e855501a91c1b9ef9339326e58f0596
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   async:
     dependency: "direct main"
     description:
@@ -598,6 +598,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.6.0"
+  github:
+    dependency: "direct dev"
+    description:
+      name: github
+      sha256: "5640619ae3780877fe62b7837b41343350acc845c528f7b339c34c60745f2cdd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.15.1"
   glob:
     dependency: transitive
     description:
@@ -1102,6 +1110,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.4"
+  properties:
+    dependency: "direct dev"
+    description:
+      name: properties
+      sha256: "975daa001432c70f5f494b50e4c5c72990d2f026e4a307cb4aaec99562f2d0e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   provider:
     dependency: transitive
     description:
@@ -1111,7 +1127,7 @@ packages:
     source: hosted
     version: "6.0.5"
   pub_semver:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pub_semver
       sha256: "40d3ab1bbd474c4c2328c91e3a7df8c6dd629b79ece4c4bd04bee496a224fb0c"
@@ -1119,7 +1135,7 @@ packages:
     source: hosted
     version: "2.1.4"
   pubspec_parse:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pubspec_parse
       sha256: c63b2876e58e194e4b0828fcb080ad0e06d051cb607a6be51a9e084f47cb9367
