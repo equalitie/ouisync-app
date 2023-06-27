@@ -441,6 +441,7 @@
   "messageEqValuesP12":"We operate from different countries and come from various social backgrounds. We work together towards a society that will respect and defend the rights of others in the physical and the digital world. The International Bill of Rights articulates the suite of human rights that inspires our work; we believe that people have a right and a duty to protect these rights",
   "messageEqValuesP13":"We understand that our tools and services can be abused to contravene these principles and our terms of service, and we firmly and actively condemn and forbid such usage. We neither permit our software and services to be used to further the commission of illicit activities, nor will we assist in the propagation of hate speech or the promotion of violence through the Internet",
   "messageEqValuesP14":"We have put safeguards in place to mitigate the misuse of our products and services. When we become aware of any use that violates our principles or terms of service, we take action to stop it. Guided by our internal policies, we carefully deliberate over acts that might compromise our principles. Our procedures will continue to evolve based on experience and best practices so that we can achieve the right balance between enabling open access to our products and services, and upholding our principles",
+  "messageRepositoryNotMounted":"The repository is not mounted ",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",

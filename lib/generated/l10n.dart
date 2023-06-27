@@ -2900,6 +2900,16 @@ class S {
     );
   }
 
+  /// `The repository is not mounted `
+  String get messageRepositoryNotMounted {
+    return Intl.message(
+      'The repository is not mounted ',
+      name: 'messageRepositoryNotMounted',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

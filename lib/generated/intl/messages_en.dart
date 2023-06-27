@@ -527,6 +527,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Repository new name"),
         "messageRepositoryNewPassword":
             MessageLookupByLibrary.simpleMessage("New password"),
+        "messageRepositoryNotMounted": MessageLookupByLibrary.simpleMessage(
+            "The repository is not mounted "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Password"),
         "messageRepositorySuggestedName": m18,
