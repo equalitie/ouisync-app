@@ -35,8 +35,9 @@ class PlatformWindowManagerDesktop
       /// So we use a harcoded string to start, then we use the localized string
       /// in app.dart -for now.
 
-      const width = 700.0;
-      const height = width * 1.3;
+      // Make it usable on older HD displays.
+      const width = 650.0;
+      const height = 700.0;
 
       const initialSize = Size(width, height);
 
@@ -46,7 +47,7 @@ class PlatformWindowManagerDesktop
           skipTaskbar: false,
           title: 'Ouisync',
           size: initialSize,
-          minimumSize: initialSize);
+          minimumSize: Size(320, 200));
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.show();
