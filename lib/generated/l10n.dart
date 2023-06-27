@@ -560,6 +560,16 @@ class S {
     );
   }
 
+  /// `Privacy Policy`
+  String get titlePrivacyPolicy {
+    return Intl.message(
+      'Privacy Policy',
+      name: 'titlePrivacyPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Digital Security`
   String get titleDigitalSecurity {
     return Intl.message(

@@ -28,42 +28,50 @@ class AboutSection extends SettingsSection with AppLogger {
             trailing:
                 PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
             value: Text(S.current.messageFAQ),
-            onTap: () => unawaited(_openFaq(context))),
+            onTap: () => unawaited(
+                _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
+        NavigationTile(
+            title: Text(S.current.titlePrivacyPolicy),
+            leading: Icon(Icons.privacy_tip_rounded),
+            trailing:
+                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+            onTap: () => unawaited(_openUrl(context,
+                S.current.titlePrivacyPolicy, Constants.eqPrivacyPolicy))),
         if (PlatformValues.isMobileDevice)
           NavigationTile(
             title: Text(S.current.titleSendFeedback),
-            leading: Icon(Icons.comment),
+            leading: Icon(Icons.comment_rounded),
             onTap: () => unawaited(_openFeedback(context)),
           ),
         NavigationTile(
           title: Text(Constants.ouisyncUrl),
           // Icons.language is actually a stylized globe icon which is a good fit here:
-          leading: Icon(Icons.language),
+          leading: Icon(Icons.language_rounded),
           trailing: _externalNavigationIcon,
           onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
         ),
         NavigationTile(
           title: Text(Constants.supportEmail),
-          leading: Icon(Icons.mail),
+          leading: Icon(Icons.mail_rounded),
           trailing: _externalNavigationIcon,
           onTap: () => unawaited(
               launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
         ),
         NavigationTile(
           title: Text(S.current.titleIssueTracker),
-          leading: Icon(Icons.bug_report),
+          leading: Icon(Icons.bug_report_rounded),
           trailing: _externalNavigationIcon,
           onTap: () =>
               unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
         ),
         AppVersionTile(
           session: _cubits.repositories.session,
-          leading: Icon(Icons.info_outline),
+          leading: Icon(Icons.info_rounded),
           title: Text(S.current.labelAppVersion),
         ),
         SettingsTile(
           title: Text(S.current.messageSettingsRuntimeID),
-          leading: Icon(Icons.person),
+          leading: Icon(Icons.person_rounded),
           value: _getRuntimeIdForOS(),
         ),
       ];
@@ -73,21 +81,21 @@ class AboutSection extends SettingsSection with AppLogger {
     return _cubits.upgradeExists.state;
   }
 
-  Future<void> _openFaq(BuildContext context) async {
+  Future<void> _openUrl(BuildContext context, String title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isMobileDevice) {
-      final title = Text(S.current.titleFAQShort);
+      final pageTitle = Text(title);
       final content = await Dialogs.executeFutureWithLoadingDialog(context,
-          f: webView.loadUrl(context, Constants.faqUrl));
+          f: webView.loadUrl(context, url));
 
       await Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  WebViewPage(title: title, content: content)));
+                  WebViewPage(title: pageTitle, content: content)));
     } else {
-      await webView.launchUrl(Constants.faqUrl);
+      await webView.launchUrl(url);
     }
   }
 
