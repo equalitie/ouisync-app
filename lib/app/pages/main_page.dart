@@ -463,7 +463,7 @@ class _MainPageState extends State<MainPage>
     } else if (io.Platform.isWindows) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {
-        showSnackBar(context, message: "The repository is not mounted");
+        showSnackBar(context, message: S.current.messageRepositoryNotMounted);
         return;
       }
       var result = await io.Process.run(
