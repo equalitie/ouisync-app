@@ -109,6 +109,7 @@ dependency_overrides:
 
 dev_dependencies:
   args: ^2.4.2
+  date_format: ^2.0.7
   flutter_test:
     sdk: flutter
   github: ^9.15.1
