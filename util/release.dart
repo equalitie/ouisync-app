@@ -18,16 +18,15 @@ Future<void> main(List<String> args) async {
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final version = pubspec.version!;
-  final commit = await getGitCommit();
-  final tag = createTag(version, commit);
+  final suffix = createFileSuffix(version);
 
-  final workDir = await createWorkDir(tag);
-  final aab = await buildAab(tag, workDir);
+  final workDir = await createWorkDir(suffix);
+  final aab = await buildAab(suffix, workDir);
   final apk = await extractApk(aab);
 
   final token = options.token;
   if (token != null) {
-    await upload(version, commit, [apk, aab], token);
+    await upload(version, [apk, aab], token);
   } else {
     print(
         'no GitHub API access token specified - skipping creation of GitHub release');
@@ -173,7 +172,6 @@ Future<String> prepareBundletool() async {
 
 Future<void> upload(
   Version version,
-  String commit,
   List<File> assets,
   String token,
 ) async {
@@ -181,25 +179,27 @@ Future<void> upload(
   final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
-    final tagName = buildVersionString(version);
+    final commit = await getGitCommit();
+    final tagName = buildTagName(version);
 
     print('Creating release $tagName ($commit) ...');
 
-    final createReleaseNotes = CreateReleaseNotes(
-      slug.owner,
-      slug.name,
-      // Using commit instead of tag name here because the tag doesn't exist yet.
-      commit,
+    final releaseNotes = await client.repositories.generateReleaseNotes(
+      CreateReleaseNotes(
+        slug.owner,
+        slug.name,
+        // Using commit instead of tag name here because the tag doesn't exist yet.
+        commit,
+      ),
     );
-    final releaseNotes =
-        await client.repositories.generateReleaseNotes(createReleaseNotes);
 
-    final createRelease = CreateRelease(tagName)
-      ..name = 'Ouisync $tagName'
-      ..body = releaseNotes.body
-      ..isDraft = true;
-    final release =
-        await client.repositories.createRelease(slug, createRelease);
+    final release = await client.repositories.createRelease(
+      slug,
+      CreateRelease(tagName)
+        ..name = 'Ouisync $tagName'
+        ..body = releaseNotes.body
+        ..isDraft = true,
+    );
 
     for (final asset in assets) {
       final name = basename(asset.path);
@@ -207,14 +207,16 @@ Future<void> upload(
 
       print('Uploading $name ...');
 
-      final createReleaseAsset = CreateReleaseAsset(
-        name: name,
-        contentType: 'application/octet-stream',
-        assetData: content,
+      await client.repositories.uploadReleaseAssets(
+        release,
+        [
+          CreateReleaseAsset(
+            name: name,
+            contentType: 'application/octet-stream',
+            assetData: content,
+          )
+        ],
       );
-
-      await client.repositories
-          .uploadReleaseAssets(release, [createReleaseAsset]);
     }
 
     print('Release $tagName ($commit) successfully created');
@@ -237,7 +239,7 @@ Future<void> upload(
   }
 }
 
-String buildVersionString(Version version) {
+String buildTagName(Version version) {
   final pre = version.preRelease.join('.');
   final v = Version(
     version.major,
@@ -255,7 +257,7 @@ Future<Directory> createWorkDir(String tag) async {
   return dir;
 }
 
-String createTag(Version version, String commit) {
+String createFileSuffix(Version version) {
   final timestamp = DateTime.now();
 
   final buffer = StringBuffer();
@@ -278,9 +280,7 @@ String createTag(Version version, String commit) {
     ..write(formatDate(
       timestamp,
       [yyyy, mm, dd, HH, nn, ss],
-    ))
-    ..write('-')
-    ..write(commit);
+    ));
 
   return buffer.toString();
 }
