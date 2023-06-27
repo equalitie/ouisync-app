@@ -293,6 +293,11 @@ class _MainPageState extends State<MainPage>
         await currentRepo.cubit.navigateTo(currentFolder.parent);
         return false;
       }
+
+      if (!_cubits.repositories.showList) {
+        _cubits.repositories.pushRepoList(true);
+        return false;
+      }
     }
 
     int clickCount = exitClickCounter.registerClick();
