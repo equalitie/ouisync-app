@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
+import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart';
 import 'package:properties/properties.dart';
@@ -17,14 +18,16 @@ Future<void> main(List<String> args) async {
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final version = pubspec.version!;
+  final commit = await getGitCommit();
+  final tag = createTag(version, commit);
 
-  final workDir = await createWorkDir(version);
-  final aab = await buildAab(version, workDir);
+  final workDir = await createWorkDir(tag);
+  final aab = await buildAab(tag, workDir);
   final apk = await extractApk(aab);
 
   final token = options.token;
   if (token != null) {
-    await upload(version, [apk, aab], token);
+    await upload(version, commit, [apk, aab], token);
   } else {
     print(
         'no GitHub API access token specified - skipping creation of GitHub release');
@@ -67,13 +70,13 @@ class Options {
 }
 
 Future<File> buildAab(
-  Version version,
+  String tag,
   Directory workDir, {
   String flavor = "vanilla",
 }) async {
   final inputPath =
       'build/app/outputs/bundle/${flavor}Release/app-$flavor-release.aab';
-  final outputPath = '${workDir.path}/ouisync-$version.aab';
+  final outputPath = '${workDir.path}/ouisync-$tag.aab';
   var outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
@@ -170,6 +173,7 @@ Future<String> prepareBundletool() async {
 
 Future<void> upload(
   Version version,
+  String commit,
   List<File> assets,
   String token,
 ) async {
@@ -179,11 +183,22 @@ Future<void> upload(
   try {
     final versionString = buildVersionString(version);
 
-    print('Creating release $versionString ...');
+    print('Creating release $versionString ($commit) ...');
+
+    final createReleaseNotes = CreateReleaseNotes(
+      slug.owner,
+      slug.name,
+      versionString,
+      targetCommitish: commit,
+    );
+    final releaseNotes =
+        await client.repositories.generateReleaseNotes(createReleaseNotes);
 
     final createRelease = CreateRelease(versionString)
       ..name = 'Ouisync $versionString'
-      ..isDraft = true;
+      ..body = releaseNotes.body
+      ..isDraft = true
+      ..targetCommitish = commit;
     final release =
         await client.repositories.createRelease(slug, createRelease);
 
@@ -203,7 +218,7 @@ Future<void> upload(
           .uploadReleaseAssets(release, [createReleaseAsset]);
     }
 
-    print('Release $versionString successfully created');
+    print('Release $versionString ($commit) successfully created');
 
     // Remove previous drafts
     await for (final oldRelease in client.repositories.listReleases(slug)) {
@@ -235,10 +250,45 @@ String buildVersionString(Version version) {
   return 'v$v';
 }
 
-Future<Directory> createWorkDir(Version version) async {
-  final dir = Directory('$rootWorkDir/v$version');
+Future<Directory> createWorkDir(String tag) async {
+  final dir = Directory('$rootWorkDir/$tag');
   await dir.create(recursive: true);
   return dir;
+}
+
+String createTag(Version version, String commit) {
+  final timestamp = DateTime.now();
+
+  final buffer = StringBuffer();
+  buffer
+    ..write('v')
+    ..write(version.major)
+    ..write('.')
+    ..write(version.minor)
+    ..write('.')
+    ..write(version.patch);
+
+  if (version.preRelease.isNotEmpty) {
+    buffer
+      ..write('-')
+      ..write(version.preRelease.join('.'));
+  }
+
+  buffer
+    ..write('-')
+    ..write(formatDate(
+      timestamp,
+      [yyyy, mm, dd, HH, nn, ss],
+    ))
+    ..write('-')
+    ..write(commit);
+
+  return buffer.toString();
+}
+
+Future<String> getGitCommit() async {
+  final result = await Process.run('git', ['rev-parse', '--short', 'HEAD']);
+  return result.stdout;
 }
 
 Future<void> run(String command, List<String> args) async {
