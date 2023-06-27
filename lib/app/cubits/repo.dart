@@ -194,6 +194,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     );
   }
 
+  String? mountedDirectory() {
+    final mountPoint = _handle.session.mountPoint;
+    if (mountPoint == null) {
+      return null;
+    }
+    return "$mountPoint/${this.name}";
+  }
+
   Future<bool> exists(String path) async {
     return await _handle.exists(path);
   }

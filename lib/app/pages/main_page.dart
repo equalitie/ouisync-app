@@ -451,6 +451,27 @@ class _MainPageState extends State<MainPage>
     );
   }
 
+  Future<void> _previewFile(RepoCubit repo, FileItem item) async {
+    if (io.Platform.isAndroid) {
+      await NativeChannels.previewOuiSyncFile(
+          F.authority, item.path, item.size,
+          useDefaultApp: true);
+    } else if (io.Platform.isWindows) {
+      final mountedDirectory = repo.mountedDirectory();
+      if (mountedDirectory == null) {
+        showSnackBar(context,
+            message: "The repository is not mounted");
+        return;
+      }
+      var result = await io.Process.run('cmd', ['/c', 'start', '', '$mountedDirectory${item.path}']);
+      loggy.app(result.stdout);
+    } else {
+      // Only the above platforms are supported right now.
+      showSnackBar(context,
+          message: S.current.messageFilePreviewNotAvailable);
+    }
+  }
+
   Widget _contentsList(RepoCubit currentRepo) => ValueListenableBuilder(
       valueListenable: _bottomPaddingWithBottomSheet,
       builder: (context, value, child) => RefreshIndicator(
@@ -474,16 +495,7 @@ class _MainPageState extends State<MainPage>
                       return;
                     }
 
-                    /// For now, only Android can preview files.
-                    if (!io.Platform.isAndroid) {
-                      showSnackBar(context,
-                          message: S.current.messageFilePreviewNotAvailable);
-                      return;
-                    }
-
-                    await NativeChannels.previewOuiSyncFile(
-                        F.authority, item.path, item.size,
-                        useDefaultApp: true);
+                    await _previewFile(currentRepo, item);
                   };
                 } else if (item is FolderItem) {
                   actionByType = () {
