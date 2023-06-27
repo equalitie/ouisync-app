@@ -1,8 +1,8 @@
 {
   "@@locale": "es",
-  "titleAppTitle": "OuiSync",
+  "titleAppTitle": "Ouisync",
   "@titleAppTitle": {},
-  "titleAddFile": "Agregar un archivo a OuiSync",
+  "titleAddFile": "Añadir un archivo a Ouisync",
   "@titleAddFile": {},
   "titleMovingEntry": "Moviendo entrada",
   "@titleMovingEntry": {},
@@ -258,11 +258,11 @@
   "@messageSelectLocation": {},
   "messageSaveToLocation": "Guardar el archivo en este directorio",
   "@messageSaveToLocation": {},
-  "messageOuiSyncDesktopTitle": "OuiSync",
+  "messageOuiSyncDesktopTitle": "Ouisync",
   "@messageOuiSyncDesktopTitle": {},
   "messageFilePreviewNotAvailable": "La vista previa de archivo no está disponible todavía",
   "@messageFilePreviewNotAvailable": {},
-  "messageBackgroundNotificationAndroid": "OuiSync está corriendo",
+  "messageBackgroundNotificationAndroid": "Ouisync se está ejecutando",
   "@messageBackgroundNotificationAndroid": {},
   "messageBackgroundAndroidPermissions": "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente",
   "@messageBackgroundAndroidPermissions": {},
@@ -631,5 +631,19 @@
   "messageBioAuthFailed": "Fallo en la autentificación biométrica",
   "@messageBioAuthFailed": {},
   "messageValidateLocalPassword": "Validar la contraseña localmente",
-  "@messageValidateLocalPassword": {}
+  "@messageValidateLocalPassword": {},
+  "titleFAQShort": "PREGUNTAS FRECUENTES",
+  "@titleFAQShort": {},
+  "titleSendFeedback": "Envía tus comentarios",
+  "@titleSendFeedback": {},
+  "titleIssueTracker": "Rastreador de los problemas",
+  "@titleIssueTracker": {
+    "description": "link to github issue tracker in setting/about"
+  },
+  "labelAttachLogs": "Adjuntar los registros",
+  "@labelAttachLogs": {},
+  "messageFAQ": "Preguntas frecuentes",
+  "@messageFAQ": {},
+  "messageMissingBackgroundServicePermission": "Ouisync no tiene permiso para ejecutarse en segundo plano, abrir otra aplicación puede detener la sincronización en curso",
+  "@messageMissingBackgroundServicePermission": {}
 }
