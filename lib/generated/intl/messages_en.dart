@@ -670,6 +670,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Our Principles"),
         "titleOurValues": MessageLookupByLibrary.simpleMessage("Our values"),
         "titlePrivacy": MessageLookupByLibrary.simpleMessage("Privacy"),
+        "titlePrivacyPolicy":
+            MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
         "titleRepositoriesList":

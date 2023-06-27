@@ -34,9 +34,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return IntroductionScreen(
         key: introKey,
         globalBackgroundColor: Colors.white,
-        allowImplicitScrolling: true,
-        autoScrollDuration: 3000,
-        freeze: true,
         pages: [
           PageViewModel(
             title: S.current.titleOnboardingShare,
@@ -58,7 +55,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
         ],
         onDone: () async => await _onIntroEnd(context),
-        onSkip: () async => await _onIntroEnd(context), // You can override onSkip callback
+        onSkip: () async =>
+            await _onIntroEnd(context), // You can override onSkip callback
         skipOrBackFlex: 0,
         nextFlex: 0,
         showBackButton: true,
