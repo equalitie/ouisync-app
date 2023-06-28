@@ -238,8 +238,11 @@ Future<String> buildReleaseNotes(
 ) async {
   final buf = StringBuffer();
 
+  buf.writeln('## What\'s new');
+  buf.writeln('');
+
   // App
-  buf.writeln('## App');
+  buf.writeln('### App');
   buf.writeln('');
   buf.writeln(changelogUrl(slug, first, last));
   buf.writeln('');
@@ -259,7 +262,7 @@ Future<String> buildReleaseNotes(
     );
 
     buf.writeln('');
-    buf.writeln('## Plugin');
+    buf.writeln('### Plugin');
     buf.writeln('');
     buf.writeln(
       changelogUrl(pluginSlug, pluginFirst, pluginLast),
@@ -290,7 +293,7 @@ Future<String> buildReleaseNotes(
     );
 
     buf.writeln('');
-    buf.writeln('## Library');
+    buf.writeln('### Library');
     buf.writeln('');
     buf.writeln(
       changelogUrl(libSlug, libFirst, libLast),
