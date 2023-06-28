@@ -145,6 +145,8 @@ class Constants {
   static const String assetLockedRepository = 'assets/locked_repo.png';
   static const String assetEmptyFolder = 'assets/empty_folder.png';
 
+  static const String dokanUrl = "https://dokan-dev.github.io";
+
   // List of available storage servers.
   static const List<String> storageServers = ["storage.ouisync.net"];
 }

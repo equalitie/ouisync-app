@@ -572,5 +572,17 @@
   "actionDone":"Done",
   "actionNext":"Next",
   "actionIAgree":"I agree",
-  "actionIDontAgree":"I don't agree"
+  "actionIDontAgree":"I don't agree",
+  "messageFailedToMount": "Failed to mount: {reason}",
+  "@messageFailedToMount": {
+    "placeholders": {
+        "reason": {}
+    }
+  },
+  "messageErrorDokanNotInstalled": "Missing Dokan installation. Please install it from {dokanUrl}",
+  "@messageErrorDokanNotInstalled": {
+    "placeholders": {
+        "dokanUrl": {}
+    }
+  }
 }
