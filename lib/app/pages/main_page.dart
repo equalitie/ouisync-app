@@ -275,7 +275,7 @@ class _MainPageState extends State<MainPage>
           child: Stack(
               alignment: AlignmentDirectional.bottomEnd,
               children: <Widget>[
-                Expanded(child: buildMainWidget()),
+                Column(children: [Expanded(child: buildMainWidget())]),
                 _cubits.repositories.builder((repos) =>
                     RepositoryProgress(repos.currentRepo?.maybeCubit))
               ]),
