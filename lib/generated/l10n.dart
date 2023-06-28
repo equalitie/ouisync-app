@@ -3689,6 +3689,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Failed to mount: {reason}`
+  String messageFailedToMount(Object reason) {
+    return Intl.message(
+      'Failed to mount: $reason',
+      name: 'messageFailedToMount',
+      desc: '',
+      args: [reason],
+    );
+  }
+
+  /// `Missing Dokan installation. Please install it from {dokanUrl}`
+  String messageErrorDokanNotInstalled(Object dokanUrl) {
+    return Intl.message(
+      'Missing Dokan installation. Please install it from $dokanUrl',
+      name: 'messageErrorDokanNotInstalled',
+      desc: '',
+      args: [dokanUrl],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

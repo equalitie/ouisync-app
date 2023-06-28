@@ -76,23 +76,22 @@ class LogsSection extends SettingsSection {
                 return SizedBox.shrink();
               }
 
-              String message;
+              String reason;
               Widget? trailing = null;
               void Function()? onTap = null;
 
               if (error.code == oui.ErrorCode.vfsDriverInstall) {
-                message =
-                    "Missing Dokan installation. Please install it from https://dokan-dev.github.io";
+                reason = S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
                 trailing = Icon(Icons.open_in_browser);
                 onTap = () {
                   unawaited(
-                      launchUrl(Uri.parse("https://dokan-dev.github.io")));
+                      launchUrl(Uri.parse(Constants.dokanUrl)));
                 };
               } else {
-                message = "${error.message}";
+                reason = error.message;
               }
 
-              return _errorTile(context, "Failed to mount: ${message}",
+              return _errorTile(context, S.current.messageFailedToMount(reason),
                   trailing: trailing, onTap: onTap);
             })
     ];
