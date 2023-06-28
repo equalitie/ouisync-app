@@ -18,15 +18,19 @@ Future<void> main(List<String> args) async {
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final version = pubspec.version!;
-  final suffix = createFileSuffix(version);
 
-  final workDir = await createWorkDir(suffix);
-  final aab = await buildAab(suffix, workDir);
-  final apk = await extractApk(aab);
+  //final suffix = createFileSuffix(version);
+  //final workDir = await createWorkDir(suffix);
+
+  //final aab = await buildAab(suffix, workDir);
+  //final apk = await extractApk(aab);
+  //final assets = <File>[apk, aab];
+
+  final assets = <File>[];
 
   final token = options.token;
   if (token != null) {
-    await upload(version, [apk, aab], token);
+    await upload(version, assets, token, first: options.firstCommit);
   } else {
     print(
         'no GitHub API access token specified - skipping creation of GitHub release');
@@ -35,8 +39,9 @@ Future<void> main(List<String> args) async {
 
 class Options {
   final String? token;
+  final String? firstCommit;
 
-  Options._({this.token});
+  Options._({this.token, this.firstCommit});
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
@@ -45,6 +50,7 @@ class Options {
       abbr: 't',
       help: 'Path to a file with the GitHub API access token',
     );
+    parser.addOption('first-commit', abbr: 'f');
     parser.addFlag(
       'help',
       abbr: 'h',
@@ -64,7 +70,10 @@ class Options {
         ? await File(tokenFilePath).readAsString()
         : null;
 
-    return Options._(token: token?.trim());
+    return Options._(
+      token: token?.trim(),
+      firstCommit: results['first-commit']?.trim(),
+    );
   }
 }
 
@@ -173,31 +182,30 @@ Future<String> prepareBundletool() async {
 Future<void> upload(
   Version version,
   List<File> assets,
-  String token,
-) async {
+  String token, {
+  String? first,
+}) async {
   final client = GitHub(auth: Authentication.withToken(token));
   final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
-    final commit = await getGitCommit();
+    final last = await getCommit();
     final tagName = buildTagName(version);
 
-    print('Creating release $tagName ($commit) ...');
+    print('Creating release $tagName ($last) ...');
 
-    final releaseNotes = await client.repositories.generateReleaseNotes(
-      CreateReleaseNotes(
-        slug.owner,
-        slug.name,
-        // Using commit instead of tag name here because the tag doesn't exist yet.
-        commit,
-      ),
-    );
+    if (first == null) {
+      final prev = await client.repositories.getLatestRelease(slug);
+      first = prev.tagName!;
+    }
+
+    final body = await buildReleaseNotes(slug, first, last);
 
     final release = await client.repositories.createRelease(
       slug,
       CreateRelease(tagName)
         ..name = 'Ouisync $tagName'
-        ..body = releaseNotes.body
+        ..body = body
         ..isDraft = true,
     );
 
@@ -219,24 +227,122 @@ Future<void> upload(
       );
     }
 
-    print('Release $tagName ($commit) successfully created');
-
-    // Remove previous drafts
-    await for (final oldRelease in client.repositories.listReleases(slug)) {
-      if (oldRelease.id == release.id) {
-        continue;
-      }
-
-      if (!(oldRelease.isDraft ?? false)) {
-        continue;
-      }
-
-      print('Removing outdated draft release ${oldRelease.name}');
-      await client.repositories.deleteRelease(slug, oldRelease);
-    }
+    print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
   } finally {
     client.dispose();
   }
+}
+
+Future<String> buildReleaseNotes(
+  RepositorySlug slug,
+  String first,
+  String last,
+) async {
+  final buf = StringBuffer();
+
+  // App
+  buf.writeln('## App');
+  buf.writeln('');
+  buf.writeln(changelogUrl(slug, first, last));
+  buf.writeln('');
+  buf.writeln(await getLog(slug, first, last));
+
+  // Plugin
+  final pluginSlug = RepositorySlug(slug.owner, 'ouisync-plugin');
+  final pluginLast = await getSubmoduleCommit(last, 'ouisync-plugin');
+  final pluginFirst = await getSubmoduleCommit(first, 'ouisync-plugin');
+
+  if (pluginFirst != pluginLast) {
+    final pluginLog = await getLog(
+      pluginSlug,
+      pluginFirst,
+      pluginLast,
+      'ouisync-plugin',
+    );
+
+    buf.writeln('');
+    buf.writeln('## Plugin');
+    buf.writeln('');
+    buf.writeln(
+      changelogUrl(pluginSlug, pluginFirst, pluginLast),
+    );
+    buf.writeln('');
+    buf.writeln(pluginLog);
+  }
+
+  // Library
+  final libSlug = RepositorySlug(slug.owner, 'ouisync');
+  final libLast = await getSubmoduleCommit(
+    pluginLast,
+    'ouisync',
+    'ouisync-plugin',
+  );
+  final libFirst = await getSubmoduleCommit(
+    pluginFirst,
+    'ouisync',
+    'ouisync-plugin',
+  );
+
+  if (libFirst != libLast) {
+    final libLog = await getLog(
+      libSlug,
+      libFirst,
+      libLast,
+      'ouisync-plugin/ouisync',
+    );
+
+    buf.writeln('');
+    buf.writeln('## Library');
+    buf.writeln('');
+    buf.writeln(
+      changelogUrl(libSlug, libFirst, libLast),
+    );
+    buf.writeln('');
+    buf.writeln(libLog);
+  }
+
+  return buf.toString();
+}
+
+Future<String> getCommit([String? workingDirectory]) => runCapture(
+      'git',
+      ['rev-parse', '--short', 'HEAD'],
+      workingDirectory,
+    );
+
+Future<String> getSubmoduleCommit(
+  String superCommit,
+  String submodule, [
+  String? workingDirectory,
+]) async {
+  final output = await runCapture(
+    'git',
+    ['ls-tree', superCommit, submodule],
+    workingDirectory,
+  );
+  final parts = output.split(RegExp(r'\s+'));
+
+  return parts[2];
+}
+
+Future<String> getLog(
+  RepositorySlug slug,
+  String first,
+  String last, [
+  String? workingDirectory,
+]) =>
+    runCapture(
+      'git',
+      [
+        'log',
+        '$first...$last',
+        '--pretty=format:- https://github.com/${slug.owner}/${slug.name}/commit/%h %s'
+      ],
+      workingDirectory,
+    );
+
+String changelogUrl(RepositorySlug slug, String first, String last) {
+  return 'https://github.com/${slug.owner}/${slug.name}/compare/$first...$last';
 }
 
 String buildTagName(Version version) {
@@ -285,13 +391,16 @@ String createFileSuffix(Version version) {
   return buffer.toString();
 }
 
-Future<String> getGitCommit() async {
-  final result = await Process.run('git', ['rev-parse', '--short', 'HEAD']);
-  return result.stdout.trim();
-}
-
-Future<void> run(String command, List<String> args) async {
-  final process = await Process.start(command, args);
+Future<void> run(
+  String command,
+  List<String> args, [
+  String? workingDirectory,
+]) async {
+  final process = await Process.start(
+    command,
+    args,
+    workingDirectory: workingDirectory,
+  );
 
   unawaited(process.stdout.transform(utf8.decoder).forEach(stdout.write));
   unawaited(process.stderr.transform(utf8.decoder).forEach(stderr.write));
@@ -299,6 +408,25 @@ Future<void> run(String command, List<String> args) async {
   final exitCode = await process.exitCode;
 
   if (exitCode != 0) {
-    throw 'Command "$command" failed with exit code $exitCode';
+    throw 'Command "$command ${args.join(' ')}" failed with exit code $exitCode';
   }
+}
+
+Future<String> runCapture(
+  String command,
+  List<String> args, [
+  String? workingDirectory,
+]) async {
+  final result = await Process.run(
+    command,
+    args,
+    workingDirectory: workingDirectory,
+  );
+
+  if (result.exitCode != 0) {
+    stderr.write(result.stderr);
+    throw 'Command $command ${args.join(' ')} failed with exit code $exitCode';
+  }
+
+  return result.stdout.trim();
 }
