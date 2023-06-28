@@ -19,14 +19,12 @@ Future<void> main(List<String> args) async {
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final version = pubspec.version!;
 
-  //final suffix = createFileSuffix(version);
-  //final workDir = await createWorkDir(suffix);
+  final suffix = createFileSuffix(version);
+  final workDir = await createWorkDir(suffix);
 
-  //final aab = await buildAab(suffix, workDir);
-  //final apk = await extractApk(aab);
-  //final assets = <File>[apk, aab];
-
-  final assets = <File>[];
+  final aab = await buildAab(suffix, workDir);
+  final apk = await extractApk(aab);
+  final assets = <File>[apk, aab];
 
   final token = options.token;
   if (token != null) {
