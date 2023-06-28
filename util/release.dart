@@ -36,6 +36,7 @@ Future<void> main(List<String> args) async {
       last: commit,
       assets: assets,
       token: token,
+      detailedLog: options.detailedLog,
     );
   } else {
     print(
@@ -46,17 +47,28 @@ Future<void> main(List<String> args) async {
 class Options {
   final String? token;
   final String? firstCommit;
+  final bool detailedLog;
 
-  Options._({this.token, this.firstCommit});
+  Options._({this.token, this.firstCommit, this.detailedLog = true});
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
     parser.addOption(
       'token-file',
       abbr: 't',
-      help: 'Path to a file with the GitHub API access token',
+      help:
+          'Path to a file containing the GitHub API access token. If omitted, still builds the packages but does not create a GitHub release',
     );
-    parser.addOption('first-commit', abbr: 'f');
+    parser.addOption('first-commit',
+        abbr: 'f',
+        help:
+            'Start of commit range to include in release notes. If omitted, includes everything since the previous release');
+    parser.addFlag(
+      'detailed-log',
+      abbr: 'l',
+      defaultsTo: true,
+      help: 'Whether to generate detailed changelog in the release notes',
+    );
     parser.addFlag(
       'help',
       abbr: 'h',
@@ -79,6 +91,7 @@ class Options {
     return Options._(
       token: token?.trim(),
       firstCommit: results['first-commit']?.trim(),
+      detailedLog: results['detailed-log'],
     );
   }
 }
@@ -199,6 +212,7 @@ Future<void> upload({
   required String last,
   required List<File> assets,
   required String token,
+  bool detailedLog = true,
 }) async {
   final client = GitHub(auth: Authentication.withToken(token));
   final slug = RepositorySlug('equalitie', 'ouisync-app');
@@ -213,7 +227,12 @@ Future<void> upload({
       first = prev.tagName!;
     }
 
-    final body = await buildReleaseNotes(slug, first, last);
+    final body = await buildReleaseNotes(
+      slug,
+      first,
+      last,
+      detailedLog: detailedLog,
+    );
 
     final release = await client.repositories.createRelease(
       slug,
@@ -250,8 +269,9 @@ Future<void> upload({
 Future<String> buildReleaseNotes(
   RepositorySlug slug,
   String first,
-  String last,
-) async {
+  String last, {
+  bool detailedLog = true,
+}) async {
   final buf = StringBuffer();
 
   buf.writeln('## What\'s new');
@@ -261,8 +281,11 @@ Future<String> buildReleaseNotes(
   buf.writeln('### App');
   buf.writeln('');
   buf.writeln(changelogUrl(slug, first, last));
-  buf.writeln('');
-  buf.writeln(await getLog(slug, first, last));
+
+  if (detailedLog) {
+    buf.writeln('');
+    buf.writeln(await getLog(slug, first, last));
+  }
 
   // Plugin
   final pluginSlug = RepositorySlug(slug.owner, 'ouisync-plugin');
@@ -270,21 +293,22 @@ Future<String> buildReleaseNotes(
   final pluginFirst = await getSubmoduleCommit(first, 'ouisync-plugin');
 
   if (pluginFirst != pluginLast) {
-    final pluginLog = await getLog(
-      pluginSlug,
-      pluginFirst,
-      pluginLast,
-      'ouisync-plugin',
-    );
-
     buf.writeln('');
     buf.writeln('### Plugin');
     buf.writeln('');
     buf.writeln(
       changelogUrl(pluginSlug, pluginFirst, pluginLast),
     );
-    buf.writeln('');
-    buf.writeln(pluginLog);
+
+    if (detailedLog) {
+      buf.writeln('');
+      buf.writeln(await getLog(
+        pluginSlug,
+        pluginFirst,
+        pluginLast,
+        'ouisync-plugin',
+      ));
+    }
   }
 
   // Library
@@ -301,21 +325,22 @@ Future<String> buildReleaseNotes(
   );
 
   if (libFirst != libLast) {
-    final libLog = await getLog(
-      libSlug,
-      libFirst,
-      libLast,
-      'ouisync-plugin/ouisync',
-    );
-
     buf.writeln('');
     buf.writeln('### Library');
     buf.writeln('');
     buf.writeln(
       changelogUrl(libSlug, libFirst, libLast),
     );
-    buf.writeln('');
-    buf.writeln(libLog);
+
+    if (detailedLog) {
+      buf.writeln('');
+      buf.writeln(await getLog(
+        libSlug,
+        libFirst,
+        libLast,
+        'ouisync-plugin/ouisync',
+      ));
+    }
   }
 
   return buf.toString();
