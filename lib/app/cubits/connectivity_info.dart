@@ -70,15 +70,29 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
         super(ConnectivityInfoState());
 
   Future<void> update() async {
+    final tcpListenerV4 = await _session.tcpListenerLocalAddressV4 ?? "";
+    final tcpListenerV6 = await _session.tcpListenerLocalAddressV6 ?? "";
+    final quicListenerV4 = await _session.quicListenerLocalAddressV4 ?? "";
+    final quicListenerV6 = await _session.quicListenerLocalAddressV6 ?? "";
+
+    if (isClosed) {
+      return;
+    }
+
     emit(state.copyWith(
-      tcpListenerV4: await _session.tcpListenerLocalAddressV4 ?? "",
-      tcpListenerV6: await _session.tcpListenerLocalAddressV6 ?? "",
-      quicListenerV4: await _session.quicListenerLocalAddressV4 ?? "",
-      quicListenerV6: await _session.quicListenerLocalAddressV6 ?? "",
+      tcpListenerV4: tcpListenerV4,
+      tcpListenerV6: tcpListenerV6,
+      quicListenerV4: quicListenerV4,
+      quicListenerV6: quicListenerV6,
     ));
 
     // This really works only when connected using WiFi.
     final localIPv4 = await _networkInfo.getWifiIP();
+
+    if (isClosed) {
+      return;
+    }
+
     emit(state.copyWith(localIPv4: localIPv4 ?? ""));
 
     /// The plugin network_info_plus is currently (2023-02-01) missing the
@@ -97,6 +111,10 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
     String? localIPv6;
     if (Platform.isAndroid || Platform.isIOS) {
       localIPv6 = await _networkInfo.getWifiIPv6();
+
+      if (isClosed) {
+        return;
+      }
     }
 
     emit(state.copyWith(localIPv6: localIPv6 ?? ""));
@@ -109,6 +127,10 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
       internalIPStr = await RGetIp.internalIP;
     } on MissingPluginException {
       // the method is not implemented on some platforms (e.g. linux), ignore it.
+    }
+
+    if (isClosed) {
+      return;
     }
 
     if (internalIPStr != null) {
@@ -131,6 +153,11 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
 
     if (connectivity != ConnectivityResult.none) {
       final externalIP = await RGetIp.externalIP;
+
+      if (isClosed) {
+        return;
+      }
+
       emit(state.copyWith(externalIP: externalIP));
     }
   }
