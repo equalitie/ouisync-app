@@ -107,8 +107,6 @@ class _MainPageState extends State<MainPage>
       initMainPage();
     }));
 
-    unawaited(mountFileSystem());
-
     unawaited(_cubits.powerControl.init());
 
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
@@ -161,20 +159,6 @@ class _MainPageState extends State<MainPage>
 
   void initMainPage() async {
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-  }
-
-  Future<void> mountFileSystem() async {
-    if (!io.Platform.isWindows) {
-      loggy.app(
-          'File System mounting is currently supported only on Windows OS');
-      return;
-    }
-
-    try {
-      await widget.session.mountAllRepositories("O:");
-    } on Error catch (error) {
-      loggy.app("Failed to mount repositories ${error.code}: ${error.message}");
-    }
   }
 
   void handleShareIntentPayload(List<SharedMediaFile> payload) {
