@@ -103,6 +103,9 @@ Future<File> buildAab(
   final versionName = stripBuild(version).canonicalizedVersion;
   final buildName = commit != null ? '$versionName-$commit' : versionName;
 
+  // Do a fresh build just in case (TODO: do we need this?)
+  await run('flutter', ['clean']);
+
   await run('flutter', [
     'build',
     'appbundle',
