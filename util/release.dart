@@ -18,17 +18,25 @@ Future<void> main(List<String> args) async {
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final version = pubspec.version!;
+  final commit = await getCommit();
 
   final suffix = createFileSuffix(version);
   final workDir = await createWorkDir(suffix);
 
-  final aab = await buildAab(suffix, workDir);
+  final aabPath = join(workDir.path, 'ouisync-$suffix.aab');
+  final aab = await buildAab(aabPath, version, commit: commit);
   final apk = await extractApk(aab);
   final assets = <File>[apk, aab];
 
   final token = options.token;
   if (token != null) {
-    await upload(version, assets, token, first: options.firstCommit);
+    await upload(
+      version: version,
+      first: options.firstCommit,
+      last: commit,
+      assets: assets,
+      token: token,
+    );
   } else {
     print(
         'no GitHub API access token specified - skipping creation of GitHub release');
@@ -76,13 +84,13 @@ class Options {
 }
 
 Future<File> buildAab(
-  String tag,
-  Directory workDir, {
+  String outputPath,
+  Version version, {
+  String? commit,
   String flavor = "vanilla",
 }) async {
   final inputPath =
       'build/app/outputs/bundle/${flavor}Release/app-$flavor-release.aab';
-  final outputPath = '${workDir.path}/ouisync-$tag.aab';
   var outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
@@ -92,6 +100,9 @@ Future<File> buildAab(
 
   print('Creating ${outputFile.path} ...');
 
+  final versionName = stripBuild(version).canonicalizedVersion;
+  final buildName = commit != null ? '$versionName-$commit' : versionName;
+
   await run('flutter', [
     'build',
     'appbundle',
@@ -99,6 +110,8 @@ Future<File> buildAab(
     flavor,
     '-t' 'lib/main_$flavor.dart',
     '--release',
+    '--build-name',
+    buildName,
   ]);
 
   return await File(inputPath).rename(outputPath);
@@ -177,17 +190,17 @@ Future<String> prepareBundletool() async {
   return path;
 }
 
-Future<void> upload(
-  Version version,
-  List<File> assets,
-  String token, {
+Future<void> upload({
+  required Version version,
   String? first,
+  required String last,
+  required List<File> assets,
+  required String token,
 }) async {
   final client = GitHub(auth: Authentication.withToken(token));
   final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
-    final last = await getCommit();
     final tagName = buildTagName(version);
 
     print('Creating release $tagName ($last) ...');
@@ -346,15 +359,18 @@ String changelogUrl(RepositorySlug slug, String first, String last) {
   return 'https://github.com/${slug.owner}/${slug.name}/compare/$first...$last';
 }
 
-String buildTagName(Version version) {
+Version stripBuild(Version version) {
   final pre = version.preRelease.join('.');
-  final v = Version(
+  return Version(
     version.major,
     version.minor,
     version.patch,
     pre: pre.isNotEmpty ? pre : null,
-  ).canonicalizedVersion;
+  );
+}
 
+String buildTagName(Version version) {
+  final v = stripBuild(version).canonicalizedVersion;
   return 'v$v';
 }
 
