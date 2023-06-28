@@ -199,7 +199,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     if (mountPoint == null) {
       return null;
     }
-    return "$mountPoint/${this.name}";
+    return "$mountPoint/$name";
   }
 
   Future<bool> exists(String path) async {
