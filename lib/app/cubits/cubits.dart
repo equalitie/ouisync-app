@@ -38,7 +38,7 @@ class Cubits {
   Cubits(this.repositories, this.powerControl, this.panicCounter,
       this.upgradeExists, this.backgroundServiceManager)
       : mount =
-            (io.Platform.isWindows) ? MountCubit(repositories.session) : null {}
+            (io.Platform.isWindows) ? MountCubit(repositories.session) : null;
 
   Color? mainNotificationBadgeColor() {
     final upgradeExists = this.upgradeExists.state;

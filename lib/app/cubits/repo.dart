@@ -252,11 +252,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
   }
 
-  Future<void> saveFile(
-      {required String filePath,
-      required int length,
-      required Stream<List<int>> fileByteStream,
-      oui.File? currentFile}) async {
+  Future<void> saveFile({
+    required String filePath,
+    required int length,
+    required Stream<List<int>> fileByteStream,
+    oui.File? currentFile,
+  }) async {
     if (state.uploads.containsKey(filePath)) {
       showMessage(S.current.messageFileIsDownloading);
       return;
@@ -268,6 +269,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       showMessage(S.current.messageNewFileError(filePath));
       return;
     }
+
+    loggy.debug('Saving file $filePath');
 
     final job = Job(0, length);
     emit(state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
@@ -285,6 +288,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         offset += buffer.length;
         job.update(offset);
       }
+
+      loggy.debug('File saved: $filePath (${formatSize(offset, units: true)})');
     } catch (e) {
       showMessage(S.current.messageWritingFileError(filePath));
       return;
@@ -300,10 +305,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
   }
 
-  Future<void> replaceFile(
-      {required String filePath,
-      required int length,
-      required Stream<List<int>> fileByteStream}) async {
+  Future<void> replaceFile({
+    required String filePath,
+    required int length,
+    required Stream<List<int>> fileByteStream,
+  }) async {
     final file = await _openFile(filePath);
 
     if (file == null) {
@@ -314,10 +320,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     await file.truncate(length);
 
     await saveFile(
-        filePath: filePath,
-        length: length,
-        fileByteStream: fileByteStream,
-        currentFile: file);
+      filePath: filePath,
+      length: length,
+      fileByteStream: fileByteStream,
+      currentFile: file,
+    );
   }
 
   Future<List<BaseItem>> getFolderContents(String path) async {

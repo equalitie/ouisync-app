@@ -93,6 +93,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
 
     if (result != null) {
+      loggy.debug(() {
+        final fileNames = result.files.map((file) => file.name).toList();
+        return 'Adding files $fileNames';
+      });
+
       Navigator.of(context).pop();
 
       for (final srcFile in result.files) {
@@ -147,7 +152,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Future<bool> _checkPermission(
-      Permission permission, String permissionName) async {
+    Permission permission,
+    String permissionName,
+  ) async {
     final result = await Permissions.requestPermission(
         context, permission, permissionName);
 

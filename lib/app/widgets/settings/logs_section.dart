@@ -15,13 +15,14 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/log_view_page.dart';
-import '../../utils/dump.dart';
-import '../../utils/platform/platform.dart';
 import '../../utils/constants.dart';
+import '../../utils/dump.dart';
+import '../../utils/log.dart';
+import '../../utils/platform/platform.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
-class LogsSection extends SettingsSection {
+class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
   final Cubits _cubits;
 
@@ -77,15 +78,15 @@ class LogsSection extends SettingsSection {
               }
 
               String reason;
-              Widget? trailing = null;
-              void Function()? onTap = null;
+              Widget? trailing;
+              void Function()? onTap;
 
               if (error.code == oui.ErrorCode.vfsDriverInstall) {
-                reason = S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
+                reason =
+                    S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
                 trailing = Icon(Icons.open_in_browser);
                 onTap = () {
-                  unawaited(
-                      launchUrl(Uri.parse(Constants.dokanUrl)));
+                  unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
                 };
               } else {
                 reason = error.message;
@@ -128,10 +129,16 @@ class LogsSection extends SettingsSection {
   Future<void> _saveLogs(BuildContext context) async {
     final tempFile = await _dumpInfo(context);
 
+    loggy.debug('Saving logs');
+
     try {
       if (Platform.isAndroid || Platform.isIOS) {
         final params = SaveFileDialogParams(sourceFilePath: tempFile.path);
-        await FlutterFileDialog.saveFile(params: params);
+        final outputPath = await FlutterFileDialog.saveFile(params: params);
+
+        if (outputPath != null) {
+          loggy.debug('Logs saved to $outputPath');
+        }
       } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
         final initialDir = await getDownloadsDirectory();
         final outputPath = await FilePicker.platform.saveFile(
@@ -140,7 +147,11 @@ class LogsSection extends SettingsSection {
 
         if (outputPath != null) {
           await tempFile.copy(outputPath);
+          loggy.debug('Logs saved to $outputPath');
         }
+      } else {
+        loggy.error(
+            'Cannot save logs - unsupported platform: ${Platform.operatingSystem}');
       }
     } finally {
       await tempFile.delete();
