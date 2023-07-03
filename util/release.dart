@@ -405,6 +405,16 @@ String buildTagName(Version version) {
 Future<Directory> createWorkDir(String tag) async {
   final dir = Directory('$rootWorkDir/$tag');
   await dir.create(recursive: true);
+
+  // Create 'latest' symlink
+  final link = Link('$rootWorkDir/latest');
+
+  if (await link.exists()) {
+    await link.delete();
+  }
+
+  await link.create(basename(dir.path));
+
   return dir;
 }
 
