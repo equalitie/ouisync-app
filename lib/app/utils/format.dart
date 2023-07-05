@@ -4,10 +4,37 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:path/path.dart' as p;
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-dynamic formatSize(int bytes, {int decimals = 2, bool units = false}) {
-  if (bytes <= 0) return "0 B";
-  if (bytes < 1024) return '$bytes B';
+String formatSize(int bytes, {int decimals = 1}) {
+  final scale = _sizeScale(bytes);
+  final value = _formatSizeValue(bytes, scale, decimals: decimals);
+  final unit = _formatSizeUnit(scale);
 
+  return '$value $unit';
+}
+
+String formatSizeProgress(
+  int totalBytes,
+  int soFarBytes, {
+  int decimals = 1,
+}) {
+  final scale = _sizeScale(totalBytes);
+  final totalValue = _formatSizeValue(totalBytes, scale, decimals: decimals);
+  final soFarValue = _formatSizeValue(soFarBytes, scale, decimals: decimals);
+  final unit = _formatSizeUnit(scale);
+
+  return '$soFarValue/$totalValue $unit';
+}
+
+int _sizeScale(int bytes) => bytes > 0 ? (log(bytes) / log(1024)).floor() : 0;
+
+String _formatSizeValue(
+  int bytes,
+  int scale, {
+  int decimals = 2,
+}) =>
+    (bytes / pow(1024, scale)).toStringAsFixed(decimals);
+
+String _formatSizeUnit(int scale) {
   const suffixes = [
     "B",
     "KiB",
@@ -19,11 +46,8 @@ dynamic formatSize(int bytes, {int decimals = 2, bool units = false}) {
     "ZiB",
     "YiB"
   ];
-  var i = (log(bytes) / log(1024)).floor();
 
-  final size = double.parse(((bytes / pow(1024, i)).toStringAsFixed(decimals)));
-
-  return units ? '$size ${suffixes[i]}' : size;
+  return suffixes[scale];
 }
 
 String buildDestinationPath(String parentPath, String entryPath) {

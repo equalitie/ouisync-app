@@ -8,65 +8,96 @@ import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
   FileDescription(
-    this.repository,
+    this.repo,
     this.fileData,
     this._uploadJob,
   );
 
-  final RepoCubit repository;
+  final RepoCubit repo;
   final FileItem fileData;
   final Job? _uploadJob;
 
   @override
-  Widget build(BuildContext context) {
-    final uploadJob = _uploadJob;
-
-    return Container(
-      child: Column(
+  Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Fields.autosizeText(fileData.name),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          (uploadJob == null)
-              ? _fileSize(fileData.size)
-              : BlocBuilder<Job, JobState>(
-                  bloc: uploadJob,
-                  builder: (context, state) => _fileSize(state.soFar),
-                ),
           Dimensions.spacingVerticalHalf,
-          (uploadJob != null) ? _uploadProgressWidget(uploadJob) : Container(),
+          _buildDetails(context),
         ],
-      ),
-    );
+      );
+
+  Widget _buildDetails(BuildContext context) {
+    final uploadJob = _uploadJob;
+
+    if (uploadJob != null) {
+      return _buildUploadDetails(context, uploadJob);
+    } else {
+      return _buildSyncDetails(context);
+    }
   }
 
-  Widget _fileSize(int size) {
-    return Fields.constrainedText(formatSize(size, units: true),
-        flex: 0,
-        fontSize: Dimensions.fontSmall,
-        fontWeight: FontWeight.w400,
-        color: Colors.black,
-        softWrap: true);
-  }
+  Widget _buildSyncDetails(BuildContext context) => BlocProvider(
+        create: (context) => FileProgress(repo, fileData.path),
+        child: BlocBuilder<FileProgress, int?>(builder: (cubit, soFar) {
+          final total = fileData.size;
+          const waitIcon = '⧗';
 
-  Widget _uploadProgressWidget(Job cubit) => BlocBuilder<Job, JobState>(
-      bloc: cubit,
-      builder: (context, state) {
-        final progress = state.soFar / state.total;
+          if (total == null) {
+            return _buildSizeWidget(waitIcon);
+          }
 
-        return Row(
-          textBaseline: TextBaseline.alphabetic,
+          if (soFar == null) {
+            return _buildSizeWidget('${formatSize(total)} $waitIcon');
+          }
+
+          if (soFar < total) {
+            return _buildSizeWidget(
+                '${formatSizeProgress(total, soFar)} $waitIcon');
+          }
+
+          return _buildSizeWidget(formatSize(total));
+        }),
+      );
+
+  Widget _buildUploadDetails(BuildContext context, Job job) =>
+      BlocBuilder<Job, JobState>(
+        bloc: job,
+        builder: (context, state) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: LinearProgressIndicator(value: progress)),
-            TextButton(
-                onPressed: () {
-                  cubit.cancel();
-                },
-                child: Text(
-                  S.current.actionCancelCapital,
-                  style: const TextStyle(fontSize: Dimensions.fontSmall),
-                )),
+            _buildSizeWidget(formatSize(state.soFar)),
+            Dimensions.spacingVerticalHalf,
+            _buildUploadProgress(job),
           ],
-        );
-      });
+        ),
+      );
+
+  Widget _buildUploadProgress(Job job) => Row(
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Expanded(
+              child: LinearProgressIndicator(
+                  value: job.state.soFar / job.state.total)),
+          TextButton(
+              onPressed: () {
+                job.cancel();
+              },
+              child: Text(
+                S.current.actionCancelCapital,
+                style: const TextStyle(fontSize: Dimensions.fontSmall),
+              )),
+        ],
+      );
+}
+
+Widget _buildSizeWidget(String text) {
+  return Fields.constrainedText(
+    text,
+    flex: 0,
+    fontSize: Dimensions.fontSmall,
+    fontWeight: FontWeight.w400,
+    color: Colors.black,
+    softWrap: true,
+  );
 }

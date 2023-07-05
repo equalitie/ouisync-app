@@ -5,28 +5,24 @@ abstract class BaseItem extends Equatable {
   const BaseItem(this.name, this.path, this.size);
 
   @override
-  List<Object> get props => [name, path, size];
+  List<Object> get props => [name, path, size ?? 0];
 
   final String name;
   final String path;
-  final int size;
+  final int? size;
 }
 
 class FileItem extends BaseItem {
-  const FileItem(
-      {required String name, required String path, required int size})
-      : super(name, path, size);
-
-  @override
-  List<Object> get props => [...super.props];
+  const FileItem({
+    required String name,
+    required String path,
+    required int? size,
+  }) : super(name, path, size);
 }
 
 class FolderItem extends BaseItem {
-  const FolderItem({required String name, required String path, int size = 0})
-      : super(name, path, size);
-
-  @override
-  List<Object> get props => [...super.props];
+  const FolderItem({required String name, required String path})
+      : super(name, path, 0);
 }
 
 class RepoItem extends BaseItem {

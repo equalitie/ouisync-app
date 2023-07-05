@@ -75,7 +75,10 @@ class _FileDetailState extends State<FileDetail> {
                 title: S.current.iconPreview,
                 dense: true,
                 onTap: () async => await NativeChannels.previewOuiSyncFile(
-                    F.authority, widget.data.path, widget.data.size),
+                  F.authority,
+                  widget.data.path,
+                  widget.data.size ?? 0,
+                ),
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.preview),
                 disabledMessage: S.current.messageActionNotAvailable,
@@ -88,7 +91,10 @@ class _FileDetailState extends State<FileDetail> {
                 title: S.current.iconShare,
                 dense: true,
                 onTap: () async => await NativeChannels.shareOuiSyncFile(
-                    F.authority, widget.data.path, widget.data.size),
+                  F.authority,
+                  widget.data.path,
+                  widget.data.size ?? 0,
+                ),
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.share),
                 disabledMessage: S.current.messageActionNotAvailable,
@@ -161,7 +167,7 @@ class _FileDetailState extends State<FileDetail> {
                     .trimRight()),
             Fields.labeledText(
                 label: S.current.labelSize,
-                text: formatSize(widget.data.size, units: true)),
+                text: formatSize(widget.data.size ?? 0)),
           ],
         ),
       ),

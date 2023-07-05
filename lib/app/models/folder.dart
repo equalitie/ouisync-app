@@ -144,7 +144,8 @@ class _Refresher {
         : (b, a) => _sizeComparator(a, b);
   }
 
-  int _sizeComparator(BaseItem a, BaseItem b) => a.size.compareTo(b.size);
+  int _sizeComparator(BaseItem a, BaseItem b) =>
+      (a.size ?? 0).compareTo(b.size ?? 0);
 
   int Function(BaseItem, BaseItem)? _sortByType(SortDirection direction) {
     return direction == SortDirection.asc
