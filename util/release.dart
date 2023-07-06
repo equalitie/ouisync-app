@@ -27,13 +27,16 @@ Future<void> main(List<String> args) async {
   await cleanBuild();
 
   final aab = await buildAab(buildName, version.build[0] as int);
-  final apk = await extractApk(aab.file);
   final winInstaller = await buildWindowsInstaller(buildName);
 
   final suffix = createFileSuffix(version, commit);
   final outputDir = await createOutputDir(suffix);
-  final assets =
-      await collateAssets(outputDir, suffix, <Intermediate>[aab, apk, winInstaller]);
+
+  final collatedAab = await collateAsset(outputDir, "ouisync-android", suffix, aab);
+  final collatedApk = await extractApk(collatedAab);
+  final collatedWinInstaller = await collateAsset(outputDir, "ouisync-windows-installer", suffix, winInstaller);
+
+  final assets = <File>[collatedAab, collatedApk, collatedWinInstaller];
 
   final token = options.token;
   if (token != null) {
@@ -103,17 +106,11 @@ class Options {
   }
 }
 
-class Intermediate {
-  File file;
-  String nameBase;
-  Intermediate(this.file, this.nameBase);
-}
-
 Future<void> cleanBuild() async {
   await run('flutter', ['clean']);
 }
 
-Future<Intermediate> buildWindowsInstaller(String buildName) async {
+Future<File> buildWindowsInstaller(String buildName) async {
   await run('flutter', [
     'build',
     'windows',
@@ -126,10 +123,10 @@ Future<Intermediate> buildWindowsInstaller(String buildName) async {
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
       ['/cc', 'windows/inno-setup.iss']);
 
-  return Intermediate(File('build/windows/runner/Release/ouisync-installer.exe'), "ouisync-windows-installer");
+  return File('build/windows/runner/Release/ouisync-installer.exe');
 }
 
-Future<Intermediate> buildAab(
+Future<File> buildAab(
   String buildName,
   int buildNumber, {
   String flavor = "vanilla",
@@ -153,18 +150,16 @@ Future<Intermediate> buildAab(
     buildName,
   ]);
 
-  return Intermediate(File(inputPath), "ouisync-android");
+  return File(inputPath);
 }
 
-Future<Intermediate> extractApk(File bundle) async {
+Future<File> extractApk(File bundle) async {
   final outputPath = setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
-  final outBaseName = "ouisync-android";
-
   if (await outputFile.exists()) {
     print('Not creating $outputPath - already exists');
-    return Intermediate(outputFile, outBaseName);
+    return outputFile;
   }
 
   print('Creating ${outputFile.path} ...');
@@ -201,7 +196,7 @@ Future<Intermediate> extractApk(File bundle) async {
     // Need to close this otherwise we won't be able to delete `tempPath` on Windows.
     await inputStream.close();
 
-    return Intermediate(outputFile, outBaseName);
+    return outputFile;
   } finally {
     await File(tempPath).delete();
   }
@@ -295,18 +290,11 @@ Future<void> upload({
   }
 }
 
-Future<List<File>> collateAssets(
-    Directory outputDir, String suffix, List<Intermediate> inputFiles) async {
-  var outputFiles = <File>[];
-
-  for (final input in inputFiles) {
-    final ext = extension(input.file.path);
-    final basename = basenameWithoutExtension(input.file.path);
-    outputFiles
-        .add(await input.file.copy(join(outputDir.path, '${input.nameBase}-$suffix$ext')));
-  }
-
-  return outputFiles;
+Future<File> collateAsset(
+    Directory outputDir, String outName, String suffix, File inputFile) async {
+  final ext = extension(inputFile.path);
+  final basename = basenameWithoutExtension(inputFile.path);
+  return await inputFile.copy(join(outputDir.path, '$outName-$suffix$ext'));
 }
 
 Future<String> buildReleaseNotes(
