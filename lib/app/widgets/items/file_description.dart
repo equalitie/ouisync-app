@@ -41,22 +41,20 @@ class FileDescription extends StatelessWidget with AppLogger {
         create: (context) => FileProgress(repo, fileData.path),
         child: BlocBuilder<FileProgress, int?>(builder: (cubit, soFar) {
           final total = fileData.size;
-          const waitIcon = '⧗';
 
           if (total == null) {
-            return _buildSizeWidget(waitIcon);
+            return _buildSizeWidget(null, true);
           }
 
           if (soFar == null) {
-            return _buildSizeWidget('${formatSize(total)} $waitIcon');
+            return _buildSizeWidget(formatSize(total), true);
           }
 
           if (soFar < total) {
-            return _buildSizeWidget(
-                '${formatSizeProgress(total, soFar)} $waitIcon');
+            return _buildSizeWidget(formatSizeProgress(total, soFar), true);
           }
 
-          return _buildSizeWidget(formatSize(total));
+          return _buildSizeWidget(formatSize(total), false);
         }),
       );
 
@@ -66,7 +64,7 @@ class FileDescription extends StatelessWidget with AppLogger {
         builder: (context, state) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSizeWidget(formatSize(state.soFar)),
+            _buildSizeWidget(formatSize(state.soFar), false),
             Dimensions.spacingVerticalHalf,
             _buildUploadProgress(job),
           ],
@@ -91,13 +89,22 @@ class FileDescription extends StatelessWidget with AppLogger {
       );
 }
 
-Widget _buildSizeWidget(String text) {
-  return Fields.constrainedText(
-    text,
-    flex: 0,
-    fontSize: Dimensions.fontSmall,
-    fontWeight: FontWeight.w400,
-    color: Colors.black,
-    softWrap: true,
-  );
-}
+Widget _buildSizeWidget(String? text, bool loading) => Row(
+      children: [
+        if (text != null)
+          Fields.constrainedText(
+            text,
+            flex: 0,
+            fontSize: Dimensions.fontSmall,
+            fontWeight: FontWeight.w400,
+            color: Colors.black,
+            softWrap: true,
+          ),
+        if (loading)
+          Icon(
+            Icons.hourglass_top,
+            size: Dimensions.fontSmall,
+            color: Colors.black.withAlpha(128),
+          ),
+      ],
+    );

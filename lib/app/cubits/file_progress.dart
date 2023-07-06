@@ -42,6 +42,10 @@ class FileProgress extends Cubit<int?> with AppLogger {
     final future = file.progress;
     await file.close();
 
-    return await future;
+    loggy.debug("$runtimeType for $path fetch start");
+    final value = await future;
+    loggy.debug("$runtimeType for $path fetch done: $value");
+
+    return value;
   }
 }
