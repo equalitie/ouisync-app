@@ -1,5 +1,6 @@
 export 'background_service_manager.dart';
 export 'connectivity_info.dart';
+export 'file_progress.dart';
 export 'job.dart';
 export 'mount.dart';
 export 'nat_detection.dart';

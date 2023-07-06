@@ -442,8 +442,12 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _previewFile(RepoCubit repo, FileItem item) async {
     if (io.Platform.isAndroid) {
-      await NativeChannels.previewOuiSyncFile(F.authority, item.path, item.size,
-          useDefaultApp: true);
+      await NativeChannels.previewOuiSyncFile(
+        F.authority,
+        item.path,
+        item.size ?? 0,
+        useDefaultApp: true,
+      );
     } else if (io.Platform.isWindows) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {

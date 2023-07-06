@@ -289,7 +289,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         job.update(offset);
       }
 
-      loggy.debug('File saved: $filePath (${formatSize(offset, units: true)})');
+      loggy.debug('File saved: $filePath (${formatSize(offset)})');
     } catch (e) {
       showMessage(S.current.messageWritingFileError(filePath));
       return;
@@ -310,7 +310,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
-    final file = await _openFile(filePath);
+    oui.File? file;
+
+    try {
+      file = await openFile(filePath);
+    } catch (e, st) {
+      loggy.error('Failed to open file $filePath:', e, st);
+      file = null;
+    }
 
     if (file == null) {
       showMessage(S.current.messageOpenFileError(filePath));
@@ -338,13 +345,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     try {
       while (iterator.moveNext()) {
-        var size = 0;
         final entryName = iterator.current.name;
         final entryType = iterator.current.entryType;
         final entryPath = buildDestinationPath(path, entryName);
 
         if (entryType == oui.EntryType.file) {
-          size = await _getFileSize(entryPath);
+          final size = await _getFileSize(entryPath);
           content.add(FileItem(name: entryName, path: entryPath, size: size));
         }
 
@@ -410,26 +416,25 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return true;
   }
 
-  Future<int> _getFileSize(String path) async {
+  Future<int?> _getFileSize(String path) async {
     oui.File file;
-    var length = 0;
 
     try {
-      file = await oui.File.open(_handle, path);
-    } catch (e, st) {
-      loggy.app("Open file $path exception (getFileSize)", e, st);
-      return length;
+      file = await openFile(path);
+    } catch (_) {
+      // Most common case of an error here is that the file hasn't been synced yet. No need to spam
+      // the logs with it.
+      return null;
     }
 
     try {
-      length = await file.length;
+      return await file.length;
     } catch (e, st) {
-      loggy.app("Get file size $path exception", e, st);
+      loggy.error('Failed to get size of file $path:', e, st);
+      return null;
+    } finally {
+      await file.close();
     }
-
-    await file.close();
-
-    return length;
   }
 
   Future<void> downloadFile({
@@ -567,17 +572,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return newFile;
   }
 
-  Future<oui.File?> _openFile(String filePath) async {
-    oui.File? file;
-
-    try {
-      file = await oui.File.open(_handle, filePath);
-    } catch (e, st) {
-      loggy.app('File open $filePath failed', e, st);
-    }
-
-    return file;
-  }
+  Future<oui.File> openFile(String path) => oui.File.open(_handle, path);
 
   @override
   Future<void> close() async {

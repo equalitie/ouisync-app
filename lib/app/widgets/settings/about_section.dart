@@ -137,7 +137,7 @@ class AboutSection extends SettingsSection with AppLogger {
 
     if (logs != null) {
       final name = basename(logs.path);
-      final size = formatSize(await logs.length(), units: true);
+      final size = formatSize(await logs.length());
 
       loggy.debug('Sending feedback email with attachment: $name, $size');
     } else {
