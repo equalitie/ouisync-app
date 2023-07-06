@@ -20,13 +20,20 @@ Future<void> main(List<String> args) async {
   final version = pubspec.version!;
   final commit = await getCommit();
 
-  final suffix = createFileSuffix(version);
-  final workDir = await createWorkDir(suffix);
+  final versionName = stripBuild(version).canonicalizedVersion;
+  final buildName = commit != null ? '$versionName-$commit' : versionName;
 
-  final aabPath = join(workDir.path, 'ouisync-$suffix.aab');
-  final aab = await buildAab(aabPath, version, commit: commit);
-  final apk = await extractApk(aab);
-  final assets = <File>[apk, aab];
+  // Do a fresh build just in case (TODO: do we need this?)
+  await cleanBuild();
+
+  final aab = await buildAab(buildName, version.build[0] as int);
+  final apk = await extractApk(aab.file);
+  final winInstaller = await buildWindowsInstaller(buildName);
+
+  final suffix = createFileSuffix(version, commit);
+  final outputDir = await createOutputDir(suffix);
+  final assets =
+      await collateAssets(outputDir, suffix, <Intermediate>[aab, apk, winInstaller]);
 
   final token = options.token;
   if (token != null) {
@@ -96,50 +103,68 @@ class Options {
   }
 }
 
-Future<File> buildAab(
-  String outputPath,
-  Version version, {
-  String? commit,
+class Intermediate {
+  File file;
+  String nameBase;
+  Intermediate(this.file, this.nameBase);
+}
+
+Future<void> cleanBuild() async {
+  await run('flutter', ['clean']);
+}
+
+Future<Intermediate> buildWindowsInstaller(String buildName) async {
+  await run('flutter', [
+    'build',
+    'windows',
+    '-t' 'lib/main_vanilla.dart',
+    '--release',
+    '--build-name',
+    buildName,
+  ]);
+
+  await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
+      ['/cc', 'windows/inno-setup.iss']);
+
+  return Intermediate(File('build/windows/runner/Release/ouisync-installer.exe'), "ouisync-windows-installer");
+}
+
+Future<Intermediate> buildAab(
+  String buildName,
+  int buildNumber, {
   String flavor = "vanilla",
 }) async {
   final inputPath =
       'build/app/outputs/bundle/${flavor}Release/app-$flavor-release.aab';
-  var outputFile = File(outputPath);
 
-  if (await outputFile.exists()) {
-    print('Not creating $outputPath - already exists');
-    return outputFile;
-  }
-
-  print('Creating ${outputFile.path} ...');
-
-  final versionName = stripBuild(version).canonicalizedVersion;
-  final buildName = commit != null ? '$versionName-$commit' : versionName;
-
-  // Do a fresh build just in case (TODO: do we need this?)
-  await run('flutter', ['clean']);
+  print('Creating Android App Bundle ...');
 
   await run('flutter', [
     'build',
     'appbundle',
     '--flavor',
     flavor,
-    '-t' 'lib/main_$flavor.dart',
+    '-t'
+        'lib/main_$flavor.dart',
     '--release',
+    '--build-number',
+    '$buildNumber',
     '--build-name',
     buildName,
   ]);
 
-  return await File(inputPath).rename(outputPath);
+  return Intermediate(File(inputPath), "ouisync-android");
 }
 
-Future<File> extractApk(File bundle) async {
+Future<Intermediate> extractApk(File bundle) async {
   final outputPath = setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
+  final outBaseName = "ouisync-android";
+
   if (await outputFile.exists()) {
     print('Not creating $outputPath - already exists');
-    return outputFile;
+    return Intermediate(outputFile, outBaseName);
   }
 
   print('Creating ${outputFile.path} ...');
@@ -167,12 +192,16 @@ Future<File> extractApk(File bundle) async {
   ]);
 
   try {
-    final archive = ZipDecoder().decodeBuffer(InputFileStream(tempPath));
+    final inputStream = InputFileStream(tempPath);
+    final archive = ZipDecoder().decodeBuffer(inputStream);
     archive
         .findFile('universal.apk')!
         .writeContent(OutputFileStream(outputFile.path));
 
-    return outputFile;
+    // Need to close this otherwise we won't be able to delete `tempPath` on Windows.
+    await inputStream.close();
+
+    return Intermediate(outputFile, outBaseName);
   } finally {
     await File(tempPath).delete();
   }
@@ -264,6 +293,20 @@ Future<void> upload({
   } finally {
     client.dispose();
   }
+}
+
+Future<List<File>> collateAssets(
+    Directory outputDir, String suffix, List<Intermediate> inputFiles) async {
+  var outputFiles = <File>[];
+
+  for (final input in inputFiles) {
+    final ext = extension(input.file.path);
+    final basename = basenameWithoutExtension(input.file.path);
+    outputFiles
+        .add(await input.file.copy(join(outputDir.path, '${input.nameBase}-$suffix$ext')));
+  }
+
+  return outputFiles;
 }
 
 Future<String> buildReleaseNotes(
@@ -402,8 +445,8 @@ String buildTagName(Version version) {
   return 'v$v';
 }
 
-Future<Directory> createWorkDir(String tag) async {
-  final dir = Directory('$rootWorkDir/$tag');
+Future<Directory> createOutputDir(String tag) async {
+  final dir = Directory('$rootWorkDir/release-$tag');
   await dir.create(recursive: true);
 
   // Create 'latest' symlink
@@ -418,11 +461,14 @@ Future<Directory> createWorkDir(String tag) async {
   return dir;
 }
 
-String createFileSuffix(Version version) {
+String createFileSuffix(Version version, String commit) {
   final timestamp = DateTime.now();
 
   final buffer = StringBuffer();
+
   buffer
+    ..write((version.build[0] as int).toString().padLeft(5, '0'))
+    ..write('--')
     ..write('v')
     ..write(version.major)
     ..write('.')
@@ -432,16 +478,18 @@ String createFileSuffix(Version version) {
 
   if (version.preRelease.isNotEmpty) {
     buffer
-      ..write('-')
+      ..write('--')
       ..write(version.preRelease.join('.'));
   }
 
   buffer
-    ..write('-')
+    ..write('--')
     ..write(formatDate(
       timestamp,
-      [yyyy, mm, dd, HH, nn, ss],
-    ));
+      [yyyy, '-', mm, '-', dd, '--', HH, '-', nn, '-', ss],
+    ))
+    ..write("-UTC")
+    ..write("--$commit");
 
   return buffer.toString();
 }
@@ -455,6 +503,8 @@ Future<void> run(
     command,
     args,
     workingDirectory: workingDirectory,
+    // This helps on Windows with finding `command` in $PATH environment variable.
+    runInShell: true,
   );
 
   unawaited(process.stdout.transform(utf8.decoder).forEach(stdout.write));
