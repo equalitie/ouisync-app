@@ -310,7 +310,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
-    final file = await openFile(filePath);
+    oui.File? file;
+
+    try {
+      file = await openFile(filePath);
+    } catch (e, st) {
+      loggy.error('Failed to open file $filePath:', e, st);
+      file = null;
+    }
 
     if (file == null) {
       showMessage(S.current.messageOpenFileError(filePath));
@@ -410,9 +417,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<int?> _getFileSize(String path) async {
-    final file = await openFile(path);
+    oui.File file;
 
-    if (file == null) {
+    try {
+      file = await openFile(path);
+    } catch (_) {
+      // Most common case of an error here is that the file hasn't been synced yet. No need to spam
+      // the logs with it.
       return null;
     }
 
@@ -561,17 +572,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return newFile;
   }
 
-  Future<oui.File?> openFile(String path) async {
-    oui.File? file;
-
-    try {
-      file = await oui.File.open(_handle, path);
-    } catch (e, st) {
-      loggy.error('Failed to open file $path:', e, st);
-    }
-
-    return file;
-  }
+  Future<oui.File> openFile(String path) => oui.File.open(_handle, path);
 
   @override
   Future<void> close() async {
