@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 
 enum AuthMode {
   manual,
@@ -46,7 +47,13 @@ AuthMode? authModeFromString(String authMode) {
       {
         return AuthMode.noLocalPassword;
       }
+    // Legacy, for backward compatibility.
+    case "no_local_password":
+      {
+        return AuthMode.noLocalPassword;
+      }
   }
+  logError("Failed to convert string \"$authMode\" to enum");
   return null;
 }
 
