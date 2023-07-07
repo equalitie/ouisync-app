@@ -120,8 +120,11 @@ Future<File> buildWindowsInstaller(String buildName) async {
     buildName,
   ]);
 
+  final inno_script = await File("windows/inno-setup.iss.template").readAsString();
+  await File("build/inno-setup.iss").writeAsString(inno_script.replaceAll("<APP_VERSION>", buildName));
+
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
-      ['/cc', 'windows/inno-setup.iss']);
+      ['/cc', 'build/inno-setup.iss']);
 
   return File('build/windows/runner/Release/ouisync-installer.exe');
 }

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Ouisync"
-#define MyAppVersion "0.7.2"
+#define MyAppVersion "<APP_VERSION>"
 #define MyAppPublisher "eQualitie"
 #define MyAppURL "https://ouisync.net"
 #define MyAppExeName "ouisync_app.exe"
