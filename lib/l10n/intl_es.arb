@@ -645,5 +645,11 @@
   "messageFAQ": "Preguntas frecuentes",
   "@messageFAQ": {},
   "messageMissingBackgroundServicePermission": "Ouisync no tiene permiso para ejecutarse en segundo plano, abrir otra aplicación puede detener la sincronización en curso",
-  "@messageMissingBackgroundServicePermission": {}
+  "@messageMissingBackgroundServicePermission": {},
+  "titleOurValues": "Nuestros valores",
+  "@titleOurValues": {},
+  "titleOnboardingShare": "Envía y recibe archivos de manera segura",
+  "@titleOnboardingShare": {},
+  "titleOnboardingPermissions": "Establece permisos para colaborar, transmitir, o simplemente almacenar",
+  "@titleOnboardingPermissions": {}
 }
