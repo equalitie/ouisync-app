@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart' as b;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:styled_text/styled_text.dart';
 
+import '../pages/pages.dart';
 import '../widgets/async_text_form_field.dart';
+import 'platform/platform.dart';
 import 'utils.dart';
 
 class Fields {
@@ -682,5 +685,59 @@ class Fields {
     }
 
     return modeIcon;
+  }
+
+  static TextSpan boldTextSpan(String text,
+          {double fontSize = Dimensions.fontSmall}) =>
+      TextSpan(
+          text: text,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize));
+
+  static TextSpan linkTextSpan(BuildContext context, String text,
+          void Function(BuildContext) callback,
+          {double fontSize = Dimensions.fontSmall}) =>
+      TextSpan(
+          text: text,
+          style: TextStyle(
+              decoration: TextDecoration.underline,
+              color: Colors.blueAccent,
+              fontSize: fontSize),
+          recognizer: TapGestureRecognizer()..onTap = () => callback(context));
+
+  static WidgetSpan quoteTextSpan(String quote, String author,
+          {double fontSize = Dimensions.fontSmall}) =>
+      WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Text.rich(TextSpan(children: [
+            italicTextSpan(quote, fontSize: fontSize),
+            TextSpan(text: '$author\n\n', style: TextStyle(fontSize: fontSize))
+          ])));
+
+  static TextSpan italicTextSpan(String text,
+          {double fontSize = Dimensions.fontSmall,
+          FontWeight fontWeight = FontWeight.normal}) =>
+      TextSpan(
+          text: text,
+          style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontSize: fontSize,
+              fontWeight: fontWeight));
+
+  static Future<void> openUrl(
+      BuildContext context, Widget title, String url) async {
+    final webView = PlatformWebView();
+
+    if (PlatformValues.isDesktopDevice) {
+      await webView.launchUrl(url);
+      return;
+    }
+
+    final content = await Dialogs.executeFutureWithLoadingDialog(context,
+        f: webView.loadUrl(context, url));
+
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => WebViewPage(title: title, content: content)));
   }
 }
