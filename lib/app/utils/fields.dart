@@ -710,7 +710,7 @@ class Fields {
           alignment: PlaceholderAlignment.middle,
           child: Text.rich(TextSpan(children: [
             italicTextSpan(quote, fontSize: fontSize),
-            TextSpan(text: '$author\n\n', style: TextStyle(fontSize: fontSize))
+            TextSpan(text: author, style: TextStyle(fontSize: fontSize))
           ])));
 
   static TextSpan italicTextSpan(String text,

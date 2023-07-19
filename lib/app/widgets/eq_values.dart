@@ -34,7 +34,7 @@ class EqValues extends StatelessWidget {
             textAlign: TextAlign.end,
             text: Fields.quoteTextSpan(
                 '${S.current.messageQuoteMainIsFree}\n\n',
-                S.current.messageRousseau)),
+                '${S.current.messageRousseau}\n\n')),
         RichText(
           text: TextSpan(
             style: TextStyle(
