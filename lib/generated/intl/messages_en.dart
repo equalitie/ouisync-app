@@ -326,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqValuesP9": MessageLookupByLibrary.simpleMessage(
             "Security is a constant thematic throughout all of our software development, service provision and capacity-building projects. We design our systems and processes to improve information security on the Internet and raise the user’s security profile and experience. We try to lead by example by not compromising the security properties of a tool or system for the sake of speed, usability or cost. We do not believe in security through obscurity and we maintain transparency through open access to our code base. We always err on the side of caution and try to implement good internal operational security"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
-            "is built in line with our values.\n\nBy using it you agree to abide by these principles."),
+            "is built in line with our values.\n\nBy using it you agree to abide by these principles, and accept our Terms of Use and Privacy Notice."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Adding a local password failed"),

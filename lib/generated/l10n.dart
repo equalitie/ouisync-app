@@ -2660,10 +2660,10 @@ class S {
     );
   }
 
-  /// `is built in line with our values.\n\nBy using it you agree to abide by these principles.`
+  /// `is built in line with our values.\n\nBy using it you agree to abide by these principles, and accept our Terms of Use and Privacy Notice.`
   String get messageEqualitieValues {
     return Intl.message(
-      'is built in line with our values.\n\nBy using it you agree to abide by these principles.',
+      'is built in line with our values.\n\nBy using it you agree to abide by these principles, and accept our Terms of Use and Privacy Notice.',
       name: 'messageEqualitieValues',
       desc: '',
       args: [],
