@@ -56,4 +56,6 @@ export 'settings/settings_container.dart';
 export 'settings/platform/platform_dht_switch.dart';
 export 'settings/platform/platform_pex_switch.dart';
 
+export 'eq_terms_privacy.dart';
+export 'eq_values.dart';
 export 'log_view.dart';
