@@ -33,15 +33,17 @@ class EqValues extends StatelessWidget {
         RichText(
             textAlign: TextAlign.end,
             text: Fields.quoteTextSpan(
-                S.current.messageQuoteMainIsFree, S.current.messageRousseau)),
+                '${S.current.messageQuoteMainIsFree}\n\n',
+                S.current.messageRousseau)),
         RichText(
           text: TextSpan(
             style: TextStyle(
                 color: Colors.black87, fontSize: Dimensions.fontSmall),
             children: [
               TextSpan(text: S.current.messageEqValuesP1),
-              Fields.linkTextSpan(context,
-                  '${S.current.messageInternationalBillHumanRights}.',
+              Fields.linkTextSpan(
+                  context,
+                  '${S.current.messageInternationalBillHumanRights}.\n\n',
                   _launchIBoHR),
               TextSpan(text: '${S.current.messageEqValuesP2}.\n\n'),
               TextSpan(text: '${S.current.messageEqValuesP3}.\n\n'),
@@ -55,7 +57,7 @@ class EqValues extends StatelessWidget {
               Fields.boldTextSpan('- ${S.current.titlePrivacy}\n\n'),
               TextSpan(text: S.current.messageEqValuesP8),
               Fields.linkTextSpan(context,
-                  '${S.current.messageDeclarationDOS}.', _launchDfDOS),
+                  '${S.current.messageDeclarationDOS}.\n\n', _launchDfDOS),
               Fields.boldTextSpan('- ${S.current.titleDigitalSecurity}\n\n'),
               TextSpan(text: '${S.current.messageEqValuesP9}.\n\n'),
               Fields.boldTextSpan(
