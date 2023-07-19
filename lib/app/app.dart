@@ -89,7 +89,7 @@ Future<Widget> initOuiSyncApp() async {
 
   var root = eqValuesAccepted
       ? ouisyncAppHome
-      : AcceptEqualitieValuesPage(
+      : AcceptEqualitieValuesTermsPrivacyPage(
           settings: settings, ouisyncAppHome: ouisyncAppHome);
 
   var homePage = showOnboarding
