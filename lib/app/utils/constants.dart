@@ -89,6 +89,12 @@ class Constants {
   static const eqDeclarationDOS =
       'https://equalit.ie/declaration-distributed-online-services/';
 
+  static const canadaPrivacyAct =
+      'https://laws-lois.justice.gc.ca/ENG/ACTS/P-21/index.html';
+
+  static const pipedaUrl =
+      'https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/';
+
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
   static const double repositoryBarHeight = 58.0;
