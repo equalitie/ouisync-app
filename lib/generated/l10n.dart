@@ -610,6 +610,156 @@ class S {
     );
   }
 
+  /// `Ouisync Terms of Use & Privacy Notice`
+  String get titleTermsPrivacy {
+    return Intl.message(
+      'Ouisync Terms of Use & Privacy Notice',
+      name: 'titleTermsPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1. Overview`
+  String get titleOverview {
+    return Intl.message(
+      '1. Overview',
+      name: 'titleOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2. Terms of Use`
+  String get titleTermsOfUse {
+    return Intl.message(
+      '2. Terms of Use',
+      name: 'titleTermsOfUse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3. Privacy Notice`
+  String get titlePrivacyNotice {
+    return Intl.message(
+      '3. Privacy Notice',
+      name: 'titlePrivacyNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3.1 Data Collection`
+  String get titleDataCollection {
+    return Intl.message(
+      '3.1 Data Collection',
+      name: 'titleDataCollection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3.2 Data Sharing`
+  String get titleDataSharing {
+    return Intl.message(
+      '3.2 Data Sharing',
+      name: 'titleDataSharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3.3 Security Practices`
+  String get titleSecurityPractices {
+    return Intl.message(
+      '3.3 Security Practices',
+      name: 'titleSecurityPractices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3.4 Deletion of your data from our Always-On-Peer server`
+  String get titleDeletionDataServer {
+    return Intl.message(
+      '3.4 Deletion of your data from our Always-On-Peer server',
+      name: 'titleDeletionDataServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log Data`
+  String get titleLogData {
+    return Intl.message(
+      'Log Data',
+      name: 'titleLogData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cookies`
+  String get titleCookies {
+    return Intl.message(
+      'Cookies',
+      name: 'titleCookies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Links to Other Sites`
+  String get titleLinksOtherSites {
+    return Intl.message(
+      'Links to Other Sites',
+      name: 'titleLinksOtherSites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Children’s Privacy`
+  String get titleChildrensPrivacy {
+    return Intl.message(
+      'Children’s Privacy',
+      name: 'titleChildrensPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changes to these Terms`
+  String get titleChangesToTerms {
+    return Intl.message(
+      'Changes to these Terms',
+      name: 'titleChangesToTerms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact Us`
+  String get titleContactUs {
+    return Intl.message(
+      'Contact Us',
+      name: 'titleContactUs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Personal Information Protection and Electronic Documents Act (PIPEDA)`
+  String get titlePIPEDA {
+    return Intl.message(
+      'The Personal Information Protection and Electronic Documents Act (PIPEDA)',
+      name: 'titlePIPEDA',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -2720,6 +2870,16 @@ class S {
     );
   }
 
+  /// `Tap here to read our Terms of Use and Privacy Notice`
+  String get messageTapForTermsPrivacy {
+    return Intl.message(
+      'Tap here to read our Terms of Use and Privacy Notice',
+      name: 'messageTapForTermsPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `“Man is born free, and everywhere he is in chains.”`
   String get messageQuoteMainIsFree {
     return Intl.message(
@@ -2895,6 +3055,346 @@ class S {
     return Intl.message(
       'We have put safeguards in place to mitigate the misuse of our products and services. When we become aware of any use that violates our principles or terms of service, we take action to stop it. Guided by our internal policies, we carefully deliberate over acts that might compromise our principles. Our procedures will continue to evolve based on experience and best practices so that we can achieve the right balance between enabling open access to our products and services, and upholding our principles',
       name: 'messageEqValuesP14',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This Ouisync Terms of Use (the “Agreement”), along with our Privacy Notice (collectively, the “Terms”), govern your use of Ouisync - an online file synchronization protocol and software.`
+  String get messageTermsPrivacyP1 {
+    return Intl.message(
+      'This Ouisync Terms of Use (the “Agreement”), along with our Privacy Notice (collectively, the “Terms”), govern your use of Ouisync - an online file synchronization protocol and software.',
+      name: 'messageTermsPrivacyP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `By installing and running the Ouisync application, you indicate your assent to be bound by and to comply with this Agreement between you and eQualitie inc. (“eQualitie”, “we”, or “us”). Usage of the Ouisync application and the Ouisync network (the Service) is provided by eQualitie at no cost and is intended for use as is`
+  String get messageTermsPrivacyP2 {
+    return Intl.message(
+      'By installing and running the Ouisync application, you indicate your assent to be bound by and to comply with this Agreement between you and eQualitie inc. (“eQualitie”, “we”, or “us”). Usage of the Ouisync application and the Ouisync network (the Service) is provided by eQualitie at no cost and is intended for use as is',
+      name: 'messageTermsPrivacyP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Ouisync application is built in-line with eQualitie’s values. By using this software you agree that you will not use Ouisync to publish, share, or store materials that is contrary to the underlying values nor the letter of the laws of Quebec or Canada or the International Bill of Human Rights, including content that:`
+  String get messageTermsPrivacyP3 {
+    return Intl.message(
+      'The Ouisync application is built in-line with eQualitie’s values. By using this software you agree that you will not use Ouisync to publish, share, or store materials that is contrary to the underlying values nor the letter of the laws of Quebec or Canada or the International Bill of Human Rights, including content that:',
+      name: 'messageTermsPrivacyP3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Infringes on personal information protection rights, including the underlying values or the letter of `
+  String get messageTerms1_1 {
+    return Intl.message(
+      'Infringes on personal information protection rights, including the underlying values or the letter of ',
+      name: 'messageTerms1_1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `(the Personal Information Protection and Electronic Documents Act)`
+  String get messageTerms1_2 {
+    return Intl.message(
+      '(the Personal Information Protection and Electronic Documents Act)',
+      name: 'messageTerms1_2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Constitutes child sexually exploitative material (including material which may not be illegal child sexual abuse material but which nonetheless sexually exploits or promotes the sexual exploitation of minors), unlawful pornography, or are otherwise indecent`
+  String get messageTerms2 {
+    return Intl.message(
+      'Constitutes child sexually exploitative material (including material which may not be illegal child sexual abuse material but which nonetheless sexually exploits or promotes the sexual exploitation of minors), unlawful pornography, or are otherwise indecent',
+      name: 'messageTerms2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contains or promotes extreme acts of violence or terrorist activity, including terror or violent extremist propaganda`
+  String get messageTerms3 {
+    return Intl.message(
+      'Contains or promotes extreme acts of violence or terrorist activity, including terror or violent extremist propaganda',
+      name: 'messageTerms3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Advocates bigotry, hatred, or the incitement of violence against any person or group of people based on their race, religion, ethnicity, national origin, sex, gender identity, sexual orientation, disability, impairment, or any other characteristic(s) associated with systemic discrimination or marginalization`
+  String get messageTerms4 {
+    return Intl.message(
+      'Advocates bigotry, hatred, or the incitement of violence against any person or group of people based on their race, religion, ethnicity, national origin, sex, gender identity, sexual orientation, disability, impairment, or any other characteristic(s) associated with systemic discrimination or marginalization',
+      name: 'messageTerms4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Files that contain viruses, trojans, worms, logic bombs or other material that is malicious or technologically harmful`
+  String get messageTerms5 {
+    return Intl.message(
+      'Files that contain viruses, trojans, worms, logic bombs or other material that is malicious or technologically harmful',
+      name: 'messageTerms5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service`
+  String get messagePrivacyIntro {
+    return Intl.message(
+      'This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service',
+      name: 'messagePrivacyIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The OuiSync team values user privacy and thus does not collect any user information`
+  String get messageDataCollectionP1 {
+    return Intl.message(
+      'The OuiSync team values user privacy and thus does not collect any user information',
+      name: 'messageDataCollectionP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don't know who uses our app and with whom they sync or share their data`
+  String get messageDataCollectionP2 {
+    return Intl.message(
+      'The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don\'t know who uses our app and with whom they sync or share their data',
+      name: 'messageDataCollectionP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ouisync (and eQualit.ie) does not share any data with any third parties`
+  String get messageDataSharingP1 {
+    return Intl.message(
+      'Ouisync (and eQualit.ie) does not share any data with any third parties',
+      name: 'messageDataSharingP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data that the user uploads into the Ouisync repositories is end-to-end encrypted in transit as well as at rest. This includes metadata such as file names, sizes, folder structure etc. Within Ouisync, data is readable only by the person who uploaded the data and those persons with whom they shared their repositories`
+  String get messageSecurityPracticesP1 {
+    return Intl.message(
+      'Data that the user uploads into the Ouisync repositories is end-to-end encrypted in transit as well as at rest. This includes metadata such as file names, sizes, folder structure etc. Within Ouisync, data is readable only by the person who uploaded the data and those persons with whom they shared their repositories',
+      name: 'messageSecurityPracticesP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can learn more about the encryption techniques used in our documentation.`
+  String get messageSecurityPracticesP2 {
+    return Intl.message(
+      'You can learn more about the encryption techniques used in our documentation.',
+      name: 'messageSecurityPracticesP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Ouisync app stores users' data on an 'Always-On Peer', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers`
+  String get messageSecurityPracticesP3 {
+    return Intl.message(
+      'The Ouisync app stores users\' data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers',
+      name: 'messageSecurityPracticesP3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below`
+  String get messageSecurityPracticesP4 {
+    return Intl.message(
+      'If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below',
+      name: 'messageSecurityPracticesP4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below`
+  String get messageDeletionDataServerP1 {
+    return Intl.message(
+      'The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below',
+      name: 'messageDeletionDataServerP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Ouisync team cannot delete individual files from repositories, as it is not possible to identify them because they are encrypted. We are able to delete whole repositories if you send us the link to the repository that needs to be deleted`
+  String get messageDeletionDataServerNote {
+    return Intl.message(
+      'The Ouisync team cannot delete individual files from repositories, as it is not possible to identify them because they are encrypted. We are able to delete whole repositories if you send us the link to the repository that needs to be deleted',
+      name: 'messageDeletionDataServerNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The OuiSync app creates logfiles on users' devices. Their purpose is only to log device's activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user's device unless the user decides to send it to us for support purposes`
+  String get messageLogDataP1 {
+    return Intl.message(
+      'The OuiSync app creates logfiles on users\' devices. Their purpose is only to log device\'s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes',
+      name: 'messageLogDataP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If the user does decide to contact us, the personally indetifiable data we may collect is:`
+  String get messageLogDataP2 {
+    return Intl.message(
+      'If the user does decide to contact us, the personally indetifiable data we may collect is:',
+      name: 'messageLogDataP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email address - if the user decided to contact us by email`
+  String get messageLogData1 {
+    return Intl.message(
+      'Email address - if the user decided to contact us by email',
+      name: 'messageLogData1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Information the user may provide by email, through help tickets, or through our website, and associated metadata - for the purposes of providing technical support`
+  String get messageLogData2 {
+    return Intl.message(
+      'Information the user may provide by email, through help tickets, or through our website, and associated metadata - for the purposes of providing technical support',
+      name: 'messageLogData2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `User’s IP address - for the purposes of providing technical support`
+  String get messageLogData3 {
+    return Intl.message(
+      'User’s IP address - for the purposes of providing technical support',
+      name: 'messageLogData3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `None of this data is shared with any third parties`
+  String get messageLogDataP3 {
+    return Intl.message(
+      'None of this data is shared with any third parties',
+      name: 'messageLogDataP3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Ouisync app does not use cookies`
+  String get messageCookiesP1 {
+    return Intl.message(
+      'The Ouisync app does not use cookies',
+      name: 'messageCookiesP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by us. Therefore, we strongly advise you to review the Privacy Policy of these websites. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services`
+  String get messageLinksOtherSitesP1 {
+    return Intl.message(
+      'This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by us. Therefore, we strongly advise you to review the Privacy Policy of these websites. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services',
+      name: 'messageLinksOtherSitesP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens' Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)`
+  String get messageChildrensPolicyP1 {
+    return Intl.message(
+      'We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens\' Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)',
+      name: 'messageChildrensPolicyP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We may update our Terms from time to time. Thus, you are advised to review this page periodically for any changes`
+  String get messageChangesToTermsP1 {
+    return Intl.message(
+      'We may update our Terms from time to time. Thus, you are advised to review this page periodically for any changes',
+      name: 'messageChangesToTermsP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This policy is effective as of 2022-03-09`
+  String get messageChangesToTermsP2 {
+    return Intl.message(
+      'This policy is effective as of 2022-03-09',
+      name: 'messageChangesToTermsP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at`
+  String get messageContatUsP1 {
+    return Intl.message(
+      'If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at',
+      name: 'messageContatUsP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Canada’s Privacy Act`
+  String get messageCanadaPrivacyAct {
+    return Intl.message(
+      'Canada’s Privacy Act',
+      name: 'messageCanadaPrivacyAct',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PIPEDA`
+  String get messagePIPEDA {
+    return Intl.message(
+      'PIPEDA',
+      name: 'messagePIPEDA',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Note`
+  String get messageNote {
+    return Intl.message(
+      'Note',
+      name: 'messageNote',
       desc: '',
       args: [],
     );
