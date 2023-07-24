@@ -114,6 +114,7 @@ Future<File> buildWindowsInstaller(String buildName) async {
   await run('flutter', [
     'build',
     'windows',
+    '--verbose',
     '-t' 'lib/main_vanilla.dart',
     '--release',
     '--build-name',
