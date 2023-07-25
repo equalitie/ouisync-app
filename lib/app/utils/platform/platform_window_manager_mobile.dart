@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import '../log.dart';
 import 'platform_window_manager.dart';
 
-class PlatformWindowManagerMobile implements PlatformWindowManager {
+class PlatformWindowManagerMobile
+    with AppLogger
+    implements PlatformWindowManager {
+  PlatformWindowManagerMobile(_);
+
   @override
   void dispose() {}
 
@@ -23,4 +28,10 @@ class PlatformWindowManagerMobile implements PlatformWindowManager {
 
   @override
   Future<void> close() async {}
+
+  @override
+  Future<bool> launchAtStartup(bool enable) async {
+    loggy.app('This function is not avaliable on mobile');
+    return false;
+  }
 }

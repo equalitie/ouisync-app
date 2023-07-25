@@ -3410,6 +3410,16 @@ class S {
     );
   }
 
+  /// `Launch at startup`
+  String get messageLaunchAtStartup {
+    return Intl.message(
+      'Launch at startup',
+      name: 'messageLaunchAtStartup',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

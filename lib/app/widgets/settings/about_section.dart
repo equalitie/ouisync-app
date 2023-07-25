@@ -16,12 +16,25 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(this._cubits) : super(title: S.current.titleAbout);
+  AboutSection(this._cubits) : super(title: S.current.titleAbout) {
+    _launchAtStartup = ValueNotifier<bool>(
+        _cubits.repositories.settings.getLaunchAtStartup() ?? true);
+  }
 
   final Cubits _cubits;
+  late final ValueNotifier<bool> _launchAtStartup;
 
   @override
   List<Widget> buildTiles(BuildContext context) => [
+        if (PlatformValues.isDesktopDevice)
+          ValueListenableBuilder(
+              valueListenable: _launchAtStartup,
+              builder: (context, value, child) => SwitchSettingsTile(
+                  value: value,
+                  onChanged: (value) =>
+                      unawaited(_updateLaunchAtStartup(value)),
+                  title: Text(S.current.messageLaunchAtStartup),
+                  leading: Icon(Icons.rocket_launch_sharp))),
         NavigationTile(
             title: Text(S.current.titleFAQShort),
             leading: Icon(Icons.question_answer_rounded),
@@ -79,6 +92,13 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() {
     return _cubits.upgradeExists.state;
+  }
+
+  Future<void> _updateLaunchAtStartup(bool value) async {
+    await _cubits.windowManager.launchAtStartup(value);
+    await _cubits.repositories.settings.setLaunchAtStartup(value);
+
+    _launchAtStartup.value = value;
   }
 
   Future<void> _openUrl(BuildContext context, String title, String url) async {

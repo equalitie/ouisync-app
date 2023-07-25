@@ -444,6 +444,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "International Bill of Human Rights"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Keep both files"),
+        "messageLaunchAtStartup":
+            MessageLookupByLibrary.simpleMessage("Launch at startup"),
         "messageLibraryPanic":
             MessageLookupByLibrary.simpleMessage("Internal crash detected."),
         "messageLinksOtherSitesP1": MessageLookupByLibrary.simpleMessage(

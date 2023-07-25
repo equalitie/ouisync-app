@@ -492,6 +492,7 @@
   "messagePIPEDA":"PIPEDA",
   "messageNote": "Note",
   "messageRepositoryNotMounted":"The repository is not mounted ",
+  "messageLaunchAtStartup":"Launch at startup",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",
