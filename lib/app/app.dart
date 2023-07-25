@@ -21,8 +21,13 @@ import 'pages/pages.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp() async {
-  final windowManager = PlatformWindowManager();
+Future<Widget> initOuiSyncApp(List<String> args) async {
+  var showWindow = true;
+  if (args.isNotEmpty) {
+    showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
+  }
+
+  final windowManager = PlatformWindowManager(showWindow);
 
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
@@ -64,6 +69,12 @@ Future<Widget> initOuiSyncApp() async {
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
   final settings = await Settings.init();
+
+  var launchAtStartup = settings.getLaunchAtStartup();
+  if (launchAtStartup == null) {
+    await settings.setLaunchAtStartup(true);
+    await windowManager.launchAtStartup(true);
+  }
 
   var showOnboarding = settings.getShowOnboarding();
   if (showOnboarding == null) {
@@ -187,7 +198,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                   upgradeExists: upgradeExists,
                   backgroundServiceManager: _backgroundServiceManager,
                   mediaReceiver: _mediaReceiver,
-                  settings: widget.settings))),
+                  settings: widget.settings,
+                  windowManager: widget.windowManager))),
     );
   }
 }
