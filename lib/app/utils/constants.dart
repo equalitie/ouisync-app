@@ -62,6 +62,8 @@ enum PasswordAction { add, change, remove, biometrics }
 class Constants {
   Constants._();
 
+  static const String launchAtStartupArg = 'auto';
+
   static const Color errorColor = Colors.red;
   static const Color warningColor = Colors.orange;
   static const Color dangerColor = Colors.red;
