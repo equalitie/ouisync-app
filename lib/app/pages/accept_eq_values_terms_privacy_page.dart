@@ -43,9 +43,12 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
                         const SizedBox(height: 20.0),
                         EqTermsAndPrivacy(),
                         const SizedBox(height: 20.0),
-                        Fields.dialogActions(context,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            buttons: _actions())
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Fields.dialogActions(context,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                buttons: _actions()))
                       ])))));
 
   Widget _headerImages() => Column(children: [
@@ -71,7 +74,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
 
   List<Widget> _actions() => [
         TextButton(
-            onPressed: () => exit(0), child: Text(S.current.actionIDontAgree)),
+            onPressed: () => exit(0),
+            child: Text(S.current.actionIDontAgree.toUpperCase())),
         TextButton(
             onPressed: () async {
               await widget.settings.setEqualitieValues(true);
@@ -81,6 +85,6 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
                   MaterialPageRoute(
                       builder: (context) => widget.ouisyncAppHome));
             },
-            child: Text(S.current.actionIAgree))
+            child: Text(S.current.actionIAgree.toUpperCase()))
       ];
 }
