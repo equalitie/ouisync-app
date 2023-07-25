@@ -28,6 +28,8 @@ class Settings with AppLogger {
   static const String _eqValuesKey = "EQ_VALUES";
   static const String _showOnboardingKey = "SHOW_ONBOARDING";
 
+  static const String _launchAtStartup = 'LAUNCH_AT_STARTUP';
+
   // Per repository settings
   static const String _repositoryPrefix = "REPOSITORIES";
   static const String _databaseId = "DATABASE_ID";
@@ -131,6 +133,11 @@ class Settings with AppLogger {
   bool? getShowOnboarding() => _prefs.getBool(_showOnboardingKey);
   Future<void> setShowOnboarding(bool value) async {
     await _prefs.setBool(_showOnboardingKey, value);
+  }
+
+  bool? getLaunchAtStartup() => _prefs.getBool(_launchAtStartup);
+  Future<void> setLaunchAtStartup(bool value) async {
+    await _prefs.setBool(_launchAtStartup, value);
   }
 
   Future<io.Directory> defaultRepoLocation() async {

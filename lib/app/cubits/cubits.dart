@@ -1,3 +1,17 @@
+import 'dart:io' as io;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../utils/platform/platform.dart';
+import '../utils/utils.dart';
+import 'background_service_manager.dart';
+import 'mount.dart';
+import 'power_control.dart';
+import 'repos.dart';
+import 'state_monitor.dart';
+import 'upgrade_exists.dart';
+
 export 'background_service_manager.dart';
 export 'connectivity_info.dart';
 export 'file_progress.dart';
@@ -15,29 +29,18 @@ export 'upgrade_exists.dart';
 export 'value.dart';
 export 'watch.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'dart:io' as io;
-import 'background_service_manager.dart';
-import 'repos.dart';
-import 'power_control.dart';
-import 'state_monitor.dart';
-import 'upgrade_exists.dart';
-import 'mount.dart';
-import '../utils/constants.dart';
-
 class Cubits {
   final ReposCubit repositories;
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
   final BackgroundServiceManager backgroundServiceManager;
+  final PlatformWindowManager windowManager;
   // Is not null only on operating system where mounting is supported.
   final MountCubit? mount;
 
   Cubits(this.repositories, this.powerControl, this.panicCounter,
-      this.upgradeExists, this.backgroundServiceManager)
+      this.upgradeExists, this.backgroundServiceManager, this.windowManager)
       : mount =
             (io.Platform.isWindows) ? MountCubit(repositories.session) : null;
 

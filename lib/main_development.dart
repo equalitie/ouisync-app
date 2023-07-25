@@ -7,7 +7,7 @@ import 'app/app.dart';
 import 'firebase_options.dart';
 import 'flavors.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   F.appFlavor = Flavor.development;
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +18,6 @@ Future<void> main() async {
     );
   }
 
-  final app = await initOuiSyncApp();
+  final app = await initOuiSyncApp(args);
   runApp(app);
 }

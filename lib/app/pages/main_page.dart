@@ -32,17 +32,19 @@ class MainPage extends StatefulWidget {
       required this.upgradeExists,
       required this.backgroundServiceManager,
       required this.mediaReceiver,
-      required this.settings});
+      required this.settings,
+      required this.windowManager});
 
   final Session session;
   final UpgradeExistsCubit upgradeExists;
   final BackgroundServiceManager backgroundServiceManager;
   final MediaReceiver mediaReceiver;
   final Settings settings;
+  final PlatformWindowManager windowManager;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(
-      session, upgradeExists, backgroundServiceManager, settings);
+  State<StatefulWidget> createState() => _MainPageState(session, upgradeExists,
+      backgroundServiceManager, settings, windowManager);
 }
 
 class _MainPageState extends State<MainPage>
@@ -61,8 +63,12 @@ class _MainPageState extends State<MainPage>
 
   _MainPageState._(this._cubits);
 
-  factory _MainPageState(Session session, UpgradeExistsCubit upgradeExists,
-      BackgroundServiceManager backgroundServiceManager, Settings settings) {
+  factory _MainPageState(
+      Session session,
+      UpgradeExistsCubit upgradeExists,
+      BackgroundServiceManager backgroundServiceManager,
+      Settings settings,
+      PlatformWindowManager windowManager) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
@@ -74,7 +80,7 @@ class _MainPageState extends State<MainPage>
         "panic_counter");
 
     return _MainPageState._(Cubits(repositories, powerControl, panicCounter,
-        upgradeExists, backgroundServiceManager));
+        upgradeExists, backgroundServiceManager, windowManager));
   }
 
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
