@@ -22,12 +22,7 @@ import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
-  var showWindow = true;
-  if (args.isNotEmpty) {
-    showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
-  }
-
-  final windowManager = PlatformWindowManager(showWindow);
+  final windowManager = PlatformWindowManager(args);
 
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);

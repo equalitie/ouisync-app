@@ -3,11 +3,11 @@ import 'dart:io';
 import 'platform.dart';
 
 abstract class PlatformWindowManager {
-  factory PlatformWindowManager(bool showWindow) {
+  factory PlatformWindowManager(List<String> args) {
     if (Platform.isAndroid || Platform.isIOS) {
-      return PlatformWindowManagerMobile(showWindow);
+      return PlatformWindowManagerMobile(args);
     }
-    return PlatformWindowManagerDesktop(showWindow);
+    return PlatformWindowManagerDesktop(args);
   }
 
   Future<void> setTitle(String title);

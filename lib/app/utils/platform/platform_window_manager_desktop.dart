@@ -5,6 +5,7 @@ import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
+import 'package:windows_single_instance/windows_single_instance.dart';
 
 import '../../../generated/l10n.dart';
 import '../utils.dart';
@@ -16,19 +17,27 @@ class PlatformWindowManagerDesktop
   final _systemTray = stray.SystemTray();
   final _appWindow = stray.AppWindow();
 
+  late final String _appName;
   bool _showWindow = true;
 
-  PlatformWindowManagerDesktop(bool showWindow) {
-    _showWindow = showWindow;
-
-    initialize().then((_) async {
+  PlatformWindowManagerDesktop(List<String> args) {
+    initialize(args).then((_) async {
       windowManager.addListener(this);
       await windowManager.setPreventClose(true);
     });
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize(List<String> args) async {
     await windowManager.ensureInitialized();
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    _appName = packageInfo.appName;
+
+    if (args.isNotEmpty) {
+      _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
+    }
+
+    await _ensureWindowsSingleInstance(args, _appName);
 
     /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
     /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
@@ -149,17 +158,25 @@ class PlatformWindowManagerDesktop
 
   @override
   Future<bool> launchAtStartup(bool enable) async {
-    await _setupLaunchAtStartup();
+    LaunchAtStartup.instance.setup(
+        appName: _appName,
+        appPath: Platform.resolvedExecutable,
+        args: [Constants.launchAtStartupArg]);
+
     return enable
         ? await LaunchAtStartup.instance.enable()
         : await LaunchAtStartup.instance.disable();
   }
 
-  Future<void> _setupLaunchAtStartup() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    LaunchAtStartup.instance.setup(
-        appName: packageInfo.appName,
-        appPath: Platform.resolvedExecutable,
-        args: [Constants.launchAtStartupArg]);
+  Future<void> _ensureWindowsSingleInstance(
+      List<String> args, String pipeName) async {
+    if (!Platform.isWindows) {
+      return;
+    }
+
+    await WindowsSingleInstance.ensureSingleInstance(args, pipeName,
+        onSecondWindow: (args) {
+      print(args);
+    });
   }
 }
