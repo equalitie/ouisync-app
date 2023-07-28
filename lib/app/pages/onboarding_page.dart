@@ -19,17 +19,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   final buttonStyle = TextStyle(fontWeight: FontWeight.w600);
 
+  double _imageWidth = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _imageWidth = MediaQuery.of(context).size.width;
+  }
+
   @override
   Widget build(BuildContext context) {
     const bodyStyle = TextStyle(fontSize: 19.0);
 
-    const pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
-      bodyTextStyle: bodyStyle,
-      bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-      pageColor: Colors.white,
-      imagePadding: EdgeInsets.zero,
-    );
+    final pageDecoration = PageDecoration(
+        titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
+        bodyAlignment: Alignment.center,
+        bodyTextStyle: bodyStyle,
+        bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+        imagePadding: EdgeInsets.zero);
 
     return IntroductionScreen(
         key: introKey,
@@ -85,8 +93,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _buildImage(String assetName, [double width = 350]) =>
-      Image.asset('assets/$assetName', width: width);
+  Widget _buildImage(String assetName) => Image.asset(
+        'assets/$assetName',
+        width: _imageWidth * 0.6,
+      );
 
   Widget _buildButton(String text) =>
       Text(text.toUpperCase(), style: buttonStyle);
