@@ -67,9 +67,10 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   var launchAtStartup = settings.getLaunchAtStartup();
   if (launchAtStartup == null) {
-    await settings.setLaunchAtStartup(true);
-    await windowManager.launchAtStartup(true);
+    launchAtStartup = true;
+    await settings.setLaunchAtStartup(launchAtStartup);
   }
+  await windowManager.launchAtStartup(launchAtStartup);
 
   var showOnboarding = settings.getShowOnboarding();
   if (showOnboarding == null) {
