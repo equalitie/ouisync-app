@@ -27,7 +27,7 @@ class PlatformDhtSwitch extends StatelessWidget {
 
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
       value: repository.state.isDhtEnabled,
-      title: title, // style: TextStyle(fontSize: Dimensions.fontSmall)),
+      title: title,
       secondary: Icon(icon),
       onChanged: (value) => onToggle?.call(value));
 

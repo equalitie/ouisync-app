@@ -53,7 +53,8 @@ class RepositorySection extends SettingsSection
       PlatformDhtSwitch(
         repository: repository,
         title: InfoBuble(
-            child: Text(S.current.labelBitTorrentDHT),
+            child: Text(S.current.labelBitTorrentDHT,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
             title: S.current.labelBitTorrentDHT,
             description:
                 'Distributed Hash Tables store resource locations throughout the'
@@ -67,7 +68,8 @@ class RepositorySection extends SettingsSection
       PlatformPexSwitch(
         repository: repository,
         title: InfoBuble(
-            child: Text(S.current.messagePeerExchange),
+            child: Text(S.current.messagePeerExchange,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
             title: S.current.messagePeerExchange,
             description:
                 'Peer Exchange is a communications protocol that allows a group '

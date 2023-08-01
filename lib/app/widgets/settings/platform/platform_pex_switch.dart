@@ -27,7 +27,7 @@ class PlatformPexSwitch extends StatelessWidget {
 
   Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
       value: repository.state.isPexEnabled,
-      title: title, // style: TextStyle(fontSize: Dimensions.fontSmall)),
+      title: title,
       secondary: Icon(icon),
       onChanged: (value) => onToggle?.call(value));
 
