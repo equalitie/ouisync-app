@@ -8,6 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peer_list.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
@@ -53,7 +54,13 @@ class NetworkSection extends SettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setPortForwardingEnabled(value));
           },
-          title: Text('UPnP'),
+          title: InfoBuble(
+              child: Text('UPnP'),
+              title: 'Universal Plug and Play (UPnP)',
+              description:
+                  'Is a set of networking protocols that will allow your Ouisync'
+                  ' apps to discover and communicate with each other. For best '
+                  'connectivity it needs to be ON'),
           leading: Icon(Icons.router),
         ),
       );
@@ -67,7 +74,14 @@ class NetworkSection extends SettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setLocalDiscoveryEnabled(value));
           },
-          title: Text(S.current.messageLocalDiscovery),
+          title: InfoBuble(
+              child: Text(S.current.messageLocalDiscovery),
+              title: S.current.messageLocalDiscovery,
+              description:
+                  'The Local Peer Discovery allows your Ouisync apps to share '
+                  'files with your peers without going through internet service '
+                  'providers, where a local wifi or other network is available. '
+                  'For best results this setting needs to be ON'),
           leading: Icon(Icons.broadcast_on_personal),
         ),
       );
@@ -81,7 +95,12 @@ class NetworkSection extends SettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
-          title: Text(S.current.messageSyncMobileData),
+          title: InfoBuble(
+              child: Text(S.current.messageSyncMobileData),
+              title: S.current.messageSyncMobileData,
+              description:
+                  'When this setting is on, your mobile services provider may '
+                  'charge you for data you share with your peers'),
           leading: Icon(Icons.mobile_screen_share),
         ),
       );
@@ -166,7 +185,12 @@ class NetworkSection extends SettingsSection {
       BlocBuilder<NatDetection, NatDetectionType>(
         builder: (context, type) => SettingsTile(
           leading: Icon(Icons.nat),
-          title: Text(S.current.messageNATType),
+          title: InfoBuble(
+              child: Text(S.current.messageNATType),
+              title: S.current.messageNATType,
+              description:
+                  'This value is set by your internet service provider, for best'
+                  ' connectivity with your peers it should be Non Symetric'),
           value: Text(type.message()),
         ),
       );

@@ -52,7 +52,13 @@ class RepositorySection extends SettingsSection
   Widget _buildDhtSwitch(BuildContext context, RepoCubit repository) =>
       PlatformDhtSwitch(
         repository: repository,
-        title: S.current.labelBitTorrentDHT,
+        title: InfoBuble(
+            child: Text(S.current.labelBitTorrentDHT),
+            title: S.current.labelBitTorrentDHT,
+            description:
+                'Distributed Hash Tables store resource locations throughout the'
+                ' network - this allows peers to find each other on the P2P '
+                'network'),
         icon: Icons.hub,
         onToggle: (value) => repository.setDhtEnabled(value),
       );
@@ -60,7 +66,13 @@ class RepositorySection extends SettingsSection
   Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
       PlatformPexSwitch(
         repository: repository,
-        title: S.current.messagePeerExchange,
+        title: InfoBuble(
+            child: Text(S.current.messagePeerExchange),
+            title: S.current.messagePeerExchange,
+            description:
+                'Peer Exchange is a communications protocol that allows a group '
+                'of users (or peers) that are collaborating to share a given '
+                'file directly, to do so more swiftly and efficiently'),
         icon: Icons.group_add,
         onToggle: (value) => repository.setPexEnabled(value),
       );
