@@ -30,7 +30,7 @@ class NetworkSection extends SettingsSection {
       BlocBuilder<PowerControl, PowerControlState>(
         builder: (context, state) => SettingsTile(
           leading: Icon(Icons.wifi),
-          title: Text(Strings.connectionType),
+          title: Text(S.current.labelConnectionType),
           value: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -55,12 +55,9 @@ class NetworkSection extends SettingsSection {
             unawaited(powerControl.setPortForwardingEnabled(value));
           },
           title: InfoBuble(
-              child: Text('UPnP'),
-              title: 'Universal Plug and Play (UPnP)',
-              description:
-                  'Is a set of networking protocols that will allow your Ouisync'
-                  ' apps to discover and communicate with each other. For best '
-                  'connectivity it needs to be ON'),
+              child: Text(Strings.upNP),
+              title: S.current.titleUPnP,
+              description: S.current.messageInfoUPnP),
           leading: Icon(Icons.router),
         ),
       );
@@ -77,11 +74,7 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageLocalDiscovery),
               title: S.current.messageLocalDiscovery,
-              description:
-                  'The Local Peer Discovery allows your Ouisync apps to share '
-                  'files with your peers without going through internet service '
-                  'providers, where a local wifi or other network is available. '
-                  'For best results this setting needs to be ON'),
+              description: S.current.messageInfoLocalDiscovery),
           leading: Icon(Icons.broadcast_on_personal),
         ),
       );
@@ -98,46 +91,44 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageSyncMobileData),
               title: S.current.messageSyncMobileData,
-              description:
-                  'When this setting is on, your mobile services provider may '
-                  'charge you for data you share with your peers'),
+              description: S.current.messageInfoSyncMobileData),
           leading: Icon(Icons.mobile_screen_share),
         ),
       );
 
   List<Widget> _buildConnectivityInfoTiles(BuildContext context) => [
         _buildConnectivityInfoTile(
-          Strings.labelTcpListenerEndpointV4,
+          S.current.labelTcpListenerEndpointV4,
           Icons.computer,
           (state) => state.tcpListenerV4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelTcpListenerEndpointV6,
+          S.current.labelTcpListenerEndpointV6,
           Icons.computer,
           (state) => state.tcpListenerV6,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelQuicListenerEndpointV4,
+          S.current.labelQuicListenerEndpointV4,
           Icons.computer,
           (state) => state.quicListenerV4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelQuicListenerEndpointV6,
+          S.current.labelQuicListenerEndpointV6,
           Icons.computer,
           (state) => state.quicListenerV6,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelExternalIP,
+          S.current.labelExternalIP,
           Icons.cloud_outlined,
           (state) => state.externalIP,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelLocalIPv4,
+          S.current.labelLocalIPv4,
           Icons.lan_outlined,
           (state) => state.localIPv4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelLocalIPv6,
+          S.current.labelLocalIPv6,
           Icons.lan_outlined,
           (state) => state.localIPv6,
         ),
@@ -188,9 +179,7 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageNATType),
               title: S.current.messageNATType,
-              description:
-                  'This value is set by your internet service provider, for best'
-                  ' connectivity with your peers it should be Non Symetric'),
+              description: S.current.messageInfoNATType),
           value: Text(type.message()),
         ),
       );

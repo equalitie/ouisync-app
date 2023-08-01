@@ -56,10 +56,7 @@ class RepositorySection extends SettingsSection
             child: Text(S.current.labelBitTorrentDHT,
                 style: TextStyle(fontSize: Dimensions.fontSmall)),
             title: S.current.labelBitTorrentDHT,
-            description:
-                'Distributed Hash Tables store resource locations throughout the'
-                ' network - this allows peers to find each other on the P2P '
-                'network'),
+            description: S.current.messageInfoBittorrentDHT),
         icon: Icons.hub,
         onToggle: (value) => repository.setDhtEnabled(value),
       );
@@ -71,10 +68,7 @@ class RepositorySection extends SettingsSection
             child: Text(S.current.messagePeerExchange,
                 style: TextStyle(fontSize: Dimensions.fontSmall)),
             title: S.current.messagePeerExchange,
-            description:
-                'Peer Exchange is a communications protocol that allows a group '
-                'of users (or peers) that are collaborating to share a given '
-                'file directly, to do so more swiftly and efficiently'),
+            description: S.current.messageInfoPeerExchange),
         icon: Icons.group_add,
         onToggle: (value) => repository.setPexEnabled(value),
       );
