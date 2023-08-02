@@ -97,6 +97,11 @@ class Constants {
   static const pipedaUrl =
       'https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/';
 
+  static const pexWikipediaUrl = 'https://en.wikipedia.org/wiki/Peer_exchange';
+
+  static const natWikipediaUrl =
+      'https://en.wikipedia.org/wiki/Network_address_translation';
+
   static Color primaryColor(context) => Theme.of(context).primaryColorDark;
 
   static const double repositoryBarHeight = 58.0;

@@ -8,6 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peer_list.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
@@ -29,7 +30,7 @@ class NetworkSection extends SettingsSection {
       BlocBuilder<PowerControl, PowerControlState>(
         builder: (context, state) => SettingsTile(
           leading: Icon(Icons.wifi),
-          title: Text(Strings.connectionType),
+          title: Text(S.current.labelConnectionType),
           value: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -48,14 +49,16 @@ class NetworkSection extends SettingsSection {
       BlocSelector<PowerControl, PowerControlState, bool>(
         selector: (state) => state.portForwardingEnabled,
         builder: (context, value) => SwitchSettingsTile(
-          value: value,
-          onChanged: (value) {
-            final powerControl = context.read<PowerControl>();
-            unawaited(powerControl.setPortForwardingEnabled(value));
-          },
-          title: Text('UPnP'),
-          leading: Icon(Icons.router),
-        ),
+            value: value,
+            onChanged: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setPortForwardingEnabled(value));
+            },
+            title: InfoBuble(
+                child: Text(Strings.upNP),
+                title: S.current.titleUPnP,
+                description: [TextSpan(text: S.current.messageInfoUPnP)]),
+            leading: Icon(Icons.router)),
       );
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
@@ -67,7 +70,12 @@ class NetworkSection extends SettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setLocalDiscoveryEnabled(value));
           },
-          title: Text(S.current.messageLocalDiscovery),
+          title: InfoBuble(
+              child: Text(S.current.messageLocalDiscovery),
+              title: S.current.messageLocalDiscovery,
+              description: [
+                TextSpan(text: S.current.messageInfoLocalDiscovery)
+              ]),
           leading: Icon(Icons.broadcast_on_personal),
         ),
       );
@@ -81,44 +89,49 @@ class NetworkSection extends SettingsSection {
             final powerControl = context.read<PowerControl>();
             unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
-          title: Text(S.current.messageSyncMobileData),
+          title: InfoBuble(
+              child: Text(S.current.messageSyncMobileData),
+              title: S.current.messageSyncMobileData,
+              description: [
+                TextSpan(text: S.current.messageInfoSyncMobileData)
+              ]),
           leading: Icon(Icons.mobile_screen_share),
         ),
       );
 
   List<Widget> _buildConnectivityInfoTiles(BuildContext context) => [
         _buildConnectivityInfoTile(
-          Strings.labelTcpListenerEndpointV4,
+          S.current.labelTcpListenerEndpointV4,
           Icons.computer,
           (state) => state.tcpListenerV4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelTcpListenerEndpointV6,
+          S.current.labelTcpListenerEndpointV6,
           Icons.computer,
           (state) => state.tcpListenerV6,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelQuicListenerEndpointV4,
+          S.current.labelQuicListenerEndpointV4,
           Icons.computer,
           (state) => state.quicListenerV4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelQuicListenerEndpointV6,
+          S.current.labelQuicListenerEndpointV6,
           Icons.computer,
           (state) => state.quicListenerV6,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelExternalIP,
+          S.current.labelExternalIP,
           Icons.cloud_outlined,
           (state) => state.externalIP,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelLocalIPv4,
+          S.current.labelLocalIPv4,
           Icons.lan_outlined,
           (state) => state.localIPv4,
         ),
         _buildConnectivityInfoTile(
-          Strings.labelLocalIPv6,
+          S.current.labelLocalIPv6,
           Icons.lan_outlined,
           (state) => state.localIPv6,
         ),
@@ -166,10 +179,24 @@ class NetworkSection extends SettingsSection {
       BlocBuilder<NatDetection, NatDetectionType>(
         builder: (context, type) => SettingsTile(
           leading: Icon(Icons.nat),
-          title: Text(S.current.messageNATType),
+          title: InfoBuble(
+              child: Text(S.current.messageNATType),
+              title: S.current.messageNATType,
+              description: [
+                TextSpan(text: S.current.messageInfoNATType),
+                Fields.linkTextSpan(
+                    context,
+                    '\n\n${S.current.messageNATOnWikipedia}',
+                    _launchNATOnWikipedia)
+              ]),
           value: Text(type.message()),
         ),
       );
+
+  void _launchNATOnWikipedia(BuildContext context) async {
+    final title = Text(S.current.messageNATOnWikipedia);
+    await Fields.openUrl(context, title, Constants.natWikipediaUrl);
+  }
 }
 
 String _connectivityTypeName(ConnectivityResult result) {
