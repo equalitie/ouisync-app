@@ -182,11 +182,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelAttachLogs": MessageLookupByLibrary.simpleMessage("Attach logs"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
+        "labelConnectionType":
+            MessageLookupByLibrary.simpleMessage("Connection type"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destination"),
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
+        "labelExternalIP": MessageLookupByLibrary.simpleMessage("External IP"),
+        "labelInternalIP": MessageLookupByLibrary.simpleMessage("Internal IP"),
+        "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("Local IPv4"),
+        "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("Local IPv6"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelLockAllRepos": MessageLookupByLibrary.simpleMessage("Lock all"),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
@@ -194,6 +200,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Password: "),
         "labelPeers": MessageLookupByLibrary.simpleMessage("Peers"),
         "labelQRCode": MessageLookupByLibrary.simpleMessage("QR code"),
+        "labelQuicListenerEndpointV4":
+            MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv4"),
+        "labelQuicListenerEndpointV6":
+            MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv6"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
         "labelRepositoryCurrentPassword":
@@ -210,6 +220,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
+        "labelTcpListenerEndpointV4":
+            MessageLookupByLibrary.simpleMessage("Listening on TCP IPv4"),
+        "labelTcpListenerEndpointV6":
+            MessageLookupByLibrary.simpleMessage("Listening on TCP IPv6"),
         "labelTokenLink":
             MessageLookupByLibrary.simpleMessage("Repository share link"),
         "labelTypePassword":
@@ -307,6 +321,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "The Ouisync team cannot delete individual files from repositories, as it is not possible to identify them because they are encrypted. We are able to delete whole repositories if you send us the link to the repository that needs to be deleted"),
         "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
             "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
+        "messageDistributedHashTables":
+            MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -429,12 +445,29 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("Generate password"),
+        "messageGoToMailApp":
+            MessageLookupByLibrary.simpleMessage("Go to the mail app"),
+        "messageGoToPeers": MessageLookupByLibrary.simpleMessage("Go to Peers"),
         "messageGranted": MessageLookupByLibrary.simpleMessage("Granted"),
         "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
             "Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications"),
         "messageIgnoreBatteryOptimizationsPermission":
             MessageLookupByLibrary.simpleMessage(
                 "Allows the app to keep syncing in the background"),
+        "messageInfoBittorrentDHT": MessageLookupByLibrary.simpleMessage(
+            "Is a tool that allows peers to find each other on the P2P (Peer to Peer) network without a centralized server"),
+        "messageInfoLocalDiscovery": MessageLookupByLibrary.simpleMessage(
+            "The Local Peer Discovery allows your Ouisync apps to share files with your peers without going through internet service providers, where a local WiFi or other network is available.\n\nFor local connectivity this setting needs to be ON"),
+        "messageInfoNATType": MessageLookupByLibrary.simpleMessage(
+            "This value is set by your internet service provider.\n\nConnectivity with your peers it\'s best achieved when this setting is Non Symetric"),
+        "messageInfoPeerExchange": MessageLookupByLibrary.simpleMessage(
+            "Is a tool used for exchanging peer list with the peers you are connected to"),
+        "messageInfoRuntimeID": MessageLookupByLibrary.simpleMessage(
+            "Is a unique ID generated by OuiSync everytime it starts.\n\nYou can use it to confirm your connection with others in the Peer section of the app"),
+        "messageInfoSyncMobileData": MessageLookupByLibrary.simpleMessage(
+            "When this setting is on, your mobile services provider may charge you for data used when syncing the repositories you share with your peers"),
+        "messageInfoUPnP": MessageLookupByLibrary.simpleMessage(
+            "Is a set of networking protocols that will allow your Ouisync apps to discover and communicate with each other.\n\nFor best connectivity we recommend this setting to be ON"),
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
@@ -488,6 +521,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMoveEntryOrigin": m13,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
+        "messageNATOnWikipedia":
+            MessageLookupByLibrary.simpleMessage("NAT on Wikipedia"),
         "messageNATType": MessageLookupByLibrary.simpleMessage("NAT type"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Network is unavailable"),
@@ -525,6 +560,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password copied to the clipboard"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Peer Exchange"),
+        "messagePeerExchangeWikipedia":
+            MessageLookupByLibrary.simpleMessage("Peer Exchange on Wikipedia"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
@@ -799,6 +836,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("2. Terms of Use"),
         "titleTermsPrivacy": MessageLookupByLibrary.simpleMessage(
             "Ouisync Terms of Use & Privacy Notice"),
+        "titleUPnP": MessageLookupByLibrary.simpleMessage(
+            "Universal Plug and Play (UPnP)"),
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Unlock repository"),
         "titleUnsavedChanges":

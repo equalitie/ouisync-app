@@ -52,7 +52,15 @@ class RepositorySection extends SettingsSection
   Widget _buildDhtSwitch(BuildContext context, RepoCubit repository) =>
       PlatformDhtSwitch(
         repository: repository,
-        title: S.current.labelBitTorrentDHT,
+        title: InfoBuble(
+            child: Text(S.current.labelBitTorrentDHT,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
+            title: S.current.labelBitTorrentDHT,
+            description: [
+              Fields.boldTextSpan(
+                  '(${S.current.messageDistributedHashTables})'),
+              TextSpan(text: ' ${S.current.messageInfoBittorrentDHT}')
+            ]),
         icon: Icons.hub,
         onToggle: (value) => repository.setDhtEnabled(value),
       );
@@ -60,10 +68,25 @@ class RepositorySection extends SettingsSection
   Widget _buildPeerExchangeSwitch(BuildContext context, RepoCubit repository) =>
       PlatformPexSwitch(
         repository: repository,
-        title: S.current.messagePeerExchange,
+        title: InfoBuble(
+            child: Text(S.current.messagePeerExchange,
+                style: TextStyle(fontSize: Dimensions.fontSmall)),
+            title: S.current.messagePeerExchange,
+            description: [
+              TextSpan(text: S.current.messageInfoPeerExchange),
+              Fields.linkTextSpan(
+                  context,
+                  '\n\n${S.current.messagePeerExchangeWikipedia}',
+                  _launchPeerExchangeOnWikipedia)
+            ]),
         icon: Icons.group_add,
         onToggle: (value) => repository.setPexEnabled(value),
       );
+
+  void _launchPeerExchangeOnWikipedia(BuildContext context) async {
+    final title = Text(S.current.messagePeerExchangeWikipedia);
+    await Fields.openUrl(context, title, Constants.pexWikipediaUrl);
+  }
 
   Widget _buildRenameTile(
     BuildContext context,
