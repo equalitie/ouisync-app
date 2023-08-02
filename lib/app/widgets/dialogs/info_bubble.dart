@@ -19,7 +19,7 @@ class InfoBuble extends StatelessWidget {
   final Widget child;
 
   final String title;
-  final String description;
+  final List<TextSpan> description;
   final Color bgColor;
   final double bubbleWidth;
   final double bubblePadding;
@@ -30,20 +30,22 @@ class InfoBuble extends StatelessWidget {
   Widget build(BuildContext context) {
     final focusableWidgetKey = GlobalKey();
 
-    return Wrap(children: [
-      child,
-      SizedBox(width: 0.2),
-      GestureDetector(
-          onTap: () =>
-              _showInfoBubble(title, description, focusableWidgetKey, bgColor),
-          child: Icon(Icons.info_outline_rounded,
-              key: focusableWidgetKey, size: Dimensions.sizeIconMicro))
-    ]);
+    return Wrap(
+        spacing: 1.0,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          child,
+          GestureDetector(
+              onTap: () => _showInfoBubble(
+                  title, description, focusableWidgetKey, bgColor),
+              child: Icon(Icons.info_outline_rounded,
+                  key: focusableWidgetKey, size: Dimensions.sizeIconMicro))
+        ]);
   }
 
   void _showInfoBubble(
     String title,
-    String description,
+    List<TextSpan> description,
     GlobalKey focusableWidgetKey,
     Color bgColor, {
     double bubbleWidth = 300.0,
@@ -78,7 +80,7 @@ class _InfoBubbleDialog extends StatefulWidget {
   final GlobalKey focusableWidgetKey;
 
   final String title;
-  final String description;
+  final List<TextSpan> description;
 
   final Color bgColor;
 
@@ -234,7 +236,13 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(widget.description),
+                        RichText(
+                            textAlign: TextAlign.start,
+                            text: TextSpan(
+                                style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: Dimensions.fontSmall),
+                                children: widget.description)),
                       ],
                     ),
                   ),

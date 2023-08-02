@@ -49,17 +49,16 @@ class NetworkSection extends SettingsSection {
       BlocSelector<PowerControl, PowerControlState, bool>(
         selector: (state) => state.portForwardingEnabled,
         builder: (context, value) => SwitchSettingsTile(
-          value: value,
-          onChanged: (value) {
-            final powerControl = context.read<PowerControl>();
-            unawaited(powerControl.setPortForwardingEnabled(value));
-          },
-          title: InfoBuble(
-              child: Text(Strings.upNP),
-              title: S.current.titleUPnP,
-              description: S.current.messageInfoUPnP),
-          leading: Icon(Icons.router),
-        ),
+            value: value,
+            onChanged: (value) {
+              final powerControl = context.read<PowerControl>();
+              unawaited(powerControl.setPortForwardingEnabled(value));
+            },
+            title: InfoBuble(
+                child: Text(Strings.upNP),
+                title: S.current.titleUPnP,
+                description: [TextSpan(text: S.current.messageInfoUPnP)]),
+            leading: Icon(Icons.router)),
       );
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
@@ -74,7 +73,9 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageLocalDiscovery),
               title: S.current.messageLocalDiscovery,
-              description: S.current.messageInfoLocalDiscovery),
+              description: [
+                TextSpan(text: S.current.messageInfoLocalDiscovery)
+              ]),
           leading: Icon(Icons.broadcast_on_personal),
         ),
       );
@@ -91,7 +92,9 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageSyncMobileData),
               title: S.current.messageSyncMobileData,
-              description: S.current.messageInfoSyncMobileData),
+              description: [
+                TextSpan(text: S.current.messageInfoSyncMobileData)
+              ]),
           leading: Icon(Icons.mobile_screen_share),
         ),
       );
@@ -179,10 +182,21 @@ class NetworkSection extends SettingsSection {
           title: InfoBuble(
               child: Text(S.current.messageNATType),
               title: S.current.messageNATType,
-              description: S.current.messageInfoNATType),
+              description: [
+                TextSpan(text: S.current.messageInfoNATType),
+                Fields.linkTextSpan(
+                    context,
+                    '\n\n${S.current.messageNATOnWikipedia}',
+                    _launchNATOnWikipedia)
+              ]),
           value: Text(type.message()),
         ),
       );
+
+  void _launchNATOnWikipedia(BuildContext context) async {
+    final title = Text(S.current.messageNATOnWikipedia);
+    await Fields.openUrl(context, title, Constants.natWikipediaUrl);
+  }
 }
 
 String _connectivityTypeName(ConnectivityResult result) {

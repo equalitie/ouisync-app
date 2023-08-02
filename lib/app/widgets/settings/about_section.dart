@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
+import '../../pages/peer_list.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -65,7 +67,7 @@ class AboutSection extends SettingsSection with AppLogger {
           onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
         ),
         NavigationTile(
-          title: Text(Constants.supportEmail),
+          title: Text(Constants.supportEmail, overflow: TextOverflow.ellipsis),
           leading: Icon(Icons.mail_rounded),
           trailing: _externalNavigationIcon,
           onTap: () => unawaited(
@@ -84,14 +86,33 @@ class AboutSection extends SettingsSection with AppLogger {
           title: Text(S.current.labelAppVersion),
         ),
         SettingsTile(
-          title: InfoBuble(
-              child: Text(S.current.messageSettingsRuntimeID),
-              title: S.current.messageSettingsRuntimeID,
-              description: S.current.messageInfoRuntimeID),
+          title: BlocBuilder<PeerSetCubit, PeerSet>(
+              builder: (context, state) => InfoBuble(
+                      child: Text(S.current.messageSettingsRuntimeID),
+                      title: S.current.messageSettingsRuntimeID,
+                      description: [
+                        TextSpan(text: S.current.messageInfoRuntimeID),
+                        Fields.linkTextSpan(
+                            context,
+                            '\n\n${S.current.messageGoToPeers}',
+                            _navigateToPeers),
+                      ])),
           leading: Icon(Icons.person_rounded),
           value: _getRuntimeIdForOS(),
         ),
       ];
+
+  void _navigateToPeers(BuildContext context) async {
+    final peerSetCubit = context.read<PeerSetCubit>();
+
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => BlocProvider.value(
+                  value: peerSetCubit,
+                  child: PeerList(),
+                )));
+  }
 
   @override
   bool containsErrorNotification() {
