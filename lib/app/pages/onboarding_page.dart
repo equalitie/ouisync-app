@@ -81,8 +81,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         next: _buildButton(S.current.actionNext),
         done: _buildButton(S.current.actionDone),
         curve: Curves.fastLinearToSlowEaseIn,
-        controlsMargin: const EdgeInsets.all(16),
-        controlsPadding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
         dotsDecorator: const DotsDecorator(
           size: Size(10.0, 10.0),
           color: Color(0xFFBDBDBD),

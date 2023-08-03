@@ -44,7 +44,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
       body: SingleChildScrollView(
           child: Center(
               child: Container(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(24.0),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
