@@ -17,7 +17,7 @@ class EqValues extends StatelessWidget {
     return Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-            childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
+            childrenPadding: EdgeInsets.only(bottom: 10.0),
             title: Text(S.current.messageTapForValues,
                 textAlign: TextAlign.end, style: headerTextStyle),
             children: [_valuesTextBlock(context)]));

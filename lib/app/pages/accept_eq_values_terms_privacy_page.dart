@@ -54,7 +54,6 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
                         _introTextSpan(),
                         const SizedBox(height: 20.0),
                         EqValues(),
-                        const SizedBox(height: 20.0),
                         EqTermsAndPrivacy(),
                         const SizedBox(height: 20.0),
                         Fields.dialogActions(context,
