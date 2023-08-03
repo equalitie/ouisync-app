@@ -168,5 +168,8 @@ class Constants {
   static const String dokanUrl = "https://dokan-dev.github.io";
 
   // List of available storage servers.
-  static const List<String> storageServers = ["storage.ouisync.net"];
+  static const List<String> storageServers = [
+    "storage.ouisync.net", // TODO: remove
+    "server-ca.ouisync.net",
+  ];
 }
