@@ -687,15 +687,12 @@ class Fields {
     return modeIcon;
   }
 
-  static TextSpan boldTextSpan(String text,
-          {double fontSize = Dimensions.fontSmall}) =>
-      TextSpan(
-          text: text,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize));
+  static TextSpan boldTextSpan(String text, {double? fontSize}) => TextSpan(
+      text: text,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize));
 
   static TextSpan linkTextSpan(BuildContext context, String text,
-          void Function(BuildContext) callback,
-          {double fontSize = Dimensions.fontSmall}) =>
+          void Function(BuildContext) callback, {double? fontSize}) =>
       TextSpan(
           text: text,
           style: TextStyle(
@@ -705,17 +702,19 @@ class Fields {
           recognizer: TapGestureRecognizer()..onTap = () => callback(context));
 
   static WidgetSpan quoteTextSpan(String quote, String author,
-          {double fontSize = Dimensions.fontSmall}) =>
+          {double? fontSize}) =>
       WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: Text.rich(TextSpan(children: [
-            italicTextSpan(quote, fontSize: fontSize),
-            TextSpan(text: author, style: TextStyle(fontSize: fontSize))
-          ])));
+          style: TextStyle(fontSize: fontSize),
+          child: Text.rich(
+              TextSpan(style: TextStyle(fontSize: fontSize), children: [
+                italicTextSpan(quote, fontSize: fontSize),
+                TextSpan(text: author, style: TextStyle(fontSize: fontSize))
+              ]),
+              style: TextStyle(fontSize: fontSize)));
 
   static TextSpan italicTextSpan(String text,
-          {double fontSize = Dimensions.fontSmall,
-          FontWeight fontWeight = FontWeight.normal}) =>
+          {double? fontSize, FontWeight? fontWeight}) =>
       TextSpan(
           text: text,
           style: TextStyle(
