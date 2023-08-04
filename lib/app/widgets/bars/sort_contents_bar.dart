@@ -91,24 +91,31 @@ class _SortByList extends StatelessWidget with AppLogger {
       ValueNotifier<SortDirection>(SortDirection.desc);
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<SortListCubit, SortListState>(
-          bloc: _sortCubit,
-          builder: (context, state) {
-            _sortDirection.value = state.direction;
+  Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
 
-            return Container(
-                padding: Dimensions.paddingBottomSheet,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle(S.current.titleSortBy),
-                      _buildSortByList(context, state.sortBy, state.direction)
-                    ]));
-          });
+    return BlocBuilder<SortListCubit, SortListState>(
+        bloc: _sortCubit,
+        builder: (context, state) {
+          _sortDirection.value = state.direction;
+
+          return Container(
+              padding: Dimensions.paddingBottomSheet,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Fields.bottomSheetHandle(context),
+                    Fields.bottomSheetTitle(S.current.titleSortBy,
+                        style: sheetTitleStyle),
+                    _buildSortByList(context, state.sortBy, state.direction)
+                  ]));
+        });
+  }
 
   Widget _buildSortByList(
           BuildContext context, SortBy sortBy, SortDirection direction) =>

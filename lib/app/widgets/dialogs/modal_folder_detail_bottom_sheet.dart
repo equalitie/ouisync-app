@@ -31,6 +31,11 @@ class FolderDetail extends StatefulWidget {
 class _FolderDetailState extends State<FolderDetail> with AppLogger {
   @override
   Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return Container(
       padding: Dimensions.paddingBottomSheet,
       child: Column(
@@ -39,7 +44,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(S.current.titleFolderDetails),
+          Fields.bottomSheetTitle(S.current.titleFolderDetails,
+              style: sheetTitleStyle),
           EntryActionItem(
               iconData: Icons.edit,
               title: S.current.iconRename,

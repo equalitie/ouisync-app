@@ -34,6 +34,11 @@ class FileDetail extends StatefulWidget {
 class _FileDetailState extends State<FileDetail> {
   @override
   Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return SingleChildScrollView(
       child: Container(
         padding: Dimensions.paddingBottomSheet,
@@ -43,7 +48,8 @@ class _FileDetailState extends State<FileDetail> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Fields.bottomSheetHandle(context),
-            Fields.bottomSheetTitle(S.current.titleFileDetails),
+            Fields.bottomSheetTitle(S.current.titleFileDetails,
+                style: sheetTitleStyle),
             EntryActionItem(
               iconData: Icons.download,
               title: S.current.iconDownload,

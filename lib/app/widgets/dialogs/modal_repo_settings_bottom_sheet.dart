@@ -35,29 +35,36 @@ class RepositorySettings extends StatefulWidget {
 class _RepositorySettingsState extends State<RepositorySettings>
     with AppLogger, RepositoryActionsMixin {
   @override
-  Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-        bloc: widget.cubit,
-        builder: (context, state) => SingleChildScrollView(
-            child: Container(
-                padding: Dimensions.paddingBottomSheet,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle(widget.cubit.name),
-                      Row(children: [
-                        Expanded(
-                            child: SwitchListTile.adaptive(
-                          title: Text(S.current.labelBitTorrentDHT),
-                          secondary: const Icon(
-                            Icons.hub,
-                            size: Dimensions.sizeIconMicro,
-                            color: Colors.black87,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                          value: state.isDhtEnabled,
+  Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
+    return BlocBuilder<RepoCubit, RepoState>(
+      bloc: widget.cubit,
+      builder: (context, state) => SingleChildScrollView(
+          child: Container(
+              padding: Dimensions.paddingBottomSheet,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Fields.bottomSheetHandle(context),
+                    Fields.bottomSheetTitle(widget.cubit.name,
+                        style: sheetTitleStyle),
+                    Row(children: [
+                      Expanded(
+                          child: SwitchListTile.adaptive(
+                        title: Text(S.current.labelBitTorrentDHT),
+                        secondary: const Icon(
+                          Icons.hub,
+                          size: Dimensions.sizeIconMicro,
+                          color: Colors.black87,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        value: state.isDhtEnabled,
                           onChanged: (value) =>
                               widget.cubit.setDhtEnabled(value),
                         )),

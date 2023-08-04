@@ -125,18 +125,15 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontBig,
-          FontWeight fontWeight = FontWeight.w400}) =>
+          TextStyle? style}) =>
       Padding(
           padding: padding,
           child: Row(children: [
-            Text(
-              title,
-              textAlign: textAlign,
-              softWrap: softWrap,
-              overflow: textOverflow,
-              style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
-            ),
+            Text(title,
+                textAlign: textAlign,
+                softWrap: softWrap,
+                overflow: textOverflow,
+                style: style)
           ]));
 
   static Widget idLabel(String text,

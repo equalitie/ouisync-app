@@ -52,6 +52,11 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
         .bodyMedium
         ?.copyWith(fontSize: microFontSize, color: Colors.black54);
 
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     // On certain resolutions (higer) the constrain set on this dialog when called
     // causes the content to scroll, giving the appearance of a smaller padding
     // at the bottom of the content.
@@ -76,7 +81,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Fields.bottomSheetHandle(context),
-                  Fields.bottomSheetTitle(widget.repository.name),
+                  Fields.bottomSheetTitle(widget.repository.name,
+                      style: sheetTitleStyle),
                   Dimensions.spacingVertical,
                   AccessModeSelector(
                     currentAccessMode: widget.repository.state.accessMode,

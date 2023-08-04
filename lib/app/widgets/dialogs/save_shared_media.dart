@@ -37,6 +37,11 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
   Widget build(BuildContext context) {
     final mediaListMaxHeight = MediaQuery.of(context).size.height * 0.2;
 
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return Container(
       padding: Dimensions.paddingBottomSheet,
       decoration: Dimensions.decorationBottomSheetAlternative,
@@ -49,7 +54,9 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Fields.bottomSheetTitle(S.current.titleAddFile,
-                    textAlign: TextAlign.start, padding: EdgeInsets.all(0.0)),
+                    textAlign: TextAlign.start,
+                    padding: EdgeInsets.all(0.0),
+                    style: sheetTitleStyle),
                 Fields.actionIcon(_collapsableIcon,
                     onPressed: _collapsableAction,
                     padding: EdgeInsets.all(0.0),

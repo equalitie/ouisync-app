@@ -18,26 +18,34 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   final RepoCubit cubit;
 
   @override
-  Widget build(BuildContext context) => Container(
-      padding: Dimensions.paddingBottomSheet,
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Fields.bottomSheetHandle(context),
-            Fields.bottomSheetTitle(S.current.titleFolderActions),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              _buildAction(
-                  name: S.current.actionNewFolder,
-                  icon: Icons.create_new_folder_outlined,
-                  action: () => createFolderDialog(context, cubit)),
-              _buildAction(
-                  name: S.current.actionNewFile,
-                  icon: Icons.upload_file_outlined,
-                  action: () async => await addFile(context, cubit))
-            ])
-          ]));
+  Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
+
+    return Container(
+        padding: Dimensions.paddingBottomSheet,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Fields.bottomSheetHandle(context),
+              Fields.bottomSheetTitle(S.current.titleFolderActions,
+                  style: sheetTitleStyle),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                _buildAction(
+                    name: S.current.actionNewFolder,
+                    icon: Icons.create_new_folder_outlined,
+                    action: () => createFolderDialog(context, cubit)),
+                _buildAction(
+                    name: S.current.actionNewFile,
+                    icon: Icons.upload_file_outlined,
+                    action: () async => await addFile(context, cubit))
+              ])
+            ]));
+  }
 
   Widget _buildAction({name, icon, action}) => Padding(
       padding: Dimensions.paddingBottomSheetActions,
@@ -50,7 +58,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
               size: Dimensions.sizeIconBig,
             ),
             Dimensions.spacingVertical,
-            Text(name, style: const TextStyle(fontSize: Dimensions.fontSmall))
+            Text(name)
           ])));
 
   void createFolderDialog(context, RepoCubit cubit) async {
