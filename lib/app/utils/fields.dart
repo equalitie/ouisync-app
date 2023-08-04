@@ -221,9 +221,7 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontAverage,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? style,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
@@ -245,9 +243,7 @@ class Fields {
                   textAlign: textAlign,
                   textOverflow: textOverflow,
                   softWrap: textSoftWrap,
-                  fontSize: textFontSize,
-                  fontWeight: textFontWeight,
-                  color: textColor)
+                  style: style)
             ],
           ));
 
@@ -279,9 +275,7 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontBig,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? style,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
@@ -297,9 +291,7 @@ class Fields {
                   textAlign: textAlign,
                   textOverflow: textOverflow,
                   softWrap: textSoftWrap,
-                  fontSize: textFontSize,
-                  fontWeight: textFontWeight,
-                  color: textColor)
+                  style: style)
             ],
           ));
 
@@ -333,9 +325,7 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool softWrap = true,
-          double fontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          Color? color,
+          TextStyle? style,
           int maxLines = 1}) =>
       Expanded(
         key: key,

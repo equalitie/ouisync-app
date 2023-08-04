@@ -20,6 +20,8 @@ class ActionsDialog extends StatefulWidget {
 class _ActionsDialogState extends State<ActionsDialog> {
   @override
   Widget build(BuildContext context) {
+    final titleStyle = Theme.of(context).textTheme.titleLarge;
+
     return Dialog(
         child: Stack(
       children: <Widget>[
@@ -52,9 +54,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Fields.constrainedText(widget.title,
-                          flex: 0,
-                          fontSize: Dimensions.fontBig,
-                          color: Colors.black),
+                          flex: 0, style: titleStyle),
                       Dimensions.spacingVertical,
                       widget.body!,
                     ],

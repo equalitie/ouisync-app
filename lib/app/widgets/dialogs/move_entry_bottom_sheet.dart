@@ -43,6 +43,11 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w800);
+
     return Container(
       key: bodyKey,
       padding: Dimensions.paddingBottomSheet,
@@ -58,8 +63,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
               text: getBasename(widget.path)),
           Fields.constrainedText(
               S.current.messageMoveEntryOrigin(getDirname(widget.path)),
-              fontWeight: FontWeight.w800,
-              color: Colors.black),
+              style: bodyStyle),
           _selectActions(context)
         ],
       ),

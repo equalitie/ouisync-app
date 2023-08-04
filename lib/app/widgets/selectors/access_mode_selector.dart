@@ -45,18 +45,20 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
   }
 
   Widget _buildModeSelector() {
+    final microFontSize =
+        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0.0) * 0.8;
+
+    final microBodyStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontSize: microFontSize, color: Constants.inputLabelForeColor);
+
     return Column(
       children: [
         Padding(
           padding: Dimensions.paddingItem,
           child: Row(
             children: [
-              Fields.constrainedText(
-                S.current.labelSetPermission,
-                fontSize: Dimensions.fontMicro,
-                fontWeight: FontWeight.normal,
-                color: Constants.inputLabelForeColor,
-              ),
+              Fields.constrainedText(S.current.labelSetPermission,
+                  style: microBodyStyle),
             ],
           ),
         ),

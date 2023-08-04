@@ -27,8 +27,16 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
     AccessMode.write: S.current.messageWriteReplicaExplanation
   };
 
+  TextStyle? labelStyle;
+
   @override
   Widget build(BuildContext context) {
+    final microFontSize =
+        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0.0) * 0.8;
+
+    labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontSize: microFontSize, color: Constants.inputLabelForeColor);
+
     return Container(
         padding: Dimensions.paddingActionBox,
         decoration: const BoxDecoration(
@@ -76,17 +84,14 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
               children: [
                 Expanded(
                     child: Column(children: [
-                  Fields.constrainedText(accessMode.name.capitalize(),
-                      fontWeight: FontWeight.normal, color: Colors.black)
+                  Fields.constrainedText(accessMode.name.capitalize())
                 ])),
                 Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 95.0),
                     child: Row(children: [
                       Fields.constrainedText(_tokenDescription(accessMode),
-                          fontSize: Dimensions.fontMicro,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.black)
+                          style: inpuLabelStyle)
                     ])),
                 Dimensions.spacingVerticalHalf
               ])
@@ -101,14 +106,9 @@ class _AccessModeDropDownMenuState extends State<AccessModeDropDownMenu>
         children: [
           Row(children: [
             Fields.constrainedText(S.current.labelSetPermission,
-                fontSize: Dimensions.fontMicro,
-                fontWeight: FontWeight.normal,
-                color: Constants.inputLabelForeColor)
+                style: inpuLabelStyle)
           ]),
-          Row(children: [
-            Fields.constrainedText(accessMode.name.capitalize(),
-                fontWeight: FontWeight.normal, color: Colors.black)
-          ])
+          Row(children: [Fields.constrainedText(accessMode.name.capitalize())])
         ],
       ));
 

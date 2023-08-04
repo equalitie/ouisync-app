@@ -43,9 +43,7 @@ class RepositorySelector extends StatelessWidget with AppLogger {
                       ]),
                       Row(
                         children: [
-                          Fields.constrainedText(repoName,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.black),
+                          Fields.constrainedText(repoName),
                         ],
                       ),
                     ],
@@ -66,8 +64,7 @@ class RepositorySelector extends StatelessWidget with AppLogger {
                           size: Dimensions.sizeIconSmall,
                           color: Theme.of(context).primaryColor),
                       Dimensions.spacingHorizontalDouble,
-                      Fields.constrainedText(repo.name,
-                          fontWeight: FontWeight.normal, color: Colors.black),
+                      Fields.constrainedText(repo.name),
                     ],
                   ),
                 ),

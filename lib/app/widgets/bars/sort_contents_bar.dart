@@ -18,35 +18,33 @@ class SortContentsBar extends StatefulWidget {
 
 class _SortContentsBarState extends State<SortContentsBar> {
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<SortListCubit, SortListState>(
-          bloc: widget.sortListCubit,
-          builder: (context, state) => widget.reposCubit.showList
-              ? SizedBox.shrink()
-              : Container(
-                  alignment: Alignment.centerLeft,
-                  padding: Dimensions.paddingActionBox,
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(Dimensions.radiusSmall))),
-                  child: GestureDetector(
-                      child: Padding(
-                          padding: Dimensions.paddingItem,
-                          child: Row(children: [
-                            Fields.constrainedText(
-                                state.sortBy.name.capitalize(),
-                                flex: 0,
-                                fontSize: Dimensions.fontSmall,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black),
-                            Dimensions.spacingHorizontalHalf,
-                            Fields.actionIcon(
-                                _getDirectionArrow(state.direction),
-                                color: Colors.black,
-                                onPressed: () => _updateSortDirection(state))
-                          ])),
-                      onTap: () async => await _showSortByDialog()),
-                ));
+  Widget build(BuildContext context) {
+    final bodyStyle = Theme.of(context).textTheme.bodySmall;
+
+    return BlocBuilder<SortListCubit, SortListState>(
+        bloc: widget.sortListCubit,
+        builder: (context, state) => widget.reposCubit.showList
+            ? SizedBox.shrink()
+            : Container(
+                alignment: Alignment.centerLeft,
+                padding: Dimensions.paddingActionBox,
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(Dimensions.radiusSmall))),
+                child: GestureDetector(
+                    child: Padding(
+                        padding: Dimensions.paddingItem,
+                        child: Row(children: [
+                          Fields.constrainedText(state.sortBy.name.capitalize(),
+                              flex: 0, style: bodyStyle),
+                          Dimensions.spacingHorizontalHalf,
+                          Fields.actionIcon(_getDirectionArrow(state.direction),
+                              color: Colors.black,
+                              onPressed: () => _updateSortDirection(state))
+                        ])),
+                    onTap: () async => await _showSortByDialog()),
+              ));
+  }
 
   Icon _getDirectionArrow(SortDirection direction) {
     return direction == SortDirection.asc
@@ -107,7 +105,7 @@ class _SortByList extends StatelessWidget with AppLogger {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle('Sort by'),
+                      Fields.bottomSheetTitle(S.current.titleSortBy),
                       _buildSortByList(context, state.sortBy, state.direction)
                     ]));
           });

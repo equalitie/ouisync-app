@@ -72,6 +72,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   bool _showRepositoryNameInUseWarning = false;
 
+  TextStyle? _linkStyle;
+  TextStyle? _messageSmall;
+  TextStyle? _labelSmall;
+
   @override
   void initState() {
     unawaited(_init());
@@ -171,35 +175,50 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   }
 
   @override
-  Widget build(BuildContext context) => WillPopScope(
-      onWillPop: () async {
-        if (_deleteRepositoryBeforePop) {
-          assert(_repositoryMetaInfo != null, '_repositoryMetaInfo is null');
+  Widget build(BuildContext context) {
+    _linkStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontWeight: FontWeight.w500);
 
-          if (_repositoryMetaInfo == null) {
-            throw ('A repository was created, but saving the password into the '
-                'secure storage failed and it may be lost.\nMost likely this '
-                'repository needs to be deleted.');
+    _messageSmall =
+        Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54);
+
+    final labelFontSize =
+        (Theme.of(context).textTheme.labelSmall?.fontSize ?? 0.0) * 0.8;
+    _labelSmall = Theme.of(context).textTheme.labelSmall?.copyWith(
+        fontSize: labelFontSize, color: Constants.inputLabelForeColor);
+
+    return WillPopScope(
+        onWillPop: () async {
+          if (_deleteRepositoryBeforePop) {
+            assert(_repositoryMetaInfo != null, '_repositoryMetaInfo is null');
+
+            if (_repositoryMetaInfo == null) {
+              throw ('A repository was created, but saving the password into the '
+                  'secure storage failed and it may be lost.\nMost likely this '
+                  'repository needs to be deleted.');
+            }
+
+            final repoName = _repositoryMetaInfo!.name;
+            final authMode =
+                widget.cubit.settings.getAuthenticationMode(repoName);
+
+            await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
           }
 
-          final repoName = _repositoryMetaInfo!.name;
-          final authMode =
-              widget.cubit.settings.getAuthenticationMode(repoName);
-
-          await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
-        }
-
-        return true;
-      },
-      child: Form(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-            SingleChildScrollView(
-                reverse: true, child: _newRepositoryWidget(widget.context))
-          ])));
+          return true;
+        },
+        child: Form(
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+              SingleChildScrollView(
+                  reverse: true, child: _newRepositoryWidget(widget.context))
+            ])));
+  }
 
   Widget _newRepositoryWidget(BuildContext context) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -230,17 +249,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Fields.constrainedText(S.current.labelRepositoryLink,
-                          flex: 0,
-                          fontSize: Dimensions.fontMicro,
-                          fontWeight: FontWeight.normal,
-                          color: Constants.inputLabelForeColor),
+                          flex: 0, style: _labelSmall),
                       Dimensions.spacingVerticalHalf,
                       Text(
                           formatShareLinkForDisplay(
                               widget.initialTokenValue ?? ''),
-                          style: const TextStyle(
-                              fontSize: Dimensions.fontAverage,
-                              fontWeight: FontWeight.w500))
+                          style: _linkStyle)
                     ]))),
         ValueListenableBuilder(
             valueListenable: _accessModeNotifier,
@@ -250,9 +264,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     S.current
                         .messageRepositoryAccessMode(message as String? ?? '?'),
                     flex: 0,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54)))
+                    style: _messageSmall)))
       ];
 
   List<Widget> _repositoryName() => [
@@ -275,12 +287,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 onTap: () => _updateNameController(_suggestedName),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Fields.constrainedText(
-                    S.current.messageRepositorySuggestedName(_suggestedName),
-                    flex: 1,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54,
-                  )
+                      S.current.messageRepositorySuggestedName(_suggestedName),
+                      flex: 1,
+                      style: _messageSmall)
                 ]))),
         Dimensions.spacingVertical
       ];

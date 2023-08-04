@@ -133,17 +133,24 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
             ]));
       });
 
-  Widget _newRepositoryWidget(BuildContext context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Fields.constrainedText('"${widget.repositoryName}"',
-                flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
-            Dimensions.spacingVerticalDouble,
-            ..._passwordSection(),
-            Fields.dialogActions(context, buttons: _actions(context)),
-          ]);
+  Widget _newRepositoryWidget(BuildContext context) {
+    final bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w400);
+
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.constrainedText('"${widget.repositoryName}"',
+              flex: 0, style: bodyStyle),
+          Dimensions.spacingVerticalDouble,
+          ..._passwordSection(),
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
+  }
 
   List<Widget> _passwordSection() =>
       [_passwordInputs(), _samePasswordWarning()];

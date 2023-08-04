@@ -26,8 +26,15 @@ class SaveToDevice extends StatefulWidget with AppLogger {
 class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
   String? destinationDir;
 
+  TextStyle? bodyStyle;
+
   @override
   Widget build(BuildContext context) {
+    bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(color: Colors.grey.shade800);
+
     return Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -35,8 +42,7 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
         children: [
           Dimensions.spacingVertical,
           Row(children: [
-            Fields.constrainedText('"${widget.data.name}"',
-                color: Colors.grey.shade800)
+            Fields.constrainedText('"${widget.data.name}"', style: bodyStyle)
           ]),
           Dimensions.spacingVerticalDouble,
           _locationPicker(),
@@ -116,20 +122,18 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-        future: _determineDefault(),
-        builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-          final dst = snapshot.data;
-          return Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (dst != null) _buildDestinationSelection(dst),
-              ]);
-        });
-  }
+  Widget build(BuildContext context) => FutureBuilder<String?>(
+      future: _determineDefault(),
+      builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+        final dst = snapshot.data;
+        return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (dst != null) _buildDestinationSelection(dst),
+            ]);
+      });
 
   Future<String?> _determineDefault() async {
     var selectedPath = _selectedPath;
@@ -160,7 +164,7 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Fields.constrainedText(dst, color: Colors.black),
+                Fields.constrainedText(dst),
                 Fields.actionIcon(const Icon(Icons.more_horiz),
                     color: Colors.black,
                     onPressed: () async => await _changeDestinationPath(dst))
@@ -217,22 +221,20 @@ class _PickLocationAndroidState extends State<PickLocationAndroid> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<_Drive>>(
-        future: _initDrives(),
-        builder: (BuildContext context, AsyncSnapshot<List<_Drive>> snapshot) {
-          final drives = snapshot.data;
-          return Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (drives != null) _buildExternalStorageSelection(drives),
-                Dimensions.spacingVertical,
-                if (drives != null) _buildDestinationSelection(drives),
-              ]);
-        });
-  }
+  Widget build(BuildContext context) => FutureBuilder<List<_Drive>>(
+      future: _initDrives(),
+      builder: (BuildContext context, AsyncSnapshot<List<_Drive>> snapshot) {
+        final drives = snapshot.data;
+        return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (drives != null) _buildExternalStorageSelection(drives),
+              Dimensions.spacingVertical,
+              if (drives != null) _buildDestinationSelection(drives),
+            ]);
+      });
 
   Widget _buildExternalStorageSelection(List<_Drive> drives) {
     if (drives.length <= 1) {
@@ -272,8 +274,7 @@ class _PickLocationAndroidState extends State<PickLocationAndroid> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Fields.constrainedText(drive.defaultDirRelative(),
-                    color: Colors.black),
+                Fields.constrainedText(drive.defaultDirRelative()),
                 Fields.actionIcon(const Icon(Icons.more_horiz),
                     onPressed: () async => await _changeDestinationPath(drives))
               ],

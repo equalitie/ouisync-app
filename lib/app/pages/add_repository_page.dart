@@ -55,6 +55,11 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
   }
 
   Widget _buildScanQrCode(BuildContext context) {
+    final smallMessageStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontWeight: FontWeight.w200);
+
     return Column(
       children: [
         Wrap(
@@ -63,12 +68,14 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
             children: [
               Row(children: [
                 Fields.constrainedText(S.current.messageAddRepoQR,
-                    flex: 0, color: Colors.black)
+                    flex: 0, style: smallMessageStyle)
               ]),
               if (_isDesktop)
                 Row(children: [
-                  Fields.constrainedText('(Available on mobile)',
-                      flex: 0, fontWeight: FontWeight.w200, color: Colors.black)
+                  Fields.constrainedText(
+                      '(${S.current.messageAvailableOnMobile})',
+                      flex: 0,
+                      style: smallMessageStyle)
                 ])
             ]),
         Dimensions.spacingVerticalDouble,
@@ -155,8 +162,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Fields.constrainedText(S.current.messageAddRepoLink,
-                flex: 0, color: Colors.black),
+            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0),
           ],
         ),
         Dimensions.spacingVerticalDouble,
