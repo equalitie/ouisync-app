@@ -297,7 +297,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _repositoryNameTakenWarning() => Visibility(
       visible: _showRepositoryNameInUseWarning,
       child: Fields.autosizeText(S.current.messageErrorRepositoryNameExist,
-          color: Colors.red,
+          style: TextStyle(color: Colors.red),
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
@@ -431,10 +431,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _manualPasswordWarning() => Visibility(
       visible: _showSavePasswordWarning && _addPassword,
       child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-          color: Colors.red,
+          style: TextStyle(color: Colors.red),
           maxLines: 10,
           softWrap: true,
-          fontSize: Dimensions.fontSmall,
           textOverflow: TextOverflow.ellipsis));
 
   List<Widget> _actions(context) => [

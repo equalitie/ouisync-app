@@ -291,7 +291,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       visible: _samePassword,
       child: Fields.autosizeText(
           S.current.messageErrorNewPasswordSameOldPassword,
-          color: Colors.red,
+          style: TextStyle(color: Colors.red),
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));

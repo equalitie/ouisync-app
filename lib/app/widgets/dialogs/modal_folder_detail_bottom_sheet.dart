@@ -100,13 +100,11 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               textAlign: TextAlign.start),
           Fields.autosizedLabeledText(
               label: S.current.labelName,
-              labelFontSize: Dimensions.fontAverage,
               text: widget.data.name,
               textAlign: TextAlign.start,
               textMaxLines: 2),
           Fields.labeledText(
               label: S.current.labelLocation,
-              labelFontSize: Dimensions.fontAverage,
               text:
                   widget.data.path.replaceAll(widget.data.name, '').trimRight(),
               textAlign: TextAlign.start),

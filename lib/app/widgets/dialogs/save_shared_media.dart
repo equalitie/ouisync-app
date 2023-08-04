@@ -60,8 +60,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
             ),
             Fields.autosizeText(
                 '(${widget.sharedMedia.length} ${widget.sharedMedia.length == 1 ? S.current.messageFile : S.current.messageFiles})',
-                textAlign: TextAlign.center,
-                fontWeight: FontWeight.w700),
+                textAlign: TextAlign.center),
             Dimensions.spacingVertical,
             Visibility(
                 visible: !_minimize,
@@ -117,10 +116,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                             flex: 1,
                             child: const Icon(Icons.insert_drive_file_outlined,
                                 size: Dimensions.sizeIconAverage)),
-                        Expanded(
-                            flex: 9,
-                            child: Fields.autosizeText(name,
-                                fontWeight: FontWeight.w800))
+                        Expanded(flex: 9, child: Fields.autosizeText(name))
                       ],
                     ),
                     Fields.autosizeText(mediaItem.path)

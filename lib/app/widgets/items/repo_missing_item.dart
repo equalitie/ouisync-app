@@ -15,8 +15,7 @@ class RepoMissing extends StatelessWidget with AppLogger {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Fields.autosizeText(repoData.name),
-            Fields.autosizeText(S.current.messageRepoMissing,
-                fontSize: Dimensions.fontSmall)
+            Fields.autosizeText(S.current.messageRepoMissing)
           ],
         ),
       );

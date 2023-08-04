@@ -143,17 +143,12 @@ class Fields {
           {TextAlign textAlign = TextAlign.center,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontSmall,
-          FontWeight fontWeight = FontWeight.w500,
-          Color color = Colors.black}) =>
-      Text(
-        text,
-        textAlign: textAlign,
-        softWrap: softWrap,
-        overflow: textOverflow,
-        style:
-            TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
-      );
+          TextStyle? style}) =>
+      Text(text,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          style: style);
 
   static autosizedLabeledText(
           {required String label,
@@ -162,17 +157,13 @@ class Fields {
           TextAlign labelTextAlign = TextAlign.center,
           TextOverflow labelTextOverflow = TextOverflow.ellipsis,
           bool labelSoftWrap = false,
-          double labelFontSize = Dimensions.fontAverage,
-          FontWeight labelFontWeight = FontWeight.w500,
-          Color labelColor = Colors.black,
+          TextStyle? labelStyle,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontAverage,
-          double minTextFontSize = Dimensions.fontSmall,
-          double maxTextFontSize = Dimensions.fontAverage,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? textStyle,
+          double? minTextFontSize,
+          double? maxTextFontSize,
           int textMaxLines = 1,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
@@ -189,9 +180,7 @@ class Fields {
                       textAlign: labelTextAlign,
                       textOverflow: labelTextOverflow,
                       softWrap: labelSoftWrap,
-                      fontSize: labelFontSize,
-                      fontWeight: labelFontWeight,
-                      color: labelColor)),
+                      style: labelStyle)),
               space,
               Expanded(
                   flex: 1,
@@ -200,11 +189,9 @@ class Fields {
                       textAlign: textAlign,
                       textOverflow: textOverflow,
                       softWrap: textSoftWrap,
-                      fontSize: textFontSize,
+                      style: textStyle,
                       minFontSize: minTextFontSize,
                       maxFontSize: maxTextFontSize,
-                      fontWeight: textFontWeight,
-                      color: textColor,
                       maxLines: textMaxLines))
             ],
           ));
@@ -215,13 +202,11 @@ class Fields {
           TextAlign labelTextAlign = TextAlign.center,
           TextOverflow labelTextOverflow = TextOverflow.ellipsis,
           bool labelSoftWrap = false,
-          double labelFontSize = Dimensions.fontAverage,
-          FontWeight labelFontWeight = FontWeight.w500,
-          Color labelColor = Colors.black,
+          TextStyle? labelStyle,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool textSoftWrap = true,
-          TextStyle? style,
+          TextStyle? textStyle,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
@@ -235,33 +220,29 @@ class Fields {
                   textAlign: labelTextAlign,
                   textOverflow: labelTextOverflow,
                   softWrap: labelSoftWrap,
-                  fontSize: labelFontSize,
-                  fontWeight: labelFontWeight,
-                  color: labelColor),
+                  style: textStyle),
               space,
               constrainedText(text,
                   textAlign: textAlign,
                   textOverflow: textOverflow,
                   softWrap: textSoftWrap,
-                  style: style)
+                  style: textStyle)
             ],
           ));
 
   static Widget labeledButton({
     required String label,
+    TextStyle? labelStyle,
     required String buttonText,
+    TextStyle? buttonTextStyle,
     required Function() onPressed,
   }) =>
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          idLabel(
-            label,
-            textAlign: TextAlign.start,
-            fontSize: Dimensions.fontAverage,
-          ),
+          idLabel(label, textAlign: TextAlign.start, style: labelStyle),
           OutlinedButton(
-            child: Text(buttonText),
+            child: Text(buttonText, style: buttonTextStyle),
             onPressed: onPressed,
           )
         ],
@@ -300,24 +281,19 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontAverage,
-          double minFontSize = Dimensions.fontSmall,
-          double maxFontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          Color color = Colors.black,
+          TextStyle? style,
+          double? minFontSize,
+          double? maxFontSize,
           int maxLines = 1}) =>
-      AutoSizeText(
-        text,
-        key: key,
-        textAlign: textAlign,
-        softWrap: softWrap,
-        overflow: textOverflow,
-        maxLines: maxLines,
-        style:
-            TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
-        minFontSize: minFontSize,
-        maxFontSize: maxFontSize,
-      );
+      AutoSizeText(text,
+          key: key,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          maxLines: maxLines,
+          style: style,
+          minFontSize: minFontSize ?? 12.0,
+          maxFontSize: maxFontSize ?? double.infinity);
 
   static Widget constrainedText(String text,
           {Key? key,
@@ -330,14 +306,12 @@ class Fields {
       Expanded(
         key: key,
         flex: flex,
-        child: Text(
-          text,
-          textAlign: textAlign,
-          softWrap: softWrap,
-          overflow: textOverflow,
-          maxLines: maxLines,
-          style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
-        ),
+        child: Text(text,
+            textAlign: textAlign,
+            softWrap: softWrap,
+            overflow: textOverflow,
+            maxLines: maxLines,
+            style: style),
       );
 
   static Icon _iconBase(
