@@ -54,7 +54,7 @@ class _ActionsDialogState extends State<ActionsDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Fields.constrainedText(widget.title,
-                          flex: 0, style: titleStyle),
+                          flex: 0, style: titleStyle, maxLines: 2),
                       Dimensions.spacingVertical,
                       widget.body!,
                     ],

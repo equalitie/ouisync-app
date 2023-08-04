@@ -74,7 +74,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   TextStyle? _linkStyle;
   TextStyle? _messageSmall;
-  TextStyle? _labelSmall;
+  TextStyle? _labelStyle;
 
   @override
   void initState() {
@@ -181,13 +181,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         .bodySmall
         ?.copyWith(fontWeight: FontWeight.w500);
 
+    _labelStyle = Theme.of(context)
+        .textTheme
+        .labelMedium
+        ?.copyWith(color: Constants.inputLabelForeColor);
+
     _messageSmall =
         Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54);
-
-    final labelFontSize =
-        (Theme.of(context).textTheme.labelSmall?.fontSize ?? 0.0) * 0.8;
-    _labelSmall = Theme.of(context).textTheme.labelSmall?.copyWith(
-        fontSize: labelFontSize, color: Constants.inputLabelForeColor);
 
     return WillPopScope(
         onWillPop: () async {
@@ -249,7 +249,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Fields.constrainedText(S.current.labelRepositoryLink,
-                          flex: 0, style: _labelSmall),
+                          flex: 0, style: _labelStyle),
                       Dimensions.spacingVerticalHalf,
                       Text(
                           formatShareLinkForDisplay(
@@ -288,7 +288,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Fields.constrainedText(
                       S.current.messageRepositorySuggestedName(_suggestedName),
-                      flex: 1,
                       style: _messageSmall)
                 ]))),
         Dimensions.spacingVertical
