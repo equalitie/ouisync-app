@@ -24,19 +24,28 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
 
   final _isDesktop = PlatformValues.isDesktopDevice;
 
+  TextStyle? titleStyle;
+  TextStyle? bodyStyle;
+  TextStyle? bodySmallStyle;
+
   @override
   Widget build(BuildContext context) {
     final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
 
+    titleStyle = Theme.of(context).textTheme.titleLarge;
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+    bodySmallStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontWeight: FontWeight.w700);
+
     return Scaffold(
         appBar: AppBar(
-          title: Text(S.current.titleAddRepoToken),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.black87,
-          titleTextStyle: const TextStyle(
-              fontSize: Dimensions.fontAverage, color: Colors.black87),
-        ),
+            title: Text(S.current.titleAddRepoToken),
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.black87,
+            titleTextStyle: titleStyle),
         body: Form(
             key: formKey,
             autovalidateMode: AutovalidateMode.disabled,
@@ -54,35 +63,28 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
             ))));
   }
 
-  Widget _buildScanQrCode(BuildContext context) {
-    final smallMessageStyle = Theme.of(context)
-        .textTheme
-        .bodySmall
-        ?.copyWith(fontWeight: FontWeight.w200);
-
-    return Column(
-      children: [
-        Wrap(
-            direction: Axis.vertical,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Row(children: [
-                Fields.constrainedText(S.current.messageAddRepoQR,
-                    flex: 0, style: smallMessageStyle)
-              ]),
-              if (_isDesktop)
+  Widget _buildScanQrCode(BuildContext context) => Column(
+        children: [
+          Wrap(
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
                 Row(children: [
-                  Fields.constrainedText(
-                      '(${S.current.messageAvailableOnMobile})',
-                      flex: 0,
-                      style: smallMessageStyle)
-                ])
-            ]),
-        Dimensions.spacingVerticalDouble,
-        _builScanQRButton(context),
-      ],
-    );
-  }
+                  Fields.constrainedText(S.current.messageAddRepoQR,
+                      flex: 0, style: bodyStyle)
+                ]),
+                if (_isDesktop)
+                  Row(children: [
+                    Fields.constrainedText(
+                        '(${S.current.messageAvailableOnMobile})',
+                        flex: 0,
+                        style: bodySmallStyle)
+                  ])
+              ]),
+          Dimensions.spacingVerticalDouble,
+          _builScanQRButton(context),
+        ],
+      );
 
   /// We don't support QR reading for desktop at the moment, just mobile.
   /// TODO: Find a plugin for reading QR with support for Windows, Linux
@@ -138,20 +140,14 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           children: [
             const Expanded(
                 child: Divider(
-              thickness: 1.0,
-              endIndent: 20.0,
-              color: Colors.black26,
-            )),
+                    thickness: 1.0, endIndent: 20.0, color: Colors.black26)),
             Text(
               S.current.messageOr.toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             const Expanded(
                 child: Divider(
-              thickness: 1.0,
-              indent: 20.0,
-              color: Colors.black26,
-            )),
+                    thickness: 1.0, indent: 20.0, color: Colors.black26)),
           ],
         ));
   }
@@ -162,7 +158,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Fields.constrainedText(S.current.messageAddRepoLink, flex: 0),
+            Fields.constrainedText(S.current.messageAddRepoLink,
+                textAlign: TextAlign.center),
           ],
         ),
         Dimensions.spacingVerticalDouble,
