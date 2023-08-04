@@ -18,6 +18,10 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mainMessageStyle =
+        Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.red);
+    final secondaryMessageStyle = Theme.of(context).textTheme.bodyMedium;
+
     return Center(
         child: SingleChildScrollView(
             reverse: false,
@@ -28,7 +32,7 @@ class ErrorState extends StatelessWidget {
                 Align(
                     alignment: Alignment.center,
                     child: Fields.inPageMainMessage(errorMessage,
-                        color: Colors.red,
+                        style: mainMessageStyle,
                         tags: {
                           Constants.inlineTextColor:
                               InlineTextStyles.color(Colors.black),
@@ -40,6 +44,7 @@ class ErrorState extends StatelessWidget {
                   Align(
                       alignment: Alignment.center,
                       child: Fields.inPageSecondaryMessage(errorDescription!,
+                          style: secondaryMessageStyle,
                           tags: {
                             Constants.inlineTextSize: InlineTextStyles.size(),
                             Constants.inlineTextBold: InlineTextStyles.bold,

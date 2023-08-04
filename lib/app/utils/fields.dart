@@ -35,22 +35,12 @@ class Fields {
   static Widget _styledTextBase(
       String message,
       TextAlign textAlign,
-      double fontSize,
-      FontWeight fontWeight,
-      FontStyle fontStyle,
-      Color color,
+      TextStyle? style,
       Map<String, StyledTextTagBase>? tags,
       EdgeInsets padding) {
     tags ??= <String, StyledTextTagBase>{};
 
-    tags.addAll({
-      'font': StyledTextTag(
-          style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              fontStyle: fontStyle,
-              color: color))
-    });
+    tags.addAll({'font': StyledTextTag(style: style)});
 
     return Container(
         padding: padding,
@@ -61,20 +51,14 @@ class Fields {
   static Widget inPageMainMessage(
     String message, {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = Dimensions.fontBig,
-    FontWeight fontWeight = FontWeight.bold,
-    FontStyle fontStyle = FontStyle.normal,
-    Color color = Colors.black,
+    TextStyle? style,
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding = Dimensions.paddingInPageMain,
   }) =>
       _styledTextBase(
         message,
         textAlign,
-        fontSize,
-        fontWeight,
-        fontStyle,
-        color,
+        style,
         tags,
         padding,
       );
@@ -82,20 +66,14 @@ class Fields {
   static Widget inPageSecondaryMessage(
     String message, {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = Dimensions.fontAverage,
-    FontWeight fontWeight = FontWeight.normal,
-    FontStyle fontStyle = FontStyle.normal,
-    Color color = Colors.black,
+    TextStyle? style,
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding = Dimensions.paddingInPageSecondary,
   }) =>
       _styledTextBase(
         message,
         textAlign,
-        fontSize,
-        fontWeight,
-        fontStyle,
-        color,
+        style,
         tags,
         padding,
       );
@@ -106,10 +84,6 @@ class Fields {
           required String text,
           Alignment alignment = Alignment.center,
           Size size = Dimensions.sizeInPageButtonRegular,
-          double fontSize = Dimensions.fontMicro,
-          FontWeight fontWeight = FontWeight.normal,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.white,
           bool autofocus = false,
           FocusNode? focusNode}) =>
       ElevatedButton(
@@ -120,14 +94,8 @@ class Fields {
             Text(text.toUpperCase())
           ]),
           style: ButtonStyle(
-            alignment: alignment,
-            minimumSize: MaterialStateProperty.all<Size?>(size),
-            textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(
-                fontSize: fontSize,
-                fontWeight: fontWeight,
-                fontStyle: fontStyle,
-                color: color)),
-          ),
+              alignment: alignment,
+              minimumSize: MaterialStateProperty.all<Size?>(size)),
           autofocus: autofocus,
           focusNode: focusNode);
 
@@ -641,6 +609,7 @@ class Fields {
   static Widget placeholderWidget(
       {required String assetName,
       String? text,
+      TextStyle? style,
       double? assetScale,
       double? assetWidth,
       double? assetHeight,
@@ -654,15 +623,7 @@ class Fields {
           height: assetHeight,
           alignment: assetAlignment,
         ),
-        if (text != null)
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: Dimensions.fontAverage,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54),
-          )
+        if (text != null) Text(text, textAlign: TextAlign.center, style: style)
       ],
     );
   }

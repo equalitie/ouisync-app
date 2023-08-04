@@ -16,6 +16,9 @@ class NoRepositoriesState extends StatelessWidget {
     final nothingHereYetImageHeight = MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
+    final mainMessageStyle = Theme.of(context).textTheme.titleLarge;
+    final secondaryMessageStyle = Theme.of(context).textTheme.bodyMedium;
+
     return Center(
         child: SingleChildScrollView(
       reverse: false,
@@ -31,27 +34,27 @@ class NoRepositoriesState extends StatelessWidget {
           Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,
-            child: Fields.inPageMainMessage(S.current.messageNoRepos),
+            child: Fields.inPageMainMessage(S.current.messageNoRepos,
+                style: mainMessageStyle),
           ),
           Dimensions.spacingVertical,
           Align(
               alignment: Alignment.center,
               child: Fields.inPageSecondaryMessage(
                   S.current.messageCreateNewRepo,
+                  style: secondaryMessageStyle,
                   tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
           Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
               onPressed: () async => await onNewRepositoryPressed.call(),
               text: S.current.actionCreateRepository,
-              fontSize: Dimensions.fontMicro,
               size: Dimensions.sizeInPageButtonRegular,
               autofocus: true),
           Dimensions.spacingVertical,
           Fields.inPageButton(
               onPressed: () async => await onImportRepositoryPressed.call(),
               text: S.current.actionAddRepositoryWithToken,
-              fontSize: Dimensions.fontMicro,
               size: Dimensions.sizeInPageButtonRegular),
         ],
       ),
