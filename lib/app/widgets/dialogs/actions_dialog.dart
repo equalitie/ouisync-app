@@ -20,7 +20,7 @@ class ActionsDialog extends StatefulWidget {
 class _ActionsDialogState extends State<ActionsDialog> {
   @override
   Widget build(BuildContext context) {
-    final titleStyle = Theme.of(context).textTheme.titleLarge;
+    final titleStyle = Theme.of(context).textTheme.titleMedium;
 
     return Dialog(
         child: Stack(
