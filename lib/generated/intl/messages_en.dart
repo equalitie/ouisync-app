@@ -256,6 +256,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This repository is a read-only replica."),
         "messageAlertSaveCopyPassword": MessageLookupByLibrary.simpleMessage(
             "If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place."),
+        "messageAvailableOnMobile":
+            MessageLookupByLibrary.simpleMessage("Available on mobile"),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground"),
         "messageBackgroundNotificationAndroid":
@@ -635,7 +637,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
             "Data that the user uploads into the Ouisync repositories is end-to-end encrypted in transit as well as at rest. This includes metadata such as file names, sizes, folder structure etc. Within Ouisync, data is readable only by the person who uploaded the data and those persons with whom they shared their repositories"),
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
-            "You can learn more about the encryption techniques used in our documentation."),
+            "You can learn more about the encryption techniques used in our documentation"),
         "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
             "The Ouisync app stores users\' data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers"),
         "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
@@ -830,6 +832,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Set password for"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
         "titleShareRepository": m33,
+        "titleSortBy": MessageLookupByLibrary.simpleMessage("Sort by"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("State Monitor"),
         "titleTermsOfUse":

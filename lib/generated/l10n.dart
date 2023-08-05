@@ -770,6 +770,16 @@ class S {
     );
   }
 
+  /// `Sort by`
+  String get titleSortBy {
+    return Intl.message(
+      'Sort by',
+      name: 'titleSortBy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -3300,10 +3310,10 @@ class S {
     );
   }
 
-  /// `You can learn more about the encryption techniques used in our documentation.`
+  /// `You can learn more about the encryption techniques used in our documentation`
   String get messageSecurityPracticesP2 {
     return Intl.message(
-      'You can learn more about the encryption techniques used in our documentation.',
+      'You can learn more about the encryption techniques used in our documentation',
       name: 'messageSecurityPracticesP2',
       desc: '',
       args: [],
@@ -3635,6 +3645,16 @@ class S {
     return Intl.message(
       'Go to the mail app',
       name: 'messageGoToMailApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available on mobile`
+  String get messageAvailableOnMobile {
+    return Intl.message(
+      'Available on mobile',
+      name: 'messageAvailableOnMobile',
       desc: '',
       args: [],
     );
