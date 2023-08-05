@@ -9,20 +9,30 @@ import '../cubits/peer_set.dart';
 import '../utils/utils.dart';
 
 class PeerList extends StatelessWidget {
-  static const _textStyle = TextStyle(fontSize: Dimensions.fontMicro);
+  late final TextStyle? bodyMicroStyle;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.labelPeers)),
-        body: BlocBuilder<PeerSetCubit, PeerSet>(
-          builder: (context, state) => SingleChildScrollView(
-            child: Container(
-              padding: Dimensions.paddingContents,
-              child: _buildTable(context, state.grouped),
-            ),
+  Widget build(BuildContext context) {
+    final microFontSize =
+        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0) * 0.8;
+
+    bodyMicroStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontSize: microFontSize);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(S.current.labelPeers)),
+      body: BlocBuilder<PeerSetCubit, PeerSet>(
+        builder: (context, state) => SingleChildScrollView(
+          child: Container(
+            padding: Dimensions.paddingContents,
+            child: _buildTable(context, state.grouped),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildTable(BuildContext context, peers) => Table(
         defaultColumnWidth: const FlexColumnWidth(),
@@ -75,11 +85,8 @@ class PeerList extends StatelessWidget {
   ) =>
       TableRow(
         children: <TableCell>[
-          _buildCell(_LongText(
-            peer.ip,
-            style: _textStyle,
-          )),
-          _buildCell(Text(peer.port.toString(), style: _textStyle)),
+          _buildCell(_LongText(peer.ip, style: bodyMicroStyle)),
+          _buildCell(Text(peer.port.toString(), style: bodyMicroStyle)),
           _buildCell(_buildSource(context, peer.source)),
           index == 0
               ? _buildCell(_buildId(context, peer.state, runtimeId))
@@ -114,7 +121,7 @@ class PeerList extends StatelessWidget {
   Widget _buildActiveId(BuildContext context, String runtimeId) =>
       Row(children: [
         Icon(Icons.person, size: Dimensions.sizeIconBadge),
-        Expanded(child: _LongText(runtimeId, style: _textStyle)),
+        Expanded(child: _LongText(runtimeId, style: bodyMicroStyle)),
       ]);
 
   Widget _buildInactiveId(BuildContext context, String state) {
@@ -124,7 +131,7 @@ class PeerList extends StatelessWidget {
       Icon(Icons.person_outline, size: Dimensions.sizeIconBadge, color: color),
       Text(
         state,
-        style: _textStyle.copyWith(color: color),
+        style: bodyMicroStyle?.copyWith(color: color),
       )
     ]);
   }
@@ -136,7 +143,7 @@ class PeerList extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: Dimensions.sizeIconBadge),
-        Text(source, style: _textStyle),
+        Text(source, style: bodyMicroStyle),
       ],
     );
   }
