@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
@@ -125,13 +126,25 @@ class _SortByList extends StatelessWidget with AppLogger {
           itemBuilder: (context, index) {
             final sortByItem = SortBy.values[index];
 
+            final settingStyle = Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(
+                    color: sortByItem.name == sortBy.name
+                        ? Colors.black87
+                        : Colors.black54,
+                    fontWeight: sortByItem.name == sortBy.name
+                        ? FontWeight.bold
+                        : FontWeight.normal);
+
             return Row(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Expanded(
                     child: Fields.actionListTile(sortByItem.name.capitalize(),
                         textOverflow: TextOverflow.ellipsis,
-                        textSoftWrap: false, onTap: () {
+                        textSoftWrap: false,
+                        style: settingStyle, onTap: () {
                   _sortCubit.sortBy(sortByItem);
 
                   if (_reposCubit.showList) {
@@ -156,12 +169,6 @@ class _SortByList extends StatelessWidget with AppLogger {
                         icon:
                             sortByItem.name == sortBy.name ? Icons.check : null,
                         iconColor: Theme.of(context).indicatorColor,
-                        textColor: sortByItem.name == sortBy.name
-                            ? Colors.black87
-                            : Colors.black54,
-                        textFontWeight: sortByItem.name == sortBy.name
-                            ? FontWeight.bold
-                            : FontWeight.normal,
                         dense: true,
                         visualDensity: VisualDensity.compact)),
               ],

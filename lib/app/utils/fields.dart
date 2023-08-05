@@ -348,9 +348,7 @@ class Fields {
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
-    double textFontSize = Dimensions.fontAverage,
-    FontWeight textFontWeight = FontWeight.normal,
-    Color textColor = Colors.black,
+    TextStyle? style,
     IconData? icon,
     double iconSize = Dimensions.sizeIconMicro,
     Color iconColor = Colors.black,
@@ -371,10 +369,7 @@ class Fields {
                 textAlign: textAlign,
                 softWrap: textSoftWrap,
                 overflow: textOverflow,
-                style: TextStyle(
-                    fontSize: textFontSize,
-                    fontWeight: textFontWeight,
-                    color: textColor)),
+                style: style),
             subtitle: subtitle != null ? Text(subtitle) : null,
           ));
 

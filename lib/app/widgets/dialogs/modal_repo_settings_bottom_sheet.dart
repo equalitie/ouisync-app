@@ -36,10 +36,14 @@ class _RepositorySettingsState extends State<RepositorySettings>
     with AppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) {
+    final bodySmallStyle = Theme.of(context).textTheme.bodySmall;
+
     final sheetTitleStyle = Theme.of(context)
         .textTheme
         .bodyLarge
         ?.copyWith(fontWeight: FontWeight.w400);
+
+    final settingStyle = bodySmallStyle?.copyWith(color: Colors.black87);
 
     return BlocBuilder<RepoCubit, RepoState>(
       bloc: widget.cubit,
@@ -57,7 +61,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     Row(children: [
                       Expanded(
                           child: SwitchListTile.adaptive(
-                        title: Text(S.current.labelBitTorrentDHT),
+                        title: Text(S.current.labelBitTorrentDHT,
+                            style: bodySmallStyle),
                         secondary: const Icon(
                           Icons.hub,
                           size: Dimensions.sizeIconMicro,
@@ -65,120 +70,113 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         ),
                         contentPadding: EdgeInsets.zero,
                         value: state.isDhtEnabled,
-                          onChanged: (value) =>
-                              widget.cubit.setDhtEnabled(value),
-                        )),
-                      ]),
-                      Row(children: [
+                        onChanged: (value) => widget.cubit.setDhtEnabled(value),
+                      )),
+                    ]),
+                    Row(children: [
+                      Expanded(
+                          child: SwitchListTile.adaptive(
+                        title: Text(S.current.messagePeerExchange,
+                            style: bodySmallStyle),
+                        secondary: const Icon(
+                          Icons.group_add,
+                          size: Dimensions.sizeIconMicro,
+                          color: Colors.black87,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        value: state.isPexEnabled,
+                        onChanged: (value) => widget.cubit.setPexEnabled(value),
+                      ))
+                    ]),
+                    Row(
+                      children: [
                         Expanded(
-                            child: SwitchListTile.adaptive(
-                          title: Text(S.current.messagePeerExchange),
-                          secondary: const Icon(
-                            Icons.group_add,
-                            size: Dimensions.sizeIconMicro,
-                            color: Colors.black87,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                          value: state.isPexEnabled,
-                          onChanged: (value) =>
-                              widget.cubit.setPexEnabled(value),
-                        ))
-                      ]),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: Fields.actionListTile(
-                                  S.current.actionRename,
-                                  textFontSize: Dimensions.fontAverage,
-                                  textOverflow: TextOverflow.ellipsis,
-                                  textSoftWrap: false,
-                                  onTap: () async => await renameRepository(
-                                      widget.context,
-                                      repository: widget.cubit,
-                                      rename: widget.renameRepository,
-                                      popDialog: () =>
-                                          Navigator.of(context).pop()),
-                                  icon: Icons.edit,
-                                  iconSize: Dimensions.sizeIconMicro,
-                                  iconColor: Colors.black87,
-                                  textColor: Colors.black87,
-                                  dense: true,
-                                  visualDensity: VisualDensity.compact)),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                              child: Fields.actionListTile(
-                                  S.current.actionShare,
-                                  textFontSize: Dimensions.fontAverage,
-                                  textOverflow: TextOverflow.ellipsis,
-                                  textSoftWrap: false, onTap: () async {
-                            Navigator.of(context).pop();
-                            await shareRepository(context,
-                                repository: widget.cubit);
-                          },
-                                  icon: Icons.share,
-                                  iconSize: Dimensions.sizeIconMicro,
-                                  iconColor: Colors.black87,
-                                  textColor: Colors.black87,
-                                  dense: true,
-                                  visualDensity: VisualDensity.compact)),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                              child: Fields.actionListTile(
-                                  S.current.titleSecurity,
-                                  textFontSize: Dimensions.fontAverage,
-                                  textOverflow: TextOverflow.ellipsis,
-                                  textSoftWrap: false,
-                                  onTap: () async =>
-                                      await navigateToRepositorySecurity(
-                                        context,
-                                        repository: widget.cubit,
-                                        checkForBiometrics:
-                                            widget.checkForBiometrics,
-                                        popDialog: () =>
-                                            Navigator.of(context).pop(),
-                                      ),
-                                  icon: Icons.password,
-                                  iconSize: Dimensions.sizeIconMicro,
-                                  iconColor: Colors.black87,
-                                  textColor: Colors.black87,
-                                  dense: true,
-                                  visualDensity: VisualDensity.compact)),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                              child: Fields.actionListTile(
-                                  S.current.actionDelete,
-                                  textFontSize: Dimensions.fontAverage,
-                                  textOverflow: TextOverflow.ellipsis,
-                                  textSoftWrap: false,
-                                  onTap: () async => await deleteRepository(
+                            child: Fields.actionListTile(S.current.actionRename,
+                                textOverflow: TextOverflow.ellipsis,
+                                textSoftWrap: false,
+                                style: settingStyle,
+                                onTap: () async => await renameRepository(
+                                    widget.context,
+                                    repository: widget.cubit,
+                                    rename: widget.renameRepository,
+                                    popDialog: () =>
+                                        Navigator.of(context).pop()),
+                                icon: Icons.edit,
+                                iconSize: Dimensions.sizeIconMicro,
+                                iconColor: Colors.black87,
+                                dense: true,
+                                visualDensity: VisualDensity.compact)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                            child: Fields.actionListTile(S.current.actionShare,
+                                textOverflow: TextOverflow.ellipsis,
+                                textSoftWrap: false,
+                                style: settingStyle, onTap: () async {
+                          Navigator.of(context).pop();
+                          await shareRepository(context,
+                              repository: widget.cubit);
+                        },
+                                icon: Icons.share,
+                                iconSize: Dimensions.sizeIconMicro,
+                                iconColor: Colors.black87,
+                                dense: true,
+                                visualDensity: VisualDensity.compact)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                            child: Fields.actionListTile(
+                                S.current.titleSecurity,
+                                textOverflow: TextOverflow.ellipsis,
+                                textSoftWrap: false,
+                                style: settingStyle,
+                                onTap: () async =>
+                                    await navigateToRepositorySecurity(
                                       context,
-                                      repositoryName: widget.cubit.name,
-                                      repositoryMetaInfo: widget.cubit.metaInfo,
-                                      getAuthenticationMode:
-                                          widget.getAuthenticationMode,
-                                      delete: widget.deleteRepository,
+                                      repository: widget.cubit,
+                                      checkForBiometrics:
+                                          widget.checkForBiometrics,
                                       popDialog: () =>
-                                          Navigator.of(context).pop()),
-                                  icon: Icons.delete,
-                                  iconSize: Dimensions.sizeIconMicro,
-                                  iconColor: Constants.dangerColor,
-                                  textColor: Constants.dangerColor,
-                                  dense: true,
-                                  visualDensity: VisualDensity.compact)),
-                        ],
-                      )
-                    ]))),
-      );
+                                          Navigator.of(context).pop(),
+                                    ),
+                                icon: Icons.password,
+                                iconSize: Dimensions.sizeIconMicro,
+                                iconColor: Colors.black87,
+                                dense: true,
+                                visualDensity: VisualDensity.compact)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                            child: Fields.actionListTile(S.current.actionDelete,
+                                textOverflow: TextOverflow.ellipsis,
+                                textSoftWrap: false,
+                                style: settingStyle,
+                                onTap: () async => await deleteRepository(
+                                    context,
+                                    repositoryName: widget.cubit.name,
+                                    repositoryMetaInfo: widget.cubit.metaInfo,
+                                    getAuthenticationMode:
+                                        widget.getAuthenticationMode,
+                                    delete: widget.deleteRepository,
+                                    popDialog: () =>
+                                        Navigator.of(context).pop()),
+                                icon: Icons.delete,
+                                iconSize: Dimensions.sizeIconMicro,
+                                iconColor: Constants.dangerColor,
+                                dense: true,
+                                visualDensity: VisualDensity.compact)),
+                      ],
+                    )
+                  ]))),
+    );
+  }
 }
