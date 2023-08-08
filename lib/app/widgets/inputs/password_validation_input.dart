@@ -104,7 +104,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
         ]),
         Dimensions.spacingVertical,
         Row(children: [
-          Text('Password strength:',
+          Text('${S.current.messagePasswordStrength}:',
               style: bodySmallStyle?.copyWith(color: Colors.black54)),
           Dimensions.spacingHorizontalHalf,
           Text(_passwordStrength ?? '',
@@ -132,13 +132,13 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
 
   String _passwordStrengthString(double strength) {
     if (strength <= 0.25) {
-      return 'Weak';
+      return S.current.messageWeak;
     } else if (strength <= 0.5) {
-      return 'Medium';
+      return S.current.messageMedium;
     } else if (strength <= 0.75) {
-      return 'Good';
+      return S.current.messageGood;
     } else {
-      return 'Strong';
+      return S.current.messageStrong;
     }
   }
 
