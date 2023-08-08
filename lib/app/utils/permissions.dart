@@ -56,13 +56,7 @@ class Permissions with AppLogger {
       await Dialogs.alertDialogWithActions(
           context: context,
           title: S.current.titleRequiredPermission,
-          body: [
-            Text(name,
-                style: TextStyle(
-                    fontSize: Dimensions.fontBig, fontWeight: FontWeight.w400)),
-            Dimensions.spacingVerticalDouble,
-            Text(message)
-          ],
+          body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
           actions: actions);
     }
 
