@@ -70,37 +70,39 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
     );
   }
 
-  List<Widget> _buildAccessModeOptions() => AccessMode.values
-      .map((mode) => Expanded(
-              child:
-                  Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            Radio(
-                value: mode,
-                groupValue: _selectedMode,
-                toggleable: true,
-                onChanged: (current) async {
-                  loggy.app('Access mode: $current');
+  List<Widget> _buildAccessModeOptions() {
+    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
 
-                  if (!widget.availableAccessMode.contains(mode)) {
-                    final message = S.current.messageAccessModeDisabled(
-                        widget.currentAccessMode.name);
-                    widget.onDisabledMessage(message);
-                    return;
-                  }
+    return AccessMode.values
+        .map((mode) => Expanded(
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  Radio(
+                      value: mode,
+                      groupValue: _selectedMode,
+                      toggleable: true,
+                      onChanged: (current) async {
+                        loggy.app('Access mode: $current');
 
-                  setState(() => _selectedMode = current);
-                  await widget.onChanged(current);
-                }),
-            Text(
-              mode.name,
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: Dimensions.fontAverage,
-                color: _getModeStateColor(mode),
-              ),
-            )
-          ])))
-      .toList();
+                        if (!widget.availableAccessMode.contains(mode)) {
+                          final message = S.current.messageAccessModeDisabled(
+                              widget.currentAccessMode.name);
+                          widget.onDisabledMessage(message);
+                          return;
+                        }
+
+                        setState(() => _selectedMode = current);
+                        await widget.onChanged(current);
+                      }),
+                  Text(
+                    mode.name,
+                    textAlign: TextAlign.start,
+                    style: bodyStyle?.copyWith(color: _getModeStateColor(mode)),
+                  )
+                ])))
+        .toList();
+  }
 
   Color _getModeStateColor(AccessMode accessMode) {
     if (widget.availableAccessMode.contains(accessMode)) {
