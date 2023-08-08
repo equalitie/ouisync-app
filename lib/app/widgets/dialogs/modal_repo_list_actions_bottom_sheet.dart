@@ -5,7 +5,7 @@ import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
 class RepoListActions extends StatelessWidget with AppLogger {
-  const RepoListActions(
+  RepoListActions(
       {required this.context,
       required this.reposCubit,
       required this.onNewRepositoryPressed,
@@ -17,8 +17,12 @@ class RepoListActions extends StatelessWidget with AppLogger {
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
 
+  TextStyle? bodySmallStyle;
+
   @override
   Widget build(BuildContext context) {
+    bodySmallStyle = Theme.of(context).textTheme.bodySmall;
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -63,6 +67,6 @@ class RepoListActions extends StatelessWidget with AppLogger {
           child: Column(children: [
             Icon(icon, size: Dimensions.sizeIconBig),
             Dimensions.spacingVertical,
-            Text(name, style: const TextStyle(fontSize: Dimensions.fontSmall))
+            Text(name, style: bodySmallStyle)
           ])));
 }
