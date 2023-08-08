@@ -139,22 +139,21 @@ class _FileDetailState extends State<FileDetail> {
                 title: S.current.iconDelete,
                 textColor: Constants.dangerColor,
                 dense: true,
-                onTap: () => showDialog<String>(
-                      context: widget.context,
-                      barrierDismissible: false, // user must tap button!
-                      builder: (BuildContext context) {
-                        final fileName = getBasename(widget.data.path);
-                        final parent = getDirname(widget.data.path);
+                onTap: () async {
+                  final fileName = getBasename(widget.data.path);
+                  final parent = getDirname(widget.data.path);
 
-                        return Dialogs.buildDeleteFileAlertDialog(widget.cubit,
-                            widget.data.path, context, fileName, parent);
-                      },
-                    ).then((fileName) {
-                      // If the user canceled the dialog, no file name is returned
-                      if (fileName?.isNotEmpty ?? false) {
-                        Navigator.of(context).pop();
-                      }
-                    }),
+                  final deletedFileName = await Dialogs.deleteFileAlertDialog(
+                      widget.cubit,
+                      widget.data.path,
+                      context,
+                      fileName,
+                      parent);
+
+                  if (deletedFileName != null && deletedFileName.isNotEmpty) {
+                    Navigator.of(context).pop();
+                  }
+                },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.delete),
                 disabledMessage: S.current.messageActionNotAvailable,
