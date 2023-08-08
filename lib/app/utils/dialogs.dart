@@ -79,7 +79,7 @@ abstract class Dialogs {
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
-            return _alertDialog(title, body, actions);
+            return _alertDialog(context, title, body, actions);
           });
 
   static Future<bool?> simpleAlertDialog(
@@ -98,7 +98,7 @@ abstract class Dialogs {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return _alertDialog(title, [Text(message)], actions!);
+          return _alertDialog(context, title, [Text(message)], actions!);
         });
   }
 
@@ -114,15 +114,18 @@ abstract class Dialogs {
             );
           });
 
-  static AlertDialog _alertDialog(
-          String title, List<Widget> body, List<Widget> actions) =>
-      AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(
-          child: ListBody(children: body),
-        ),
-        actions: actions,
-      );
+  static AlertDialog _alertDialog(BuildContext context, String title,
+      List<Widget> body, List<Widget> actions) {
+    final titleStyle = Theme.of(context).textTheme.titleMedium;
+
+    return AlertDialog(
+      title: Text(title, style: titleStyle),
+      content: SingleChildScrollView(
+        child: ListBody(children: body),
+      ),
+      actions: actions,
+    );
+  }
 
   static Future<String?> deleteFileAlertDialog(RepoCubit repo, String path,
       BuildContext context, String fileName, String parent) async {
@@ -155,6 +158,38 @@ abstract class Dialogs {
                     onPressed: () async {
                       await repo.deleteFile(path);
                       Navigator.of(context).pop(fileName);
+                    },
+                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+              ])
+            ])));
+  }
+
+  static Future<String?> deleteFolderAlertDialog(
+      BuildContext context, RepoCubit repo, String path, bool recursive) async {
+    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+    return showDialog<String?>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => ActionsDialog(
+            title: S.current.titleDeleteFolder,
+            body: ListBody(children: <Widget>[
+              Text(path,
+                  style: bodyStyle?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 30.0),
+              Text(S.current.messageConfirmFolderDeletion),
+              Fields.dialogActions(context, buttons: [
+                NegativeButton(
+                    text: S.current.actionCancel,
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(),
+                    buttonsAspectRatio:
+                        Dimensions.aspectRatioModalDialogButton),
+                PositiveButton(
+                    text: S.current.actionDelete,
+                    isDangerButton: true,
+                    onPressed: () async {
+                      await repo.deleteFolder(path, recursive);
+                      Navigator.of(context).pop(path);
                     },
                     buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
               ])

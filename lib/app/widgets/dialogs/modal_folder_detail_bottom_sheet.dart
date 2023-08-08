@@ -76,21 +76,30 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               textColor: Constants.dangerColor,
               dense: true,
               onTap: () async {
-                await showDialog<bool>(
-                  context: widget.context,
-                  barrierDismissible: false, // user must tap button!
-                  builder: (context) {
-                    return buildDeleteFolderAlertDialog(
-                        context, widget.cubit, widget.data.path);
-                  },
-                ).then((result) {
-                  if (result ?? false) {
-                    Navigator.of(context).pop(result);
-                    showSnackBar(context,
-                        message:
-                            S.current.messageFolderDeleted(widget.data.name));
-                  }
-                });
+                final repo = widget.cubit;
+                final path = widget.data.path;
+
+                final recursiveDeletion =
+                    await deleteFolderWithContentsValidation(
+                        context, repo, path);
+
+                if (recursiveDeletion == null) {
+                  // The item is not a folder or, most likely, the user canceled
+                  return;
+                }
+
+                final deletedFolderName = await Dialogs.deleteFolderAlertDialog(
+                    widget.context,
+                    widget.cubit,
+                    widget.data.path,
+                    recursiveDeletion);
+
+                if (deletedFolderName != null && deletedFolderName.isNotEmpty) {
+                  Navigator.of(context).pop(deletedFolderName);
+                  showSnackBar(context,
+                      message:
+                          S.current.messageFolderDeleted(widget.data.name));
+                }
               },
               enabledValidation: () => widget.isActionAvailableValidator(
                   widget.cubit.state.accessMode, EntryAction.delete),
@@ -119,51 +128,15 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     );
   }
 
-  AlertDialog buildDeleteFolderAlertDialog(
-      BuildContext context, RepoCubit cubit, String path) {
-    return AlertDialog(
-      title: Text(S.current.titleDeleteFolder),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            Text(
-              path,
-              style: const TextStyle(
-                  fontSize: Dimensions.fontAverage,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 30.0,
-            ),
-            Text(S.current.messageConfirmFolderDeletion),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text(S.current.actionDeleteCapital),
-          onPressed: () =>
-              deleteFolderWithContentsValidation(cubit, path, context),
-        ),
-        TextButton(
-          child: Text(S.current.actionCancelCapital),
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-        ),
-      ],
-    );
-  }
-
-  void deleteFolderWithContentsValidation(
-      RepoCubit repo, String path, BuildContext context) async {
-    bool recursive = false;
+  Future<bool?> deleteFolderWithContentsValidation(
+      BuildContext context, RepoCubit repo, String path) async {
+    bool? recursive = false;
 
     final type = await repo.type(path);
 
     if (type != EntryType.directory) {
       loggy.app('Is directory empty: $path is not a directory.');
-      return;
+      return null;
     }
 
     final Directory directory = await repo.openDirectory(path);
@@ -174,36 +147,31 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     }
 
     if (directory.isNotEmpty) {
-      recursive = await Dialogs.alertDialogWithActions(
-              context: context,
-              title: S.current.titleDeleteNotEmptyFolder,
-              body: [
-                Text(S.current.messageConfirmNotEmptyFolderDeletion)
-              ],
-              actions: [
-                TextButton(
-                  child: Text(S.current.actionDeleteCapital),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-                TextButton(
-                  child: Text(S.current.actionCancelCapital),
-                  onPressed: () => Navigator.of(context).pop(false),
-                )
-              ]) ??
-          false;
+      final bodyStyle = Theme.of(context).textTheme.bodyMedium;
 
-      if (!recursive) {
-        return;
-      }
+      recursive = await Dialogs.alertDialogWithActions(
+          context: context,
+          title: S.current.titleDeleteNotEmptyFolder,
+          body: [
+            Text(S.current.messageConfirmNotEmptyFolderDeletion,
+                style: bodyStyle)
+          ],
+          actions: [
+            Fields.dialogActions(context, buttons: [
+              NegativeButton(
+                  text: S.current.actionCancelCapital,
+                  onPressed: () => Navigator.of(context).pop(null),
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+              PositiveButton(
+                  text: S.current.actionDeleteCapital,
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+                  onPressed: () => Navigator.of(context).pop(true),
+                  isDangerButton: true)
+            ])
+          ]);
     }
 
-    deleteAction(context, repo, path, recursive);
-  }
-
-  void deleteAction(
-      BuildContext context, RepoCubit repo, String path, bool recursive) {
-    repo.deleteFolder(path, recursive);
-    Navigator.of(context).pop(true);
+    return recursive;
   }
 
   _showMoveEntryBottomSheet(
