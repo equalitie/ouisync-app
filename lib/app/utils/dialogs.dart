@@ -43,8 +43,7 @@ abstract class Dialogs {
           Text(
             text!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white, fontSize: Dimensions.fontAverage),
+            style: const TextStyle(color: Colors.white),
           ),
       ],
     );
