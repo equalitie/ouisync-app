@@ -10,8 +10,18 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
 
   final Job? _downloadJob;
 
+  TextStyle? bodyMicroStyle;
+
   @override
   Widget build(BuildContext context) {
+    final microFontSize =
+        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0.0) * 0.8;
+
+    bodyMicroStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontSize: microFontSize);
+
     return GestureDetector(
         child: _getWidgetForState(context),
         onTap: () => onFileIconTap(context));
@@ -45,8 +55,7 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
               animateFromLastPercent: true,
               percent: ratio,
               progressColor: Theme.of(context).colorScheme.secondary,
-              center: Text('$percentage%',
-                  style: const TextStyle(fontSize: Dimensions.fontMicro)));
+              center: Text('$percentage%', style: bodyMicroStyle));
         });
 
     // TODO: This code used to show a different icon once the download finished.
