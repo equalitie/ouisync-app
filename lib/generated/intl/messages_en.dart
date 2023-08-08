@@ -100,6 +100,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("Accept"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACCEPT"),
+        "actionAdd": MessageLookupByLibrary.simpleMessage("Add"),
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("Import a Repository"),
         "actionAddRepositoryWithToken":
@@ -149,6 +150,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionReloadRepo":
             MessageLookupByLibrary.simpleMessage("Reload repository"),
         "actionRemove": MessageLookupByLibrary.simpleMessage("Remove"),
+        "actionRemoveLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Remove local password"),
         "actionRemoveRepo":
             MessageLookupByLibrary.simpleMessage("Remove repository"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
@@ -163,6 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
+        "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
@@ -245,6 +249,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "This option is not available on read-only repositories"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("Add local password"),
+        "messageAddLocalPasswordConfirmation":
+            MessageLookupByLibrary.simpleMessage(
+                "Add a local password for this repository?"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Import a repository using a token link"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -254,8 +261,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "This repository is a read-only replica."),
-        "messageAlertSaveCopyPassword": MessageLookupByLibrary.simpleMessage(
-            "If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place."),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("Available on mobile"),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
@@ -450,6 +455,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageGoToMailApp":
             MessageLookupByLibrary.simpleMessage("Go to the mail app"),
         "messageGoToPeers": MessageLookupByLibrary.simpleMessage("Go to Peers"),
+        "messageGood": MessageLookupByLibrary.simpleMessage("Good"),
         "messageGranted": MessageLookupByLibrary.simpleMessage("Granted"),
         "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
             "Granting this permission requires navigating to the settings:\n\n Settings > Apps & notifications"),
@@ -516,6 +522,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogLevelErrorWarnInfo":
             MessageLookupByLibrary.simpleMessage("Error, Warn and Info"),
         "messageLogViewer": MessageLookupByLibrary.simpleMessage("Log viewer"),
+        "messageMedium": MessageLookupByLibrary.simpleMessage("Medium"),
         "messageMissingBackgroundServicePermission":
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization"),
@@ -560,6 +567,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messagePassword": MessageLookupByLibrary.simpleMessage("Password"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Password copied to the clipboard"),
+        "messagePasswordStrength":
+            MessageLookupByLibrary.simpleMessage("Password strength"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Peer Exchange"),
         "messagePeerExchangeWikipedia":
@@ -582,9 +591,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
-        "messageRemoveBiometricsConfirmation":
+        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
+            "Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added."),
+        "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this repository biometrics?"),
+                "This will remove the repository password and use the biometric validation for unlocking"),
+        "messageRemoveLocalPasswordConfirmation":
+            MessageLookupByLibrary.simpleMessage(
+                "Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again"),
         "messageRemovedInBrackets":
             MessageLookupByLibrary.simpleMessage("<removed>"),
         "messageRenameFile":
@@ -655,6 +669,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageStorage": MessageLookupByLibrary.simpleMessage("Storage"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
             "Needed for getting access to the files"),
+        "messageStrong": MessageLookupByLibrary.simpleMessage("Strong"),
         "messageSyncMobileData": MessageLookupByLibrary.simpleMessage(
             "Sync while using mobile data"),
         "messageSyncingIsDisabledOnMobileInternet":
@@ -691,14 +706,21 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Unlock using biometrics"),
+        "messageUnlockUsingBiometricsConfirmation":
+            MessageLookupByLibrary.simpleMessage(
+                "Unlock this repository using biometrics?"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "You have unsaved changes.\n\nDo you want to discard them?"),
+        "messageUpdateLocalPasswordConfirmation":
+            MessageLookupByLibrary.simpleMessage(
+                "Update this repository localpassword?"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("Validate local password"),
         "messageVerbosity":
             MessageLookupByLibrary.simpleMessage("Log verbosity"),
         "messageView": MessageLookupByLibrary.simpleMessage("View"),
+        "messageWeak": MessageLookupByLibrary.simpleMessage("Weak"),
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),

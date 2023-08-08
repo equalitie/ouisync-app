@@ -1700,6 +1700,56 @@ class S {
     );
   }
 
+  /// `Password strength`
+  String get messagePasswordStrength {
+    return Intl.message(
+      'Password strength',
+      name: 'messagePasswordStrength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weak`
+  String get messageWeak {
+    return Intl.message(
+      'Weak',
+      name: 'messageWeak',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Medium`
+  String get messageMedium {
+    return Intl.message(
+      'Medium',
+      name: 'messageMedium',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Good`
+  String get messageGood {
+    return Intl.message(
+      'Good',
+      name: 'messageGood',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strong`
+  String get messageStrong {
+    return Intl.message(
+      'Strong',
+      name: 'messageStrong',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The current password`
   String get messageRepositoryCurrentPassword {
     return Intl.message(
@@ -2425,26 +2475,6 @@ class S {
     return Intl.message(
       'Remove biometric validation',
       name: 'messageRemoveBiometricValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.`
-  String get messageAlertSaveCopyPassword {
-    return Intl.message(
-      'If you remove the biometric validation, once you navigate out of this screen you wont be able to see or copy the password anymore; please save it in a secure place.',
-      name: 'messageAlertSaveCopyPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to remove this repository biometrics?`
-  String get messageRemoveBiometricsConfirmation {
-    return Intl.message(
-      'Are you sure you want to remove this repository biometrics?',
-      name: 'messageRemoveBiometricsConfirmation',
       desc: '',
       args: [],
     );
@@ -3660,6 +3690,66 @@ class S {
     );
   }
 
+  /// `Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again`
+  String get messageRemoveLocalPasswordConfirmation {
+    return Intl.message(
+      'Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again',
+      name: 'messageRemoveLocalPasswordConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update this repository localpassword?`
+  String get messageUpdateLocalPasswordConfirmation {
+    return Intl.message(
+      'Update this repository localpassword?',
+      name: 'messageUpdateLocalPasswordConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a local password for this repository?`
+  String get messageAddLocalPasswordConfirmation {
+    return Intl.message(
+      'Add a local password for this repository?',
+      name: 'messageAddLocalPasswordConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlock this repository using biometrics?`
+  String get messageUnlockUsingBiometricsConfirmation {
+    return Intl.message(
+      'Unlock this repository using biometrics?',
+      name: 'messageUnlockUsingBiometricsConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.`
+  String get messageRemoveBiometricsConfirmation {
+    return Intl.message(
+      'Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.',
+      name: 'messageRemoveBiometricsConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove the repository password and use the biometric validation for unlocking`
+  String get messageRemoveBiometricsConfirmationMoreInfo {
+    return Intl.message(
+      'This will remove the repository password and use the biometric validation for unlocking',
+      name: 'messageRemoveBiometricsConfirmationMoreInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4435,6 +4525,36 @@ class S {
     return Intl.message(
       'I don\'t agree',
       name: 'actionIDontAgree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove local password`
+  String get actionRemoveLocalPassword {
+    return Intl.message(
+      'Remove local password',
+      name: 'actionRemoveLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update`
+  String get actionUpdate {
+    return Intl.message(
+      'Update',
+      name: 'actionUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get actionAdd {
+    return Intl.message(
+      'Add',
+      name: 'actionAdd',
       desc: '',
       args: [],
     );
