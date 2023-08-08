@@ -26,8 +26,6 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black87,
-          titleTextStyle: const TextStyle(
-              fontSize: Dimensions.fontAverage, color: Colors.black87),
           actions: [
             IconButton(
               color: Theme.of(context).primaryColorDark,
