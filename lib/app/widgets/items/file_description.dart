@@ -17,15 +17,27 @@ class FileDescription extends StatelessWidget with AppLogger {
   final FileItem fileData;
   final Job? _uploadJob;
 
+  late Color primaryColor;
+
+  TextStyle? bodyStyle;
+  TextStyle? bodySmallStyle;
+
   @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Fields.autosizeText(fileData.name),
-          Dimensions.spacingVerticalHalf,
-          _buildDetails(context),
-        ],
-      );
+  Widget build(BuildContext context) {
+    primaryColor = Theme.of(context).primaryColor;
+
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+    bodySmallStyle = Theme.of(context).textTheme.bodySmall;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Fields.autosizeText(fileData.name, style: bodyStyle),
+        Dimensions.spacingVerticalHalf,
+        _buildDetails(context),
+      ],
+    );
+  }
 
   Widget _buildDetails(BuildContext context) {
     final uploadJob = _uploadJob;
@@ -84,32 +96,26 @@ class FileDescription extends StatelessWidget with AppLogger {
               },
               child: Text(
                 S.current.actionCancelCapital,
-                style: const TextStyle(fontSize: Dimensions.fontSmall),
+                style: bodySmallStyle?.copyWith(color: primaryColor),
               )),
         ],
       );
-}
 
-Widget _buildSizeWidget(BuildContext context, String? text, bool loading) {
-  final bodyStyle = Theme.of(context)
-      .textTheme
-      .bodySmall
-      ?.copyWith(fontWeight: FontWeight.w400);
-
-  return Row(
-    children: [
-      if (text != null)
-        Fields.constrainedText(
-          text,
-          flex: 0,
-          style: bodyStyle,
-          softWrap: true,
-        ),
-      if (loading)
-        Icon(
-          Icons.hourglass_top,
-          color: Colors.black.withAlpha(128),
-        ),
-    ],
-  );
+  Widget _buildSizeWidget(BuildContext context, String? text, bool loading) =>
+      Row(
+        children: [
+          if (text != null)
+            Fields.constrainedText(
+              text,
+              flex: 0,
+              style: bodySmallStyle?.copyWith(fontWeight: FontWeight.w400),
+              softWrap: true,
+            ),
+          if (loading)
+            Icon(
+              Icons.hourglass_top,
+              color: Colors.black.withAlpha(128),
+            ),
+        ],
+      );
 }
