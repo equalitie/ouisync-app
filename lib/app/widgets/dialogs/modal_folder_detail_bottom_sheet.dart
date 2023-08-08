@@ -73,7 +73,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           EntryActionItem(
               iconData: Icons.delete,
               title: S.current.iconDelete,
-              textColor: Constants.dangerColor,
+              isDanger: true,
               dense: true,
               onTap: () async {
                 final repo = widget.cubit;

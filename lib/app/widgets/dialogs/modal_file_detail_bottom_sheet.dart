@@ -137,7 +137,7 @@ class _FileDetailState extends State<FileDetail> {
             EntryActionItem(
                 iconData: Icons.delete,
                 title: S.current.iconDelete,
-                textColor: Constants.dangerColor,
+                isDanger: true,
                 dense: true,
                 onTap: () async {
                   final fileName = getBasename(widget.data.path);

@@ -21,9 +21,7 @@ class EntryActionItem extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textOverflow = TextOverflow.ellipsis,
     this.textSoftWrap = true,
-    this.textFontSize = Dimensions.fontAverage,
-    this.textFontWeight = FontWeight.normal,
-    this.textColor = Colors.black,
+    this.isDanger = false,
     Key? key,
   }) : super(key: key);
 
@@ -41,9 +39,7 @@ class EntryActionItem extends StatefulWidget {
   final TextAlign textAlign;
   final TextOverflow textOverflow;
   final bool textSoftWrap;
-  final double textFontSize;
-  final FontWeight textFontWeight;
-  final Color textColor;
+  final bool isDanger;
 
   @override
   State<EntryActionItem> createState() => _EntryActionItemState();
@@ -59,6 +55,8 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
   RestartableTimer? _timer;
 
+  TextStyle? bodySmallStyle;
+
   @override
   void initState() {
     _validateEnabledState();
@@ -70,7 +68,11 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
     setState(() {
       _enabled = isEnabled;
-      _itemColor = isEnabled ? widget.textColor : Colors.grey;
+      _itemColor = isEnabled
+          ? widget.isDanger
+              ? Constants.dangerColor
+              : Colors.black
+          : Colors.grey;
 
       if (!init) {
         _message = widget.disabledMessage;
@@ -100,64 +102,65 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InkWell(
-          child: ListTile(
-            contentPadding: widget.contentPadding,
-            dense: widget.dense,
-            visualDensity: widget.visualDensity,
-            minLeadingWidth: widget.minLeadingWidth,
-            leading: widget.iconData != null
-                ? Icon(widget.iconData, color: _itemColor)
-                : null,
-            title: Text(
-              widget.title,
+    final microFontSize =
+        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0.0) * 0.8;
+
+    final bodySmallStyle =
+        Theme.of(context).textTheme.bodySmall?.copyWith(color: _itemColor);
+
+    final bodyMicroStyle = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(fontSize: microFontSize, color: _itemColor);
+
+    return Column(children: [
+      InkWell(
+        child: ListTile(
+          contentPadding: widget.contentPadding,
+          dense: widget.dense,
+          visualDensity: widget.visualDensity,
+          minLeadingWidth: widget.minLeadingWidth,
+          leading: widget.iconData != null
+              ? Icon(widget.iconData, color: _itemColor)
+              : null,
+          title: Text(widget.title,
               textAlign: widget.textAlign,
               softWrap: widget.textSoftWrap,
               overflow: widget.textOverflow,
-              style: TextStyle(
-                  fontSize: widget.textFontSize,
-                  fontWeight: widget.textFontWeight,
-                  color: _itemColor),
-            ),
-            subtitle: widget.subtitle != null ? Text(widget.subtitle!) : null,
-          ),
-          onTap: () {
-            if (widget.onTap == null) return;
-
-            if (!_enabled) {
-              _validateEnabledState(init: false);
-              return;
-            }
-
-            widget.onTap!();
-          },
+              style: bodySmallStyle),
+          subtitle: widget.subtitle != null
+              ? Text(widget.subtitle!, style: bodyMicroStyle)
+              : null,
         ),
-        Visibility(
+        onTap: () {
+          if (widget.onTap == null) return;
+
+          if (!_enabled) {
+            _validateEnabledState(init: false);
+            return;
+          }
+
+          widget.onTap!();
+        },
+      ),
+      Visibility(
           visible: _isDisabledMessageVisible,
           child: GestureDetector(
-            onTap: _hideDisabledMessage,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 20.0, bottom: 4.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Expanded(
-                  child: Text(
-                    _message ?? '',
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: true,
-                    maxLines: 2,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                        fontSize: Dimensions.fontSmall,
-                        color: Colors.red.shade400),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        ),
-      ],
-    );
+              onTap: _hideDisabledMessage,
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 20.0, bottom: 4.0),
+                  child:
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    Expanded(
+                      child: Text(_message ?? '',
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          maxLines: 2,
+                          textAlign: TextAlign.end,
+                          style: bodySmallStyle?.copyWith(
+                              color: Colors.red.shade400)),
+                    )
+                  ]))))
+    ]);
   }
 }
