@@ -1,7 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../models/models.dart';
-import '../../utils/utils.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({
@@ -12,12 +11,11 @@ class FolderDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
     return Text(
       folderData.name,
-      style: const TextStyle(
-        fontWeight: FontWeight.w500,
-        fontSize: Dimensions.fontAverage,
-      ),
+      style: bodyStyle?.copyWith(fontWeight: FontWeight.w500),
     );
   }
 }
