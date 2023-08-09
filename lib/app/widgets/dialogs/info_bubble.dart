@@ -185,91 +185,90 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-        children: [
-          AnimatedPositioned(
-            duration: animationDuration,
-            left: leftPosition,
-            right: rightPosition,
-            top: topPosition != null
-                ? topPosition! // + animationTopHeight
-                : null,
-            bottom: bottomPosition != null
-                ? bottomPosition! // + animationBottomHeight
-                : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // if (!showBubbleAboveWidget)
-                //   Padding(
-                //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
-                //     child: CustomPaint(
-                //       painter: TrianglePainter(
-                //         strokeColor: widget.bgColor,
-                //         strokeWidth: 10,
-                //         paintingStyle: PaintingStyle.fill,
-                //       ),
-                //       child: SizedBox(
-                //         height: widget.bubbleTipHeight,
-                //         width: widget.bubbleTipWidth,
-                //       ),
-                //     ),
-                //   ),
-                Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    width: widget.bubbleWidth,
-                    decoration: BoxDecoration(
+  Widget build(BuildContext context) {
+    final titleStyle = Theme.of(context).textTheme.bodySmall;
+    final bodySmallStyle = Theme.of(context).textTheme.bodySmall;
+
+    return Stack(
+      children: [
+        AnimatedPositioned(
+          duration: animationDuration,
+          left: leftPosition,
+          right: rightPosition,
+          top: topPosition != null
+              ? topPosition! // + animationTopHeight
+              : null,
+          bottom: bottomPosition != null
+              ? bottomPosition! // + animationBottomHeight
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // if (!showBubbleAboveWidget)
+              //   Padding(
+              //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
+              //     child: CustomPaint(
+              //       painter: TrianglePainter(
+              //         strokeColor: widget.bgColor,
+              //         strokeWidth: 10,
+              //         paintingStyle: PaintingStyle.fill,
+              //       ),
+              //       child: SizedBox(
+              //         height: widget.bubbleTipHeight,
+              //         width: widget.bubbleTipWidth,
+              //       ),
+              //     ),
+              //   ),
+              Material(
+                color: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  width: widget.bubbleWidth,
+                  decoration: BoxDecoration(
                       color: widget.bgColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        RichText(
-                            textAlign: TextAlign.start,
-                            text: TextSpan(
-                                style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: Dimensions.fontSmall),
-                                children: widget.description)),
-                      ],
-                    ),
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(widget.title,
+                          style: titleStyle?.copyWith(
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 12),
+                      RichText(
+                          textAlign: TextAlign.start,
+                          text: TextSpan(
+                              style: bodySmallStyle?.copyWith(
+                                  color: Colors.black87),
+                              children: widget.description)),
+                    ],
                   ),
                 ),
-                // if (showBubbleAboveWidget)
-                //   Padding(
-                //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
-                //     child: RotatedBox(
-                //       quarterTurns: 2,
-                //       child: CustomPaint(
-                //         painter: TrianglePainter(
-                //           strokeColor: widget.bgColor,
-                //           strokeWidth: 10,
-                //           paintingStyle: PaintingStyle.fill,
-                //         ),
-                //         child: SizedBox(
-                //           height: widget.bubbleTipHeight,
-                //           width: widget.bubbleTipWidth,
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-              ],
-            ),
+              ),
+              // if (showBubbleAboveWidget)
+              //   Padding(
+              //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
+              //     child: RotatedBox(
+              //       quarterTurns: 2,
+              //       child: CustomPaint(
+              //         painter: TrianglePainter(
+              //           strokeColor: widget.bgColor,
+              //           strokeWidth: 10,
+              //           paintingStyle: PaintingStyle.fill,
+              //         ),
+              //         child: SizedBox(
+              //           height: widget.bubbleTipHeight,
+              //           width: widget.bubbleTipWidth,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+            ],
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 
   @override
   void dispose() {
