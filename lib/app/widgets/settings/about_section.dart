@@ -27,80 +27,87 @@ class AboutSection extends SettingsSection with AppLogger {
   final Cubits _cubits;
   late final ValueNotifier<bool> _launchAtStartup;
 
+  TextStyle? bodyStyle;
+  TextStyle? subtitleStyle;
+
   @override
-  List<Widget> buildTiles(BuildContext context) => [
-        if (PlatformValues.isDesktopDevice)
-          ValueListenableBuilder(
-              valueListenable: _launchAtStartup,
-              builder: (context, value, child) => SwitchSettingsTile(
-                  value: value,
-                  onChanged: (value) =>
-                      unawaited(_updateLaunchAtStartup(value)),
-                  title: Text(S.current.messageLaunchAtStartup),
-                  leading: Icon(Icons.rocket_launch_sharp))),
-        NavigationTile(
-            title: Text(S.current.titleFAQShort),
-            leading: Icon(Icons.question_answer_rounded),
-            trailing:
-                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-            value: Text(S.current.messageFAQ),
-            onTap: () => unawaited(
-                _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
-        NavigationTile(
-            title: Text(S.current.titlePrivacyPolicy),
-            leading: Icon(Icons.privacy_tip_rounded),
-            trailing:
-                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-            onTap: () => unawaited(_openUrl(context,
-                S.current.titlePrivacyPolicy, Constants.eqPrivacyPolicy))),
-        if (PlatformValues.isMobileDevice)
-          NavigationTile(
-            title: Text(S.current.titleSendFeedback),
-            leading: Icon(Icons.comment_rounded),
-            onTap: () => unawaited(_openFeedback(context)),
-          ),
-        NavigationTile(
-          title: Text(Constants.ouisyncUrl),
-          // Icons.language is actually a stylized globe icon which is a good fit here:
-          leading: Icon(Icons.language_rounded),
-          trailing: _externalNavigationIcon,
-          onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
-        ),
-        NavigationTile(
-          title: Text(Constants.supportEmail, overflow: TextOverflow.ellipsis),
-          leading: Icon(Icons.mail_rounded),
-          trailing: _externalNavigationIcon,
+  List<Widget> buildTiles(BuildContext context) {
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+    subtitleStyle = Theme.of(context).textTheme.bodySmall;
+
+    return [
+      if (PlatformValues.isDesktopDevice)
+        ValueListenableBuilder(
+            valueListenable: _launchAtStartup,
+            builder: (context, value, child) => SwitchSettingsTile(
+                value: value,
+                onChanged: (value) => unawaited(_updateLaunchAtStartup(value)),
+                title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
+                leading: Icon(Icons.rocket_launch_sharp))),
+      NavigationTile(
+          title: Text(S.current.titleFAQShort, style: bodyStyle),
+          leading: Icon(Icons.question_answer_rounded),
+          trailing:
+              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+          value: Text(S.current.messageFAQ, style: subtitleStyle),
           onTap: () => unawaited(
-              launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
-        ),
+              _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
+      NavigationTile(
+          title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
+          leading: Icon(Icons.privacy_tip_rounded),
+          trailing:
+              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+          onTap: () => unawaited(_openUrl(context, S.current.titlePrivacyPolicy,
+              Constants.eqPrivacyPolicy))),
+      if (PlatformValues.isMobileDevice)
         NavigationTile(
-          title: Text(S.current.titleIssueTracker),
-          leading: Icon(Icons.bug_report_rounded),
-          trailing: _externalNavigationIcon,
-          onTap: () =>
-              unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
+          title: Text(S.current.titleSendFeedback, style: bodyStyle),
+          leading: Icon(Icons.comment_rounded),
+          onTap: () => unawaited(_openFeedback(context)),
         ),
-        AppVersionTile(
-          session: _cubits.repositories.session,
-          leading: Icon(Icons.info_rounded),
-          title: Text(S.current.labelAppVersion),
-        ),
-        SettingsTile(
-          title: BlocBuilder<PeerSetCubit, PeerSet>(
-              builder: (context, state) => InfoBuble(
-                      child: Text(S.current.messageSettingsRuntimeID),
-                      title: S.current.messageSettingsRuntimeID,
-                      description: [
-                        TextSpan(text: S.current.messageInfoRuntimeID),
-                        Fields.linkTextSpan(
-                            context,
-                            '\n\n${S.current.messageGoToPeers}',
-                            _navigateToPeers),
-                      ])),
-          leading: Icon(Icons.person_rounded),
-          value: _getRuntimeIdForOS(),
-        ),
-      ];
+      NavigationTile(
+        title: Text(Constants.ouisyncUrl, style: bodyStyle),
+        // Icons.language is actually a stylized globe icon which is a good fit here:
+        leading: Icon(Icons.language_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
+      ),
+      NavigationTile(
+        title: Text(Constants.supportEmail, style: bodyStyle),
+        leading: Icon(Icons.mail_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () =>
+            unawaited(launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
+      ),
+      NavigationTile(
+        title: Text(S.current.titleIssueTracker, style: bodyStyle),
+        leading: Icon(Icons.bug_report_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
+      ),
+      AppVersionTile(
+        session: _cubits.repositories.session,
+        leading: Icon(Icons.info_rounded),
+        title: Text(S.current.labelAppVersion, style: bodyStyle),
+      ),
+      SettingsTile(
+        title: BlocBuilder<PeerSetCubit, PeerSet>(
+            builder: (context, state) => InfoBuble(
+                    child: Text(S.current.messageSettingsRuntimeID,
+                        style: bodyStyle),
+                    title: S.current.messageSettingsRuntimeID,
+                    description: [
+                      TextSpan(text: S.current.messageInfoRuntimeID),
+                      Fields.linkTextSpan(
+                          context,
+                          '\n\n${S.current.messageGoToPeers}',
+                          _navigateToPeers),
+                    ])),
+        leading: Icon(Icons.person_rounded),
+        value: _getRuntimeIdForOS(),
+      ),
+    ];
+  }
 
   void _navigateToPeers(BuildContext context) async {
     final peerSetCubit = context.read<PeerSetCubit>();
@@ -196,10 +203,8 @@ class AboutSection extends SettingsSection with AppLogger {
       future: _cubits.repositories.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
-        final runtimeIdWidget = Text(
-          runtimeId,
-          overflow: TextOverflow.ellipsis,
-        );
+        final runtimeIdWidget =
+            Text(runtimeId, overflow: TextOverflow.ellipsis, style: bodyStyle);
 
         if (Platform.isIOS) {
           return Expanded(

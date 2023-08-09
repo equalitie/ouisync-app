@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
-import '../../utils/dimensions.dart';
-import '../../utils/platform/platform.dart';
 import '../../utils/constants.dart';
 import '../../utils/fields.dart';
+import '../../utils/platform/platform.dart';
 import 'about_section.dart';
 import 'logs_section.dart';
 import 'network_section.dart';
@@ -37,23 +36,29 @@ class SettingsContainer extends StatelessWidget {
 }
 
 class SettingsContainerMobile extends StatelessWidget {
-  const SettingsContainerMobile(this.sections);
+  SettingsContainerMobile(this.sections);
 
   final List<SettingsSection> sections;
 
+  TextStyle? bodyStyle;
+
   @override
-  Widget build(BuildContext context) => s.SettingsList(
-      platform: s.PlatformUtils.detectPlatform(context),
-      sections: sections
-          .map((section) => s.SettingsSection(
-              title: Text(section.title),
-              tiles: section
-                  .buildTiles(context)
-                  .map((tile) => (tile is s.AbstractSettingsTile)
-                      ? tile
-                      : s.CustomSettingsTile(child: tile))
-                  .toList()))
-          .toList());
+  Widget build(BuildContext context) {
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
+    return s.SettingsList(
+        platform: s.PlatformUtils.detectPlatform(context),
+        sections: sections
+            .map((section) => s.SettingsSection(
+                title: Text(section.title, style: bodyStyle),
+                tiles: section
+                    .buildTiles(context)
+                    .map((tile) => (tile is s.AbstractSettingsTile)
+                        ? tile
+                        : s.CustomSettingsTile(child: tile))
+                    .toList()))
+            .toList());
+  }
 }
 
 class SettingsContainerDesktop extends StatefulWidget {
@@ -98,7 +103,7 @@ class _SettingsContainerDesktopState extends State<SettingsContainerDesktop> {
 }
 
 class SettingsSectionTitleDesktop extends StatelessWidget {
-  const SettingsSectionTitleDesktop({
+  SettingsSectionTitleDesktop({
     required this.section,
     required this.onTap,
     this.selected = false,
@@ -108,20 +113,26 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  @override
-  Widget build(BuildContext context) => ListTile(
-        title: Row(children: [
-          // Need to put the badge in a row because wrapping the Text in Badge
-          // will make the text centered. Maybe there's a better solution
-          // though.
-          Text(section.title, style: _getStyle()),
-          _maybeBadge(section)
-        ]),
-        selected: selected,
-        onTap: onTap,
-      );
+  TextStyle? bodyStyle;
 
-  TextStyle _getStyle() {
+  @override
+  Widget build(BuildContext context) {
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
+    return ListTile(
+      title: Row(children: [
+        // Need to put the badge in a row because wrapping the Text in Badge
+        // will make the text centered. Maybe there's a better solution
+        // though.
+        Text(section.title, style: _getStyle()),
+        _maybeBadge(section)
+      ]),
+      selected: selected,
+      onTap: onTap,
+    );
+  }
+
+  TextStyle? _getStyle() {
     Color? color = Colors.black54;
     FontWeight fontWeight = FontWeight.normal;
 
@@ -130,11 +141,7 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
       fontWeight = FontWeight.w500;
     }
 
-    return TextStyle(
-      color: color,
-      fontSize: Dimensions.fontSmall,
-      fontWeight: fontWeight,
-    );
+    return bodyStyle?.copyWith(color: color, fontWeight: fontWeight);
   }
 
   Widget _maybeBadge(SettingsSection section) {

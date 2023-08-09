@@ -36,14 +36,13 @@ class _RepositorySettingsState extends State<RepositorySettings>
     with AppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) {
-    final bodySmallStyle = Theme.of(context).textTheme.bodySmall;
-
     final sheetTitleStyle = Theme.of(context)
         .textTheme
         .bodyLarge
         ?.copyWith(fontWeight: FontWeight.w400);
 
-    final settingStyle = bodySmallStyle?.copyWith(color: Colors.black87);
+    final settingStyle =
+        Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black87);
 
     return BlocBuilder<RepoCubit, RepoState>(
       bloc: widget.cubit,
@@ -62,13 +61,15 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       Expanded(
                           child: SwitchListTile.adaptive(
                         title: Text(S.current.labelBitTorrentDHT,
-                            style: bodySmallStyle),
+                            style: settingStyle),
                         secondary: const Icon(
                           Icons.hub,
                           size: Dimensions.sizeIconMicro,
                           color: Colors.black87,
                         ),
                         contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -4.0),
                         value: state.isDhtEnabled,
                         onChanged: (value) => widget.cubit.setDhtEnabled(value),
                       )),
@@ -77,13 +78,15 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       Expanded(
                           child: SwitchListTile.adaptive(
                         title: Text(S.current.messagePeerExchange,
-                            style: bodySmallStyle),
+                            style: settingStyle),
                         secondary: const Icon(
                           Icons.group_add,
                           size: Dimensions.sizeIconMicro,
                           color: Colors.black87,
                         ),
                         contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -4.0),
                         value: state.isPexEnabled,
                         onChanged: (value) => widget.cubit.setPexEnabled(value),
                       ))

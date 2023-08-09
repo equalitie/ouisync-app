@@ -30,7 +30,7 @@ class RepositorySection extends SettingsSection
 
   @override
   List<Widget> buildTiles(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodySmall;
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
 
     final currentRepo = _cubits.repositories.currentRepo;
 
@@ -162,7 +162,7 @@ class _SecurityTileState extends State<SecurityTile>
 
   @override
   Widget build(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodySmall;
+    bodyStyle = Theme.of(context).textTheme.bodyMedium;
 
     return BlocBuilder<SecurityCubit, SecurityState>(
         bloc: _security,
