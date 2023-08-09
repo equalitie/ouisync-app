@@ -36,6 +36,9 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         .bodyLarge
         ?.copyWith(fontWeight: FontWeight.w400);
 
+    final bodyLargeStyle = Theme.of(context).textTheme.bodyLarge;
+    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
     return Container(
       padding: Dimensions.paddingBottomSheet,
       child: Column(
@@ -49,6 +52,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           EntryActionItem(
               iconData: Icons.edit,
               title: S.current.iconRename,
+              titleTextStyle: bodyStyle,
               dense: true,
               onTap: () async => _showRenameDialog(widget.data),
               enabledValidation: () => widget.isActionAvailableValidator(
@@ -59,6 +63,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           EntryActionItem(
               iconData: Icons.drive_file_move_outlined,
               title: S.current.iconMove,
+              titleTextStyle: bodyStyle,
               dense: true,
               onTap: () async => _showMoveEntryBottomSheet(
                   widget.data.path,
@@ -73,6 +78,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           EntryActionItem(
               iconData: Icons.delete,
               title: S.current.iconDelete,
+              titleTextStyle: bodyStyle,
               isDanger: true,
               dense: true,
               onTap: () async {
@@ -112,17 +118,20 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               icon: Icons.info_rounded,
               text: S.current.iconInformation,
               iconSize: Dimensions.sizeIconBig,
-              textAlign: TextAlign.start),
+              textAlign: TextAlign.start,
+              style: bodyLargeStyle),
           Fields.autosizedLabeledText(
               label: S.current.labelName,
               text: widget.data.name,
               textAlign: TextAlign.start,
-              textMaxLines: 2),
+              textMaxLines: 2,
+              textStyle: bodyStyle),
           Fields.labeledText(
               label: S.current.labelLocation,
               text:
                   widget.data.path.replaceAll(widget.data.name, '').trimRight(),
-              textAlign: TextAlign.start),
+              textAlign: TextAlign.start,
+              textStyle: bodyStyle),
         ],
       ),
     );

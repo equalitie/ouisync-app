@@ -39,6 +39,9 @@ class _FileDetailState extends State<FileDetail> {
         .bodyLarge
         ?.copyWith(fontWeight: FontWeight.w400);
 
+    final bodyLargeStyle = Theme.of(context).textTheme.bodyLarge;
+    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
+
     return SingleChildScrollView(
       child: Container(
         padding: Dimensions.paddingBottomSheet,
@@ -53,6 +56,7 @@ class _FileDetailState extends State<FileDetail> {
             EntryActionItem(
               iconData: Icons.download,
               title: S.current.iconDownload,
+              titleTextStyle: bodyStyle,
               dense: true,
               onTap: () async {
                 Navigator.of(context, rootNavigator: false).pop();
@@ -79,6 +83,7 @@ class _FileDetailState extends State<FileDetail> {
               EntryActionItem(
                 iconData: Icons.preview_rounded,
                 title: S.current.iconPreview,
+                titleTextStyle: bodyStyle,
                 dense: true,
                 onTap: () async => await NativeChannels.previewOuiSyncFile(
                   F.authority,
@@ -95,6 +100,7 @@ class _FileDetailState extends State<FileDetail> {
               EntryActionItem(
                 iconData: Icons.share_rounded,
                 title: S.current.iconShare,
+                titleTextStyle: bodyStyle,
                 dense: true,
                 onTap: () async => await NativeChannels.shareOuiSyncFile(
                   F.authority,
@@ -110,6 +116,7 @@ class _FileDetailState extends State<FileDetail> {
             EntryActionItem(
               iconData: Icons.edit,
               title: S.current.iconRename,
+              titleTextStyle: bodyStyle,
               dense: true,
               onTap: () async => _showRenameDialog(widget.data),
               enabledValidation: () => widget.isActionAvailableValidator(
@@ -121,6 +128,7 @@ class _FileDetailState extends State<FileDetail> {
             EntryActionItem(
               iconData: Icons.drive_file_move_outlined,
               title: S.current.iconMove,
+              titleTextStyle: bodyStyle,
               dense: true,
               onTap: () async => _showMoveEntryBottomSheet(
                 widget.data.path,
@@ -137,6 +145,7 @@ class _FileDetailState extends State<FileDetail> {
             EntryActionItem(
                 iconData: Icons.delete,
                 title: S.current.iconDelete,
+                titleTextStyle: bodyStyle,
                 isDanger: true,
                 dense: true,
                 onTap: () async {
@@ -162,17 +171,23 @@ class _FileDetailState extends State<FileDetail> {
             const Divider(
                 height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
             Fields.iconLabel(
-                icon: Icons.info_rounded, text: S.current.iconInformation),
+                icon: Icons.info_rounded,
+                text: S.current.iconInformation,
+                style: bodyLargeStyle),
             Fields.autosizedLabeledText(
-                label: S.current.labelName, text: widget.data.name),
+                label: S.current.labelName,
+                text: widget.data.name,
+                textStyle: bodyStyle),
             Fields.labeledText(
                 label: S.current.labelLocation,
                 text: widget.data.path
                     .replaceAll(widget.data.name, '')
-                    .trimRight()),
+                    .trimRight(),
+                textStyle: bodyStyle),
             Fields.labeledText(
                 label: S.current.labelSize,
-                text: formatSize(widget.data.size ?? 0)),
+                text: formatSize(widget.data.size ?? 0),
+                textStyle: bodyStyle),
           ],
         ),
       ),
