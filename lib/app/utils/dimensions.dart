@@ -6,10 +6,10 @@ import 'platform/platform_values.dart';
 class Dimensions {
   Dimensions._();
 
-  static const double fontBig = 20.0;
-  static const double fontAverage = 16.0;
-  static const double fontSmall = 14.0;
-  static const double fontMicro = 12.0;
+  // static const double fontBig = 20.0;
+  // static const double fontAverage = 16.0;
+  // static const double fontSmall = 14.0;
+  // static const double fontMicro = 12.0;
 
   static const Size sizeInPageButtonSmall = Size(120.0, 50.0);
   static const Size sizeInPageButtonRegular = Size(150.0, 50.0);
