@@ -1,3 +1,6 @@
+export 'themes/app_text_theme_extension.dart';
+export 'themes/app_typography.dart';
+
 export 'actions.dart';
 export 'ansi_parser.dart';
 export 'constants.dart';
