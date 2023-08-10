@@ -642,17 +642,20 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: false, // user must tap button!
           builder: (context) {
             return AlertDialog(
-              title: Text(S.current.titleAddFile),
-              content: SingleChildScrollView(
-                child: ListBody(children: [Text(accessModeMessage)]),
-              ),
-              actions: [
-                TextButton(
-                  child: Text(S.current.actionCloseCapital),
-                  onPressed: () => Navigator.of(context).pop(),
-                )
-              ],
-            );
+                title: Fields.constrainedText(S.current.titleAddFile,
+                    flex: 0,
+                    style: context.theme.appTextStyle.titleMedium,
+                    maxLines: 2),
+                content: SingleChildScrollView(
+                    child: ListBody(children: [
+                  Text(accessModeMessage,
+                      style: context.theme.appTextStyle.bodyMedium)
+                ])),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(S.current.actionCloseCapital))
+                ]);
           });
 
       return false;
@@ -768,15 +771,16 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: true,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text(S.current.titleAddRepository),
-              content: Text(tokenValidationError),
+              title: Fields.constrainedText(S.current.titleAddRepository,
+                  flex: 0,
+                  style: context.theme.appTextStyle.titleMedium,
+                  maxLines: 2),
+              content: Text(tokenValidationError,
+                  style: context.theme.appTextStyle.bodyMedium),
               actions: <Widget>[
                 TextButton(
-                  child: Text(S.current.actionOK),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(S.current.actionOK))
               ],
             );
           });

@@ -234,21 +234,31 @@ mixin RepositoryActionsMixin on AppLogger {
     final deleteRepo = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(S.current.titleDeleteRepository),
+        title: Fields.constrainedText(S.current.titleDeleteRepository,
+            flex: 0,
+            style: context.theme.appTextStyle.titleMedium,
+            maxLines: 2),
         content: SingleChildScrollView(
           child: ListBody(
-            children: [Text(S.current.messageConfirmRepositoryDeletion)],
+            children: [
+              Text(S.current.messageConfirmRepositoryDeletion,
+                  style: context.theme.appTextStyle.bodyMedium)
+            ],
           ),
         ),
         actions: [
-          TextButton(
-            child: Text(S.current.actionCloseCapital),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          DangerButton(
-            text: S.current.actionDeleteCapital,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
+          Fields.dialogActions(context, buttons: [
+            NegativeButton(
+                text: S.current.actionCloseCapital,
+                onPressed: () => Navigator.of(context).pop(false),
+                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            PositiveButton(
+              text: S.current.actionDeleteCapital,
+              onPressed: () => Navigator.of(context).pop(true),
+              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+              isDangerButton: true,
+            )
+          ])
         ],
       ),
     );

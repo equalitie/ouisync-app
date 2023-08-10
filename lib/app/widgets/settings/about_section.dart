@@ -230,33 +230,34 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-        title: Text(S.current.messageGoToMailApp),
-        content: CheckboxListTile(
-          title: Text(S.current.labelAttachLogs),
-          value: attachments.logs,
-          onChanged: (value) {
-            if (value != null) {
-              setState(() {
-                attachments = FeedbackAttachments(logs: value);
-              });
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            child: Text(S.current.actionOK),
-            onPressed: () {
-              Navigator.of(context).pop(attachments);
+          title: Fields.constrainedText(S.current.messageGoToMailApp,
+              flex: 0,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2),
+          content: CheckboxListTile(
+            title: Text(S.current.labelAttachLogs,
+                style: context.theme.appTextStyle.bodyMedium),
+            value: attachments.logs,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  attachments = FeedbackAttachments(logs: value);
+                });
+              }
             },
           ),
-          TextButton(
-            child: Text(S.current.actionCancel),
-            onPressed: () {
-              Navigator.of(context).pop(null);
-            },
-          ),
-        ],
-      );
+          actions: [
+            Fields.dialogActions(context, buttons: [
+              NegativeButton(
+                  text: S.current.actionCancel,
+                  onPressed: () => Navigator.of(context).pop(null),
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+              PositiveButton(
+                  text: S.current.actionOK,
+                  onPressed: () async => Navigator.of(context).pop(attachments),
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+            ])
+          ]);
 }
 
 class FeedbackAttachments {

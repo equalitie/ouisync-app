@@ -115,17 +115,14 @@ abstract class Dialogs {
           });
 
   static AlertDialog _alertDialog(BuildContext context, String title,
-      List<Widget> body, List<Widget> actions) {
-    final titleStyle = Theme.of(context).textTheme.titleMedium;
-
-    return AlertDialog(
-      title: Text(title, style: titleStyle),
-      content: SingleChildScrollView(
-        child: ListBody(children: body),
-      ),
-      actions: actions,
-    );
-  }
+          List<Widget> body, List<Widget> actions) =>
+      AlertDialog(
+          title: Fields.constrainedText(title,
+              flex: 0,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2),
+          content: SingleChildScrollView(child: ListBody(children: body)),
+          actions: actions);
 
   static Future<String?> deleteFileAlertDialog(RepoCubit repo, String path,
       BuildContext context, String fileName, String parent) async {

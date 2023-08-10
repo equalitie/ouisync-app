@@ -13,38 +13,44 @@ class ReplaceFile extends StatelessWidget {
   final _fileAction = ValueNotifier<FileAction>(FileAction.replace);
 
   @override
-  Widget build(BuildContext context) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Dimensions.spacingVerticalDouble,
-            Text(S.current.messageFileAlreadyExist(fileName)),
-            Dimensions.spacingVertical,
-            ValueListenableBuilder(
-              valueListenable: _fileAction,
-              builder: (context, value, child) {
-                return Column(children: [
-                  RadioListTile<FileAction>(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(S.current.messageReplaceExistingFile),
-                      value: FileAction.replace,
-                      groupValue: value,
-                      onChanged: _onFileActionChanged),
-                  RadioListTile<FileAction>(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(S.current.messageKeepBothFiles),
-                      value: FileAction.keep,
-                      groupValue: value,
-                      onChanged: _onFileActionChanged),
-                ]);
-              },
-            ),
-            Dimensions.spacingVertical,
-            Fields.dialogActions(context, buttons: _actions(context)),
-          ]);
+  Widget build(BuildContext context) {
+    final bodyStyle = context.theme.appTextStyle.bodyMedium;
+
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Dimensions.spacingVerticalDouble,
+          Text(S.current.messageFileAlreadyExist(fileName), style: bodyStyle),
+          Dimensions.spacingVertical,
+          ValueListenableBuilder(
+            valueListenable: _fileAction,
+            builder: (context, value, child) {
+              return Column(children: [
+                RadioListTile<FileAction>(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(S.current.messageReplaceExistingFile,
+                        style: bodyStyle),
+                    value: FileAction.replace,
+                    groupValue: value,
+                    onChanged: _onFileActionChanged),
+                RadioListTile<FileAction>(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title:
+                        Text(S.current.messageKeepBothFiles, style: bodyStyle),
+                    value: FileAction.keep,
+                    groupValue: value,
+                    onChanged: _onFileActionChanged),
+              ]);
+            },
+          ),
+          Dimensions.spacingVertical,
+          Fields.dialogActions(context, buttons: _actions(context)),
+        ]);
+  }
 
   List<Widget> _actions(context) => [
         NegativeButton(
