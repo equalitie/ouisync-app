@@ -205,7 +205,8 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
             bodyMedium: AppTypography.bodyMedium,
-            bodySmall: AppTypography.bodySmall),
+            bodySmall: AppTypography.bodySmall,
+            titleMedium: AppTypography.titleMedium),
         extensions: <ThemeExtension<dynamic>>[
           AppTextThemeExtension(
               titleLarge: AppTypography.titleBig,
