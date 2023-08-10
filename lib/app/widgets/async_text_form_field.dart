@@ -14,20 +14,21 @@ class AsyncTextFormField extends StatefulWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final InputDecoration? decoration;
+  final TextStyle? style;
 
-  const AsyncTextFormField({
-    Key? key,
-    this.controller,
-    this.enabled,
-    this.onSaved,
-    required this.validator,
-    this.autovalidateMode,
-    this.autofocus = false,
-    this.focusNode,
-    this.obscureText = false,
-    this.keyboardType,
-    this.decoration,
-  });
+  const AsyncTextFormField(
+      {Key? key,
+      this.controller,
+      this.enabled,
+      this.onSaved,
+      required this.validator,
+      this.autovalidateMode,
+      this.autofocus = false,
+      this.focusNode,
+      this.obscureText = false,
+      this.keyboardType,
+      this.decoration,
+      this.style});
 
   @override
   State<AsyncTextFormField> createState() => _State();
@@ -50,6 +51,7 @@ class _State extends State<AsyncTextFormField> {
         obscureText: widget.obscureText,
         keyboardType: widget.keyboardType,
         decoration: widget.decoration,
+        style: widget.style,
         validator: (_) => _validationResult,
         onChanged: _onChanged,
       );
