@@ -17,47 +17,41 @@ class ErrorState extends StatelessWidget {
   final void Function()? onReload;
 
   @override
-  Widget build(BuildContext context) {
-    final mainMessageStyle =
-        Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.red);
-    final secondaryMessageStyle = Theme.of(context).textTheme.bodyMedium;
-
-    return Center(
-        child: SingleChildScrollView(
-            reverse: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+  Widget build(BuildContext context) => Center(
+      child: SingleChildScrollView(
+          reverse: false,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Align(
+                  alignment: Alignment.center,
+                  child: Fields.inPageMainMessage(errorMessage,
+                      style: context.theme.appTextStyle.bodyLarge
+                          .copyWith(color: Constants.dangerColor),
+                      tags: {
+                        Constants.inlineTextColor:
+                            InlineTextStyles.color(Colors.black),
+                        Constants.inlineTextSize: InlineTextStyles.size(),
+                        Constants.inlineTextBold: InlineTextStyles.bold
+                      })),
+              if (errorDescription != null) const SizedBox(height: 10.0),
+              if (errorDescription != null)
                 Align(
                     alignment: Alignment.center,
-                    child: Fields.inPageMainMessage(errorMessage,
-                        style: mainMessageStyle,
-                        tags: {
-                          Constants.inlineTextColor:
-                              InlineTextStyles.color(Colors.black),
-                          Constants.inlineTextSize: InlineTextStyles.size(),
-                          Constants.inlineTextBold: InlineTextStyles.bold
-                        })),
-                if (errorDescription != null) const SizedBox(height: 10.0),
-                if (errorDescription != null)
-                  Align(
-                      alignment: Alignment.center,
-                      child: Fields.inPageSecondaryMessage(errorDescription!,
-                          style: secondaryMessageStyle,
-                          tags: {
-                            Constants.inlineTextSize: InlineTextStyles.size(),
-                            Constants.inlineTextBold: InlineTextStyles.bold,
-                            Constants.inlineTextIcon:
-                                InlineTextStyles.icon(Icons.south)
-                          })),
-                if (onReload != null) Dimensions.spacingVerticalDouble,
-                if (onReload != null)
-                  Fields.inPageButton(
-                      onPressed: onReload,
-                      text: S.current.actionReloadContents,
-                      autofocus: true)
-              ],
-            )));
-  }
+                    child:
+                        Fields.inPageSecondaryMessage(errorDescription!, tags: {
+                      Constants.inlineTextSize: InlineTextStyles.size(),
+                      Constants.inlineTextBold: InlineTextStyles.bold,
+                      Constants.inlineTextIcon:
+                          InlineTextStyles.icon(Icons.south)
+                    })),
+              if (onReload != null) Dimensions.spacingVerticalDouble,
+              if (onReload != null)
+                Fields.inPageButton(
+                    onPressed: onReload,
+                    text: S.current.actionReloadContents,
+                    autofocus: true)
+            ],
+          )));
 }

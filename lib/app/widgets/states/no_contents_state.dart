@@ -35,10 +35,10 @@ class NoContentsState extends StatelessWidget {
             Align(
               alignment: Alignment.center,
               child: Fields.inPageMainMessage(
-                path.isEmpty
-                    ? S.current.messageEmptyRepo
-                    : S.current.messageEmptyFolder,
-              ),
+                  path.isEmpty
+                      ? S.current.messageEmptyRepo
+                      : S.current.messageEmptyFolder,
+                  style: context.theme.appTextStyle.bodyLarge),
             ),
             Dimensions.spacingVertical,
             Align(

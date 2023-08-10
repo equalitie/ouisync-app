@@ -29,6 +29,9 @@ class MissingRepositoryState extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final emptyFolderImageHeight = MediaQuery.of(context).size.height *
+        Constants.statePlaceholderImageHeightFactor;
+
     return Center(
         child: SingleChildScrollView(
       reverse: false,
@@ -37,8 +40,16 @@ class MissingRepositoryState extends StatelessWidget
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Align(
+              alignment: Alignment.center,
+              child: Fields.placeholderWidget(
+                  assetName: Constants.assetEmptyFolder,
+                  assetHeight: emptyFolderImageHeight)),
+          Dimensions.spacingVerticalDouble,
+          Align(
             alignment: Alignment.center,
-            child: Fields.inPageMainMessage(errorMessage),
+            child: Fields.inPageMainMessage(errorMessage,
+                style: context.theme.appTextStyle.bodyLarge
+                    .copyWith(color: Constants.dangerColor)),
           ),
           if (errorDescription != null) Dimensions.spacingVertical,
           if (errorDescription != null)
