@@ -176,18 +176,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   @override
   Widget build(BuildContext context) {
-    _linkStyle = Theme.of(context)
-        .textTheme
-        .bodySmall
-        ?.copyWith(fontWeight: FontWeight.w500);
+    _linkStyle = context.theme.appTextStyle.bodySmall
+        .copyWith(fontWeight: FontWeight.w500);
 
-    _labelStyle = Theme.of(context)
-        .textTheme
-        .labelMedium
-        ?.copyWith(color: Constants.inputLabelForeColor);
+    _labelStyle = context.theme.appTextStyle.labelMedium
+        .copyWith(color: Constants.inputLabelForeColor);
 
     _messageSmall =
-        Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54);
+        context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
 
     return WillPopScope(
         onWillPop: () async {
@@ -231,7 +227,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             if (!_isBlindReplica) ..._passwordSection(),
             if (_isBiometricsAvailable && !_isBlindReplica && _addPassword)
               _useBiometricsSwitch(),
-            _manualPasswordWarning(),
+            Dimensions.spacingVertical,
+            _manualPasswordWarning(context),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
@@ -414,7 +411,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       child: SwitchListTile.adaptive(
           value: _secureWithBiometrics,
           title: Text(S.current.messageSecureUsingBiometrics,
-              textAlign: TextAlign.end),
+              textAlign: TextAlign.end,
+              style: context.theme.appTextStyle.bodyMedium),
           onChanged: (enableBiometrics) {
             setState(() {
               _secureWithBiometrics = enableBiometrics;
@@ -427,10 +425,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
-  Widget _manualPasswordWarning() => Visibility(
+  Widget _manualPasswordWarning(BuildContext context) => Visibility(
       visible: _showSavePasswordWarning && _addPassword,
       child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-          style: TextStyle(color: Colors.red),
+          style:
+              context.theme.appTextStyle.bodyMedium.copyWith(color: Colors.red),
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));

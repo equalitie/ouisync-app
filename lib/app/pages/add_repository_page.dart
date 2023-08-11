@@ -24,20 +24,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
 
   final _isDesktop = PlatformValues.isDesktopDevice;
 
-  TextStyle? titleStyle;
-  TextStyle? bodyStyle;
-  TextStyle? bodySmallStyle;
-
   @override
   Widget build(BuildContext context) {
     final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
-
-    titleStyle = Theme.of(context).textTheme.titleLarge;
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
-    bodySmallStyle = Theme.of(context)
-        .textTheme
-        .bodySmall
-        ?.copyWith(fontWeight: FontWeight.w700);
 
     return Scaffold(
         appBar: AppBar(
@@ -45,7 +34,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
             elevation: 0.0,
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.black87,
-            titleTextStyle: titleStyle),
+            titleTextStyle: context.theme.appTextStyle.titleMedium),
         body: Form(
             key: formKey,
             autovalidateMode: AutovalidateMode.disabled,
@@ -70,15 +59,15 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Row(children: [
-                  Fields.constrainedText(S.current.messageAddRepoQR,
-                      flex: 0, style: bodyStyle)
+                  Fields.constrainedText(S.current.messageAddRepoQR, flex: 0)
                 ]),
                 if (_isDesktop)
                   Row(children: [
                     Fields.constrainedText(
                         '(${S.current.messageAvailableOnMobile})',
                         flex: 0,
-                        style: bodySmallStyle)
+                        style: context.theme.appTextStyle.bodySmall
+                            .copyWith(fontWeight: FontWeight.w700))
                   ])
               ]),
           Dimensions.spacingVerticalDouble,
@@ -143,7 +132,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
                     thickness: 1.0, endIndent: 20.0, color: Colors.black26)),
             Text(
               S.current.messageOr.toUpperCase(),
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
             const Expanded(
                 child: Divider(

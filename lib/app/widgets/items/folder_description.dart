@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../models/models.dart';
 
@@ -10,12 +11,8 @@ class FolderDescription extends StatelessWidget {
   final BaseItem folderData;
 
   @override
-  Widget build(BuildContext context) {
-    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
-
-    return Text(
-      folderData.name,
-      style: bodyStyle?.copyWith(fontWeight: FontWeight.w500),
-    );
-  }
+  Widget build(BuildContext context) => Fields.autosizeText(folderData.name,
+      minFontSize: context.theme.appTextStyle.bodyMicro.fontSize,
+      maxFontSize: context.theme.appTextStyle.bodyMedium.fontSize,
+      maxLines: 2);
 }

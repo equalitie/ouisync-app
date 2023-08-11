@@ -30,20 +30,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final titleFontSize = Theme.of(context).textTheme.titleLarge?.fontSize;
-    final titleFontWeight = Theme.of(context).textTheme.titleLarge?.fontWeight;
-    final titleStyle =
-        TextStyle(fontSize: titleFontSize, fontWeight: titleFontWeight);
-
-    final bodyFontSize = Theme.of(context).textTheme.bodyMedium?.fontSize;
-    final bodyFontWeight = Theme.of(context).textTheme.bodyMedium?.fontWeight;
-    final bodyStyle =
-        TextStyle(fontSize: bodyFontSize, fontWeight: bodyFontWeight);
-
     final pageDecoration = PageDecoration(
-        titleTextStyle: titleStyle,
+        titleTextStyle: context.theme.appTextStyle.titleLarge,
         bodyAlignment: Alignment.center,
-        bodyTextStyle: bodyStyle,
+        bodyTextStyle: context.theme.appTextStyle.bodyMedium,
         bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
         imagePadding: EdgeInsets.zero);
 

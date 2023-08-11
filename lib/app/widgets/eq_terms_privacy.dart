@@ -25,28 +25,29 @@ class EqTermsAndPrivacy extends StatelessWidget {
   }
 
   Widget _temsAndPrivacyTextBlock(BuildContext context) {
-    final titleTextStyle = Theme.of(context).textTheme.titleLarge;
-    final subtitleTextStyle = Theme.of(context).textTheme.titleMedium;
-    final bodyTextStyle = Theme.of(context).textTheme.bodyMedium;
+    final titleFontSize = context.theme.appTextStyle.titleLarge.fontSize;
+    final subtitleFontSize = context.theme.appTextStyle.titleMedium.fontSize;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       RichText(
           textAlign: TextAlign.start,
-          text: TextSpan(style: titleTextStyle, children: [
-            Fields.boldTextSpan('\n${S.current.titleTermsPrivacy}\n')
-          ])),
+          text: TextSpan(
+              style: context.theme.appTextStyle.titleLarge,
+              children: [
+                Fields.boldTextSpan('\n${S.current.titleTermsPrivacy}\n')
+              ])),
       RichText(
         text: TextSpan(
-          style: bodyTextStyle,
+          style: context.theme.appTextStyle.bodyMedium,
           children: [
             Fields.boldTextSpan('${S.current.titleOverview}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageTermsPrivacyP1}.\n\n'),
             TextSpan(text: '${S.current.messageTermsPrivacyP2}.\n\n'),
             Fields.boldTextSpan('${S.current.titleTermsOfUse}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageTermsPrivacyP3}\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: S.current.messageTerms1_1),
             Fields.linkTextSpan(
                 context, S.current.messageCanadaPrivacyAct, _launchCPA),
@@ -54,62 +55,62 @@ class EqTermsAndPrivacy extends StatelessWidget {
             Fields.linkTextSpan(
                 context, S.current.messagePIPEDA, _launchPIPEDA),
             TextSpan(text: ' ${S.current.messageTerms1_2},\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageTerms2};\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageTerms3};\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageTerms4};\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageTerms5}.\n\n'),
             Fields.boldTextSpan('${S.current.titlePrivacyNotice}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messagePrivacyIntro}.\n\n'),
             Fields.boldTextSpan('${S.current.titleDataCollection}\n\n',
-                fontSize: subtitleTextStyle?.fontSize),
+                fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageDataCollectionP1}.\n\n'),
             TextSpan(text: '${S.current.messageDataCollectionP2}.\n\n'),
             Fields.boldTextSpan('${S.current.titleDataSharing}\n\n',
-                fontSize: subtitleTextStyle?.fontSize),
+                fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageDataSharingP1}.\n\n'),
             Fields.boldTextSpan('${S.current.titleSecurityPractices}\n\n',
-                fontSize: subtitleTextStyle?.fontSize),
+                fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageSecurityPracticesP1}.\n\n'),
             TextSpan(text: '${S.current.messageSecurityPracticesP2}.\n\n'),
             TextSpan(text: '${S.current.messageSecurityPracticesP3}.\n\n'),
             TextSpan(text: '${S.current.messageSecurityPracticesP4}.\n\n'),
             Fields.boldTextSpan('${S.current.titleDeletionDataServer}\n\n',
-                fontSize: subtitleTextStyle?.fontSize),
+                fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageDeletionDataServerP1}.\n\n'),
             Fields.italicTextSpan('${S.current.messageNote}: '),
             Fields.italicTextSpan(
                 '${S.current.messageDeletionDataServerNote}.\n\n'),
             Fields.boldTextSpan('${S.current.titleLogData}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageLogDataP1}.\n\n'),
             TextSpan(text: '${S.current.messageLogDataP2}\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageLogData1};\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageLogData2};\n\n'),
-            Fields.boldTextSpan('·	', fontSize: subtitleTextStyle?.fontSize),
+            Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageLogData3}.\n\n'),
             TextSpan(text: '${S.current.messageLogDataP3}.\n\n'),
             Fields.boldTextSpan('${S.current.titleCookies}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageCookiesP1}.\n\n'),
             Fields.boldTextSpan('${S.current.titleLinksOtherSites}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageLinksOtherSitesP1}.\n\n'),
             Fields.boldTextSpan('${S.current.titleChildrensPrivacy}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageChildrensPolicyP1}.\n\n'),
             Fields.boldTextSpan('${S.current.titleChangesToTerms}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageChangesToTermsP1}.\n\n'),
             TextSpan(text: '${S.current.messageChangesToTermsP2}.\n\n'),
             Fields.boldTextSpan('${S.current.titleContactUs}\n\n',
-                fontSize: titleTextStyle?.fontSize),
+                fontSize: titleFontSize),
             TextSpan(text: '${S.current.messageContatUsP1} '),
             Fields.linkTextSpan(context, Constants.supportEmail, _mailTo),
             TextSpan(text: '.'),

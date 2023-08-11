@@ -23,7 +23,7 @@ abstract class AppTypography {
   static const bodyMicro = TextStyle(
       color: Color(0x8a000000),
       fontSize: 10.0,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       textBaseline: TextBaseline.alphabetic,
       decoration: TextDecoration.none);
 

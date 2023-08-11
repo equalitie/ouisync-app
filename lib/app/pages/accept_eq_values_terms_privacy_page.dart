@@ -21,21 +21,6 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
-  TextStyle? introTextStyle;
-  TextStyle? bodyTextStyle;
-  TextStyle? byTextStyle;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    introTextStyle = Theme.of(context).textTheme.titleMedium;
-    bodyTextStyle = Theme.of(context).textTheme.bodyMedium;
-    byTextStyle = TextStyle(
-        fontSize: (bodyTextStyle?.fontSize ?? 10.0) * 0.8,
-        color: Colors.black54);
-  }
-
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: PlatformValues.isMobileDevice
@@ -66,14 +51,16 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
             width: MediaQuery.of(context).size.width * 0.6),
         Padding(
             padding: EdgeInsets.only(bottom: 10.0),
-            child: Text(S.current.messageBy, style: byTextStyle)),
+            child: Text(S.current.messageBy,
+                style: context.theme.appTextStyle.bodyMicro
+                    .copyWith(color: Colors.black54))),
         Image.asset(Constants.eQLogo,
             width: MediaQuery.of(context).size.width * 0.2)
       ]);
 
   Widget _introTextSpan() => RichText(
       textAlign: TextAlign.start,
-      text: TextSpan(style: bodyTextStyle, children: [
+      text: TextSpan(style: context.theme.appTextStyle.bodyMedium, children: [
         Fields.boldTextSpan(S.current.titleAppTitle),
         TextSpan(text: ' ${S.current.messageEqualitieValues}')
       ]));

@@ -43,8 +43,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
 
-  TextStyle? bodyStyle;
-
   @override
   void initState() {
     security = SecurityCubit.create(
@@ -58,27 +56,23 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   @override
-  Widget build(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
-
-    return Scaffold(
-        appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
-        body: SingleChildScrollView(
-            child: Container(
-                child: BlocBuilder<SecurityCubit, SecurityState>(
-                    bloc: security,
-                    builder: (context, state) => Column(children: [
-                          _pasword(state),
-                          Divider(height: 30.0),
-                          _biometrics(state)
-                        ])))));
-  }
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
+      body: SingleChildScrollView(
+          child: Container(
+              child: BlocBuilder<SecurityCubit, SecurityState>(
+                  bloc: security,
+                  builder: (context, state) => Column(children: [
+                        _pasword(state),
+                        Divider(height: 30.0),
+                        _biometrics(state)
+                      ])))));
 
   Widget _pasword(SecurityState state) {
     return Container(
         padding: Dimensions.paddingDialog,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(state.passwordModeTitle, style: bodyStyle),
+          Text(state.passwordModeTitle),
           Dimensions.spacingVerticalDouble,
           PasswordValidation(
               passwordMode: state.passwordMode,
@@ -99,8 +93,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                 TextButton(
                     focusNode: _passwordAction,
                     child: Text(S.current.actionRemoveLocalPassword,
-                        style:
-                            bodyStyle?.copyWith(color: Constants.dangerColor)),
+                        style: context.theme.appTextStyle.bodyMedium
+                            .copyWith(color: Constants.dangerColor)),
                     onPressed: () async {
                       final positiveButtonText = S.current.actionRemove;
                       final confirmationMessage =
@@ -118,6 +112,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           f: _removePassword());
                     })
               ]),
+              Dimensions.spacingVertical,
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Fields.inPageButton(
                     onPressed: () async {
@@ -191,7 +186,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       secondary:
                           Icon(Icons.fingerprint_rounded, color: Colors.black),
                       title: Text(S.current.messageUnlockUsingBiometrics,
-                          style: bodyStyle),
+                          style: context.theme.appTextStyle.bodyMedium),
                       onChanged: (useBiometrics) async {
                         final positiveButtonText = S.current.actionAccept;
                         String confirmationMessage = useBiometrics

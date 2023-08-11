@@ -7,7 +7,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
-  FileDescription(
+  const FileDescription(
     this.repo,
     this.fileData,
     this._uploadJob,
@@ -17,27 +17,18 @@ class FileDescription extends StatelessWidget with AppLogger {
   final FileItem fileData;
   final Job? _uploadJob;
 
-  late Color primaryColor;
-
-  TextStyle? bodyStyle;
-  TextStyle? bodySmallStyle;
-
   @override
-  Widget build(BuildContext context) {
-    primaryColor = Theme.of(context).primaryColor;
-
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
-    bodySmallStyle = Theme.of(context).textTheme.bodySmall;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Fields.autosizeText(fileData.name, style: bodyStyle),
-        Dimensions.spacingVerticalHalf,
-        _buildDetails(context),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Fields.autosizeText(fileData.name,
+              minFontSize: context.theme.appTextStyle.bodyMicro.fontSize,
+              maxFontSize: context.theme.appTextStyle.bodyMedium.fontSize,
+              maxLines: 1),
+          Dimensions.spacingVerticalHalf,
+          _buildDetails(context),
+        ],
+      );
 
   Widget _buildDetails(BuildContext context) {
     final uploadJob = _uploadJob;
@@ -79,12 +70,12 @@ class FileDescription extends StatelessWidget with AppLogger {
           children: [
             _buildSizeWidget(context, formatSize(state.soFar), false),
             Dimensions.spacingVerticalHalf,
-            _buildUploadProgress(job),
+            _buildUploadProgress(context, job),
           ],
         ),
       );
 
-  Widget _buildUploadProgress(Job job) => Row(
+  Widget _buildUploadProgress(BuildContext context, Job job) => Row(
         textBaseline: TextBaseline.alphabetic,
         children: [
           Expanded(
@@ -94,28 +85,20 @@ class FileDescription extends StatelessWidget with AppLogger {
               onPressed: () {
                 job.cancel();
               },
-              child: Text(
-                S.current.actionCancelCapital,
-                style: bodySmallStyle?.copyWith(color: primaryColor),
-              )),
+              child: Text(S.current.actionCancelCapital,
+                  style: context.theme.appTextStyle.bodyMicro
+                      .copyWith(color: context.theme.primaryColor))),
         ],
       );
 
   Widget _buildSizeWidget(BuildContext context, String? text, bool loading) =>
-      Row(
-        children: [
-          if (text != null)
-            Fields.constrainedText(
-              text,
+      Row(children: [
+        if (text != null)
+          Fields.constrainedText(text,
               flex: 0,
-              style: bodySmallStyle?.copyWith(fontWeight: FontWeight.w400),
-              softWrap: true,
-            ),
-          if (loading)
-            Icon(
-              Icons.hourglass_top,
-              color: Colors.black.withAlpha(128),
-            ),
-        ],
-      );
+              style: context.theme.appTextStyle.bodyMicro,
+              softWrap: true),
+        if (loading)
+          Icon(Icons.hourglass_top, color: Colors.black.withAlpha(128))
+      ]);
 }

@@ -6,16 +6,12 @@ import '../../cubits/cubits.dart';
 class FolderNavigationBar extends StatelessWidget {
   final RepoCubit _repo;
 
-  FolderNavigationBar(this._repo);
-
-  TextStyle? titleStyle;
+  const FolderNavigationBar(this._repo);
 
   @override
   Widget build(BuildContext context) {
-    titleStyle = Theme.of(context).textTheme.titleMedium;
-
     final path = _repo.state.currentFolder.path;
-    final route = _currentLocationBar(path, context);
+    final route = _currentLocationBar(context, path, context);
 
     return Container(
         padding: const EdgeInsets.all(10.0),
@@ -31,7 +27,8 @@ class FolderNavigationBar extends StatelessWidget {
         ]));
   }
 
-  Widget _currentLocationBar(String path, BuildContext ctx) {
+  Widget _currentLocationBar(
+      BuildContext context, String path, BuildContext ctx) {
     final current = getBasename(path);
     String separator = Strings.root;
 
@@ -45,7 +42,7 @@ class FolderNavigationBar extends StatelessWidget {
               child: Text(current,
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
-                  style: titleStyle)))
+                  style: context.theme.appTextStyle.titleMedium)))
     ]);
   }
 

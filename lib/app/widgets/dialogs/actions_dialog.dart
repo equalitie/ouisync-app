@@ -19,52 +19,50 @@ class ActionsDialog extends StatefulWidget {
 
 class _ActionsDialogState extends State<ActionsDialog> {
   @override
-  Widget build(BuildContext context) {
-    final titleStyle = Theme.of(context).textTheme.titleMedium;
-
-    return Dialog(
-        child: Stack(
-      children: <Widget>[
-        Container(
-          width: Platform.isAndroid
-              ? null
-              : Dimensions.sizeModalDialogWidthDesktop,
-          padding: Dimensions.paddingDialog,
-          decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black,
-                    offset: Offset(0, 10),
-                    blurRadius: Dimensions.radiusBig / 2),
-              ]),
-          child: LayoutBuilder(
-            builder:
-                (BuildContext context, BoxConstraints viewportConstraints) {
-              return SingleChildScrollView(
-                reverse: true,
-                child: ConstrainedBox(
-                  constraints:
-                      BoxConstraints(minHeight: viewportConstraints.minHeight),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Fields.constrainedText(widget.title,
-                          flex: 0, style: titleStyle, maxLines: 2),
-                      Dimensions.spacingVertical,
-                      widget.body!,
-                    ],
+  Widget build(BuildContext context) => Dialog(
+          child: Stack(
+        children: <Widget>[
+          Container(
+            width: Platform.isAndroid
+                ? null
+                : Dimensions.sizeModalDialogWidthDesktop,
+            padding: Dimensions.paddingDialog,
+            decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black,
+                      offset: Offset(0, 10),
+                      blurRadius: Dimensions.radiusBig / 2),
+                ]),
+            child: LayoutBuilder(
+              builder:
+                  (BuildContext context, BoxConstraints viewportConstraints) {
+                return SingleChildScrollView(
+                  reverse: true,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minHeight: viewportConstraints.minHeight),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Fields.constrainedText(widget.title,
+                            flex: 0,
+                            style: context.theme.appTextStyle.titleMedium,
+                            maxLines: 2),
+                        Dimensions.spacingVertical,
+                        widget.body!,
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    ));
-  }
+        ],
+      ));
 }

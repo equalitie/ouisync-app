@@ -37,25 +37,11 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
   final scrollController = ScrollController();
 
   TextStyle? labelStyle;
-  TextStyle? descriptionStyle;
 
   @override
   Widget build(BuildContext context) {
-    final microFontSize =
-        (Theme.of(context).textTheme.labelMedium?.fontSize ?? 0.0) * 0.8;
-
-    labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-        fontSize: microFontSize, color: Constants.inputLabelForeColor);
-
-    descriptionStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(fontSize: microFontSize, color: Colors.black54);
-
-    final sheetTitleStyle = Theme.of(context)
-        .textTheme
-        .bodyLarge
-        ?.copyWith(fontWeight: FontWeight.w400);
+    labelStyle = context.theme.appTextStyle.bodyMicro
+        .copyWith(color: Constants.inputLabelForeColor);
 
     // On certain resolutions (higer) the constrain set on this dialog when called
     // causes the content to scroll, giving the appearance of a smaller padding
@@ -82,7 +68,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                 children: [
                   Fields.bottomSheetHandle(context),
                   Fields.bottomSheetTitle(widget.repository.name,
-                      style: sheetTitleStyle),
+                      style: context.theme.appTextStyle.titleMedium),
                   Dimensions.spacingVertical,
                   AccessModeSelector(
                     currentAccessMode: widget.repository.state.accessMode,
@@ -134,7 +120,11 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
         child: Row(
           children: [
             Fields.constrainedText(_tokenDescription(accessMode),
-                flex: 0, style: descriptionStyle),
+                style: context.theme.appTextStyle.bodyMicro
+                    .copyWith(color: Colors.black54),
+                softWrap: true,
+                maxLines: 2,
+                textOverflow: TextOverflow.ellipsis),
           ],
         ),
       );
@@ -169,14 +159,13 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Fields.constrainedText(_displayToken ?? Constants.ouisyncUrl,
-                      flex: 0,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: TextStyle().copyWith(
                           color: _shareToken != null
                               ? Colors.black
                               : Colors.black54),
                       softWrap: true,
-                      maxLines: 2,
-                      textOverflow: TextOverflow.fade),
+                      maxLines: 1,
+                      textOverflow: TextOverflow.ellipsis),
                 ],
               ),
             ),

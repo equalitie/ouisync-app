@@ -15,10 +15,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/log_view_page.dart';
-import '../../utils/constants.dart';
-import '../../utils/dump.dart';
-import '../../utils/log.dart';
 import '../../utils/platform/platform.dart';
+import '../../utils/utils.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
@@ -34,7 +32,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   @override
   List<Widget> buildTiles(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
 
     final mountCubit = _cubits.mount;
 

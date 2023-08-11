@@ -40,8 +40,6 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   String? _passwordStrength;
   Color? _passwordStrengthColorValue;
 
-  TextStyle? bodySmallStyle;
-
   @override
   void initState() {
     widget.passwordController.addListener(
@@ -51,11 +49,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    bodySmallStyle = Theme.of(context).textTheme.bodySmall;
-
-    return _passwordInputs();
-  }
+  Widget build(BuildContext context) => _passwordInputs();
 
   double _inputOpacity() => widget.passwordMode != PasswordMode.bio ? 1 : 0.5;
 
@@ -105,11 +99,12 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
         Dimensions.spacingVertical,
         Row(children: [
           Text('${S.current.messagePasswordStrength}:',
-              style: bodySmallStyle?.copyWith(color: Colors.black54)),
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(color: Colors.black54)),
           Dimensions.spacingHorizontalHalf,
           Text(_passwordStrength ?? '',
-              style:
-                  bodySmallStyle?.copyWith(color: _passwordStrengthColorValue))
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(color: _passwordStrengthColorValue))
         ]),
         Dimensions.spacingVertical,
         FlutterPasswordStrength(

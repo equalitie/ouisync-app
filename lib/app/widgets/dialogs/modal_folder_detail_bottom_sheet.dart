@@ -30,112 +30,97 @@ class FolderDetail extends StatefulWidget {
 
 class _FolderDetailState extends State<FolderDetail> with AppLogger {
   @override
-  Widget build(BuildContext context) {
-    final sheetTitleStyle = Theme.of(context)
-        .textTheme
-        .bodyLarge
-        ?.copyWith(fontWeight: FontWeight.w400);
-
-    final bodyLargeStyle = Theme.of(context).textTheme.bodyLarge;
-    final bodyStyle = Theme.of(context).textTheme.bodyMedium;
-
-    return Container(
-      padding: Dimensions.paddingBottomSheet,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(S.current.titleFolderDetails,
-              style: sheetTitleStyle),
-          EntryActionItem(
-              iconData: Icons.edit,
-              title: S.current.iconRename,
-              titleTextStyle: bodyStyle,
-              dense: true,
-              onTap: () async => _showRenameDialog(widget.data),
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.state.accessMode, EntryAction.rename),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration),
-          EntryActionItem(
-              iconData: Icons.drive_file_move_outlined,
-              title: S.current.iconMove,
-              titleTextStyle: bodyStyle,
-              dense: true,
-              onTap: () async => _showMoveEntryBottomSheet(
-                  widget.data.path,
-                  EntryType.directory,
-                  widget.onMoveEntry,
-                  widget.onUpdateBottomSheet),
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.state.accessMode, EntryAction.move),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration),
-          EntryActionItem(
-              iconData: Icons.delete,
-              title: S.current.iconDelete,
-              titleTextStyle: bodyStyle,
-              isDanger: true,
-              dense: true,
-              onTap: () async {
-                final repo = widget.cubit;
-                final path = widget.data.path;
-
-                final recursiveDeletion =
-                    await deleteFolderWithContentsValidation(
-                        context, repo, path);
-
-                if (recursiveDeletion == null) {
-                  // The item is not a folder or, most likely, the user canceled
-                  return;
-                }
-
-                final deletedFolderName = await Dialogs.deleteFolderAlertDialog(
-                    widget.context,
-                    widget.cubit,
+  Widget build(BuildContext context) => Container(
+        padding: Dimensions.paddingBottomSheet,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Fields.bottomSheetTitle(S.current.titleFolderDetails,
+                style: context.theme.appTextStyle.titleMedium),
+            EntryActionItem(
+                iconData: Icons.edit,
+                title: S.current.iconRename,
+                dense: true,
+                onTap: () async => _showRenameDialog(widget.data),
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.state.accessMode, EntryAction.rename),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration),
+            EntryActionItem(
+                iconData: Icons.drive_file_move_outlined,
+                title: S.current.iconMove,
+                dense: true,
+                onTap: () async => _showMoveEntryBottomSheet(
                     widget.data.path,
-                    recursiveDeletion);
+                    EntryType.directory,
+                    widget.onMoveEntry,
+                    widget.onUpdateBottomSheet),
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.state.accessMode, EntryAction.move),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration),
+            EntryActionItem(
+                iconData: Icons.delete,
+                title: S.current.iconDelete,
+                isDanger: true,
+                dense: true,
+                onTap: () async {
+                  final repo = widget.cubit;
+                  final path = widget.data.path;
 
-                if (deletedFolderName != null && deletedFolderName.isNotEmpty) {
-                  Navigator.of(context).pop(deletedFolderName);
-                  showSnackBar(context,
-                      message:
-                          S.current.messageFolderDeleted(widget.data.name));
-                }
-              },
-              enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.cubit.state.accessMode, EntryAction.delete),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration),
-          const Divider(
-              height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-          Fields.iconLabel(
-              icon: Icons.info_rounded,
-              text: S.current.iconInformation,
-              iconSize: Dimensions.sizeIconBig,
-              textAlign: TextAlign.start,
-              style: bodyLargeStyle),
-          Fields.autosizedLabeledText(
-              label: S.current.labelName,
-              text: widget.data.name,
-              textAlign: TextAlign.start,
-              textMaxLines: 2,
-              textStyle: bodyStyle),
-          Fields.labeledText(
-              label: S.current.labelLocation,
-              text:
-                  widget.data.path.replaceAll(widget.data.name, '').trimRight(),
-              textAlign: TextAlign.start,
-              textStyle: bodyStyle),
-        ],
-      ),
-    );
-  }
+                  final recursiveDeletion =
+                      await deleteFolderWithContentsValidation(
+                          context, repo, path);
+
+                  if (recursiveDeletion == null) {
+                    // The item is not a folder or, most likely, the user canceled
+                    return;
+                  }
+
+                  final deletedFolderName =
+                      await Dialogs.deleteFolderAlertDialog(widget.context,
+                          widget.cubit, widget.data.path, recursiveDeletion);
+
+                  if (deletedFolderName != null &&
+                      deletedFolderName.isNotEmpty) {
+                    Navigator.of(context).pop(deletedFolderName);
+                    showSnackBar(context,
+                        message:
+                            S.current.messageFolderDeleted(widget.data.name));
+                  }
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.state.accessMode, EntryAction.delete),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration),
+            const Divider(
+                height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
+            Fields.iconLabel(
+                icon: Icons.info_rounded,
+                text: S.current.iconInformation,
+                iconSize: Dimensions.sizeIconBig,
+                textAlign: TextAlign.start,
+                style: context.theme.appTextStyle.titleMedium),
+            Fields.autosizedLabeledText(
+                label: S.current.labelName,
+                text: widget.data.name,
+                textAlign: TextAlign.start,
+                textMaxLines: 2),
+            Fields.labeledText(
+                label: S.current.labelLocation,
+                text: widget.data.path
+                    .replaceAll(widget.data.name, '')
+                    .trimRight(),
+                textAlign: TextAlign.start)
+          ],
+        ),
+      );
 
   Future<bool?> deleteFolderWithContentsValidation(
       BuildContext context, RepoCubit repo, String path) async {
@@ -156,14 +141,12 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     }
 
     if (directory.isNotEmpty) {
-      final bodyStyle = Theme.of(context).textTheme.bodyMedium;
-
       recursive = await Dialogs.alertDialogWithActions(
           context: context,
           title: S.current.titleDeleteNotEmptyFolder,
           body: [
             Text(S.current.messageConfirmNotEmptyFolderDeletion,
-                style: bodyStyle)
+                style: context.theme.appTextStyle.bodyMedium)
           ],
           actions: [
             Fields.dialogActions(context, buttons: [

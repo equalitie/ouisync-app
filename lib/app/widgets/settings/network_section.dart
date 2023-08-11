@@ -20,8 +20,8 @@ class NetworkSection extends SettingsSection {
 
   @override
   List<Widget> buildTiles(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
-    subtitleStyle = Theme.of(context).textTheme.bodySmall;
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
+    subtitleStyle = context.theme.appTextStyle.bodySmall;
 
     return [
       _buildConnectivityTypeTile(context),

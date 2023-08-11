@@ -28,12 +28,10 @@ class AboutSection extends SettingsSection with AppLogger {
   late final ValueNotifier<bool> _launchAtStartup;
 
   TextStyle? bodyStyle;
-  TextStyle? subtitleStyle;
 
   @override
   List<Widget> buildTiles(BuildContext context) {
-    bodyStyle = Theme.of(context).textTheme.bodyMedium;
-    subtitleStyle = Theme.of(context).textTheme.bodySmall;
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
 
     return [
       if (PlatformValues.isDesktopDevice)
@@ -49,7 +47,8 @@ class AboutSection extends SettingsSection with AppLogger {
           leading: Icon(Icons.question_answer_rounded),
           trailing:
               PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-          value: Text(S.current.messageFAQ, style: subtitleStyle),
+          value: Text(S.current.messageFAQ,
+              style: context.theme.appTextStyle.bodySmall),
           onTap: () => unawaited(
               _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
       NavigationTile(
@@ -203,8 +202,9 @@ class AboutSection extends SettingsSection with AppLogger {
       future: _cubits.repositories.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
-        final runtimeIdWidget =
-            Text(runtimeId, overflow: TextOverflow.ellipsis, style: bodyStyle);
+        final runtimeIdWidget = Text(runtimeId,
+            overflow: TextOverflow.ellipsis,
+            style: context.theme.appTextStyle.bodySmall);
 
         if (Platform.isIOS) {
           return Expanded(

@@ -540,15 +540,15 @@ mixin RepositoryActionsMixin on AppLogger {
         context: context,
         title: S.current.titleSaveChanges,
         body: [
-          Text(message)
+          Text(message, style: context.theme.appTextStyle.bodyMedium)
         ],
         actions: [
           TextButton(
-              child: Text(positiveButtonText),
-              onPressed: () => Navigator.of(context).pop(true)),
+              child: Text(S.current.actionCancel.toUpperCase()),
+              onPressed: () => Navigator.of(context).pop(false)),
           TextButton(
-              child: Text(S.current.actionCancel),
-              onPressed: () => Navigator.of(context).pop(false))
+              child: Text(positiveButtonText.toUpperCase()),
+              onPressed: () => Navigator.of(context).pop(true))
         ]);
 
     return saveChanges;

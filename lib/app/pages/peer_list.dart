@@ -13,13 +13,7 @@ class PeerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final microFontSize =
-        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 0) * 0.8;
-
-    bodyMicroStyle = Theme.of(context)
-        .textTheme
-        .bodySmall
-        ?.copyWith(fontSize: microFontSize);
+    bodyMicroStyle = context.theme.appTextStyle.bodyMicro;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.current.labelPeers)),
@@ -47,7 +41,7 @@ class PeerList extends StatelessWidget {
       );
 
   TableRow _buildHeaderRow(BuildContext context) {
-    final style = Theme.of(context).textTheme.titleSmall;
+    final style = context.theme.appTextStyle.titleSmall;
 
     return TableRow(children: <TableCell>[
       _buildCell(Text('IP', style: style)),

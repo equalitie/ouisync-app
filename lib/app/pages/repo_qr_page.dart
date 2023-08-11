@@ -16,32 +16,20 @@ class RepositoryQRPage extends StatefulWidget {
 }
 
 class _RepositoryQRPageState extends State<RepositoryQRPage> {
-  TextStyle? titleStyle;
-  TextStyle? bodyStyle;
-
   @override
-  Widget build(BuildContext context) {
-    titleStyle =
-        Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white);
-    bodyStyle =
-        Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white);
-
-    return Scaffold(
-        appBar: AppBar(
-            leading: Fields.actionIcon(
-                const Icon(Icons.close, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop()),
-            elevation: 0.0,
-            backgroundColor: Colors.transparent),
-        backgroundColor: Theme.of(context).primaryColorDark,
-        body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-              _getQRCodeImage(widget.shareLink),
-              _buildShareMessage()
-            ])));
-  }
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+          leading: Fields.actionIcon(
+              const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop()),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent),
+      backgroundColor: Theme.of(context).primaryColorDark,
+      body: Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        _getQRCodeImage(widget.shareLink),
+        _buildShareMessage()
+      ])));
 
   Widget _getQRCodeImage(String tokenLink) {
     double qrCodeSize = 0.0;
@@ -70,10 +58,14 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
         padding: Dimensions.paddingTop40,
         child: Column(children: [
           Text(S.current.messageShareWithWR,
-              textAlign: TextAlign.center, style: titleStyle),
+              textAlign: TextAlign.center,
+              style: context.theme.appTextStyle.titleLarge
+                  .copyWith(color: Colors.white)),
           Dimensions.spacingVertical,
           Text(S.current.messageScanQROrShare,
-              textAlign: TextAlign.center, style: bodyStyle)
+              textAlign: TextAlign.center,
+              style: context.theme.appTextStyle.bodyMedium
+                  .copyWith(color: Colors.white))
         ]));
   }
 }
