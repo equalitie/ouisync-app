@@ -26,8 +26,12 @@ class RepositorySection extends SettingsSection
   final Cubits _cubits;
   final bool isBiometricsAvailable;
 
+  TextStyle? bodyStyle;
+
   @override
   List<Widget> buildTiles(BuildContext context) {
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
+
     final currentRepo = _cubits.repositories.currentRepo;
 
     if (currentRepo is! OpenRepoEntry) {
@@ -53,8 +57,7 @@ class RepositorySection extends SettingsSection
       PlatformDhtSwitch(
         repository: repository,
         title: InfoBuble(
-            child: Text(S.current.labelBitTorrentDHT,
-                style: TextStyle(fontSize: Dimensions.fontSmall)),
+            child: Text(S.current.labelBitTorrentDHT, style: bodyStyle),
             title: S.current.labelBitTorrentDHT,
             description: [
               Fields.boldTextSpan(
@@ -69,8 +72,7 @@ class RepositorySection extends SettingsSection
       PlatformPexSwitch(
         repository: repository,
         title: InfoBuble(
-            child: Text(S.current.messagePeerExchange,
-                style: TextStyle(fontSize: Dimensions.fontSmall)),
+            child: Text(S.current.messagePeerExchange, style: bodyStyle),
             title: S.current.messagePeerExchange,
             description: [
               TextSpan(text: S.current.messageInfoPeerExchange),
@@ -93,8 +95,7 @@ class RepositorySection extends SettingsSection
     RepoCubit repository,
   ) =>
       NavigationTile(
-          title: Text(S.current.actionRename,
-              style: TextStyle(fontSize: Dimensions.fontSmall)),
+          title: Text(S.current.actionRename, style: bodyStyle),
           leading: Icon(Icons.edit),
           onTap: () => renameRepository(context,
               repository: repository,
@@ -102,8 +103,7 @@ class RepositorySection extends SettingsSection
 
   Widget _buildShareTile(BuildContext context, RepoCubit repository) =>
       NavigationTile(
-        title: Text(S.current.actionShare,
-            style: TextStyle(fontSize: Dimensions.fontSmall)),
+        title: Text(S.current.actionShare, style: bodyStyle),
         leading: Icon(Icons.share),
         onTap: () => shareRepository(context, repository: repository),
       );
@@ -111,7 +111,7 @@ class RepositorySection extends SettingsSection
   Widget _buildDeleteTile(BuildContext context, RepoCubit repository) =>
       NavigationTile(
           title: Text(S.current.actionDelete,
-              style: const TextStyle(color: Constants.dangerColor)),
+              style: bodyStyle?.copyWith(color: Constants.dangerColor)),
           leading: Icon(Icons.delete, color: Constants.dangerColor),
           onTap: () async {
             final repoName = repository.name;
@@ -145,6 +145,8 @@ class _SecurityTileState extends State<SecurityTile>
     with AppLogger, RepositoryActionsMixin {
   SecurityCubit? _security;
 
+  TextStyle? bodyStyle;
+
   @override
   void initState() {
     super.initState();
@@ -159,14 +161,17 @@ class _SecurityTileState extends State<SecurityTile>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<SecurityCubit, SecurityState>(
-          bloc: _security,
-          builder: (context, state) => Column(children: [
-                _addLocalPassword(context, state, widget.repo),
-                _password(context, state, widget.repo),
-                _biometrics(context, state, widget.repo)
-              ]));
+  Widget build(BuildContext context) {
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
+
+    return BlocBuilder<SecurityCubit, SecurityState>(
+        bloc: _security,
+        builder: (context, state) => Column(children: [
+              _addLocalPassword(context, state, widget.repo),
+              _password(context, state, widget.repo),
+              _biometrics(context, state, widget.repo)
+            ]));
+  }
 
   Widget _addLocalPassword(
     BuildContext context,
@@ -175,8 +180,7 @@ class _SecurityTileState extends State<SecurityTile>
   ) =>
       state.passwordMode == PasswordMode.none
           ? NavigationTile(
-              title: Text(S.current.messageAddLocalPassword,
-                  style: TextStyle(fontSize: Dimensions.fontSmall)),
+              title: Text(S.current.messageAddLocalPassword, style: bodyStyle),
               leading: Icon(Icons.password),
               onTap: () async {
                 final setPasswordResult = await _getNewLocalPassword(context,
@@ -261,8 +265,7 @@ class _SecurityTileState extends State<SecurityTile>
                         Expanded(
                             flex: 0,
                             child: Text(S.current.messageChangeLocalPassword,
-                                style:
-                                    TextStyle(fontSize: Dimensions.fontSmall)))
+                                style: bodyStyle))
                       ]),
                   leading: Icon(Icons.change_circle_outlined),
                   onTap: () async {
@@ -307,8 +310,7 @@ class _SecurityTileState extends State<SecurityTile>
                         Expanded(
                             flex: 0,
                             child: Text(S.current.messageRemovaLocalPassword,
-                                style:
-                                    TextStyle(fontSize: Dimensions.fontSmall)))
+                                style: bodyStyle))
                       ]),
                   leading: Icon(Icons.remove),
                   onTap: () async {
@@ -439,7 +441,7 @@ class _SecurityTileState extends State<SecurityTile>
                 }
               },
               title: Text(S.current.messageUnlockUsingBiometrics,
-                  style: TextStyle(fontSize: Dimensions.fontSmall)),
+                  style: bodyStyle),
               secondary: Icon(Icons.fingerprint_outlined))
           : const SizedBox.shrink();
 

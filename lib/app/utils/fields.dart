@@ -35,22 +35,12 @@ class Fields {
   static Widget _styledTextBase(
       String message,
       TextAlign textAlign,
-      double fontSize,
-      FontWeight fontWeight,
-      FontStyle fontStyle,
-      Color color,
+      TextStyle? style,
       Map<String, StyledTextTagBase>? tags,
       EdgeInsets padding) {
     tags ??= <String, StyledTextTagBase>{};
 
-    tags.addAll({
-      'font': StyledTextTag(
-          style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-              fontStyle: fontStyle,
-              color: color))
-    });
+    tags.addAll({'font': StyledTextTag(style: style)});
 
     return Container(
         padding: padding,
@@ -61,20 +51,14 @@ class Fields {
   static Widget inPageMainMessage(
     String message, {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = Dimensions.fontBig,
-    FontWeight fontWeight = FontWeight.bold,
-    FontStyle fontStyle = FontStyle.normal,
-    Color color = Colors.black,
+    TextStyle? style,
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding = Dimensions.paddingInPageMain,
   }) =>
       _styledTextBase(
         message,
         textAlign,
-        fontSize,
-        fontWeight,
-        fontStyle,
-        color,
+        style,
         tags,
         padding,
       );
@@ -82,20 +66,14 @@ class Fields {
   static Widget inPageSecondaryMessage(
     String message, {
     TextAlign textAlign = TextAlign.center,
-    double fontSize = Dimensions.fontAverage,
-    FontWeight fontWeight = FontWeight.normal,
-    FontStyle fontStyle = FontStyle.normal,
-    Color color = Colors.black,
+    TextStyle? style,
     Map<String, StyledTextTagBase>? tags,
     EdgeInsets padding = Dimensions.paddingInPageSecondary,
   }) =>
       _styledTextBase(
         message,
         textAlign,
-        fontSize,
-        fontWeight,
-        fontStyle,
-        color,
+        style,
         tags,
         padding,
       );
@@ -106,10 +84,6 @@ class Fields {
           required String text,
           Alignment alignment = Alignment.center,
           Size size = Dimensions.sizeInPageButtonRegular,
-          double fontSize = Dimensions.fontMicro,
-          FontWeight fontWeight = FontWeight.normal,
-          FontStyle fontStyle = FontStyle.normal,
-          Color color = Colors.white,
           bool autofocus = false,
           FocusNode? focusNode}) =>
       ElevatedButton(
@@ -120,14 +94,8 @@ class Fields {
             Text(text.toUpperCase())
           ]),
           style: ButtonStyle(
-            alignment: alignment,
-            minimumSize: MaterialStateProperty.all<Size?>(size),
-            textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(
-                fontSize: fontSize,
-                fontWeight: fontWeight,
-                fontStyle: fontStyle,
-                color: color)),
-          ),
+              alignment: alignment,
+              minimumSize: MaterialStateProperty.all<Size?>(size)),
           autofocus: autofocus,
           focusNode: focusNode);
 
@@ -157,35 +125,27 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontBig,
-          FontWeight fontWeight = FontWeight.w400}) =>
+          TextStyle? style}) =>
       Padding(
           padding: padding,
           child: Row(children: [
-            Text(
-              title,
-              textAlign: textAlign,
-              softWrap: softWrap,
-              overflow: textOverflow,
-              style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
-            ),
+            Text(title,
+                textAlign: textAlign,
+                softWrap: softWrap,
+                overflow: textOverflow,
+                style: style)
           ]));
 
   static Widget idLabel(String text,
           {TextAlign textAlign = TextAlign.center,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontSmall,
-          FontWeight fontWeight = FontWeight.w500,
-          Color color = Colors.black}) =>
-      Text(
-        text,
-        textAlign: textAlign,
-        softWrap: softWrap,
-        overflow: textOverflow,
-        style:
-            TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
-      );
+          TextStyle? style}) =>
+      Text(text,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          style: style);
 
   static autosizedLabeledText(
           {required String label,
@@ -194,17 +154,13 @@ class Fields {
           TextAlign labelTextAlign = TextAlign.center,
           TextOverflow labelTextOverflow = TextOverflow.ellipsis,
           bool labelSoftWrap = false,
-          double labelFontSize = Dimensions.fontAverage,
-          FontWeight labelFontWeight = FontWeight.w500,
-          Color labelColor = Colors.black,
+          TextStyle? labelStyle,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontAverage,
-          double minTextFontSize = Dimensions.fontSmall,
-          double maxTextFontSize = Dimensions.fontAverage,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? textStyle,
+          double? minTextFontSize,
+          double? maxTextFontSize,
           int textMaxLines = 1,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
@@ -221,9 +177,7 @@ class Fields {
                       textAlign: labelTextAlign,
                       textOverflow: labelTextOverflow,
                       softWrap: labelSoftWrap,
-                      fontSize: labelFontSize,
-                      fontWeight: labelFontWeight,
-                      color: labelColor)),
+                      style: labelStyle)),
               space,
               Expanded(
                   flex: 1,
@@ -232,11 +186,9 @@ class Fields {
                       textAlign: textAlign,
                       textOverflow: textOverflow,
                       softWrap: textSoftWrap,
-                      fontSize: textFontSize,
+                      style: textStyle,
                       minFontSize: minTextFontSize,
                       maxFontSize: maxTextFontSize,
-                      fontWeight: textFontWeight,
-                      color: textColor,
                       maxLines: textMaxLines))
             ],
           ));
@@ -247,15 +199,11 @@ class Fields {
           TextAlign labelTextAlign = TextAlign.center,
           TextOverflow labelTextOverflow = TextOverflow.ellipsis,
           bool labelSoftWrap = false,
-          double labelFontSize = Dimensions.fontAverage,
-          FontWeight labelFontWeight = FontWeight.w500,
-          Color labelColor = Colors.black,
+          TextStyle? labelStyle,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontAverage,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? textStyle,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
@@ -269,35 +217,29 @@ class Fields {
                   textAlign: labelTextAlign,
                   textOverflow: labelTextOverflow,
                   softWrap: labelSoftWrap,
-                  fontSize: labelFontSize,
-                  fontWeight: labelFontWeight,
-                  color: labelColor),
+                  style: textStyle),
               space,
               constrainedText(text,
                   textAlign: textAlign,
                   textOverflow: textOverflow,
                   softWrap: textSoftWrap,
-                  fontSize: textFontSize,
-                  fontWeight: textFontWeight,
-                  color: textColor)
+                  style: textStyle)
             ],
           ));
 
   static Widget labeledButton({
     required String label,
+    TextStyle? labelStyle,
     required String buttonText,
+    TextStyle? buttonTextStyle,
     required Function() onPressed,
   }) =>
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          idLabel(
-            label,
-            textAlign: TextAlign.start,
-            fontSize: Dimensions.fontAverage,
-          ),
+          idLabel(label, textAlign: TextAlign.start, style: labelStyle),
           OutlinedButton(
-            child: Text(buttonText),
+            child: Text(buttonText, style: buttonTextStyle),
             onPressed: onPressed,
           )
         ],
@@ -311,9 +253,7 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool textSoftWrap = true,
-          double textFontSize = Dimensions.fontBig,
-          FontWeight textFontWeight = FontWeight.normal,
-          Color textColor = Colors.black,
+          TextStyle? style,
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
@@ -329,9 +269,7 @@ class Fields {
                   textAlign: textAlign,
                   textOverflow: textOverflow,
                   softWrap: textSoftWrap,
-                  fontSize: textFontSize,
-                  fontWeight: textFontWeight,
-                  color: textColor)
+                  style: style)
             ],
           ));
 
@@ -340,24 +278,19 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
           bool softWrap = true,
-          double fontSize = Dimensions.fontAverage,
-          double minFontSize = Dimensions.fontSmall,
-          double maxFontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          Color color = Colors.black,
+          TextStyle? style,
+          double? minFontSize,
+          double? maxFontSize,
           int maxLines = 1}) =>
-      AutoSizeText(
-        text,
-        key: key,
-        textAlign: textAlign,
-        softWrap: softWrap,
-        overflow: textOverflow,
-        maxLines: maxLines,
-        style:
-            TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color),
-        minFontSize: minFontSize,
-        maxFontSize: maxFontSize,
-      );
+      AutoSizeText(text,
+          key: key,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          maxLines: maxLines,
+          style: style,
+          minFontSize: minFontSize ?? 12.0,
+          maxFontSize: maxFontSize ?? double.infinity);
 
   static Widget constrainedText(String text,
           {Key? key,
@@ -365,21 +298,17 @@ class Fields {
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.clip,
           bool softWrap = true,
-          double fontSize = Dimensions.fontAverage,
-          FontWeight fontWeight = FontWeight.normal,
-          Color? color,
+          TextStyle? style,
           int maxLines = 1}) =>
       Expanded(
         key: key,
         flex: flex,
-        child: Text(
-          text,
-          textAlign: textAlign,
-          softWrap: softWrap,
-          overflow: textOverflow,
-          maxLines: maxLines,
-          style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
-        ),
+        child: Text(text,
+            textAlign: textAlign,
+            softWrap: softWrap,
+            overflow: textOverflow,
+            maxLines: maxLines,
+            style: style),
       );
 
   static Icon _iconBase(
@@ -419,9 +348,7 @@ class Fields {
     TextAlign textAlign = TextAlign.start,
     TextOverflow textOverflow = TextOverflow.clip,
     bool textSoftWrap = true,
-    double textFontSize = Dimensions.fontAverage,
-    FontWeight textFontWeight = FontWeight.normal,
-    Color textColor = Colors.black,
+    TextStyle? style,
     IconData? icon,
     double iconSize = Dimensions.sizeIconMicro,
     Color iconColor = Colors.black,
@@ -442,83 +369,15 @@ class Fields {
                 textAlign: textAlign,
                 softWrap: textSoftWrap,
                 overflow: textOverflow,
-                style: TextStyle(
-                    fontSize: textFontSize,
-                    fontWeight: textFontWeight,
-                    color: textColor)),
+                style: style),
             subtitle: subtitle != null ? Text(subtitle) : null,
           ));
-
-  static Widget actionText(
-    String text, {
-    String? subtitle,
-    required void Function()? onTap,
-    TextAlign textAlign = TextAlign.start,
-    TextOverflow textOverflow = TextOverflow.clip,
-    bool textSoftWrap = true,
-    int textMaxLines = 1,
-    double textFontSize = Dimensions.fontBig,
-    FontWeight textFontWeight = FontWeight.normal,
-    Color textColor = Colors.black,
-    IconData? icon,
-    double iconSize = Dimensions.sizeIconAverage,
-    Color iconColor = Colors.black,
-  }) =>
-      InkWell(
-          onTap: onTap,
-          child: Row(
-            children: [
-              if (icon != null)
-                _iconBase(icon, size: iconSize, color: iconColor),
-              Dimensions.spacingHorizontal,
-              Expanded(
-                  child: Text(text,
-                      textAlign: textAlign,
-                      overflow: textOverflow,
-                      softWrap: textSoftWrap,
-                      maxLines: textMaxLines,
-                      style: TextStyle(
-                          fontSize: textFontSize,
-                          fontWeight: textFontWeight,
-                          color: textColor)))
-            ],
-          ));
-
-  static Widget paddedActionText(
-    String text, {
-    String? subtitle,
-    required void Function()? onTap,
-    TextAlign textAlign = TextAlign.start,
-    TextOverflow textOverflow = TextOverflow.clip,
-    bool textSoftWrap = true,
-    int textMaxLines = 1,
-    double textFontSize = Dimensions.fontBig,
-    FontWeight textFontWeight = FontWeight.normal,
-    Color textColor = Colors.black,
-    IconData? icon,
-    double iconSize = Dimensions.sizeIconAverage,
-    Color iconColor = Colors.black,
-  }) =>
-      Padding(
-          padding: Dimensions.paddingActionButton,
-          child: actionText(text,
-              subtitle: subtitle,
-              onTap: onTap,
-              textAlign: textAlign,
-              textSoftWrap: textSoftWrap,
-              textOverflow: textOverflow,
-              textMaxLines: textMaxLines,
-              textFontWeight: textFontWeight,
-              textColor: textColor,
-              textFontSize: textFontSize,
-              icon: icon,
-              iconSize: iconSize,
-              iconColor: iconColor));
 
   static Widget _textFormFieldBase({
     Key? key,
     required BuildContext context,
     TextEditingController? textEditingController,
+    TextStyle? style,
     bool? enabled = true,
     Icon? icon,
     Widget? prefixIcon,
@@ -563,6 +422,7 @@ class Fields {
         obscureText: obscureText,
         keyboardType: TextInputType.text,
         decoration: decoration,
+        style: style,
         validator: validator,
         onSaved: onSaved,
       );
@@ -577,6 +437,7 @@ class Fields {
         obscureText: obscureText,
         keyboardType: TextInputType.text,
         decoration: decoration,
+        style: style,
         validator: validator as String? Function(String?)?,
         onSaved: onSaved,
       );
@@ -587,6 +448,7 @@ class Fields {
     Key? key,
     required BuildContext context,
     TextEditingController? textEditingController,
+    TextStyle? style,
     bool? enabled = true,
     Icon? icon,
     Widget? prefixIcon,
@@ -611,6 +473,7 @@ class Fields {
                 key: key,
                 context: context,
                 textEditingController: textEditingController,
+                style: style,
                 enabled: enabled,
                 icon: icon,
                 prefixIcon: prefixIcon,
@@ -641,6 +504,7 @@ class Fields {
   static Widget placeholderWidget(
       {required String assetName,
       String? text,
+      TextStyle? style,
       double? assetScale,
       double? assetWidth,
       double? assetHeight,
@@ -654,15 +518,7 @@ class Fields {
           height: assetHeight,
           alignment: assetAlignment,
         ),
-        if (text != null)
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: Dimensions.fontAverage,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54),
-          )
+        if (text != null) Text(text, textAlign: TextAlign.center, style: style)
       ],
     );
   }
@@ -687,15 +543,12 @@ class Fields {
     return modeIcon;
   }
 
-  static TextSpan boldTextSpan(String text,
-          {double fontSize = Dimensions.fontSmall}) =>
-      TextSpan(
-          text: text,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize));
+  static TextSpan boldTextSpan(String text, {double? fontSize}) => TextSpan(
+      text: text,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize));
 
   static TextSpan linkTextSpan(BuildContext context, String text,
-          void Function(BuildContext) callback,
-          {double fontSize = Dimensions.fontSmall}) =>
+          void Function(BuildContext) callback, {double? fontSize}) =>
       TextSpan(
           text: text,
           style: TextStyle(
@@ -705,17 +558,19 @@ class Fields {
           recognizer: TapGestureRecognizer()..onTap = () => callback(context));
 
   static WidgetSpan quoteTextSpan(String quote, String author,
-          {double fontSize = Dimensions.fontSmall}) =>
+          {double? fontSize}) =>
       WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: Text.rich(TextSpan(children: [
-            italicTextSpan(quote, fontSize: fontSize),
-            TextSpan(text: author, style: TextStyle(fontSize: fontSize))
-          ])));
+          style: TextStyle(fontSize: fontSize),
+          child: Text.rich(
+              TextSpan(style: TextStyle(fontSize: fontSize), children: [
+                italicTextSpan(quote, fontSize: fontSize),
+                TextSpan(text: author, style: TextStyle(fontSize: fontSize))
+              ]),
+              style: TextStyle(fontSize: fontSize)));
 
   static TextSpan italicTextSpan(String text,
-          {double fontSize = Dimensions.fontSmall,
-          FontWeight fontWeight = FontWeight.normal}) =>
+          {double? fontSize, FontWeight? fontWeight}) =>
       TextSpan(
           text: text,
           style: TextStyle(

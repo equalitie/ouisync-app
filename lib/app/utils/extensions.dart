@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'utils.dart';
+
 extension StringExtension on String {
   String capitalize() {
     return '${this[0].toUpperCase()}${substring(1)}';
@@ -51,4 +53,24 @@ extension GlobalKeyExtension on GlobalKey {
       return null;
     }
   }
+}
+
+extension AppThemeExtension on ThemeData {
+  AppTextThemeExtension get appTextStyle =>
+      extension<AppTextThemeExtension>() ??
+      AppTextThemeExtension(
+          titleLarge: AppTypography.titleBig,
+          titleMedium: AppTypography.titleMedium,
+          titleSmall: AppTypography.titleSmall,
+          bodyLarge: AppTypography.bodyBig,
+          bodyMedium: AppTypography.bodyMedium,
+          bodySmall: AppTypography.bodySmall,
+          bodyMicro: AppTypography.bodyMicro,
+          labelLarge: AppTypography.labelBig,
+          labelMedium: AppTypography.labelMedium,
+          labelSmall: AppTypography.labelSmall);
+}
+
+extension ThemeGetter on BuildContext {
+  ThemeData get theme => Theme.of(this);
 }

@@ -27,80 +27,86 @@ class AboutSection extends SettingsSection with AppLogger {
   final Cubits _cubits;
   late final ValueNotifier<bool> _launchAtStartup;
 
+  TextStyle? bodyStyle;
+
   @override
-  List<Widget> buildTiles(BuildContext context) => [
-        if (PlatformValues.isDesktopDevice)
-          ValueListenableBuilder(
-              valueListenable: _launchAtStartup,
-              builder: (context, value, child) => SwitchSettingsTile(
-                  value: value,
-                  onChanged: (value) =>
-                      unawaited(_updateLaunchAtStartup(value)),
-                  title: Text(S.current.messageLaunchAtStartup),
-                  leading: Icon(Icons.rocket_launch_sharp))),
-        NavigationTile(
-            title: Text(S.current.titleFAQShort),
-            leading: Icon(Icons.question_answer_rounded),
-            trailing:
-                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-            value: Text(S.current.messageFAQ),
-            onTap: () => unawaited(
-                _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
-        NavigationTile(
-            title: Text(S.current.titlePrivacyPolicy),
-            leading: Icon(Icons.privacy_tip_rounded),
-            trailing:
-                PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-            onTap: () => unawaited(_openUrl(context,
-                S.current.titlePrivacyPolicy, Constants.eqPrivacyPolicy))),
-        if (PlatformValues.isMobileDevice)
-          NavigationTile(
-            title: Text(S.current.titleSendFeedback),
-            leading: Icon(Icons.comment_rounded),
-            onTap: () => unawaited(_openFeedback(context)),
-          ),
-        NavigationTile(
-          title: Text(Constants.ouisyncUrl),
-          // Icons.language is actually a stylized globe icon which is a good fit here:
-          leading: Icon(Icons.language_rounded),
-          trailing: _externalNavigationIcon,
-          onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
-        ),
-        NavigationTile(
-          title: Text(Constants.supportEmail, overflow: TextOverflow.ellipsis),
-          leading: Icon(Icons.mail_rounded),
-          trailing: _externalNavigationIcon,
+  List<Widget> buildTiles(BuildContext context) {
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
+
+    return [
+      if (PlatformValues.isDesktopDevice)
+        ValueListenableBuilder(
+            valueListenable: _launchAtStartup,
+            builder: (context, value, child) => SwitchSettingsTile(
+                value: value,
+                onChanged: (value) => unawaited(_updateLaunchAtStartup(value)),
+                title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
+                leading: Icon(Icons.rocket_launch_sharp))),
+      NavigationTile(
+          title: Text(S.current.titleFAQShort, style: bodyStyle),
+          leading: Icon(Icons.question_answer_rounded),
+          trailing:
+              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+          value: Text(S.current.messageFAQ,
+              style: context.theme.appTextStyle.bodySmall),
           onTap: () => unawaited(
-              launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
-        ),
+              _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
+      NavigationTile(
+          title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
+          leading: Icon(Icons.privacy_tip_rounded),
+          trailing:
+              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+          onTap: () => unawaited(_openUrl(context, S.current.titlePrivacyPolicy,
+              Constants.eqPrivacyPolicy))),
+      if (PlatformValues.isMobileDevice)
         NavigationTile(
-          title: Text(S.current.titleIssueTracker),
-          leading: Icon(Icons.bug_report_rounded),
-          trailing: _externalNavigationIcon,
-          onTap: () =>
-              unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
+          title: Text(S.current.titleSendFeedback, style: bodyStyle),
+          leading: Icon(Icons.comment_rounded),
+          onTap: () => unawaited(_openFeedback(context)),
         ),
-        AppVersionTile(
-          session: _cubits.repositories.session,
-          leading: Icon(Icons.info_rounded),
-          title: Text(S.current.labelAppVersion),
-        ),
-        SettingsTile(
-          title: BlocBuilder<PeerSetCubit, PeerSet>(
-              builder: (context, state) => InfoBuble(
-                      child: Text(S.current.messageSettingsRuntimeID),
-                      title: S.current.messageSettingsRuntimeID,
-                      description: [
-                        TextSpan(text: S.current.messageInfoRuntimeID),
-                        Fields.linkTextSpan(
-                            context,
-                            '\n\n${S.current.messageGoToPeers}',
-                            _navigateToPeers),
-                      ])),
-          leading: Icon(Icons.person_rounded),
-          value: _getRuntimeIdForOS(),
-        ),
-      ];
+      NavigationTile(
+        title: Text(Constants.ouisyncUrl, style: bodyStyle),
+        // Icons.language is actually a stylized globe icon which is a good fit here:
+        leading: Icon(Icons.language_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () => unawaited(launchUrl(Uri.parse(Constants.ouisyncUrl))),
+      ),
+      NavigationTile(
+        title: Text(Constants.supportEmail, style: bodyStyle),
+        leading: Icon(Icons.mail_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () =>
+            unawaited(launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
+      ),
+      NavigationTile(
+        title: Text(S.current.titleIssueTracker, style: bodyStyle),
+        leading: Icon(Icons.bug_report_rounded),
+        trailing: _externalNavigationIcon,
+        onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
+      ),
+      AppVersionTile(
+        session: _cubits.repositories.session,
+        leading: Icon(Icons.info_rounded),
+        title: Text(S.current.labelAppVersion, style: bodyStyle),
+      ),
+      SettingsTile(
+        title: BlocBuilder<PeerSetCubit, PeerSet>(
+            builder: (context, state) => InfoBuble(
+                    child: Text(S.current.messageSettingsRuntimeID,
+                        style: bodyStyle),
+                    title: S.current.messageSettingsRuntimeID,
+                    description: [
+                      TextSpan(text: S.current.messageInfoRuntimeID),
+                      Fields.linkTextSpan(
+                          context,
+                          '\n\n${S.current.messageGoToPeers}',
+                          _navigateToPeers),
+                    ])),
+        leading: Icon(Icons.person_rounded),
+        value: _getRuntimeIdForOS(),
+      ),
+    ];
+  }
 
   void _navigateToPeers(BuildContext context) async {
     final peerSetCubit = context.read<PeerSetCubit>();
@@ -196,10 +202,9 @@ class AboutSection extends SettingsSection with AppLogger {
       future: _cubits.repositories.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
-        final runtimeIdWidget = Text(
-          runtimeId,
-          overflow: TextOverflow.ellipsis,
-        );
+        final runtimeIdWidget = Text(runtimeId,
+            overflow: TextOverflow.ellipsis,
+            style: context.theme.appTextStyle.bodySmall);
 
         if (Platform.isIOS) {
           return Expanded(
@@ -225,33 +230,34 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-        title: Text(S.current.messageGoToMailApp),
-        content: CheckboxListTile(
-          title: Text(S.current.labelAttachLogs),
-          value: attachments.logs,
-          onChanged: (value) {
-            if (value != null) {
-              setState(() {
-                attachments = FeedbackAttachments(logs: value);
-              });
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            child: Text(S.current.actionOK),
-            onPressed: () {
-              Navigator.of(context).pop(attachments);
+          title: Fields.constrainedText(S.current.messageGoToMailApp,
+              flex: 0,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2),
+          content: CheckboxListTile(
+            title: Text(S.current.labelAttachLogs,
+                style: context.theme.appTextStyle.bodyMedium),
+            value: attachments.logs,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  attachments = FeedbackAttachments(logs: value);
+                });
+              }
             },
           ),
-          TextButton(
-            child: Text(S.current.actionCancel),
-            onPressed: () {
-              Navigator.of(context).pop(null);
-            },
-          ),
-        ],
-      );
+          actions: [
+            Fields.dialogActions(context, buttons: [
+              NegativeButton(
+                  text: S.current.actionCancel,
+                  onPressed: () => Navigator.of(context).pop(null),
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+              PositiveButton(
+                  text: S.current.actionOK,
+                  onPressed: () async => Navigator.of(context).pop(attachments),
+                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+            ])
+          ]);
 }
 
 class FeedbackAttachments {

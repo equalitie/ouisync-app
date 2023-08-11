@@ -34,13 +34,18 @@ class UnlockDialog<T> extends StatelessWidget with AppLogger {
       );
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
+    final bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"${repository.name}"',
-              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
+              flex: 0, style: bodyStyle),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,

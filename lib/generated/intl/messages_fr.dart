@@ -238,8 +238,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "Ce dépôt est une copie en lecture seule."),
-        "messageAlertSaveCopyPassword": MessageLookupByLibrary.simpleMessage(
-            "Si vous supprimez la validation par biométrie, une fois que vous aurez quitté cet écran, vous ne pourrez plus voir ou copier le mot de passe ; veuillez l\'enregistrer dans un endroit sûr."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Le système d\'exploitation vous demandera bientôt l\'autorisation d\'exécuter cette application en arrière-plan.\n\nCette autorisation est nécessaire pour poursuivre la synchronisation lorsque l\'application n\'est pas ouverte"),
         "messageBackgroundNotificationAndroid":

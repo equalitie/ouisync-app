@@ -221,27 +221,21 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
                     padding: const EdgeInsets.all(12),
                     width: widget.bubbleWidth,
                     decoration: BoxDecoration(
-                      color: widget.bgColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                        color: widget.bgColor,
+                        borderRadius: BorderRadius.circular(8)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
+                        Text(widget.title,
+                            style: context.theme.appTextStyle.bodySmall
+                                .copyWith(fontWeight: FontWeight.w500)),
                         const SizedBox(height: 12),
                         RichText(
                             textAlign: TextAlign.start,
                             text: TextSpan(
-                                style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: Dimensions.fontSmall),
+                                style: context.theme.appTextStyle.bodySmall
+                                    .copyWith(color: Colors.black87),
                                 children: widget.description)),
                       ],
                     ),

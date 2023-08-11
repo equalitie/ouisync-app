@@ -9,6 +9,7 @@ class PositiveButton extends StatelessWidget {
       required this.buttonsAspectRatio,
       this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
       this.focusNode,
+      this.isDangerButton = false,
       Key? key})
       : super(key: key);
 
@@ -17,6 +18,7 @@ class PositiveButton extends StatelessWidget {
   final double buttonsAspectRatio;
   final BoxConstraints buttonConstrains;
   final FocusNode? focusNode;
+  final bool isDangerButton;
 
   @override
   Widget build(BuildContext context) => Expanded(
@@ -49,6 +51,8 @@ class PositiveButton extends StatelessWidget {
   Color _fillColorStatus(context) {
     return onPressed == null
         ? Colors.grey
-        : Theme.of(context).colorScheme.primary;
+        : isDangerButton
+            ? Theme.of(context).colorScheme.error
+            : Theme.of(context).colorScheme.primary;
   }
 }

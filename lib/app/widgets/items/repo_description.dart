@@ -10,15 +10,15 @@ class RepoDescription extends StatelessWidget with AppLogger {
 
   @override
   Widget build(BuildContext context) {
-    final fontWeight = repoData.isDefault ? FontWeight.bold : FontWeight.normal;
+    final textStyle = TextStyle(
+        fontWeight: repoData.isDefault ? FontWeight.bold : FontWeight.normal);
 
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.autosizeText(repoData.name, fontWeight: fontWeight),
-          Fields.autosizeText(repoData.accessMode.name,
-              fontSize: Dimensions.fontSmall, fontWeight: fontWeight)
+          Fields.autosizeText(repoData.name, style: textStyle),
+          Fields.autosizeText(repoData.accessMode.name, style: textStyle)
         ],
       ),
     );

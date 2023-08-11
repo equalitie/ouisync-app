@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
-import '../../utils/dimensions.dart';
 import '../../utils/platform/platform.dart';
-import '../../utils/constants.dart';
-import '../../utils/fields.dart';
+import '../../utils/utils.dart';
 import 'about_section.dart';
 import 'logs_section.dart';
 import 'network_section.dart';
@@ -46,7 +44,8 @@ class SettingsContainerMobile extends StatelessWidget {
       platform: s.PlatformUtils.detectPlatform(context),
       sections: sections
           .map((section) => s.SettingsSection(
-              title: Text(section.title),
+              title: Text(section.title,
+                  style: context.theme.appTextStyle.titleMedium),
               tiles: section
                   .buildTiles(context)
                   .map((tile) => (tile is s.AbstractSettingsTile)
@@ -114,14 +113,14 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
           // Need to put the badge in a row because wrapping the Text in Badge
           // will make the text centered. Maybe there's a better solution
           // though.
-          Text(section.title, style: _getStyle()),
+          Text(section.title, style: _getStyle(context)),
           _maybeBadge(section)
         ]),
         selected: selected,
         onTap: onTap,
       );
 
-  TextStyle _getStyle() {
+  TextStyle? _getStyle(BuildContext context) {
     Color? color = Colors.black54;
     FontWeight fontWeight = FontWeight.normal;
 
@@ -130,11 +129,8 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
       fontWeight = FontWeight.w500;
     }
 
-    return TextStyle(
-      color: color,
-      fontSize: Dimensions.fontSmall,
-      fontWeight: fontWeight,
-    );
+    return context.theme.appTextStyle.bodyMedium
+        .copyWith(color: color, fontWeight: fontWeight);
   }
 
   Widget _maybeBadge(SettingsSection section) {

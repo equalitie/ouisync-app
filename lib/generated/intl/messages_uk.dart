@@ -225,8 +225,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "Цей репозиторій доступний тільки для читання."),
-        "messageAlertSaveCopyPassword": MessageLookupByLibrary.simpleMessage(
-            "Якщо ви знімете біометричну перевірку, після виходу з цього екрану ви більше не зможете побачити або скопіювати пароль; будь ласка, збережіть його в надійному місці."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Незабаром операційна система запитає у вас дозвіл на виконання цієї програми у фоновому режимі.\n\nЦе необхідно для того, щоб продовжувати синхронізацію, коли програма не знаходиться на передньому плані"),
         "messageBackgroundNotificationAndroid":

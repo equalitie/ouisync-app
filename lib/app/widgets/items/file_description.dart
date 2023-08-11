@@ -7,7 +7,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
-  FileDescription(
+  const FileDescription(
     this.repo,
     this.fileData,
     this._uploadJob,
@@ -21,7 +21,10 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.autosizeText(fileData.name),
+          Fields.autosizeText(fileData.name,
+              minFontSize: context.theme.appTextStyle.bodyMicro.fontSize,
+              maxFontSize: context.theme.appTextStyle.bodyMedium.fontSize,
+              maxLines: 1),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),
         ],
@@ -43,18 +46,19 @@ class FileDescription extends StatelessWidget with AppLogger {
           final total = fileData.size;
 
           if (total == null) {
-            return _buildSizeWidget(null, true);
+            return _buildSizeWidget(context, null, true);
           }
 
           if (soFar == null) {
-            return _buildSizeWidget(formatSize(total), true);
+            return _buildSizeWidget(context, formatSize(total), true);
           }
 
           if (soFar < total) {
-            return _buildSizeWidget(formatSizeProgress(total, soFar), true);
+            return _buildSizeWidget(
+                context, formatSizeProgress(total, soFar), true);
           }
 
-          return _buildSizeWidget(formatSize(total), false);
+          return _buildSizeWidget(context, formatSize(total), false);
         }),
       );
 
@@ -64,14 +68,14 @@ class FileDescription extends StatelessWidget with AppLogger {
         builder: (context, state) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSizeWidget(formatSize(state.soFar), false),
+            _buildSizeWidget(context, formatSize(state.soFar), false),
             Dimensions.spacingVerticalHalf,
-            _buildUploadProgress(job),
+            _buildUploadProgress(context, job),
           ],
         ),
       );
 
-  Widget _buildUploadProgress(Job job) => Row(
+  Widget _buildUploadProgress(BuildContext context, Job job) => Row(
         textBaseline: TextBaseline.alphabetic,
         children: [
           Expanded(
@@ -81,30 +85,20 @@ class FileDescription extends StatelessWidget with AppLogger {
               onPressed: () {
                 job.cancel();
               },
-              child: Text(
-                S.current.actionCancelCapital,
-                style: const TextStyle(fontSize: Dimensions.fontSmall),
-              )),
+              child: Text(S.current.actionCancelCapital,
+                  style: context.theme.appTextStyle.bodyMicro
+                      .copyWith(color: context.theme.primaryColor))),
         ],
       );
-}
 
-Widget _buildSizeWidget(String? text, bool loading) => Row(
-      children: [
+  Widget _buildSizeWidget(BuildContext context, String? text, bool loading) =>
+      Row(children: [
         if (text != null)
-          Fields.constrainedText(
-            text,
-            flex: 0,
-            fontSize: Dimensions.fontSmall,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-            softWrap: true,
-          ),
+          Fields.constrainedText(text,
+              flex: 0,
+              style: context.theme.appTextStyle.bodyMicro,
+              softWrap: true),
         if (loading)
-          Icon(
-            Icons.hourglass_top,
-            size: Dimensions.fontSmall,
-            color: Colors.black.withAlpha(128),
-          ),
-      ],
-    );
+          Icon(Icons.hourglass_top, color: Colors.black.withAlpha(128))
+      ]);
+}

@@ -92,15 +92,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               Row(children: [
                 TextButton(
                     focusNode: _passwordAction,
-                    child: Text('Remove local password',
-                        style: TextStyle(
-                            fontSize: Dimensions.fontSmall,
-                            color: Constants.dangerColor)),
+                    child: Text(S.current.actionRemoveLocalPassword,
+                        style: context.theme.appTextStyle.bodyMedium
+                            .copyWith(color: Constants.dangerColor)),
                     onPressed: () async {
-                      final positiveButtonText = 'Remove';
-                      final confirmationMessage = 'Remove this repository local'
-                          ' password?\n\nThe repository will unlock '
-                          'automatically, unless a local password is added again';
+                      final positiveButtonText = S.current.actionRemove;
+                      final confirmationMessage =
+                          S.current.messageRemoveLocalPasswordConfirmation;
 
                       final saveChanges = await confirmSaveChanges(
                         context,
@@ -114,6 +112,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           f: _removePassword());
                     })
               ]),
+              Dimensions.spacingVertical,
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Fields.inPageButton(
                     onPressed: () async {
@@ -126,9 +125,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                       if (newPassword == null) return;
 
-                      final positiveButtonText = 'Update';
-                      final confirmationMessage = 'Update this repository local'
-                          ' password?';
+                      final positiveButtonText = S.current.actionUpdate;
+                      final confirmationMessage =
+                          S.current.messageUpdateLocalPasswordConfirmation;
 
                       final saveChanges = await confirmSaveChanges(
                           context, positiveButtonText, confirmationMessage);
@@ -138,7 +137,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       await Dialogs.executeFutureWithLoadingDialog(context,
                           f: _updateLocalPassword(newPassword));
                     },
-                    text: 'Update',
+                    text: S.current.actionUpdate,
                     size: Dimensions.sizeInPageButtonLong,
                     focusNode: _passwordAction)
               ])
@@ -156,10 +155,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
                           if (newPassword == null) return;
 
-                          final positiveButtonText = 'Add';
+                          final positiveButtonText = S.current.actionAdd;
                           final confirmationMessage =
-                              'Add a local password for '
-                              'this repository?';
+                              S.current.messageAddLocalPasswordConfirmation;
 
                           final saveChanges = await confirmSaveChanges(
                               context, positiveButtonText, confirmationMessage);
@@ -173,7 +171,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                               f: _addLocalPassword(newPassword));
                         }
                       : null,
-                  text: 'Create',
+                  text: S.current.actionCreate,
                   size: Dimensions.sizeInPageButtonLong,
                   focusNode: _passwordAction)
             ]);
@@ -187,20 +185,18 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       value: state.unlockWithBiometrics,
                       secondary:
                           Icon(Icons.fingerprint_rounded, color: Colors.black),
-                      title: Text(S.current.messageUnlockUsingBiometrics),
+                      title: Text(S.current.messageUnlockUsingBiometrics,
+                          style: context.theme.appTextStyle.bodyMedium),
                       onChanged: (useBiometrics) async {
-                        final positiveButtonText = 'Accept';
+                        final positiveButtonText = S.current.actionAccept;
                         String confirmationMessage = useBiometrics
-                            ? 'Unlock this repository using biometrics?'
-                            : 'Remove the biometrics validation for this '
-                                'repository?\n\nThe repository will unlock'
-                                ' automatically, unless a local password is added.';
+                            ? S.current.messageUnlockUsingBiometricsConfirmation
+                            : S.current.messageRemoveBiometricsConfirmation;
 
                         if (useBiometrics &&
                             state.authMode == AuthMode.manual) {
                           confirmationMessage +=
-                              '\n\nThis will remove the repository password'
-                              ' and use the biometric validation for unlocking.';
+                              '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
                         }
 
                         final saveChanges = await confirmSaveChanges(

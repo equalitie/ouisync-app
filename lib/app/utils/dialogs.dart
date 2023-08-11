@@ -43,8 +43,7 @@ abstract class Dialogs {
           Text(
             text!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white, fontSize: Dimensions.fontAverage),
+            style: const TextStyle(color: Colors.white),
           ),
       ],
     );
@@ -80,7 +79,7 @@ abstract class Dialogs {
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
-            return _alertDialog(title, body, actions);
+            return _alertDialog(context, title, body, actions);
           });
 
   static Future<bool?> simpleAlertDialog(
@@ -99,7 +98,7 @@ abstract class Dialogs {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return _alertDialog(title, [Text(message)], actions!);
+          return _alertDialog(context, title, [Text(message)], actions!);
         });
   }
 
@@ -115,64 +114,82 @@ abstract class Dialogs {
             );
           });
 
-  static AlertDialog _alertDialog(
-          String title, List<Widget> body, List<Widget> actions) =>
+  static AlertDialog _alertDialog(BuildContext context, String title,
+          List<Widget> body, List<Widget> actions) =>
       AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(
-          child: ListBody(children: body),
-        ),
-        actions: actions,
-      );
+          title: Fields.constrainedText(title,
+              flex: 0,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2),
+          content: SingleChildScrollView(child: ListBody(children: body)),
+          actions: actions);
 
-  static AlertDialog buildDeleteFileAlertDialog(RepoCubit repo, String path,
-          BuildContext context, String fileName, String parent) =>
-      AlertDialog(
-        title: Text(S.current.titleDeleteFile),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text(
-                fileName,
-                style: const TextStyle(
-                    fontSize: Dimensions.fontAverage,
-                    fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  const Text(
-                    Strings.atSymbol,
-                    style: TextStyle(
-                        fontSize: Dimensions.fontAverage,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    parent,
-                    style: const TextStyle(
-                        fontSize: Dimensions.fontAverage,
-                        fontWeight: FontWeight.w700),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 30.0,
-              ),
+  static Future<String?> deleteFileAlertDialog(RepoCubit repo, String path,
+      BuildContext context, String fileName, String parent) async {
+    final bodyStyle = context.theme.appTextStyle.bodyMedium
+        .copyWith(fontWeight: FontWeight.bold);
+
+    return showDialog<String?>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => ActionsDialog(
+            title: S.current.titleDeleteFile,
+            body: ListBody(children: <Widget>[
+              Text(fileName, style: bodyStyle),
+              Row(children: [
+                Text(Strings.atSymbol, style: bodyStyle),
+                Text(parent, style: bodyStyle)
+              ]),
+              const SizedBox(height: 20.0),
               Text(S.current.messageConfirmFileDeletion),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: Text(S.current.actionCancelCapital),
-            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-          ),
-          DangerButton(
-            text: S.current.actionDeleteCapital,
-            onPressed: () {
-              repo.deleteFile(path);
-              Navigator.of(context).pop(fileName);
-            },
-          ),
-        ],
-      );
+              Fields.dialogActions(context, buttons: [
+                NegativeButton(
+                    text: S.current.actionCancel,
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(),
+                    buttonsAspectRatio:
+                        Dimensions.aspectRatioModalDialogButton),
+                PositiveButton(
+                    text: S.current.actionDelete,
+                    isDangerButton: true,
+                    onPressed: () async {
+                      await repo.deleteFile(path);
+                      Navigator.of(context).pop(fileName);
+                    },
+                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+              ])
+            ])));
+  }
+
+  static Future<String?> deleteFolderAlertDialog(BuildContext context,
+          RepoCubit repo, String path, bool recursive) async =>
+      showDialog<String?>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => ActionsDialog(
+              title: S.current.titleDeleteFolder,
+              body: ListBody(children: <Widget>[
+                Text(path,
+                    style: context.theme.appTextStyle.bodyMedium
+                        .copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20.0),
+                Text(S.current.messageConfirmFolderDeletion),
+                Fields.dialogActions(context, buttons: [
+                  NegativeButton(
+                      text: S.current.actionCancel,
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(),
+                      buttonsAspectRatio:
+                          Dimensions.aspectRatioModalDialogButton),
+                  PositiveButton(
+                      text: S.current.actionDelete,
+                      isDangerButton: true,
+                      onPressed: () async {
+                        await repo.deleteFolder(path, recursive);
+                        Navigator.of(context).pop(path);
+                      },
+                      buttonsAspectRatio:
+                          Dimensions.aspectRatioModalDialogButton)
+                ])
+              ])));
 }

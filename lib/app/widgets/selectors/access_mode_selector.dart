@@ -44,29 +44,18 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
     );
   }
 
-  Widget _buildModeSelector() {
-    return Column(
-      children: [
+  Widget _buildModeSelector() => Column(children: [
         Padding(
-          padding: Dimensions.paddingItem,
-          child: Row(
-            children: [
-              Fields.constrainedText(
-                S.current.labelSetPermission,
-                fontSize: Dimensions.fontMicro,
-                fontWeight: FontWeight.normal,
-                color: Constants.inputLabelForeColor,
-              ),
-            ],
-          ),
-        ),
+            padding: Dimensions.paddingItem,
+            child: Row(children: [
+              Fields.constrainedText(S.current.labelSetPermission,
+                  style: context.theme.appTextStyle.bodyMicro
+                      .copyWith(color: Constants.inputLabelForeColor))
+            ])),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _buildAccessModeOptions(),
-        )
-      ],
-    );
-  }
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _buildAccessModeOptions())
+      ]);
 
   List<Widget> _buildAccessModeOptions() => AccessMode.values
       .map((mode) => Expanded(
@@ -92,10 +81,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
             Text(
               mode.name,
               textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: Dimensions.fontAverage,
-                color: _getModeStateColor(mode),
-              ),
+              style: TextStyle().copyWith(color: _getModeStateColor(mode)),
             )
           ])))
       .toList();

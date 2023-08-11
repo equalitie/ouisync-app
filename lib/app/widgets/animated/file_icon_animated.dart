@@ -46,7 +46,7 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
               percent: ratio,
               progressColor: Theme.of(context).colorScheme.secondary,
               center: Text('$percentage%',
-                  style: const TextStyle(fontSize: Dimensions.fontMicro)));
+                  style: context.theme.appTextStyle.bodyMicro));
         });
 
     // TODO: This code used to show a different icon once the download finished.

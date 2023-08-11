@@ -41,15 +41,15 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   Color? _passwordStrengthColorValue;
 
   @override
-  Widget build(BuildContext context) => _passwordInputs();
-
-  @override
   void initState() {
     widget.passwordController.addListener(
         () => setState(() => _password = widget.passwordController.text));
 
     super.initState();
   }
+
+  @override
+  Widget build(BuildContext context) => _passwordInputs();
 
   double _inputOpacity() => widget.passwordMode != PasswordMode.bio ? 1 : 0.5;
 
@@ -98,15 +98,13 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
         ]),
         Dimensions.spacingVertical,
         Row(children: [
-          Text('Password strength:',
-              style: TextStyle(
-                  fontSize: Dimensions.fontMicro, color: Colors.black54)),
+          Text('${S.current.messagePasswordStrength}:',
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(color: Colors.black54)),
           Dimensions.spacingHorizontalHalf,
           Text(_passwordStrength ?? '',
-              style: TextStyle(
-                  fontSize: Dimensions.fontMicro,
-                  fontWeight: FontWeight.w500,
-                  color: _passwordStrengthColorValue))
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(color: _passwordStrengthColorValue))
         ]),
         Dimensions.spacingVertical,
         FlutterPasswordStrength(
@@ -129,13 +127,13 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
 
   String _passwordStrengthString(double strength) {
     if (strength <= 0.25) {
-      return 'Weak';
+      return S.current.messageWeak;
     } else if (strength <= 0.5) {
-      return 'Medium';
+      return S.current.messageMedium;
     } else if (strength <= 0.75) {
-      return 'Good';
+      return S.current.messageGood;
     } else {
-      return 'Strong';
+      return S.current.messageStrong;
     }
   }
 

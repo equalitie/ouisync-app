@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
@@ -36,9 +37,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
                             Fields.constrainedText(
                                 state.sortBy.name.capitalize(),
                                 flex: 0,
-                                fontSize: Dimensions.fontSmall,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black),
+                                style: context.theme.appTextStyle.bodySmall),
                             Dimensions.spacingHorizontalHalf,
                             Fields.actionIcon(
                                 _getDirectionArrow(state.direction),
@@ -93,24 +92,31 @@ class _SortByList extends StatelessWidget with AppLogger {
       ValueNotifier<SortDirection>(SortDirection.desc);
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<SortListCubit, SortListState>(
-          bloc: _sortCubit,
-          builder: (context, state) {
-            _sortDirection.value = state.direction;
+  Widget build(BuildContext context) {
+    final sheetTitleStyle = Theme.of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(fontWeight: FontWeight.w400);
 
-            return Container(
-                padding: Dimensions.paddingBottomSheet,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle('Sort by'),
-                      _buildSortByList(context, state.sortBy, state.direction)
-                    ]));
-          });
+    return BlocBuilder<SortListCubit, SortListState>(
+        bloc: _sortCubit,
+        builder: (context, state) {
+          _sortDirection.value = state.direction;
+
+          return Container(
+              padding: Dimensions.paddingBottomSheet,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Fields.bottomSheetHandle(context),
+                    Fields.bottomSheetTitle(S.current.titleSortBy,
+                        style: sheetTitleStyle),
+                    _buildSortByList(context, state.sortBy, state.direction)
+                  ]));
+        });
+  }
 
   Widget _buildSortByList(
           BuildContext context, SortBy sortBy, SortDirection direction) =>
@@ -120,13 +126,25 @@ class _SortByList extends StatelessWidget with AppLogger {
           itemBuilder: (context, index) {
             final sortByItem = SortBy.values[index];
 
+            final settingStyle = Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(
+                    color: sortByItem.name == sortBy.name
+                        ? Colors.black87
+                        : Colors.black54,
+                    fontWeight: sortByItem.name == sortBy.name
+                        ? FontWeight.bold
+                        : FontWeight.normal);
+
             return Row(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Expanded(
                     child: Fields.actionListTile(sortByItem.name.capitalize(),
                         textOverflow: TextOverflow.ellipsis,
-                        textSoftWrap: false, onTap: () {
+                        textSoftWrap: false,
+                        style: settingStyle, onTap: () {
                   _sortCubit.sortBy(sortByItem);
 
                   if (_reposCubit.showList) {
@@ -151,12 +169,6 @@ class _SortByList extends StatelessWidget with AppLogger {
                         icon:
                             sortByItem.name == sortBy.name ? Icons.check : null,
                         iconColor: Theme.of(context).indicatorColor,
-                        textColor: sortByItem.name == sortBy.name
-                            ? Colors.black87
-                            : Colors.black54,
-                        textFontWeight: sortByItem.name == sortBy.name
-                            ? FontWeight.bold
-                            : FontWeight.normal,
                         dense: true,
                         visualDensity: VisualDensity.compact)),
               ],

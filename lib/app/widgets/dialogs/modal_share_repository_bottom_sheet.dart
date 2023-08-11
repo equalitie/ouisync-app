@@ -36,8 +36,13 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
 
   final scrollController = ScrollController();
 
+  TextStyle? labelStyle;
+
   @override
   Widget build(BuildContext context) {
+    labelStyle = context.theme.appTextStyle.bodyMicro
+        .copyWith(color: Constants.inputLabelForeColor);
+
     // On certain resolutions (higer) the constrain set on this dialog when called
     // causes the content to scroll, giving the appearance of a smaller padding
     // at the bottom of the content.
@@ -62,7 +67,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Fields.bottomSheetHandle(context),
-                  Fields.bottomSheetTitle(widget.repository.name),
+                  Fields.bottomSheetTitle(widget.repository.name,
+                      style: context.theme.appTextStyle.titleMedium),
                   Dimensions.spacingVertical,
                   AccessModeSelector(
                     currentAccessMode: widget.repository.state.accessMode,
@@ -113,13 +119,12 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
         padding: Dimensions.paddingItem,
         child: Row(
           children: [
-            Fields.constrainedText(
-              _tokenDescription(accessMode),
-              flex: 0,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Colors.black54,
-            ),
+            Fields.constrainedText(_tokenDescription(accessMode),
+                style: context.theme.appTextStyle.bodyMicro
+                    .copyWith(color: Colors.black54),
+                softWrap: true,
+                maxLines: 2,
+                textOverflow: TextOverflow.ellipsis),
           ],
         ),
       );
@@ -146,26 +151,21 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Fields.constrainedText(
-              S.current.labelRepositoryLink,
-              flex: 0,
-              fontSize: Dimensions.fontMicro,
-              fontWeight: FontWeight.normal,
-              color: Constants.inputLabelForeColor,
-            ),
+            Fields.constrainedText(S.current.labelRepositoryLink,
+                flex: 0, style: labelStyle),
             Padding(
               padding: Dimensions.paddingActionBoxRight,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Fields.constrainedText(
-                    _displayToken ?? Constants.ouisyncUrl,
-                    flex: 0,
-                    softWrap: true,
-                    maxLines: 2,
-                    textOverflow: TextOverflow.fade,
-                    color: _shareToken != null ? Colors.black : Colors.black54,
-                  ),
+                  Fields.constrainedText(_displayToken ?? Constants.ouisyncUrl,
+                      style: TextStyle().copyWith(
+                          color: _shareToken != null
+                              ? Colors.black
+                              : Colors.black54),
+                      softWrap: true,
+                      maxLines: 1,
+                      textOverflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
@@ -198,13 +198,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     message: S.current.messageTokenCopiedToClipboard,
                   );
                 }),
-                Fields.constrainedText(
-                  S.current.labelCopyLink,
-                  flex: 0,
-                  fontSize: Dimensions.fontMicro,
-                  fontWeight: FontWeight.normal,
-                  color: Constants.inputLabelForeColor,
-                ),
+                Fields.constrainedText(S.current.labelCopyLink,
+                    flex: 0, style: labelStyle),
               ],
             ),
             Column(children: [
@@ -224,13 +219,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
 
                 await Share.share(_shareToken!);
               }),
-              Fields.constrainedText(
-                S.current.labelShareLink,
-                flex: 0,
-                fontSize: Dimensions.fontMicro,
-                fontWeight: FontWeight.normal,
-                color: Constants.inputLabelForeColor,
-              ),
+              Fields.constrainedText(S.current.labelShareLink,
+                  flex: 0, style: labelStyle),
             ]),
             Column(
               children: [
@@ -257,13 +247,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     }),
                   );
                 }),
-                Fields.constrainedText(
-                  S.current.labelQRCode,
-                  flex: 0,
-                  fontSize: Dimensions.fontMicro,
-                  fontWeight: FontWeight.normal,
-                  color: Constants.inputLabelForeColor,
-                ),
+                Fields.constrainedText(S.current.labelQRCode,
+                    flex: 0, style: labelStyle),
               ],
             )
           ],

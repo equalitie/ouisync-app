@@ -10,71 +10,78 @@ class EqValues extends StatelessWidget {
   Widget build(BuildContext context) => Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
-          childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
+          childrenPadding: EdgeInsets.only(bottom: 10.0),
           title: Text(S.current.messageTapForValues,
               textAlign: TextAlign.end,
-              style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: Dimensions.fontSmall,
+              style: context.theme.appTextStyle.titleSmall.copyWith(
+                  color: context.theme.primaryColor,
                   fontStyle: FontStyle.italic)),
           children: [_valuesTextBlock(context)]));
 
-  Widget _valuesTextBlock(BuildContext context) =>
-      Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        RichText(
-            textAlign: TextAlign.start,
-            text: TextSpan(
-                style: TextStyle(
-                    color: Colors.black87, fontSize: Dimensions.fontSmall),
-                children: [
-                  Fields.boldTextSpan('\n${S.current.titleEqualitiesValues}\n',
-                      fontSize: Dimensions.fontBig)
-                ])),
-        RichText(
-            textAlign: TextAlign.end,
-            text: Fields.quoteTextSpan(
-                '${S.current.messageQuoteMainIsFree}\n\n',
-                '${S.current.messageRousseau}\n\n')),
-        RichText(
+  Widget _valuesTextBlock(BuildContext context) {
+    final titleFontSize = context.theme.appTextStyle.titleLarge.fontSize;
+    final subtitleFontSize = context.theme.appTextStyle.titleMedium.fontSize;
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      RichText(
+          textAlign: TextAlign.start,
           text: TextSpan(
-            style: TextStyle(
-                color: Colors.black87, fontSize: Dimensions.fontSmall),
-            children: [
-              TextSpan(text: S.current.messageEqValuesP1),
-              Fields.linkTextSpan(
-                  context,
-                  '${S.current.messageInternationalBillHumanRights}.\n\n',
-                  _launchIBoHR),
-              TextSpan(text: '${S.current.messageEqValuesP2}.\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP3}.\n\n'),
-              Fields.boldTextSpan('${S.current.titleOurMission}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP4}.\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP5}.\n\n'),
-              Fields.boldTextSpan('${S.current.titleWeAreEq}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP6}.\n\n'),
-              Fields.boldTextSpan('${S.current.titleOurPrinciples}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP7}.\n\n'),
-              Fields.boldTextSpan('- ${S.current.titlePrivacy}\n\n'),
-              TextSpan(text: S.current.messageEqValuesP8),
-              Fields.linkTextSpan(context,
-                  '${S.current.messageDeclarationDOS}.\n\n', _launchDfDOS),
-              Fields.boldTextSpan('- ${S.current.titleDigitalSecurity}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP9}.\n\n'),
-              Fields.boldTextSpan(
-                  '- ${S.current.titleOpennessTransparency}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP10}\n\n'),
-              Fields.boldTextSpan(
-                  '- ${S.current.titleFreedomExpresionAccessInfo}\n\n'),
-              TextSpan(text: '${S.current.messageEqValuesP11}.\n\n'),
-              Fields.boldTextSpan('- ${S.current.titleJustLegalSociety}\n\n'),
-              TextSpan(
-                  text: '${S.current.messageEqValuesP12}.\n\n'
-                      '${S.current.messageEqValuesP13}.\n\n'
-                      '${S.current.messageEqValuesP14}.'),
-            ],
-          ),
-        )
-      ]);
+              style: context.theme.appTextStyle.titleLarge,
+              children: [
+                Fields.boldTextSpan('\n${S.current.titleEqualitiesValues}\n')
+              ])),
+      RichText(
+          textAlign: TextAlign.end,
+          text: Fields.quoteTextSpan('${S.current.messageQuoteMainIsFree}\n\n',
+              '${S.current.messageRousseau}\n\n',
+              fontSize: context.theme.appTextStyle.bodyLarge.fontSize)),
+      RichText(
+        text: TextSpan(
+          style: context.theme.appTextStyle.bodyMedium,
+          children: [
+            TextSpan(text: S.current.messageEqValuesP1),
+            Fields.linkTextSpan(
+                context,
+                '${S.current.messageInternationalBillHumanRights}.\n\n',
+                _launchIBoHR),
+            TextSpan(text: '${S.current.messageEqValuesP2}.\n\n'),
+            TextSpan(text: '${S.current.messageEqValuesP3}.\n\n'),
+            Fields.boldTextSpan('${S.current.titleOurMission}\n\n',
+                fontSize: titleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP4}.\n\n'),
+            TextSpan(text: '${S.current.messageEqValuesP5}.\n\n'),
+            Fields.boldTextSpan('${S.current.titleWeAreEq}\n\n',
+                fontSize: titleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP6}.\n\n'),
+            Fields.boldTextSpan('${S.current.titleOurPrinciples}\n\n',
+                fontSize: titleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP7}.\n\n'),
+            Fields.boldTextSpan('· ${S.current.titlePrivacy}\n\n',
+                fontSize: subtitleFontSize),
+            TextSpan(text: S.current.messageEqValuesP8),
+            Fields.linkTextSpan(context,
+                '${S.current.messageDeclarationDOS}.\n\n', _launchDfDOS),
+            Fields.boldTextSpan('· ${S.current.titleDigitalSecurity}\n\n',
+                fontSize: subtitleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP9}.\n\n'),
+            Fields.boldTextSpan('· ${S.current.titleOpennessTransparency}\n\n',
+                fontSize: subtitleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP10}\n\n'),
+            Fields.boldTextSpan(
+                '· ${S.current.titleFreedomExpresionAccessInfo}\n\n',
+                fontSize: subtitleFontSize),
+            TextSpan(text: '${S.current.messageEqValuesP11}.\n\n'),
+            Fields.boldTextSpan('· ${S.current.titleJustLegalSociety}\n\n',
+                fontSize: subtitleFontSize),
+            TextSpan(
+                text: '${S.current.messageEqValuesP12}.\n\n'
+                    '${S.current.messageEqValuesP13}.\n\n'
+                    '${S.current.messageEqValuesP14}.'),
+          ],
+        ),
+      )
+    ]);
+  }
 
   void _launchIBoHR(BuildContext context) async {
     final title = Text(S.current.messageInternationalBillHumanRights);

@@ -30,13 +30,11 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(S.current.titleAddRepoToken),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.black87,
-          titleTextStyle: const TextStyle(
-              fontSize: Dimensions.fontAverage, color: Colors.black87),
-        ),
+            title: Text(S.current.titleAddRepoToken),
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.black87,
+            titleTextStyle: context.theme.appTextStyle.titleMedium),
         body: Form(
             key: formKey,
             autovalidateMode: AutovalidateMode.disabled,
@@ -54,28 +52,28 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
             ))));
   }
 
-  Widget _buildScanQrCode(BuildContext context) {
-    return Column(
-      children: [
-        Wrap(
-            direction: Axis.vertical,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Row(children: [
-                Fields.constrainedText(S.current.messageAddRepoQR,
-                    flex: 0, color: Colors.black)
-              ]),
-              if (_isDesktop)
+  Widget _buildScanQrCode(BuildContext context) => Column(
+        children: [
+          Wrap(
+              direction: Axis.vertical,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
                 Row(children: [
-                  Fields.constrainedText('(Available on mobile)',
-                      flex: 0, fontWeight: FontWeight.w200, color: Colors.black)
-                ])
-            ]),
-        Dimensions.spacingVerticalDouble,
-        _builScanQRButton(context),
-      ],
-    );
-  }
+                  Fields.constrainedText(S.current.messageAddRepoQR, flex: 0)
+                ]),
+                if (_isDesktop)
+                  Row(children: [
+                    Fields.constrainedText(
+                        '(${S.current.messageAvailableOnMobile})',
+                        flex: 0,
+                        style: context.theme.appTextStyle.bodySmall
+                            .copyWith(fontWeight: FontWeight.w700))
+                  ])
+              ]),
+          Dimensions.spacingVerticalDouble,
+          _builScanQRButton(context),
+        ],
+      );
 
   /// We don't support QR reading for desktop at the moment, just mobile.
   /// TODO: Find a plugin for reading QR with support for Windows, Linux
@@ -131,20 +129,15 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           children: [
             const Expanded(
                 child: Divider(
-              thickness: 1.0,
-              endIndent: 20.0,
-              color: Colors.black26,
-            )),
+                    thickness: 1.0, endIndent: 20.0, color: Colors.black26)),
             Text(
               S.current.messageOr.toUpperCase(),
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: context.theme.appTextStyle.bodySmall
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
             const Expanded(
                 child: Divider(
-              thickness: 1.0,
-              indent: 20.0,
-              color: Colors.black26,
-            )),
+                    thickness: 1.0, indent: 20.0, color: Colors.black26)),
           ],
         ));
   }
@@ -156,7 +149,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Fields.constrainedText(S.current.messageAddRepoLink,
-                flex: 0, color: Colors.black),
+                textAlign: TextAlign.center),
           ],
         ),
         Dimensions.spacingVerticalDouble,

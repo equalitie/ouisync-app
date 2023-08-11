@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/widgets/eq_terms_privacy.dart';
-import '../widgets/eq_values.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../widgets/widgets.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
   const AcceptEqualitieValuesTermsPrivacyPage(
@@ -30,7 +29,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
       body: SingleChildScrollView(
           child: Center(
               child: Container(
-                  padding: EdgeInsets.all(20.0),
+                  padding: EdgeInsets.all(24.0),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -40,15 +39,11 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
                         _introTextSpan(),
                         const SizedBox(height: 20.0),
                         EqValues(),
-                        const SizedBox(height: 20.0),
                         EqTermsAndPrivacy(),
                         const SizedBox(height: 20.0),
-                        Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Fields.dialogActions(context,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                buttons: _actions()))
+                        Fields.dialogActions(context,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            buttons: _actions())
                       ])))));
 
   Widget _headerImages() => Column(children: [
@@ -57,26 +52,24 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         Padding(
             padding: EdgeInsets.only(bottom: 10.0),
             child: Text(S.current.messageBy,
-                style: TextStyle(color: Colors.black54, fontSize: 8.0))),
+                style: context.theme.appTextStyle.bodyMicro
+                    .copyWith(color: Colors.black54))),
         Image.asset(Constants.eQLogo,
             width: MediaQuery.of(context).size.width * 0.2)
       ]);
 
   Widget _introTextSpan() => RichText(
       textAlign: TextAlign.start,
-      text: TextSpan(
-          style:
-              TextStyle(color: Colors.black87, fontSize: Dimensions.fontSmall),
-          children: [
-            Fields.boldTextSpan(S.current.titleAppTitle),
-            TextSpan(text: ' ${S.current.messageEqualitieValues}')
-          ]));
+      text: TextSpan(style: context.theme.appTextStyle.bodyMedium, children: [
+        Fields.boldTextSpan(S.current.titleAppTitle),
+        TextSpan(text: ' ${S.current.messageEqualitieValues}')
+      ]));
 
   List<Widget> _actions() => [
-        TextButton(
+        OutlinedButton(
             onPressed: () => exit(0),
             child: Text(S.current.actionIDontAgree.toUpperCase())),
-        TextButton(
+        ElevatedButton(
             onPressed: () async {
               await widget.settings.setEqualitieValues(true);
 
@@ -85,6 +78,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
                   MaterialPageRoute(
                       builder: (context) => widget.ouisyncAppHome));
             },
+            autofocus: true,
             child: Text(S.current.actionIAgree.toUpperCase()))
       ];
 }
