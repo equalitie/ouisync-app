@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
-import '../widgets/widgets.dart';
 
 class BackgroundServiceManagerState {
   bool isServiceRunning;
