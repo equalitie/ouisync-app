@@ -72,6 +72,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   bool _showRepositoryNameInUseWarning = false;
 
+  TextStyle? _linkStyle;
+  TextStyle? _messageSmall;
+  TextStyle? _labelStyle;
+
   @override
   void initState() {
     unawaited(_init());
@@ -171,35 +175,46 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   }
 
   @override
-  Widget build(BuildContext context) => WillPopScope(
-      onWillPop: () async {
-        if (_deleteRepositoryBeforePop) {
-          assert(_repositoryMetaInfo != null, '_repositoryMetaInfo is null');
+  Widget build(BuildContext context) {
+    _linkStyle = context.theme.appTextStyle.bodySmall
+        .copyWith(fontWeight: FontWeight.w500);
 
-          if (_repositoryMetaInfo == null) {
-            throw ('A repository was created, but saving the password into the '
-                'secure storage failed and it may be lost.\nMost likely this '
-                'repository needs to be deleted.');
+    _labelStyle = context.theme.appTextStyle.labelMedium
+        .copyWith(color: Constants.inputLabelForeColor);
+
+    _messageSmall =
+        context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
+
+    return WillPopScope(
+        onWillPop: () async {
+          if (_deleteRepositoryBeforePop) {
+            assert(_repositoryMetaInfo != null, '_repositoryMetaInfo is null');
+
+            if (_repositoryMetaInfo == null) {
+              throw ('A repository was created, but saving the password into the '
+                  'secure storage failed and it may be lost.\nMost likely this '
+                  'repository needs to be deleted.');
+            }
+
+            final repoName = _repositoryMetaInfo!.name;
+            final authMode =
+                widget.cubit.settings.getAuthenticationMode(repoName);
+
+            await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
           }
 
-          final repoName = _repositoryMetaInfo!.name;
-          final authMode =
-              widget.cubit.settings.getAuthenticationMode(repoName);
-
-          await widget.cubit.deleteRepository(_repositoryMetaInfo!, authMode);
-        }
-
-        return true;
-      },
-      child: Form(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-            SingleChildScrollView(
-                reverse: true, child: _newRepositoryWidget(widget.context))
-          ])));
+          return true;
+        },
+        child: Form(
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+              SingleChildScrollView(
+                  reverse: true, child: _newRepositoryWidget(widget.context))
+            ])));
+  }
 
   Widget _newRepositoryWidget(BuildContext context) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -212,7 +227,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             if (!_isBlindReplica) ..._passwordSection(),
             if (_isBiometricsAvailable && !_isBlindReplica && _addPassword)
               _useBiometricsSwitch(),
-            _manualPasswordWarning(),
+            Dimensions.spacingVertical,
+            _manualPasswordWarning(context),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
@@ -230,17 +246,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Fields.constrainedText(S.current.labelRepositoryLink,
-                          flex: 0,
-                          fontSize: Dimensions.fontMicro,
-                          fontWeight: FontWeight.normal,
-                          color: Constants.inputLabelForeColor),
+                          flex: 0, style: _labelStyle),
                       Dimensions.spacingVerticalHalf,
                       Text(
                           formatShareLinkForDisplay(
                               widget.initialTokenValue ?? ''),
-                          style: const TextStyle(
-                              fontSize: Dimensions.fontAverage,
-                              fontWeight: FontWeight.w500))
+                          style: _linkStyle)
                     ]))),
         ValueListenableBuilder(
             valueListenable: _accessModeNotifier,
@@ -250,9 +261,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                     S.current
                         .messageRepositoryAccessMode(message as String? ?? '?'),
                     flex: 0,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54)))
+                    style: _messageSmall)))
       ];
 
   List<Widget> _repositoryName() => [
@@ -275,12 +284,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                 onTap: () => _updateNameController(_suggestedName),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Fields.constrainedText(
-                    S.current.messageRepositorySuggestedName(_suggestedName),
-                    flex: 1,
-                    fontSize: Dimensions.fontSmall,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54,
-                  )
+                      S.current.messageRepositorySuggestedName(_suggestedName),
+                      style: _messageSmall)
                 ]))),
         Dimensions.spacingVertical
       ];
@@ -288,7 +293,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _repositoryNameTakenWarning() => Visibility(
       visible: _showRepositoryNameInUseWarning,
       child: Fields.autosizeText(S.current.messageErrorRepositoryNameExist,
-          color: Colors.red,
+          style: TextStyle(color: Colors.red),
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
@@ -406,7 +411,8 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       child: SwitchListTile.adaptive(
           value: _secureWithBiometrics,
           title: Text(S.current.messageSecureUsingBiometrics,
-              textAlign: TextAlign.end),
+              textAlign: TextAlign.end,
+              style: context.theme.appTextStyle.bodyMedium),
           onChanged: (enableBiometrics) {
             setState(() {
               _secureWithBiometrics = enableBiometrics;
@@ -419,13 +425,13 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
 
-  Widget _manualPasswordWarning() => Visibility(
+  Widget _manualPasswordWarning(BuildContext context) => Visibility(
       visible: _showSavePasswordWarning && _addPassword,
       child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-          color: Colors.red,
+          style:
+              context.theme.appTextStyle.bodyMedium.copyWith(color: Colors.red),
           maxLines: 10,
           softWrap: true,
-          fontSize: Dimensions.fontSmall,
           textOverflow: TextOverflow.ellipsis));
 
   List<Widget> _actions(context) => [

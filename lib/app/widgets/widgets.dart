@@ -35,16 +35,13 @@ export 'inputs/password_validation_input.dart';
 export 'items/entry_action_item.dart';
 export 'items/file_description.dart';
 export 'items/folder_description.dart';
-export 'items/labeled_switch.dart';
 export 'items/list_item.dart';
 export 'items/repo_description.dart';
 export 'items/repo_missing_item.dart';
 
-export 'selectors/access_mode_dropddown_menu.dart';
 export 'selectors/access_mode_selector.dart';
 
 export 'states/error_state.dart';
-export 'states/loading_main_page_state.dart';
 export 'states/locked_repository_state.dart';
 export 'states/missing_repo_state.dart';
 export 'states/no_contents_state.dart';

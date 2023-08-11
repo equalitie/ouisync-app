@@ -15,28 +15,37 @@ import 'settings_tile.dart';
 class NetworkSection extends SettingsSection {
   NetworkSection() : super(title: S.current.titleNetwork);
 
+  TextStyle? bodyStyle;
+  TextStyle? subtitleStyle;
+
   @override
-  List<Widget> buildTiles(BuildContext context) => [
-        _buildConnectivityTypeTile(context),
-        _buildPortForwardingTile(context),
-        _buildLocalDiscoveryTile(context),
-        _buildSyncOnMobileSwitch(context),
-        ..._buildConnectivityInfoTiles(context),
-        _buildPeerListTile(context),
-        _buildNatDetectionTile(context),
-      ];
+  List<Widget> buildTiles(BuildContext context) {
+    bodyStyle = context.theme.appTextStyle.bodyMedium;
+    subtitleStyle = context.theme.appTextStyle.bodySmall;
+
+    return [
+      _buildConnectivityTypeTile(context),
+      _buildPortForwardingTile(context),
+      _buildLocalDiscoveryTile(context),
+      _buildSyncOnMobileSwitch(context),
+      ..._buildConnectivityInfoTiles(context),
+      _buildPeerListTile(context),
+      _buildNatDetectionTile(context),
+    ];
+  }
 
   Widget _buildConnectivityTypeTile(BuildContext context) =>
       BlocBuilder<PowerControl, PowerControlState>(
         builder: (context, state) => SettingsTile(
           leading: Icon(Icons.wifi),
-          title: Text(S.current.labelConnectionType),
+          title: Text(S.current.labelConnectionType, style: bodyStyle),
           value: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_connectivityTypeName(state.connectivityType)),
+              Text(_connectivityTypeName(state.connectivityType),
+                  style: subtitleStyle),
               if (state.networkDisabledReason != null)
-                Text('(${state.networkDisabledReason!})'),
+                Text('(${state.networkDisabledReason!})', style: subtitleStyle),
             ],
           ),
           trailing: (state.isNetworkEnabled ?? true)
@@ -55,7 +64,7 @@ class NetworkSection extends SettingsSection {
               unawaited(powerControl.setPortForwardingEnabled(value));
             },
             title: InfoBuble(
-                child: Text(Strings.upNP),
+                child: Text(Strings.upNP, style: bodyStyle),
                 title: S.current.titleUPnP,
                 description: [TextSpan(text: S.current.messageInfoUPnP)]),
             leading: Icon(Icons.router)),
@@ -71,7 +80,7 @@ class NetworkSection extends SettingsSection {
             unawaited(powerControl.setLocalDiscoveryEnabled(value));
           },
           title: InfoBuble(
-              child: Text(S.current.messageLocalDiscovery),
+              child: Text(S.current.messageLocalDiscovery, style: bodyStyle),
               title: S.current.messageLocalDiscovery,
               description: [
                 TextSpan(text: S.current.messageInfoLocalDiscovery)
@@ -90,7 +99,7 @@ class NetworkSection extends SettingsSection {
             unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
           title: InfoBuble(
-              child: Text(S.current.messageSyncMobileData),
+              child: Text(S.current.messageSyncMobileData, style: bodyStyle),
               title: S.current.messageSyncMobileData,
               description: [
                 TextSpan(text: S.current.messageInfoSyncMobileData)
@@ -148,8 +157,8 @@ class NetworkSection extends SettingsSection {
             if (value.isNotEmpty) {
               return SettingsTile(
                 leading: Icon(icon),
-                title: Text(title),
-                value: Text(value),
+                title: Text(title, style: bodyStyle),
+                value: Text(value, style: subtitleStyle),
               );
             } else {
               return SizedBox.shrink();
@@ -160,8 +169,8 @@ class NetworkSection extends SettingsSection {
       BlocBuilder<PeerSetCubit, PeerSet>(
         builder: (context, state) => NavigationTile(
             leading: Icon(Icons.people),
-            title: Text(S.current.labelPeers),
-            value: Text(state.stats()),
+            title: Text(S.current.labelPeers, style: bodyStyle),
+            value: Text(state.stats(), style: subtitleStyle),
             onTap: () {
               final peerSetCubit = context.read<PeerSetCubit>();
 
@@ -180,7 +189,7 @@ class NetworkSection extends SettingsSection {
         builder: (context, type) => SettingsTile(
           leading: Icon(Icons.nat),
           title: InfoBuble(
-              child: Text(S.current.messageNATType),
+              child: Text(S.current.messageNATType, style: bodyStyle),
               title: S.current.messageNATType,
               description: [
                 TextSpan(text: S.current.messageInfoNATType),
@@ -189,7 +198,7 @@ class NetworkSection extends SettingsSection {
                     '\n\n${S.current.messageNATOnWikipedia}',
                     _launchNATOnWikipedia)
               ]),
-          value: Text(type.message()),
+          value: Text(type.message(), style: subtitleStyle),
         ),
       );
 

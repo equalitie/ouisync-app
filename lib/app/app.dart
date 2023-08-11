@@ -105,7 +105,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(appBarTheme: AppBarTheme(color: F.color)),
+      theme: _setupAppThemeData(),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -199,6 +199,27 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     );
   }
 }
+
+ThemeData _setupAppThemeData() => ThemeData().copyWith(
+        appBarTheme: AppBarTheme(color: F.color),
+        textTheme: TextTheme().copyWith(
+            bodyLarge: AppTypography.bodyBig,
+            bodyMedium: AppTypography.bodyMedium,
+            bodySmall: AppTypography.bodySmall,
+            titleMedium: AppTypography.titleMedium),
+        extensions: <ThemeExtension<dynamic>>[
+          AppTextThemeExtension(
+              titleLarge: AppTypography.titleBig,
+              titleMedium: AppTypography.titleMedium,
+              titleSmall: AppTypography.titleSmall,
+              bodyLarge: AppTypography.bodyBig,
+              bodyMedium: AppTypography.bodyMedium,
+              bodySmall: AppTypography.bodySmall,
+              bodyMicro: AppTypography.bodyMicro,
+              labelLarge: AppTypography.labelBig,
+              labelMedium: AppTypography.labelMedium,
+              labelSmall: AppTypography.labelSmall)
+        ]);
 
 void _setupErrorReporting() {
   // Errors from flutter

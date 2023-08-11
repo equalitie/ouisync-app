@@ -31,7 +31,8 @@ class NoRepositoriesState extends StatelessWidget {
           Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,
-            child: Fields.inPageMainMessage(S.current.messageNoRepos),
+            child: Fields.inPageMainMessage(S.current.messageNoRepos,
+                style: context.theme.appTextStyle.bodyLarge),
           ),
           Dimensions.spacingVertical,
           Align(
@@ -44,14 +45,12 @@ class NoRepositoriesState extends StatelessWidget {
           Fields.inPageButton(
               onPressed: () async => await onNewRepositoryPressed.call(),
               text: S.current.actionCreateRepository,
-              fontSize: Dimensions.fontMicro,
               size: Dimensions.sizeInPageButtonRegular,
               autofocus: true),
           Dimensions.spacingVertical,
           Fields.inPageButton(
               onPressed: () async => await onImportRepositoryPressed.call(),
               text: S.current.actionAddRepositoryWithToken,
-              fontSize: Dimensions.fontMicro,
               size: Dimensions.sizeInPageButtonRegular),
         ],
       ),

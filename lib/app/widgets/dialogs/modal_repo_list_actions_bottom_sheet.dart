@@ -5,7 +5,7 @@ import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 
 class RepoListActions extends StatelessWidget with AppLogger {
-  const RepoListActions(
+  RepoListActions(
       {required this.context,
       required this.reposCubit,
       required this.onNewRepositoryPressed,
@@ -18,42 +18,40 @@ class RepoListActions extends StatelessWidget with AppLogger {
   final Future<String?> Function() onImportRepositoryPressed;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _buildAction(
-                name: S.current.actionNewRepo,
-                icon: Icons.archive_outlined,
-                action: () async {
-                  final newRepoName = await onNewRepositoryPressed.call();
+  Widget build(BuildContext context) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              _buildAction(
+                  name: S.current.actionNewRepo,
+                  icon: Icons.archive_outlined,
+                  action: () async {
+                    final newRepoName = await onNewRepositoryPressed.call();
 
-                  if (newRepoName == null) {
-                    return;
-                  }
+                    if (newRepoName == null) {
+                      return;
+                    }
 
-                  Navigator.of(context).pop();
-                }),
-            _buildAction(
-                name: S.current.actionImportRepo,
-                icon: Icons.unarchive_outlined,
-                action: () async {
-                  final importedRepoName =
-                      await onImportRepositoryPressed.call();
+                    Navigator.of(context).pop();
+                  }),
+              _buildAction(
+                  name: S.current.actionImportRepo,
+                  icon: Icons.unarchive_outlined,
+                  action: () async {
+                    final importedRepoName =
+                        await onImportRepositoryPressed.call();
 
-                  if (importedRepoName == null) {
-                    return;
-                  }
+                    if (importedRepoName == null) {
+                      return;
+                    }
 
-                  Navigator.of(context).pop();
-                })
-          ]),
-        ]);
-  }
+                    Navigator.of(context).pop();
+                  })
+            ]),
+          ]);
 
   Widget _buildAction({name, icon, action}) => Padding(
       padding: Dimensions.paddingBottomSheetActions,
@@ -63,6 +61,6 @@ class RepoListActions extends StatelessWidget with AppLogger {
           child: Column(children: [
             Icon(icon, size: Dimensions.sizeIconBig),
             Dimensions.spacingVertical,
-            Text(name, style: const TextStyle(fontSize: Dimensions.fontSmall))
+            Text(name)
           ])));
 }

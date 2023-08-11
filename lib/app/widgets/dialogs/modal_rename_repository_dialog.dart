@@ -26,13 +26,18 @@ class RenameRepository extends StatelessWidget {
   }
 
   Widget _buildUnlockRepositoryWidget(BuildContext context) {
+    final bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.constrainedText('"$repositoryName"',
-              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
+              flex: 0, style: bodyStyle),
           Fields.formTextField(
               context: context,
               label: S.current.labelRenameRepository,

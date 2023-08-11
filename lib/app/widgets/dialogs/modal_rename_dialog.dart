@@ -68,13 +68,17 @@ class _RenameState extends State<Rename> {
   }
 
   Widget _buildRenameEntryWidget(BuildContext context) {
+    final bodyStyle = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(fontWeight: FontWeight.w400);
+
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.constrainedText('"$_oldName"',
-              flex: 0, fontWeight: FontWeight.w400, color: Colors.black),
+          Fields.constrainedText('"$_oldName"', flex: 0, style: bodyStyle),
           Dimensions.spacingVerticalDouble,
           Fields.formTextField(
               context: context,

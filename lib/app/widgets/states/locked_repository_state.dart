@@ -47,6 +47,7 @@ class LockedRepositoryState extends StatelessWidget
         Align(
             alignment: Alignment.center,
             child: Fields.inPageMainMessage(S.current.messageLockedRepository,
+                style: context.theme.appTextStyle.bodyLarge,
                 tags: {
                   Constants.inlineTextColor:
                       InlineTextStyles.color(Colors.black),

@@ -1,11 +1,12 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/log.dart';
+import '../utils/utils.dart';
 
 class BackgroundServiceManagerState {
   bool isServiceRunning;
@@ -52,13 +53,17 @@ class BackgroundServiceManager extends Cubit<BackgroundServiceManagerState>
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Text(S.current.titleBackgroundAndroidPermissionsTitle),
-                content: Text(S.current.messageBackgroundAndroidPermissions),
+                title: Fields.constrainedText(
+                    S.current.titleBackgroundAndroidPermissionsTitle,
+                    flex: 0,
+                    style: context.theme.appTextStyle.titleLarge,
+                    maxLines: 2),
+                content: Text(S.current.messageBackgroundAndroidPermissions,
+                    style: context.theme.appTextStyle.bodyMedium),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context, 'OK'),
-                    child: Text(S.current.actionOK),
-                  ),
+                      onPressed: () => Navigator.of(context).pop('OK'),
+                      child: Text(S.current.actionOK))
                 ]);
           });
     }

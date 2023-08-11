@@ -30,12 +30,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    const bodyStyle = TextStyle(fontSize: 19.0);
-
     final pageDecoration = PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
+        titleTextStyle: context.theme.appTextStyle.titleLarge,
         bodyAlignment: Alignment.center,
-        bodyTextStyle: bodyStyle,
+        bodyTextStyle: context.theme.appTextStyle.bodyMedium,
         bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
         imagePadding: EdgeInsets.zero);
 
@@ -73,8 +71,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         next: _buildButton(S.current.actionNext),
         done: _buildButton(S.current.actionDone),
         curve: Curves.fastLinearToSlowEaseIn,
-        controlsMargin: const EdgeInsets.all(16),
-        controlsPadding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
         dotsDecorator: const DotsDecorator(
           size: Size(10.0, 10.0),
           color: Color(0xFFBDBDBD),
