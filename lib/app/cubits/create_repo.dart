@@ -15,6 +15,7 @@ class CreateRepositoryState extends Equatable {
   final bool secureWithBiometrics;
   final bool addPassword;
 
+  final AccessMode accessModeGranted;
   final String suggestedName;
   final RepoMetaInfo? repositoryMetaInfo;
 
@@ -34,6 +35,7 @@ class CreateRepositoryState extends Equatable {
       required this.isBlindReplica,
       required this.secureWithBiometrics,
       required this.addPassword,
+      required this.accessModeGranted,
       required this.suggestedName,
       required this.repositoryMetaInfo,
       required this.obscurePassword,
@@ -50,6 +52,7 @@ class CreateRepositoryState extends Equatable {
           bool? isBlindReplica,
           bool? secureWithBiometrics,
           bool? addPassword,
+          AccessMode? accessModeGranted,
           String? suggestedName,
           RepoMetaInfo? repositoryMetaInfo,
           bool? obscurePassword,
@@ -67,6 +70,7 @@ class CreateRepositoryState extends Equatable {
           secureWithBiometrics:
               secureWithBiometrics ?? this.secureWithBiometrics,
           addPassword: addPassword ?? this.addPassword,
+          accessModeGranted: accessModeGranted ?? this.accessModeGranted,
           suggestedName: suggestedName ?? this.suggestedName,
           repositoryMetaInfo: repositoryMetaInfo ?? this.repositoryMetaInfo,
           obscurePassword: obscurePassword ?? this.obscurePassword,
@@ -89,6 +93,7 @@ class CreateRepositoryState extends Equatable {
         isBlindReplica,
         secureWithBiometrics,
         addPassword,
+        accessModeGranted,
         suggestedName,
         repositoryMetaInfo,
         obscurePassword,
@@ -116,6 +121,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
       required ShareToken? shareToken,
       required bool isBlindReplica,
       required String? suggestedName,
+      required AccessMode? accessModeGranted,
       required bool showSuggestedName,
       required bool showAccessModeMessage}) {
     var initialState = CreateRepositoryState(
@@ -124,6 +130,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
         isBlindReplica: isBlindReplica,
         secureWithBiometrics: false,
         addPassword: false,
+        accessModeGranted: accessModeGranted ?? AccessMode.blind,
         suggestedName: suggestedName ?? '',
         repositoryMetaInfo: null,
         obscurePassword: true,
