@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -13,7 +14,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RepositoryCreation extends StatelessWidget with AppLogger {
+class RepositoryCreation extends HookWidget with AppLogger {
   RepositoryCreation(
       {required this.context,
       required this.cubit,
@@ -27,117 +28,139 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
   final String? initialTokenValue;
   final bool isBiometricsAvailable;
 
+  late final CreateRepositoryCubit createRepoCubit;
+
   final _scrollKey = GlobalKey();
 
   final _repositoryNameInputKey = GlobalKey<FormFieldState>();
   final _passwordInputKey = GlobalKey<FormFieldState>();
   final _retypePasswordInputKey = GlobalKey<FormFieldState>();
 
-  final TextEditingController _nameController =
-      TextEditingController(text: null);
-  final TextEditingController _passwordController =
-      TextEditingController(text: null);
-  final TextEditingController _retypedPasswordController =
-      TextEditingController(text: null);
+  late TextEditingController nameController;
+  late TextEditingController passwordController;
+  late TextEditingController retypedPasswordController;
 
-  final _repositoryNameFocus = FocusNode();
-  final _passwordFocus = FocusNode();
-  final _retryPasswordFocus = FocusNode();
+  late FocusNode repositoryNameFocus;
+  late FocusNode passwordFocus;
+  late FocusNode retryPasswordFocus;
 
-  late final CreateRepositoryCubit createRepo;
-
-  final ValueNotifier _accessModeNotifier = ValueNotifier<String>('');
-
-  TextStyle? _linkStyle;
-  TextStyle? _messageSmall;
-  TextStyle? _labelStyle;
+  TextStyle? linkStyle;
+  TextStyle? messageSmall;
+  TextStyle? labelStyle;
 
   @override
   Widget build(BuildContext context) {
-    _linkStyle = context.theme.appTextStyle.bodySmall
+    _initHooks(context);
+    _initTextStyles(context);
+
+    final snapshotCubit = _getCubit();
+    if (snapshotCubit.hasData) {
+      createRepoCubit = snapshotCubit.data!;
+
+      _populatePasswordControllers(generatePassword: true);
+
+      repositoryNameFocus.requestFocus();
+      _addListeners();
+
+      return BlocBuilder<CreateRepositoryCubit, CreateRepositoryState>(
+          bloc: createRepoCubit,
+          builder: (context, state) => WillPopScope(
+              onWillPop: () async {
+                if (state.deleteRepositoryBeforePop) {
+                  assert(state.repositoryMetaInfo != null,
+                      '_repositoryMetaInfo is null');
+
+                  if (state.repositoryMetaInfo == null) {
+                    throw ('A repository was created, but saving the password into the '
+                        'secure storage failed and it may be lost.\nMost likely this '
+                        'repository needs to be deleted.');
+                  }
+
+                  final repoName = state.repositoryMetaInfo!.name;
+                  final authMode =
+                      cubit.settings.getAuthenticationMode(repoName);
+
+                  await cubit.deleteRepository(
+                      state.repositoryMetaInfo!, authMode);
+                }
+
+                return true;
+              },
+              child: Form(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                    SingleChildScrollView(
+                        reverse: true,
+                        child: _newRepositoryWidget(context, state))
+                  ]))));
+    } else if (snapshotCubit.hasError) {
+      return Container(
+          child: Center(
+              child: Column(children: [
+        const Icon(
+          Icons.error_outline,
+          color: Colors.red,
+          size: 60,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text('Error: ${snapshotCubit.error}'),
+        )
+      ])));
+    } else {
+      return Container(
+          child: Center(
+              child: Column(children: [
+        SizedBox(
+          width: 60,
+          height: 60,
+          child: CircularProgressIndicator(),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 16),
+          child: Text('Awaiting result...'),
+        )
+      ])));
+    }
+  }
+
+  void _initHooks(BuildContext context) {
+    initTextControllers();
+    initFocusNodes();
+  }
+
+  void initTextControllers() {
+    nameController = useTextEditingController.fromValue(TextEditingValue.empty);
+    passwordController =
+        useTextEditingController.fromValue(TextEditingValue.empty);
+    retypedPasswordController =
+        useTextEditingController.fromValue(TextEditingValue.empty);
+  }
+
+  void initFocusNodes() {
+    repositoryNameFocus = useFocusNode(debugLabel: 'name-focus');
+    passwordFocus = useFocusNode(debugLabel: 'password-focus');
+    retryPasswordFocus = useFocusNode(debugLabel: 'retrypwd-focus');
+  }
+
+  AsyncSnapshot<CreateRepositoryCubit> _getCubit() {
+    final futureCreateRepoCubit = useMemoized(initCubit);
+    final snapshot = useFuture(futureCreateRepoCubit);
+    return snapshot;
+  }
+
+  void _initTextStyles(BuildContext context) {
+    linkStyle = context.theme.appTextStyle.bodySmall
         .copyWith(fontWeight: FontWeight.w500);
 
-    _labelStyle = context.theme.appTextStyle.labelMedium
+    labelStyle = context.theme.appTextStyle.labelMedium
         .copyWith(color: Constants.inputLabelForeColor);
 
-    _messageSmall =
+    messageSmall =
         context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
-
-    return FutureBuilder(
-        future: initCubit(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            createRepo = snapshot.data!;
-
-            _populatePasswordControllers(generatePassword: true);
-
-            _repositoryNameFocus.requestFocus();
-            _addListeners();
-
-            return BlocBuilder<CreateRepositoryCubit, CreateRepositoryState>(
-                bloc: createRepo,
-                builder: (context, state) => WillPopScope(
-                    onWillPop: () async {
-                      if (state.deleteRepositoryBeforePop) {
-                        assert(state.repositoryMetaInfo != null,
-                            '_repositoryMetaInfo is null');
-
-                        if (state.repositoryMetaInfo == null) {
-                          throw ('A repository was created, but saving the password into the '
-                              'secure storage failed and it may be lost.\nMost likely this '
-                              'repository needs to be deleted.');
-                        }
-
-                        final repoName = state.repositoryMetaInfo!.name;
-                        final authMode =
-                            cubit.settings.getAuthenticationMode(repoName);
-
-                        await cubit.deleteRepository(
-                            state.repositoryMetaInfo!, authMode);
-                      }
-
-                      return true;
-                    },
-                    child: Form(
-                        child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                          SingleChildScrollView(
-                              reverse: true,
-                              child: _newRepositoryWidget(context, state))
-                        ]))));
-          } else if (snapshot.hasError) {
-            return Container(
-                child: Center(
-                    child: Column(children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}'),
-              )
-            ])));
-          } else {
-            return Container(
-                child: Center(
-                    child: Column(children: [
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text('Awaiting result...'),
-              )
-            ])));
-          }
-        });
   }
 
   Future<CreateRepositoryCubit> initCubit() async {
@@ -154,18 +177,15 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
       accessMode = await shareToken.mode;
     }
 
-    final showSuggestedName =
-        _nameController.text.isEmpty && initialTokenValue != null;
-
-    _accessModeNotifier.value = accessMode?.name ?? '';
-    final showAccessModeMessage =
-        _accessModeNotifier.value.toString().isNotEmpty;
+    final showSuggestedName = suggestedName.isNotEmpty;
+    final showAccessModeMessage = accessMode != null;
 
     final state = CreateRepositoryCubit.create(
         reposCubit: cubit,
         isBiometricsAvailable: isBiometricsAvailable,
         shareToken: shareToken,
         isBlindReplica: accessMode == AccessMode.blind,
+        accessModeGranted: accessMode,
         suggestedName: suggestedName,
         showSuggestedName: showSuggestedName,
         showAccessModeMessage: showAccessModeMessage);
@@ -191,18 +211,18 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
   }
 
   void _addListeners() {
-    _repositoryNameFocus.addListener(() {
-      if (initialTokenValue != null && _nameController.text.isEmpty) {
-        createRepo.showSuggestedName(_nameController.text.isEmpty);
+    repositoryNameFocus.addListener(() {
+      if (initialTokenValue != null && nameController.text.isEmpty) {
+        createRepoCubit.showSuggestedName(nameController.text.isEmpty);
       }
     });
 
-    _nameController.addListener(() {
-      if (initialTokenValue != null && _nameController.text.isEmpty) {
-        createRepo.showSuggestedName(true);
+    nameController.addListener(() {
+      if (initialTokenValue != null && nameController.text.isEmpty) {
+        createRepoCubit.showSuggestedName(true);
       }
 
-      createRepo.showRepositoryNameInUseWarning(false);
+      createRepoCubit.showRepositoryNameInUseWarning(false);
     });
   }
 
@@ -241,20 +261,18 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Fields.constrainedText(S.current.labelRepositoryLink,
-                          flex: 0, style: _labelStyle),
+                          flex: 0, style: labelStyle),
                       Dimensions.spacingVerticalHalf,
                       Text(formatShareLinkForDisplay(initialTokenValue ?? ''),
-                          style: _linkStyle)
+                          style: linkStyle)
                     ]))),
-        ValueListenableBuilder(
-            valueListenable: _accessModeNotifier,
-            builder: (context, message, child) => Visibility(
-                visible: state.showAccessModeMessage,
-                child: Fields.constrainedText(
-                    S.current
-                        .messageRepositoryAccessMode(message as String? ?? '?'),
-                    flex: 0,
-                    style: _messageSmall)))
+        Visibility(
+            visible: state.showAccessModeMessage,
+            child: Fields.constrainedText(
+                S.current
+                    .messageRepositoryAccessMode(state.accessModeGranted.name),
+                flex: 0,
+                style: messageSmall))
       ];
 
   List<Widget> _repositoryName(CreateRepositoryState state) => [
@@ -262,14 +280,14 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
         Fields.formTextField(
             key: _repositoryNameInputKey,
             context: context,
-            textEditingController: _nameController,
+            textEditingController: nameController,
             label: S.current.labelName,
             hint: S.current.messageRepositoryName,
             onSaved: (_) {},
             validator:
                 validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
             autovalidateMode: AutovalidateMode.disabled,
-            focusNode: _repositoryNameFocus),
+            focusNode: repositoryNameFocus),
         _repositoryNameTakenWarning(state),
         Visibility(
             visible: state.showSuggestedName,
@@ -279,17 +297,18 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
                   Fields.constrainedText(
                       S.current
                           .messageRepositorySuggestedName(state.suggestedName),
-                      style: _messageSmall)
+                      style: messageSmall)
                 ]))),
         Dimensions.spacingVertical
       ];
 
   void _updateNameController(String value) {
-    _nameController.text = value;
-    _nameController.selection =
+    nameController.text = value;
+    nameController.selection =
         TextSelection(baseOffset: 0, extentOffset: value.length);
 
-    createRepo.showSuggestedName(value.isEmpty && initialTokenValue != null);
+    createRepoCubit
+        .showSuggestedName(value.isEmpty && initialTokenValue != null);
 
     final targetContext = _scrollKey.currentContext;
     if (targetContext != null) {
@@ -315,7 +334,7 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
               child: Fields.formTextField(
                   key: _passwordInputKey,
                   context: context,
-                  textEditingController: _passwordController,
+                  textEditingController: passwordController,
                   obscureText: state.obscurePassword,
                   label: S.current.labelPassword,
                   suffixIcon: _passwordActions(state),
@@ -324,31 +343,32 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
                   validator: validateNoEmpty(
                       Strings.messageErrorRepositoryPasswordValidation),
                   autovalidateMode: AutovalidateMode.disabled,
-                  focusNode: _passwordFocus))
+                  focusNode: passwordFocus))
         ]),
         Row(children: [
           Expanded(
               child: Fields.formTextField(
                   key: _retypePasswordInputKey,
                   context: context,
-                  textEditingController: _retypedPasswordController,
+                  textEditingController: retypedPasswordController,
                   obscureText: state.obscureRetypePassword,
                   label: S.current.labelRetypePassword,
                   suffixIcon: _retypePasswordActions(state),
                   hint: S.current.messageRepositoryPassword,
                   onSaved: (_) {},
                   validator: (retypedPassword) => retypedPasswordValidator(
-                        password: _passwordController.text,
+                        password: passwordController.text,
                         retypedPassword: retypedPassword,
                       ),
                   autovalidateMode: AutovalidateMode.disabled,
-                  focusNode: _retryPasswordFocus))
+                  focusNode: retryPasswordFocus))
         ])
       ])));
 
   Widget _passwordActions(CreateRepositoryState state) => Wrap(children: [
         IconButton(
-            onPressed: () => createRepo.obscurePassword(!state.obscurePassword),
+            onPressed: () =>
+                createRepoCubit.obscurePassword(!state.obscurePassword),
             icon: state.obscurePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
@@ -357,7 +377,7 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
             color: Colors.black),
         IconButton(
             onPressed: () async {
-              final password = _passwordController.text;
+              final password = passwordController.text;
               if (password.isEmpty) return;
 
               await copyStringToClipboard(password);
@@ -372,8 +392,8 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
 
   Widget _retypePasswordActions(CreateRepositoryState state) => Wrap(children: [
         IconButton(
-            onPressed: () =>
-                createRepo.obscureRetypePassword(!state.obscureRetypePassword),
+            onPressed: () => createRepoCubit
+                .obscureRetypePassword(!state.obscureRetypePassword),
             icon: state.obscureRetypePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
@@ -382,7 +402,7 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
             color: Colors.black),
         IconButton(
             onPressed: () async {
-              final retypedPassword = _retypedPasswordController.text;
+              final retypedPassword = retypedPasswordController.text;
               if (retypedPassword.isEmpty) return;
 
               await copyStringToClipboard(retypedPassword);
@@ -421,8 +441,8 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
               textAlign: TextAlign.start,
               style: context.theme.appTextStyle.bodyMedium),
           onChanged: (enableBiometrics) {
-            createRepo.secureWithBiometrics(enableBiometrics);
-            createRepo.showSavePasswordWarning(!enableBiometrics);
+            createRepoCubit.secureWithBiometrics(enableBiometrics);
+            createRepoCubit.showSavePasswordWarning(!enableBiometrics);
 
             _populatePasswordControllers(generatePassword: true);
           },
@@ -454,9 +474,9 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
                 ? S.current.actionCreate
                 : S.current.actionImport,
             onPressed: () {
-              final name = _nameController.text;
+              final name = nameController.text;
               final password =
-                  state.isBlindReplica ? '' : _passwordController.text;
+                  state.isBlindReplica ? '' : passwordController.text;
 
               _onSaved(name, password, state);
             },
@@ -464,11 +484,11 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
       ];
 
   void _updatePasswordSection(bool addPassword) {
-    createRepo.addPassword(addPassword);
+    createRepoCubit.addPassword(addPassword);
 
     // Biometrics used to be the default; now we let the user enable it.
-    createRepo.secureWithBiometrics(false);
-    createRepo.showSavePasswordWarning(addPassword);
+    createRepoCubit.secureWithBiometrics(false);
+    createRepoCubit.showSavePasswordWarning(addPassword);
 
     _populatePasswordControllers(generatePassword: !addPassword);
   }
@@ -476,16 +496,16 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
   void _populatePasswordControllers({required bool generatePassword}) {
     final autoPassword = generatePassword ? generateRandomPassword() : '';
 
-    _passwordController.text = autoPassword;
-    _retypedPasswordController.text = autoPassword;
+    passwordController.text = autoPassword;
+    retypedPasswordController.text = autoPassword;
 
-    if (_nameController.text.isEmpty) {
-      _repositoryNameFocus.requestFocus();
+    if (nameController.text.isEmpty) {
+      repositoryNameFocus.requestFocus();
       return;
     }
 
     if (!generatePassword) {
-      _passwordFocus.requestFocus();
+      passwordFocus.requestFocus();
     }
   }
 
@@ -507,12 +527,12 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
       _retypePasswordInputKey.currentState!.save();
     }
 
-    final defaultRepoLocation = await createRepo.defaultRepoLocation;
+    final defaultRepoLocation = await createRepoCubit.defaultRepoLocation;
     final repoMetaInfo = RepoMetaInfo.fromDirAndName(defaultRepoLocation, name);
 
     final exist = await Dialogs.executeFutureWithLoadingDialog(context,
         f: io.File(repoMetaInfo.path()).exists());
-    createRepo.showRepositoryNameInUseWarning(exist);
+    createRepoCubit.showRepositoryNameInUseWarning(exist);
 
     if (exist) return;
 
@@ -541,8 +561,8 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
         : AuthMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: createRepo.createRepository(repoMetaInfo, password, state.shareToken,
-            authenticationMode, true));
+        f: createRepoCubit.createRepository(repoMetaInfo, password,
+            state.shareToken, authenticationMode, true));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";
@@ -615,19 +635,7 @@ class RepositoryCreation extends StatelessWidget with AppLogger {
   }
 
   void _setDeleteRepoBeforePop(bool delete, RepoMetaInfo? repoMetaInfo) {
-    createRepo.deleteRepositoryBeforePop(delete);
-    createRepo.repositoryMetaInfo(repoMetaInfo);
+    createRepoCubit.deleteRepositoryBeforePop(delete);
+    createRepoCubit.repositoryMetaInfo(repoMetaInfo);
   }
-
-  // @override
-  // void dispose() {
-  //   _nameController.dispose();
-  //   _passwordController.dispose();
-  //   _retypedPasswordController.dispose();
-
-  //   _repositoryNameFocus.dispose();
-  //   _passwordFocus.dispose();
-
-  //   super.dispose();
-  // }
 }
