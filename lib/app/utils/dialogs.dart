@@ -117,10 +117,12 @@ abstract class Dialogs {
   static AlertDialog _alertDialog(BuildContext context, String title,
           List<Widget> body, List<Widget> actions) =>
       AlertDialog(
-          title: Fields.constrainedText(title,
-              flex: 0,
-              style: context.theme.appTextStyle.titleMedium,
-              maxLines: 2),
+          title: Flex(direction: Axis.horizontal, children: [
+            Fields.constrainedText(title,
+                flex: 1,
+                style: context.theme.appTextStyle.titleMedium,
+                maxLines: 2)
+          ]),
           content: SingleChildScrollView(child: ListBody(children: body)),
           actions: actions);
 
