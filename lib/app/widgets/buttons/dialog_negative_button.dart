@@ -8,6 +8,7 @@ class NegativeButton extends StatelessWidget {
     required this.onPressed,
     required this.buttonsAspectRatio,
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
+    this.focusNode,
     Key? key,
   }) : super(key: key);
 
@@ -15,6 +16,7 @@ class NegativeButton extends StatelessWidget {
   final GestureTapCallback? onPressed;
   final double buttonsAspectRatio;
   final BoxConstraints buttonConstrains;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class NegativeButton extends StatelessWidget {
               child: Container(
                 margin: Dimensions.marginDialogNegativeButton,
                 child: RawMaterialButton(
+                  focusNode: focusNode,
                   onPressed: onPressed,
                   child: Text((text ?? '').toUpperCase()),
                   constraints: buttonConstrains,
