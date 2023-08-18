@@ -25,12 +25,12 @@ class Rename extends StatefulWidget {
 
 class _RenameState extends State<Rename> {
   late String _oldName;
-
-  final _newNameController = TextEditingController();
-
   late String _originalExtension;
 
   late bool _isFile;
+
+  final _newNameController = TextEditingController();
+  final _positiveButtonFocus = FocusNode(debugLabel: 'accept-button-focus');
 
   @override
   void initState() {
@@ -42,6 +42,7 @@ class _RenameState extends State<Rename> {
   @override
   void dispose() {
     _newNameController.dispose();
+    _positiveButtonFocus.dispose();
 
     super.dispose();
   }
@@ -68,10 +69,8 @@ class _RenameState extends State<Rename> {
   }
 
   Widget _buildRenameEntryWidget(BuildContext context) {
-    final bodyStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(fontWeight: FontWeight.w400);
+    final bodyStyle = context.theme.appTextStyle.bodyMedium
+        .copyWith(fontWeight: FontWeight.w400);
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -86,6 +85,9 @@ class _RenameState extends State<Rename> {
               label: S.current.labelName,
               hint: widget.hint,
               onSaved: (newName) => Navigator.of(context).pop(newName),
+              onFieldSubmitted: (_) =>
+                  FocusScope.of(context).requestFocus(_positiveButtonFocus),
+              textInputAction: TextInputAction.done,
               validator: _validateEntryName(
                   emptyError: S.current.messageErrorFormValidatorNameDefault,
                   regExp: '.*[/\\\\].*',
@@ -115,10 +117,13 @@ class _RenameState extends State<Rename> {
             text: S.current.actionRename,
             onPressed: () async =>
                 await _validateNewName(_newNameController.text),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+            focusNode: _positiveButtonFocus)
       ];
 
   Future<void> _validateNewName(String newName) async {
+    if (newName.isEmpty || newName == _oldName) return;
+
     if (!(widget.formKey.currentState?.validate() ?? false)) return;
 
     if (_isFile) {
