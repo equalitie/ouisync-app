@@ -194,7 +194,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           return ActionsDialog(
             title: S.current.messageRenameFolder,
             body: Rename(
-              context: context,
+              parentContext: context,
               entryData: data,
               hint: S.current.messageFolderName,
               formKey: formKey,

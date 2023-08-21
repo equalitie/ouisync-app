@@ -203,7 +203,7 @@ class _FileDetailState extends State<FileDetail> {
         return ActionsDialog(
           title: S.current.messageRenameFile,
           body: Rename(
-            context: context,
+            parentContext: context,
             entryData: data,
             hint: S.current.messageFileName,
             formKey: formKey,

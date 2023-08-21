@@ -1,102 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../models/item.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class Rename extends StatefulWidget {
-  const Rename({
+class Rename extends HookWidget with AppLogger {
+  Rename({
     Key? key,
-    required this.context,
+    required this.parentContext,
     required this.entryData,
     required this.hint,
     required this.formKey,
   }) : super(key: key);
 
-  final BuildContext context;
+  final BuildContext parentContext;
   final BaseItem entryData;
   final String hint;
   final GlobalKey<FormState> formKey;
 
-  @override
-  State<Rename> createState() => _RenameState();
-}
+  String _oldName = '';
+  String _originalExtension = '';
 
-class _RenameState extends State<Rename> {
-  late String _oldName;
-  late String _originalExtension;
+  bool _isFile = false;
 
-  late bool _isFile;
+  late TextEditingController _newNameController;
 
-  final _newNameController = TextEditingController();
-  final _positiveButtonFocus = FocusNode(debugLabel: 'accept-button-focus');
-
-  @override
-  void initState() {
-    selectEntryName();
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _newNameController.dispose();
-    _positiveButtonFocus.dispose();
-
-    super.dispose();
-  }
+  late FocusNode _nameTextFieldFocus;
+  late FocusNode _positiveButtonFocus;
 
   @override
   Widget build(BuildContext context) {
+    initHooks();
+    initForm();
+
+    final bodyStyle = initTextStyle(context);
     return Form(
-      key: widget.formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: _buildRenameEntryWidget(widget.context),
-    );
+        key: formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: _buildRenameEntryWidget(context, bodyStyle));
   }
 
-  void selectEntryName() {
-    _oldName = getBasename(widget.entryData.path);
-    _originalExtension = getFileExtension(widget.entryData.path);
+  void initHooks() {
+    _newNameController =
+        useTextEditingController.fromValue(TextEditingValue.empty);
 
-    _isFile = widget.entryData is FileItem;
-    final fileExtensionOffset = _isFile ? _originalExtension.length : 0;
-
-    _newNameController.text = _oldName;
-    _newNameController.selection = TextSelection(
-        baseOffset: 0, extentOffset: _oldName.length - fileExtensionOffset);
+    _nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
+    _positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
   }
 
-  Widget _buildRenameEntryWidget(BuildContext context) {
+  void initForm() {
+    _oldName = getBasename(entryData.path);
+    _originalExtension = getFileExtension(entryData.path);
+
+    _isFile = entryData is FileItem;
+    selectEntryName(_oldName, _originalExtension, _isFile);
+  }
+
+  TextStyle initTextStyle(BuildContext context) {
     final bodyStyle = context.theme.appTextStyle.bodyMedium
         .copyWith(fontWeight: FontWeight.w400);
+    return bodyStyle;
+  }
 
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.constrainedText('"$_oldName"', flex: 0, style: bodyStyle),
-          Dimensions.spacingVerticalDouble,
-          Fields.formTextField(
-              context: context,
-              textEditingController: _newNameController,
-              label: S.current.labelName,
-              hint: widget.hint,
-              onSaved: (newName) => Navigator.of(context).pop(newName),
-              onFieldSubmitted: (_) =>
-                  FocusScope.of(context).requestFocus(_positiveButtonFocus),
-              textInputAction: TextInputAction.done,
-              validator: _validateEntryName(
-                  emptyError: S.current.messageErrorFormValidatorNameDefault,
-                  regExp: '.*[/\\\\].*',
+  Widget _buildRenameEntryWidget(BuildContext context, TextStyle bodyStyle) =>
+      Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.constrainedText('"$_oldName"', flex: 0, style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Fields.formTextField(
+                context: context,
+                textEditingController: _newNameController,
+                textInputAction: TextInputAction.done,
+                label: S.current.labelName,
+                hint: hint,
+                onFieldSubmitted: (newName) async =>
+                    await _validateFieldSubmitted(context),
+                validator: _validateEntryName(
+                    emptyError: S.current.messageErrorFormValidatorNameDefault,
+                    regExp: '.*[/\\\\].*',
 
-                  /// No / nor \ allowed
-                  regExpError: S.current.messageErrorCharactersNotAllowed),
-              autofocus: true),
-          Fields.dialogActions(context, buttons: _actions(context)),
-        ]);
+                    /// No / nor \ allowed
+                    regExpError: S.current.messageErrorCharactersNotAllowed),
+                focusNode: _nameTextFieldFocus,
+                autofocus: true),
+            Fields.dialogActions(context, buttons: _actions(context)),
+          ]);
+
+  void selectEntryName(String value, String extension, bool isFile) {
+    final fileExtensionOffset = isFile ? extension.length : 0;
+
+    _newNameController.text = value;
+    _newNameController.selection = TextSelection(
+        baseOffset: 0, extentOffset: value.length - fileExtensionOffset);
+  }
+
+  Future<void> _validateFieldSubmitted(BuildContext context) async {
+    final newName = _newNameController.text;
+    final newExtension = getFileExtension(_newNameController.text);
+    final validationOk = await _validateNewName(newName);
+
+    validationOk
+        ? {
+            PlatformValues.isDesktopDevice
+                ? formKey.currentState!.save()
+                : _positiveButtonFocus.requestFocus(),
+            Navigator.of(context).pop(newName)
+          }
+        : {
+            selectEntryName(newName, newExtension, _isFile),
+            _nameTextFieldFocus.requestFocus()
+          };
   }
 
   String? Function(String?) _validateEntryName(
@@ -115,23 +134,23 @@ class _RenameState extends State<Rename> {
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionRename,
-            onPressed: () async =>
-                await _validateNewName(_newNameController.text),
+            onPressed: () async => await _validateFieldSubmitted(context),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
 
-  Future<void> _validateNewName(String newName) async {
-    if (newName.isEmpty || newName == _oldName) return;
+  Future<bool> _validateNewName(String newName) async {
+    if (newName.isEmpty || newName == _oldName) return false;
 
-    if (!(widget.formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) return false;
 
     if (_isFile) {
       final extensionValidationOK = await _validateExtension(newName);
-      if (!extensionValidationOK) return;
+      if (!extensionValidationOK) return false;
     }
 
-    widget.formKey.currentState!.save();
+    formKey.currentState!.save();
+    return true;
   }
 
   Future<bool> _validateExtension(String name) async {
@@ -154,7 +173,7 @@ class _RenameState extends State<Rename> {
     if (title.isEmpty) return true;
 
     final continueAnyway = await Dialogs.alertDialogWithActions(
-        context: widget.context,
+        context: parentContext,
         title: title,
         body: [
           Text(message)
@@ -162,11 +181,11 @@ class _RenameState extends State<Rename> {
         actions: [
           TextButton(
             child: Text(S.current.actionRename.toUpperCase()),
-            onPressed: () => Navigator.of(widget.context).pop(true),
+            onPressed: () => Navigator.of(parentContext).pop(true),
           ),
           TextButton(
             child: Text(S.current.actionCancelCapital),
-            onPressed: () => Navigator.of(widget.context).pop(false),
+            onPressed: () => Navigator.of(parentContext).pop(false),
           )
         ]);
 
