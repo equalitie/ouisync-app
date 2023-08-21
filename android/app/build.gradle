@@ -46,18 +46,18 @@ android {
         vanilla {
             dimension "flavor-type"
             applicationId "org.equalitie.ouisync"
-            resValue "string", "app_name", "OuiSync"
+            resValue "string", "app_name", "Ouisync"
         }
         analytics {
             dimension "flavor-type"
             applicationId "org.equalitie.ouisync"
-            resValue "string", "app_name", "OuiSync"
+            resValue "string", "app_name", "Ouisync"
         }
         development {
             dimension "flavor-type"
             applicationId "org.equalitie.ouisync.dev"
             versionNameSuffix "-dev"
-            resValue "string", "app_name", "OuiSync-Dev"
+            resValue "string", "app_name", "Ouisync-Dev"
         }
     }
 

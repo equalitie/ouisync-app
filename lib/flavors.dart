@@ -12,13 +12,13 @@ class F {
   static String get title {
     switch (appFlavor) {
       case Flavor.vanilla:
-        return 'OuiSync';
+        return 'Ouisync';
       case Flavor.analytics:
-        return 'OuiSync';
+        return 'Ouisync';
       case Flavor.development:
-        return 'OuiSync-Dev';
+        return 'Ouisync-Dev';
       default:
-        return 'OuiSync';
+        return 'Ouisync';
     }
   }
 

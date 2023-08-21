@@ -41,7 +41,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
   logInfo(
-      "-------------------- OuiSync (${F.name}) Start --------------------");
+      "-------------------- Ouisync (${F.name}) Start --------------------");
 
   _setupErrorReporting();
 
