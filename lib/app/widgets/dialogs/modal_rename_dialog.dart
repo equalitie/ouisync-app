@@ -95,9 +95,7 @@ class RenameEntry extends HookWidget with AppLogger {
                 },
                 validator: validateNoEmptyMaybeRegExpr(
                     emptyError: S.current.messageErrorFormValidatorNameDefault,
-                    regExp: '.*[/\\\\].*',
-
-                    /// No / nor \ allowed
+                    regExp: Strings.entityNameRegExp,
                     regExpError: S.current.messageErrorCharactersNotAllowed),
                 focusNode: _nameTextFieldFocus,
                 autofocus: true),

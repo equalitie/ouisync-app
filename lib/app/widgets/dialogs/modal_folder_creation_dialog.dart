@@ -36,9 +36,7 @@ class FolderCreation extends StatelessWidget {
               onSaved: (value) => _onSaved(cubit, value),
               validator: validateNoEmptyMaybeRegExpr(
                   emptyError: S.current.messageErrorFormValidatorNameDefault,
-                  regExp: '.*[/\\\\].*',
-
-                  /// No / nor \ allowed
+                  regExp: Strings.entityNameRegExp,
                   regExpError: S.current.messageErrorCharactersNotAllowed),
               autofocus: true),
           Fields.dialogActions(context, buttons: _actions(context)),

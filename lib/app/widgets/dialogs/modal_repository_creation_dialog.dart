@@ -287,9 +287,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
           onFieldSubmitted: (name) {},
           validator: validateNoEmptyMaybeRegExpr(
               emptyError: S.current.messageErrorFormValidatorNameDefault,
-              regExp: '.*[/\\\\].*',
-
-              /// No / nor \ allowed
+              regExp: Strings.entityNameRegExp,
               regExpError: S.current.messageErrorCharactersNotAllowed),
           autovalidateMode: AutovalidateMode.disabled,
           focusNode: repositoryNameFocus),
