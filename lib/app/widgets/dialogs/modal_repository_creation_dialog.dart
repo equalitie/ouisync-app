@@ -284,23 +284,28 @@ class RepositoryCreation extends HookWidget with AppLogger {
             label: S.current.labelName,
             hint: S.current.messageRepositoryName,
             onSaved: (_) {},
-            validator:
-                validateNoEmpty(S.current.messageErrorFormValidatorNameDefault),
-            autovalidateMode: AutovalidateMode.disabled,
-            focusNode: repositoryNameFocus),
-        _repositoryNameTakenWarning(state),
-        Visibility(
-            visible: state.showSuggestedName,
-            child: GestureDetector(
-                onTap: () => _updateNameController(state.suggestedName),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Fields.constrainedText(
-                      S.current
-                          .messageRepositorySuggestedName(state.suggestedName),
-                      style: messageSmall)
-                ]))),
-        Dimensions.spacingVertical
-      ];
+          onFieldSubmitted: (name) {},
+          validator: validateNoEmptyMaybeRegExpr(
+              emptyError: S.current.messageErrorFormValidatorNameDefault,
+              regExp: '.*[/\\\\].*',
+
+              /// No / nor \ allowed
+              regExpError: S.current.messageErrorCharactersNotAllowed),
+          autovalidateMode: AutovalidateMode.disabled,
+          focusNode: repositoryNameFocus),
+      _repositoryNameTakenWarning(state),
+      Visibility(
+          visible: state.showSuggestedName,
+          child: GestureDetector(
+              onTap: () => _updateNameController(state.suggestedName),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Fields.constrainedText(
+                    S.current
+                        .messageRepositorySuggestedName(state.suggestedName),
+                    style: messageSmall)
+              ]))),
+      Dimensions.spacingVertical
+    ];
 
   void _updateNameController(String value) {
     nameController.text = value;
@@ -340,8 +345,9 @@ class RepositoryCreation extends HookWidget with AppLogger {
                   suffixIcon: _passwordActions(state),
                   hint: S.current.messageRepositoryPassword,
                   onSaved: (_) {},
-                  validator: validateNoEmpty(
-                      Strings.messageErrorRepositoryPasswordValidation),
+                  validator: validateNoEmptyMaybeRegExpr(
+                      emptyError:
+                          Strings.messageErrorRepositoryPasswordValidation),
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: passwordFocus))
         ]),

@@ -43,8 +43,12 @@ class RenameRepository extends StatelessWidget {
               label: S.current.labelRenameRepository,
               hint: S.current.messageRepositoryNewName,
               onSaved: _returnName,
-              validator: validateNoEmpty(
-                  S.current.messageErrorFormValidatorNameDefault),
+              validator: validateNoEmptyMaybeRegExpr(
+                  emptyError: S.current.messageErrorFormValidatorNameDefault,
+                  regExp: '.*[/\\\\].*',
+
+                  /// No / nor \ allowed
+                  regExpError: S.current.messageErrorCharactersNotAllowed),
               autofocus: true),
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);

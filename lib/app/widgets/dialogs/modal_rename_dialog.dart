@@ -81,7 +81,7 @@ class Rename extends HookWidget with AppLogger {
                 hint: hint,
                 onFieldSubmitted: (newName) async =>
                     await _validateFieldSubmitted(context),
-                validator: _validateEntryName(
+                validator: validateNoEmptyMaybeRegExpr(
                     emptyError: S.current.messageErrorFormValidatorNameDefault,
                     regExp: '.*[/\\\\].*',
 
@@ -117,15 +117,6 @@ class Rename extends HookWidget with AppLogger {
             _nameTextFieldFocus.requestFocus()
           };
   }
-
-  String? Function(String?) _validateEntryName(
-          {String? emptyError, String? regExp, String? regExpError}) =>
-      (String? newName) {
-        if (newName?.isEmpty ?? true) return emptyError;
-        if (newName!.contains(RegExp(regExp!))) return regExpError;
-
-        return null;
-      };
 
   List<Widget> _actions(context) => [
         NegativeButton(

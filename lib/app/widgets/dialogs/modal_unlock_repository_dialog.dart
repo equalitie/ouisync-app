@@ -80,8 +80,9 @@ class UnlockRepository extends StatelessWidget with AppLogger {
                           onSaved: (String? password) async {
                             await _unlockRepository(password);
                           },
-                          validator: validateNoEmpty(
-                              Strings.messageErrorRepositoryPasswordValidation),
+                          validator: validateNoEmptyMaybeRegExpr(
+                              emptyError: Strings
+                                  .messageErrorRepositoryPasswordValidation),
                           autofocus: true))
                 ]);
               }),

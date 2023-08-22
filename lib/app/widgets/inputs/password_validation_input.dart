@@ -71,8 +71,9 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   suffixIcon: _passwordActions(),
                   hint: S.current.messageRepositoryPassword,
                   onSaved: (_) {},
-                  validator: validateNoEmpty(
-                      Strings.messageErrorRepositoryPasswordValidation),
+                  validator: validateNoEmptyMaybeRegExpr(
+                      emptyError:
+                          Strings.messageErrorRepositoryPasswordValidation),
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: _passwordFocus))
         ]),

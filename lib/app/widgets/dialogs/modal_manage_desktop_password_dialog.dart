@@ -169,8 +169,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     suffixIcon: _currentPasswordActions(),
                     hint: S.current.messageRepositoryCurrentPassword,
                     onSaved: (_) {},
-                    validator: validateNoEmpty(
-                        Strings.messageErrorRepositoryPasswordValidation),
+                    validator: validateNoEmptyMaybeRegExpr(
+                        emptyError:
+                            Strings.messageErrorRepositoryPasswordValidation),
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _currentPasswordFocus))
           ]),
@@ -188,8 +189,9 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     suffixIcon: _passwordActions(),
                     hint: S.current.messageRepositoryNewPassword,
                     onSaved: (_) {},
-                    validator: validateNoEmpty(
-                        Strings.messageErrorRepositoryPasswordValidation),
+                    validator: validateNoEmptyMaybeRegExpr(
+                        emptyError:
+                            Strings.messageErrorRepositoryPasswordValidation),
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _newPasswordFocus))
           ]),
