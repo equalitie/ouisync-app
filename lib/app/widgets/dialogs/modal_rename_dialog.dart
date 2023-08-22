@@ -7,8 +7,8 @@ import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class Rename extends HookWidget with AppLogger {
-  Rename({
+class RenameEntry extends HookWidget with AppLogger {
+  RenameEntry({
     Key? key,
     required this.parentContext,
     required this.entryData,
@@ -65,6 +65,14 @@ class Rename extends HookWidget with AppLogger {
     return bodyStyle;
   }
 
+  void selectEntryName(String value, String extension, bool isFile) {
+    final fileExtensionOffset = isFile ? extension.length : 0;
+
+    _newNameController.text = value;
+    _newNameController.selection = TextSelection(
+        baseOffset: 0, extentOffset: value.length - fileExtensionOffset);
+  }
+
   Widget _buildRenameEntryWidget(BuildContext context, TextStyle bodyStyle) =>
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -79,8 +87,12 @@ class Rename extends HookWidget with AppLogger {
                 textInputAction: TextInputAction.done,
                 label: S.current.labelName,
                 hint: hint,
-                onFieldSubmitted: (newName) async =>
-                    await _validateFieldSubmitted(context),
+                onFieldSubmitted: (newName) async {
+                  final submitted = await _submitField(newName);
+                  if (submitted && PlatformValues.isDesktopDevice) {
+                    Navigator.of(context).pop(newName);
+                  }
+                },
                 validator: validateNoEmptyMaybeRegExpr(
                     emptyError: S.current.messageErrorFormValidatorNameDefault,
                     regExp: '.*[/\\\\].*',
@@ -92,43 +104,22 @@ class Rename extends HookWidget with AppLogger {
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  void selectEntryName(String value, String extension, bool isFile) {
-    final fileExtensionOffset = isFile ? extension.length : 0;
+  Future<bool> _submitField(String? newName) async {
+    final newExtension = getFileExtension(newName ?? '');
+    final validationOk = await _validateNewName(newName ?? '');
 
-    _newNameController.text = value;
-    _newNameController.selection = TextSelection(
-        baseOffset: 0, extentOffset: value.length - fileExtensionOffset);
+    if (!validationOk) {
+      selectEntryName(newName ?? '', newExtension, _isFile);
+      _nameTextFieldFocus.requestFocus();
+      return false;
+    }
+
+    if (PlatformValues.isMobileDevice) {
+      _positiveButtonFocus.requestFocus();
+    }
+
+    return true;
   }
-
-  Future<void> _validateFieldSubmitted(BuildContext context) async {
-    final newName = _newNameController.text;
-    final newExtension = getFileExtension(_newNameController.text);
-    final validationOk = await _validateNewName(newName);
-
-    validationOk
-        ? {
-            PlatformValues.isDesktopDevice
-                ? formKey.currentState!.save()
-                : _positiveButtonFocus.requestFocus(),
-            Navigator.of(context).pop(newName)
-          }
-        : {
-            selectEntryName(newName, newExtension, _isFile),
-            _nameTextFieldFocus.requestFocus()
-          };
-  }
-
-  List<Widget> _actions(context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
-        PositiveButton(
-            text: S.current.actionRename,
-            onPressed: () async => await _validateFieldSubmitted(context),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            focusNode: _positiveButtonFocus)
-      ];
 
   Future<bool> _validateNewName(String newName) async {
     if (newName.isEmpty || newName == _oldName) return false;
@@ -181,5 +172,27 @@ class Rename extends HookWidget with AppLogger {
         ]);
 
     return continueAnyway ?? false;
+  }
+
+  List<Widget> _actions(BuildContext context) => [
+        NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => Navigator.of(context).pop(''),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+        PositiveButton(
+            text: S.current.actionRename,
+            onPressed: () async {
+              final newName = _newNameController.text;
+              await _onSaved(context, newName);
+            },
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+            focusNode: _positiveButtonFocus)
+      ];
+
+  Future<void> _onSaved(BuildContext context, String? newName) async {
+    final submitted = await _submitField(newName);
+    if (submitted) {
+      Navigator.of(context).pop(newName);
+    }
   }
 }
