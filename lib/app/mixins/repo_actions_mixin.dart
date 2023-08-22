@@ -25,17 +25,10 @@ mixin RepositoryActionsMixin on AppLogger {
 
     final newName = await showDialog<String>(
         context: context,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
-
-          return ActionsDialog(
+        builder: (BuildContext context) => ActionsDialog(
             title: S.current.messageRenameRepository,
             body: RenameRepository(
-                context: context,
-                formKey: formKey,
-                repositoryName: currentName),
-          );
-        });
+                parentContext: context, oldName: currentName)));
 
     if (newName == null || newName.isEmpty) {
       return;
