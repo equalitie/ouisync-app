@@ -171,7 +171,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     onSaved: (_) {},
                     validator: validateNoEmptyMaybeRegExpr(
                         emptyError:
-                            Strings.messageErrorRepositoryPasswordValidation),
+                            S.current.messageErrorRepositoryPasswordValidation),
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _currentPasswordFocus))
           ]),
@@ -191,7 +191,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
                     onSaved: (_) {},
                     validator: validateNoEmptyMaybeRegExpr(
                         emptyError:
-                            Strings.messageErrorRepositoryPasswordValidation),
+                            S.current.messageErrorRepositoryPasswordValidation),
                     autovalidateMode: AutovalidateMode.disabled,
                     focusNode: _newPasswordFocus))
           ]),

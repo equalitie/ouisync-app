@@ -73,7 +73,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   onSaved: (_) {},
                   validator: validateNoEmptyMaybeRegExpr(
                       emptyError:
-                          Strings.messageErrorRepositoryPasswordValidation),
+                          S.current.messageErrorRepositoryPasswordValidation),
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: _passwordFocus))
         ]),

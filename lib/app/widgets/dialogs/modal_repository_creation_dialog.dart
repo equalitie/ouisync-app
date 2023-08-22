@@ -347,7 +347,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
                   onSaved: (_) {},
                   validator: validateNoEmptyMaybeRegExpr(
                       emptyError:
-                          Strings.messageErrorRepositoryPasswordValidation),
+                          S.current.messageErrorRepositoryPasswordValidation),
                   autovalidateMode: AutovalidateMode.disabled,
                   focusNode: passwordFocus))
         ]),
