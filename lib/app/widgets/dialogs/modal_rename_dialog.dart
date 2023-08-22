@@ -69,8 +69,7 @@ class RenameEntry extends HookWidget with AppLogger {
     final fileExtensionOffset = isFile ? extension.length : 0;
 
     _newNameController.text = value;
-    _newNameController.selection = TextSelection(
-        baseOffset: 0, extentOffset: value.length - fileExtensionOffset);
+    _newNameController.selectAll(extentOffset: fileExtensionOffset);
   }
 
   Widget _buildRenameEntryWidget(BuildContext context, TextStyle bodyStyle) =>
