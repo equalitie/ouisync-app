@@ -198,17 +198,17 @@ class _FileDetailState extends State<FileDetail> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        final formKey = GlobalKey<FormState>();
+        final oldName = getBasename(data.path);
+        final originalExtension = getFileExtension(data.path);
 
         return ActionsDialog(
-          title: S.current.messageRenameFile,
-          body: RenameEntry(
-            parentContext: context,
-            entryData: data,
-            hint: S.current.messageFileName,
-            formKey: formKey,
-          ),
-        );
+            title: S.current.messageRenameFile,
+            body: RenameEntry(
+                parentContext: context,
+                oldName: oldName,
+                originalExtension: originalExtension,
+                isFile: true,
+                hint: S.current.messageFileName));
       },
     ).then((newName) {
       if (newName.isNotEmpty) {

@@ -2,45 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../models/item.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RenameEntry extends HookWidget with AppLogger {
-  RenameEntry({
-    Key? key,
-    required this.parentContext,
-    required this.entryData,
-    required this.hint,
-    required this.formKey,
-  }) : super(key: key);
+  RenameEntry(
+      {required this.parentContext,
+      required this.oldName,
+      required this.originalExtension,
+      required this.isFile,
+      required this.hint});
 
   final BuildContext parentContext;
-  final BaseItem entryData;
+  final String oldName;
+  final String originalExtension;
+  final bool isFile;
   final String hint;
-  final GlobalKey<FormState> formKey;
 
-  String _oldName = '';
-  String _originalExtension = '';
+  final formKey = GlobalKey<FormState>();
 
-  bool _isFile = false;
+  late final TextEditingController _newNameController;
 
-  late TextEditingController _newNameController;
-
-  late FocusNode _nameTextFieldFocus;
-  late FocusNode _positiveButtonFocus;
+  late final FocusNode _nameTextFieldFocus;
+  late final FocusNode _positiveButtonFocus;
 
   @override
   Widget build(BuildContext context) {
     initHooks();
-    initForm();
+    selectEntryName(oldName, originalExtension, isFile);
 
-    final bodyStyle = initTextStyle(context);
     return Form(
         key: formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: _buildRenameEntryWidget(context, bodyStyle));
+        child: _buildRenameEntryWidget(context));
   }
 
   void initHooks() {
@@ -51,20 +46,6 @@ class RenameEntry extends HookWidget with AppLogger {
     _positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
   }
 
-  void initForm() {
-    _oldName = getBasename(entryData.path);
-    _originalExtension = getFileExtension(entryData.path);
-
-    _isFile = entryData is FileItem;
-    selectEntryName(_oldName, _originalExtension, _isFile);
-  }
-
-  TextStyle initTextStyle(BuildContext context) {
-    final bodyStyle = context.theme.appTextStyle.bodyMedium
-        .copyWith(fontWeight: FontWeight.w400);
-    return bodyStyle;
-  }
-
   void selectEntryName(String value, String extension, bool isFile) {
     final fileExtensionOffset = isFile ? extension.length : 0;
 
@@ -72,13 +53,15 @@ class RenameEntry extends HookWidget with AppLogger {
     _newNameController.selectAll(extentOffset: fileExtensionOffset);
   }
 
-  Widget _buildRenameEntryWidget(BuildContext context, TextStyle bodyStyle) =>
-      Column(
+  Widget _buildRenameEntryWidget(BuildContext context) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Fields.constrainedText('"$_oldName"', flex: 0, style: bodyStyle),
+            Fields.constrainedText('"$oldName"',
+                flex: 0,
+                style: context.theme.appTextStyle.bodyMedium
+                    .copyWith(fontWeight: FontWeight.w400)),
             Dimensions.spacingVerticalDouble,
             Fields.formTextField(
                 context: context,
@@ -106,8 +89,9 @@ class RenameEntry extends HookWidget with AppLogger {
     final validationOk = await _validateNewName(newName ?? '');
 
     if (!validationOk) {
-      selectEntryName(newName ?? '', newExtension, _isFile);
+      selectEntryName(newName ?? '', newExtension, isFile);
       _nameTextFieldFocus.requestFocus();
+
       return false;
     }
 
@@ -119,11 +103,11 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Future<bool> _validateNewName(String newName) async {
-    if (newName.isEmpty || newName == _oldName) return false;
+    if (newName.isEmpty || newName == oldName) return false;
 
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
-    if (_isFile) {
+    if (isFile) {
       final extensionValidationOK = await _validateExtension(newName);
       if (!extensionValidationOK) return false;
     }
@@ -136,12 +120,12 @@ class RenameEntry extends HookWidget with AppLogger {
     final fileExtension = getFileExtension(name);
 
     /// If there was not extension originally, then no need to have or validate a new one
-    if (_originalExtension.isEmpty) return true;
+    if (originalExtension.isEmpty) return true;
 
     String title = '';
     String message = S.current.messageChangeExtensionAlert;
 
-    if (fileExtension != _originalExtension) {
+    if (fileExtension != originalExtension) {
       title = S.current.titleFileExtensionChanged;
     }
 
@@ -178,10 +162,8 @@ class RenameEntry extends HookWidget with AppLogger {
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionRename,
-            onPressed: () async {
-              final newName = _newNameController.text;
-              await _onSaved(context, newName);
-            },
+            onPressed: () async =>
+                await _onSaved(context, _newNameController.text),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
