@@ -178,7 +178,8 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
     final path = await FilesystemPicker.open(
         context: context,
         fsType: FilesystemType.folder,
-        rootDirectory: io.Directory(currentDestination),
+        rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
+        directory: io.Directory(currentDestination),
         title: S.current.messageSelectLocation,
         pickText: S.current.messageSaveToLocation,
         requestPermission: () async {
