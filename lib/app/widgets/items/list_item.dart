@@ -10,6 +10,7 @@ import '../widgets.dart';
 
 class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
   const ListItem({
+    super.key,
     required this.repository,
     required this.itemData,
     required this.mainAction,

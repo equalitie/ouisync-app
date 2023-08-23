@@ -92,13 +92,22 @@ class FileDescription extends StatelessWidget with AppLogger {
       );
 
   Widget _buildSizeWidget(BuildContext context, String? text, bool loading) =>
-      Row(children: [
-        if (text != null)
-          Fields.constrainedText(text,
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (text != null)
+            Fields.constrainedText(
+              text,
               flex: 0,
               style: context.theme.appTextStyle.bodyMicro,
-              softWrap: true),
-        if (loading)
-          Icon(Icons.hourglass_top, color: Colors.black.withAlpha(128))
-      ]);
+              softWrap: true,
+            ),
+          if (loading)
+            Icon(
+              Icons.hourglass_top,
+              color: Colors.black.withAlpha(128),
+              size: context.theme.appTextStyle.bodyMicro.fontSize,
+            )
+        ],
+      );
 }
