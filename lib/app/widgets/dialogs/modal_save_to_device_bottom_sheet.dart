@@ -192,6 +192,7 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
 
     setState(() {
       _selectedPath = path;
+      _onDestinationSelected(path);
     });
   }
 }
