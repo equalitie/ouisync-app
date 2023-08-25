@@ -122,7 +122,7 @@ dev_dependencies:
   # # flutter pub run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^2.0.0
-  msix: ^3.5.1
+  msix: ^3.16.1
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
