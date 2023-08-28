@@ -56,7 +56,6 @@ dependencies:
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^6.0.0
   flutter_file_dialog: ^2.3.0
-  flutter_flavorizr: ^2.1.5
   flutter_hooks: ^0.20.0
   flutter_localizations:
     sdk: flutter
@@ -198,41 +197,3 @@ msix_config:
   msix_config: publisher
   # msix_version: 1.0.0.0
   # store: true
-
-flavorizr:
-  flavors:
-    vanilla:
-      app:
-        name: 'Ouisync'
-
-      android:
-        applicationId: 'org.equalitie.ouisync'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync'
-
-    analytics:
-      app:
-        name: 'Ouisync'
-
-      android:
-        applicationId: 'org.equalitie.ouisync'
-        firebase:
-          config: './lib/firebase_options.dart'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync'
-
-    development:
-      app:
-        name: 'Ouisync-Dev'
-
-      android:
-        applicationId: 'org.equalitie.ouisync.dev'
-        customConfig:
-          versionNameSuffix: "\"-dev\""
-        firebase:
-          config: './lib/firebase_options.dart'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync.dev'

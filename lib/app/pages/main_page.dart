@@ -9,7 +9,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
@@ -446,10 +445,11 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _previewFile(RepoCubit repo, FileItem item) async {
+  Future<void> _previewFile(
+      RepoCubit repo, FileItem item, String authority) async {
     if (io.Platform.isAndroid) {
       await NativeChannels.previewOuiSyncFile(
-        F.authority,
+        authority,
         item.path,
         item.size ?? 0,
         useDefaultApp: true,
@@ -492,7 +492,8 @@ class _MainPageState extends State<MainPage>
                       return;
                     }
 
-                    await _previewFile(currentRepo, item);
+                    await _previewFile(
+                        currentRepo, item, Constants.androidAppAuthority);
                   };
                 } else if (item is FolderItem) {
                   actionByType = () {
