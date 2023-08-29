@@ -53,11 +53,12 @@ class BackgroundServiceManager extends Cubit<BackgroundServiceManagerState>
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Fields.constrainedText(
-                    S.current.titleBackgroundAndroidPermissionsTitle,
-                    flex: 0,
-                    style: context.theme.appTextStyle.titleLarge,
-                    maxLines: 2),
+                title: Flex(direction: Axis.horizontal, children: [
+                  Fields.constrainedText(
+                      S.current.titleBackgroundAndroidPermissionsTitle,
+                      style: context.theme.appTextStyle.titleLarge,
+                      maxLines: 2)
+                ]),
                 content: Text(S.current.messageBackgroundAndroidPermissions,
                     style: context.theme.appTextStyle.bodyMedium),
                 actions: [

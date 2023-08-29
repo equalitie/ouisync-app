@@ -644,10 +644,11 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: false, // user must tap button!
           builder: (context) {
             return AlertDialog(
-                title: Fields.constrainedText(S.current.titleAddFile,
-                    flex: 0,
-                    style: context.theme.appTextStyle.titleMedium,
-                    maxLines: 2),
+                title: Flex(direction: Axis.horizontal, children: [
+                  Fields.constrainedText(S.current.titleAddFile,
+                      style: context.theme.appTextStyle.titleMedium,
+                      maxLines: 2)
+                ]),
                 content: SingleChildScrollView(
                     child: ListBody(children: [
                   Text(accessModeMessage,
@@ -773,10 +774,10 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: true,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Fields.constrainedText(S.current.titleAddRepository,
-                  flex: 0,
-                  style: context.theme.appTextStyle.titleMedium,
-                  maxLines: 2),
+              title: Flex(direction: Axis.horizontal, children: [
+                Fields.constrainedText(S.current.titleAddRepository,
+                    style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+              ]),
               content: Text(tokenValidationError,
                   style: context.theme.appTextStyle.bodyMedium),
               actions: <Widget>[

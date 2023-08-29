@@ -116,10 +116,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           final action = await showDialog<FileAction>(
               context: context,
               builder: (BuildContext context) => AlertDialog(
-                  title: Fields.constrainedText(S.current.titleAddFile,
-                      flex: 0,
-                      style: context.theme.appTextStyle.titleMedium,
-                      maxLines: 2),
+                  title: Flex(direction: Axis.horizontal, children: [
+                    Fields.constrainedText(S.current.titleAddFile,
+                        style: context.theme.appTextStyle.titleMedium,
+                        maxLines: 2)
+                  ]),
                   content: ReplaceFile(context: context, fileName: fileName)));
 
           if (action == null) {

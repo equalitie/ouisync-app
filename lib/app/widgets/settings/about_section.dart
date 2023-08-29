@@ -230,10 +230,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-          title: Fields.constrainedText(S.current.messageGoToMailApp,
-              flex: 0,
-              style: context.theme.appTextStyle.titleMedium,
-              maxLines: 2),
+          title: Flex(direction: Axis.horizontal, children: [
+            Fields.constrainedText(S.current.messageGoToMailApp,
+                style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+          ]),
           content: CheckboxListTile(
             title: Text(S.current.labelAttachLogs,
                 style: context.theme.appTextStyle.bodyMedium),
