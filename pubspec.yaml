@@ -177,11 +177,6 @@ flutter_intl:
 
 msix_config:
   display_name: Ouisync
-  # publisher_display_name: eQualitie Inc
-  # identity_name: eQualitieInc.Ouisync
-  # publisher: CN=E3D17812-E9F1-46C8-B650-4D39786777D9
-  # certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
-  # certificate_password: _ball$*watch17
   logo_path: .\assets\Ouisync-beta-1240-desktop.png
   start_menu_icon_path: .\assets\Ouisync-beta-1240-desktop.png
   tile_icon_path: .\assets\Ouisync-beta-1240-desktop.png
@@ -195,5 +190,3 @@ msix_config:
     capabilities: internetClientServer, privateNetworkClientServer,
       removableStorage, documentsLibrary
   msix_config: publisher
-  # msix_version: 1.0.0.0
-  # store: true
