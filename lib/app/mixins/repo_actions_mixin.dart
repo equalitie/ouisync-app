@@ -234,10 +234,10 @@ mixin RepositoryActionsMixin on AppLogger {
     final deleteRepo = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Fields.constrainedText(S.current.titleDeleteRepository,
-            flex: 0,
-            style: context.theme.appTextStyle.titleMedium,
-            maxLines: 2),
+        title: Flex(direction: Axis.horizontal, children: [
+          Fields.constrainedText(S.current.titleDeleteRepository,
+              style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+        ]),
         content: SingleChildScrollView(
           child: ListBody(
             children: [

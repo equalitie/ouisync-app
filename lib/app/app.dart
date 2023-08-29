@@ -14,7 +14,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../flavors.dart';
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
@@ -40,8 +39,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // When dumping log from logcat, we get logs from past ouisync runs as well,
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
-  logInfo(
-      "-------------------- OuiSync (${F.name}) Start --------------------");
+  logInfo("-------------------- OuiSync Start --------------------");
 
   _setupErrorReporting();
 
@@ -201,7 +199,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 }
 
 ThemeData _setupAppThemeData() => ThemeData().copyWith(
-        appBarTheme: AppBarTheme(color: F.color),
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
             bodyMedium: AppTypography.bodyMedium,

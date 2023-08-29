@@ -56,7 +56,6 @@ dependencies:
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^6.0.0
   flutter_file_dialog: ^2.3.0
-  flutter_flavorizr: ^2.1.5
   flutter_hooks: ^0.20.0
   flutter_localizations:
     sdk: flutter
@@ -122,7 +121,7 @@ dev_dependencies:
   # # flutter pub run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^2.0.0
-  msix: ^3.5.1
+  msix: ^3.16.1
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
@@ -178,12 +177,9 @@ flutter_intl:
 
 msix_config:
   display_name: Ouisync
-  publisher_name: eQualitie
-  certificate_path: .\certificates\self-signed\CERTIFICATE.pfx
-  certificate_password: _ball$*watch17
-  logo_path: .\assets\ouisync-beta-round-1200.png
-  start_menu_icon_path: .\assets\ouisync-beta-round-1200.png
-  tile_icon_path: .\assets\ouisync-beta-round-1200.png
+  logo_path: .\assets\Ouisync-beta-1240-desktop.png
+  start_menu_icon_path: .\assets\Ouisync-beta-1240-desktop.png
+  tile_icon_path: .\assets\Ouisync-beta-1240-desktop.png
   app_installer: #<-- app installer configuration
     publish_folder_path: .\installers
     hours_between_update_checks: 0
@@ -191,44 +187,6 @@ msix_config:
     update_blocks_activation: true
     show_prompt: true
     force_update_from_any_version: false
-    capabilities: internetClient, internetClientServer, privateNetworkClientServer,
+    capabilities: internetClientServer, privateNetworkClientServer,
       removableStorage, documentsLibrary
-  msix_version: 1.0.0.0
-
-flavorizr:
-  flavors:
-    vanilla:
-      app:
-        name: 'Ouisync'
-
-      android:
-        applicationId: 'org.equalitie.ouisync'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync'
-
-    analytics:
-      app:
-        name: 'Ouisync'
-
-      android:
-        applicationId: 'org.equalitie.ouisync'
-        firebase:
-          config: './lib/firebase_options.dart'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync'
-
-    development:
-      app:
-        name: 'Ouisync-Dev'
-
-      android:
-        applicationId: 'org.equalitie.ouisync.dev'
-        customConfig:
-          versionNameSuffix: "\"-dev\""
-        firebase:
-          config: './lib/firebase_options.dart'
-
-      ios:
-        bundleId: 'org.equalitie.ouisync.dev'
+  msix_config: publisher
