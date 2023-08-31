@@ -241,8 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Le système d\'exploitation vous demandera bientôt l\'autorisation d\'exécuter cette application en arrière-plan.\n\nCette autorisation est nécessaire pour poursuivre la synchronisation lorsque l\'application n\'est pas ouverte"),
         "messageBackgroundNotificationAndroid":
-            MessageLookupByLibrary.simpleMessage(
-                "OuiSync est en cours d\'exécution"),
+            MessageLookupByLibrary.simpleMessage("Est en cours d\'exécution"),
         "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
             "L\'authentification biométrique a échoué"),
         "messageBiometricValidationAdded": m1,
@@ -432,7 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOpenFileError": m15,
         "messageOr": MessageLookupByLibrary.simpleMessage("Ou"),
         "messageOuiSyncDesktopTitle":
-            MessageLookupByLibrary.simpleMessage("OuiSync"),
+            MessageLookupByLibrary.simpleMessage("Ouisync"),
         "messagePassword": MessageLookupByLibrary.simpleMessage("Mot de passe"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Mot de passe copié dans le presse-papiers"),
@@ -558,12 +557,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Non spécifié"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("À propos"),
         "titleAddFile": MessageLookupByLibrary.simpleMessage(
-            "Ajouter un fichier à OuiSync"),
+            "Ajouter un fichier à Ouisync"),
         "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(
             "Importer un dépôt avec un jeton"),
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Importer un dépôt"),
-        "titleAppTitle": MessageLookupByLibrary.simpleMessage("OuiSync"),
+        "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions requises"),
         "titleChangePassword":
