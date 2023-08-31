@@ -29,14 +29,38 @@ Future<void> main(List<String> args) async {
   final aab = await buildAab(buildName, version.build[0] as int);
   final winInstaller = await buildWindowsInstaller(buildName);
 
+  final identityName = options.identityName;
+  final publisher = options.publisher;
+  final winMSIX = await buildWindowsMSIX(identityName, publisher);
+
   final suffix = createFileSuffix(version, commit);
   final outputDir = await createOutputDir(suffix);
 
-  final collatedAab = await collateAsset(outputDir, "ouisync-android", suffix, aab);
+  final collatedAab =
+      await collateAsset(outputDir, "ouisync-android", suffix, aab);
   final collatedApk = await extractApk(collatedAab);
-  final collatedWinInstaller = await collateAsset(outputDir, "ouisync-windows-installer", suffix, winInstaller);
+  final collatedWinInstaller = await collateAsset(
+      outputDir, "ouisync-windows-installer", suffix, winInstaller);
 
-  final assets = <File>[collatedAab, collatedApk, collatedWinInstaller];
+  File? collateWinMSIX;
+  if (winMSIX != null) {
+    collateWinMSIX =
+        await collateAsset(outputDir, 'ouisync-windows-msix', suffix, winMSIX);
+  }
+
+  /// Right now the MSIX is not signed, therefore, it can only be used for the
+  /// Microsoft Store, not for standalone installations.
+  ///
+  /// Until we get the certificates and sign the MSIX, we don't upload it to
+  /// GitHub releases.
+  ///
+  ///
+  final assets = <File>[
+    collatedAab,
+    collatedApk,
+    collatedWinInstaller,
+    if (collateWinMSIX != null) collateWinMSIX
+  ];
 
   final token = options.token;
   if (token != null) {
@@ -58,8 +82,15 @@ class Options {
   final String? token;
   final String? firstCommit;
   final bool detailedLog;
+  final String? identityName;
+  final String? publisher;
 
-  Options._({this.token, this.firstCommit, this.detailedLog = true});
+  Options._(
+      {this.token,
+      this.firstCommit,
+      this.detailedLog = true,
+      this.identityName,
+      this.publisher});
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
@@ -78,6 +109,18 @@ class Options {
       abbr: 'l',
       defaultsTo: true,
       help: 'Whether to generate detailed changelog in the release notes',
+    );
+    parser.addOption(
+      'identity-name',
+      abbr: 'i',
+      help:
+          'The unique identifier for the app in the Microsoft Store (For the MSIX)',
+    );
+    parser.addOption(
+      'publisher',
+      abbr: 'b',
+      help:
+          'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
     );
     parser.addFlag(
       'help',
@@ -102,6 +145,8 @@ class Options {
       token: token?.trim(),
       firstCommit: results['first-commit']?.trim(),
       detailedLog: results['detailed-log'],
+      identityName: results['identity-name'],
+      publisher: results['publisher'],
     );
   }
 }
@@ -115,14 +160,15 @@ Future<File> buildWindowsInstaller(String buildName) async {
     'build',
     'windows',
     '--verbose',
-    '-t' 'lib/main_vanilla.dart',
     '--release',
     '--build-name',
     buildName,
   ]);
 
-  final inno_script = await File("windows/inno-setup.iss.template").readAsString();
-  await File("build/inno-setup.iss").writeAsString(inno_script.replaceAll("<APP_VERSION>", buildName));
+  final innoScript =
+      await File("windows/inno-setup.iss.template").readAsString();
+  await File("build/inno-setup.iss")
+      .writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
 
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
       ['/cc', 'build/inno-setup.iss']);
@@ -130,23 +176,46 @@ Future<File> buildWindowsInstaller(String buildName) async {
   return File('build/windows/runner/Release/ouisync-installer.exe');
 }
 
-Future<File> buildAab(
-  String buildName,
-  int buildNumber, {
-  String flavor = "vanilla",
-}) async {
-  final inputPath =
-      'build/app/outputs/bundle/${flavor}Release/app-$flavor-release.aab';
+Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
+  if (identityName == null || publisher == null) {
+    final missingOptions =
+        StringBuffer('The Windows MSIX creation will be skipped:\n\n');
+
+    if (identityName == null) {
+      missingOptions.writeln('  --identity-name, -i: parameter not provided.');
+    }
+    if (publisher == null) {
+      missingOptions.writeln('  --publisher, -b: parameter not provided.\n');
+    }
+
+    print(missingOptions.toString());
+
+    return null;
+  }
+
+  await run('dart', [
+    'run',
+    'msix:create',
+    '-u',
+    '"eQualitie Inc"',
+    '-i',
+    identityName,
+    '-b',
+    publisher,
+    '--store'
+  ]);
+
+  return File('build/windows/runner/Release/ouisync_app.msix');
+}
+
+Future<File> buildAab(String buildName, int buildNumber) async {
+  final inputPath = 'build/app/outputs/bundle/Release/app-release.aab';
 
   print('Creating Android App Bundle ...');
 
   await run('flutter', [
     'build',
     'appbundle',
-    '--flavor',
-    flavor,
-    '-t'
-        'lib/main_$flavor.dart',
     '--release',
     '--build-number',
     '$buildNumber',
