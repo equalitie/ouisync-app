@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/env/env.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
@@ -6,7 +7,7 @@ import 'app/app.dart';
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final dsn = '';
+  final dsn = Env.ouisyncDSN;
   await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
 }
 
