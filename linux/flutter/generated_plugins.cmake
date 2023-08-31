@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   ouisync_plugin
   screen_retriever
+  sentry_flutter
   system_tray
   tray_manager
   url_launcher_linux

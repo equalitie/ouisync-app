@@ -90,6 +90,7 @@ dependencies:
   receive_sharing_intent:
     git: https://github.com/J-Pabon/receive_sharing_intent
   result_type: ^0.2.0
+  sentry_flutter: ^7.9.0
   settings_ui: ^2.0.2
   share_plus: ^7.0.2
   shared_preferences: ^2.0.13

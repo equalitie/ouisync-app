@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   r_get_ip
   screen_retriever
+  sentry_flutter
   share_plus
   system_tray
   tray_manager
