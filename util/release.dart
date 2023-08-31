@@ -115,7 +115,6 @@ Future<File> buildWindowsInstaller(String buildName) async {
     'build',
     'windows',
     '--verbose',
-    '-t' 'lib/main_vanilla.dart',
     '--release',
     '--build-name',
     buildName,
@@ -143,10 +142,6 @@ Future<File> buildAab(
   await run('flutter', [
     'build',
     'appbundle',
-    '--flavor',
-    flavor,
-    '-t'
-        'lib/main_$flavor.dart',
     '--release',
     '--build-number',
     '$buildNumber',
