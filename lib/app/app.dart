@@ -20,7 +20,7 @@ import 'pages/pages.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp(List<String> args) async {
+Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   final windowManager = PlatformWindowManager(args);
 
   final appDir = await getApplicationSupportDirectory();
@@ -39,7 +39,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // When dumping log from logcat, we get logs from past ouisync runs as well,
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
-  logInfo("-------------------- OuiSync Start --------------------");
+  logInfo("-------------------- OuiSync$appSuffix Start --------------------");
 
   _setupErrorReporting();
 
@@ -101,9 +101,11 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
       ? OnboardingPage(settings: settings, ouisyncAppHome: root)
       : root;
 
+  final suffixColor = appSuffix.isNotEmpty ? Constants.devColor : null;
+
   return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: _setupAppThemeData(),
+      theme: _setupAppThemeData(suffixColor),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -198,7 +200,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   }
 }
 
-ThemeData _setupAppThemeData() => ThemeData().copyWith(
+ThemeData _setupAppThemeData(Color? suffixColor) => ThemeData().copyWith(
+        appBarTheme: AppBarTheme(backgroundColor: suffixColor),
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
             bodyMedium: AppTypography.bodyMedium,

@@ -36,6 +36,7 @@ dependencies:
   desktop_drop: ^0.4.1
   desktop_webview_window: ^0.2.0
   dns_client: ^0.2.1
+  envied: ^0.3.0+3
   equatable: ^2.0.3
   external_path: ^1.0.1
   ffi: ^2.0.1
@@ -90,6 +91,7 @@ dependencies:
   receive_sharing_intent:
     git: https://github.com/J-Pabon/receive_sharing_intent
   result_type: ^0.2.0
+  sentry_flutter: ^7.9.0
   settings_ui: ^2.0.2
   share_plus: ^7.0.2
   shared_preferences: ^2.0.13
@@ -112,6 +114,7 @@ dependency_overrides:
 dev_dependencies:
   args: ^2.4.2
   date_format: ^2.0.7
+  envied_generator: ^0.3.0+3
   flutter_test:
     sdk: flutter
   github: ^9.15.1
