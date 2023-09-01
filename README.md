@@ -224,6 +224,17 @@ If we want to build for **_all_** the supported ABIs, this property is not neede
 
 <br />
 
+# Sentry
+
+**Ouisync** integrates **Sentry**, via the `sentry_flutter` plugin. 
+
+For initialization, you need to get a client key, called **DSN**, from a Sentry instance, then make it available via an `.env` file, using [envied](https://pub.dev/packages/envied):
+Please follow the instructions in the package repository for [envied in GitHub](https://github.com/petercinibulk/envied#table-of-contents) to add a key called `DSN`, that contains the client key.
+
+You can also skip this step if you are not interested on using Sentry.
+
+<br />
+
 # Troubleshooting
 
 <br />
