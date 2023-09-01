@@ -68,9 +68,9 @@ You can get the app installers for the supported platforms directly from our web
 
 Or you can use the official app store for each platform in your different devices:
 - **Android:**
-  - **Google Play Store**: [Ouisync Peer-to-Peer File Sync](https://play.google.com/store/apps/details?id=org.equalitie.ouisync) (currently in early access)
-- **Windows**
-  - [**Windows Apps**](https://www.microsoft.com/en-us/store/apps/windows): Coming soon.
+  - **Google Play Store**: [Ouisync Peer-to-Peer File Sync](https://play.google.com/store/apps/details?id=org.equalitie.ouisync)
+- **Windows:**
+  - **Microsoft Store**: [Ouisync](https://www.microsoft.com/store/apps/9NVMS5ZRV27F)
 
 <br />
 
@@ -150,30 +150,26 @@ You can run the app from the command line and make use of different flags to obt
 
 ### Flutter
 
-The **Ouisync Flutter app** implements some build variants, specifically product flavors, as a way to control the inclusion of some tools in its releases.
+The **Ouisync Flutter app** uses command arguments to specify a `.<suffix>` variant (don't forget the **"."**), for debuging purposes, or as a way to control the inclusion of some tools in its releases.
 
-Currently, there are three (3) flavors:
-
-- **vanilla**: regular code base, no extra tooling.
-- **analytics**: regular code base, includes Firebase Crashlytics **ON** by default.
-- **development**: This flavor is used for testing any new functionality or tools without replacing the regular app installation (**vanilla** or **analytics**). It has a different `applicationId` and `authority` for the content provider, so it will install next to the regular app.
+Passing the flag `--dart-define=DEV_SUFFIX=.<suffix>` when runing the app, adds the suffix provided to the `applicationId`, `authority`, and application name, so it will install next to the regular app. This suffix is used for testing any new functionality or tools without replacing the regular app installation. 
   
-Inside the project folder, you can execute `flutter run --flavor vanilla -t lib/main_vanilla.dart` for running the app in the default device (replacing the flavor and target accordingly). 
+Inside the project folder, you can execute `flutter run --dart-define=DEV_SUFFIX=.dev` for running the app in the default device, and adding the suffix ".dev", for example. 
 
 There are some other useful flags you should checkout (You can find all the available flags in the SDK help: `flutter --help`):
 
 ```
-flutter run --flavor vanilla -t lib/main_vanilla.dart --release // Run the app in release mode
+flutter run --release // Run the app in release mode
 
-flutter run --flavor vanilla -t lib/main_vanilla.dart --verbose // Noisy logging, including all shell commands executed. It can be abbreviate as -v
+flutter run --verbose // Noisy logging, including all shell commands executed. It can be abbreviate as -v
 
 flutter clean // Delete the build/ and .dart_tool/ directories. Don't forget to run <flutter pub get> right after, to get the packages.
 
 flutter test // Run Flutter unit tests for the current project.
 
-flutter build apk --flavor vanilla -t lib/main_vanilla.dart // Build the default executable. By default the resulting **APK** will be a release version.
+flutter build apk // Build the default executable. By default the resulting **APK** will be a release version.
 
-flutter build appbundle --flavor vanilla -t lib/main_vanilla.dart // Build the default app bundle. By default the resulting **AAB** will be a release version.
+flutter build appbundle // Build the default app bundle. By default the resulting **AAB** will be a release version.
 ```
 
 You can also select the device in which you want to run the app, by using the command `flutter devices` to get the list of connected devices:
@@ -181,12 +177,13 @@ You can also select the device in which you want to run the app, by using the co
 ```
 3 connected devices:
 
-Windows (desktop) • windows • windows-x64    • Microsoft Windows [Version 10.0.19044.1645]
-Chrome (web)      • chrome  • web-javascript • Google Chrome 100.0.4896.127
-Edge (web)        • edge    • web-javascript • Microsoft Edge 100.0.1185.36
+Nokia 7 plus (mobile) • 192.168.128.94:5555 • android-arm64  • Android 10 (API 29)
+Windows (desktop)     • windows             • windows-x64    • Microsoft Windows [Version 10.0.22621.2134]
+Chrome (web)          • chrome              • web-javascript • Google Chrome 115.0.5790.171
+Edge (web)            • edge                • web-javascript • Microsoft Edge 116.0.1938.54
 ```
 
-Then you can just use the device name from the second column, like this: `flutter run --flavor vanilla -t lib/main_vanilla.dart -d windows`
+Then you can just use the device name from the second column, like this: `flutter run -d windows`; and with a suffix: `flutter run -d 192.168.128.94:5555 --dart-define=DEV_SUFFIX=.dev` 
 
 <br />
 
