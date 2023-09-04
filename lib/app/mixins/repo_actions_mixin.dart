@@ -88,43 +88,9 @@ mixin RepositoryActionsMixin on AppLogger {
 
     AuthMode authenticationMode = repository.state.authenticationMode;
 
-    if (authenticationMode == AuthMode.noLocalPassword &&
-        (Platform.isAndroid || Platform.isIOS)) {
-      final auth = LocalAuthentication();
-      final isSupported = await auth.isDeviceSupported();
-
-      /// LocalAuthentication can tell us three (3) things:
-      ///
-      /// - canCheck: If the device has biometrics capabilities, maybe even just
-      ///   PIN, pattern or password protection, it returns TRUE. Basically, it
-      ///   always returns TRUE.
-      ///
-      ///   NOTE: This needs to be confirmed on a phone without any biometric
-      ///   capability
-      ///
-      /// - available: The list of enrolled biometrics.
-      ///   If the user has PIN (Password, pattern, even?), but no biometric
-      ///   method in use, it returns an empty list.
-      ///   If the user has a biometric method in use, it returns a list with
-      ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
-      ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
-      ///
-      /// - isSupported: Only if the user doesn't use any screen lock method
-      ///   (Pattern, PIN, password), which also means it doesn't use any
-      ///   biometric method, it returns FALSE.
-      ///
-      /// We don't use isBiometricsAvailable here because it only validates that
-      /// the user has at least one biometric method enrolled
-      /// (BiometricType.STRONG); if the user only uses weak methods
-      /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
-      if (isSupported) {
-        final authorized = await auth.authenticate(
-            localizedReason: S.current.messageAccessingSecureStorage);
-
-        if (authorized == false) {
-          return null;
-        }
-      }
+    if (authenticationMode == AuthMode.noLocalPassword) {
+      final authorized = await authorizeNavigationToSettings();
+      if (authorized == null || authorized == false) return null;
     }
 
     final securePassword = await tryGetSecurePassword(context,
@@ -549,6 +515,47 @@ mixin RepositoryActionsMixin on AppLogger {
 
     return saveChanges;
   }
+}
+
+Future<bool?> authorizeNavigationToSettings() async {
+  final auth = LocalAuthentication();
+  final isSupported = await auth.isDeviceSupported();
+
+  /// LocalAuthentication can tell us three (3) things:
+  ///
+  /// - canCheck: If the device has biometrics capabilities, maybe even just
+  ///   PIN, pattern or password protection, it returns TRUE. Basically, it
+  ///   always returns TRUE.
+  ///
+  ///   NOTE: This needs to be confirmed on a phone without any biometric
+  ///   capability
+  ///
+  /// - available: The list of enrolled biometrics.
+  ///   If the user has PIN (Password, pattern, even?), but no biometric
+  ///   method in use, it returns an empty list.
+  ///   If the user has a biometric method in use, it returns a list with
+  ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
+  ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
+  ///
+  /// - isSupported: Only if the user doesn't use any screen lock method
+  ///   (Pattern, PIN, password), which also means it doesn't use any
+  ///   biometric method, it returns FALSE.
+  ///
+  /// We don't use isBiometricsAvailable here because it only validates that
+  /// the user has at least one biometric method enrolled
+  /// (BiometricType.STRONG); if the user only uses weak methods
+  /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
+  var authorized = false;
+  if (isSupported) {
+    authorized = await auth.authenticate(
+        localizedReason: S.current.messageAccessingSecureStorage);
+
+    if (authorized == false) {
+      return null;
+    }
+  }
+
+  return authorized;
 }
 
 class UnlockResult {
