@@ -55,8 +55,8 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.write(password);
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: null);
@@ -74,8 +74,8 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       password = await storageFile.read();
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: password);
@@ -91,8 +91,8 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.delete();
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: null);
@@ -100,8 +100,9 @@ class SecureStorage {
 }
 
 class SecureStorageResult {
-  SecureStorageResult({required this.value, this.exception});
+  SecureStorageResult({required this.value, this.exception, this.stackTrace});
 
   final String? value;
   final Exception? exception;
+  final StackTrace? stackTrace;
 }
