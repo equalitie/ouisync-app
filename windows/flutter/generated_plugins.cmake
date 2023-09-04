@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
   desktop_webview_window
-  firebase_core
   local_auth_windows
   ouisync_plugin
   permission_handler_windows

@@ -43,8 +43,6 @@ dependencies:
   file: ^6.1.4
   file_picker: ^5.2.5
   filesystem_picker: ^3.1.0
-  firebase_core: ^2.3.0
-  firebase_crashlytics: ^3.0.6
   flutter:
     sdk: flutter
   # Fix for the issue "[BUG] Release 1.2.0 is broken"
