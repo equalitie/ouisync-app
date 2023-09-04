@@ -71,10 +71,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     String currentPassword = '';
 
     if (authMode != AuthMode.manual) {
-      final securePassword = await tryGetSecurePassword(
-          context: context,
-          databaseId: databaseId,
-          authenticationMode: authMode);
+      final securePassword = await tryGetSecurePassword(context,
+          databaseId: databaseId, authenticationMode: authMode);
 
       if (securePassword == null || securePassword.isEmpty) {
         if (securePassword != null) {

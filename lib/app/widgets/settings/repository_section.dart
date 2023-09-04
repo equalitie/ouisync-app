@@ -374,8 +374,7 @@ class _SecurityTileState extends State<SecurityTile>
                     }
                   }
 
-                  final securePassword = await tryGetSecurePassword(
-                      context: context,
+                  final securePassword = await tryGetSecurePassword(context,
                       databaseId: repository.databaseId,
                       authenticationMode: state.authMode);
 

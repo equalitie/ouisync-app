@@ -127,8 +127,7 @@ mixin RepositoryActionsMixin on AppLogger {
       }
     }
 
-    final securePassword = await tryGetSecurePassword(
-        context: context,
+    final securePassword = await tryGetSecurePassword(context,
         databaseId: repository.databaseId,
         authenticationMode: authenticationMode);
 
@@ -391,10 +390,8 @@ mixin RepositoryActionsMixin on AppLogger {
       return null;
     }
 
-    final securePassword = await tryGetSecurePassword(
-        context: context,
-        databaseId: databaseId,
-        authenticationMode: authenticationMode);
+    final securePassword = await tryGetSecurePassword(context,
+        databaseId: databaseId, authenticationMode: authenticationMode);
 
     if (securePassword == null) {
       /// There was an exception getting the value from the secure storage.
@@ -417,9 +414,8 @@ mixin RepositoryActionsMixin on AppLogger {
     return securePassword;
   }
 
-  Future<String?> tryGetSecurePassword(
-      {required BuildContext context,
-      required String databaseId,
+  Future<String?> tryGetSecurePassword(BuildContext context,
+      {required String databaseId,
       required AuthMode authenticationMode}) async {
     if (authenticationMode == AuthMode.manual) {
       return null;
