@@ -93,25 +93,27 @@ mixin RepositoryActionsMixin on AppLogger {
       if (authorized == null || authorized == false) return null;
     }
 
-    final securePassword = await tryGetSecurePassword(context,
-        databaseId: repository.databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword != null && securePassword.isNotEmpty) {
-      password = securePassword;
-      shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
-          context,
-          f: repository.createShareToken(AccessMode.write, password: password));
-    } else {
-      authenticationMode = AuthMode.manual;
-
+    if (authenticationMode == AuthMode.manual) {
       final unlockResult = await manualUnlock(context, repository);
 
       if (unlockResult == null) return null;
 
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
+    } else {
+      final securePassword = await tryGetSecurePassword(context,
+          databaseId: repository.databaseId,
+          authenticationMode: authenticationMode);
+
+      if (securePassword == null || securePassword.isEmpty) return null;
+
+      password = securePassword;
+      shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
+          context,
+          f: repository.createShareToken(AccessMode.write, password: password));
     }
+
+    if (shareToken == null) return null;
 
     final accessMode = await shareToken.mode;
 
@@ -359,23 +361,16 @@ mixin RepositoryActionsMixin on AppLogger {
     final securePassword = await tryGetSecurePassword(context,
         databaseId: databaseId, authenticationMode: authenticationMode);
 
-    if (securePassword == null) {
-      /// There was an exception getting the value from the secure storage.
-      return null;
+    if (securePassword != null && securePassword.isNotEmpty) {
+      final accessMode =
+          await cubitUnlockRepository(repositoryName, password: securePassword);
+
+      final message = (accessMode != null && accessMode != AccessMode.blind)
+          ? S.current.messageUnlockRepoOk(accessMode.name)
+          : S.current.messageUnlockRepoFailed;
+
+      showSnackBar(context, message: message);
     }
-
-    if (securePassword.isEmpty) {
-      return '';
-    }
-
-    final accessMode =
-        await cubitUnlockRepository(repositoryName, password: securePassword);
-
-    final message = (accessMode != null && accessMode != AccessMode.blind)
-        ? S.current.messageUnlockRepoOk(accessMode.name)
-        : S.current.messageUnlockRepoFailed;
-
-    showSnackBar(context, message: message);
 
     return securePassword;
   }
@@ -410,7 +405,10 @@ mixin RepositoryActionsMixin on AppLogger {
         databaseId: databaseId, authMode: authMode);
 
     if (secureStorageResult.exception != null) {
-      loggy.error(secureStorageResult.exception);
+      loggy.error(
+          'Repository password could not be retrieved from secure storage',
+          secureStorageResult.exception,
+          secureStorageResult.stackTrace);
 
       return null;
     }
