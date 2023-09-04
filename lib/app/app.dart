@@ -4,8 +4,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,6 +11,7 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
@@ -242,7 +241,6 @@ void _setupErrorReporting() {
 void _onError(FlutterErrorDetails details) {
   logError("Unhandled Exception:", details.exception, details.stack);
 
-  if (Firebase.apps.isNotEmpty) {
-    unawaited(FirebaseCrashlytics.instance.recordFlutterFatalError(details));
-  }
+  unawaited(
+      Sentry.captureException(details.exception, stackTrace: details.stack));
 }

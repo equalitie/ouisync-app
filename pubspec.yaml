@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.7.0-beta+46
+version: 0.7.2-beta+47
 
 environment:
   sdk: ">=2.18.1 <4.0.0"
@@ -43,8 +43,6 @@ dependencies:
   file: ^6.1.4
   file_picker: ^5.2.5
   filesystem_picker: ^3.1.0
-  firebase_core: ^2.3.0
-  firebase_crashlytics: ^3.0.6
   flutter:
     sdk: flutter
   # Fix for the issue "[BUG] Release 1.2.0 is broken"
