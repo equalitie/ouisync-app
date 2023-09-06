@@ -8,6 +8,7 @@ import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -466,24 +467,27 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _previewFile(
-      RepoCubit repo, FileItem item, String authority) async {
+  Future<void> _previewFile(RepoCubit repo, FileItem item) async {
     if (io.Platform.isAndroid) {
+      // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
+
       await NativeChannels.previewOuiSyncFile(
-        authority,
+        Constants.androidAppAuthority,
         item.path,
         item.size ?? 0,
         useDefaultApp: true,
       );
-    } else if (io.Platform.isWindows) {
+    } else if (io.Platform.isWindows ||
+        io.Platform.isLinux ||
+        io.Platform.isMacOS) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {
         showSnackBar(context, message: S.current.messageRepositoryNotMounted);
         return;
       }
-      var result = await io.Process.run(
-          'cmd', ['/c', 'start', '', '$mountedDirectory${item.path}']);
-      loggy.app(result.stdout);
+
+      final url = Uri.parse('file:$mountedDirectory${item.path}');
+      await launchUrl(url);
     } else {
       // Only the above platforms are supported right now.
       showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
@@ -513,8 +517,7 @@ class _MainPageState extends State<MainPage>
                       return;
                     }
 
-                    await _previewFile(
-                        currentRepo, item, Constants.androidAppAuthority);
+                    await _previewFile(currentRepo, item);
                   };
                 } else if (item is FolderItem) {
                   actionByType = () {
