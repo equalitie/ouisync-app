@@ -1,5 +1,3 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,20 +34,24 @@ class Cubits {
   final UpgradeExistsCubit upgradeExists;
   final BackgroundServiceManager backgroundServiceManager;
   final PlatformWindowManager windowManager;
-  // Is not null only on operating system where mounting is supported.
-  final MountCubit? mount;
+  final MountCubit mount;
 
-  Cubits(this.repositories, this.powerControl, this.panicCounter,
-      this.upgradeExists, this.backgroundServiceManager, this.windowManager)
-      : mount =
-            (io.Platform.isWindows) ? MountCubit(repositories.session) : null;
+  Cubits({
+    required this.repositories,
+    required this.powerControl,
+    required this.panicCounter,
+    required this.upgradeExists,
+    required this.backgroundServiceManager,
+    required this.windowManager,
+    required this.mount,
+  });
 
   Color? mainNotificationBadgeColor() {
     final upgradeExists = this.upgradeExists.state;
     final panicCount = panicCounter.state ?? 0;
     final isNetworkEnabled = powerControl.state.isNetworkEnabled ?? true;
     final showWarning = backgroundServiceManager.showWarning();
-    final mountState = mount?.state;
+    final mountState = mount.state;
 
     if (upgradeExists || panicCount > 0 || mountState is MountStateError) {
       return Constants.errorColor;

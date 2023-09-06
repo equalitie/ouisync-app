@@ -31,6 +31,20 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
     logPath: logPath,
   );
 
+  // NOTE: When the app exits, the `State.dispose()` methods are not guaranteed to be called for
+  // some reason. To ensure resources are properly disposed of, we need to do it via this lifecycle
+  // listener.
+  // NOTE: The lifecycle listener itself is never `dispose`d but that's OK because it's supposed to
+  // live as long as the app itself.
+  AppLifecycleListener(
+    onExitRequested: () async {
+      await session.dispose();
+      windowManager.dispose();
+
+      return AppExitResponse.exit;
+    },
+  );
+
   // Make sure to only output logs after Session is created (which sets up the log subscriber),
   // otherwise the logs will go nowhere.
   Loggy.initLoggy(logPrinter: AppLogPrinter());
@@ -153,14 +167,12 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   @override
   void dispose() {
     _mediaReceiver.dispose();
-
-    widget.windowManager.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO: We are recreating this on every rebuild. Is that what we want?
     final upgradeExists = UpgradeExistsCubit(
         widget.session.currentProtocolVersion, widget.settings);
 
@@ -189,12 +201,13 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                 loggy.app('Drop exited: ${detail.localPosition}');
               },
               child: MainPage(
-                  session: widget.session,
-                  upgradeExists: upgradeExists,
-                  backgroundServiceManager: _backgroundServiceManager,
-                  mediaReceiver: _mediaReceiver,
-                  settings: widget.settings,
-                  windowManager: widget.windowManager))),
+                session: widget.session,
+                upgradeExists: upgradeExists,
+                backgroundServiceManager: _backgroundServiceManager,
+                mediaReceiver: _mediaReceiver,
+                settings: widget.settings,
+                windowManager: widget.windowManager,
+              ))),
     );
   }
 }

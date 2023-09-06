@@ -198,12 +198,8 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
     try {
       shareToken = await ShareToken.fromString(cubit.session, initialToken);
-
-      if (shareToken == null) {
-        throw "Failed to construct the token from \"$initialToken\"";
-      }
     } catch (e, st) {
-      loggy.app('Extract repository token exception', e, st);
+      loggy.error('Extract repository token exception:', e, st);
       showSnackBar(context, message: S.current.messageErrorTokenInvalid);
     }
 

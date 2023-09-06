@@ -26,13 +26,14 @@ typedef MoveEntryCallback = void Function(
     String origin, String path, EntryType type);
 
 class MainPage extends StatefulWidget {
-  const MainPage(
-      {required this.session,
-      required this.upgradeExists,
-      required this.backgroundServiceManager,
-      required this.mediaReceiver,
-      required this.settings,
-      required this.windowManager});
+  const MainPage({
+    required this.session,
+    required this.upgradeExists,
+    required this.backgroundServiceManager,
+    required this.mediaReceiver,
+    required this.settings,
+    required this.windowManager,
+  });
 
   final Session session;
   final UpgradeExistsCubit upgradeExists;
@@ -42,8 +43,13 @@ class MainPage extends StatefulWidget {
   final PlatformWindowManager windowManager;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(session, upgradeExists,
-      backgroundServiceManager, settings, windowManager);
+  State<StatefulWidget> createState() => _MainPageState(
+        session,
+        upgradeExists,
+        backgroundServiceManager,
+        settings,
+        windowManager,
+      );
 }
 
 class _MainPageState extends State<MainPage>
@@ -63,23 +69,38 @@ class _MainPageState extends State<MainPage>
   _MainPageState._(this._cubits);
 
   factory _MainPageState(
-      Session session,
-      UpgradeExistsCubit upgradeExists,
-      BackgroundServiceManager backgroundServiceManager,
-      Settings settings,
-      PlatformWindowManager windowManager) {
+    Session session,
+    UpgradeExistsCubit upgradeExists,
+    BackgroundServiceManager backgroundServiceManager,
+    Settings settings,
+    PlatformWindowManager windowManager,
+  ) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
     );
     final powerControl = PowerControl(session, settings);
     final panicCounter = StateMonitorIntCubit(
-        repositories.rootStateMonitor
-            .child(oui.MonitorId.expectUnique("Session")),
-        "panic_counter");
+      repositories.rootStateMonitor
+          .child(oui.MonitorId.expectUnique("Session")),
+      "panic_counter",
+    );
 
-    return _MainPageState._(Cubits(repositories, powerControl, panicCounter,
-        upgradeExists, backgroundServiceManager, windowManager));
+    final mount = MountCubit(session);
+    final mountPoint = settings.getMountPoint();
+    if (mountPoint != null) {
+      unawaited(mount.mount(mountPoint));
+    }
+
+    return _MainPageState._(Cubits(
+      repositories: repositories,
+      powerControl: powerControl,
+      panicCounter: panicCounter,
+      upgradeExists: upgradeExists,
+      backgroundServiceManager: backgroundServiceManager,
+      windowManager: windowManager,
+      mount: mount,
+    ));
   }
 
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
