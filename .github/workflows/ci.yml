@@ -11,6 +11,7 @@ jobs:
   build_and_test:
     name: build and test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         name: [android, linux, windows]
@@ -22,30 +23,32 @@ jobs:
               version: r25c
               abi: arm64-v8a
             test-env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/release/libouisync_ffi.so
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             build-args: apk --target-platform android-arm64
 
           - name: linux
             os: ubuntu-latest
-            analyze: true
+            # TODO: enable analysis
+            # analyze: true
             test-env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/release/libouisync_ffi.so
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             build-args:
 
           - name: windows
             os: windows-latest
             test-env:
-              OUISYNC_LIB: D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll
+              OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.so
             build-args:
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
 
       - name: Add rust target
         run: rustup target add ${{ matrix.target }}
@@ -68,7 +71,7 @@ jobs:
       - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
         run: |
          cd ouisync-plugin/ouisync
-         cargo run --bin bindgen
+         cargo run --package ouisync-bindgen --bin bindgen
 
       - uses: subosito/flutter-action@v2
         with:
@@ -93,12 +96,12 @@ jobs:
           cd lib  && flutter analyze
           cd test && flutter analyze
           cd util && flutter analyze
-        if: matrix.analyze == 'true'
+        if: matrix.analyze
 
       - name: Build Ouisync library for tests
         run: |
          cd ouisync-plugin/ouisync
-         cargo build --release -p ouisync-ffi
+         cargo build --package ouisync-ffi
 
       - name: Run tests
         run:
