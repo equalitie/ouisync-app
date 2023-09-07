@@ -66,7 +66,10 @@ jobs:
          flutter pub run ffigen
 
       - name: Analyze
-        run: flutter analyze
+        run: |
+          cd lib  && flutter analyze
+          cd test && flutter analyze
+          cd util && flutter analyze
 
       - name: Build OuiSync library for tests
         run: |
