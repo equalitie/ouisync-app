@@ -9,7 +9,7 @@ Future<void> main(List<String> args) async {
 
   const appSuffix = String.fromEnvironment('DEV_SUFFIX');
   final dsn = Env.ouisyncDSN;
-  
+
   await setupSentry(
       () async => runApp(await initOuiSyncApp(args, appSuffix)), dsn);
 }
