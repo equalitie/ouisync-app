@@ -48,18 +48,17 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.10.1'
 
       - name: Flutter doctor
         run: flutter doctor -v
 
-      - name: Getting Flutter packages (App)
-        run: flutter pub get
+      - name: Getting Flutter packages
+        run:  dart pub get
 
-      - name: Get Flutter packages (Plugin)
-        run: |
-         cd ouisync-plugin
-         flutter pub get
+      - name: Run Flutter code generators
+        run: dart run build_runner build
+        env:
+          DSN:
 
       - name: Generate the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
         run: |
