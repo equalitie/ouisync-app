@@ -2,22 +2,43 @@ name: CI
 
 on:
   push:
-    #branches: [master]
     paths-ignore:
       - '**/README.md'
   pull_request:
     branches: [master]
 
-  workflow_dispatch:
-
 jobs:
   build_and_test:
-    name: OuiSync Flutter App - Android
-    runs-on: ubuntu-latest
-    steps:
-      - name: Installing llvm
-        run: sudo apt-get install libclang-dev
+    name: build and test on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        name: [android, linux, windows]
+        include:
+          - name: android
+            os: ubuntu-latest
+            target: aarch64-linux-android
+            ndk:
+              version: r25c
+              abi: arm64-v8a
+            test-env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/release/libouisync_ffi.so
+            build-args: apk --target-platform android-arm64
 
+          - name: linux
+            os: ubuntu-latest
+            analyze: true
+            test-env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/release/libouisync_ffi.so
+            build-args:
+
+          - name: windows
+            os: windows-latest
+            test-env:
+              OUISYNC_LIB: D:\a\ouisync-app\ouisync-app\ouisync-plugin\ouisync\target\release\ouisync_ffi.dll
+            build-args:
+
+    steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -26,33 +47,37 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Adding Android Platform target
-        run: rustup target add x86_64-linux-android # armv7-linux-androideabi aarch64-linux-android i686-linux-android
+      - name: Add rust target
+        run: rustup target add ${{ matrix.target }}
+        if: matrix.target != ''
 
-      - name: Install dependencies
+      - name: Install libfuse
         run: sudo apt-get install libfuse-dev
+        if: matrix.name != 'windows'
+
+      - name: Install Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+            ndk-version: ${{ matrix.ndk.version }}
+        if: matrix.ndk.version != ''
+
+      - name: Set NDK ABI filter
+        run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
+        if: matrix.ndk.abi != ''
 
       - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
         run: |
          cd ouisync-plugin/ouisync
          cargo run --bin bindgen
 
-      - name: Setting up the Android NDK environment
-        uses: nttld/setup-ndk@v1
-        with:
-            ndk-version: r25c
-
-      - name: Set the ABI filter for x86_64
-        run: echo "ndk.abiFilters=x86_64" >> android/local.properties
-
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Flutter doctor
+      - name: Run Flutter doctor
         run: flutter doctor -v
 
-      - name: Getting Flutter packages
+      - name: Get Flutter packages
         run:  dart pub get
 
       - name: Run Flutter code generators
@@ -60,24 +85,27 @@ jobs:
         env:
           DSN:
 
-      - name: Generate the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
-        run: |
-         cd ouisync-plugin
-         flutter pub run ffigen
+      - name: Generate the Dart bindings for the Ouisync library
+        run: cd ouisync-plugin && flutter pub run ffigen
 
       - name: Analyze
         run: |
           cd lib  && flutter analyze
           cd test && flutter analyze
           cd util && flutter analyze
+        if: matrix.analyze == 'true'
 
-      - name: Build OuiSync library for tests
+      - name: Build Ouisync library for tests
         run: |
          cd ouisync-plugin/ouisync
          cargo build --release -p ouisync-ffi
 
       - name: Run tests
-        run: OUISYNC_LIB=`pwd`/ouisync-plugin/ouisync/target/release/libouisync_ffi.so flutter test
+        run:
+          flutter test
+        env: ${{ matrix.test-env }}
 
-      - name: Building APK (android-x64)
-        run: flutter build apk --flavor vanilla -t lib/main_vanilla.dart --target-platform android-x64
+      - name: Build Ouisync app
+        run: flutter build ${{ matrix.build-args }}
+
+
