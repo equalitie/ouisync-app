@@ -21,7 +21,7 @@ Future<void> main(List<String> args) async {
   final commit = await getCommit();
 
   final versionName = stripBuild(version).canonicalizedVersion;
-  final buildName = commit != null ? '$versionName-$commit' : versionName;
+  final buildName = '$versionName-$commit';
 
   // Do a fresh build just in case (TODO: do we need this?)
   await cleanBuild();
@@ -364,9 +364,12 @@ Future<void> upload({
 }
 
 Future<File> collateAsset(
-    Directory outputDir, String outName, String suffix, File inputFile) async {
+  Directory outputDir,
+  String outName,
+  String suffix,
+  File inputFile,
+) async {
   final ext = extension(inputFile.path);
-  final basename = basenameWithoutExtension(inputFile.path);
   return await inputFile.copy(join(outputDir.path, '$outName-$suffix$ext'));
 }
 
