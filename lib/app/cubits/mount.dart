@@ -6,6 +6,8 @@ import '../utils/log.dart';
 
 class MountState {}
 
+class MountStateDisabled extends MountState {}
+
 class MountStateMounting extends MountState {}
 
 class MountStateSuccess extends MountState {}
@@ -17,16 +19,22 @@ class MountStateError extends MountState {
 }
 
 class MountCubit extends Cubit<MountState> with AppLogger {
-  MountCubit(oui.Session session) : super(MountStateMounting()) {
-    unawaited(_mountFileSystem(session));
-  }
+  final oui.Session session;
 
-  Future<void> _mountFileSystem(oui.Session session) async {
+  MountCubit(this.session) : super(MountStateDisabled());
+
+  Future<void> mount(String mountPoint) async {
+    emit(MountStateMounting());
+
     try {
-      await session.mountAllRepositories("O:");
+      await session.mountAllRepositories(mountPoint);
       emit(MountStateSuccess());
-    } on oui.Error catch (error) {
-      loggy.app("Failed to mount repositories ${error.code}: ${error.message}");
+    } on oui.Error catch (error, st) {
+      loggy.error(
+        'Failed to mount repositories at $mountPoint:',
+        error.message,
+        st,
+      );
       emit(MountStateError(error.code, error.message));
     }
   }
