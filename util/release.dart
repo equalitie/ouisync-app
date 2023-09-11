@@ -17,50 +17,56 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
+  // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
+  final name = 'ouisync';
   final version = pubspec.version!;
+
   final commit = await getCommit();
 
   final versionName = stripBuild(version).canonicalizedVersion;
   final buildName = '$versionName-$commit';
 
-  // Do a fresh build just in case (TODO: do we need this?)
-  await cleanBuild();
-
-  final aab = await buildAab(buildName, version.build[0] as int);
-  final winInstaller = await buildWindowsInstaller(buildName);
-
-  final identityName = options.identityName;
-  final publisher = options.publisher;
-  final winMSIX = await buildWindowsMSIX(identityName, publisher);
-
   final suffix = createFileSuffix(version, commit);
   final outputDir = await createOutputDir(suffix);
 
-  final collatedAab =
-      await collateAsset(outputDir, "ouisync-android", suffix, aab);
-  final collatedApk = await extractApk(collatedAab);
-  final collatedWinInstaller = await collateAsset(
-      outputDir, "ouisync-windows-installer", suffix, winInstaller);
+  List<File> assets = [];
 
-  File? collateWinMSIX;
-  if (winMSIX != null) {
-    collateWinMSIX =
-        await collateAsset(outputDir, 'ouisync-windows-msix', suffix, winMSIX);
+  if (options.apk || options.aab) {
+    final aab = await buildAab(buildName, version.build[0] as int);
+
+    if (options.aab) {
+      assets.add(await collateAsset(outputDir, name, suffix, aab));
+    }
+
+    if (options.apk) {
+      final apk = await extractApk(aab);
+      assets.add(await collateAsset(outputDir, name, suffix, apk));
+    }
   }
 
-  /// Right now the MSIX is not signed, therefore, it can only be used for the
-  /// Microsoft Store, not for standalone installations.
-  ///
-  /// Until we get the certificates and sign the MSIX, we don't upload it to
-  /// GitHub releases.
-  ///
-  ///
-  final assets = <File>[
-    collatedAab,
-    collatedApk,
-    collatedWinInstaller,
-    if (collateWinMSIX != null) collateWinMSIX
-  ];
+  if (options.exe) {
+    final asset = await buildWindowsInstaller(buildName);
+    assets.add(await collateAsset(outputDir, name, suffix, asset));
+  }
+
+  if (options.msix) {
+    /// Right now the MSIX is not signed, therefore, it can only be used for the
+    /// Microsoft Store, not for standalone installations.
+    ///
+    /// Until we get the certificates and sign the MSIX, we don't upload it to
+    /// GitHub releases.
+    await buildWindowsMSIX(options.identityName, options.publisher);
+  }
+
+  if (options.deb) {
+    await buildDeb(
+      outputDir: outputDir,
+      name: name,
+      version: versionName,
+      commit: commit,
+      description: pubspec.description ?? '',
+    );
+  }
 
   final token = options.token;
   if (token != null) {
@@ -79,21 +85,41 @@ Future<void> main(List<String> args) async {
 }
 
 class Options {
+  final bool apk;
+  final bool aab;
+  final bool exe;
+  final bool msix;
+  final bool deb;
+
   final String? token;
   final String? firstCommit;
   final bool detailedLog;
   final String? identityName;
   final String? publisher;
 
-  Options._(
-      {this.token,
-      this.firstCommit,
-      this.detailedLog = true,
-      this.identityName,
-      this.publisher});
+  Options._({
+    this.apk = false,
+    this.aab = false,
+    this.exe = false,
+    this.msix = false,
+    this.deb = false,
+    this.token,
+    this.firstCommit,
+    this.detailedLog = true,
+    this.identityName,
+    this.publisher,
+  });
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
+
+    parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
+    parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
+    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: true);
+    parser.addFlag('msix',
+        help: 'Build Windows MSIX package', defaultsTo: true);
+    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
+
     parser.addOption(
       'token-file',
       abbr: 't',
@@ -142,6 +168,11 @@ class Options {
         : null;
 
     return Options._(
+      apk: results['apk'],
+      aab: results['aab'],
+      exe: results['exe'],
+      msix: results['msix'],
+      deb: results['deb'],
       token: token?.trim(),
       firstCommit: results['first-commit']?.trim(),
       detailedLog: results['detailed-log'],
@@ -151,10 +182,11 @@ class Options {
   }
 }
 
-Future<void> cleanBuild() async {
-  await run('flutter', ['clean']);
-}
-
+////////////////////////////////////////////////////////////////////////////////
+//
+// exe
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsInstaller(String buildName) async {
   await run('flutter', [
     'build',
@@ -176,6 +208,11 @@ Future<File> buildWindowsInstaller(String buildName) async {
   return File('build/windows/runner/Release/ouisync-installer.exe');
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// msix
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
   if (identityName == null || publisher == null) {
     final missingOptions =
@@ -208,6 +245,110 @@ Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
   return File('build/windows/runner/Release/ouisync_app.msix');
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// deb
+//
+////////////////////////////////////////////////////////////////////////////////
+Future<File> buildDeb({
+  required Directory outputDir,
+  required String name,
+  required String version,
+  String? commit,
+  String description = '',
+}) async {
+  final buildName = commit != null ? '$version-$commit' : version;
+
+  await run('flutter', [
+    'build',
+    'linux',
+    '--build-name',
+    buildName,
+  ]);
+
+  final arch = 'amd64';
+  final revision = commit != null ? '0+$commit' : '0';
+  final packageName = '${name}_$version-${revision}_$arch';
+
+  final packageDir = Directory('${outputDir.path}/$packageName');
+
+  // Delete any previous dir
+  try {
+    await packageDir.delete(recursive: true);
+  } on PathNotFoundException {
+    // ignore if it doesn't exist yet
+  }
+
+  await packageDir.create();
+
+  // Copy files
+  final bundleDir = Directory('build/linux/x64/release/bundle');
+
+  final libDir = Directory('${packageDir.path}/usr/lib/$name');
+  await libDir.create(recursive: true);
+  await copyDirectory(bundleDir, libDir);
+
+  // HACK: rename the binary 'ouisync_app' -> 'ouisync'
+  await File('${libDir.path}/ouisync_app').rename('${libDir.path}/$name');
+
+  final binDir = Directory('${packageDir.path}/usr/bin');
+  await binDir.create();
+  await Link('${binDir.path}/$name').create('../lib/$name/$name');
+
+  // Create desktop file
+  final desktopDir = Directory('${packageDir.path}/usr/share/applications');
+  await desktopDir.create(recursive: true);
+
+  final capitalizedName = '${name[0].toUpperCase()}${name.substring(1)}';
+
+  final desktopContent = '[Desktop Entry]\n'
+      'Name=$capitalizedName\n'
+      'GenericName=File synchronization\n'
+      'Version=$version-$revision\n'
+      'Comment=$description\n'
+      'Exec=/usr/bin/$name\n'
+      'Terminal=false\n'
+      'Type=Application\n'
+      'Icon=$name\n'
+      'Categories=Network;FileTransfer;P2P\n';
+  await File('${desktopDir.path}/$name.desktop').writeAsString(desktopContent);
+
+  // Add icon
+  // TODO: other resolutions?
+  final iconDir =
+      Directory('${packageDir.path}/usr/share/icons/hicolor/192x192/apps');
+  await iconDir.create(recursive: true);
+  await File('assets/ic_launcher.png').copy('${iconDir.path}/$name.png');
+
+  // Create debian control file
+  final debDir = Directory('${packageDir.path}/DEBIAN');
+  await debDir.create();
+
+  final controlContent = 'Package: $name\n'
+      'Version: $version-$revision\n'
+      'Architecture: $arch\n'
+      // TODO: dependencies
+      'Maintainer: Ouisync developers <support@ouisync.net>\n'
+      'Description: $description\n';
+  await File('${debDir.path}/control').writeAsString(controlContent);
+
+  final package = File('${outputDir.path}/$packageName.deb');
+
+  await run('dpkg-deb', [
+    '--root-owner-group',
+    '-b',
+    packageDir.path,
+    package.path,
+  ]);
+
+  return package;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// aab
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(String buildName, int buildNumber) async {
   final inputPath = 'build/app/outputs/bundle/Release/app-release.aab';
 
@@ -226,6 +367,11 @@ Future<File> buildAab(String buildName, int buildNumber) async {
   return File(inputPath);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// apk
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File> extractApk(File bundle) async {
   final outputPath = setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
@@ -274,6 +420,12 @@ Future<File> extractApk(File bundle) async {
     await File(tempPath).delete();
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// utils
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Future<String> prepareBundletool() async {
   final version = "1.8.2";
@@ -531,9 +683,6 @@ String createFileSuffix(Version version, String commit) {
   final buffer = StringBuffer();
 
   buffer
-    ..write((version.build[0] as int).toString().padLeft(5, '0'))
-    ..write('--')
-    ..write('v')
     ..write(version.major)
     ..write('.')
     ..write(version.minor)
@@ -542,18 +691,16 @@ String createFileSuffix(Version version, String commit) {
 
   if (version.preRelease.isNotEmpty) {
     buffer
-      ..write('--')
+      ..write('-')
       ..write(version.preRelease.join('.'));
   }
 
   buffer
-    ..write('--')
+    ..write('+')
     ..write(formatDate(
       timestamp,
-      [yyyy, '-', mm, '-', dd, '--', HH, '-', nn, '-', ss],
-    ))
-    ..write("-UTC")
-    ..write("--$commit");
+      [yyyy, mm, dd, HH, nn, ss],
+    ));
 
   return buffer.toString();
 }
@@ -598,4 +745,19 @@ Future<String> runCapture(
   }
 
   return result.stdout.trim();
+}
+
+// Copy directory including its contents
+Future<void> copyDirectory(Directory src, Directory dst) async {
+  await for (final srcEntry in src.list(recursive: true, followLinks: false)) {
+    final dstPath = join(dst.path, relative(srcEntry.path, from: src.path));
+
+    if (srcEntry is File) {
+      final dstEntry = File(dstPath);
+      await Directory(dstEntry.parent.path).create(recursive: true);
+      await srcEntry.copy(dstEntry.path);
+    } else if (srcEntry is Directory) {
+      await Directory(dstPath).create(recursive: true);
+    }
+  }
 }
