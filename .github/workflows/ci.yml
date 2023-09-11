@@ -32,7 +32,7 @@ jobs:
               OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
             # analyze: true
-            build-args:
+            build-args: linux
 
           - name: windows
             os: windows-latest
@@ -41,7 +41,7 @@ jobs:
               DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
               OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.dll
             dokan-version: 2.0.6.1000
-            build-args:
+            build-args: windows
 
     env: ${{ matrix.env }}
 
