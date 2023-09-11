@@ -18,27 +18,32 @@ jobs:
         include:
           - name: android
             os: ubuntu-latest
+            env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android
             ndk:
               version: r25c
               abi: arm64-v8a
-            test-env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             build-args: apk --target-platform android-arm64
 
           - name: linux
             os: ubuntu-latest
+            env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
             # analyze: true
-            test-env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
             build-args:
 
           - name: windows
             os: windows-latest
-            test-env:
-              OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.so
+            env:
+              # Install Dokan2.dll to where `flutter test` can find it
+              DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
+              OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.dll
+            dokan-version: 2.0.6.1000
             build-args:
+
+    env: ${{ matrix.env }}
 
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +111,6 @@ jobs:
       - name: Run tests
         run:
           flutter test
-        env: ${{ matrix.test-env }}
 
       - name: Build Ouisync app
         run: flutter build ${{ matrix.build-args }}
