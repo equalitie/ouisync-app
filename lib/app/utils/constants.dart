@@ -5,6 +5,7 @@ enum AuthMode {
   manual,
   version1,
   version2,
+  secured,
   noLocalPassword,
 }
 
@@ -21,6 +22,10 @@ String authModeToString(AuthMode authMode) {
     case AuthMode.version2:
       {
         return "version2";
+      }
+    case AuthMode.secured:
+      {
+        return "secured";
       }
     case AuthMode.noLocalPassword:
       {
@@ -42,6 +47,10 @@ AuthMode? authModeFromString(String authMode) {
     case "version2":
       {
         return AuthMode.version2;
+      }
+    case "secured":
+      {
+        return AuthMode.secured;
       }
     case "noLocalPassword":
       {
