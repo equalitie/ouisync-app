@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
+import '../storage/storage.dart';
 import '../utils/utils.dart';
 import '../widgets/inputs/password_validation_input.dart';
 import 'cubits.dart';
@@ -21,8 +22,8 @@ class SecurityState extends Equatable {
           : PasswordMode.bio;
 
   String get passwordModeTitle => authMode == AuthMode.manual
-      ? 'Update local password'
-      : 'Add local password';
+      ? S.current.messageUpdateLocalPassword
+      : S.current.messageAddLocalPassword;
 
   SecurityState(
       {required this.authMode,
@@ -120,10 +121,11 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
     setPassword(newPassword);
 
-    final addedToSecureStorage = await _addPasswordToSecureStorage(
-        newPassword, AuthMode.noLocalPassword);
+    final updatedPassword =
+        await SecureStorage(databaseId: _repoCubit.databaseId)
+            .saveOrUpdatePassword(value: newPassword);
 
-    if (addedToSecureStorage == false) {
+    if (updatedPassword == null || updatedPassword.isEmpty) {
       return S.current.messageErrorRemovingPassword;
     }
 
@@ -135,6 +137,7 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   Future<String?> updateUnlockRepoWithBiometrics(
       bool unlockWithBiometrics) async {
     if (unlockWithBiometrics == false) {
+      /// TODO: Remove _addOrRemoveVersion2InSecureStorage
       final addedOrRemoved =
           await _addOrRemoveVersion2InSecureStorage(AuthMode.noLocalPassword);
 
@@ -178,33 +181,13 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     return null;
   }
 
-  Future<bool> _addPasswordToSecureStorage(
-      String password, AuthMode authMode) async {
-    final secureStorageResult = await SecureStorage.addRepositoryPassword(
-        databaseId: _repoCubit.databaseId,
-        password: password,
-        authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-      return false;
-    }
-
-    return true;
-  }
-
   Future<bool> _updatePasswordInSecureStorage(
       String newPassword, AuthMode authMode) async {
-    final secureStorageResult = await SecureStorage.addRepositoryPassword(
-        databaseId: _repoCubit.databaseId,
-        password: state.password,
-        authMode: authMode);
+    final updatedPassword =
+        await SecureStorage(databaseId: _repoCubit.databaseId)
+            .saveOrUpdatePassword(value: state.password);
 
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return false;
-    }
+    if (updatedPassword == null || updatedPassword.isEmpty) return false;
 
     emit(state.copyWith(password: newPassword));
 
@@ -213,42 +196,23 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
   Future<bool?> _addOrRemoveVersion2InSecureStorage(
       AuthMode newAuthMode) async {
-    final newEntryResult = await SecureStorage.addRepositoryPassword(
-        databaseId: _repoCubit.databaseId,
-        password: state.password,
-        authMode: newAuthMode);
+    final savedPassword = await SecureStorage(databaseId: _repoCubit.databaseId)
+        .saveOrUpdatePassword(value: state.password);
 
-    if (newEntryResult.exception != null) {
-      loggy.app(newEntryResult.exception);
+    if (savedPassword == null) return null;
+    if (savedPassword.isEmpty) return false;
 
-      return null;
-    }
+    final passwordDeleted =
+        await SecureStorage(databaseId: _repoCubit.databaseId).deletePassword();
 
-    final oldVersion2EntryResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: _repoCubit.databaseId,
-        authMode: state.authMode,
-        authenticationRequired: false);
-
-    if (oldVersion2EntryResult.exception != null) {
-      loggy.app(oldVersion2EntryResult.exception);
-
-      return false;
-    }
-
-    return true;
+    return passwordDeleted;
   }
 
   Future<bool> _removePasswordFromSecureStorage(AuthMode authMode) async {
-    final secureStorageResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: _repoCubit.databaseId,
-        authMode: authMode,
-        authenticationRequired: false);
+    final passwordDeleted =
+        await SecureStorage(databaseId: _repoCubit.databaseId).deletePassword();
 
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
-      return false;
-    }
+    if (!passwordDeleted) return false;
 
     emit(state.copyWith(unlockWithBiometrics: false, previewPassword: false));
     return true;

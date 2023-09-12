@@ -522,6 +522,7 @@
   "messageAvailableOnMobile":"Available on mobile",
   "messageRemoveLocalPasswordConfirmation":"Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again",
   "messageUpdateLocalPasswordConfirmation":"Update this repository localpassword?",
+  "messageUpdateLocalPassword":"Update local password",
   "messageAddLocalPasswordConfirmation":"Add a local password for this repository?",
   "messageUnlockUsingBiometricsConfirmation":"Unlock this repository using biometrics?",
   "messageRemoveBiometricsConfirmation":"Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.",

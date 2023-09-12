@@ -25,9 +25,15 @@ class SecureStorage with AppLogger {
   Future<String?> tryGetPassword({required AuthMode authMode}) async {
     if (authMode == AuthMode.manual) return null;
 
-    return authMode == AuthMode.secured
-        ? _readFlutterSecureStorage(databaseId)
-        : _getValueAndMigrateFromBiometricStorage(databaseId, authMode);
+    final authorized = await _maybeValidateBiometrics(authMode);
+    if (authorized == false) {
+      return null;
+    }
+
+    final needMigration = await _needMigration(databaseId);
+    return needMigration
+        ? _getValueAndMigrateFromBiometricStorage(databaseId, authMode)
+        : _readFlutterSecureStorage(databaseId);
   }
 
   Future<bool> deletePassword() async {
@@ -43,9 +49,27 @@ class SecureStorage with AppLogger {
     return true;
   }
 
+  /////////////////////////////////
+
+  Future<bool> _maybeValidateBiometrics(AuthMode authMode) async {
+    if (authMode == AuthMode.version2) {
+      final auth = LocalAuthentication();
+      final authorized = await auth.authenticate(
+          localizedReason: S.current.messageAccessingSecureStorage);
+
+      return authorized;
+    }
+
+    return true;
+  }
+
+  Future<bool> _needMigration(String databaseId) async {
+    final exist = await FlutterSecure.exist(databaseId: databaseId);
+    return !exist;
+  }
+
   Future<String?> _readFlutterSecureStorage(String databaseId) async {
     final result = await FlutterSecure.readValue(databaseId: databaseId);
-
     if (result.exception != null) {
       loggy.error(
           'Getting repository password from flutter_secure_storage failed',
@@ -92,21 +116,10 @@ class SecureStorage with AppLogger {
   /// just go from either version to AuthMode.secure, which uses the new plugin.
   Future<String?> _getValueAndMigrateFromBiometricStorage(
       String databaseId, AuthMode authMode) async {
-    if (authMode == AuthMode.version2) {
-      final auth = LocalAuthentication();
-
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
     final value =
         await _readBiometricStorage(databaseId: databaseId, authMode: authMode);
 
-    if (value != null) {
+    if (value != null && value.isNotEmpty) {
       await _migrateToSecureAuthMode(databaseId, value, authMode);
     }
 

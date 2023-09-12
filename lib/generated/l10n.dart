@@ -3710,6 +3710,16 @@ class S {
     );
   }
 
+  /// `Update local password`
+  String get messageUpdateLocalPassword {
+    return Intl.message(
+      'Update local password',
+      name: 'messageUpdateLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add a local password for this repository?`
   String get messageAddLocalPasswordConfirmation {
     return Intl.message(

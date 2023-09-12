@@ -65,13 +65,19 @@ class LockedRepositoryState extends StatelessWidget
                 })),
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
-            onPressed: () async => await unlockRepository(parentContext,
-                databaseId: databaseId,
-                repositoryName: repositoryName,
-                checkForBiometrics: checkForBiometricsCallback,
-                getAuthenticationMode: getAuthenticationModeCallback,
-                setAuthenticationMode: setAuthenticationModeCallback,
-                cubitUnlockRepository: unlockRepositoryCallback),
+            onPressed: () async {
+              final authMode = getAuthenticationModeCallback(repositoryName);
+              final isBiometricsAvailable =
+                  await checkForBiometricsCallback() ?? false;
+
+              await unlockRepository(parentContext,
+                  databaseId: databaseId,
+                  repositoryName: repositoryName,
+                  authenticationMode: authMode,
+                  isBiometricsAvailable: isBiometricsAvailable,
+                  setAuthenticationMode: setAuthenticationModeCallback,
+                  cubitUnlockRepository: unlockRepositoryCallback);
+            },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
             autofocus: true)

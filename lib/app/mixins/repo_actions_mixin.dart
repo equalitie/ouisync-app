@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
+import '../storage/storage.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -101,9 +101,9 @@ mixin RepositoryActionsMixin on AppLogger {
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
     } else {
-      final securePassword = await tryGetSecurePassword(context,
-          databaseId: repository.databaseId,
-          authenticationMode: authenticationMode);
+      final securePassword =
+          await SecureStorage(databaseId: repository.databaseId)
+              .tryGetPassword(authMode: authenticationMode);
 
       if (securePassword == null || securePassword.isEmpty) return null;
 
@@ -242,93 +242,22 @@ mixin RepositoryActionsMixin on AppLogger {
     }
   }
 
-  /// checkForBiometrics => main_page._checkForBiometricsCallback
-  /// getAuthenticationMode => Settings.getAuthenticationMode
   /// setAuthenticationMode => Settings.setAuthenticationMode
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
       {required String databaseId,
       required String repositoryName,
-      required CheckForBiometricsFunction checkForBiometrics,
-      required AuthMode Function(String) getAuthenticationMode,
+      required AuthMode authenticationMode,
+      required bool isBiometricsAvailable,
       required Future<void> Function(String, AuthMode?) setAuthenticationMode,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    AuthMode authenticationMode = getAuthenticationMode(repositoryName);
-
-    /// Runs once per repository (if needed): before adding to the app the
-    /// possibility to create a repository without a local password, any entry
-    /// to the secure storage (biometric_storage) required biometric validation
-    /// (authenticationRequired=true, by default).
-    ///
-    /// With the option of not having a local password, we now save the password,
-    /// for both this option and biometrics, in the secure storage, and only in
-    /// the latest case we require biometric validation, using the Dart package
-    /// local_auth, instead of the biometric_storage built in validation.
-    ///
-    /// Any repo that doesn't have this setting is considered from a version
-    /// before this implementation, and we need to determine the value for this
-    /// setting right after the update, on the first unlocking.
-    ///
-    /// Trying to get the password from the secure storage using the built in
-    /// biometric validation can tell us this:
-    ///
-    /// IF securePassword != null
-    ///   The repo password exist and it was secured using biometrics. (version1)
-    /// ELSE
-    ///   The repo password doesn't exist and it was manually input by the user.
-    ///
-    /// (If the password is empty, something wrong happened in the previous
-    /// version of the app saving its value and it is considered non existent
-    /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == AuthMode.version1) {
-      final securedPassword = await getPasswordAndUnlock(context,
-          databaseId: databaseId,
-          repositoryName: repositoryName,
-          authenticationMode: AuthMode.version1,
-          cubitUnlockRepository: cubitUnlockRepository);
-
-      if (securedPassword == null) {
-        return;
-      }
-
-      /// IF password.isEmpty => The password doesn't exist in the secure
-      /// storage.
-      authenticationMode =
-          securedPassword.isEmpty ? AuthMode.manual : AuthMode.version1;
-
-      await setAuthenticationMode(repositoryName, authenticationMode);
-
-      if (authenticationMode == AuthMode.version1) {
-        final upgraded = await upgradeBiometricEntryToVersion2(
-            databaseId: databaseId, password: securedPassword);
-
-        if (upgraded == null) {
-          loggy.error(
-              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
-
-          return;
-        }
-
-        if (upgraded == false) {
-          loggy.warning(
-              'Removing the old entry (version1) for $repositoryName in the '
-              'secure storage failed, but the creating the new entry (version2) '
-              'was successful.');
-        }
-
-        await setAuthenticationMode(repositoryName, AuthMode.version2);
-
-        return;
-      }
-    }
-
     if (authenticationMode == AuthMode.manual) {
-      final unlockResult = await getManualPasswordAndUnlock(context,
+      final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
-          checkForBiometrics: checkForBiometrics,
+          isBiometricsAvailable: isBiometricsAvailable,
           cubitUnlockRepository: cubitUnlockRepository,
           setAuthenticationMode: setAuthenticationMode);
 
@@ -339,145 +268,56 @@ mixin RepositoryActionsMixin on AppLogger {
       return;
     }
 
-    await getPasswordAndUnlock(context,
-        databaseId: databaseId,
-        repositoryName: repositoryName,
-        authenticationMode: authenticationMode,
-        cubitUnlockRepository: cubitUnlockRepository);
-  }
+    final securePassword = await SecureStorage(databaseId: databaseId)
+        .tryGetPassword(authMode: authenticationMode);
 
-  /// cubitUnlockRepository => ReposCubit.unlockRepository
-  Future<String?> getPasswordAndUnlock(BuildContext context,
-      {required String databaseId,
-      required String repositoryName,
-      required AuthMode authenticationMode,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
-          cubitUnlockRepository}) async {
-    if (authenticationMode == AuthMode.manual) {
-      return null;
-    }
-
-    final securePassword = await tryGetSecurePassword(context,
-        databaseId: databaseId, authenticationMode: authenticationMode);
-
-    if (securePassword != null && securePassword.isNotEmpty) {
-      final accessMode =
-          await cubitUnlockRepository(repositoryName, password: securePassword);
-
-      final message = (accessMode != null && accessMode != AccessMode.blind)
-          ? S.current.messageUnlockRepoOk(accessMode.name)
-          : S.current.messageUnlockRepoFailed;
-
+    if (securePassword == null || securePassword.isEmpty) {
+      final message = authenticationMode == AuthMode.noLocalPassword
+          ? 'We couldn\'t unlocked the repository'
+          : 'Biometric unlocking failed.';
       showSnackBar(context, message: message);
+      return;
     }
 
-    return securePassword;
-  }
+    final accessMode =
+        await cubitUnlockRepository(repositoryName, password: securePassword);
 
-  Future<String?> tryGetSecurePassword(BuildContext context,
-      {required String databaseId,
-      required AuthMode authenticationMode}) async {
-    if (authenticationMode == AuthMode.manual) {
-      return null;
-    }
+    final message = (accessMode != null && accessMode != AccessMode.blind)
+        ? S.current.messageUnlockRepoOk(accessMode.name)
+        : S.current.messageUnlockRepoFailed;
 
-    if (authenticationMode == AuthMode.version2) {
-      final auth = LocalAuthentication();
-
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    final value = await readSecureStorage(
-        databaseId: databaseId, authMode: authenticationMode);
-
-    return value;
-  }
-
-  Future<String?> readSecureStorage(
-      {required String databaseId, required AuthMode authMode}) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.error(
-          'Repository password could not be retrieved from secure storage',
-          secureStorageResult.exception,
-          secureStorageResult.stackTrace);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
-  }
-
-  Future<bool?> upgradeBiometricEntryToVersion2(
-      {required String databaseId, required String password}) async {
-    final addTempResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
-        password: password,
-        authMode: AuthMode.version2);
-
-    if (addTempResult.exception != null) {
-      loggy.error(addTempResult.exception);
-
-      return null;
-    }
-
-    final deleteOldResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: AuthMode.version1,
-        authenticationRequired: false);
-
-    if (deleteOldResult.exception != null) {
-      loggy.error(deleteOldResult.exception);
-
-      return false;
-    }
-
-    return true;
+    showSnackBar(context, message: message);
   }
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
-  Future<UnlockRepositoryResult?> getManualPasswordAndUnlock(
-      BuildContext context,
-      {required String databaseId,
-      required String repositoryName,
-      required CheckForBiometricsFunction checkForBiometrics,
-      required Future<void> Function(String repoName, AuthMode? value)
-          setAuthenticationMode,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
-          cubitUnlockRepository}) async {
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
-
-    final unlockResult = await showDialog<UnlockRepositoryResult?>(
-        context: context,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                    title: S.current.messageUnlockRepository,
-                    body: UnlockRepository(
-                        parentContext: context,
-                        databaseId: databaseId,
-                        repositoryName: repositoryName,
-                        isPasswordValidation: false,
-                        isBiometricsAvailable: isBiometricsAvailable,
-                        setAuthenticationModeCallback: setAuthenticationMode,
-                        unlockRepositoryCallback: cubitUnlockRepository),
-                  ));
-            }))));
-
-    return unlockResult;
-  }
+  Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
+          {required String databaseId,
+          required String repositoryName,
+          required bool isBiometricsAvailable,
+          required Future<void> Function(String repoName, AuthMode? value)
+              setAuthenticationMode,
+          required Future<AccessMode?> Function(String repositoryName,
+                  {required String password})
+              cubitUnlockRepository}) async =>
+      await showDialog<UnlockRepositoryResult?>(
+          context: context,
+          builder: (BuildContext context) =>
+              ScaffoldMessenger(child: Builder(builder: ((context) {
+                return Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: ActionsDialog(
+                      title: S.current.messageUnlockRepository,
+                      body: UnlockRepository(
+                          parentContext: context,
+                          databaseId: databaseId,
+                          repositoryName: repositoryName,
+                          isPasswordValidation: false,
+                          isBiometricsAvailable: isBiometricsAvailable,
+                          setAuthenticationModeCallback: setAuthenticationMode,
+                          unlockRepositoryCallback: cubitUnlockRepository),
+                    ));
+              }))));
 
   String? validatePassword(String password,
       {required GlobalKey<FormFieldState> passwordInputKey,

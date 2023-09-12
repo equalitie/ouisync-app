@@ -41,6 +41,9 @@ class FlutterSecure {
 
     return SecureStorageResult(value: null);
   }
+
+  static Future<bool> exist({required String databaseId}) async =>
+      _storage.containsKey(key: databaseId);
 }
 
 AndroidOptions _getAndroidOptions() =>

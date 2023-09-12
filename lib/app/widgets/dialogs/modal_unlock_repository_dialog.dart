@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
+import '../../storage/storage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -129,17 +130,12 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     // Only if the password successfuly unlocked the repo, then we add it
     // to the secure storage -if the user selected the option.
     if (_useBiometrics.value) {
-      final biometricsResult = await Dialogs.executeFutureWithLoadingDialog(
-          parentContext,
-          f: SecureStorage.addRepositoryPassword(
-              databaseId: databaseId,
-              password: password,
-              authMode: AuthMode.version2));
+      final savedPassword =
+          await Dialogs.executeFutureWithLoadingDialog<String?>(parentContext,
+              f: SecureStorage(databaseId: databaseId)
+                  .saveOrUpdatePassword(value: password));
 
-      if (biometricsResult.exception != null) {
-        loggy.app(biometricsResult.exception);
-        return;
-      }
+      if (savedPassword == null || savedPassword.isEmpty) return;
 
       await setAuthenticationModeCallback(repositoryName, AuthMode.version2);
     }

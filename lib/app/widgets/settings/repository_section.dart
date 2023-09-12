@@ -8,6 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/repo_entry.dart';
+import '../../storage/secure_storage.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
 import 'repository_selector.dart';
@@ -374,9 +375,9 @@ class _SecurityTileState extends State<SecurityTile>
                     }
                   }
 
-                  final securePassword = await tryGetSecurePassword(context,
-                      databaseId: repository.databaseId,
-                      authenticationMode: state.authMode);
+                  final securePassword =
+                      await SecureStorage(databaseId: repository.databaseId)
+                          .tryGetPassword(authMode: state.authMode);
 
                   if (securePassword == null || securePassword.isEmpty) {
                     if (securePassword != null) {
