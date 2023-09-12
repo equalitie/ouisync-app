@@ -63,6 +63,10 @@ jobs:
         run: sudo apt install libfuse-dev
         if: matrix.name != 'windows'
 
+      - name: Install libgtk
+        run: apt install libgtk-3-dev
+        if: matrix.name == 'linux'
+
       - name: Install Ninja
         run: sudo apt install ninja-build
         if: matrix.name == 'linux'
@@ -76,7 +80,6 @@ jobs:
       - name: Set NDK ABI filter
         run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
         if: matrix.ndk.abi != ''
-
 
       - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
         run: |
