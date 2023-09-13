@@ -55,17 +55,19 @@ Future<void> main(List<String> args) async {
   }
 
   if (options.deb) {
-    await buildDeb(
+    final asset = await buildDeb(
       name: name,
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
     );
+    assets.add(asset);
   }
 
   final token = options.token;
   if (token != null) {
     await upload(
+      slug: options.slug,
       version: version,
       first: options.firstCommit,
       last: commit,
@@ -87,6 +89,7 @@ class Options {
   final bool deb;
 
   final String? token;
+  final RepositorySlug slug;
   final String? firstCommit;
   final bool detailedLog;
   final String? identityName;
@@ -98,6 +101,7 @@ class Options {
     this.exe = false,
     this.msix = false,
     this.deb = false,
+    required this.slug,
     this.token,
     this.firstCommit,
     this.detailedLog = true,
@@ -115,6 +119,12 @@ class Options {
         help: 'Build Windows MSIX package', defaultsTo: true);
     parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
 
+    parser.addOption(
+      'repo',
+      abbr: 'r',
+      help: 'GitHub repository slug (owner/name)',
+      defaultsTo: 'equalitie/ouisync-app',
+    );
     parser.addOption(
       'token-file',
       abbr: 't',
@@ -157,6 +167,8 @@ class Options {
       exit(0);
     }
 
+    final slug = RepositorySlug.full(results['repo']!);
+
     final tokenFilePath = results['token-file'];
     final token = (tokenFilePath != null)
         ? await File(tokenFilePath).readAsString()
@@ -168,6 +180,7 @@ class Options {
       exe: results['exe'],
       msix: results['msix'],
       deb: results['deb'],
+      slug: slug,
       token: token?.trim(),
       firstCommit: results['first-commit']?.trim(),
       detailedLog: results['detailed-log'],
@@ -260,8 +273,9 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 
   final innoScript =
       await File("windows/inno-setup.iss.template").readAsString();
-  await File("build/inno-setup.iss")
-      .writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
+  await File("build/inno-setup.iss").writeAsString(
+    innoScript.replaceAll("<APP_VERSION>", buildName),
+  );
 
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
       ['/cc', 'build/inno-setup.iss']);
@@ -515,6 +529,7 @@ Future<String> prepareBundletool() async {
 }
 
 Future<void> upload({
+  required RepositorySlug slug,
   required Version version,
   String? first,
   required String last,
@@ -523,7 +538,6 @@ Future<void> upload({
   bool detailedLog = true,
 }) async {
   final client = GitHub(auth: Authentication.withToken(token));
-  final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
     final release = await createRelease(
@@ -553,8 +567,13 @@ Future<Release> createRelease(
   print('Creating release $tagName ($last) ...');
 
   if (first == null) {
-    final prev = await client.repositories.getLatestRelease(slug);
-    first = prev.tagName!;
+    try {
+      final prev = await client.repositories.getLatestRelease(slug);
+      first = prev.tagName!;
+    } on NotFound {
+      print('No previous release found');
+      rethrow;
+    }
   }
 
   final body = await buildReleaseNotes(
