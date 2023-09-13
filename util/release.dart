@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
+import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart';
@@ -17,89 +18,162 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
+  // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
+  final name = 'ouisync';
   final version = pubspec.version!;
   final commit = await getCommit();
 
-  final versionName = stripBuild(version).canonicalizedVersion;
-  final buildName = '$versionName-$commit';
+  final buildDesc = BuildDesc(version, commit);
+  final outputDir = await createOutputDir(buildDesc);
 
-  // Do a fresh build just in case (TODO: do we need this?)
-  await cleanBuild();
+  List<File> assets = [];
 
-  final aab = await buildAab(buildName, version.build[0] as int);
-  final winInstaller = await buildWindowsInstaller(buildName);
+  if (options.apk || options.aab) {
+    final aab = await buildAab(buildDesc);
 
-  final identityName = options.identityName;
-  final publisher = options.publisher;
-  final winMSIX = await buildWindowsMSIX(identityName, publisher);
+    if (options.aab) {
+      assets.add(await collateAsset(outputDir, name, buildDesc, aab));
+    }
 
-  final suffix = createFileSuffix(version, commit);
-  final outputDir = await createOutputDir(suffix);
-
-  final collatedAab =
-      await collateAsset(outputDir, "ouisync-android", suffix, aab);
-  final collatedApk = await extractApk(collatedAab);
-  final collatedWinInstaller = await collateAsset(
-      outputDir, "ouisync-windows-installer", suffix, winInstaller);
-
-  File? collateWinMSIX;
-  if (winMSIX != null) {
-    collateWinMSIX =
-        await collateAsset(outputDir, 'ouisync-windows-msix', suffix, winMSIX);
+    if (options.apk) {
+      final apk = await extractApk(aab);
+      assets.add(await collateAsset(outputDir, name, buildDesc, apk));
+    }
   }
 
-  /// Right now the MSIX is not signed, therefore, it can only be used for the
-  /// Microsoft Store, not for standalone installations.
-  ///
-  /// Until we get the certificates and sign the MSIX, we don't upload it to
-  /// GitHub releases.
-  ///
-  ///
-  final assets = <File>[
-    collatedAab,
-    collatedApk,
-    collatedWinInstaller,
-    if (collateWinMSIX != null) collateWinMSIX
-  ];
+  if (options.exe) {
+    final asset = await buildWindowsInstaller(buildDesc);
+    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
+  }
 
-  final token = options.token;
-  if (token != null) {
-    await upload(
-      version: version,
-      first: options.firstCommit,
-      last: commit,
-      assets: assets,
-      token: token,
-      detailedLog: options.detailedLog,
+  if (options.msix) {
+    /// Right now the MSIX is not signed, therefore, it can only be used for the
+    /// Microsoft Store, not for standalone installations.
+    ///
+    /// Until we get the certificates and sign the MSIX, we don't upload it to
+    /// GitHub releases.
+    await buildWindowsMSIX(options.identityName, options.publisher);
+  }
+
+  if (options.deb) {
+    final asset = await buildDeb(
+      name: name,
+      outputDir: outputDir,
+      buildDesc: buildDesc,
+      description: pubspec.description ?? '',
     );
-  } else {
-    print(
-        'no GitHub API access token specified - skipping creation of GitHub release');
+    assets.add(asset);
+  }
+
+  if (assets.isNotEmpty) {
+    print('Built assets:\n');
+    for (final asset in assets) {
+      print(' * ${asset.path}');
+    }
+    print('');
+  }
+
+  final auth = options.token != null
+      ? Authentication.withToken(options.token)
+      : Authentication.anonymous();
+  final client = GitHub(auth: auth);
+
+  try {
+    switch (options.action) {
+      case ReleaseAction.create:
+        final release = await createRelease(
+          client,
+          options.slug,
+          version: version,
+          first: options.firstCommit,
+          last: commit,
+          detailedLog: options.detailedLog,
+        );
+        await uploadAssets(client, release, assets);
+        break;
+
+      case ReleaseAction.update:
+        final release = await findLatestDraftRelease(client, options.slug);
+        await uploadAssets(client, release, assets);
+        break;
+
+      case null:
+        break;
+    }
+  } finally {
+    client.dispose();
   }
 }
 
 class Options {
+  final bool apk;
+  final bool aab;
+  final bool exe;
+  final bool msix;
+  final bool deb;
+
   final String? token;
+  final RepositorySlug slug;
+  final ReleaseAction? action;
   final String? firstCommit;
   final bool detailedLog;
   final String? identityName;
   final String? publisher;
 
-  Options._(
-      {this.token,
-      this.firstCommit,
-      this.detailedLog = true,
-      this.identityName,
-      this.publisher});
+  Options._({
+    this.apk = false,
+    this.aab = false,
+    this.exe = false,
+    this.msix = false,
+    this.deb = false,
+    this.token,
+    required this.slug,
+    this.action,
+    this.firstCommit,
+    this.detailedLog = true,
+    this.identityName,
+    this.publisher,
+  });
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
+
+    parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
+    parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
+    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: true);
+    parser.addFlag('msix',
+        help: 'Build Windows MSIX package', defaultsTo: true);
+    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
+
     parser.addOption(
       'token-file',
       abbr: 't',
       help:
           'Path to a file containing the GitHub API access token. If omitted, still builds the packages but does not create a GitHub release',
     );
+    parser.addOption(
+      'repo',
+      abbr: 'r',
+      help: 'GitHub repository slug (owner/name)',
+      defaultsTo: 'equalitie/ouisync-app',
+    );
+    parser.addFlag(
+      'create',
+      abbr: 'c',
+      negatable: false,
+      help:
+          'Create new release and upload the assets to it (conflicts with --update)',
+      defaultsTo: false,
+    );
+    parser.addFlag(
+      'update',
+      abbr: 'u',
+      negatable: false,
+      help:
+          'Do not create new release, upload the assets to the latest existing draft release instead (conflicts with --create)',
+      defaultsTo: false,
+    );
+
     parser.addOption('first-commit',
         abbr: 'f',
         help:
@@ -136,13 +210,33 @@ class Options {
       exit(0);
     }
 
+    if (results['create'] && results['update']) {
+      print('At most one of --create, --update can be used at the same time');
+      exit(1);
+    }
+
     final tokenFilePath = results['token-file'];
     final token = (tokenFilePath != null)
         ? await File(tokenFilePath).readAsString()
         : null;
 
+    final slug = RepositorySlug.full(results['repo']!);
+
+    final action = results['create']
+        ? ReleaseAction.create
+        : results['update']
+            ? ReleaseAction.update
+            : null;
+
     return Options._(
+      apk: results['apk'],
+      aab: results['aab'],
+      exe: results['exe'],
+      msix: results['msix'],
+      deb: results['deb'],
       token: token?.trim(),
+      slug: slug,
+      action: action,
       firstCommit: results['first-commit']?.trim(),
       detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
@@ -151,11 +245,83 @@ class Options {
   }
 }
 
-Future<void> cleanBuild() async {
-  await run('flutter', ['clean']);
+enum ReleaseAction {
+  create,
+  update,
 }
 
-Future<File> buildWindowsInstaller(String buildName) async {
+class BuildDesc {
+  final Version version;
+  final DateTime timestamp;
+  final String commit;
+
+  BuildDesc(this.version, this.commit) : timestamp = DateTime.now();
+
+  String get versionString => _formatVersion(StringBuffer()).toString();
+  String get revisionString => _formatRevision(StringBuffer()).toString();
+
+  @override
+  String toString() {
+    final buffer = StringBuffer();
+
+    _formatVersion(buffer);
+
+    buffer.write('-');
+
+    _formatRevision(buffer);
+
+    return buffer.toString();
+  }
+
+  StringBuffer _formatVersion(StringBuffer buffer) {
+    buffer
+      ..write(version.major)
+      ..write('.')
+      ..write(version.minor)
+      ..write('.')
+      ..write(version.patch);
+
+    if (version.preRelease.isNotEmpty) {
+      buffer
+        ..write('-')
+        ..write(version.preRelease.join('.'));
+    }
+
+    return buffer;
+  }
+
+  StringBuffer _formatTimestamp(StringBuffer buffer, [String separator = '']) =>
+      buffer
+        ..write(formatDate(
+          timestamp,
+          [
+            yyyy,
+            separator,
+            mm,
+            separator,
+            dd,
+            separator,
+            HH,
+            separator,
+            nn,
+            separator,
+            ss,
+          ],
+        ));
+
+  StringBuffer _formatRevision(StringBuffer buffer) => _formatTimestamp(buffer)
+    ..write('.')
+    ..write(commit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// exe
+//
+////////////////////////////////////////////////////////////////////////////////
+Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
+  final buildName = buildDesc.toString();
+
   await run('flutter', [
     'build',
     'windows',
@@ -167,8 +333,9 @@ Future<File> buildWindowsInstaller(String buildName) async {
 
   final innoScript =
       await File("windows/inno-setup.iss.template").readAsString();
-  await File("build/inno-setup.iss")
-      .writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
+  await File("build/inno-setup.iss").writeAsString(
+    innoScript.replaceAll("<APP_VERSION>", buildName),
+  );
 
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
       ['/cc', 'build/inno-setup.iss']);
@@ -176,6 +343,11 @@ Future<File> buildWindowsInstaller(String buildName) async {
   return File('build/windows/runner/Release/ouisync-installer.exe');
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// msix
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
   if (identityName == null || publisher == null) {
     final missingOptions =
@@ -208,8 +380,110 @@ Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
   return File('build/windows/runner/Release/ouisync_app.msix');
 }
 
-Future<File> buildAab(String buildName, int buildNumber) async {
-  final inputPath = 'build/app/outputs/bundle/Release/app-release.aab';
+////////////////////////////////////////////////////////////////////////////////
+//
+// deb
+//
+////////////////////////////////////////////////////////////////////////////////
+Future<File> buildDeb({
+  required String name,
+  required Directory outputDir,
+  required BuildDesc buildDesc,
+  String description = '',
+}) async {
+  final buildName = buildDesc.toString();
+
+  await run('flutter', [
+    'build',
+    'linux',
+    '--build-name',
+    buildName,
+  ]);
+
+  final arch = 'amd64';
+  final packageName = '${name}_${buildDesc}_$arch';
+
+  final packageDir = Directory('${outputDir.path}/$packageName');
+
+  // Delete any previous dir
+  try {
+    await packageDir.delete(recursive: true);
+  } on PathNotFoundException {
+    // ignore if it doesn't exist yet
+  }
+
+  await packageDir.create();
+
+  // Copy files
+  final bundleDir = Directory('build/linux/x64/release/bundle');
+
+  final libDir = Directory('${packageDir.path}/usr/lib/$name');
+  await libDir.create(recursive: true);
+  await copyDirectory(bundleDir, libDir);
+
+  // HACK: rename the binary 'ouisync_app' -> 'ouisync'
+  await File('${libDir.path}/ouisync_app').rename('${libDir.path}/$name');
+
+  final binDir = Directory('${packageDir.path}/usr/bin');
+  await binDir.create();
+  await Link('${binDir.path}/$name').create('../lib/$name/$name');
+
+  // Create desktop file
+  final desktopDir = Directory('${packageDir.path}/usr/share/applications');
+  await desktopDir.create(recursive: true);
+
+  final capitalizedName = '${name[0].toUpperCase()}${name.substring(1)}';
+
+  final desktopContent = '[Desktop Entry]\n'
+      'Name=$capitalizedName\n'
+      'GenericName=File synchronization\n'
+      'Version=$buildName\n'
+      'Comment=$description\n'
+      'Exec=/usr/bin/$name\n'
+      'Terminal=false\n'
+      'Type=Application\n'
+      'Icon=$name\n'
+      'Categories=Network;FileTransfer;P2P\n';
+  await File('${desktopDir.path}/$name.desktop').writeAsString(desktopContent);
+
+  // Add icon
+  // TODO: other resolutions?
+  final iconDir =
+      Directory('${packageDir.path}/usr/share/icons/hicolor/192x192/apps');
+  await iconDir.create(recursive: true);
+  await File('assets/ic_launcher.png').copy('${iconDir.path}/$name.png');
+
+  // Create debian control file
+  final debDir = Directory('${packageDir.path}/DEBIAN');
+  await debDir.create();
+
+  final controlContent = 'Package: $name\n'
+      'Version: $buildName\n'
+      'Architecture: $arch\n'
+      'Depends: libgtk-3-0, libsecret-1-0, libwebkit2gtk-4.1-0, libayatana-appindicator3-1\n'
+      'Maintainer: Ouisync developers <support@ouisync.net>\n'
+      'Description: $description\n';
+  await File('${debDir.path}/control').writeAsString(controlContent);
+
+  final package = File('${outputDir.path}/$packageName.deb');
+
+  await run('dpkg-deb', [
+    '--root-owner-group',
+    '-b',
+    packageDir.path,
+    package.path,
+  ]);
+
+  return package;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// aab
+//
+////////////////////////////////////////////////////////////////////////////////
+Future<File> buildAab(BuildDesc buildDesc) async {
+  final inputPath = 'build/app/outputs/bundle/release/app-release.aab';
 
   print('Creating Android App Bundle ...');
 
@@ -218,14 +492,19 @@ Future<File> buildAab(String buildName, int buildNumber) async {
     'appbundle',
     '--release',
     '--build-number',
-    '$buildNumber',
+    buildDesc.version.build[0].toString(),
     '--build-name',
-    buildName,
+    buildDesc.toString(),
   ]);
 
   return File(inputPath);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// apk
+//
+////////////////////////////////////////////////////////////////////////////////
 Future<File> extractApk(File bundle) async {
   final outputPath = setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
@@ -275,6 +554,12 @@ Future<File> extractApk(File bundle) async {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// utils
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Future<String> prepareBundletool() async {
   final version = "1.8.2";
   final name = "bundletool-all-$version.jar";
@@ -303,74 +588,97 @@ Future<String> prepareBundletool() async {
   return path;
 }
 
-Future<void> upload({
+Future<Release> createRelease(
+  GitHub client,
+  RepositorySlug slug, {
   required Version version,
   String? first,
   required String last,
-  required List<File> assets,
-  required String token,
   bool detailedLog = true,
 }) async {
-  final client = GitHub(auth: Authentication.withToken(token));
-  final slug = RepositorySlug('equalitie', 'ouisync-app');
+  final tagName = buildTagName(version);
 
-  try {
-    final tagName = buildTagName(version);
+  print('Creating release $tagName ($last) ...');
 
-    print('Creating release $tagName ($last) ...');
-
-    if (first == null) {
+  if (first == null) {
+    try {
       final prev = await client.repositories.getLatestRelease(slug);
       first = prev.tagName!;
+    } on NotFound {
+      print('No previous release found');
+      rethrow;
     }
-
-    final body = await buildReleaseNotes(
-      slug,
-      first,
-      last,
-      detailedLog: detailedLog,
-    );
-
-    final release = await client.repositories.createRelease(
-      slug,
-      CreateRelease(tagName)
-        ..name = 'Ouisync $tagName'
-        ..body = body
-        ..isDraft = true,
-    );
-
-    for (final asset in assets) {
-      final name = basename(asset.path);
-      final content = await asset.readAsBytes();
-
-      print('Uploading $name ...');
-
-      await client.repositories.uploadReleaseAssets(
-        release,
-        [
-          CreateReleaseAsset(
-            name: name,
-            contentType: 'application/octet-stream',
-            assetData: content,
-          )
-        ],
-      );
-    }
-
-    print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
-  } finally {
-    client.dispose();
   }
+
+  final body = await buildReleaseNotes(
+    slug,
+    first,
+    last,
+    detailedLog: detailedLog,
+  );
+
+  final release = await client.repositories.createRelease(
+    slug,
+    CreateRelease(tagName)
+      ..name = 'Ouisync $tagName'
+      ..body = body
+      ..isDraft = true,
+  );
+
+  print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
+
+  return release;
+}
+
+Future<Release> findLatestDraftRelease(
+  GitHub client,
+  RepositorySlug slug,
+) async {
+  final release = await client.repositories.listReleases(slug).firstOrNull;
+
+  if (release != null && (release.isDraft ?? false)) {
+    return release;
+  }
+
+  throw 'No latest draft release found';
+}
+
+Future<void> uploadAssets(
+  GitHub client,
+  Release release,
+  List<File> assets,
+) async {
+  for (final asset in assets) {
+    final name = basename(asset.path);
+    final content = await asset.readAsBytes();
+
+    print('Uploading $name ...');
+
+    await client.repositories.uploadReleaseAssets(
+      release,
+      [
+        CreateReleaseAsset(
+          name: name,
+          contentType: 'application/octet-stream',
+          assetData: content,
+        )
+      ],
+    );
+  }
+
+  print('${assets.length} assets successfully uploaded');
 }
 
 Future<File> collateAsset(
   Directory outputDir,
-  String outName,
-  String suffix,
-  File inputFile,
-) async {
+  String name,
+  BuildDesc buildDesc,
+  File inputFile, {
+  String suffix = '',
+}) async {
   final ext = extension(inputFile.path);
-  return await inputFile.copy(join(outputDir.path, '$outName-$suffix$ext'));
+  return await inputFile
+      .copy(join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
 }
 
 Future<String> buildReleaseNotes(
@@ -509,8 +817,8 @@ String buildTagName(Version version) {
   return 'v$v';
 }
 
-Future<Directory> createOutputDir(String tag) async {
-  final dir = Directory('$rootWorkDir/release-$tag');
+Future<Directory> createOutputDir(BuildDesc buildDesc) async {
+  final dir = Directory('$rootWorkDir/release_$buildDesc');
   await dir.create(recursive: true);
 
   // Create 'latest' symlink
@@ -523,39 +831,6 @@ Future<Directory> createOutputDir(String tag) async {
   await link.create(basename(dir.path));
 
   return dir;
-}
-
-String createFileSuffix(Version version, String commit) {
-  final timestamp = DateTime.now();
-
-  final buffer = StringBuffer();
-
-  buffer
-    ..write((version.build[0] as int).toString().padLeft(5, '0'))
-    ..write('--')
-    ..write('v')
-    ..write(version.major)
-    ..write('.')
-    ..write(version.minor)
-    ..write('.')
-    ..write(version.patch);
-
-  if (version.preRelease.isNotEmpty) {
-    buffer
-      ..write('--')
-      ..write(version.preRelease.join('.'));
-  }
-
-  buffer
-    ..write('--')
-    ..write(formatDate(
-      timestamp,
-      [yyyy, '-', mm, '-', dd, '--', HH, '-', nn, '-', ss],
-    ))
-    ..write("-UTC")
-    ..write("--$commit");
-
-  return buffer.toString();
 }
 
 Future<void> run(
@@ -598,4 +873,19 @@ Future<String> runCapture(
   }
 
   return result.stdout.trim();
+}
+
+// Copy directory including its contents
+Future<void> copyDirectory(Directory src, Directory dst) async {
+  await for (final srcEntry in src.list(recursive: true, followLinks: false)) {
+    final dstPath = join(dst.path, relative(srcEntry.path, from: src.path));
+
+    if (srcEntry is File) {
+      final dstEntry = File(dstPath);
+      await Directory(dstEntry.parent.path).create(recursive: true);
+      await srcEntry.copy(dstEntry.path);
+    } else if (srcEntry is Directory) {
+      await Directory(dstPath).create(recursive: true);
+    }
+  }
 }
