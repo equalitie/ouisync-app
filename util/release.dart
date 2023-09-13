@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
+import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart';
@@ -64,20 +65,43 @@ Future<void> main(List<String> args) async {
     assets.add(asset);
   }
 
-  final token = options.token;
-  if (token != null) {
-    await upload(
-      slug: options.slug,
-      version: version,
-      first: options.firstCommit,
-      last: commit,
-      assets: assets,
-      token: token,
-      detailedLog: options.detailedLog,
-    );
-  } else {
-    print(
-        'no GitHub API access token specified - skipping creation of GitHub release');
+  if (assets.isNotEmpty) {
+    print('Built assets:\n');
+    for (final asset in assets) {
+      print(' * ${asset.path}');
+    }
+    print('');
+  }
+
+  final auth = options.token != null
+      ? Authentication.withToken(options.token)
+      : Authentication.anonymous();
+  final client = GitHub(auth: auth);
+
+  try {
+    switch (options.action) {
+      case ReleaseAction.create:
+        final release = await createRelease(
+          client,
+          options.slug,
+          version: version,
+          first: options.firstCommit,
+          last: commit,
+          detailedLog: options.detailedLog,
+        );
+        await uploadAssets(client, release, assets);
+        break;
+
+      case ReleaseAction.update:
+        final release = await findLatestDraftRelease(client, options.slug);
+        await uploadAssets(client, release, assets);
+        break;
+
+      case null:
+        break;
+    }
+  } finally {
+    client.dispose();
   }
 }
 
@@ -90,6 +114,7 @@ class Options {
 
   final String? token;
   final RepositorySlug slug;
+  final ReleaseAction? action;
   final String? firstCommit;
   final bool detailedLog;
   final String? identityName;
@@ -101,8 +126,9 @@ class Options {
     this.exe = false,
     this.msix = false,
     this.deb = false,
-    required this.slug,
     this.token,
+    required this.slug,
+    this.action,
     this.firstCommit,
     this.detailedLog = true,
     this.identityName,
@@ -120,17 +146,34 @@ class Options {
     parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
 
     parser.addOption(
-      'repo',
-      abbr: 'r',
-      help: 'GitHub repository slug (owner/name)',
-      defaultsTo: 'equalitie/ouisync-app',
-    );
-    parser.addOption(
       'token-file',
       abbr: 't',
       help:
           'Path to a file containing the GitHub API access token. If omitted, still builds the packages but does not create a GitHub release',
     );
+    parser.addOption(
+      'repo',
+      abbr: 'r',
+      help: 'GitHub repository slug (owner/name)',
+      defaultsTo: 'equalitie/ouisync-app',
+    );
+    parser.addFlag(
+      'create',
+      abbr: 'c',
+      negatable: false,
+      help:
+          'Create new release and upload the assets to it (conflicts with --update)',
+      defaultsTo: false,
+    );
+    parser.addFlag(
+      'update',
+      abbr: 'u',
+      negatable: false,
+      help:
+          'Do not create new release, upload the assets to the latest existing draft release instead (conflicts with --create)',
+      defaultsTo: false,
+    );
+
     parser.addOption('first-commit',
         abbr: 'f',
         help:
@@ -167,12 +210,23 @@ class Options {
       exit(0);
     }
 
-    final slug = RepositorySlug.full(results['repo']!);
+    if (results['create'] && results['update']) {
+      print('At most one of --create, --update can be used at the same time');
+      exit(1);
+    }
 
     final tokenFilePath = results['token-file'];
     final token = (tokenFilePath != null)
         ? await File(tokenFilePath).readAsString()
         : null;
+
+    final slug = RepositorySlug.full(results['repo']!);
+
+    final action = results['create']
+        ? ReleaseAction.create
+        : results['update']
+            ? ReleaseAction.update
+            : null;
 
     return Options._(
       apk: results['apk'],
@@ -180,14 +234,20 @@ class Options {
       exe: results['exe'],
       msix: results['msix'],
       deb: results['deb'],
-      slug: slug,
       token: token?.trim(),
+      slug: slug,
+      action: action,
       firstCommit: results['first-commit']?.trim(),
       detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
       publisher: results['publisher'],
     );
   }
+}
+
+enum ReleaseAction {
+  create,
+  update,
 }
 
 class BuildDesc {
@@ -528,32 +588,6 @@ Future<String> prepareBundletool() async {
   return path;
 }
 
-Future<void> upload({
-  required RepositorySlug slug,
-  required Version version,
-  String? first,
-  required String last,
-  required List<File> assets,
-  required String token,
-  bool detailedLog = true,
-}) async {
-  final client = GitHub(auth: Authentication.withToken(token));
-
-  try {
-    final release = await createRelease(
-      client,
-      slug,
-      version: version,
-      first: first,
-      last: last,
-      detailedLog: detailedLog,
-    );
-    await uploadAssets(client, release, assets);
-  } finally {
-    client.dispose();
-  }
-}
-
 Future<Release> createRelease(
   GitHub client,
   RepositorySlug slug, {
@@ -596,6 +630,19 @@ Future<Release> createRelease(
   return release;
 }
 
+Future<Release> findLatestDraftRelease(
+  GitHub client,
+  RepositorySlug slug,
+) async {
+  final release = await client.repositories.listReleases(slug).firstOrNull;
+
+  if (release != null && (release.isDraft ?? false)) {
+    return release;
+  }
+
+  throw 'No latest draft release found';
+}
+
 Future<void> uploadAssets(
   GitHub client,
   Release release,
@@ -618,6 +665,8 @@ Future<void> uploadAssets(
       ],
     );
   }
+
+  print('${assets.length} assets successfully uploaded');
 }
 
 Future<File> collateAsset(
