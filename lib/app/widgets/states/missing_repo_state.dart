@@ -12,8 +12,8 @@ class MissingRepositoryState extends StatelessWidget
       required this.repositoryMetaInfo,
       required this.errorMessage,
       this.errorDescription,
+      required this.settings,
       required this.onReloadRepository,
-      required this.onGetAuthenticationMode,
       required this.onDelete,
       Key? key})
       : super(key: key);
@@ -23,8 +23,8 @@ class MissingRepositoryState extends StatelessWidget
   final String errorMessage;
   final String? errorDescription;
 
+  final Settings settings;
   final void Function()? onReloadRepository;
-  final AuthMode Function(String) onGetAuthenticationMode;
   final Future<void> Function(RepoMetaInfo, AuthMode) onDelete;
 
   @override
@@ -70,7 +70,7 @@ class MissingRepositoryState extends StatelessWidget
             onPressed: () => deleteRepository(context,
                 repositoryName: repositoryName,
                 repositoryMetaInfo: repositoryMetaInfo,
-                getAuthenticationMode: onGetAuthenticationMode,
+                settings: settings,
                 delete: onDelete),
             text: S.current.actionRemoveRepo,
             size: Dimensions.sizeInPageButtonLong,
