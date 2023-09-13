@@ -20,33 +20,29 @@ Future<void> main(List<String> args) async {
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
   final version = pubspec.version!;
-
   final commit = await getCommit();
 
-  final versionName = stripBuild(version).canonicalizedVersion;
-  final buildName = '$versionName-$commit';
-
-  final suffix = createFileSuffix(version, commit);
-  final outputDir = await createOutputDir(suffix);
+  final buildDesc = BuildDesc(version, commit);
+  final outputDir = await createOutputDir(buildDesc);
 
   List<File> assets = [];
 
   if (options.apk || options.aab) {
-    final aab = await buildAab(buildName, version.build[0] as int);
+    final aab = await buildAab(buildDesc);
 
     if (options.aab) {
-      assets.add(await collateAsset(outputDir, name, suffix, aab));
+      assets.add(await collateAsset(outputDir, name, buildDesc, aab));
     }
 
     if (options.apk) {
       final apk = await extractApk(aab);
-      assets.add(await collateAsset(outputDir, name, suffix, apk));
+      assets.add(await collateAsset(outputDir, name, buildDesc, apk));
     }
   }
 
   if (options.exe) {
-    final asset = await buildWindowsInstaller(buildName);
-    assets.add(await collateAsset(outputDir, name, suffix, asset));
+    final asset = await buildWindowsInstaller(buildDesc);
+    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
   if (options.msix) {
@@ -60,10 +56,9 @@ Future<void> main(List<String> args) async {
 
   if (options.deb) {
     await buildDeb(
-      outputDir: outputDir,
       name: name,
-      version: versionName,
-      commit: commit,
+      outputDir: outputDir,
+      buildDesc: buildDesc,
       description: pubspec.description ?? '',
     );
   }
@@ -182,12 +177,78 @@ class Options {
   }
 }
 
+class BuildDesc {
+  final Version version;
+  final DateTime timestamp;
+  final String commit;
+
+  BuildDesc(this.version, this.commit) : timestamp = DateTime.now();
+
+  String get versionString => _formatVersion(StringBuffer()).toString();
+  String get revisionString => _formatRevision(StringBuffer()).toString();
+
+  @override
+  String toString() {
+    final buffer = StringBuffer();
+
+    _formatVersion(buffer);
+
+    buffer.write('-');
+
+    _formatRevision(buffer);
+
+    return buffer.toString();
+  }
+
+  StringBuffer _formatVersion(StringBuffer buffer) {
+    buffer
+      ..write(version.major)
+      ..write('.')
+      ..write(version.minor)
+      ..write('.')
+      ..write(version.patch);
+
+    if (version.preRelease.isNotEmpty) {
+      buffer
+        ..write('-')
+        ..write(version.preRelease.join('.'));
+    }
+
+    return buffer;
+  }
+
+  StringBuffer _formatTimestamp(StringBuffer buffer, [String separator = '']) =>
+      buffer
+        ..write(formatDate(
+          timestamp,
+          [
+            yyyy,
+            separator,
+            mm,
+            separator,
+            dd,
+            separator,
+            HH,
+            separator,
+            nn,
+            separator,
+            ss,
+          ],
+        ));
+
+  StringBuffer _formatRevision(StringBuffer buffer) => _formatTimestamp(buffer)
+    ..write('.')
+    ..write(commit);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // exe
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsInstaller(String buildName) async {
+Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
+  final buildName = buildDesc.toString();
+
   await run('flutter', [
     'build',
     'windows',
@@ -251,13 +312,12 @@ Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildDeb({
-  required Directory outputDir,
   required String name,
-  required String version,
-  String? commit,
+  required Directory outputDir,
+  required BuildDesc buildDesc,
   String description = '',
 }) async {
-  final buildName = commit != null ? '$version-$commit' : version;
+  final buildName = buildDesc.toString();
 
   await run('flutter', [
     'build',
@@ -267,8 +327,7 @@ Future<File> buildDeb({
   ]);
 
   final arch = 'amd64';
-  final revision = commit != null ? '0+$commit' : '0';
-  final packageName = '${name}_$version-${revision}_$arch';
+  final packageName = '${name}_${buildDesc}_$arch';
 
   final packageDir = Directory('${outputDir.path}/$packageName');
 
@@ -304,7 +363,7 @@ Future<File> buildDeb({
   final desktopContent = '[Desktop Entry]\n'
       'Name=$capitalizedName\n'
       'GenericName=File synchronization\n'
-      'Version=$version-$revision\n'
+      'Version=$buildName\n'
       'Comment=$description\n'
       'Exec=/usr/bin/$name\n'
       'Terminal=false\n'
@@ -325,9 +384,9 @@ Future<File> buildDeb({
   await debDir.create();
 
   final controlContent = 'Package: $name\n'
-      'Version: $version-$revision\n'
+      'Version: $buildName\n'
       'Architecture: $arch\n'
-      // TODO: dependencies
+      'Depends: libgtk-3-0, libsecret-1-0, libwebkit2gtk-4.1-0, libayatana-appindicator3-1\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
@@ -349,8 +408,8 @@ Future<File> buildDeb({
 // aab
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildAab(String buildName, int buildNumber) async {
-  final inputPath = 'build/app/outputs/bundle/Release/app-release.aab';
+Future<File> buildAab(BuildDesc buildDesc) async {
+  final inputPath = 'build/app/outputs/bundle/release/app-release.aab';
 
   print('Creating Android App Bundle ...');
 
@@ -359,9 +418,9 @@ Future<File> buildAab(String buildName, int buildNumber) async {
     'appbundle',
     '--release',
     '--build-number',
-    '$buildNumber',
+    buildDesc.version.build[0].toString(),
     '--build-name',
-    buildName,
+    buildDesc.toString(),
   ]);
 
   return File(inputPath);
@@ -517,12 +576,14 @@ Future<void> upload({
 
 Future<File> collateAsset(
   Directory outputDir,
-  String outName,
-  String suffix,
-  File inputFile,
-) async {
+  String name,
+  BuildDesc buildDesc,
+  File inputFile, {
+  String suffix = '',
+}) async {
   final ext = extension(inputFile.path);
-  return await inputFile.copy(join(outputDir.path, '$outName-$suffix$ext'));
+  return await inputFile
+      .copy(join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
 }
 
 Future<String> buildReleaseNotes(
@@ -661,8 +722,8 @@ String buildTagName(Version version) {
   return 'v$v';
 }
 
-Future<Directory> createOutputDir(String tag) async {
-  final dir = Directory('$rootWorkDir/release-$tag');
+Future<Directory> createOutputDir(BuildDesc buildDesc) async {
+  final dir = Directory('$rootWorkDir/release_$buildDesc');
   await dir.create(recursive: true);
 
   // Create 'latest' symlink
@@ -675,34 +736,6 @@ Future<Directory> createOutputDir(String tag) async {
   await link.create(basename(dir.path));
 
   return dir;
-}
-
-String createFileSuffix(Version version, String commit) {
-  final timestamp = DateTime.now();
-
-  final buffer = StringBuffer();
-
-  buffer
-    ..write(version.major)
-    ..write('.')
-    ..write(version.minor)
-    ..write('.')
-    ..write(version.patch);
-
-  if (version.preRelease.isNotEmpty) {
-    buffer
-      ..write('-')
-      ..write(version.preRelease.join('.'));
-  }
-
-  buffer
-    ..write('+')
-    ..write(formatDate(
-      timestamp,
-      [yyyy, mm, dd, HH, nn, ss],
-    ));
-
-  return buffer.toString();
 }
 
 Future<void> run(
