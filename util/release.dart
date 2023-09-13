@@ -526,51 +526,78 @@ Future<void> upload({
   final slug = RepositorySlug('equalitie', 'ouisync-app');
 
   try {
-    final tagName = buildTagName(version);
-
-    print('Creating release $tagName ($last) ...');
-
-    if (first == null) {
-      final prev = await client.repositories.getLatestRelease(slug);
-      first = prev.tagName!;
-    }
-
-    final body = await buildReleaseNotes(
+    final release = await createRelease(
+      client,
       slug,
-      first,
-      last,
+      version: version,
+      first: first,
+      last: last,
       detailedLog: detailedLog,
     );
-
-    final release = await client.repositories.createRelease(
-      slug,
-      CreateRelease(tagName)
-        ..name = 'Ouisync $tagName'
-        ..body = body
-        ..isDraft = true,
-    );
-
-    for (final asset in assets) {
-      final name = basename(asset.path);
-      final content = await asset.readAsBytes();
-
-      print('Uploading $name ...');
-
-      await client.repositories.uploadReleaseAssets(
-        release,
-        [
-          CreateReleaseAsset(
-            name: name,
-            contentType: 'application/octet-stream',
-            assetData: content,
-          )
-        ],
-      );
-    }
-
-    print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
+    await uploadAssets(client, release, assets);
   } finally {
     client.dispose();
+  }
+}
+
+Future<Release> createRelease(
+  GitHub client,
+  RepositorySlug slug, {
+  required Version version,
+  String? first,
+  required String last,
+  bool detailedLog = true,
+}) async {
+  final tagName = buildTagName(version);
+
+  print('Creating release $tagName ($last) ...');
+
+  if (first == null) {
+    final prev = await client.repositories.getLatestRelease(slug);
+    first = prev.tagName!;
+  }
+
+  final body = await buildReleaseNotes(
+    slug,
+    first,
+    last,
+    detailedLog: detailedLog,
+  );
+
+  final release = await client.repositories.createRelease(
+    slug,
+    CreateRelease(tagName)
+      ..name = 'Ouisync $tagName'
+      ..body = body
+      ..isDraft = true,
+  );
+
+  print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
+
+  return release;
+}
+
+Future<void> uploadAssets(
+  GitHub client,
+  Release release,
+  List<File> assets,
+) async {
+  for (final asset in assets) {
+    final name = basename(asset.path);
+    final content = await asset.readAsBytes();
+
+    print('Uploading $name ...');
+
+    await client.repositories.uploadReleaseAssets(
+      release,
+      [
+        CreateReleaseAsset(
+          name: name,
+          contentType: 'application/octet-stream',
+          assetData: content,
+        )
+      ],
+    );
   }
 }
 
