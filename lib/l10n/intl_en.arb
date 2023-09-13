@@ -527,6 +527,8 @@
   "messageUnlockUsingBiometricsConfirmation":"Unlock this repository using biometrics?",
   "messageRemoveBiometricsConfirmation":"Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.",
   "messageRemoveBiometricsConfirmationMoreInfo":"This will remove the repository password and use the biometric validation for unlocking",
+  "messageAutomaticUnlockRepositoryFailed":"We couldn't unlock the repository",
+  "messageBiometricUnlockRepositoryFailed":"Biometric unlocking failed",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",

@@ -10,9 +10,8 @@ class LockedRepositoryState extends StatelessWidget
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
       required this.repositoryName,
+      required this.settings,
       required this.checkForBiometricsCallback,
-      required this.getAuthenticationModeCallback,
-      required this.setAuthenticationModeCallback,
       required this.unlockRepositoryCallback});
 
   final BuildContext parentContext;
@@ -20,10 +19,8 @@ class LockedRepositoryState extends StatelessWidget
   final String databaseId;
   final String repositoryName;
 
+  final Settings settings;
   final CheckForBiometricsFunction checkForBiometricsCallback;
-  final AuthMode Function(String repoName) getAuthenticationModeCallback;
-  final Future<void> Function(String repoName, AuthMode? value)
-      setAuthenticationModeCallback;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
 
@@ -66,7 +63,7 @@ class LockedRepositoryState extends StatelessWidget
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
             onPressed: () async {
-              final authMode = getAuthenticationModeCallback(repositoryName);
+              final authMode = settings.getAuthenticationMode(repositoryName);
               final isBiometricsAvailable =
                   await checkForBiometricsCallback() ?? false;
 
@@ -75,7 +72,7 @@ class LockedRepositoryState extends StatelessWidget
                   repositoryName: repositoryName,
                   authenticationMode: authMode,
                   isBiometricsAvailable: isBiometricsAvailable,
-                  setAuthenticationMode: setAuthenticationModeCallback,
+                  settings: settings,
                   cubitUnlockRepository: unlockRepositoryCallback);
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),

@@ -202,13 +202,14 @@ class _MainPageState extends State<MainPage>
         //     _sortListCubit?.state.direction ?? SortDirection.asc;
 
         return RepoListState(
-            reposCubit: repos,
-            bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
-            onCheckForBiometrics: _checkForBiometricsCallback,
-            onShowRepoSettings: _showRepoSettings,
-            onNewRepositoryPressed: _addRepository,
-            onImportRepositoryPressed: _importRepository,
-            onGetAuthenticationMode: widget.settings.getAuthenticationMode);
+          reposCubit: repos,
+          bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
+          settings: widget.settings,
+          onCheckForBiometrics: _checkForBiometricsCallback,
+          onShowRepoSettings: _showRepoSettings,
+          onNewRepositoryPressed: _addRepository,
+          onImportRepositoryPressed: _importRepository,
+        );
       }
 
       final current = repos.currentRepo;
@@ -231,8 +232,8 @@ class _MainPageState extends State<MainPage>
             repositoryMetaInfo: current.metaInfo,
             errorMessage: current.error,
             errorDescription: current.errorDescription,
+            settings: widget.settings,
             onReloadRepository: null,
-            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
             onDelete: repos.deleteRepository);
       }
 
@@ -404,10 +405,7 @@ class _MainPageState extends State<MainPage>
             databaseId: current.databaseId,
             repositoryName: current.name,
             checkForBiometricsCallback: _checkForBiometricsCallback,
-            getAuthenticationModeCallback:
-                widget.settings.getAuthenticationMode,
-            setAuthenticationModeCallback:
-                widget.settings.setAuthenticationMode,
+            settings: widget.settings,
             unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
 
@@ -849,8 +847,8 @@ class _MainPageState extends State<MainPage>
             return RepositorySettings(
                 context: context,
                 cubit: repoCubit,
+                settings: widget.settings,
                 checkForBiometrics: _checkForBiometricsCallback,
-                getAuthenticationMode: widget.settings.getAuthenticationMode,
                 renameRepository: _cubits.repositories.renameRepository,
                 deleteRepository: _cubits.repositories.deleteRepository);
           });

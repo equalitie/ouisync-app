@@ -211,8 +211,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
               : SizedBox());
 
   Future<void> _addLocalPassword(String newPassword) async {
-    final addLocalPasswordResult =
-        await security.addRepoLocalPassword(newPassword);
+    final addLocalPasswordResult = await security.addLocalPassword(newPassword);
 
     if (addLocalPasswordResult != null) {
       showSnackBar(context, message: addLocalPasswordResult);
@@ -224,7 +223,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Future<void> _updateLocalPassword(String newPassword) async {
     final updateRepoLocalPasswordResult =
-        await security.updateRepoLocalPassword(newPassword);
+        await security.updateLocalPassword(newPassword);
 
     if (updateRepoLocalPasswordResult != null) {
       showSnackBar(context, message: updateRepoLocalPasswordResult);
@@ -242,8 +241,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   }
 
   Future<void> _removePassword() async {
-    final removeRepoLocalPasswordResult =
-        await security.removeRepoLocalPassword();
+    final removeRepoLocalPasswordResult = await security.removeLocalPassword();
 
     if (removeRepoLocalPasswordResult != null) {
       showSnackBar(context, message: removeRepoLocalPasswordResult);

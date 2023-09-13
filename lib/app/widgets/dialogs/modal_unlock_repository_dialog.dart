@@ -13,7 +13,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     required this.repositoryName,
     required this.isBiometricsAvailable,
     required this.isPasswordValidation,
-    required this.setAuthenticationModeCallback,
+    required this.settings,
     required this.unlockRepositoryCallback,
   });
 
@@ -25,8 +25,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final Future<void> Function(String repoName, AuthMode? value)
-      setAuthenticationModeCallback;
+  final Settings settings;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
 
@@ -137,7 +136,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
       if (savedPassword == null || savedPassword.isEmpty) return;
 
-      await setAuthenticationModeCallback(repositoryName, AuthMode.version2);
+      await settings.setAuthenticationMode(repositoryName, AuthMode.version2);
     }
 
     final message = _useBiometrics.value

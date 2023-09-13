@@ -3760,6 +3760,26 @@ class S {
     );
   }
 
+  /// `We couldn't unlock the repository`
+  String get messageAutomaticUnlockRepositoryFailed {
+    return Intl.message(
+      'We couldn\'t unlock the repository',
+      name: 'messageAutomaticUnlockRepositoryFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Biometric unlocking failed`
+  String get messageBiometricUnlockRepositoryFailed {
+    return Intl.message(
+      'Biometric unlocking failed',
+      name: 'messageBiometricUnlockRepositoryFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

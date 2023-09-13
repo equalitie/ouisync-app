@@ -117,8 +117,7 @@ class RepositorySection extends SettingsSection
           onTap: () async {
             final repoName = repository.name;
             final metaInfo = repository.metaInfo;
-            final getAuthenticationModeCallback =
-                _cubits.repositories.settings.getAuthenticationMode;
+            final settings = _cubits.repositories.settings;
             final deleteRepositoryCallback =
                 _cubits.repositories.deleteRepository;
 
@@ -126,7 +125,7 @@ class RepositorySection extends SettingsSection
               context,
               repositoryName: repoName,
               repositoryMetaInfo: metaInfo,
-              getAuthenticationMode: getAuthenticationModeCallback,
+              settings: settings,
               delete: deleteRepositoryCallback,
             );
           });
@@ -209,7 +208,7 @@ class _SecurityTileState extends State<SecurityTile>
                 _security?.setShareToken(shareToken);
 
                 final addLocalPasswordResult =
-                    await _security?.addRepoLocalPassword(newPassword);
+                    await _security?.addLocalPassword(newPassword);
 
                 if (addLocalPasswordResult != null) {
                   showSnackBar(context, message: addLocalPasswordResult);
@@ -296,7 +295,7 @@ class _SecurityTileState extends State<SecurityTile>
                     _security?.setShareToken(shareToken);
 
                     final updateRepoLocalPasswordResult =
-                        await _security?.updateRepoLocalPassword(newPassword);
+                        await _security?.updateLocalPassword(newPassword);
 
                     if (updateRepoLocalPasswordResult != null) {
                       showSnackBar(context,
@@ -339,7 +338,7 @@ class _SecurityTileState extends State<SecurityTile>
                     _security?.setShareToken(shareToken);
 
                     final removeRepoLocalPasswordResult =
-                        await _security?.removeRepoLocalPassword();
+                        await _security?.removeLocalPassword();
 
                     if (removeRepoLocalPasswordResult != null) {
                       showSnackBar(context,
