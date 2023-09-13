@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,6 +10,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/create_repo.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
+import '../../storage/storage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -19,9 +19,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
       {required this.context,
       required this.cubit,
       this.initialTokenValue,
-      required this.isBiometricsAvailable,
-      Key? key})
-      : super(key: key);
+      required this.isBiometricsAvailable});
 
   final BuildContext context;
   final ReposCubit cubit;
@@ -600,27 +598,24 @@ class RepositoryCreation extends HookWidget with AppLogger {
     /// the repository, we need to delete the repository before leaving this
     /// dialog if the user tap the CANCEL button, hence this:
     /// _deleteRepositoryBeforePop = true;
-    final secureStorageResult = await Dialogs.executeFutureWithLoadingDialog(
+    final savedPassword = await Dialogs.executeFutureWithLoadingDialog<String?>(
         context,
-        f: SecureStorage.addRepositoryPassword(
-            databaseId: repoEntry.databaseId,
-            password: password,
-            authMode: authenticationMode));
+        f: SecureStorage(databaseId: repoEntry.databaseId)
+            .saveOrUpdatePassword(value: password));
 
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
+    if (savedPassword == null || savedPassword.isEmpty) {
       _setDeleteRepoBeforePop(true, repoEntry.metaInfo);
 
-      if (secureStorageResult.exception is AuthException) {
-        if ((secureStorageResult.exception as AuthException).code !=
-            AuthExceptionCode.userCanceled) {
-          await Dialogs.simpleAlertDialog(
-              context: context,
-              title: S.current.messsageFailedCreateRepository(name),
-              message: S.current.messageErrorAuthenticatingBiometrics);
-        }
-      }
+      // TODO: Check if this still can be determined or even occur
+      // if (savedPassword.exception is AuthException) {
+      //   if ((savedPassword.exception as AuthException).code !=
+      //       AuthExceptionCode.userCanceled) {
+      //     await Dialogs.simpleAlertDialog(
+      //         context: context,
+      //         title: S.current.messsageFailedCreateRepository(name),
+      //         message: S.current.messageErrorAuthenticatingBiometrics);
+      //   }
+      // }
 
       return;
     }

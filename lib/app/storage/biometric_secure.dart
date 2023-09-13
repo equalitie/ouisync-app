@@ -1,7 +1,9 @@
-import 'package:biometric_storage/biometric_storage.dart';
 import 'dart:io' show Platform;
 
-import 'constants.dart';
+import 'package:biometric_storage/biometric_storage.dart';
+
+import '../utils/constants.dart';
+import 'storage.dart';
 
 BiometricStorage _chooseStorageByPlatform() {
   if (Platform.isAndroid ||
@@ -14,10 +16,10 @@ BiometricStorage _chooseStorageByPlatform() {
   }
 }
 
-class SecureStorage {
+class BiometricSecure {
   static final BiometricStorage _storage = _chooseStorageByPlatform();
 
-  SecureStorage._();
+  BiometricSecure._();
 
   static Future<BiometricStorageFile> _getStorageFileForKey(
       String key, bool authenticationRequired) async {
@@ -55,8 +57,8 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.write(password);
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: null);
@@ -74,8 +76,8 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       password = await storageFile.read();
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: password);
@@ -91,17 +93,10 @@ class SecureStorage {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.delete();
-    } on Exception catch (e) {
-      return SecureStorageResult(value: null, exception: e);
+    } on Exception catch (e, st) {
+      return SecureStorageResult(value: null, exception: e, stackTrace: st);
     }
 
     return SecureStorageResult(value: null);
   }
-}
-
-class SecureStorageResult {
-  SecureStorageResult({required this.value, this.exception});
-
-  final String? value;
-  final Exception? exception;
 }

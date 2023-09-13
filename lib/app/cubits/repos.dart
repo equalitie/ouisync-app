@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../storage/storage.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -236,18 +237,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     final authenticationMode = settings.getAuthenticationMode(repoName);
 
     if (authenticationMode == AuthMode.noLocalPassword) {
-      final secureStorageResult = await SecureStorage.getRepositoryPassword(
-          databaseId: databaseId, authMode: authenticationMode);
+      final securePassword = await SecureStorage(databaseId: databaseId)
+          .tryGetPassword(authMode: authenticationMode);
 
-      if (secureStorageResult.exception != null) {
-        loggy.app(secureStorageResult.exception);
-
-        return null;
-      }
-
-      final password = secureStorageResult.value;
-
-      return password;
+      return securePassword;
     }
 
     return null;
@@ -393,23 +386,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     final wasCurrent = currentRepoName == repoName;
     final databaseId = _settings.getDatabaseId(repoName);
 
-    final biometricsResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: authMode,
-        authenticationRequired: false);
+    final passwordDeleted =
+        await SecureStorage(databaseId: databaseId).deletePassword();
 
-    if (biometricsResult.exception != null) {
-      loggy.app(biometricsResult.exception);
-      return;
-    }
+    if (!passwordDeleted) return;
 
     await _forget(repoName);
     await _settings.forgetRepository(repoName);
 
-    final deleted = await _deleteRepositoryFiles(info);
+    final filesDeleted = await _deleteRepositoryFiles(info);
 
-    if (!deleted) {
-      loggy.app('The repository "$repoName" deletion failed');
+    if (!filesDeleted) {
+      loggy.app('The deletion of files for the repository "$repoName" failed');
 
       await _put(
           ErrorRepoEntry(info, S.current.messageRepoDeletionFailed,

@@ -9,6 +9,7 @@
 #include <biometric_storage/biometric_storage_plugin.h>
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
+#include <flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h>
 #include <ouisync_plugin/ouisync_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
@@ -27,6 +28,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) desktop_webview_window_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "DesktopWebviewWindowPlugin");
   desktop_webview_window_plugin_register_with_registrar(desktop_webview_window_registrar);
+  g_autoptr(FlPluginRegistrar) flutter_secure_storage_linux_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "FlutterSecureStorageLinuxPlugin");
+  flutter_secure_storage_linux_plugin_register_with_registrar(flutter_secure_storage_linux_registrar);
   g_autoptr(FlPluginRegistrar) ouisync_plugin_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "OuisyncPlugin");
   ouisync_plugin_register_with_registrar(ouisync_plugin_registrar);

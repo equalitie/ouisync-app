@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
   desktop_webview_window
+  flutter_secure_storage_windows
   local_auth_windows
   ouisync_plugin
   permission_handler_windows

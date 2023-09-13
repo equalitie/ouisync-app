@@ -3710,6 +3710,16 @@ class S {
     );
   }
 
+  /// `Update local password`
+  String get messageUpdateLocalPassword {
+    return Intl.message(
+      'Update local password',
+      name: 'messageUpdateLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add a local password for this repository?`
   String get messageAddLocalPasswordConfirmation {
     return Intl.message(
@@ -3745,6 +3755,26 @@ class S {
     return Intl.message(
       'This will remove the repository password and use the biometric validation for unlocking',
       name: 'messageRemoveBiometricsConfirmationMoreInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We couldn't unlock the repository`
+  String get messageAutomaticUnlockRepositoryFailed {
+    return Intl.message(
+      'We couldn\'t unlock the repository',
+      name: 'messageAutomaticUnlockRepositoryFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Biometric unlocking failed`
+  String get messageBiometricUnlockRepositoryFailed {
+    return Intl.message(
+      'Biometric unlocking failed',
+      name: 'messageBiometricUnlockRepositoryFailed',
       desc: '',
       args: [],
     );
