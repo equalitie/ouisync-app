@@ -15,7 +15,6 @@ class RepositorySettings extends StatefulWidget {
       {required this.context,
       required this.cubit,
       required this.settings,
-      required this.checkForBiometrics,
       required this.renameRepository,
       required this.deleteRepository});
 
@@ -23,7 +22,6 @@ class RepositorySettings extends StatefulWidget {
   final RepoCubit cubit;
 
   final Settings settings;
-  final Future<bool?> Function() checkForBiometrics;
   final Future<void> Function(
       String oldName, String newName, Uint8List reopenToken) renameRepository;
   final Future<void> Function(RepoMetaInfo info, AuthMode authMode)
@@ -111,7 +109,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                                 context,
                                 repository: widget.cubit,
                                 settings: widget.settings,
-                                checkForBiometrics: widget.checkForBiometrics,
                                 popDialog: () => Navigator.of(context).pop(),
                               )),
                       EntryActionItem(

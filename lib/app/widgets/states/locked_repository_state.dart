@@ -11,7 +11,6 @@ class LockedRepositoryState extends StatelessWidget
       {required this.databaseId,
       required this.repositoryName,
       required this.settings,
-      required this.checkForBiometricsCallback,
       required this.unlockRepositoryCallback});
 
   final BuildContext parentContext;
@@ -20,7 +19,6 @@ class LockedRepositoryState extends StatelessWidget
   final String repositoryName;
 
   final Settings settings;
-  final CheckForBiometricsFunction checkForBiometricsCallback;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
 
@@ -64,16 +62,15 @@ class LockedRepositoryState extends StatelessWidget
         Fields.inPageButton(
             onPressed: () async {
               final authMode = settings.getAuthenticationMode(repositoryName);
-              final isBiometricsAvailable =
-                  await checkForBiometricsCallback() ?? false;
 
-              await unlockRepository(parentContext,
-                  databaseId: databaseId,
-                  repositoryName: repositoryName,
-                  authenticationMode: authMode,
-                  isBiometricsAvailable: isBiometricsAvailable,
-                  settings: settings,
-                  cubitUnlockRepository: unlockRepositoryCallback);
+              await unlockRepository(
+                parentContext,
+                databaseId: databaseId,
+                repositoryName: repositoryName,
+                authenticationMode: authMode,
+                settings: settings,
+                cubitUnlockRepository: unlockRepositoryCallback,
+              );
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,

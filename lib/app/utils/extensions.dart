@@ -8,6 +8,16 @@ extension StringExtension on String {
   }
 }
 
+extension ToBoolean on String {
+  bool toBoolean() {
+    return (toLowerCase() == "true" || toLowerCase() == "1")
+        ? true
+        : (toLowerCase() == "false" || toLowerCase() == "0"
+            ? false
+            : throw UnsupportedError('The string is not a bool value'));
+  }
+}
+
 extension UriExtension on Uri {
   bool isValidOuiSyncUri() {
     final isHttps = isScheme('HTTPS');

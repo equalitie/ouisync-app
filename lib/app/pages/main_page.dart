@@ -3,7 +3,6 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
@@ -14,6 +13,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
 import '../models/models.dart';
+import '../storage/storage.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
@@ -162,28 +162,6 @@ class _MainPageState extends State<MainPage>
     super.dispose();
   }
 
-  Future<bool?> _checkForBiometricsCallback() async {
-    if (!io.Platform.isAndroid &&
-        !io.Platform.isIOS &&
-        !io.Platform.isWindows) {
-      return null;
-    }
-
-    final auth = LocalAuthentication();
-
-    final isBiometricsAvailable = await auth.canCheckBiometrics;
-
-    // The device doesn't have biometrics
-    if (!isBiometricsAvailable) return null;
-
-    final availableBiometrics = await auth.getAvailableBiometrics();
-
-    // The device has biometrics capabilites, but not in use'.
-    if (availableBiometrics.isEmpty) return false;
-
-    return true;
-  }
-
   void initMainPage() async {
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
   }
@@ -227,7 +205,6 @@ class _MainPageState extends State<MainPage>
           reposCubit: repos,
           bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
           settings: widget.settings,
-          onCheckForBiometrics: _checkForBiometricsCallback,
           onShowRepoSettings: _showRepoSettings,
           onNewRepositoryPressed: _addRepository,
           onImportRepositoryPressed: _importRepository,
@@ -426,7 +403,6 @@ class _MainPageState extends State<MainPage>
         return LockedRepositoryState(context,
             databaseId: current.databaseId,
             repositoryName: current.name,
-            checkForBiometricsCallback: _checkForBiometricsCallback,
             settings: widget.settings,
             unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
@@ -760,26 +736,27 @@ class _MainPageState extends State<MainPage>
     return newRepoName;
   }
 
-  Future<String?> createRepoDialog(BuildContext parentContext) async {
-    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(
-            parentContext,
-            f: _checkForBiometricsCallback()) ??
-        false;
-    return showDialog<String>(
+  Future<String?> createRepoDialog(BuildContext parentContext) async =>
+      showDialog<String>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
+        builder: (BuildContext context) => ScaffoldMessenger(
+          child: Builder(
+            builder: ((context) {
               return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                      title: S.current.titleCreateRepository,
-                      body: RepositoryCreation(
-                          context: context,
-                          cubit: _cubits.repositories,
-                          isBiometricsAvailable: hasBiometrics)));
-            }))));
-  }
+                backgroundColor: Colors.transparent,
+                body: ActionsDialog(
+                  title: S.current.titleCreateRepository,
+                  body: RepositoryCreation(
+                    context: context,
+                    cubit: _cubits.repositories,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      );
 
   Future<String?> addRepoWithTokenDialog(BuildContext parentContext,
       {String? initialTokenValue}) async {
@@ -817,34 +794,36 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            parentContext,
-            f: _checkForBiometricsCallback()) ??
-        false;
-
     return showDialog<String>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                      title: S.current.titleAddRepository,
-                      body: RepositoryCreation(
-                          context: context,
-                          cubit: _cubits.repositories,
-                          initialTokenValue: initialTokenValue,
-                          isBiometricsAvailable: isBiometricsAvailable)));
-            }))));
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => ScaffoldMessenger(
+        child: Builder(
+          builder: ((context) {
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: ActionsDialog(
+                title: S.current.titleAddRepository,
+                body: RepositoryCreation(
+                  context: context,
+                  cubit: _cubits.repositories,
+                  initialTokenValue: initialTokenValue,
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
   }
 
   void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() async {
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            context,
-            f: _checkForBiometricsCallback()) ??
+          context,
+          f: SecurityValidations.canCheckBiometrics(),
+        ) ??
         false;
 
     await Navigator.push(
@@ -854,8 +833,10 @@ class _MainPageState extends State<MainPage>
           providers: [
             BlocProvider.value(value: _cubits.upgradeExists),
           ],
-          child: SettingsPage(_cubits,
-              isBiometricsAvailable: isBiometricsAvailable),
+          child: SettingsPage(
+            _cubits,
+            isBiometricsAvailable: isBiometricsAvailable,
+          ),
         ),
       ),
     );
@@ -864,16 +845,17 @@ class _MainPageState extends State<MainPage>
   Future<void> _showRepoSettings(BuildContext context,
           {required RepoCubit repoCubit}) =>
       showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return RepositorySettings(
-                context: context,
-                cubit: repoCubit,
-                settings: widget.settings,
-                checkForBiometrics: _checkForBiometricsCallback,
-                renameRepository: _cubits.repositories.renameRepository,
-                deleteRepository: _cubits.repositories.deleteRepository);
-          });
+        isScrollControlled: true,
+        context: context,
+        shape: Dimensions.borderBottomSheetTop,
+        builder: (context) {
+          return RepositorySettings(
+            context: context,
+            cubit: repoCubit,
+            settings: widget.settings,
+            renameRepository: _cubits.repositories.renameRepository,
+            deleteRepository: _cubits.repositories.deleteRepository,
+          );
+        },
+      );
 }
