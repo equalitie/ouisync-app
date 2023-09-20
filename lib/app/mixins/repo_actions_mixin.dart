@@ -358,8 +358,14 @@ mixin RepositoryActionsMixin on AppLogger {
 }
 
 Future<bool?> authorizeNavigationToSettings() async {
+  /// local_auth doesn't support Linux. If the repository has a local password,
+  /// then we use it for validation; otherwise we just return true.
+  if (Platform.isLinux) {
+    return true;
+  }
+
   final auth = LocalAuthentication();
-  final isSupported = await auth.isDeviceSupported();
+  final isSupported = Platform.isLinux ? false : await auth.isDeviceSupported();
 
   /// LocalAuthentication can tell us three (3) things:
   ///
