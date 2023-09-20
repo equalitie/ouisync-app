@@ -15,16 +15,15 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends HookWidget with AppLogger {
-  RepositoryCreation(
-      {required this.context,
-      required this.cubit,
-      this.initialTokenValue,
-      required this.isBiometricsAvailable});
+  RepositoryCreation({
+    required this.context,
+    required this.cubit,
+    this.initialTokenValue,
+  });
 
   final BuildContext context;
   final ReposCubit cubit;
   final String? initialTokenValue;
-  final bool isBiometricsAvailable;
 
   late final CreateRepositoryCubit createRepoCubit;
 
@@ -177,6 +176,9 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
     final showSuggestedName = suggestedName.isNotEmpty;
     final showAccessModeMessage = accessMode != null;
+
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics() ?? false;
 
     final state = CreateRepositoryCubit.create(
         reposCubit: cubit,
@@ -598,9 +600,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
     /// the repository, we need to delete the repository before leaving this
     /// dialog if the user tap the CANCEL button, hence this:
     /// _deleteRepositoryBeforePop = true;
+    final databaseId = repoEntry.databaseId;
     final savedPassword = await Dialogs.executeFutureWithLoadingDialog<String?>(
         context,
-        f: SecureStorage(databaseId: repoEntry.databaseId)
+        f: SecureStorage(databaseId: databaseId)
             .saveOrUpdatePassword(value: password));
 
     if (savedPassword == null || savedPassword.isEmpty) {

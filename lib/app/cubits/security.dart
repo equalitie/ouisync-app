@@ -117,9 +117,9 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
     setPassword(newPassword);
 
-    final updatedPassword =
-        await SecureStorage(databaseId: _repoCubit.databaseId)
-            .saveOrUpdatePassword(value: newPassword);
+    final databaseId = _repoCubit.databaseId;
+    final updatedPassword = await SecureStorage(databaseId: databaseId)
+        .saveOrUpdatePassword(value: newPassword);
 
     if (updatedPassword == null || updatedPassword.isEmpty) {
       return S.current.messageErrorRemovingPassword;
@@ -152,7 +152,9 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     if (updated == false) {
       setUnlockWithBiometrics(false);
       setPassword(newPassword);
-      setAuthMode(AuthMode.manual); ///TODO: Check this is correct
+      setAuthMode(AuthMode.manual);
+
+      //TODO: Check this is correct
 
       return S.current.messageErrorUpdatingSecureStorage;
     }
@@ -164,9 +166,9 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   }
 
   Future<bool> _updatePasswordInSecureStorage(String newPassword) async {
-    final updatedPassword =
-        await SecureStorage(databaseId: _repoCubit.databaseId)
-            .saveOrUpdatePassword(value: state.password);
+    final databaseId = _repoCubit.databaseId;
+    final updatedPassword = await SecureStorage(databaseId: databaseId)
+        .saveOrUpdatePassword(value: state.password);
 
     if (updatedPassword == null || updatedPassword.isEmpty) return false;
 
@@ -176,8 +178,9 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   }
 
   Future<bool> _removePasswordFromSecureStorage() async {
+    final databaseId = _repoCubit.databaseId;
     final passwordDeleted =
-        await SecureStorage(databaseId: _repoCubit.databaseId).deletePassword();
+        await SecureStorage(databaseId: databaseId).deletePassword();
 
     if (!passwordDeleted) return false;
 

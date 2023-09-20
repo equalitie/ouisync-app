@@ -1,7 +1,7 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -82,7 +82,6 @@ mixin RepositoryActionsMixin on AppLogger {
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
       required Settings settings,
-      required CheckForBiometricsFunction checkForBiometrics,
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
@@ -102,24 +101,17 @@ mixin RepositoryActionsMixin on AppLogger {
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
     } else {
-      final securePassword =
-          await SecureStorage(databaseId: repository.databaseId)
-              .tryGetPassword(authMode: authenticationMode);
+      final databaseId = repository.databaseId;
+      final securePassword = await SecureStorage(databaseId: databaseId)
+          .tryGetPassword(authMode: authenticationMode);
 
       if (securePassword == null || securePassword.isEmpty) return null;
-
-      if (authenticationMode == AuthMode.version1) {
-        await settings.setAuthenticationMode(
-            repository.name, AuthMode.version2);
-      }
 
       password = securePassword;
       shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
           context,
           f: repository.createShareToken(AccessMode.write, password: password));
     }
-
-    if (shareToken == null) return null;
 
     final accessMode = await shareToken.mode;
 
@@ -131,7 +123,8 @@ mixin RepositoryActionsMixin on AppLogger {
 
     popDialog();
 
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics() ?? false;
 
     await Navigator.push(
         context,
@@ -253,12 +246,14 @@ mixin RepositoryActionsMixin on AppLogger {
       {required String databaseId,
       required String repositoryName,
       required AuthMode authenticationMode,
-      required bool isBiometricsAvailable,
       required Settings settings,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
     if (authenticationMode == AuthMode.manual) {
+      final isBiometricsAvailable =
+          await SecurityValidations.canCheckBiometrics() ?? false;
+
       final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
@@ -282,10 +277,6 @@ mixin RepositoryActionsMixin on AppLogger {
           : S.current.messageBiometricUnlockRepositoryFailed;
       showSnackBar(context, message: message);
       return;
-    }
-
-    if (authenticationMode == AuthMode.version1) {
-      await settings.setAuthenticationMode(repositoryName, AuthMode.version2);
     }
 
     final accessMode =
@@ -364,8 +355,15 @@ mixin RepositoryActionsMixin on AppLogger {
 }
 
 Future<bool?> authorizeNavigationToSettings() async {
-  final auth = LocalAuthentication();
-  final isSupported = await auth.isDeviceSupported();
+  /// local_auth doesn't support Linux. If the repository has a local password,
+  /// then we use it for validation; otherwise we just return true.
+  if (Platform.isLinux) {
+    return true;
+  }
+
+  final isSupported = Platform.isLinux
+      ? false
+      : await SecurityValidations.isBiometricSupported();
 
   /// LocalAuthentication can tell us three (3) things:
   ///
@@ -393,7 +391,7 @@ Future<bool?> authorizeNavigationToSettings() async {
   /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
   var authorized = false;
   if (isSupported) {
-    authorized = await auth.authenticate(
+    authorized = await SecurityValidations.validateBiometrics(
         localizedReason: S.current.messageAccessingSecureStorage);
 
     if (authorized == false) {

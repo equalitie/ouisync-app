@@ -1,11 +1,9 @@
-import 'package:local_auth/local_auth.dart';
-
-import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 import 'storage.dart';
 
 class SecureStorage with AppLogger {
   final String databaseId;
+
   SecureStorage({required this.databaseId});
 
   Future<String?> saveOrUpdatePassword({required String value}) async {
@@ -25,15 +23,10 @@ class SecureStorage with AppLogger {
   Future<String?> tryGetPassword({required AuthMode authMode}) async {
     if (authMode == AuthMode.manual) return null;
 
-    final authorized = await _maybeValidateBiometrics(authMode);
-    if (authorized == false) {
-      return null;
-    }
-
     final needMigration = await _needMigration(databaseId);
     return needMigration
         ? _getValueAndMigrateFromBiometricStorage(databaseId, authMode)
-        : _readFlutterSecureStorage(databaseId);
+        : _readFlutterSecureStorage(databaseId, authMode);
   }
 
   Future<bool> deletePassword() async {
@@ -51,24 +44,42 @@ class SecureStorage with AppLogger {
 
   /////////////////////////////////
 
-  Future<bool> _maybeValidateBiometrics(AuthMode authMode) async {
-    if (authMode == AuthMode.version2) {
-      final auth = LocalAuthentication();
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      return authorized;
+  Future<bool> _validateBiometrics() async {
+    bool authorized;
+    try {
+      authorized = await SecurityValidations.validateBiometrics();
+    } on Exception catch (e, st) {
+      loggy.app('Biometric authentication (local_auth) failed', e, st);
+      return false;
     }
 
-    return true;
+    return authorized;
   }
 
   Future<bool> _needMigration(String databaseId) async {
-    final exist = await FlutterSecure.exist(databaseId: databaseId);
+    final result = await FlutterSecure.exist(databaseId: databaseId);
+    if (result.exception != null) {
+      loggy.error(
+          'Checking if flutter_secure_storage contains this repo key failed',
+          result.exception,
+          result.stackTrace);
+
+      return false;
+    }
+
+    final exist = result.value?.toBoolean() ?? false;
     return !exist;
   }
 
-  Future<String?> _readFlutterSecureStorage(String databaseId) async {
+  Future<String?> _readFlutterSecureStorage(
+      String databaseId, AuthMode authMode) async {
+    if ([AuthMode.version1, AuthMode.version2].contains(authMode)) {
+      final authorized = await _validateBiometrics();
+      if (authorized == false) {
+        return null;
+      }
+    }
+
     final result = await FlutterSecure.readValue(databaseId: databaseId);
     if (result.exception != null) {
       loggy.error(
@@ -116,6 +127,13 @@ class SecureStorage with AppLogger {
   /// just go from either version to AuthMode.secure, which uses the new plugin.
   Future<String?> _getValueAndMigrateFromBiometricStorage(
       String databaseId, AuthMode authMode) async {
+    if (authMode == AuthMode.version2) {
+      final authorized = await _validateBiometrics();
+      if (authorized == false) {
+        return null;
+      }
+    }
+
     final value =
         await _readBiometricStorage(databaseId: databaseId, authMode: authMode);
 

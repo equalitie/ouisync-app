@@ -13,7 +13,6 @@ class RepoListState extends StatelessWidget
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
       required this.settings,
-      required this.onCheckForBiometrics,
       required this.onShowRepoSettings,
       required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed});
@@ -22,7 +21,6 @@ class RepoListState extends StatelessWidget
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
   final Settings settings;
-  final Future<bool?> Function() onCheckForBiometrics;
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<String?> Function() onNewRepositoryPressed;

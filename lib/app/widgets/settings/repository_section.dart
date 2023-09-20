@@ -374,9 +374,11 @@ class _SecurityTileState extends State<SecurityTile>
                     }
                   }
 
+                  final databaseId = repository.databaseId;
+                  final authMode = state.authMode;
                   final securePassword =
-                      await SecureStorage(databaseId: repository.databaseId)
-                          .tryGetPassword(authMode: state.authMode);
+                      await SecureStorage(databaseId: databaseId)
+                          .tryGetPassword(authMode: authMode);
 
                   if (securePassword == null || securePassword.isEmpty) {
                     if (securePassword != null) {
