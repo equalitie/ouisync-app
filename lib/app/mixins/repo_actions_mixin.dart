@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -82,7 +83,6 @@ mixin RepositoryActionsMixin on AppLogger {
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
       required Settings settings,
-      required CheckForBiometricsFunction checkForBiometrics,
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
@@ -102,9 +102,9 @@ mixin RepositoryActionsMixin on AppLogger {
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
     } else {
-      final securePassword =
-          await SecureStorage(databaseId: repository.databaseId)
-              .tryGetPassword(authMode: authenticationMode);
+      final databaseId = repository.databaseId;
+      final securePassword = await SecureStorage(databaseId: databaseId)
+          .tryGetPassword(authMode: authenticationMode);
 
       if (securePassword == null || securePassword.isEmpty) return null;
 
@@ -126,7 +126,8 @@ mixin RepositoryActionsMixin on AppLogger {
 
     popDialog();
 
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics() ?? false;
 
     await Navigator.push(
         context,
@@ -248,12 +249,14 @@ mixin RepositoryActionsMixin on AppLogger {
       {required String databaseId,
       required String repositoryName,
       required AuthMode authenticationMode,
-      required bool isBiometricsAvailable,
       required Settings settings,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
     if (authenticationMode == AuthMode.manual) {
+      final isBiometricsAvailable =
+          await SecurityValidations.canCheckBiometrics() ?? false;
+
       final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
