@@ -113,8 +113,6 @@ mixin RepositoryActionsMixin on AppLogger {
           f: repository.createShareToken(AccessMode.write, password: password));
     }
 
-    if (shareToken == null) return null;
-
     final accessMode = await shareToken.mode;
 
     if (accessMode == AccessMode.blind) {
