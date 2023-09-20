@@ -108,11 +108,6 @@ mixin RepositoryActionsMixin on AppLogger {
 
       if (securePassword == null || securePassword.isEmpty) return null;
 
-      if (authenticationMode == AuthMode.version1) {
-        await settings.setAuthenticationMode(
-            repository.name, AuthMode.version2);
-      }
-
       password = securePassword;
       shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
           context,
@@ -282,10 +277,6 @@ mixin RepositoryActionsMixin on AppLogger {
           : S.current.messageBiometricUnlockRepositoryFailed;
       showSnackBar(context, message: message);
       return;
-    }
-
-    if (authenticationMode == AuthMode.version1) {
-      await settings.setAuthenticationMode(repositoryName, AuthMode.version2);
     }
 
     final accessMode =
