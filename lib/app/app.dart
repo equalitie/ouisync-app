@@ -36,9 +36,12 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   // listener.
   // NOTE: The lifecycle listener itself is never `dispose`d but that's OK because it's supposed to
   // live as long as the app itself.
+  // NOTE: That the `onExitRequested` function is known to be called only on
+  // Linux and Windows, it is known to not get called on Android and iOS has
+  // not been tested yet.
   AppLifecycleListener(
     onExitRequested: () async {
-      await session.dispose();
+      await session.asyncClose();
       windowManager.dispose();
 
       return AppExitResponse.exit;
