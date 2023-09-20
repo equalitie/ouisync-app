@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -364,8 +363,9 @@ Future<bool?> authorizeNavigationToSettings() async {
     return true;
   }
 
-  final auth = LocalAuthentication();
-  final isSupported = Platform.isLinux ? false : await auth.isDeviceSupported();
+  final isSupported = Platform.isLinux
+      ? false
+      : await SecurityValidations.isBiometricSupported();
 
   /// LocalAuthentication can tell us three (3) things:
   ///
@@ -393,7 +393,7 @@ Future<bool?> authorizeNavigationToSettings() async {
   /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
   var authorized = false;
   if (isSupported) {
-    authorized = await auth.authenticate(
+    authorized = await SecurityValidations.validateBiometrics(
         localizedReason: S.current.messageAccessingSecureStorage);
 
     if (authorized == false) {

@@ -7,6 +7,8 @@ import '../../generated/l10n.dart';
 abstract class SecurityValidations {
   static final LocalAuthentication _localAuth = LocalAuthentication();
 
+  static Future<bool> isBiometricSupported() => _localAuth.isDeviceSupported();
+
   static Future<bool> validateBiometrics({String? localizedReason}) async {
     localizedReason ??= S.current.messageAccessingSecureStorage;
 
