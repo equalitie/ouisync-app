@@ -187,7 +187,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Descargado en:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Punto final: "),
-        "labelExternalIP": MessageLookupByLibrary.simpleMessage("IP externa"),
         "labelInternalIP": MessageLookupByLibrary.simpleMessage("IP interna"),
         "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 local"),
         "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 local"),

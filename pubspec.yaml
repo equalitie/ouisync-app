@@ -32,6 +32,7 @@ dependencies:
   connectivity_plus: ^4.0.2
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
+  dart_ipify: ^1.1.1
   desktop_drop: ^0.4.1
   dns_client: ^0.2.1
   envied: ^0.3.0+3
@@ -80,8 +81,6 @@ dependencies:
   percent_indicator: ^4.2.2
   permission_handler: ^10.2.0
   qr_flutter: ^4.0.0
-  r_get_ip:
-    git: https://github.com/J-Pabon/r_get_ip
   random_password_generator: ^0.2.1
   receive_sharing_intent:
     git: https://github.com/J-Pabon/receive_sharing_intent

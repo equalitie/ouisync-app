@@ -130,9 +130,14 @@ class NetworkSection extends SettingsSection {
           (state) => state.quicListenerV6,
         ),
         _buildConnectivityInfoTile(
-          S.current.labelExternalIP,
+          S.current.labelExternalIPv4,
           Icons.cloud_outlined,
-          (state) => state.externalIP,
+          (state) => state.externalIPv4,
+        ),
+        _buildConnectivityInfoTile(
+          S.current.labelExternalIPv6,
+          Icons.cloud_outlined,
+          (state) => state.externalIPv6,
         ),
         _buildConnectivityInfoTile(
           S.current.labelLocalIPv4,

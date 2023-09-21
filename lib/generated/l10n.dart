@@ -1120,11 +1120,21 @@ class S {
     );
   }
 
-  /// `External IP`
-  String get labelExternalIP {
+  /// `External IPv4`
+  String get labelExternalIPv4 {
     return Intl.message(
-      'External IP',
-      name: 'labelExternalIP',
+      'External IPv4',
+      name: 'labelExternalIPv4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `External IPv6`
+  String get labelExternalIPv6 {
+    return Intl.message(
+      'External IPv6',
+      name: 'labelExternalIPv6',
       desc: '',
       args: [],
     );
