@@ -743,14 +743,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
-  lecle_downloads_path_provider:
-    dependency: "direct main"
-    description:
-      name: lecle_downloads_path_provider
-      sha256: "111f6d6d21e18acddda515eba8fd445658aa14defcbd59513d6d1b02b9ed47a0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2+8"
   lints:
     dependency: "direct dev"
     description:
