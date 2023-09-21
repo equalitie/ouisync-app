@@ -265,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  dart_ipify:
+    dependency: "direct main"
+    description:
+      name: dart_ipify
+      sha256: "3b70d589504126107e81ad0703d91394cc8e2039cb0a11ebd92b9b824a5e9561"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   dart_style:
     dependency: transitive
     description:
@@ -743,14 +751,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
-  lecle_downloads_path_provider:
-    dependency: "direct main"
-    description:
-      name: lecle_downloads_path_provider
-      sha256: "111f6d6d21e18acddda515eba8fd445658aa14defcbd59513d6d1b02b9ed47a0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2+8"
   lints:
     dependency: "direct dev"
     description:
@@ -1166,15 +1166,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  r_get_ip:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "1a125da6993354545790ef7d54176ff80c3adbe3"
-      url: "https://github.com/J-Pabon/r_get_ip"
-    source: git
-    version: "0.1.1"
   random_password_generator:
     dependency: "direct main"
     description:

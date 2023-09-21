@@ -9,7 +9,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   ouisync_plugin
   permission_handler_windows
-  r_get_ip
   screen_retriever
   sentry_flutter
   share_plus

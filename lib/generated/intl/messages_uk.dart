@@ -204,8 +204,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Завантажено в:"),
         "labelEndpoint":
             MessageLookupByLibrary.simpleMessage("Кінцева точка: "),
-        "labelExternalIP":
-            MessageLookupByLibrary.simpleMessage("Зовнішня IP-адреса"),
         "labelInternalIP":
             MessageLookupByLibrary.simpleMessage("Внутрішня ІP-адреса"),
         "labelLocalIPv4":
