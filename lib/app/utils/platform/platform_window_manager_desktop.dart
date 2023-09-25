@@ -39,38 +39,45 @@ class PlatformWindowManagerDesktop
 
     await _ensureWindowsSingleInstance(args, _appName);
 
+    /// Neither these suations seems to be true any more [Tested on Ubuntu 22.04.3 LTS - 2023-09-22]
+    /// TODO: Remove this comment after more testing
     /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
     /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
     /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
     /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
-    if (!Platform.isLinux) {
-      /// For some reason, if we use a constant value for the title in the
-      /// WindowsOptions, the app hangs. This is true for the localized strings,
-      /// or a regular constant value in Constants.
-      /// So we use a harcoded string to start, then we use the localized string
-      /// in app.dart -for now.
+    /// *****************
+    /// For some reason, if we use a constant value for the title in the
+    /// WindowsOptions, the app hangs. This is true for the localized strings,
+    /// or a regular constant value in Constants.
+    /// So we use a harcoded string to start, then we use the localized string
+    /// in app.dart -for now.
 
-      // Make it usable on older HD displays.
-      const width = 650.0;
-      const height = 700.0;
+    // Make it usable on older HD displays.
+    const initWidth = 650.0;
+    const initHeight = 700.0;
 
-      const initialSize = Size(width, height);
+    const initialSize = Size(initWidth, initHeight);
 
-      WindowOptions windowOptions = const WindowOptions(
-          center: true,
-          backgroundColor: Colors.transparent,
-          skipTaskbar: false,
-          title: 'Ouisync',
-          size: initialSize,
-          minimumSize: Size(320, 200));
+    const minWidth = 320.0;
+    const minHeight = 200.0;
 
-      await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        if (_showWindow) {
-          await windowManager.show();
-          await windowManager.focus();
-        }
-      });
-    }
+    const minSize = Size(minWidth, minHeight);
+
+    WindowOptions windowOptions = const WindowOptions(
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.normal,
+        title: 'Ouisync',
+        size: initialSize,
+        minimumSize: minSize);
+
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (_showWindow) {
+        await windowManager.show();
+        await windowManager.focus();
+      }
+    });
   }
 
   @override
