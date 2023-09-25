@@ -320,8 +320,10 @@ class _MainPageState extends State<MainPage>
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
         onPressed: () async {
-      final authorized = await authorizeNavigationToSettings();
-      if (authorized == null || authorized == false) return;
+      if (PlatformValues.isDesktopDevice) {
+        final authorized = await authorizeNavigationToSettings();
+        if (authorized == null || authorized == false) return;
+      }
 
       await _showAppSettings();
     }, size: Dimensions.sizeIconSmall);
