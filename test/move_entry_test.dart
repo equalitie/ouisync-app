@@ -35,7 +35,7 @@ void main() {
   tearDown(() async {
     // await repository.close();
     await pluginRepo.close();
-    await session.dispose();
+    await session.close();
   });
 
   test('Placeholder test', () async {
