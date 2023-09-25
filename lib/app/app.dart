@@ -41,7 +41,7 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   // not been tested yet.
   AppLifecycleListener(
     onExitRequested: () async {
-      await session.asyncClose();
+      await session.close();
       windowManager.dispose();
 
       return AppExitResponse.exit;

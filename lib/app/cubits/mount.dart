@@ -13,7 +13,7 @@ class MountStateMounting extends MountState {}
 class MountStateSuccess extends MountState {}
 
 class MountStateError extends MountState {
-  int code;
+  oui.ErrorCode code;
   String message;
   MountStateError(this.code, this.message);
 }
