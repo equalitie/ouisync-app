@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:biometric_storage/biometric_storage.dart';
+import 'package:result_type/result_type.dart';
 
 import '../utils/constants.dart';
 import 'storage.dart';
@@ -45,7 +46,7 @@ class BiometricSecure {
     return false;
   }
 
-  static Future<SecureStorageResult> addRepositoryPassword(
+  static Future<Result<Void, Error>> addRepositoryPassword(
       {required String databaseId,
       required String password,
       required AuthMode authMode}) async {
@@ -57,33 +58,28 @@ class BiometricSecure {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.write(password);
+      return Success(Void());
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: null);
   }
 
-  static Future<SecureStorageResult> getRepositoryPassword(
+  static Future<Result<String?, Error>> getRepositoryPassword(
       {required String databaseId, required AuthMode authMode}) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
-
-    String? password;
 
     try {
       final storageFile =
           await _getStorageFileForKey(key, authenticationRequired);
 
-      password = await storageFile.read();
+      return Success(await storageFile.read());
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: password);
   }
 
-  static Future<SecureStorageResult> deleteRepositoryPassword(
+  static Future<Result<Void, Error>> deleteRepositoryPassword(
       {required String databaseId,
       required AuthMode authMode,
       required bool authenticationRequired}) async {
@@ -93,10 +89,9 @@ class BiometricSecure {
           await _getStorageFileForKey(key, authenticationRequired);
 
       await storageFile.delete();
+      return Success(Void());
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: null);
   }
 }

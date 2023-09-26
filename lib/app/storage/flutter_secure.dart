@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:result_type/result_type.dart';
 
 import 'storage.dart';
 
@@ -7,50 +8,44 @@ class FlutterSecure {
 
   static final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
-  static Future<SecureStorageResult> writeValue(
+  static Future<Result<Void, Error>> writeValue(
       {required String databaseId, required String password}) async {
     try {
       await _storage.write(key: databaseId, value: password);
+      return Success(Void());
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: null);
   }
 
-  static Future<SecureStorageResult> readValue(
+  static Future<Result<String?, Error>> readValue(
       {required String databaseId}) async {
-    String? password;
-
     try {
-      password = await _storage.read(key: databaseId);
+      return Success(await _storage.read(key: databaseId));
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: password);
   }
 
-  static Future<SecureStorageResult> deleteValue(
+  static Future<Result<Void, Error>> deleteValue(
       {required String databaseId}) async {
     try {
       await _storage.delete(key: databaseId);
+      return Success(Void());
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
-
-    return SecureStorageResult(value: null);
   }
 
-  static Future<SecureStorageResult> exist({required String databaseId}) async {
+  static Future<Result<bool, Error>> exist({required String databaseId}) async {
     bool exist = false;
     try {
       exist = await _storage.containsKey(key: databaseId);
     } on Exception catch (e, st) {
-      return SecureStorageResult(value: null, exception: e, stackTrace: st);
+      return Failure(Error(e, st));
     }
 
-    return SecureStorageResult(value: exist.toString());
+    return Success(exist);
   }
 }
 
