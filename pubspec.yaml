@@ -132,7 +132,8 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/favicon.ico
+    - assets/app_icon.ico
+    - assets/app_icon.png
     - assets/add_with_qr.png
     - assets/nothing_here_yet.png
     - assets/locked_repo.png
@@ -141,6 +142,7 @@ flutter:
     - assets/01_onboarding_send_receive_files.png
     - assets/02_onboarding_permissions_collaborate.png
     - assets/03_onboarding_access_multiple_devices.png
+    - assets/Ouisync_v1_1560x1553.png
     - assets/OuisyncFull.png
     # - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
