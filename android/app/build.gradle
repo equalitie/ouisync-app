@@ -71,7 +71,7 @@ android {
         applicationId appId
         resValue "string", "app_name", appName
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
