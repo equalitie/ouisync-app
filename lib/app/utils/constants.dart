@@ -158,7 +158,7 @@ class Constants {
   static const String onboardingAccessImage =
       '03_onboarding_access_multiple_devices.png';
 
-  static const String appIcon = './assets/app_icon.png';
+  static const String appIcon = 'assets/app_icon.png';
   static const String windowsAppIcon = './assets/app_icon.ico';
 
   static const String eventLeftMouseUp = 'leftMouseUp';
