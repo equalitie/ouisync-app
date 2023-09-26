@@ -59,7 +59,13 @@ dependencies:
     sdk: flutter
   flutter_loggy: ^2.0.1
   flutter_password_strength: ^0.1.6
-  flutter_secure_storage: ^9.0.0
+  #flutter_secure_storage: ^9.0.0
+  # https://github.com/mogol/flutter_secure_storage/issues/618
+  flutter_secure_storage:
+    git:
+      url: https://github.com/inetic/flutter_secure_storage
+      path: flutter_secure_storage
+      ref: local-platform-dependencies
   intl: ^0.18.0
   intro_slider: ^4.2.0
   # Fix for (closed) issue #175: "Bug: PageController.page cannot be accessed before a PageView is built with it"
