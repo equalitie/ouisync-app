@@ -66,6 +66,10 @@ Future<void> main(List<String> args) async {
   if (options.deb) {
     final asset = await buildDeb(
       name: name,
+      // At some point we'll want to include the command line `ouisync`
+      // executable as well, so we rename this flutter app so as to not clash
+      // with it.
+      executableName: "$name-gui",
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
@@ -395,6 +399,7 @@ Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildDeb({
   required String name,
+  required String executableName,
   required Directory outputDir,
   required BuildDesc buildDesc,
   String description = '',
@@ -429,12 +434,14 @@ Future<File> buildDeb({
   await libDir.create(recursive: true);
   await copyDirectory(bundleDir, libDir);
 
-  // HACK: rename the binary 'ouisync_app' -> 'ouisync'
-  await File('${libDir.path}/ouisync_app').rename('${libDir.path}/$name');
+  // HACK: rename the binary 'ouisync_app' -> 'ouisync-gui'
+  await File('${libDir.path}/ouisync_app')
+      .rename('${libDir.path}/$executableName');
 
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create();
-  await Link('${binDir.path}/$name').create('../lib/$name/$name');
+  await Link('${binDir.path}/$executableName')
+      .create('../lib/$name/$executableName');
 
   // Create desktop file
   final desktopDir = Directory('${packageDir.path}/usr/share/applications');
@@ -447,7 +454,7 @@ Future<File> buildDeb({
       'GenericName=File synchronization\n'
       'Version=$buildName\n'
       'Comment=$description\n'
-      'Exec=/usr/bin/$name\n'
+      'Exec=/usr/bin/$executableName\n'
       'Terminal=false\n'
       'Type=Application\n'
       'Icon=$name\n'
