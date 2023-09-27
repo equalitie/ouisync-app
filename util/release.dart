@@ -7,7 +7,7 @@ import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -506,7 +506,7 @@ Future<File> buildAab(BuildDesc buildDesc) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> extractApk(File bundle) async {
-  final outputPath = setExtension(bundle.path, '.apk');
+  final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
@@ -519,11 +519,11 @@ Future<File> extractApk(File bundle) async {
   final bundletool = await prepareBundletool();
 
   final keyProperties = Properties.fromFile('android/key.properties');
-  final storeFile = join('android/app', keyProperties.get('storeFile')!);
+  final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
   final storePassword = keyProperties.get('storePassword')!;
   final keyPassword = keyProperties.get('keyPassword')!;
 
-  final tempPath = setExtension(bundle.path, '.apks');
+  final tempPath = p.setExtension(bundle.path, '.apks');
 
   await run('java', [
     '-jar',
@@ -563,7 +563,7 @@ Future<File> extractApk(File bundle) async {
 Future<String> prepareBundletool() async {
   final version = "1.8.2";
   final name = "bundletool-all-$version.jar";
-  final path = join(rootWorkDir, name);
+  final path = p.join(rootWorkDir, name);
 
   final file = File(path);
 
@@ -649,7 +649,7 @@ Future<void> uploadAssets(
   List<File> assets,
 ) async {
   for (final asset in assets) {
-    final name = basename(asset.path);
+    final name = p.basename(asset.path);
     final content = await asset.readAsBytes();
 
     print('Uploading $name ...');
@@ -676,9 +676,9 @@ Future<File> collateAsset(
   File inputFile, {
   String suffix = '',
 }) async {
-  final ext = extension(inputFile.path);
+  final ext = p.extension(inputFile.path);
   return await inputFile
-      .copy(join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
+      .copy(p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
 }
 
 Future<String> buildReleaseNotes(
@@ -828,7 +828,7 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
     await link.delete();
   }
 
-  await link.create(basename(dir.path));
+  await link.create(p.basename(dir.path));
 
   return dir;
 }
@@ -878,7 +878,7 @@ Future<String> runCapture(
 // Copy directory including its contents
 Future<void> copyDirectory(Directory src, Directory dst) async {
   await for (final srcEntry in src.list(recursive: true, followLinks: false)) {
-    final dstPath = join(dst.path, relative(srcEntry.path, from: src.path));
+    final dstPath = p.join(dst.path, p.relative(srcEntry.path, from: src.path));
 
     if (srcEntry is File) {
       final dstEntry = File(dstPath);
