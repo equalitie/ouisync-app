@@ -54,8 +54,11 @@ android/log.bck
 /ios/ouisync/build-dir/
 .vscode/settings.json
 
-# Keystore secrets
+# Keystore secrets (we used to have it here, but then moved all the secrets to secrets/)
 android/key.properties
+
+# Whatever secrets needed to build a release for any of the supported platform.
+secrets/
 
 # For Windows app publishing (MSIX)
 /installers/

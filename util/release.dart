@@ -518,7 +518,7 @@ Future<File> extractApk(File bundle) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyProperties = Properties.fromFile('android/key.properties');
+  final keyProperties = Properties.fromFile('secrets/android/key.properties');
   final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
   final storePassword = keyProperties.get('storePassword')!;
   final keyPassword = keyProperties.get('keyPassword')!;
