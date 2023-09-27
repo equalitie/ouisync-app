@@ -38,14 +38,11 @@ class FlutterSecure {
   }
 
   static Future<Result<bool, Error>> exist({required String databaseId}) async {
-    bool exist = false;
     try {
-      exist = await _storage.containsKey(key: databaseId);
+      return Success(await _storage.containsKey(key: databaseId));
     } on Exception catch (e, st) {
       return Failure(Error(e, st));
     }
-
-    return Success(exist);
   }
 }
 

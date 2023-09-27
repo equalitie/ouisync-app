@@ -20,67 +20,6 @@ class SecureStorage with AppLogger {
     return value;
   }
 
-  Future<String?> tryGetPassword({required AuthMode authMode}) async {
-    if (authMode == AuthMode.manual) return null;
-
-    final password = await _readFlutterSecureStorage(databaseId, authMode);
-
-    if (password != null) {
-      return password;
-    }
-
-    return await _maybeMigrate(databaseId, authMode);
-  }
-
-  Future<bool> deletePassword() async {
-    final result = await FlutterSecure.deleteValue(databaseId: databaseId);
-
-    if (result.isFailure) {
-      loggy.error('Deleting repository password from secure storage failed',
-          result.failure.exception, result.failure.stackTrace);
-
-      return false;
-    }
-
-    return true;
-  }
-
-  /////////////////////////////////
-
-  Future<bool> _validateBiometrics() async {
-    bool authorized;
-    try {
-      authorized = await SecurityValidations.validateBiometrics();
-    } on Exception catch (e, st) {
-      loggy.app('Biometric authentication (local_auth) failed', e, st);
-      return false;
-    }
-
-    return authorized;
-  }
-
-  Future<String?> _readFlutterSecureStorage(
-      String databaseId, AuthMode authMode) async {
-    if ([AuthMode.version1, AuthMode.version2].contains(authMode)) {
-      final authorized = await _validateBiometrics();
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    final result = await FlutterSecure.readValue(databaseId: databaseId);
-    if (result.isFailure) {
-      loggy.error(
-          'Getting repository password from flutter_secure_storage failed',
-          result.failure.exception,
-          result.failure.stackTrace);
-
-      return null;
-    }
-
-    return result.success;
-  }
-
   /// Runs once per repository (if needed): before adding to the app the
   /// possibility to create a repository without a local password, any entry
   /// to the secure storage (biometric_storage) required biometric validation
@@ -113,27 +52,16 @@ class SecureStorage with AppLogger {
   /// To achieve this we still use the old transformation from AuthMode.version1
   /// to AuthMode.version2, but instead of going throught AuthMode.version2, we
   /// just go from either version to AuthMode.secure, which uses the new plugin.
-  Future<bool> _hasMigratedPassword(String databaseId) async {
-    final result = await FlutterSecure.exist(databaseId: databaseId);
+  Future<String?> tryGetPassword({required AuthMode authMode}) async {
+    if (authMode == AuthMode.manual) return null;
 
-    if (result.isFailure) {
-      loggy.error(
-          'Checking if flutter_secure_storage contains this repo key failed',
-          result.failure.exception,
-          result.failure.stackTrace);
+    final password = await _readFlutterSecureStorage(databaseId, authMode);
 
-      return false;
+    if (password != null) {
+      return password;
     }
 
-    final exist = result.success;
-    return exist;
-  }
-
-  Future<String?> _maybeMigrate(String databaseId, AuthMode authMode) async {
-    if (await _hasMigratedPassword(databaseId)) {
-      return null;
-    }
-
+    // Try to migrate the password from the legacy `biometric_storage` plugin.
     if (authMode == AuthMode.version2) {
       final authorized = await _validateBiometrics();
       if (authorized == false) {
@@ -151,6 +79,52 @@ class SecureStorage with AppLogger {
     await _migrateToSecureAuthMode(databaseId, value, authMode);
 
     return value;
+  }
+
+  Future<bool> deletePassword() async {
+    final result = await FlutterSecure.deleteValue(databaseId: databaseId);
+
+    if (result.isFailure) {
+      loggy.error('Deleting repository password from secure storage failed',
+          result.failure.exception, result.failure.stackTrace);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /////////////////////////////////
+
+  Future<bool> _validateBiometrics() async {
+    try {
+      return await SecurityValidations.validateBiometrics();
+    } on Exception catch (e, st) {
+      loggy.app('Biometric authentication (local_auth) failed', e, st);
+      return false;
+    }
+  }
+
+  Future<String?> _readFlutterSecureStorage(
+      String databaseId, AuthMode authMode) async {
+    if ([AuthMode.version1, AuthMode.version2].contains(authMode)) {
+      final authorized = await _validateBiometrics();
+      if (authorized == false) {
+        return null;
+      }
+    }
+
+    final result = await FlutterSecure.readValue(databaseId: databaseId);
+    if (result.isFailure) {
+      loggy.error(
+          'Getting repository password from flutter_secure_storage failed',
+          result.failure.exception,
+          result.failure.stackTrace);
+
+      return null;
+    }
+
+    return result.success;
   }
 
   Future<String?> _readLegacyBiometricStorage(
