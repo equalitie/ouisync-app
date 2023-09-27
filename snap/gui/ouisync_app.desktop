@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Ouisync App
+Comment=Ouiisync Linux app
+Exec=ouisync_app
+Icon=ouisync_app.png
+Terminal=false
+Type=Application
+Categories=Entertainment;
