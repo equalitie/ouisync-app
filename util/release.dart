@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:git/git.dart';
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
@@ -18,6 +19,13 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
+
+  final git = await GitDir.fromExisting(p.current);
+
+  if (!await checkWorkingTreeIsClean(git)) {
+    return;
+  }
+
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
   final version = pubspec.version!;
@@ -888,4 +896,22 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
       await Directory(dstPath).create(recursive: true);
     }
   }
+}
+
+// Check if working tree is clean and if not confirm with the caller if we want to continue.
+Future<bool> checkWorkingTreeIsClean(GitDir git) async {
+  if (!await git.isWorkingTreeClean()) {
+    while (true) {
+      print("Git is dirty, continue anyway? [y/n/diff]");
+      final input = stdin.readLineSync();
+      if (input == 'y') {
+        return true;
+      } else if (input == 'n') {
+        return false;
+      } else if (input == 'diff') {
+        await run('git', ['diff', '--color=always']);
+      }
+    }
+  }
+  return true;
 }

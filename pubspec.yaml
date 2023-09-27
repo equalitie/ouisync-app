@@ -115,6 +115,7 @@ dev_dependencies:
   envied_generator: ^0.3.0+3
   flutter_test:
     sdk: flutter
+  git: ^2.2.1
   github: ^9.15.1
   icons_launcher: ^2.0.3
   # Use this command to generate internationalization files if you're not using
