@@ -93,12 +93,19 @@ class PlatformWindowManagerDesktop
 
     final menu = stray.Menu();
     await menu.buildFrom([
+      if (Platform.isLinux)
+        stray.MenuItemLabel(
+        label: '${S.current.actionHide} / ${S.current.actionShow}',
+        onClicked: (_) async {
+          await windowManager.isVisible()
+          ? await _appWindow.hide() : await _appWindow.show();
+        }),
       stray.MenuItemLabel(
-          label: S.current.actionExit,
-          onClicked: (_) async {
-            await windowManager.setPreventClose(false);
-            await windowManager.close();
-          }),
+      label: S.current.actionExit,
+      onClicked: (_) async {
+        await windowManager.setPreventClose(false);
+        await windowManager.close();
+      }),
     ]);
 
     await _systemTray.setContextMenu(menu);
