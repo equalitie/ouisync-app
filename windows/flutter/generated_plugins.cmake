@@ -5,16 +5,14 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
-  desktop_webview_window
-  firebase_core
+  flutter_secure_storage_windows
   local_auth_windows
   ouisync_plugin
   permission_handler_windows
-  r_get_ip
   screen_retriever
+  sentry_flutter
   share_plus
   system_tray
-  tray_manager
   url_launcher_windows
   window_manager
   windows_single_instance

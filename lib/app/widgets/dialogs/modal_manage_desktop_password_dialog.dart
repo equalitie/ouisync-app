@@ -7,6 +7,7 @@ import 'package:result_type/result_type.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
+import '../../storage/secure_storage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -31,7 +32,7 @@ class ManageDesktopPassword extends StatefulWidget {
 }
 
 class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
-    with AppLogger, RepositoryActionsMixin {
+    with AppLogger {
   final _currentPasswordInputKey = GlobalKey<FormFieldState>();
   final _newPasswordInputKey = GlobalKey<FormFieldState>();
   final _retypeNewPasswordInputKey = GlobalKey<FormFieldState>();
@@ -71,10 +72,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     String currentPassword = '';
 
     if (authMode != AuthMode.manual) {
-      final securePassword = await tryGetSecurePassword(
-          context: context,
-          databaseId: databaseId,
-          authenticationMode: authMode);
+      final securePassword = await SecureStorage(databaseId: databaseId)
+          .tryGetPassword(authMode: authMode);
 
       if (securePassword == null || securePassword.isEmpty) {
         if (securePassword != null) {

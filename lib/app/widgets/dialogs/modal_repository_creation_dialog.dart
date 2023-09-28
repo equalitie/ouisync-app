@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:biometric_storage/biometric_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,21 +10,21 @@ import '../../../generated/l10n.dart';
 import '../../cubits/create_repo.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
+import '../../storage/storage.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends HookWidget with AppLogger {
-  RepositoryCreation(
-      {required this.context,
-      required this.cubit,
-      this.initialTokenValue,
-      required this.isBiometricsAvailable});
+  RepositoryCreation({
+    required this.context,
+    required this.cubit,
+    this.initialTokenValue,
+  });
 
   final BuildContext context;
   final ReposCubit cubit;
   final String? initialTokenValue;
-  final bool isBiometricsAvailable;
 
   late final CreateRepositoryCubit createRepoCubit;
 
@@ -185,6 +184,9 @@ class RepositoryCreation extends HookWidget with AppLogger {
     final showSuggestedName = suggestedName.isNotEmpty;
     final showAccessModeMessage = accessMode != null;
 
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics() ?? false;
+
     final state = CreateRepositoryCubit.create(
         reposCubit: cubit,
         isBiometricsAvailable: isBiometricsAvailable,
@@ -203,12 +205,8 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
     try {
       shareToken = await ShareToken.fromString(cubit.session, initialToken);
-
-      if (shareToken == null) {
-        throw "Failed to construct the token from \"$initialToken\"";
-      }
     } catch (e, st) {
-      loggy.app('Extract repository token exception', e, st);
+      loggy.error('Extract repository token exception:', e, st);
       showSnackBar(context, message: S.current.messageErrorTokenInvalid);
     }
 
@@ -721,27 +719,25 @@ class RepositoryCreation extends HookWidget with AppLogger {
     /// the repository, we need to delete the repository before leaving this
     /// dialog if the user tap the CANCEL button, hence this:
     /// _deleteRepositoryBeforePop = true;
-    final secureStorageResult = await Dialogs.executeFutureWithLoadingDialog(
+    final databaseId = repoEntry.databaseId;
+    final savedPassword = await Dialogs.executeFutureWithLoadingDialog<String?>(
         context,
-        f: SecureStorage.addRepositoryPassword(
-            databaseId: repoEntry.databaseId,
-            password: password,
-            authMode: authenticationMode));
+        f: SecureStorage(databaseId: databaseId)
+            .saveOrUpdatePassword(value: password));
 
-    if (secureStorageResult.exception != null) {
-      loggy.app(secureStorageResult.exception);
-
+    if (savedPassword == null || savedPassword.isEmpty) {
       setDeleteRepoBeforePop(true, repoEntry.metaInfo);
 
-      if (secureStorageResult.exception is AuthException) {
-        if ((secureStorageResult.exception as AuthException).code !=
-            AuthExceptionCode.userCanceled) {
-          await Dialogs.simpleAlertDialog(
-              context: context,
-              title: S.current.messsageFailedCreateRepository(name),
-              message: S.current.messageErrorAuthenticatingBiometrics);
-        }
-      }
+      // TODO: Check if this still can be determined or even occur
+      // if (savedPassword.exception is AuthException) {
+      //   if ((savedPassword.exception as AuthException).code !=
+      //       AuthExceptionCode.userCanceled) {
+      //     await Dialogs.simpleAlertDialog(
+      //         context: context,
+      //         title: S.current.messsageFailedCreateRepository(name),
+      //         message: S.current.messageErrorAuthenticatingBiometrics);
+      //   }
+      // }
 
       return;
     }

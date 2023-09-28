@@ -64,6 +64,8 @@ class Constants {
 
   static const String launchAtStartupArg = 'auto';
 
+  static const Color devColor = Colors.grey;
+
   static const Color errorColor = Colors.red;
   static const Color warningColor = Colors.orange;
   static const Color dangerColor = Colors.red;
@@ -73,6 +75,8 @@ class Constants {
   static const String logFileName = 'ouisync.log';
 
   static const int bufferSize = 64000;
+
+  static const String androidAppAuthority = 'org.equalitie.ouisync';
 
   static const int maxCharacterRepoTokenForDisplay = 8;
   static const String ouisyncUrl = 'https://ouisync.net';
@@ -154,8 +158,8 @@ class Constants {
   static const String onboardingAccessImage =
       '03_onboarding_access_multiple_devices.png';
 
-  static const String appIcon = './assets/favicon.png';
-  static const String windowsAppIcon = './assets/favicon.ico';
+  static const String appIcon = 'assets/app_icon.png';
+  static const String windowsAppIcon = './assets/app_icon.ico';
 
   static const String eventLeftMouseUp = 'leftMouseUp';
   static const String eventRightMouseUp = 'rightMouseUp';

@@ -1,4 +1,4 @@
-import 'dart:io' as io show Directory, Platform;
+import 'dart:io' show Directory, Platform;
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -13,7 +13,7 @@ class SettingsRepoEntry {
   RepoMetaInfo info;
 
   String get name => info.name;
-  io.Directory get dir => info.dir;
+  Directory get dir => info.dir;
 
   SettingsRepoEntry(this.databaseId, this.info);
 }
@@ -69,6 +69,9 @@ class Settings with AppLogger {
   // `_legacyReposIncluded` flag to indicate whether we checked the legacy
   // directory and moved everything there into this settings.
   static const String _legacyReposIncluded = "LEGACY_REPOS_INCLUDED";
+
+  // Path to mount repositories at
+  static const String _mountPoint = "MOUNT_POINT";
 
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
@@ -140,7 +143,7 @@ class Settings with AppLogger {
     await _prefs.setBool(_launchAtStartup, value);
   }
 
-  Future<io.Directory> defaultRepoLocation() async {
+  Future<Directory> defaultRepoLocation() async {
     try {
       // Docs says this throws on non Android systems.
       // https://pub.dev/documentation/path_provider/latest/path_provider/getExternalStorageDirectory.html
@@ -160,7 +163,7 @@ class Settings with AppLogger {
     // also gets deleted when the app is un/re-installed.
     final alternativeDir =
         await path_provider.getApplicationDocumentsDirectory();
-    if (io.Platform.isAndroid) {
+    if (Platform.isAndroid) {
       return alternativeDir;
     }
 
@@ -168,7 +171,7 @@ class Settings with AppLogger {
     final nonAndroidAlternativePath =
         context.join(alternativeDir.path, 'ouisync');
 
-    final documents = await io.Directory(nonAndroidAlternativePath).create();
+    final documents = await Directory(nonAndroidAlternativePath).create();
     return documents;
   }
 
@@ -196,7 +199,7 @@ class Settings with AppLogger {
   RepoMetaInfo? repoMetaInfo(String repoName) {
     final dir = _repos[repoName];
     if (dir == null) return null;
-    return RepoMetaInfo.fromDirAndName(io.Directory(dir), repoName);
+    return RepoMetaInfo.fromDirAndName(Directory(dir), repoName);
   }
 
   Future<void> setDefaultRepo(String? name) async {
@@ -232,7 +235,9 @@ class Settings with AppLogger {
     await forgetRepository(oldName);
 
     return SettingsRepoEntry(
-        databaseId, RepoMetaInfo.fromDirAndName(io.Directory(path), newName));
+      databaseId,
+      RepoMetaInfo.fromDirAndName(Directory(path), newName),
+    );
   }
 
   Future<SettingsRepoEntry?> addRepo(
@@ -302,6 +307,9 @@ class Settings with AppLogger {
     await _setRepositoryString(repoName, _authenticationMode, str);
   }
 
+  String? getMountPoint() =>
+      _prefs.getString(_mountPoint) ?? _defaultMountPoint();
+
   // Read and remove a bool property. This functions exists to facilitate migration to the new
   // repository config system where config values are stored in the repository metadata.
   bool? takeRepositoryBool(String repoName, String key) {
@@ -349,7 +357,7 @@ class Settings with AppLogger {
     // We used to have all the repositories in a single place in the internal
     // memory. The disadvantage was that the user had no access to them and
     // thus couldn't back them up or put them on an SD card.
-    final dir = io.Directory(p.join(
+    final dir = Directory(p.join(
         (await path_provider.getApplicationSupportDirectory()).path,
         Constants.folderRepositoriesName));
 
@@ -395,5 +403,21 @@ class _CachedString {
     } else {
       await Settings._remove(_prefs, _key);
     }
+  }
+}
+
+String? _defaultMountPoint() {
+  if (Platform.isLinux || Platform.isMacOS) {
+    final home = Platform.environment['HOME'];
+
+    if (home == null) {
+      return null;
+    }
+
+    return '$home/Ouisync';
+  } else if (Platform.isWindows) {
+    return 'O:';
+  } else {
+    return null;
   }
 }

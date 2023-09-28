@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -80,11 +82,13 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    final permissionName = S.current.messageStorage;
-    final permissionGranted =
-        await _checkPermission(Permission.storage, permissionName);
+    if (Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
+      final permissionName = S.current.messageStorage;
+      final permissionGranted =
+          await _checkPermission(Permission.storage, permissionName);
 
-    if (!permissionGranted) return;
+      if (!permissionGranted) return;
+    }
 
     final dstDir = repo.state.currentFolder.path;
 
@@ -110,10 +114,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           final action = await showDialog<FileAction>(
               context: context,
               builder: (BuildContext context) => AlertDialog(
-                  title: Fields.constrainedText(S.current.titleAddFile,
-                      flex: 0,
-                      style: context.theme.appTextStyle.titleMedium,
-                      maxLines: 2),
+                  title: Flex(direction: Axis.horizontal, children: [
+                    Fields.constrainedText(S.current.titleAddFile,
+                        style: context.theme.appTextStyle.titleMedium,
+                        maxLines: 2)
+                  ]),
                   content: ReplaceFile(context: context, fileName: fileName)));
 
           if (action == null) {

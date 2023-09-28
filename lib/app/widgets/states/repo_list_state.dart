@@ -4,8 +4,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
-import '../../utils/constants.dart';
-import '../../utils/log.dart';
+import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget
@@ -13,21 +12,19 @@ class RepoListState extends StatelessWidget
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
-      required this.onCheckForBiometrics,
+      required this.settings,
       required this.onShowRepoSettings,
       required this.onNewRepositoryPressed,
-      required this.onImportRepositoryPressed,
-      required this.onGetAuthenticationMode});
+      required this.onImportRepositoryPressed});
 
   final ReposCubit reposCubit;
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
-  final Future<bool?> Function() onCheckForBiometrics;
+  final Settings settings;
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<String?> Function() onNewRepositoryPressed;
   final Future<String?> Function() onImportRepositoryPressed;
-  final AuthMode Function(String repoName) onGetAuthenticationMode;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +69,7 @@ class RepoListState extends StatelessWidget
                       verticalDotsAction: () async => deleteRepository(context,
                           repositoryName: repoEntry.name,
                           repositoryMetaInfo: repoEntry.metaInfo!,
-                          getAuthenticationMode: onGetAuthenticationMode,
+                          settings: settings,
                           delete: reposCubit.deleteRepository));
                 }
 

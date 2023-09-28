@@ -119,7 +119,6 @@ abstract class Dialogs {
       AlertDialog(
           title: Flex(direction: Axis.horizontal, children: [
             Fields.constrainedText(title,
-                flex: 1,
                 style: context.theme.appTextStyle.titleMedium,
                 maxLines: 2)
           ]),

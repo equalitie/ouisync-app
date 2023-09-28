@@ -3,17 +3,17 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../flavors.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
 import '../models/models.dart';
+import '../storage/storage.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
@@ -27,13 +27,14 @@ typedef MoveEntryCallback = void Function(
     String origin, String path, EntryType type);
 
 class MainPage extends StatefulWidget {
-  const MainPage(
-      {required this.session,
-      required this.upgradeExists,
-      required this.backgroundServiceManager,
-      required this.mediaReceiver,
-      required this.settings,
-      required this.windowManager});
+  const MainPage({
+    required this.session,
+    required this.upgradeExists,
+    required this.backgroundServiceManager,
+    required this.mediaReceiver,
+    required this.settings,
+    required this.windowManager,
+  });
 
   final Session session;
   final UpgradeExistsCubit upgradeExists;
@@ -43,8 +44,13 @@ class MainPage extends StatefulWidget {
   final PlatformWindowManager windowManager;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(session, upgradeExists,
-      backgroundServiceManager, settings, windowManager);
+  State<StatefulWidget> createState() => _MainPageState(
+        session,
+        upgradeExists,
+        backgroundServiceManager,
+        settings,
+        windowManager,
+      );
 }
 
 class _MainPageState extends State<MainPage>
@@ -64,23 +70,38 @@ class _MainPageState extends State<MainPage>
   _MainPageState._(this._cubits);
 
   factory _MainPageState(
-      Session session,
-      UpgradeExistsCubit upgradeExists,
-      BackgroundServiceManager backgroundServiceManager,
-      Settings settings,
-      PlatformWindowManager windowManager) {
+    Session session,
+    UpgradeExistsCubit upgradeExists,
+    BackgroundServiceManager backgroundServiceManager,
+    Settings settings,
+    PlatformWindowManager windowManager,
+  ) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
     );
     final powerControl = PowerControl(session, settings);
     final panicCounter = StateMonitorIntCubit(
-        repositories.rootStateMonitor
-            .child(oui.MonitorId.expectUnique("Session")),
-        "panic_counter");
+      repositories.rootStateMonitor
+          .child(oui.MonitorId.expectUnique("Session")),
+      "panic_counter",
+    );
 
-    return _MainPageState._(Cubits(repositories, powerControl, panicCounter,
-        upgradeExists, backgroundServiceManager, windowManager));
+    final mount = MountCubit(session);
+    final mountPoint = settings.getMountPoint();
+    if (mountPoint != null) {
+      unawaited(mount.mount(mountPoint));
+    }
+
+    return _MainPageState._(Cubits(
+      repositories: repositories,
+      powerControl: powerControl,
+      panicCounter: panicCounter,
+      upgradeExists: upgradeExists,
+      backgroundServiceManager: backgroundServiceManager,
+      windowManager: windowManager,
+      mount: mount,
+    ));
   }
 
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
@@ -141,28 +162,6 @@ class _MainPageState extends State<MainPage>
     super.dispose();
   }
 
-  Future<bool?> _checkForBiometricsCallback() async {
-    if (!io.Platform.isAndroid &&
-        !io.Platform.isIOS &&
-        !io.Platform.isWindows) {
-      return null;
-    }
-
-    final auth = LocalAuthentication();
-
-    final isBiometricsAvailable = await auth.canCheckBiometrics;
-
-    // The device doesn't have biometrics
-    if (!isBiometricsAvailable) return null;
-
-    final availableBiometrics = await auth.getAvailableBiometrics();
-
-    // The device has biometrics capabilites, but not in use'.
-    if (availableBiometrics.isEmpty) return false;
-
-    return true;
-  }
-
   void initMainPage() async {
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
   }
@@ -203,13 +202,13 @@ class _MainPageState extends State<MainPage>
         //     _sortListCubit?.state.direction ?? SortDirection.asc;
 
         return RepoListState(
-            reposCubit: repos,
-            bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
-            onCheckForBiometrics: _checkForBiometricsCallback,
-            onShowRepoSettings: _showRepoSettings,
-            onNewRepositoryPressed: _addRepository,
-            onImportRepositoryPressed: _importRepository,
-            onGetAuthenticationMode: widget.settings.getAuthenticationMode);
+          reposCubit: repos,
+          bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
+          settings: widget.settings,
+          onShowRepoSettings: _showRepoSettings,
+          onNewRepositoryPressed: _addRepository,
+          onImportRepositoryPressed: _importRepository,
+        );
       }
 
       final current = repos.currentRepo;
@@ -232,8 +231,8 @@ class _MainPageState extends State<MainPage>
             repositoryMetaInfo: current.metaInfo,
             errorMessage: current.error,
             errorDescription: current.errorDescription,
+            settings: widget.settings,
             onReloadRepository: null,
-            onGetAuthenticationMode: widget.settings.getAuthenticationMode,
             onDelete: repos.deleteRepository);
       }
 
@@ -320,8 +319,14 @@ class _MainPageState extends State<MainPage>
 
   Widget _buildAppSettingsIcon() {
     final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: () async => await _showAppSettings(),
-        size: Dimensions.sizeIconSmall);
+        onPressed: () async {
+      if (PlatformValues.isDesktopDevice) {
+        final authorized = await authorizeNavigationToSettings();
+        if (authorized == null || authorized == false) return;
+      }
+
+      await _showAppSettings();
+    }, size: Dimensions.sizeIconSmall);
 
     return multiBlocBuilder([
       _cubits.upgradeExists,
@@ -400,11 +405,7 @@ class _MainPageState extends State<MainPage>
         return LockedRepositoryState(context,
             databaseId: current.databaseId,
             repositoryName: current.name,
-            checkForBiometricsCallback: _checkForBiometricsCallback,
-            getAuthenticationModeCallback:
-                widget.settings.getAuthenticationMode,
-            setAuthenticationModeCallback:
-                widget.settings.setAuthenticationMode,
+            settings: widget.settings,
             unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
 
@@ -448,21 +449,25 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _previewFile(RepoCubit repo, FileItem item) async {
     if (io.Platform.isAndroid) {
+      // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
+
       await NativeChannels.previewOuiSyncFile(
-        F.authority,
+        Constants.androidAppAuthority,
         item.path,
         item.size ?? 0,
         useDefaultApp: true,
       );
-    } else if (io.Platform.isWindows) {
+    } else if (io.Platform.isWindows ||
+        io.Platform.isLinux ||
+        io.Platform.isMacOS) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {
         showSnackBar(context, message: S.current.messageRepositoryNotMounted);
         return;
       }
-      var result = await io.Process.run(
-          'cmd', ['/c', 'start', '', '$mountedDirectory${item.path}']);
-      loggy.app(result.stdout);
+
+      final url = Uri.parse('file:$mountedDirectory${item.path}');
+      await launchUrl(url);
     } else {
       // Only the above platforms are supported right now.
       showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
@@ -507,6 +512,7 @@ class _MainPageState extends State<MainPage>
                 }
 
                 final listItem = ListItem(
+                    key: ValueKey(item.name),
                     repository: currentRepo,
                     itemData: item,
                     mainAction: actionByType,
@@ -642,10 +648,11 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: false, // user must tap button!
           builder: (context) {
             return AlertDialog(
-                title: Fields.constrainedText(S.current.titleAddFile,
-                    flex: 0,
-                    style: context.theme.appTextStyle.titleMedium,
-                    maxLines: 2),
+                title: Flex(direction: Axis.horizontal, children: [
+                  Fields.constrainedText(S.current.titleAddFile,
+                      style: context.theme.appTextStyle.titleMedium,
+                      maxLines: 2)
+                ]),
                 content: SingleChildScrollView(
                     child: ListBody(children: [
                   Text(accessModeMessage,
@@ -731,26 +738,27 @@ class _MainPageState extends State<MainPage>
     return newRepoName;
   }
 
-  Future<String?> createRepoDialog(BuildContext parentContext) async {
-    final hasBiometrics = await Dialogs.executeFutureWithLoadingDialog(
-            parentContext,
-            f: _checkForBiometricsCallback()) ??
-        false;
-    return showDialog<String>(
+  Future<String?> createRepoDialog(BuildContext parentContext) async =>
+      showDialog<String>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
+        builder: (BuildContext context) => ScaffoldMessenger(
+          child: Builder(
+            builder: ((context) {
               return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                      title: S.current.titleCreateRepository,
-                      body: RepositoryCreation(
-                          context: context,
-                          cubit: _cubits.repositories,
-                          isBiometricsAvailable: hasBiometrics)));
-            }))));
-  }
+                backgroundColor: Colors.transparent,
+                body: ActionsDialog(
+                  title: S.current.titleCreateRepository,
+                  body: RepositoryCreation(
+                    context: context,
+                    cubit: _cubits.repositories,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      );
 
   Future<String?> addRepoWithTokenDialog(BuildContext parentContext,
       {String? initialTokenValue}) async {
@@ -771,10 +779,10 @@ class _MainPageState extends State<MainPage>
           barrierDismissible: true,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Fields.constrainedText(S.current.titleAddRepository,
-                  flex: 0,
-                  style: context.theme.appTextStyle.titleMedium,
-                  maxLines: 2),
+              title: Flex(direction: Axis.horizontal, children: [
+                Fields.constrainedText(S.current.titleAddRepository,
+                    style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+              ]),
               content: Text(tokenValidationError,
                   style: context.theme.appTextStyle.bodyMedium),
               actions: <Widget>[
@@ -788,34 +796,36 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            parentContext,
-            f: _checkForBiometricsCallback()) ??
-        false;
-
     return showDialog<String>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                      title: S.current.titleAddRepository,
-                      body: RepositoryCreation(
-                          context: context,
-                          cubit: _cubits.repositories,
-                          initialTokenValue: initialTokenValue,
-                          isBiometricsAvailable: isBiometricsAvailable)));
-            }))));
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => ScaffoldMessenger(
+        child: Builder(
+          builder: ((context) {
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: ActionsDialog(
+                title: S.current.titleAddRepository,
+                body: RepositoryCreation(
+                  context: context,
+                  cubit: _cubits.repositories,
+                  initialTokenValue: initialTokenValue,
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
   }
 
   void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() async {
     final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-            context,
-            f: _checkForBiometricsCallback()) ??
+          context,
+          f: SecurityValidations.canCheckBiometrics(),
+        ) ??
         false;
 
     await Navigator.push(
@@ -825,8 +835,10 @@ class _MainPageState extends State<MainPage>
           providers: [
             BlocProvider.value(value: _cubits.upgradeExists),
           ],
-          child: SettingsPage(_cubits,
-              isBiometricsAvailable: isBiometricsAvailable),
+          child: SettingsPage(
+            _cubits,
+            isBiometricsAvailable: isBiometricsAvailable,
+          ),
         ),
       ),
     );
@@ -835,16 +847,17 @@ class _MainPageState extends State<MainPage>
   Future<void> _showRepoSettings(BuildContext context,
           {required RepoCubit repoCubit}) =>
       showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return RepositorySettings(
-                context: context,
-                cubit: repoCubit,
-                checkForBiometrics: _checkForBiometricsCallback,
-                getAuthenticationMode: widget.settings.getAuthenticationMode,
-                renameRepository: _cubits.repositories.renameRepository,
-                deleteRepository: _cubits.repositories.deleteRepository);
-          });
+        isScrollControlled: true,
+        context: context,
+        shape: Dimensions.borderBottomSheetTop,
+        builder: (context) {
+          return RepositorySettings(
+            context: context,
+            cubit: repoCubit,
+            settings: widget.settings,
+            renameRepository: _cubits.repositories.renameRepository,
+            deleteRepository: _cubits.repositories.deleteRepository,
+          );
+        },
+      );
 }

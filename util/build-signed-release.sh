@@ -78,9 +78,7 @@ if [ -d "$release_dir" ]; then
   exit 1
 fi
 
-flavor=vanilla
-
-input_bundle=./build/app/outputs/bundle/${flavor}Release/app-${flavor}-release.aab
+input_bundle=./build/app/outputs/bundle/release/app-release.aab
 
 # I noticed that when the apk/aab is created, the process adds libraries for platforms that were not
 # specified below (created while debugging), so better clean the build first.
@@ -92,8 +90,6 @@ flutter clean
 
 NO_SIGN="true" \
     flutter build appbundle \
-    --flavor $flavor \
-    -t lib/main_$flavor.dart \
     --release \
     $platforms_flag \
     --build-number=$build_number \

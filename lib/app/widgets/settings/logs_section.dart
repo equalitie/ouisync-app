@@ -71,32 +71,31 @@ class LogsSection extends SettingsSection with AppLogger {
             return _warningTile(
                 context, S.current.messageMissingBackgroundServicePermission);
           }),
-      if (mountCubit != null)
-        BlocBuilder<MountCubit, MountState>(
-            bloc: mountCubit,
-            builder: (context, error) {
-              if (error is! MountStateError) {
-                return SizedBox.shrink();
-              }
+      BlocBuilder<MountCubit, MountState>(
+          bloc: mountCubit,
+          builder: (context, error) {
+            if (error is! MountStateError) {
+              return SizedBox.shrink();
+            }
 
-              String reason;
-              Widget? trailing;
-              void Function()? onTap;
+            String reason;
+            Widget? trailing;
+            void Function()? onTap;
 
-              if (error.code == oui.ErrorCode.vfsDriverInstall) {
-                reason =
-                    S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
-                trailing = Icon(Icons.open_in_browser);
-                onTap = () {
-                  unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
-                };
-              } else {
-                reason = error.message;
-              }
+            if (error.code == oui.ErrorCode.vfsDriverInstall) {
+              reason =
+                  S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
+              trailing = Icon(Icons.open_in_browser);
+              onTap = () {
+                unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
+              };
+            } else {
+              reason = error.message;
+            }
 
-              return _errorTile(context, S.current.messageFailedToMount(reason),
-                  trailing: trailing, onTap: onTap);
-            })
+            return _errorTile(context, S.current.messageFailedToMount(reason),
+                trailing: trailing, onTap: onTap);
+          })
     ];
   }
 
@@ -120,7 +119,7 @@ class LogsSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() {
     return (_cubits.panicCounter.state ?? 0) > 0 ||
-        _cubits.mount?.state is MountStateError;
+        _cubits.mount.state is MountStateError;
   }
 
   @override

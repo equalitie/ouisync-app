@@ -193,7 +193,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
-        "labelExternalIP": MessageLookupByLibrary.simpleMessage("External IP"),
+        "labelExternalIPv4":
+            MessageLookupByLibrary.simpleMessage("External IPv4"),
+        "labelExternalIPv6":
+            MessageLookupByLibrary.simpleMessage("External IPv6"),
         "labelInternalIP": MessageLookupByLibrary.simpleMessage("Internal IP"),
         "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("Local IPv4"),
         "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("Local IPv6"),
@@ -261,6 +264,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "This repository is a read-only replica."),
+        "messageAutomaticUnlockRepositoryFailed":
+            MessageLookupByLibrary.simpleMessage(
+                "We couldn\'t unlock the repository"),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("Available on mobile"),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
@@ -269,6 +275,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Is running"),
         "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Biometric authentication failed"),
+        "messageBiometricUnlockRepositoryFailed":
+            MessageLookupByLibrary.simpleMessage("Biometric unlocking failed"),
         "messageBiometricValidationAdded": m1,
         "messageBiometricValidationRemoved":
             MessageLookupByLibrary.simpleMessage(
@@ -711,6 +719,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Unlock this repository using biometrics?"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "You have unsaved changes.\n\nDo you want to discard them?"),
+        "messageUpdateLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Update local password"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),

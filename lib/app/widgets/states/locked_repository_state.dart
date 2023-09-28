@@ -10,9 +10,7 @@ class LockedRepositoryState extends StatelessWidget
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
       required this.repositoryName,
-      required this.checkForBiometricsCallback,
-      required this.getAuthenticationModeCallback,
-      required this.setAuthenticationModeCallback,
+      required this.settings,
       required this.unlockRepositoryCallback});
 
   final BuildContext parentContext;
@@ -20,10 +18,7 @@ class LockedRepositoryState extends StatelessWidget
   final String databaseId;
   final String repositoryName;
 
-  final CheckForBiometricsFunction checkForBiometricsCallback;
-  final AuthMode Function(String repoName) getAuthenticationModeCallback;
-  final Future<void> Function(String repoName, AuthMode? value)
-      setAuthenticationModeCallback;
+  final Settings settings;
   final Future<AccessMode?> Function(String repositoryName,
       {required String password}) unlockRepositoryCallback;
 
@@ -65,13 +60,18 @@ class LockedRepositoryState extends StatelessWidget
                 })),
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
-            onPressed: () async => await unlockRepository(parentContext,
+            onPressed: () async {
+              final authMode = settings.getAuthenticationMode(repositoryName);
+
+              await unlockRepository(
+                parentContext,
                 databaseId: databaseId,
                 repositoryName: repositoryName,
-                checkForBiometrics: checkForBiometricsCallback,
-                getAuthenticationMode: getAuthenticationModeCallback,
-                setAuthenticationMode: setAuthenticationModeCallback,
-                cubitUnlockRepository: unlockRepositoryCallback),
+                authenticationMode: authMode,
+                settings: settings,
+                cubitUnlockRepository: unlockRepositoryCallback,
+              );
+            },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
             autofocus: true)

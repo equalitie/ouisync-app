@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:r_get_ip/r_get_ip.dart';
+import 'package:dart_ipify/dart_ipify.dart';
 
 class ConnectivityInfoState extends Equatable {
   final String tcpListenerV4;
@@ -17,7 +16,8 @@ class ConnectivityInfoState extends Equatable {
   final String localIPv4;
   final String localIPv6;
 
-  final String externalIP;
+  final String externalIPv4;
+  final String externalIPv6;
 
   ConnectivityInfoState({
     this.tcpListenerV4 = "",
@@ -26,7 +26,8 @@ class ConnectivityInfoState extends Equatable {
     this.quicListenerV6 = "",
     this.localIPv4 = "",
     this.localIPv6 = "",
-    this.externalIP = "",
+    this.externalIPv4 = "",
+    this.externalIPv6 = "",
   });
 
   ConnectivityInfoState copyWith({
@@ -36,7 +37,8 @@ class ConnectivityInfoState extends Equatable {
     String? quicListenerV6,
     String? localIPv4,
     String? localIPv6,
-    String? externalIP,
+    String? externalIPv4,
+    String? externalIPv6,
   }) =>
       ConnectivityInfoState(
         tcpListenerV4: tcpListenerV4 ?? this.tcpListenerV4,
@@ -45,7 +47,8 @@ class ConnectivityInfoState extends Equatable {
         quicListenerV6: quicListenerV6 ?? this.quicListenerV6,
         localIPv4: localIPv4 ?? this.localIPv4,
         localIPv6: localIPv6 ?? this.localIPv6,
-        externalIP: externalIP ?? this.externalIP,
+        externalIPv4: externalIPv4 ?? this.externalIPv4,
+        externalIPv6: externalIPv6 ?? this.externalIPv6,
       );
 
   @override
@@ -56,7 +59,8 @@ class ConnectivityInfoState extends Equatable {
         quicListenerV4,
         localIPv4,
         localIPv6,
-        externalIP,
+        externalIPv4,
+        externalIPv6,
       ];
 }
 
@@ -119,46 +123,53 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
 
     emit(state.copyWith(localIPv6: localIPv6 ?? ""));
 
-    // This works also when on mobile network, but doesn't show IPv6 address if
-    // IPv4 is used as primary.
-    String? internalIPStr;
+    String? extIpStr;
 
-    try {
-      internalIPStr = await RGetIp.internalIP;
-    } on MissingPluginException {
-      // the method is not implemented on some platforms (e.g. linux), ignore it.
-    }
+    extIpStr = await Ipify.ipv64();
 
     if (isClosed) {
       return;
     }
 
-    if (internalIPStr != null) {
-      final internalIP = InternetAddress.tryParse(internalIPStr);
+    bool gotIpv4 = false;
 
-      if (internalIP != null) {
-        if (state.localIPv4.isEmpty &&
-            internalIP.type == InternetAddressType.IPv4) {
-          emit(state.copyWith(localIPv4: internalIPStr));
+    if (extIpStr != null) {
+      final extIp = InternetAddress.tryParse(extIpStr);
+
+      if (extIp != null) {
+        if (extIp.type == InternetAddressType.IPv4) {
+          gotIpv4 = true;
+          emit(state.copyWith(externalIPv4: extIpStr));
         }
 
-        if (state.localIPv6.isEmpty &&
-            internalIP.type == InternetAddressType.IPv6) {
-          emit(state.copyWith(localIPv6: internalIPStr));
+        if (extIp.type == InternetAddressType.IPv6) {
+          emit(state.copyWith(externalIPv6: extIpStr));
         }
       }
     }
 
-    final connectivity = await _connectivity.checkConnectivity();
+    if (!gotIpv4) {
+      final connectivity = await _connectivity.checkConnectivity();
 
-    if (connectivity != ConnectivityResult.none) {
-      final externalIP = await RGetIp.externalIP;
+      if (connectivity != ConnectivityResult.none) {
+        final extIpStr = await Ipify.ipv4();
 
-      if (isClosed) {
-        return;
+        if (isClosed) {
+          return;
+        }
+
+        final extIp = InternetAddress.tryParse(extIpStr);
+
+        if (extIp != null) {
+          if (extIp.type == InternetAddressType.IPv4) {
+            emit(state.copyWith(externalIPv4: extIpStr));
+          }
+
+          if (extIp.type == InternetAddressType.IPv6) {
+            emit(state.copyWith(externalIPv6: extIpStr));
+          }
+        }
       }
-
-      emit(state.copyWith(externalIP: externalIP));
     }
   }
 }

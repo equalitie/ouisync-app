@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../../../flavors.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
@@ -75,7 +74,7 @@ class _FileDetailState extends State<FileDetail> {
                   title: S.current.iconPreview,
                   dense: true,
                   onTap: () async => await NativeChannels.previewOuiSyncFile(
-                    F.authority,
+                    Constants.androidAppAuthority,
                     widget.data.path,
                     widget.data.size ?? 0,
                   ),
@@ -91,7 +90,7 @@ class _FileDetailState extends State<FileDetail> {
                   title: S.current.iconShare,
                   dense: true,
                   onTap: () async => await NativeChannels.shareOuiSyncFile(
-                    F.authority,
+                    Constants.androidAppAuthority,
                     widget.data.path,
                     widget.data.size ?? 0,
                   ),

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -10,6 +9,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
+import '../storage/storage.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -74,71 +74,36 @@ mixin RepositoryActionsMixin on AppLogger {
   /// getAuthenticationMode => Settings.getAuthenticationMode
   Future<String?> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
-      required CheckForBiometricsFunction checkForBiometrics,
+      required Settings settings,
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
 
     AuthMode authenticationMode = repository.state.authenticationMode;
 
-    if (authenticationMode == AuthMode.noLocalPassword &&
-        (Platform.isAndroid || Platform.isIOS)) {
-      final auth = LocalAuthentication();
-      final isSupported = await auth.isDeviceSupported();
-
-      /// LocalAuthentication can tell us three (3) things:
-      ///
-      /// - canCheck: If the device has biometrics capabilities, maybe even just
-      ///   PIN, pattern or password protection, it returns TRUE. Basically, it
-      ///   always returns TRUE.
-      ///
-      ///   NOTE: This needs to be confirmed on a phone without any biometric
-      ///   capability
-      ///
-      /// - available: The list of enrolled biometrics.
-      ///   If the user has PIN (Password, pattern, even?), but no biometric
-      ///   method in use, it returns an empty list.
-      ///   If the user has a biometric method in use, it returns a list with
-      ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
-      ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
-      ///
-      /// - isSupported: Only if the user doesn't use any screen lock method
-      ///   (Pattern, PIN, password), which also means it doesn't use any
-      ///   biometric method, it returns FALSE.
-      ///
-      /// We don't use isBiometricsAvailable here because it only validates that
-      /// the user has at least one biometric method enrolled
-      /// (BiometricType.STRONG); if the user only uses weak methods
-      /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
-      if (isSupported) {
-        final authorized = await auth.authenticate(
-            localizedReason: S.current.messageAccessingSecureStorage);
-
-        if (authorized == false) {
-          return null;
-        }
-      }
+    if (authenticationMode == AuthMode.noLocalPassword) {
+      final authorized = await authorizeNavigationToSettings();
+      if (authorized == null || authorized == false) return null;
     }
 
-    final securePassword = await tryGetSecurePassword(
-        context: context,
-        databaseId: repository.databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword != null && securePassword.isNotEmpty) {
-      password = securePassword;
-      shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
-          context,
-          f: repository.createShareToken(AccessMode.write, password: password));
-    } else {
-      authenticationMode = AuthMode.manual;
-
+    if (authenticationMode == AuthMode.manual) {
       final unlockResult = await manualUnlock(context, repository);
 
       if (unlockResult == null) return null;
 
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
+    } else {
+      final databaseId = repository.databaseId;
+      final securePassword = await SecureStorage(databaseId: databaseId)
+          .tryGetPassword(authMode: authenticationMode);
+
+      if (securePassword == null || securePassword.isEmpty) return null;
+
+      password = securePassword;
+      shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
+          context,
+          f: repository.createShareToken(AccessMode.write, password: password));
     }
 
     final accessMode = await shareToken.mode;
@@ -151,7 +116,8 @@ mixin RepositoryActionsMixin on AppLogger {
 
     popDialog();
 
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics() ?? false;
 
     await Navigator.push(
         context,
@@ -216,21 +182,20 @@ mixin RepositoryActionsMixin on AppLogger {
     return UnlockResult(password: password, shareToken: token);
   }
 
-  /// getAuthenticationMode => Settings.getAuthenticationMode
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(BuildContext context,
       {required String repositoryName,
       required RepoMetaInfo repositoryMetaInfo,
-      required AuthMode Function(String) getAuthenticationMode,
+      required Settings settings,
       required Future<void> Function(RepoMetaInfo, AuthMode) delete,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Fields.constrainedText(S.current.titleDeleteRepository,
-            flex: 0,
-            style: context.theme.appTextStyle.titleMedium,
-            maxLines: 2),
+        title: Flex(direction: Axis.horizontal, children: [
+          Fields.constrainedText(S.current.titleDeleteRepository,
+              style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+        ]),
         content: SingleChildScrollView(
           child: ListBody(
             children: [
@@ -257,7 +222,7 @@ mixin RepositoryActionsMixin on AppLogger {
     );
 
     if (deleteRepo ?? false) {
-      final authMode = getAuthenticationMode(repositoryName);
+      final authMode = settings.getAuthenticationMode(repositoryName);
 
       await Dialogs.executeFutureWithLoadingDialog(context,
           f: delete(repositoryMetaInfo, authMode));
@@ -268,95 +233,26 @@ mixin RepositoryActionsMixin on AppLogger {
     }
   }
 
-  /// checkForBiometrics => main_page._checkForBiometricsCallback
-  /// getAuthenticationMode => Settings.getAuthenticationMode
   /// setAuthenticationMode => Settings.setAuthenticationMode
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
       {required String databaseId,
       required String repositoryName,
-      required CheckForBiometricsFunction checkForBiometrics,
-      required AuthMode Function(String) getAuthenticationMode,
-      required Future<void> Function(String, AuthMode?) setAuthenticationMode,
+      required AuthMode authenticationMode,
+      required Settings settings,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    AuthMode authenticationMode = getAuthenticationMode(repositoryName);
-
-    /// Runs once per repository (if needed): before adding to the app the
-    /// possibility to create a repository without a local password, any entry
-    /// to the secure storage (biometric_storage) required biometric validation
-    /// (authenticationRequired=true, by default).
-    ///
-    /// With the option of not having a local password, we now save the password,
-    /// for both this option and biometrics, in the secure storage, and only in
-    /// the latest case we require biometric validation, using the Dart package
-    /// local_auth, instead of the biometric_storage built in validation.
-    ///
-    /// Any repo that doesn't have this setting is considered from a version
-    /// before this implementation, and we need to determine the value for this
-    /// setting right after the update, on the first unlocking.
-    ///
-    /// Trying to get the password from the secure storage using the built in
-    /// biometric validation can tell us this:
-    ///
-    /// IF securePassword != null
-    ///   The repo password exist and it was secured using biometrics. (version1)
-    /// ELSE
-    ///   The repo password doesn't exist and it was manually input by the user.
-    ///
-    /// (If the password is empty, something wrong happened in the previous
-    /// version of the app saving its value and it is considered non existent
-    /// in the secure storage, this is, not secured with biometrics).
-    if (authenticationMode == AuthMode.version1) {
-      final securedPassword = await getPasswordAndUnlock(context,
-          databaseId: databaseId,
-          repositoryName: repositoryName,
-          authenticationMode: AuthMode.version1,
-          cubitUnlockRepository: cubitUnlockRepository);
-
-      if (securedPassword == null) {
-        return;
-      }
-
-      /// IF password.isEmpty => The password doesn't exist in the secure
-      /// storage.
-      authenticationMode =
-          securedPassword.isEmpty ? AuthMode.manual : AuthMode.version1;
-
-      await setAuthenticationMode(repositoryName, authenticationMode);
-
-      if (authenticationMode == AuthMode.version1) {
-        final upgraded = await upgradeBiometricEntryToVersion2(
-            databaseId: databaseId, password: securedPassword);
-
-        if (upgraded == null) {
-          loggy.error(
-              'Upgrading repo $repositoryName to AUTH_MODE version2 failed.');
-
-          return;
-        }
-
-        if (upgraded == false) {
-          loggy.warning(
-              'Removing the old entry (version1) for $repositoryName in the '
-              'secure storage failed, but the creating the new entry (version2) '
-              'was successful.');
-        }
-
-        await setAuthenticationMode(repositoryName, AuthMode.version2);
-
-        return;
-      }
-    }
-
     if (authenticationMode == AuthMode.manual) {
-      final unlockResult = await getManualPasswordAndUnlock(context,
+      final isBiometricsAvailable =
+          await SecurityValidations.canCheckBiometrics() ?? false;
+
+      final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
           repositoryName: repositoryName,
-          checkForBiometrics: checkForBiometrics,
-          cubitUnlockRepository: cubitUnlockRepository,
-          setAuthenticationMode: setAuthenticationMode);
+          isBiometricsAvailable: isBiometricsAvailable,
+          settings: settings,
+          cubitUnlockRepository: cubitUnlockRepository);
 
       if (unlockResult == null) return;
 
@@ -365,37 +261,15 @@ mixin RepositoryActionsMixin on AppLogger {
       return;
     }
 
-    await getPasswordAndUnlock(context,
-        databaseId: databaseId,
-        repositoryName: repositoryName,
-        authenticationMode: authenticationMode,
-        cubitUnlockRepository: cubitUnlockRepository);
-  }
+    final securePassword = await SecureStorage(databaseId: databaseId)
+        .tryGetPassword(authMode: authenticationMode);
 
-  /// cubitUnlockRepository => ReposCubit.unlockRepository
-  Future<String?> getPasswordAndUnlock(BuildContext context,
-      {required String databaseId,
-      required String repositoryName,
-      required AuthMode authenticationMode,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
-          cubitUnlockRepository}) async {
-    if (authenticationMode == AuthMode.manual) {
-      return null;
-    }
-
-    final securePassword = await tryGetSecurePassword(
-        context: context,
-        databaseId: databaseId,
-        authenticationMode: authenticationMode);
-
-    if (securePassword == null) {
-      /// There was an exception getting the value from the secure storage.
-      return null;
-    }
-
-    if (securePassword.isEmpty) {
-      return '';
+    if (securePassword == null || securePassword.isEmpty) {
+      final message = authenticationMode == AuthMode.noLocalPassword
+          ? S.current.messageAutomaticUnlockRepositoryFailed
+          : S.current.messageBiometricUnlockRepositoryFailed;
+      showSnackBar(context, message: message);
+      return;
     }
 
     final accessMode =
@@ -406,111 +280,36 @@ mixin RepositoryActionsMixin on AppLogger {
         : S.current.messageUnlockRepoFailed;
 
     showSnackBar(context, message: message);
-
-    return securePassword;
-  }
-
-  Future<String?> tryGetSecurePassword(
-      {required BuildContext context,
-      required String databaseId,
-      required AuthMode authenticationMode}) async {
-    if (authenticationMode == AuthMode.manual) {
-      return null;
-    }
-
-    if (authenticationMode == AuthMode.version2) {
-      final auth = LocalAuthentication();
-
-      final authorized = await auth.authenticate(
-          localizedReason: S.current.messageAccessingSecureStorage);
-
-      if (authorized == false) {
-        return null;
-      }
-    }
-
-    final value = await readSecureStorage(
-        databaseId: databaseId, authMode: authenticationMode);
-
-    return value;
-  }
-
-  Future<String?> readSecureStorage(
-      {required String databaseId, required AuthMode authMode}) async {
-    final secureStorageResult = await SecureStorage.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
-
-    if (secureStorageResult.exception != null) {
-      loggy.error(secureStorageResult.exception);
-
-      return null;
-    }
-
-    return secureStorageResult.value ?? '';
-  }
-
-  Future<bool?> upgradeBiometricEntryToVersion2(
-      {required String databaseId, required String password}) async {
-    final addTempResult = await SecureStorage.addRepositoryPassword(
-        databaseId: databaseId,
-        password: password,
-        authMode: AuthMode.version2);
-
-    if (addTempResult.exception != null) {
-      loggy.error(addTempResult.exception);
-
-      return null;
-    }
-
-    final deleteOldResult = await SecureStorage.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: AuthMode.version1,
-        authenticationRequired: false);
-
-    if (deleteOldResult.exception != null) {
-      loggy.error(deleteOldResult.exception);
-
-      return false;
-    }
-
-    return true;
   }
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
-  Future<UnlockRepositoryResult?> getManualPasswordAndUnlock(
-      BuildContext context,
-      {required String databaseId,
-      required String repositoryName,
-      required CheckForBiometricsFunction checkForBiometrics,
-      required Future<void> Function(String repoName, AuthMode? value)
-          setAuthenticationMode,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
-          cubitUnlockRepository}) async {
-    final isBiometricsAvailable = await checkForBiometrics() ?? false;
-
-    final unlockResult = await showDialog<UnlockRepositoryResult?>(
-        context: context,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                    title: S.current.messageUnlockRepository,
-                    body: UnlockRepository(
-                        parentContext: context,
-                        databaseId: databaseId,
-                        repositoryName: repositoryName,
-                        isPasswordValidation: false,
-                        isBiometricsAvailable: isBiometricsAvailable,
-                        setAuthenticationModeCallback: setAuthenticationMode,
-                        unlockRepositoryCallback: cubitUnlockRepository),
-                  ));
-            }))));
-
-    return unlockResult;
-  }
+  Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
+          {required String databaseId,
+          required String repositoryName,
+          required bool isBiometricsAvailable,
+          required Settings settings,
+          required Future<AccessMode?> Function(String repositoryName,
+                  {required String password})
+              cubitUnlockRepository}) async =>
+      await showDialog<UnlockRepositoryResult?>(
+          context: context,
+          builder: (BuildContext context) =>
+              ScaffoldMessenger(child: Builder(builder: ((context) {
+                return Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: ActionsDialog(
+                      title: S.current.messageUnlockRepository,
+                      body: UnlockRepository(
+                          parentContext: context,
+                          databaseId: databaseId,
+                          repositoryName: repositoryName,
+                          isPasswordValidation: false,
+                          isBiometricsAvailable: isBiometricsAvailable,
+                          settings: settings,
+                          unlockRepositoryCallback: cubitUnlockRepository),
+                    ));
+              }))));
 
   String? validatePassword(String password,
       {required GlobalKey<FormFieldState> passwordInputKey,
@@ -546,6 +345,54 @@ mixin RepositoryActionsMixin on AppLogger {
 
     return saveChanges;
   }
+}
+
+Future<bool?> authorizeNavigationToSettings() async {
+  /// local_auth doesn't support Linux. If the repository has a local password,
+  /// then we use it for validation; otherwise we just return true.
+  if (Platform.isLinux) {
+    return true;
+  }
+
+  final isSupported = Platform.isLinux
+      ? false
+      : await SecurityValidations.isBiometricSupported();
+
+  /// LocalAuthentication can tell us three (3) things:
+  ///
+  /// - canCheck: If the device has biometrics capabilities, maybe even just
+  ///   PIN, pattern or password protection, it returns TRUE. Basically, it
+  ///   always returns TRUE.
+  ///
+  ///   NOTE: This needs to be confirmed on a phone without any biometric
+  ///   capability
+  ///
+  /// - available: The list of enrolled biometrics.
+  ///   If the user has PIN (Password, pattern, even?), but no biometric
+  ///   method in use, it returns an empty list.
+  ///   If the user has a biometric method in use, it returns a list with
+  ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
+  ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
+  ///
+  /// - isSupported: Only if the user doesn't use any screen lock method
+  ///   (Pattern, PIN, password), which also means it doesn't use any
+  ///   biometric method, it returns FALSE.
+  ///
+  /// We don't use isBiometricsAvailable here because it only validates that
+  /// the user has at least one biometric method enrolled
+  /// (BiometricType.STRONG); if the user only uses weak methods
+  /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
+  var authorized = false;
+  if (isSupported) {
+    authorized = await SecurityValidations.validateBiometrics(
+        localizedReason: S.current.messageAccessingSecureStorage);
+
+    if (authorized == false) {
+      return null;
+    }
+  }
+
+  return authorized;
 }
 
 class UnlockResult {

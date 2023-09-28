@@ -4,8 +4,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,15 +11,15 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-import '../flavors.dart';
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp(List<String> args) async {
+Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   final windowManager = PlatformWindowManager(args);
 
   final appDir = await getApplicationSupportDirectory();
@@ -33,6 +31,23 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
     logPath: logPath,
   );
 
+  // NOTE: When the app exits, the `State.dispose()` methods are not guaranteed to be called for
+  // some reason. To ensure resources are properly disposed of, we need to do it via this lifecycle
+  // listener.
+  // NOTE: The lifecycle listener itself is never `dispose`d but that's OK because it's supposed to
+  // live as long as the app itself.
+  // NOTE: That the `onExitRequested` function is known to be called only on
+  // Linux and Windows, it is known to not get called on Android and iOS has
+  // not been tested yet.
+  AppLifecycleListener(
+    onExitRequested: () async {
+      await session.close();
+      windowManager.dispose();
+
+      return AppExitResponse.exit;
+    },
+  );
+
   // Make sure to only output logs after Session is created (which sets up the log subscriber),
   // otherwise the logs will go nowhere.
   Loggy.initLoggy(logPrinter: AppLogPrinter());
@@ -40,8 +55,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // When dumping log from logcat, we get logs from past ouisync runs as well,
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
-  logInfo(
-      "-------------------- Ouisync (${F.name}) Start --------------------");
+  logInfo("-------------------- OuiSync$appSuffix Start --------------------");
 
   _setupErrorReporting();
 
@@ -103,9 +117,11 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
       ? OnboardingPage(settings: settings, ouisyncAppHome: root)
       : root;
 
+  final suffixColor = appSuffix.isNotEmpty ? Constants.devColor : null;
+
   return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: _setupAppThemeData(),
+      theme: _setupAppThemeData(suffixColor),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -154,14 +170,12 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   @override
   void dispose() {
     _mediaReceiver.dispose();
-
-    widget.windowManager.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO: We are recreating this on every rebuild. Is that what we want?
     final upgradeExists = UpgradeExistsCubit(
         widget.session.currentProtocolVersion, widget.settings);
 
@@ -190,18 +204,19 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                 loggy.app('Drop exited: ${detail.localPosition}');
               },
               child: MainPage(
-                  session: widget.session,
-                  upgradeExists: upgradeExists,
-                  backgroundServiceManager: _backgroundServiceManager,
-                  mediaReceiver: _mediaReceiver,
-                  settings: widget.settings,
-                  windowManager: widget.windowManager))),
+                session: widget.session,
+                upgradeExists: upgradeExists,
+                backgroundServiceManager: _backgroundServiceManager,
+                mediaReceiver: _mediaReceiver,
+                settings: widget.settings,
+                windowManager: widget.windowManager,
+              ))),
     );
   }
 }
 
-ThemeData _setupAppThemeData() => ThemeData().copyWith(
-        appBarTheme: AppBarTheme(color: F.color),
+ThemeData _setupAppThemeData(Color? suffixColor) => ThemeData().copyWith(
+        appBarTheme: AppBarTheme(backgroundColor: suffixColor),
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
             bodyMedium: AppTypography.bodyMedium,
@@ -242,7 +257,6 @@ void _setupErrorReporting() {
 void _onError(FlutterErrorDetails details) {
   logError("Unhandled Exception:", details.exception, details.stack);
 
-  if (Firebase.apps.isNotEmpty) {
-    unawaited(FirebaseCrashlytics.instance.recordFlutterFatalError(details));
-  }
+  unawaited(
+      Sentry.captureException(details.exception, stackTrace: details.stack));
 }

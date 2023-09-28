@@ -14,16 +14,14 @@ class RepositorySettings extends StatefulWidget {
   const RepositorySettings(
       {required this.context,
       required this.cubit,
-      required this.checkForBiometrics,
-      required this.getAuthenticationMode,
+      required this.settings,
       required this.renameRepository,
       required this.deleteRepository});
 
   final BuildContext context;
   final RepoCubit cubit;
 
-  final Future<bool?> Function() checkForBiometrics;
-  final AuthMode Function(String repoName) getAuthenticationMode;
+  final Settings settings;
   final Future<void> Function(
       String oldName, String newName, Uint8List reopenToken) renameRepository;
   final Future<void> Function(RepoMetaInfo info, AuthMode authMode)
@@ -110,7 +108,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
                                 repository: widget.cubit,
-                                checkForBiometrics: widget.checkForBiometrics,
+                                settings: widget.settings,
                                 popDialog: () => Navigator.of(context).pop(),
                               )),
                       EntryActionItem(
@@ -121,8 +119,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await deleteRepository(context,
                               repositoryName: widget.cubit.name,
                               repositoryMetaInfo: widget.cubit.metaInfo,
-                              getAuthenticationMode:
-                                  widget.getAuthenticationMode,
+                              settings: widget.settings,
                               delete: widget.deleteRepository,
                               popDialog: () => Navigator.of(context).pop()))
                     ]))),

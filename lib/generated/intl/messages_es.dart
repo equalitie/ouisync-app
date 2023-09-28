@@ -119,6 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
         "actionDiscard": MessageLookupByLibrary.simpleMessage("Descartar"),
+        "actionDone": MessageLookupByLibrary.simpleMessage("Hecho"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Cambiar nombre"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Salir"),
@@ -135,6 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("Carpeta"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Crear repositorio"),
+        "actionNext": MessageLookupByLibrary.simpleMessage("Siguiente"),
         "actionOK": MessageLookupByLibrary.simpleMessage("OK"),
         "actionPreviewFile":
             MessageLookupByLibrary.simpleMessage("Vista previa de archivo"),
@@ -178,11 +180,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Adjuntar los registros"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
+        "labelConnectionType":
+            MessageLookupByLibrary.simpleMessage("Tipo de conexión"),
         "labelCopyLink": MessageLookupByLibrary.simpleMessage("Copia el link"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Destino"),
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Descargado en:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Punto final: "),
+        "labelInternalIP": MessageLookupByLibrary.simpleMessage("IP interna"),
+        "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 local"),
+        "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 local"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Localización: "),
         "labelLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Bloquear todos"),
@@ -191,6 +198,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Clave: "),
         "labelPeers": MessageLookupByLibrary.simpleMessage("Pares"),
         "labelQRCode": MessageLookupByLibrary.simpleMessage("Código QR"),
+        "labelQuicListenerEndpointV4": MessageLookupByLibrary.simpleMessage(
+            "Escuchar sobre QUIC/UDP IPv4"),
+        "labelQuicListenerEndpointV6": MessageLookupByLibrary.simpleMessage(
+            "Escuchando sobre QUIC/UPD IPv6"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre: "),
         "labelRepositoryCurrentPassword":
@@ -208,6 +219,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Tamaño: "),
         "labelSyncStatus": MessageLookupByLibrary.simpleMessage(
             "Estado de la sincronización: "),
+        "labelTcpListenerEndpointV4":
+            MessageLookupByLibrary.simpleMessage("Escuchar sobre TCP IPv4"),
+        "labelTcpListenerEndpointV6":
+            MessageLookupByLibrary.simpleMessage("Escuchar sobre TCP IPv6"),
         "labelTokenLink":
             MessageLookupByLibrary.simpleMessage("Link del repositorio"),
         "labelTypePassword":
@@ -241,7 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente"),
         "messageBackgroundNotificationAndroid":
-            MessageLookupByLibrary.simpleMessage("Ouisync se está ejecutando"),
+            MessageLookupByLibrary.simpleMessage("Se está ejecutando"),
         "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Fallo en la autentificación biométrica"),
         "messageBiometricValidationAdded": m1,
@@ -255,6 +270,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "La <bold>clave</bold> ingresada no da acceso a los contenidos de este repositorio."),
         "messageBluetooth": MessageLookupByLibrary.simpleMessage("Bluetooth"),
+        "messageBy": MessageLookupByLibrary.simpleMessage("por"),
         "messageCamera": MessageLookupByLibrary.simpleMessage("Cámara"),
         "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
             "Necesitamos este permiso para utilizar la cámara y leer el código QR"),
@@ -290,6 +306,24 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Un archivo"),
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("Un directorio"),
+        "messageEqValuesP1": MessageLookupByLibrary.simpleMessage(
+            "Los derechos básicos y las libertades fundamentales son inherentes, inalienables y se aplican a todos por igual. Los derechos humanos son universales; protegido en el derecho internacional y consagrado en la "),
+        "messageEqValuesP2": MessageLookupByLibrary.simpleMessage(
+            "Las personas valientes arriesgan la vida y la libertad para defender los derechos humanos, movilizarse, criticar y denunciar a los perpetradores de abusos. Las personas valientes expresan su apoyo a los demás, a las ideas y comunican sus preocupaciones al mundo. Estos valientes ejercen sus derechos humanos en línea"),
+        "messageEqValuesP3": MessageLookupByLibrary.simpleMessage(
+            "Internet es una plataforma para la libre expresión y la autodeterminación. Como toda herramienta de comunicación, Internet no es inmune a la censura, la vigilancia, los ataques y los intentos de actores estatales y grupos criminales por silenciar las voces disidentes. Cuando se criminaliza la expresión democrática, cuando hay discriminación étnica y política, Internet se convierte en otro campo de batalla para la resistencia no violenta"),
+        "messageEqValuesP4": MessageLookupByLibrary.simpleMessage(
+            "Nuestra misión es promover y defender las libertades fundamentales y los derechos humanos, incluido el libre flujo de información en línea. Nuestro objetivo es crear tecnología accesible y mejorar el conjunto de habilidades necesarias para defender los derechos humanos y las libertades en la era digital"),
+        "messageEqValuesP5": MessageLookupByLibrary.simpleMessage(
+            "Nuestro objetivo es educar y aumentar la capacidad de nuestros constituyentes para disfrutar de operaciones seguras en el dominio digital. Hacemos esto mediante la creación de herramientas que permiten y protegen la libertad de expresión, eluden la censura, potencian el anonimato y protegen de la vigilancia donde y cuando sea necesario. Nuestras herramientas también mejoran la gestión de la información y las funciones analíticas"),
+        "messageEqValuesP6": MessageLookupByLibrary.simpleMessage(
+            "Somos un grupo internacional de activistas de diversos orígenes y creencias, unidos para defender los principios comunes entre nosotros. Somos desarrolladores de software, criptógrafos, especialistas en seguridad, así como educadores, sociólogos, historiadores, antropólogos y periodistas. Desarrollamos herramientas abiertas y reutilizables con un enfoque en la privacidad, la seguridad en línea y una mejor gestión de la información. Financiamos nuestras operaciones con subvenciones públicas y consultorías con el sector privado. Creemos en una Internet libre de vigilancia, censura y opresión intrusiva e injustificada"),
+        "messageEqValuesP7": MessageLookupByLibrary.simpleMessage(
+            "Inspirados en la Carta Internacional de Derechos Humanos, nuestros principios se aplican a todos los individuos, grupos y órganos de la sociedad con los que trabajamos, incluidos los beneficiarios del software y los servicios que lanzamos. Todos nuestros proyectos están diseñados teniendo en cuenta nuestros principios. Nuestros conocimientos, herramientas y servicios están disponibles para estos grupos e individuos siempre que se respeten nuestros principios y términos de servicio"),
+        "messageEqValuesP8": MessageLookupByLibrary.simpleMessage(
+            "El derecho a la privacidad es un derecho fundamental que pretendemos proteger siempre que sea posible. La privacidad de nuestros beneficiarios directos es sacrosanta para nuestras operaciones. Nuestras herramientas, servicios y políticas internas están diseñadas para este efecto. Utilizaremos todos los recursos técnicos y legales a nuestro alcance para proteger la privacidad de nuestros beneficiarios. Consulte nuestra Política de privacidad y nuestra "),
+        "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
+            "esta construido en línea con nuestros valores.\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Error al añadir una contraseña local"),
@@ -347,7 +381,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorTokenValidator": MessageLookupByLibrary.simpleMessage(
             "Por favor ingrese un token válido."),
         "messageErrorUnhandledState":
-            MessageLookupByLibrary.simpleMessage("Error: estado no gestionado"),
+            MessageLookupByLibrary.simpleMessage("Error: estado no manejado"),
         "messageErrorUpdatingSecureStorage":
             MessageLookupByLibrary.simpleMessage(
                 "Error al actualizar la contraseña en el almacenamiento seguro"),
@@ -370,6 +404,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("Generar una contraseña"),
+        "messageGood": MessageLookupByLibrary.simpleMessage("Buena"),
         "messageGranted": MessageLookupByLibrary.simpleMessage("Concedido"),
         "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
             "Para conceder este permiso hay que ir a los ajustes:\n\n Ajustes > Aplicaciones y notificaciones"),
@@ -380,6 +415,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inicializando…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos."),
+        "messageInternationalBillHumanRights":
+            MessageLookupByLibrary.simpleMessage(
+                "Declaración Internacional de Derechos Humanos"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Guarde ambos archivos"),
         "messageLibraryPanic":
@@ -405,6 +443,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Error, Alerta e Información"),
         "messageLogViewer":
             MessageLookupByLibrary.simpleMessage("Visor de registro"),
+        "messageMedium": MessageLookupByLibrary.simpleMessage("Mediana"),
         "messageMissingBackgroundServicePermission":
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync no tiene permiso para ejecutarse en segundo plano, abrir otra aplicación puede detener la sincronización en curso"),
@@ -432,6 +471,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNone": MessageLookupByLibrary.simpleMessage("Ninguno"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("No hay nada aún!"),
+        "messageOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Comparte archivos a todos tus dispositivos o con otros usuarios y construye tu propia nube segura!"),
+        "messageOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Los repositorios pueden ser compartidos en modo lectura/escritura, sólo lectura, o \"ciegamente\" (almacenas archivos para otras personas, pero no puedes accederlos)"),
+        "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "Todos los archivos y carpetas agregados a Ouisync son cifrados de manera segura de forma predeterminada, tanto en reposo como en tránsito."),
         "messageOpenFileError": m15,
         "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
@@ -439,10 +484,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messagePassword": MessageLookupByLibrary.simpleMessage("Contraseña"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Contraseña copiada al portapapeles"),
+        "messagePasswordStrength":
+            MessageLookupByLibrary.simpleMessage("Fuerza de contraseña"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Intercambio entre pares"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Este permiso es requerido"),
+        "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
+            "“El hombre nace libre, y en todas partes está encadenado.”"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "Este repositorio es de <bold>solo lectura</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -453,12 +502,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eliminar la contraseña local"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(
-                "Eliminar la validación biométrica"),
+                "Remover validación biométrica"),
         "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(
             "Eliminar los datos biométricos"),
-        "messageRemoveBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "¿Está seguro de que desea eliminar este repositorio biométrico?"),
+        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
+            "¿Remover la validación biométrica para este repositorio?\n\nEl repositorio se desbloqueará automáticamente, a menos que se agregue una contraseña local."),
         "messageRemovedInBrackets":
             MessageLookupByLibrary.simpleMessage("<eliminado>"),
         "messageRenameFile":
@@ -494,6 +542,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m20,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Pegue el link aquí"),
+        "messageRousseau":
+            MessageLookupByLibrary.simpleMessage("Jean-Jacques Rousseau"),
         "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
             "Guardar el archivo de registro"),
         "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
@@ -518,11 +568,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Almacenamiento"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
             "Necesario para acceder a los archivos"),
+        "messageStrong": MessageLookupByLibrary.simpleMessage("Fuerte"),
         "messageSyncMobileData": MessageLookupByLibrary.simpleMessage(
             "Sincronizar con datos móviles"),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
                 "La sincronización está desactivada cuando usas los datos móviles"),
+        "messageTapForTermsPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Pulse aquí para leer nuestros Términos de Uso y Notas de Privacidad"),
+        "messageTapForValues": MessageLookupByLibrary.simpleMessage(
+            "Pulse aquí para leer nuestros valores"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Token de repositorio copiado al portapapeles."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
@@ -538,8 +593,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Validar la contraseña localmente"),
         "messageVerbosity":
-            MessageLookupByLibrary.simpleMessage("Registro detallado"),
+            MessageLookupByLibrary.simpleMessage("Detalle del registro"),
         "messageView": MessageLookupByLibrary.simpleMessage("Ver"),
+        "messageWeak": MessageLookupByLibrary.simpleMessage("Débil"),
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wifi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Acceso total. Tu par puede leer y modificar"),
@@ -573,10 +629,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permisos requeridos"),
         "titleChangePassword":
             MessageLookupByLibrary.simpleMessage("Cambiar la contraseña"),
+        "titleChangesToTerms":
+            MessageLookupByLibrary.simpleMessage("Cambios a esos términos"),
+        "titleChildrensPrivacy":
+            MessageLookupByLibrary.simpleMessage("Privacidad de los niños"),
+        "titleContactUs": MessageLookupByLibrary.simpleMessage("Contáctenos"),
+        "titleCookies": MessageLookupByLibrary.simpleMessage("\"Cookies\""),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Crear un directorio"),
         "titleCreateRepository":
             MessageLookupByLibrary.simpleMessage("Crear un repositorio nuevo"),
+        "titleDataCollection":
+            MessageLookupByLibrary.simpleMessage("3.1 Recopilación de Datos"),
+        "titleDataSharing":
+            MessageLookupByLibrary.simpleMessage("3.2 Intercambio de Datos"),
         "titleDeleteFile":
             MessageLookupByLibrary.simpleMessage("Borrar archivo"),
         "titleDeleteFolder":
@@ -585,12 +651,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Borrar directorio no vacío"),
         "titleDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Borrar repositorio"),
+        "titleDeletionDataServer": MessageLookupByLibrary.simpleMessage(
+            "3.4 Eliminación de sus datos de nuestro servidor Always-On-Peer"),
+        "titleDigitalSecurity":
+            MessageLookupByLibrary.simpleMessage("Seguridad Digital"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Ubicación de descarga"),
         "titleDownloadToDevice":
             MessageLookupByLibrary.simpleMessage("Descargar al dispositivo"),
         "titleEditRepository":
             MessageLookupByLibrary.simpleMessage("Editar repositorio"),
+        "titleEqualitiesValues":
+            MessageLookupByLibrary.simpleMessage("Valores de eQualitie"),
         "titleFAQShort":
             MessageLookupByLibrary.simpleMessage("PREGUNTAS FRECUENTES"),
         "titleFileDetails":
@@ -602,18 +674,49 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Añadir"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Detalles de directorio"),
+        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+            "Libertad de expresión y acceso a la información"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Rastreador de los problemas"),
+        "titleJustLegalSociety":
+            MessageLookupByLibrary.simpleMessage("Sociedad justa y legal"),
+        "titleLinksOtherSites":
+            MessageLookupByLibrary.simpleMessage("Enlaces a otros sitios"),
         "titleLockAllRepos": MessageLookupByLibrary.simpleMessage(
             "Bloquear todos los repositorios"),
+        "titleLogData":
+            MessageLookupByLibrary.simpleMessage("Datos de registros"),
         "titleLogs": MessageLookupByLibrary.simpleMessage("Registros"),
         "titleMovingEntry":
             MessageLookupByLibrary.simpleMessage("Moviendo entrada"),
         "titleNetwork": MessageLookupByLibrary.simpleMessage("Conectividad"),
+        "titleOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Accede a archivos desde múltiples dispositivos"),
+        "titleOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Establece permisos para colaborar, transmitir, o simplemente almacenar"),
+        "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "Envía y recibe archivos de manera segura"),
+        "titleOpennessTransparency":
+            MessageLookupByLibrary.simpleMessage("Apertura y Transparencia"),
+        "titleOurMission":
+            MessageLookupByLibrary.simpleMessage("Nuestra misión"),
+        "titleOurPrinciples":
+            MessageLookupByLibrary.simpleMessage("Nuestros Principios"),
+        "titleOurValues":
+            MessageLookupByLibrary.simpleMessage("Nuestros valores"),
+        "titleOverview":
+            MessageLookupByLibrary.simpleMessage("1. Descripción general"),
+        "titlePIPEDA": MessageLookupByLibrary.simpleMessage(
+            "La acta de protección de información personal y documentos electrónicos (PIPEDA en inglés)"),
+        "titlePrivacy": MessageLookupByLibrary.simpleMessage("Privacidad"),
+        "titlePrivacyNotice":
+            MessageLookupByLibrary.simpleMessage("3. Aviso de Privacidad"),
+        "titlePrivacyPolicy":
+            MessageLookupByLibrary.simpleMessage("Política de Privacidad"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remover biométricos"),
         "titleRepositoriesList":
-            MessageLookupByLibrary.simpleMessage("Tus repositorios"),
+            MessageLookupByLibrary.simpleMessage("Mis repositorios"),
         "titleRepository": MessageLookupByLibrary.simpleMessage("Repositorio"),
         "titleRepositoryName":
             MessageLookupByLibrary.simpleMessage("Nombre del repositorio"),
@@ -624,6 +727,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleScanRepoQR":
             MessageLookupByLibrary.simpleMessage("Escanear QR de Repositorio"),
         "titleSecurity": MessageLookupByLibrary.simpleMessage("Seguridad"),
+        "titleSecurityPractices":
+            MessageLookupByLibrary.simpleMessage("3.3 Prácticas de Seguridad"),
         "titleSendFeedback":
             MessageLookupByLibrary.simpleMessage("Envía tus comentarios"),
         "titleSetPasswordFor": MessageLookupByLibrary.simpleMessage(
@@ -631,12 +736,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSettings":
             MessageLookupByLibrary.simpleMessage("Configuraciones"),
         "titleShareRepository": m33,
+        "titleSortBy": MessageLookupByLibrary.simpleMessage("Ordenar por"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("Monitor de Estado"),
+        "titleTermsOfUse":
+            MessageLookupByLibrary.simpleMessage("2. Términos de uso"),
+        "titleTermsPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Terminos de Uso y Aviso de Privacidad de Ouisync"),
+        "titleUPnP": MessageLookupByLibrary.simpleMessage(
+            "Plug and Play universal (UPnP)"),
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Abrir repositorio"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("Cambios sin guardar"),
+        "titleWeAreEq":
+            MessageLookupByLibrary.simpleMessage("Somos eQualit.ie"),
         "typeFile": MessageLookupByLibrary.simpleMessage("Archivo"),
         "typeFolder": MessageLookupByLibrary.simpleMessage("Directorio")
       };

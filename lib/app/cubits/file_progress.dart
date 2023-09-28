@@ -34,10 +34,6 @@ class FileProgress extends Cubit<int?> with AppLogger {
   Future<int?> _fetch(RepoCubit repo) async {
     final file = await repo.openFile(path);
 
-    if (file == null) {
-      return null;
-    }
-
     // To avoid read-locking the file for longer than necessary, close it before awaiting the result.
     final future = file.progress;
     await file.close();

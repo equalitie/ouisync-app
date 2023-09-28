@@ -2,80 +2,137 @@ name: CI
 
 on:
   push:
-    #branches: [master]
     paths-ignore:
       - '**/README.md'
   pull_request:
     branches: [master]
 
-  workflow_dispatch:
-
 jobs:
   build_and_test:
-    name: OuiSync Flutter App - Android
-    runs-on: ubuntu-latest
-    steps:
-      - name: Installing llvm
-        run: sudo apt-get install libclang-dev
+    name: build and test on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
 
-      - uses: actions/checkout@v2
+    strategy:
+      matrix:
+        name: [android, linux, windows]
+        include:
+          - name: android
+            os: ubuntu-latest
+            env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
+            target: aarch64-linux-android
+            ndk:
+              version: r25c
+              abi: arm64-v8a
+            build-args: apk --target-platform android-arm64
+
+          - name: linux
+            os: ubuntu-latest
+            env:
+              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
+            # TODO: enable analysis
+            # analyze: true
+            build-args: linux
+
+          - name: windows
+            os: windows-latest
+            env:
+              # Install Dokan2.dll to where `flutter test` can find it
+              DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
+              OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.dll
+            dokan-version: 2.0.6.1000
+            build-args: windows
+
+    env: ${{ matrix.env }}
+
+    steps:
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
 
-      - name: Adding Android Platform target
-        run: rustup target add x86_64-linux-android # armv7-linux-androideabi aarch64-linux-android i686-linux-android
+      - name: Add rust target
+        run: rustup target add ${{ matrix.target }}
+        if: matrix.target != ''
 
-      - name: Install dependencies
-        run: sudo apt-get install libfuse-dev
 
-      - name: Generate ./ouisync-plugin/ouisync/target/bindings.h
+      - name: Install build dependencies (linux)
         run: |
-         cd ouisync-plugin/ouisync
-         cargo run --bin bindgen
+          sudo apt-get install libappindicator3-dev   \
+                               libfuse-dev            \
+                               libgtk-3-dev           \
+                               libwebkit2gtk-4.1-dev  \
+                               ninja-build
+        if: matrix.name == 'linux'
 
-      - name: Setting up the Android NDK environment
+      - name: Install build dependencies (android)
+        run: sudo apt-get install libfuse-dev
+        if: matrix.name == 'android'
+
+      - name: Install Android NDK
         uses: nttld/setup-ndk@v1
         with:
-            ndk-version: r25c
+            ndk-version: ${{ matrix.ndk.version }}
+        if: matrix.ndk.version != ''
 
-      - name: Set the ABI filter for x86_64
-        run: echo "ndk.abiFilters=x86_64" >> android/local.properties
+      - name: Set NDK ABI filter
+        run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
+        if: matrix.ndk.abi != ''
 
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.10.1'
 
-      - name: Flutter doctor
+      - name: Run Flutter doctor
         run: flutter doctor -v
 
-      - name: Getting Flutter packages (App)
-        run: flutter pub get
+      - name: Get Flutter packages
+        run:  dart pub get
 
-      - name: Get Flutter packages (Plugin)
-        run: |
-         cd ouisync-plugin
-         flutter pub get
+      - name: Run Flutter code generators
+        run: dart run build_runner build
+        env:
+          DSN:
 
-      - name: Generate the Dart bindings for the OuiSync plugin (from the Rust FFI bindings for OuiSync library)
+      - name: Generate the Dart bindings for the Ouisync library
         run: |
-         cd ouisync-plugin
-         flutter pub run ffigen
+          pushd ouisync-plugin
+          pushd ouisync
+          cargo run --package ouisync-bindgen --bin bindgen
+          popd
+          flutter pub run ffigen
+          popd
 
       - name: Analyze
-        run: flutter analyze
+        run: |
+          pushd lib
+          flutter analyze
+          popd
 
-      - name: Build OuiSync library for tests
+          pushd test
+          flutter analyze
+          popd
+
+          pushd util
+          flutter analyze
+          popd
+
+        if: matrix.analyze
+
+      - name: Build Ouisync library for tests
         run: |
          cd ouisync-plugin/ouisync
-         cargo build --release -p ouisync-ffi
+         cargo build --package ouisync-ffi
 
       - name: Run tests
-        run: OUISYNC_LIB=`pwd`/ouisync-plugin/ouisync/target/release/libouisync_ffi.so flutter test
+        run:
+          flutter test
 
-      - name: Building APK (android-x64)
-        run: flutter build apk --flavor vanilla -t lib/main_vanilla.dart --target-platform android-x64
+      - name: Build Ouisync app
+        run: flutter build ${{ matrix.build-args }}
+
+

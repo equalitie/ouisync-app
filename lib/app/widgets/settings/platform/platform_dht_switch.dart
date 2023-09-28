@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
@@ -25,11 +26,18 @@ class PlatformDhtSwitch extends StatelessWidget {
     return buildDesktopWidget(context);
   }
 
-  Widget buildDesktopWidget(BuildContext context) => SwitchListTile.adaptive(
-      value: repository.state.isDhtEnabled,
-      title: title,
-      secondary: Icon(icon),
-      onChanged: (value) => onToggle?.call(value));
+  Widget buildDesktopWidget(BuildContext context) =>
+      BlocSelector<RepoCubit, RepoState, bool>(
+          bloc: repository,
+          selector: (state) => state.isDhtEnabled,
+          builder: (context, value) => SwitchListTile.adaptive(
+                value: repository.state.isDhtEnabled,
+                title: title,
+                secondary: Icon(icon),
+                onChanged: (value) {
+                  onToggle?.call(value);
+                },
+              ));
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>
       SettingsTile.switchTile(
