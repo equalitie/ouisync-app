@@ -64,24 +64,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#SourcePath}..\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\connectivity_plus_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\desktop_drop_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\desktop_webview_window_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\dokan2.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\local_auth_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\ouisync_ffi.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\ouisync_plugin_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\permission_handler_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\r_get_ip_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\screen_retriever_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\sentry_flutter_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\share_plus_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\system_tray_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\tray_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\Webview2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}..\build\windows\runner\Release\window_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}..\build\windows\runner\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}..\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
