@@ -3,7 +3,7 @@
 
 #define MyAppName "Ouisync"
 #define MyAppVersion "<APP_VERSION>"
-#define MyAppPublisher "eQualitie"
+#define MyAppPublisher "eQualitie Inc"
 #define MyAppURL "https://ouisync.net"
 #define MyAppExeName "ouisync_app.exe"
 
