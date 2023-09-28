@@ -181,9 +181,9 @@ flutter_intl:
 
 msix_config:
   display_name: Ouisync
-  logo_path: .\assets\Ouisync-beta-1240-desktop.png
-  start_menu_icon_path: .\assets\Ouisync-beta-1240-desktop.png
-  tile_icon_path: .\assets\Ouisync-beta-1240-desktop.png
+  logo_path: .\assets\Ouisync_v1_1560x1553.png
+  start_menu_icon_path: .\assets\Ouisync_v1_1560x1553.png
+  tile_icon_path: .\assets\Ouisync_v1_1560x1553.png
   app_installer: #<-- app installer configuration
     publish_folder_path: .\installers
     hours_between_update_checks: 0
