@@ -537,7 +537,7 @@ packages:
     description:
       path: flutter_secure_storage
       ref: local-platform-dependencies
-      resolved-ref: b625e9a46e5cd597ca4716343ff18d32cd8b7930
+      resolved-ref: "49386bc9fdeb594e492075374060365ae8b6f005"
       url: "https://github.com/inetic/flutter_secure_storage"
     source: git
     version: "9.0.0"
@@ -546,7 +546,7 @@ packages:
     description:
       path: flutter_secure_storage_linux
       ref: local-platform-dependencies
-      resolved-ref: b625e9a46e5cd597ca4716343ff18d32cd8b7930
+      resolved-ref: "49386bc9fdeb594e492075374060365ae8b6f005"
       url: "https://github.com/inetic/flutter_secure_storage"
     source: git
     version: "1.2.0"
