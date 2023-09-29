@@ -55,6 +55,8 @@ android/log.bck
 .vscode/settings.json
 
 # Keystore secrets
+secrets/
+# Legacy, use the above secrets/ folder for any secrets so we have it all in one place.
 android/key.properties
 
 # For Windows app publishing (MSIX)
