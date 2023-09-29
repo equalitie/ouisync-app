@@ -30,7 +30,7 @@ and can be set to anything but ideally we should follow established practices (i
 
 Then run the provided `release.dart` script from the project root:
 
-    dart run utils/release.dart -t path/to/github/token/file -i <identity name> -b <publisher>
+    dart run utils/release.dart -t path/to/github/token/file
 
 Notes:
 

@@ -202,12 +202,14 @@ class Options {
       abbr: 'i',
       help:
           'The unique identifier for the app in the Microsoft Store (For the MSIX)',
+      defaultsTo: 'eQualitieInc.Ouisync',
     );
     parser.addOption(
       'publisher',
       abbr: 'b',
       help:
           'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
+      defaultsTo: 'CN=E3D17812-E9F1-46C8-B650-4D39786777D9',
     );
     parser.addFlag(
       'help',
