@@ -93,16 +93,11 @@ jobs:
       - name: Get Flutter packages
         run:  dart pub get
 
-      - name: Run Flutter code generators
-        run: dart run build_runner build
-        env:
-          DSN:
-
       - name: Generate the Dart bindings for the Ouisync library
         run: |
           pushd ouisync-plugin
           pushd ouisync
-          cargo run --package ouisync-bindgen --bin bindgen
+          cargo run --package ouisync-bindgen --bin bindgen -- --language dart
           popd
           flutter pub run ffigen
           popd

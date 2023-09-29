@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:git/git.dart';
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -18,6 +19,13 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
+
+  final git = await GitDir.fromExisting(p.current);
+
+  if (!await checkWorkingTreeIsClean(git)) {
+    return;
+  }
+
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
   final version = pubspec.version!;
@@ -52,12 +60,17 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    await buildWindowsMSIX(options.identityName, options.publisher);
+    final asset = await buildWindowsMSIX(options.identityName!, options.publisher!);
+    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
   if (options.deb) {
     final asset = await buildDeb(
       name: name,
+      // At some point we'll want to include the command line `ouisync`
+      // executable as well, so we rename this flutter app so as to not clash
+      // with it.
+      executableName: "$name-gui",
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
@@ -140,10 +153,10 @@ class Options {
 
     parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
     parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
-    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: true);
+    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
-        help: 'Build Windows MSIX package', defaultsTo: true);
-    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
+        help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
+    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
 
     parser.addOption(
       'token-file',
@@ -189,12 +202,14 @@ class Options {
       abbr: 'i',
       help:
           'The unique identifier for the app in the Microsoft Store (For the MSIX)',
+      defaultsTo: 'eQualitieInc.Ouisync',
     );
     parser.addOption(
       'publisher',
       abbr: 'b',
       help:
           'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
+      defaultsTo: 'CN=E3D17812-E9F1-46C8-B650-4D39786777D9',
     );
     parser.addFlag(
       'help',
@@ -227,6 +242,13 @@ class Options {
         : results['update']
             ? ReleaseAction.update
             : null;
+
+    if (results['msix']) {
+      if (results['identity-name'] == null || results['publisher'] == null) {
+        print("The Windows MSIX creation requires the --identity-name and --publisher parameters");
+        exit(1);
+      }
+    }
 
     return Options._(
       apk: results['apk'],
@@ -348,23 +370,7 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 // msix
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
-  if (identityName == null || publisher == null) {
-    final missingOptions =
-        StringBuffer('The Windows MSIX creation will be skipped:\n\n');
-
-    if (identityName == null) {
-      missingOptions.writeln('  --identity-name, -i: parameter not provided.');
-    }
-    if (publisher == null) {
-      missingOptions.writeln('  --publisher, -b: parameter not provided.\n');
-    }
-
-    print(missingOptions.toString());
-
-    return null;
-  }
-
+Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   await run('dart', [
     'run',
     'msix:create',
@@ -387,6 +393,7 @@ Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildDeb({
   required String name,
+  required String executableName,
   required Directory outputDir,
   required BuildDesc buildDesc,
   String description = '',
@@ -421,12 +428,14 @@ Future<File> buildDeb({
   await libDir.create(recursive: true);
   await copyDirectory(bundleDir, libDir);
 
-  // HACK: rename the binary 'ouisync_app' -> 'ouisync'
-  await File('${libDir.path}/ouisync_app').rename('${libDir.path}/$name');
+  // HACK: rename the binary 'ouisync_app' -> 'ouisync-gui'
+  await File('${libDir.path}/ouisync_app')
+      .rename('${libDir.path}/$executableName');
 
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create();
-  await Link('${binDir.path}/$name').create('../lib/$name/$name');
+  await Link('${binDir.path}/$executableName')
+      .create('../lib/$name/$executableName');
 
   // Create desktop file
   final desktopDir = Directory('${packageDir.path}/usr/share/applications');
@@ -439,7 +448,7 @@ Future<File> buildDeb({
       'GenericName=File synchronization\n'
       'Version=$buildName\n'
       'Comment=$description\n'
-      'Exec=/usr/bin/$name\n'
+      'Exec=/usr/bin/$executableName\n'
       'Terminal=false\n'
       'Type=Application\n'
       'Icon=$name\n'
@@ -460,7 +469,7 @@ Future<File> buildDeb({
   final controlContent = 'Package: $name\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
-      'Depends: libgtk-3-0, libsecret-1-0, libwebkit2gtk-4.1-0, libayatana-appindicator3-1\n'
+      'Depends: libgtk-3-0, libsecret-1-0, libwebkit2gtk-4.1-0, libayatana-appindicator3-1 | libappindicator3-1\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
@@ -506,7 +515,7 @@ Future<File> buildAab(BuildDesc buildDesc) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> extractApk(File bundle) async {
-  final outputPath = setExtension(bundle.path, '.apk');
+  final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
@@ -518,12 +527,12 @@ Future<File> extractApk(File bundle) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyProperties = Properties.fromFile('android/key.properties');
-  final storeFile = join('android/app', keyProperties.get('storeFile')!);
+  final keyProperties = Properties.fromFile('secrets/android/key.properties');
+  final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
   final storePassword = keyProperties.get('storePassword')!;
   final keyPassword = keyProperties.get('keyPassword')!;
 
-  final tempPath = setExtension(bundle.path, '.apks');
+  final tempPath = p.setExtension(bundle.path, '.apks');
 
   await run('java', [
     '-jar',
@@ -563,7 +572,7 @@ Future<File> extractApk(File bundle) async {
 Future<String> prepareBundletool() async {
   final version = "1.8.2";
   final name = "bundletool-all-$version.jar";
-  final path = join(rootWorkDir, name);
+  final path = p.join(rootWorkDir, name);
 
   final file = File(path);
 
@@ -649,7 +658,7 @@ Future<void> uploadAssets(
   List<File> assets,
 ) async {
   for (final asset in assets) {
-    final name = basename(asset.path);
+    final name = p.basename(asset.path);
     final content = await asset.readAsBytes();
 
     print('Uploading $name ...');
@@ -676,9 +685,9 @@ Future<File> collateAsset(
   File inputFile, {
   String suffix = '',
 }) async {
-  final ext = extension(inputFile.path);
+  final ext = p.extension(inputFile.path);
   return await inputFile
-      .copy(join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
+      .copy(p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
 }
 
 Future<String> buildReleaseNotes(
@@ -828,7 +837,7 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
     await link.delete();
   }
 
-  await link.create(basename(dir.path));
+  await link.create(p.basename(dir.path));
 
   return dir;
 }
@@ -878,7 +887,7 @@ Future<String> runCapture(
 // Copy directory including its contents
 Future<void> copyDirectory(Directory src, Directory dst) async {
   await for (final srcEntry in src.list(recursive: true, followLinks: false)) {
-    final dstPath = join(dst.path, relative(srcEntry.path, from: src.path));
+    final dstPath = p.join(dst.path, p.relative(srcEntry.path, from: src.path));
 
     if (srcEntry is File) {
       final dstEntry = File(dstPath);
@@ -888,4 +897,22 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
       await Directory(dstPath).create(recursive: true);
     }
   }
+}
+
+// Check if working tree is clean and if not confirm with the caller if we want to continue.
+Future<bool> checkWorkingTreeIsClean(GitDir git) async {
+  if (!await git.isWorkingTreeClean()) {
+    while (true) {
+      print("Git is dirty, continue anyway? [y/n/diff]");
+      final input = stdin.readLineSync();
+      if (input == 'y') {
+        return true;
+      } else if (input == 'n') {
+        return false;
+      } else if (input == 'diff') {
+        await run('git', ['diff', '--color=always']);
+      }
+    }
+  }
+  return true;
 }

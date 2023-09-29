@@ -115,6 +115,7 @@ dev_dependencies:
   envied_generator: ^0.3.0+3
   flutter_test:
     sdk: flutter
+  git: ^2.2.1
   github: ^9.15.1
   icons_launcher: ^2.0.3
   # Use this command to generate internationalization files if you're not using
@@ -122,7 +123,7 @@ dev_dependencies:
   # # flutter pub run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^2.0.0
-  msix: ^3.16.1
+  msix: ^3.16.4
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
@@ -180,9 +181,9 @@ flutter_intl:
 
 msix_config:
   display_name: Ouisync
-  logo_path: .\assets\Ouisync-beta-1240-desktop.png
-  start_menu_icon_path: .\assets\Ouisync-beta-1240-desktop.png
-  tile_icon_path: .\assets\Ouisync-beta-1240-desktop.png
+  logo_path: .\assets\Ouisync_v1_1560x1553.png
+  start_menu_icon_path: .\assets\Ouisync_v1_1560x1553.png
+  tile_icon_path: .\assets\Ouisync_v1_1560x1553.png
   app_installer: #<-- app installer configuration
     publish_folder_path: .\installers
     hours_between_update_checks: 0
