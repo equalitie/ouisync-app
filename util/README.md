@@ -35,7 +35,6 @@ Then run the provided `release.dart` script from the project root:
 Notes:
 
 - Omitting the github token still creates the release packages but doesn't upload them to github.
-- If --identity-name, -i; *or* --publisher, -b; are not present, the Windows MSIX installer will not be created.
 
 ## Publishing the release
 
