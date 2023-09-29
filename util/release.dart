@@ -60,7 +60,8 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    await buildWindowsMSIX(options.identityName, options.publisher);
+    final asset = await buildWindowsMSIX(options.identityName!, options.publisher!);
+    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
   if (options.deb) {
@@ -240,6 +241,13 @@ class Options {
             ? ReleaseAction.update
             : null;
 
+    if (results['msix']) {
+      if (results['identity-name'] == null || results['publisher'] == null) {
+        print("The Windows MSIX creation requires the --identity-name and --publisher parameters");
+        exit(1);
+      }
+    }
+
     return Options._(
       apk: results['apk'],
       aab: results['aab'],
@@ -360,23 +368,7 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 // msix
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File?> buildWindowsMSIX(String? identityName, String? publisher) async {
-  if (identityName == null || publisher == null) {
-    final missingOptions =
-        StringBuffer('The Windows MSIX creation will be skipped:\n\n');
-
-    if (identityName == null) {
-      missingOptions.writeln('  --identity-name, -i: parameter not provided.');
-    }
-    if (publisher == null) {
-      missingOptions.writeln('  --publisher, -b: parameter not provided.\n');
-    }
-
-    print(missingOptions.toString());
-
-    return null;
-  }
-
+Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   await run('dart', [
     'run',
     'msix:create',
