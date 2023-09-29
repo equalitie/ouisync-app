@@ -153,10 +153,10 @@ class Options {
 
     parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
     parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
-    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: true);
+    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
-        help: 'Build Windows MSIX package', defaultsTo: true);
-    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: true);
+        help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
+    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
 
     parser.addOption(
       'token-file',
