@@ -97,7 +97,7 @@ jobs:
         run: |
           pushd ouisync-plugin
           pushd ouisync
-          cargo run --package ouisync-bindgen --bin bindgen
+          cargo run --package ouisync-bindgen --bin bindgen -- --language dart
           popd
           flutter pub run ffigen
           popd
