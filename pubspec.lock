@@ -628,10 +628,10 @@ packages:
     dependency: "direct dev"
     description:
       name: github
-      sha256: "5640619ae3780877fe62b7837b41343350acc845c528f7b339c34c60745f2cdd"
+      sha256: e20582edb07b859cc226ab2fd64fd246f7cdcbfc7098f46e241c03deb81b5682
       url: "https://pub.dev"
     source: hosted
-    version: "9.15.1"
+    version: "9.19.0"
   glob:
     dependency: transitive
     description:

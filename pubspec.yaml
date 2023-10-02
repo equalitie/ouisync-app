@@ -116,7 +116,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   git: ^2.2.1
-  github: ^9.15.1
+  github: ^9.19.0
   icons_launcher: ^2.0.3
   # Use this command to generate internationalization files if you're not using
   # the vscode plugin:
