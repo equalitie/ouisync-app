@@ -361,9 +361,7 @@ Future<bool?> authorizeNavigationToSettings() async {
     return true;
   }
 
-  final isSupported = Platform.isLinux
-      ? false
-      : await SecurityValidations.isBiometricSupported();
+  final isSupported = await SecurityValidations.isBiometricSupported();
 
   /// LocalAuthentication can tell us three (3) things:
   ///
