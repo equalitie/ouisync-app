@@ -60,7 +60,8 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    final asset = await buildWindowsMSIX(options.identityName!, options.publisher!);
+    final asset =
+        await buildWindowsMSIX(options.identityName!, options.publisher!);
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
@@ -153,10 +154,12 @@ class Options {
 
     parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
     parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
-    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: Platform.isWindows);
+    parser.addFlag('exe',
+        help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
         help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
-    parser.addFlag('deb', help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
+    parser.addFlag('deb',
+        help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
 
     parser.addOption(
       'token-file',
@@ -245,7 +248,8 @@ class Options {
 
     if (results['msix']) {
       if (results['identity-name'] == null || results['publisher'] == null) {
-        print("The Windows MSIX creation requires the --identity-name and --publisher parameters");
+        print(
+            "The Windows MSIX creation requires the --identity-name and --publisher parameters");
         exit(1);
       }
     }
@@ -627,12 +631,12 @@ Future<Release> createRelease(
   );
 
   final release = await client.repositories.createRelease(
-    slug,
-    CreateRelease(tagName)
-      ..name = 'Ouisync $tagName'
-      ..body = body
-      ..isDraft = true,
-  );
+      slug,
+      CreateRelease(tagName)
+        ..name = 'Ouisync $tagName'
+        ..body = body
+        ..isDraft = true
+        ..isPrerelease = false);
 
   print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
 
