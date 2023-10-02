@@ -67,6 +67,11 @@ class _MainPageState extends State<MainPage>
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
+  final FocusNode _appSettingsIconFocus =
+      FocusNode(debugLabel: 'app_settings_icon_focus');
+
+  final FocusNode _fabFocus = FocusNode(debugLabel: 'fab_focus');
+
   _MainPageState._(this._cubits);
 
   factory _MainPageState(
@@ -159,6 +164,10 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() async {
     await _cubits.repositories.close();
+
+    _appSettingsIconFocus.dispose();
+    _fabFocus.dispose();
+
     super.dispose();
   }
 
@@ -200,6 +209,12 @@ class _MainPageState extends State<MainPage>
         // final sortBy = SortBy.name;
         // final sortDirection =
         //     _sortListCubit?.state.direction ?? SortDirection.asc;
+
+        /// Usiing the "back" arrow causes the app settings icon (gear) to get
+        /// the focus, even if we explicitly ask for it to losse it.
+        /// So for now we request focus for the FAB, then unfocused it.
+        _fabFocus.requestFocus();
+        _fabFocus.unfocus();
 
         return RepoListState(
           reposCubit: repos,
@@ -318,15 +333,19 @@ class _MainPageState extends State<MainPage>
       );
 
   Widget _buildAppSettingsIcon() {
-    final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: () async {
-      if (PlatformValues.isDesktopDevice) {
-        final authorized = await authorizeNavigationToSettings();
-        if (authorized == null || authorized == false) return;
-      }
+    final button = Fields.actionIcon(
+      const Icon(Icons.settings_outlined),
+      focusNode: _appSettingsIconFocus,
+      onPressed: () async {
+        if (PlatformValues.isDesktopDevice) {
+          final authorized = await authorizeNavigationToSettings();
+          if (authorized == null || authorized == false) return;
+        }
 
-      await _showAppSettings();
-    }, size: Dimensions.sizeIconSmall);
+        await _showAppSettings();
+      },
+      size: Dimensions.sizeIconSmall,
+    );
 
     return multiBlocBuilder([
       _cubits.upgradeExists,
@@ -361,6 +380,7 @@ class _MainPageState extends State<MainPage>
     if (_cubits.repositories.showList &&
         _cubits.repositories.repos.isNotEmpty) {
       return FloatingActionButton(
+        focusNode: _fabFocus,
         heroTag: Constants.heroTagRepoListActions,
         child: icon,
         onPressed: () => _showRepoListActions(context),
@@ -371,6 +391,7 @@ class _MainPageState extends State<MainPage>
         current.cubit.state.canWrite &&
         !_cubits.repositories.showList) {
       return FloatingActionButton(
+        focusNode: _fabFocus,
         heroTag: Constants.heroTagMainPageActions,
         child: icon,
         onPressed: () => _showDirectoryActions(context, current),
@@ -409,6 +430,7 @@ class _MainPageState extends State<MainPage>
             unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
 
+      _appSettingsIconFocus.unfocus();
       return _contentBrowser(current.cubit);
     }
 
@@ -421,9 +443,12 @@ class _MainPageState extends State<MainPage>
     final folder = repo.state.currentFolder;
 
     if (folder.content.isEmpty) {
-      child = repo.state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : NoContentsState(repository: repo, path: folder.path);
+      if (repo.state.isLoading) {
+        child = const Center(child: CircularProgressIndicator());
+      } else {
+        _fabFocus.requestFocus();
+        child = NoContentsState(repository: repo, path: folder.path);
+      }
     } else {
       child = _contentsList(repo);
     }

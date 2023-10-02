@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
-class MissingRepositoryState extends StatelessWidget
+class MissingRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
   const MissingRepositoryState(
       {required this.repositoryName,
@@ -31,6 +32,11 @@ class MissingRepositoryState extends StatelessWidget
   Widget build(BuildContext context) {
     final emptyFolderImageHeight = MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
+
+    final reloadButtonFocus = useFocusNode(debugLabel: 'reload_button_focus');
+    final deleteButtonFOcus = useFocusNode(debugLabel: 'delete_button_focus');
+
+    reloadButtonFocus.requestFocus();
 
     return Center(
         child: SingleChildScrollView(
@@ -64,18 +70,19 @@ class MissingRepositoryState extends StatelessWidget
                 text: S.current.actionReloadRepo,
                 size: Dimensions.sizeInPageButtonLong,
                 alignment: Alignment.center,
+                focusNode: reloadButtonFocus,
                 autofocus: true),
           if (onReloadRepository != null) Dimensions.spacingVertical,
           Fields.inPageButton(
-            onPressed: () => deleteRepository(context,
-                repositoryName: repositoryName,
-                repositoryMetaInfo: repositoryMetaInfo,
-                settings: settings,
-                delete: onDelete),
-            text: S.current.actionRemoveRepo,
-            size: Dimensions.sizeInPageButtonLong,
-            alignment: Alignment.center,
-          ),
+              onPressed: () => deleteRepository(context,
+                  repositoryName: repositoryName,
+                  repositoryMetaInfo: repositoryMetaInfo,
+                  settings: settings,
+                  delete: onDelete),
+              text: S.current.actionRemoveRepo,
+              size: Dimensions.sizeInPageButtonLong,
+              alignment: Alignment.center,
+              focusNode: deleteButtonFOcus),
         ],
       ),
     ));

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
-class NoRepositoriesState extends StatelessWidget {
+class NoRepositoriesState extends HookWidget {
   const NoRepositoriesState(
       {required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed});
@@ -16,6 +17,13 @@ class NoRepositoriesState extends StatelessWidget {
     final nothingHereYetImageHeight = MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
+    final newRepoButtonFocus =
+        useFocusNode(debugLabel: 'new_repo_button_focus');
+    final importRepoButtonFocus =
+        useFocusNode(debugLabel: 'import_repo_button_focus');
+
+    newRepoButtonFocus.requestFocus();
+
     return Center(
         child: SingleChildScrollView(
       reverse: false,
@@ -24,34 +32,44 @@ class NoRepositoriesState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Align(
-              alignment: Alignment.center,
-              child: Fields.placeholderWidget(
-                  assetName: Constants.assetPathNothingHereYet,
-                  assetHeight: nothingHereYetImageHeight)),
+            alignment: Alignment.center,
+            child: Fields.placeholderWidget(
+              assetName: Constants.assetPathNothingHereYet,
+              assetHeight: nothingHereYetImageHeight,
+            ),
+          ),
           Dimensions.spacingVerticalDouble,
           Align(
             alignment: Alignment.center,
-            child: Fields.inPageMainMessage(S.current.messageNoRepos,
-                style: context.theme.appTextStyle.bodyLarge),
+            child: Fields.inPageMainMessage(
+              S.current.messageNoRepos,
+              style: context.theme.appTextStyle.bodyLarge,
+            ),
           ),
           Dimensions.spacingVertical,
           Align(
-              alignment: Alignment.center,
-              child: Fields.inPageSecondaryMessage(
-                  S.current.messageCreateNewRepo,
-                  tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
+            alignment: Alignment.center,
+            child: Fields.inPageSecondaryMessage(
+              S.current.messageCreateNewRepo,
+              tags: {Constants.inlineTextBold: InlineTextStyles.bold},
+            ),
+          ),
           Dimensions.spacingVerticalDouble,
           Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
-              onPressed: () async => await onNewRepositoryPressed.call(),
-              text: S.current.actionCreateRepository,
-              size: Dimensions.sizeInPageButtonRegular,
-              autofocus: true),
+            onPressed: () async => await onNewRepositoryPressed.call(),
+            text: S.current.actionCreateRepository,
+            size: Dimensions.sizeInPageButtonRegular,
+            focusNode: newRepoButtonFocus,
+            autofocus: true,
+          ),
           Dimensions.spacingVertical,
           Fields.inPageButton(
-              onPressed: () async => await onImportRepositoryPressed.call(),
-              text: S.current.actionAddRepositoryWithToken,
-              size: Dimensions.sizeInPageButtonRegular),
+            onPressed: () async => await onImportRepositoryPressed.call(),
+            text: S.current.actionAddRepositoryWithToken,
+            size: Dimensions.sizeInPageButtonRegular,
+            focusNode: importRepoButtonFocus,
+          ),
         ],
       ),
     ));

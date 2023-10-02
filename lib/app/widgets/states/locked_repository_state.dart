@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
 
-class LockedRepositoryState extends StatelessWidget
+class LockedRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
@@ -26,6 +27,11 @@ class LockedRepositoryState extends StatelessWidget
   Widget build(BuildContext context) {
     final lockedRepoImageHeight = MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
+
+    final FocusNode unlockButtonFocus =
+        useFocusNode(debugLabel: 'unlock_button_focus');
+
+    unlockButtonFocus.requestFocus();
 
     return Center(
         child: SingleChildScrollView(
@@ -74,6 +80,7 @@ class LockedRepositoryState extends StatelessWidget
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
+            focusNode: unlockButtonFocus,
             autofocus: true)
       ],
     )));
