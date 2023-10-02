@@ -14,8 +14,15 @@ the source control (it should already be in `.gitignore`).
 
 The `path/to/keystore.jks` path should be absolute, or relative to the `android/app/` directory.
 
-Additionally, create a [GitHub access token](https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api?apiVersion=2022-11-28#about-tokens) and put it into a file
-somewhere (again, don't commit it).
+Additionally, create a [GitHub access
+token](https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api?apiVersion=2022-11-28#about-tokens)
+
+Click on your profile icon > Settings > Developer settings > Personal access
+tokens > Tokens. Check the `write:packages` and `delete:packages` scopes
+(without the latter you won't be able to upload more assets using the script).
+
+and put it into a file somewhere, you'll pass it to the release script as an
+argument. Again, don't commit it.
 
 ## Creating a release
 
@@ -30,7 +37,8 @@ and can be set to anything but ideally we should follow established practices (i
 
 Then run the provided `release.dart` script from the project root:
 
-    dart run utils/release.dart -t path/to/github/token/file
+    dart pub get
+    dart run utils/release.dart --create -t path/to/github/token/file
 
 Notes:
 
