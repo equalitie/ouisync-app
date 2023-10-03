@@ -148,7 +148,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                 await widget.onSaveFile(media.path);
               }
 
-              Navigator.of(context).pop();
+              widget.onUpdateBottomSheet.call(null, '');
             },
             buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton)
       ];
