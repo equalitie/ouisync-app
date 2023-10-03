@@ -80,7 +80,7 @@ dependencies:
   move_to_background: ^1.0.2
   network_info_plus: ^4.0.2
   ouisync_plugin:
-    path: ./ouisync-plugin
+    path: ouisync/bindings/dart
   package_info_plus: ^4.1.0
   path: ^1.8.2
   path_provider: ^2.0.9

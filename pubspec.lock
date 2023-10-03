@@ -940,7 +940,7 @@ packages:
   ouisync_plugin:
     dependency: "direct main"
     description:
-      path: ouisync-plugin
+      path: "ouisync/bindings/dart"
       relative: true
     source: path
     version: "0.1.0"
