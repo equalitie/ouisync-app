@@ -93,6 +93,6 @@ extension TextEditingControllerExtension on TextEditingController {
     extentOffset ??= 0;
 
     selection = TextSelection(
-        baseOffset: baseOffset, extentOffset: text.length + extentOffset);
+        baseOffset: baseOffset, extentOffset: text.length - extentOffset);
   }
 }
