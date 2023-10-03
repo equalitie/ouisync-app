@@ -19,7 +19,7 @@ jobs:
           - name: android
             os: ubuntu-latest
             env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
+              OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android
             ndk:
               version: r25c
@@ -29,7 +29,7 @@ jobs:
           - name: linux
             os: ubuntu-latest
             env:
-              OUISYNC_LIB: ouisync-plugin/ouisync/target/debug/libouisync_ffi.so
+              OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
             # analyze: true
             build-args: linux
@@ -39,8 +39,7 @@ jobs:
             env:
               # Install Dokan2.dll to where `flutter test` can find it
               DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
-              OUISYNC_LIB: ouisync-plugin\ouisync\target\debug\ouisync_ffi.dll
-            dokan-version: 2.0.6.1000
+              OUISYNC_LIB: ouisync\target\debug\ouisync_ffi.dll
             build-args: windows
 
     env: ${{ matrix.env }}
@@ -50,15 +49,16 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-
       - name: Add rust target
         run: rustup target add ${{ matrix.target }}
         if: matrix.target != ''
 
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+        if: matrix.name == 'android'
 
       - name: Install build dependencies (linux)
         run: |
@@ -94,13 +94,8 @@ jobs:
         run:  dart pub get
 
       - name: Generate the Dart bindings for the Ouisync library
-        run: |
-          pushd ouisync-plugin
-          pushd ouisync
-          cargo run --package ouisync-bindgen --bin bindgen -- --language dart
-          popd
-          flutter pub run ffigen
-          popd
+        working-directory: ouisync/bindings/dart
+        run: dart util/bindgen.dart
 
       - name: Analyze
         run: |
@@ -119,9 +114,8 @@ jobs:
         if: matrix.analyze
 
       - name: Build Ouisync library for tests
-        run: |
-         cd ouisync-plugin/ouisync
-         cargo build --package ouisync-ffi
+        working-directory: ouisync
+        run: cargo build --package ouisync-ffi --lib
 
       - name: Run tests
         run:
@@ -129,5 +123,3 @@ jobs:
 
       - name: Build Ouisync app
         run: flutter build ${{ matrix.build-args }}
-
-
