@@ -146,7 +146,7 @@ class _MainPageState extends State<MainPage>
 
       if (media is List<SharedMediaFile>) {
         loggy.app('mediaReceiver: List<ShareMediaFile>');
-        handleShareIntentPayload(media);
+        handleShareIntentPayload(media, _cubits.repositories);
       }
 
       if (media is io.File) {
@@ -166,7 +166,8 @@ class _MainPageState extends State<MainPage>
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
   }
 
-  void handleShareIntentPayload(List<SharedMediaFile> payload) {
+  void handleShareIntentPayload(
+      List<SharedMediaFile> payload, ReposCubit repos) {
     if (payload.isEmpty) {
       return;
     }
@@ -174,7 +175,7 @@ class _MainPageState extends State<MainPage>
     _bottomPaddingWithBottomSheet.value =
         defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
 
-    final bottomSheetSaveMedia = SaveSharedMedia(
+    final bottomSheetSaveMedia = SaveSharedMedia(repos,
         sharedMedia: payload,
         onUpdateBottomSheet: updateBottomSheet,
         onSaveFile: saveMedia,
