@@ -70,7 +70,7 @@ class RenameEntry extends HookWidget with AppLogger {
                 label: S.current.labelName,
                 hint: hint,
                 onFieldSubmitted: (newName) async {
-                  final submitted = await _submitField(newName);
+                  final submitted = await _submitField(context, newName);
                   if (submitted && PlatformValues.isDesktopDevice) {
                     Navigator.of(context).pop(newName);
                   }
@@ -84,12 +84,23 @@ class RenameEntry extends HookWidget with AppLogger {
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  Future<bool> _submitField(String? newName) async {
-    final newExtension = getFileExtension(newName ?? '');
-    final validationOk = await _validateNewName(newName ?? '');
+  Future<bool> _submitField(BuildContext context, String? newName) async {
+    if (newName == null) return false;
+
+    if (newName == oldName) {
+      showSnackBar(context, message: S.current.messageEnterDifferentName);
+
+      _nameTextFieldFocus.requestFocus();
+
+      return false;
+    }
+
+    final validationOk = await _validateNewName(newName);
 
     if (!validationOk) {
-      selectEntryName(newName ?? '', newExtension, isFile);
+      final newExtension = getFileExtension(newName);
+      selectEntryName(newName, newExtension, isFile);
+
       _nameTextFieldFocus.requestFocus();
 
       return false;
@@ -103,8 +114,6 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Future<bool> _validateNewName(String newName) async {
-    if (newName.isEmpty || newName == oldName) return false;
-
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     if (isFile) {
@@ -169,7 +178,7 @@ class RenameEntry extends HookWidget with AppLogger {
       ];
 
   Future<void> _onSaved(BuildContext context, String? newName) async {
-    final submitted = await _submitField(newName);
+    final submitted = await _submitField(context, newName);
     if (submitted) {
       Navigator.of(context).pop(newName);
     }

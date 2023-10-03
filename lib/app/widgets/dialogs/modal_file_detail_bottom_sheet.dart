@@ -197,17 +197,28 @@ class _FileDetailState extends State<FileDetail> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        final oldName = getBasename(data.path);
-        final originalExtension = getFileExtension(data.path);
+        return ScaffoldMessenger(
+          child: Builder(
+            builder: (context) {
+              final oldName = getBasename(data.path);
+              final originalExtension = getFileExtension(data.path);
 
-        return ActionsDialog(
-            title: S.current.messageRenameFile,
-            body: RenameEntry(
-                parentContext: context,
-                oldName: oldName,
-                originalExtension: originalExtension,
-                isFile: true,
-                hint: S.current.messageFileName));
+              return Scaffold(
+                backgroundColor: Colors.transparent,
+                body: ActionsDialog(
+                  title: S.current.messageRenameFile,
+                  body: RenameEntry(
+                    parentContext: context,
+                    oldName: oldName,
+                    originalExtension: originalExtension,
+                    isFile: true,
+                    hint: S.current.messageFileName,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
       },
     ).then((newName) {
       if (newName.isNotEmpty) {
