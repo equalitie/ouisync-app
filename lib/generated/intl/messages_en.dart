@@ -344,6 +344,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "This <bold>folder</bold> is empty"),
         "messageEmptyRepo": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is empty"),
+        "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
+            "Please enter a different name"),
         "messageEntryAlreadyExist": m4,
         "messageEntryTypeDefault":
             MessageLookupByLibrary.simpleMessage("An entry"),

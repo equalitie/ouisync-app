@@ -530,6 +530,7 @@
   "messageRemoveBiometricsConfirmationMoreInfo":"This will remove the repository password and use the biometric validation for unlocking",
   "messageAutomaticUnlockRepositoryFailed":"We couldn't unlock the repository",
   "messageBiometricUnlockRepositoryFailed":"Biometric unlocking failed",
+  "messageEnterDifferentName":"Please enter a different name",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",

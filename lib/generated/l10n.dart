@@ -3790,6 +3790,16 @@ class S {
     );
   }
 
+  /// `Please enter a different name`
+  String get messageEnterDifferentName {
+    return Intl.message(
+      'Please enter a different name',
+      name: 'messageEnterDifferentName',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
