@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -90,8 +91,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   Future<void> addFile(context, RepoCubit repo) async {
     if (Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
       final permissionName = S.current.messageStorage;
+      final storagePermission = Platform.isAndroid
+          ? await _getStoragePermissionForAndroidVersion()
+          : Permission.storage;
+
       final permissionGranted =
-          await _checkPermission(Permission.storage, permissionName);
+          await _checkPermission(storagePermission, permissionName);
 
       if (!permissionGranted) return;
     }
@@ -152,6 +157,14 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         );
       }
     }
+  }
+
+  Future<Permission> _getStoragePermissionForAndroidVersion() async {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final storagePermission = androidInfo.version.sdkInt >= 33
+        ? Permission.manageExternalStorage
+        : Permission.storage;
+    return storagePermission;
   }
 
   Future<String> _renameFile(String dstPath, int versions) async {
