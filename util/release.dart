@@ -715,44 +715,18 @@ Future<String> buildReleaseNotes(
     buf.writeln(await getLog(slug, first, last));
   }
 
-  // Plugin
-  final pluginSlug = RepositorySlug(slug.owner, 'ouisync-plugin');
-  final pluginLast = await getSubmoduleCommit(last, 'ouisync-plugin');
-  final pluginFirst = await getSubmoduleCommit(first, 'ouisync-plugin');
-
-  if (pluginFirst != pluginLast) {
-    buf.writeln('');
-    buf.writeln('### Plugin');
-    buf.writeln('');
-    buf.writeln(
-      changelogUrl(pluginSlug, pluginFirst, pluginLast),
-    );
-
-    if (detailedLog) {
-      buf.writeln('');
-      buf.writeln(await getLog(
-        pluginSlug,
-        pluginFirst,
-        pluginLast,
-        'ouisync-plugin',
-      ));
-    }
-  }
-
   // Library
   final libSlug = RepositorySlug(slug.owner, 'ouisync');
   final libLast = await getSubmoduleCommit(
-    pluginLast,
+    last,
     'ouisync',
-    'ouisync-plugin',
   );
   final libFirst = await getSubmoduleCommit(
-    pluginFirst,
+    first,
     'ouisync',
-    'ouisync-plugin',
   );
 
-  if (libFirst != libLast) {
+  if (libFirst != null && libLast != null && libFirst != libLast) {
     buf.writeln('');
     buf.writeln('### Library');
     buf.writeln('');
@@ -766,7 +740,7 @@ Future<String> buildReleaseNotes(
         libSlug,
         libFirst,
         libLast,
-        'ouisync-plugin/ouisync',
+        'ouisync',
       ));
     }
   }
@@ -780,17 +754,17 @@ Future<String> getCommit([String? workingDirectory]) => runCapture(
       workingDirectory,
     );
 
-Future<String> getSubmoduleCommit(
-  String superCommit,
-  String submodule, [
-  String? workingDirectory,
-]) async {
+Future<String?> getSubmoduleCommit(String superCommit, String submodule) async {
   final output = await runCapture(
     'git',
     ['ls-tree', superCommit, submodule],
-    workingDirectory,
   );
   final parts = output.split(RegExp(r'\s+'));
+
+  if (parts.length < 3) {
+    // The above can fail if we moved/renamed submodules.
+    return null;
+  }
 
   return parts[2];
 }
