@@ -85,8 +85,13 @@ class PlatformWindowManagerDesktop
     String path =
         Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
+    // On Windows, the system tray title is shown only when howering over the
+    // icon, but on Linux it is always visible next to it. That's in my
+    // experience is unlike how other apps behave. So turning it off on Linux.
+    final systemTrayTitle = Platform.isLinux ? null : S.current.titleAppTitle;
+
     await _systemTray.initSystemTray(
-      title: S.current.titleAppTitle,
+      title: systemTrayTitle,
       iconPath: path,
       toolTip: S.current.messageOuiSyncDesktopTitle,
     );
@@ -95,17 +100,18 @@ class PlatformWindowManagerDesktop
     await menu.buildFrom([
       if (Platform.isLinux)
         stray.MenuItemLabel(
-        label: '${S.current.actionHide} / ${S.current.actionShow}',
-        onClicked: (_) async {
-          await windowManager.isVisible()
-          ? await _appWindow.hide() : await _appWindow.show();
-        }),
+            label: '${S.current.actionHide} / ${S.current.actionShow}',
+            onClicked: (_) async {
+              await windowManager.isVisible()
+                  ? await _appWindow.hide()
+                  : await _appWindow.show();
+            }),
       stray.MenuItemLabel(
-      label: S.current.actionExit,
-      onClicked: (_) async {
-        await windowManager.setPreventClose(false);
-        await windowManager.close();
-      }),
+          label: S.current.actionExit,
+          onClicked: (_) async {
+            await windowManager.setPreventClose(false);
+            await windowManager.close();
+          }),
     ]);
 
     await _systemTray.setContextMenu(menu);
