@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../utils.dart';
@@ -19,8 +20,9 @@ class PlatformWindowManagerDesktop
 
   late final String _appName;
   bool _showWindow = true;
+  Session _session;
 
-  PlatformWindowManagerDesktop(List<String> args) {
+  PlatformWindowManagerDesktop(List<String> args, this._session) {
     initialize(args).then((_) async {
       windowManager.addListener(this);
       await windowManager.setPreventClose(true);
@@ -109,6 +111,7 @@ class PlatformWindowManagerDesktop
       stray.MenuItemLabel(
           label: S.current.actionExit,
           onClicked: (_) async {
+            await _session.close();
             await windowManager.setPreventClose(false);
             await windowManager.close();
           }),

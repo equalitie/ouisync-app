@@ -20,8 +20,6 @@ import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
-  final windowManager = PlatformWindowManager(args);
-
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
@@ -30,6 +28,8 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
     configPath: configPath,
     logPath: logPath,
   );
+
+  final windowManager = PlatformWindowManager(args, session);
 
   // NOTE: When the app exits, the `State.dispose()` methods are not guaranteed to be called for
   // some reason. To ensure resources are properly disposed of, we need to do it via this lifecycle
