@@ -11,7 +11,7 @@ Ouisync is a free and open source tool enabling peer-to-peer file syncing and
 sharing between devices. With or without the internet. For more information,
 please visit the project's home page at https://ouisync.net.
 
-This repository implements the GUI for the **[Ouisync library](https://github.com/equalitie/ouisync)**.
+This repository implements the GUI for the [Ouisync library](https://github.com/equalitie/ouisync).
 
 Currently supported operating systems are Android, Windows and Linux.
 
@@ -20,7 +20,7 @@ Currently supported operating systems are Android, Windows and Linux.
 This repository uses git submodules. As such, use the following commands to clone it locally:
 
 ```bash
-git clone https://github.com/equalitie/ouisync-app 
+git clone https://github.com/equalitie/ouisync-app
 git submodule update --init --recursive
 ```
 
@@ -42,21 +42,21 @@ flutter <build|run> -d <windows|android|linux>
 ## Docker
 
 We have *Dockerfiles* for
-[**Linux**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/linux/Dockerfile)
+[Linux](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/linux/Dockerfile)
 and
-[**Windows**](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/windows/Dockerfile)
+[Windows](https://github.com/equalitie/ouisync-app/blob/master/docker/dev/windows/Dockerfile)
 which contain the development environment although at time of writing they are
-somewhat outdated (TODO). 
+somewhat outdated (TODO).
 
    - If your development platform is Linux, you can use the Dockerfile to
      create the Linux desktop or the Android app.
-   
+
    - Similarly, you can use the Windows Dockerfile to create the Windows
-     desktop or the Android app. 
+     desktop or the Android app.
 
 ## Localization
 
-We use the package [**intl_utils**](https://pub.dev/packages/intl_utils) for handling the localization of the strings used in the app.
+We use the package [`intl_utils`](https://pub.dev/packages/intl_utils) for handling the localization of the strings used in the app.
 
 To add/modify a localized string, modify the [English `.arb`
 file](lib/l10n/intl_en.arb), and run the following to generate the dart code.
@@ -67,8 +67,8 @@ dart run intl_utils:generate
 
 ## Sentry (optional)
 
-**Ouisync** integrates **Sentry**, via the `sentry_flutter` plugin. 
+Ouisync integrates Sentry, via the `sentry_flutter` plugin.
 
-For initialization, you need to get a client key, called **DSN**, from a **Sentry** instance, making it available via an `.env` file, or as a environment variable using `export`, and then using [envied](https://github.com/petercinibulk/envied)
+For initialization, you need to get a client key, called _DSN_, from a Sentry instance, making it available via an `.env` file, or as a environment variable using `export`, and then using [envied](https://github.com/petercinibulk/envied)
 
 Please follow the instructions in the package repository for [envied in GitHub](https://github.com/petercinibulk/envied#table-of-contents) to add a key called `DSN`, that contains the client key.
