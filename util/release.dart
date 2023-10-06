@@ -508,7 +508,9 @@ Future<File> buildAab(BuildDesc buildDesc) async {
     buildDesc.version.build[0].toString(),
     '--build-name',
     buildDesc.toString(),
-  ]);
+  ], environment: {
+    "NO_SIGN": "true"
+  });
 
   return File(inputPath);
 }
@@ -822,9 +824,10 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
 
 Future<void> run(
   String command,
-  List<String> args, [
+  List<String> args, {
   String? workingDirectory,
-]) async {
+  Map<String, String>? environment,
+}) async {
   final process = await Process.start(
     command,
     args,

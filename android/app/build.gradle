@@ -87,9 +87,8 @@ android {
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig signingConfigs.release
-            } else {
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            if (System.getenv("NO_SIGN") != "true") {
                 signingConfig signingConfigs.debug
             }
         }
