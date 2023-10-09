@@ -19,12 +19,8 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => reposCubit.builder((state) {
-        /// Only on mobile we separate the repository settings from the
-        /// rest of the app settings (For now at least)
-        final mobilePlatforms = Platform.isAndroid || Platform.isIOS;
-        final settingsActionButton = state.showList == false && mobilePlatforms
-            ? repoSettingsButton
-            : appSettingsButton;
+        final settingsActionButton =
+            state.showList == false ? repoSettingsButton : appSettingsButton;
 
         return AppBar(
             shadowColor: Colors.black26,
