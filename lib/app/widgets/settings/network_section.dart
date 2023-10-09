@@ -13,7 +13,11 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
-  NetworkSection() : super(title: S.current.titleNetwork);
+  NetworkSection()
+      : super(
+          key: GlobalKey(debugLabel: 'key_network_section'),
+          title: S.current.titleNetwork,
+        );
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;

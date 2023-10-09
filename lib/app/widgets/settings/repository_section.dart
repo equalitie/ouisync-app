@@ -21,8 +21,9 @@ class RepositorySection extends SettingsSection
     this._cubits, {
     required this.isBiometricsAvailable,
   }) : super(
-            title: S.current.titleRepository,
-            changed: _cubits.repositories.stream);
+          key: GlobalKey(debugLabel: 'key_repo_section'),
+          title: S.current.titleRepository,
+        );
 
   final Cubits _cubits;
   final bool isBiometricsAvailable;
