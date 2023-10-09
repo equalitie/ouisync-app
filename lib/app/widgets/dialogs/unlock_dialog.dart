@@ -71,8 +71,9 @@ class UnlockDialog<T> extends StatelessWidget with AppLogger {
                           hint: S.current.messageRepositoryPassword,
                           onSaved: (String? password) async =>
                               await _validatePasswordAndReturn(password),
-                          validator: validateNoEmpty(
-                              Strings.messageErrorRepositoryPasswordValidation),
+                          validator: validateNoEmptyMaybeRegExpr(
+                              emptyError: S.current
+                                  .messageErrorRepositoryPasswordValidation),
                           autofocus: true))
                 ]);
               }),

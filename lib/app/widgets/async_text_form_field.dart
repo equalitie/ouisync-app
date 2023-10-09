@@ -7,11 +7,13 @@ class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final bool? enabled;
   final Function(String?)? onSaved;
+  final Function(String)? onFieldSubmitted;
   final Future<String?> Function(String?) validator;
   final AutovalidateMode? autovalidateMode;
   final bool autofocus;
   final FocusNode? focusNode;
   final bool obscureText;
+  final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
   final InputDecoration? decoration;
   final TextStyle? style;
@@ -21,11 +23,13 @@ class AsyncTextFormField extends StatefulWidget {
       this.controller,
       this.enabled,
       this.onSaved,
+      this.onFieldSubmitted,
       required this.validator,
       this.autovalidateMode,
       this.autofocus = false,
       this.focusNode,
       this.obscureText = false,
+      this.textInputAction,
       this.keyboardType,
       this.decoration,
       this.style});
@@ -41,20 +45,21 @@ class _State extends State<AsyncTextFormField> {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-        key: widget.key,
-        controller: widget.controller,
-        enabled: widget.enabled,
-        onSaved: widget.onSaved,
-        autovalidateMode: widget.autovalidateMode,
-        autofocus: widget.autofocus,
-        focusNode: widget.focusNode,
-        obscureText: widget.obscureText,
-        keyboardType: widget.keyboardType,
-        decoration: widget.decoration,
-        style: widget.style,
-        validator: (_) => _validationResult,
-        onChanged: _onChanged,
-      );
+      key: widget.key,
+      controller: widget.controller,
+      enabled: widget.enabled,
+      onSaved: widget.onSaved,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      autovalidateMode: widget.autovalidateMode,
+      autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
+      obscureText: widget.obscureText,
+      textInputAction: widget.textInputAction,
+      keyboardType: widget.keyboardType,
+      decoration: widget.decoration,
+      style: widget.style,
+      validator: (_) => _validationResult,
+      onChanged: _onChanged);
 
   Future<void> _onChanged(String value) async {
     _validationInput = value;

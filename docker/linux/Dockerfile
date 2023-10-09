@@ -58,7 +58,7 @@ RUN echo "  llvm-path: ['/usr/lib/llvm-14/lib/libclang.so']" >> /home/code/ouisy
 
 FROM pre-build as build
 
-# Building the OuiSync library and generating the bindings for the OuiSync plugin
+# Building the Ouisync library and generating the bindings for the Ouisync plugin
 RUN cd ouisync-app/ouisync-plugin/ouisync && \
     cargo build --release --lib && \
     cargo run --bin bindgen

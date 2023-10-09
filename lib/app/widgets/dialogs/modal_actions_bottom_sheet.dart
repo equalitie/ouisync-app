@@ -65,27 +65,21 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           ])));
 
   void createFolderDialog(context, RepoCubit cubit) async {
+    final parent = cubit.state.currentFolder.path;
     await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => ActionsDialog(
+          title: S.current.titleCreateFolder,
+          body: FolderCreation(cubit: cubit, parent: parent)),
+    ).then((newFolderPath) async {
+      if (newFolderPath.isNotEmpty) {
+        await cubit.createFolder(newFolderPath);
 
-          return ActionsDialog(
-            title: S.current.titleCreateFolder,
-            body: FolderCreation(
-              context: context,
-              cubit: cubit,
-              formKey: formKey,
-            ),
-          );
-        }).then((newFolder) => {
-          if (newFolder.isNotEmpty)
-            {
-              // If a folder is created, the new folder is returned path; otherwise, empty string.
-              Navigator.of(this.context).pop()
-            }
-        });
+        /// If a name for the new folder is provided, the new folder path is returned; otherwise, empty string.
+        Navigator.of(this.context).pop();
+      }
+    });
   }
 
   Future<void> addFile(context, RepoCubit repo) async {

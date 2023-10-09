@@ -45,6 +45,6 @@ class SettingsPage extends StatelessWidget {
               listener: (context, state) {
                 unawaited(context.read<ConnectivityInfo>().update());
               },
-              child: SettingsContainer(_cubits,
+              child: AppSettingsContainer(_cubits,
                   isBiometricsAvailable: isBiometricsAvailable))));
 }

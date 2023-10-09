@@ -217,6 +217,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
 ThemeData _setupAppThemeData(Color? suffixColor) => ThemeData().copyWith(
         appBarTheme: AppBarTheme(backgroundColor: suffixColor),
+        focusColor: Colors.black26,
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
             bodyMedium: AppTypography.bodyMedium,

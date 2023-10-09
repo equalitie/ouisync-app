@@ -1,7 +1,7 @@
-# OuiSync Docker Build
+# Ouisync Docker Build
 
 ## Linux container
-To create an image that builds **OuiSync** for **Android** (**APK**, **AAB**), **Linux desktop**, and **Linux CLI**, you need to run the build command and 
+To create an image that builds **Ouisync** for **Android** (**APK**, **AAB**), **Linux desktop**, and **Linux CLI**, you need to run the build command and 
 pass the parameters used to sign the bundle: `build_name`, `build_number`, `keystore` (file name), and `keystore_password_file` (file name).
 
 Also provide the **Android NDK** version required. for compiling the app, and the branch to checkout for the building process: `ndk_version`, `branch`

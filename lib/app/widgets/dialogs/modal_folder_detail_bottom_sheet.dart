@@ -189,17 +189,16 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          final formKey = GlobalKey<FormState>();
+          final oldName = getBasename(data.path);
 
           return ActionsDialog(
-            title: S.current.messageRenameFolder,
-            body: Rename(
-              context: context,
-              entryData: data,
-              hint: S.current.messageFolderName,
-              formKey: formKey,
-            ),
-          );
+              title: S.current.messageRenameFolder,
+              body: RenameEntry(
+                  parentContext: context,
+                  oldName: oldName,
+                  originalExtension: '',
+                  isFile: false,
+                  hint: S.current.messageFolderName));
         }).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.

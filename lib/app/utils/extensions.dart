@@ -84,3 +84,15 @@ extension AppThemeExtension on ThemeData {
 extension ThemeGetter on BuildContext {
   ThemeData get theme => Theme.of(this);
 }
+
+extension TextEditingControllerExtension on TextEditingController {
+  void selectAll({int? baseOffset, int? extentOffset}) {
+    if (text.isEmpty) return;
+
+    baseOffset ??= 0;
+    extentOffset ??= 0;
+
+    selection = TextSelection(
+        baseOffset: baseOffset, extentOffset: text.length - extentOffset);
+  }
+}

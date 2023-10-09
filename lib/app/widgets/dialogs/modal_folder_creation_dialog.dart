@@ -1,73 +1,122 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class FolderCreation extends StatelessWidget {
-  const FolderCreation(
-      {required this.context, required this.cubit, required this.formKey});
+class FolderCreation extends HookWidget {
+  FolderCreation({required this.cubit, required this.parent});
 
-  final BuildContext context;
   final RepoCubit cubit;
-  final GlobalKey<FormState> formKey;
+  final String parent;
+
+  final formKey = GlobalKey<FormState>();
+
+  late final TextEditingController nameController;
+
+  late final FocusNode nameTextFieldFocus;
+  late final FocusNode positiveButtonFocus;
 
   @override
   Widget build(BuildContext context) {
+    initHooks();
+
     return Form(
-      key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: _buildCreateFolderWidget(this.context),
-    );
+        key: formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Dimensions.spacingVerticalDouble,
+              Fields.formTextField(
+                  context: context,
+                  textEditingController: nameController,
+                  textInputAction: TextInputAction.done,
+                  label: S.current.labelName,
+                  hint: S.current.messageFolderName,
+                  onFieldSubmitted: (newFolderName) async {
+                    final submitted = await submitField(parent, newFolderName);
+                    if (submitted && PlatformValues.isDesktopDevice) {
+                      final newFolderPath =
+                          buildDestinationPath(parent, newFolderName!);
+                      Navigator.of(context).pop(newFolderPath);
+                    }
+                  },
+                  validator: validateNoEmptyMaybeRegExpr(
+                      emptyError:
+                          S.current.messageErrorFormValidatorNameDefault,
+                      regExp: Strings.entityNameRegExp,
+                      regExpError: S.current.messageErrorCharactersNotAllowed),
+                  autofocus: true,
+                  focusNode: nameTextFieldFocus),
+              Fields.dialogActions(context, buttons: _actions(context, parent)),
+            ]));
   }
 
-  Widget _buildCreateFolderWidget(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Dimensions.spacingVerticalDouble,
-          Fields.formTextField(
-              context: context,
-              label: S.current.labelName,
-              hint: S.current.messageFolderName,
-              onSaved: (value) => _onSaved(cubit, value),
-              validator: validateNoEmpty(
-                  S.current.messageErrorFormValidatorNameDefault),
-              autofocus: true),
-          Fields.dialogActions(context, buttons: _actions(context)),
-        ]);
+  void initHooks() {
+    nameController = useTextEditingController.fromValue(TextEditingValue.empty);
+
+    nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
+    positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
   }
 
-  void _onSaved(RepoCubit cubit, newFolderName) async {
-    final path = cubit.state.currentFolder.path;
-    final newFolderPath = buildDestinationPath(path, newFolderName);
+  void selectEntryName(String value) {
+    nameController.text = value;
+    nameController.selectAll();
+  }
 
-    if (await cubit.exists(newFolderPath)) {
-      return;
+  Future<bool> submitField(String parent, String? newName) async {
+    final validationOk = await validateNewName(parent, newName ?? '');
+
+    if (!validationOk) {
+      selectEntryName(newName ?? '');
+      nameTextFieldFocus.requestFocus();
+
+      return false;
     }
 
-    await cubit.createFolder(newFolderPath);
+    if (PlatformValues.isMobileDevice) {
+      positiveButtonFocus.requestFocus();
+    }
 
-    Navigator.of(context).pop(newFolderPath);
+    return true;
   }
 
-  List<Widget> _actions(context) => [
+  Future<bool> validateNewName(String parent, String newName) async {
+    if (newName.isEmpty) return false;
+
+    if (!(formKey.currentState?.validate() ?? false)) return false;
+
+    final newFolderPath = buildDestinationPath(parent, newName);
+    if (await cubit.exists(newFolderPath)) return false;
+
+    formKey.currentState!.save();
+    return true;
+  }
+
+  List<Widget> _actions(BuildContext context, String parent) => [
         NegativeButton(
             text: S.current.actionCancel,
             onPressed: () => Navigator.of(context).pop(''),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionCreate,
-            onPressed: _validateFolderName,
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+            onPressed: () => onSaved(context, parent, nameController.text),
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+            focusNode: positiveButtonFocus)
       ];
 
-  void _validateFolderName() {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+  void onSaved(
+      BuildContext context, String parent, String newFolderName) async {
+    final submitted = await submitField(parent, newFolderName);
+    if (submitted) {
+      final newFolderPath = buildDestinationPath(parent, newFolderName);
+      Navigator.of(context).pop(newFolderPath);
     }
   }
 }

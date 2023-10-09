@@ -1,16 +1,16 @@
 **Privacy Policy**
 
-eQualitie built the OuiSync app as an Open Source app. This SERVICE is provided by eQualitie at no cost and is intended for use as is.
+eQualitie built the Ouisync app as an Open Source app. This SERVICE is provided by eQualitie at no cost and is intended for use as is.
 
 This page is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service.
 
 **Information Collection and Use**
 
-The OuiSync team values user privacy and thus does not collect any user information.
+The Ouisync team values user privacy and thus does not collect any user information.
 
 **Log Data**
 
-OuiSync does not log any additional data on user devices.
+Ouisync does not log any additional data on user devices.
 
 **Cookies**
 
@@ -20,7 +20,7 @@ This Service does not use cookies.
 
 **Security**
 
-Files stored and shared via OuiSync are encrypted end-to-end and are not stored by eQualitie. We value user privacy and security, and thus we strive to use all possible means of protecting user data. But remember that no method of transmission over the internet, or method of electronic storage, is 100% secure and reliable, and we cannot guarantee its absolute security.
+Files stored and shared via Ouisync are encrypted end-to-end and are not stored by eQualitie. We value user privacy and security, and thus we strive to use all possible means of protecting user data. But remember that no method of transmission over the internet, or method of electronic storage, is 100% secure and reliable, and we cannot guarantee its absolute security.
 
 **Links to Other Sites**
 

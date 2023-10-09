@@ -19,7 +19,11 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(this._cubits) : super(title: S.current.titleAbout) {
+  AboutSection(this._cubits)
+      : super(
+          key: GlobalKey(debugLabel: 'key_about_section'),
+          title: S.current.titleAbout,
+        ) {
     _launchAtStartup = ValueNotifier<bool>(
         _cubits.repositories.settings.getLaunchAtStartup() ?? true);
   }

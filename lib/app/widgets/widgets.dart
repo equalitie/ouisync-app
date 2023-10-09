@@ -49,7 +49,7 @@ export 'states/no_repositories_state.dart';
 export 'states/repo_list_state.dart';
 
 export 'settings/desktop/repository_security_desktop.dart';
-export 'settings/settings_container.dart';
+export 'settings/app_settings_container.dart';
 
 export 'settings/platform/platform_dht_switch.dart';
 export 'settings/platform/platform_pex_switch.dart';

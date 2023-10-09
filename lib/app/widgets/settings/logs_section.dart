@@ -26,7 +26,10 @@ class LogsSection extends SettingsSection with AppLogger {
 
   LogsSection(this._cubits)
       : stateMonitor = _cubits.repositories.rootStateMonitor,
-        super(title: S.current.titleLogs);
+        super(
+          key: GlobalKey(debugLabel: 'key_logs_section'),
+          title: S.current.titleLogs,
+        );
 
   TextStyle? bodyStyle;
 
