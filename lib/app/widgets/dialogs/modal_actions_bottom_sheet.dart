@@ -35,18 +35,25 @@ class DirectoryActions extends StatelessWidget with AppLogger {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Fields.bottomSheetHandle(context),
-              Fields.bottomSheetTitle(S.current.titleFolderActions,
-                  style: sheetTitleStyle),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                _buildAction(
+              Fields.bottomSheetTitle(
+                S.current.titleFolderActions,
+                style: sheetTitleStyle,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAction(
                     name: S.current.actionNewFolder,
                     icon: Icons.create_new_folder_outlined,
-                    action: () => createFolderDialog(context, cubit)),
-                _buildAction(
+                    action: () => createFolderDialog(context, cubit),
+                  ),
+                  _buildAction(
                     name: S.current.actionNewFile,
                     icon: Icons.upload_file_outlined,
-                    action: () async => await addFile(context, cubit))
-              ])
+                    action: () async => await addFile(context, cubit),
+                  ),
+                ],
+              ),
             ]));
   }
 
@@ -84,13 +91,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
   Future<void> addFile(context, RepoCubit repo) async {
     if (Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
-      final permissionName = S.current.messageStorage;
       final storagePermission = Platform.isAndroid
           ? await _getStoragePermissionForAndroidVersion()
-          : Permission.storage;
+          : (permission: Permission.storage, name: S.current.messageStorage);
 
-      final permissionGranted =
-          await _checkPermission(storagePermission, permissionName);
+      final permissionGranted = await _checkPermission(
+          storagePermission.permission, storagePermission.name);
 
       if (!permissionGranted) return;
     }
@@ -153,11 +159,17 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     }
   }
 
-  Future<Permission> _getStoragePermissionForAndroidVersion() async {
+  Future<({Permission permission, String name})>
+      _getStoragePermissionForAndroidVersion() async {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
+
     final storagePermission = androidInfo.version.sdkInt >= 33
-        ? Permission.manageExternalStorage
-        : Permission.storage;
+        ? (
+            permission: Permission.accessMediaLocation,
+            name: S.current.messageMediaLocation
+          )
+        : (permission: Permission.storage, name: S.current.messageStorage);
+
     return storagePermission;
   }
 
