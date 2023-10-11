@@ -8,13 +8,9 @@ import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage(
-    this._cubits, {
-    required this.isBiometricsAvailable,
-  });
+  const SettingsPage(this._cubits);
 
   final Cubits _cubits;
-  final bool isBiometricsAvailable;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -45,6 +41,5 @@ class SettingsPage extends StatelessWidget {
               listener: (context, state) {
                 unawaited(context.read<ConnectivityInfo>().update());
               },
-              child: AppSettingsContainer(_cubits,
-                  isBiometricsAvailable: isBiometricsAvailable))));
+              child: AppSettingsContainer(_cubits))));
 }

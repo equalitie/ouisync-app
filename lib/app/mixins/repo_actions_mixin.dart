@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
 import '../storage/storage.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -72,7 +72,7 @@ mixin RepositoryActionsMixin on AppLogger {
 
   /// checkForBiometrics => main_page._checkForBiometricsCallback
   /// getAuthenticationMode => Settings.getAuthenticationMode
-  Future<String?> navigateToRepositorySecurity(BuildContext context,
+  Future<void> navigateToRepositorySecurity(BuildContext context,
       {required RepoCubit repository,
       required Settings settings,
       required void Function() popDialog}) async {
@@ -81,15 +81,16 @@ mixin RepositoryActionsMixin on AppLogger {
 
     AuthMode authenticationMode = repository.state.authenticationMode;
 
-    if (authenticationMode == AuthMode.noLocalPassword) {
-      final authorized = await authorizeNavigationToSettings();
-      if (authorized == null || authorized == false) return null;
+    if (PlatformValues.isMobileDevice &&
+        authenticationMode == AuthMode.noLocalPassword) {
+      final authorized = await biometricValidation();
+      if (authorized == false) return;
     }
 
     if (authenticationMode == AuthMode.manual) {
       final unlockResult = await manualUnlock(context, repository);
 
-      if (unlockResult == null) return null;
+      if (unlockResult == null) return;
 
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
@@ -98,7 +99,7 @@ mixin RepositoryActionsMixin on AppLogger {
       final securePassword = await SecureStorage(databaseId: databaseId)
           .tryGetPassword(authMode: authenticationMode);
 
-      if (securePassword == null || securePassword.isEmpty) return null;
+      if (securePassword == null || securePassword.isEmpty) return;
 
       password = securePassword;
       shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
@@ -111,13 +112,13 @@ mixin RepositoryActionsMixin on AppLogger {
     if (accessMode == AccessMode.blind) {
       showSnackBar(context, message: S.current.messageUnlockRepoFailed);
 
-      return null;
+      return;
     }
 
     popDialog();
 
     final isBiometricsAvailable =
-        await SecurityValidations.canCheckBiometrics() ?? false;
+        await SecurityValidations.canCheckBiometrics();
 
     await Navigator.push(
         context,
@@ -129,8 +130,6 @@ mixin RepositoryActionsMixin on AppLogger {
               isBiometricsAvailable: isBiometricsAvailable,
               authenticationMode: authenticationMode),
         ));
-
-    return password;
   }
 
   Future<UnlockResult?> manualUnlock(
@@ -245,7 +244,7 @@ mixin RepositoryActionsMixin on AppLogger {
           cubitUnlockRepository}) async {
     if (authenticationMode == AuthMode.manual) {
       final isBiometricsAvailable =
-          await SecurityValidations.canCheckBiometrics() ?? false;
+          await SecurityValidations.canCheckBiometrics();
 
       final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
@@ -347,12 +346,11 @@ mixin RepositoryActionsMixin on AppLogger {
   }
 }
 
-Future<bool?> authorizeNavigationToSettings() async {
-  /// local_auth doesn't support Linux. If the repository has a local password,
-  /// then we use it for validation; otherwise we just return true.
-  if (Platform.isLinux) {
-    return true;
-  }
+/// For repositories with no local password, if the device supports biometrics
+/// (currently we only do this for mobile devices), we use the biometric
+/// validation to secure the settings page.
+Future<bool> biometricValidation() async {
+  if (PlatformValues.isDesktopDevice) return false;
 
   final isSupported = await SecurityValidations.isBiometricSupported();
 
@@ -384,10 +382,6 @@ Future<bool?> authorizeNavigationToSettings() async {
   if (isSupported) {
     authorized = await SecurityValidations.validateBiometrics(
         localizedReason: S.current.messageAccessingSecureStorage);
-
-    if (authorized == false) {
-      return null;
-    }
   }
 
   return authorized;

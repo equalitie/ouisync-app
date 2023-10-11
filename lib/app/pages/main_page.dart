@@ -13,7 +13,6 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../mixins/mixins.dart';
 import '../models/models.dart';
-import '../storage/storage.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
@@ -836,28 +835,17 @@ class _MainPageState extends State<MainPage>
 
   void reloadRepository() => _cubits.repositories.init();
 
-  Future<void> _showAppSettings() async {
-    final isBiometricsAvailable = await Dialogs.executeFutureWithLoadingDialog(
-          context,
-          f: SecurityValidations.canCheckBiometrics(),
-        ) ??
-        false;
-
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: _cubits.upgradeExists),
-          ],
-          child: SettingsPage(
-            _cubits,
-            isBiometricsAvailable: isBiometricsAvailable,
+  Future<void> _showAppSettings() async => await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: _cubits.upgradeExists),
+            ],
+            child: SettingsPage(_cubits),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   Future<void> _showRepoSettings(BuildContext context,
           {required RepoCubit repoCubit}) =>

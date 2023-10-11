@@ -185,7 +185,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
     final showAccessModeMessage = accessMode != null;
 
     final isBiometricsAvailable =
-        await SecurityValidations.canCheckBiometrics() ?? false;
+        await SecurityValidations.canCheckBiometrics();
 
     final state = CreateRepositoryCubit.create(
         reposCubit: cubit,

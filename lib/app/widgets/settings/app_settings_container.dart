@@ -12,10 +12,8 @@ import 'network_section.dart';
 import 'settings_section.dart';
 
 class AppSettingsContainer extends StatefulHookWidget {
-  AppSettingsContainer(
-    Cubits cubits, {
-    required bool isBiometricsAvailable,
-  }) : sections = [
+  AppSettingsContainer(Cubits cubits)
+      : sections = [
           NetworkSection(),
           LogsSection(cubits),
           AboutSection(cubits),

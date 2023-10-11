@@ -1,3 +1,4 @@
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'storage.dart';
 
@@ -62,7 +63,7 @@ class SecureStorage with AppLogger {
     }
 
     // Try to migrate the password from the legacy `biometric_storage` plugin.
-    if (authMode == AuthMode.version2) {
+    if (PlatformValues.isMobileDevice && authMode == AuthMode.version2) {
       final authorized = await _validateBiometrics();
       if (authorized == false) {
         return null;
@@ -107,7 +108,8 @@ class SecureStorage with AppLogger {
 
   Future<String?> _readFlutterSecureStorage(
       String databaseId, AuthMode authMode) async {
-    if ([AuthMode.version1, AuthMode.version2].contains(authMode)) {
+    if (PlatformValues.isMobileDevice &&
+        [AuthMode.version1, AuthMode.version2].contains(authMode)) {
       final authorized = await _validateBiometrics();
       if (authorized == false) {
         return null;
