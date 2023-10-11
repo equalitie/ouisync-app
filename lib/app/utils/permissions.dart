@@ -78,5 +78,6 @@ final ouiSyncPermissions = {
   Permission.camera: S.current.messageCameraPermission,
   Permission.ignoreBatteryOptimizations:
       S.current.messageIgnoreBatteryOptimizationsPermission,
-  Permission.storage: S.current.messageStoragePermission
+  Permission.storage: S.current.messageStoragePermission,
+  Permission.accessMediaLocation: S.current.messageMediaLocationPermission
 };
