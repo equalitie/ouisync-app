@@ -74,7 +74,7 @@ class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
             child: Padding(
                 padding: Dimensions.paddingItem,
                 child: RepoDescription(repoData: repoItem))),
-        if (Platform.isAndroid || Platform.isIOS) _getVerticalMenuAction(false)
+        _getVerticalMenuAction(false)
       ],
     );
   }
