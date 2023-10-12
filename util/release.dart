@@ -473,7 +473,7 @@ Future<File> buildDeb({
   final controlContent = 'Package: $name\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
-      'Depends: libgtk-3-0, libsecret-1-0, libwebkit2gtk-4.1-0, libayatana-appindicator3-1 | libappindicator3-1\n'
+      'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1 | libappindicator3-1\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
