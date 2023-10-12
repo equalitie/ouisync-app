@@ -523,8 +523,7 @@ Future<File> extractApk(File bundle) async {
   final outputFile = File(outputPath);
 
   if (await outputFile.exists()) {
-    print('Not creating $outputPath - already exists');
-    return outputFile;
+    await outputFile.delete();
   }
 
   print('Creating ${outputFile.path} ...');
