@@ -72,6 +72,7 @@ class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
               icon: Icon(Fields.accessModeIcon(repoItem.accessMode),
                   size: Dimensions.sizeIconAverage),
               color: Constants.folderIconColor,
+              padding: EdgeInsets.all(0.0),
               onPressed: () async {
                 final entry = reposCubit?.get(repoItem.name);
                 final lockRepoFunction = reposCubit?.lockRepository;
