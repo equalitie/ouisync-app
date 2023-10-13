@@ -527,6 +527,7 @@ class _MainPageState extends State<MainPage>
 
                 final listItem = ListItem(
                     key: ValueKey(item.name),
+                    reposCubit: null,
                     repository: currentRepo,
                     itemData: item,
                     mainAction: actionByType,

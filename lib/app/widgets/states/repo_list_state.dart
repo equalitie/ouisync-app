@@ -63,6 +63,7 @@ class RepoListState extends StatelessWidget
                       message: S.current.messageRepoMissing);
 
                   return ListItem(
+                      reposCubit: null,
                       repository: null,
                       itemData: repoMissingItem,
                       mainAction: () {},
@@ -80,6 +81,7 @@ class RepoListState extends StatelessWidget
                     isDefault: isDefault);
 
                 final listItem = ListItem(
+                    reposCubit: reposCubit,
                     repository: repoEntry.maybeCubit!,
                     itemData: repoItem,
                     mainAction: () async {

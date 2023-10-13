@@ -15,7 +15,7 @@ import '../widgets/widgets.dart';
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
-mixin RepositoryActionsMixin on AppLogger {
+mixin RepositoryActionsMixin {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(BuildContext context,
       {required RepoCubit repository,
@@ -343,6 +343,17 @@ mixin RepositoryActionsMixin on AppLogger {
         ]);
 
     return saveChanges;
+  }
+}
+
+Future<void> lockRepository(
+    RepoEntry repositoryEntry,
+    Future<void> Function(SettingsRepoEntry settingsRepoEntry)
+        lockRepositoryFunction) async {
+  if (repositoryEntry.accessMode == AccessMode.blind) return;
+
+  if (repositoryEntry is OpenRepoEntry) {
+    await lockRepositoryFunction(repositoryEntry.settingsRepoEntry);
   }
 }
 

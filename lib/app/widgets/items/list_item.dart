@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
@@ -11,12 +9,14 @@ import '../widgets.dart';
 class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
   const ListItem({
     super.key,
+    required this.reposCubit,
     required this.repository,
     required this.itemData,
     required this.mainAction,
     required this.verticalDotsAction,
   });
 
+  final ReposCubit? reposCubit;
   final RepoCubit? repository;
   final BaseItem itemData;
   final Function mainAction;
@@ -61,14 +61,26 @@ class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
   }
 
   Widget _buildRepoItem(RepoItem repoItem) {
+    assert(reposCubit != null, "Repository cubit object for RepoItem is null");
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
             flex: 1,
-            child: Icon(Fields.accessModeIcon(repoItem.accessMode),
-                size: Dimensions.sizeIconAverage,
-                color: Constants.folderIconColor)),
+            child: IconButton(
+              icon: Icon(Fields.accessModeIcon(repoItem.accessMode),
+                  size: Dimensions.sizeIconAverage),
+              color: Constants.folderIconColor,
+              onPressed: () async {
+                final entry = reposCubit?.get(repoItem.name);
+                final lockRepoFunction = reposCubit?.lockRepository;
+
+                if (entry == null || lockRepoFunction == null) return;
+
+                await lockRepository(entry, lockRepoFunction);
+              },
+            )),
         Expanded(
             flex: 9,
             child: Padding(

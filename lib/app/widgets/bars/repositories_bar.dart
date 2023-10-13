@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../mixins/mixins.dart';
 import '../../models/models.dart';
-import '../../utils/utils.dart';
 import '../../utils/platform/platform.dart';
+import '../../utils/utils.dart';
 
-class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
+class RepositoriesBar extends StatelessWidget
+    with RepositoryActionsMixin, AppLogger
+    implements PreferredSizeWidget {
   const RepositoriesBar(this._cubits);
 
   final Cubits _cubits;
@@ -96,21 +98,18 @@ class RepositoriesBar extends StatelessWidget implements PreferredSizeWidget {
                 padding: Dimensions.paddingRepositoryPicker,
                 child: Row(children: [
                   IconButton(
-                      icon: Icon(icon),
-                      iconSize: Dimensions.sizeIconSmall,
-                      onPressed: () async {
-                        if (_cubits.repositories.currentRepo == null) return;
+                    icon: Icon(icon),
+                    iconSize: Dimensions.sizeIconSmall,
+                    onPressed: () async {
+                      final entry = _cubits.repositories.get(repoName);
+                      if (entry == null) return;
 
-                        if (_cubits.repositories.currentRepo?.accessMode ==
-                            AccessMode.blind) return;
+                      final lockRepoFunction =
+                          _cubits.repositories.lockRepository;
 
-                        final repo = _cubits.repositories.currentRepo;
-
-                        if (repo is OpenRepoEntry) {
-                          await _cubits.repositories
-                              .lockRepository(repo.settingsRepoEntry);
-                        }
-                      }),
+                      await lockRepository(entry, lockRepoFunction);
+                    },
+                  ),
                   Fields.constrainedText(repoName,
                       softWrap: false, textOverflow: TextOverflow.fade)
                 ])))
