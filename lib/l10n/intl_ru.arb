@@ -737,5 +737,15 @@
   "titleFreedomExpresionAccessInfo": "Свобода выражения и доступа к информации",
   "@titleFreedomExpresionAccessInfo": {},
   "titleLinksOtherSites": "Ссылки на Другие сайты",
-  "@titleLinksOtherSites": {}
+  "@titleLinksOtherSites": {},
+  "labelConnectionType": "Тип соединения",
+  "@labelConnectionType": {},
+  "titleOnboardingPermissions": "Установите разрешения для совместной работы, передачи или просто хранения",
+  "@titleOnboardingPermissions": {},
+  "titleOnboardingShare": "Отправляйте и получайте файлы безопасно",
+  "@titleOnboardingShare": {},
+  "titleOnboardingAccess": "Доступ к файлам с нескольких устройств",
+  "@titleOnboardingAccess": {},
+  "titleOurMission": "Наша миссия",
+  "@titleOurMission": {}
 }
