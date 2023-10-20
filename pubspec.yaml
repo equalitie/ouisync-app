@@ -29,7 +29,7 @@ dependencies:
   biometric_storage: ^5.0.0+4
   bloc_test: ^9.0.3
   collection: ^1.16.0
-  connectivity_plus: ^4.0.2
+  connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
   cupertino_icons: ^1.0.4
   dart_ipify: ^1.1.1
