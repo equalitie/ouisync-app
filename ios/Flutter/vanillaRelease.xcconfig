@@ -1,5 +1,0 @@
-#include "Generated.xcconfig"
-
-FLUTTER_TARGET=lib/main_vanilla.dart
-ASSET_PREFIX=vanilla
-BUNDLE_NAME=OuiSync

@@ -1,5 +1,0 @@
-#include "Generated.xcconfig"
-
-FLUTTER_TARGET=lib/main_analytics.dart
-ASSET_PREFIX=analytics
-BUNDLE_NAME=OuiSync
