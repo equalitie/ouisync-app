@@ -379,7 +379,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     'run',
     'msix:create',
     '-u',
-    '"eQualitie Inc"',
+    'eQualitie Inc',
     '-i',
     identityName,
     '-b',
