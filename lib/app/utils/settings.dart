@@ -5,8 +5,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/repo_meta_info.dart';
-import 'constants.dart';
-import 'log.dart';
+import 'utils.dart';
 
 class SettingsRepoEntry {
   String databaseId;
@@ -91,7 +90,14 @@ class Settings with AppLogger {
     final repoPaths = prefs.getStringList(_knownRepositoriesKey);
 
     if (repoPaths != null) {
-      for (final path in repoPaths) {
+      String? iosDebugReposPath = await getiOSDebugReposPath();
+
+      for (var path in repoPaths) {
+        if (iosDebugReposPath != null) {
+          final repoFile = p.basename(path);
+          path = p.join(iosDebugReposPath, repoFile);
+        }
+
         final repo = RepoMetaInfo.fromDbPath(path);
         repos[repo.name] = repo.dir.path;
       }
@@ -175,7 +181,7 @@ class Settings with AppLogger {
     return documents;
   }
 
-  List<SettingsRepoEntry> repos() {
+  List<SettingsRepoEntry> repos(String? iosDebugReposPath) {
     final paths = _prefs.getStringList(_knownRepositoriesKey);
 
     if (paths == null) {
@@ -183,6 +189,11 @@ class Settings with AppLogger {
     }
 
     return paths.map((path) {
+      if (iosDebugReposPath != null) {
+        final repoFile = p.basename(path);
+        path = p.join(iosDebugReposPath, repoFile);
+      }
+
       final info = RepoMetaInfo.fromDbPath(path);
       final id = getDatabaseId(info.name);
       return SettingsRepoEntry(id, info);
