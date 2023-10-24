@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
@@ -39,7 +39,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    for (final repo in _settings.repos()) {
+    String? iosDebugReposPath = await getiOSDebugReposPath();
+
+    for (final repo in _settings.repos(iosDebugReposPath)) {
       final repoName = repo.name;
       if (defaultRepo == null) {
         defaultRepo = repoName;
@@ -54,10 +56,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       _isLoading = false;
     });
 
-    /// The repos list (landing page) is not avilable on desktop.
-    if (io.Platform.isAndroid || io.Platform.isIOS) {
-      _putRepoList(RepoListEntry(reposCubit: this));
-    }
+     _putRepoList(RepoListEntry(reposCubit: this));
   }
 
   bool get isLoading => _isLoading;
