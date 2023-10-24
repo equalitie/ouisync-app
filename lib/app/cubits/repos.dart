@@ -54,10 +54,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       _isLoading = false;
     });
 
-    /// The repos list (landing page) is not avilable on desktop.
-    if (io.Platform.isAndroid || io.Platform.isIOS) {
-      _putRepoList(RepoListEntry(reposCubit: this));
-    }
+     _putRepoList(RepoListEntry(reposCubit: this));
   }
 
   bool get isLoading => _isLoading;
