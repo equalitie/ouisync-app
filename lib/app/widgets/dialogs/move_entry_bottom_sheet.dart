@@ -110,8 +110,12 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
             buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
             text: S.current.actionMove,
             onPressed: canMove
-                ? () => widget.onMoveEntry
-                    .call(widget.origin, widget.path, widget.type)
+                ? () async {
+                    final moved = await widget.onMoveEntry
+                        .call(widget.origin, widget.path, widget.type);
+
+                    if (moved) widget.onBottomSheetOpen.call(null, '');
+                  }
                 : null)
 
         /// If the entry can't be moved (the user selected the same entry/path, for example)

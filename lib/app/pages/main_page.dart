@@ -22,7 +22,7 @@ import 'pages.dart';
 
 typedef BottomSheetCallback = void Function(Widget? widget, String entryPath);
 
-typedef MoveEntryCallback = void Function(
+typedef MoveEntryCallback = Future<bool> Function(
     String origin, String path, EntryType type);
 
 class MainPage extends StatefulWidget {
@@ -613,7 +613,7 @@ class _MainPageState extends State<MainPage>
     return !readDisabledActions.contains(action);
   }
 
-  void moveEntry(
+  Future<bool> moveEntry(
       RepoCubit currentRepo, String origin, String path, EntryType type) async {
     final basename = getBasename(path);
     final destination = buildDestinationPath(
@@ -623,7 +623,7 @@ class _MainPageState extends State<MainPage>
 
     _bottomSheet = null;
 
-    await currentRepo.moveEntry(
+    return currentRepo.moveEntry(
       source: path,
       destination: destination,
     );
