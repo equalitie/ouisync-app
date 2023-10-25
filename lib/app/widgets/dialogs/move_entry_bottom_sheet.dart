@@ -111,8 +111,10 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
             text: S.current.actionMove,
             onPressed: canMove
                 ? () async {
-                    final moved = await widget.onMoveEntry
-                        .call(widget.origin, widget.path, widget.type);
+                    final moved = await Dialogs.executeFutureWithLoadingDialog(
+                        context,
+                        f: widget.onMoveEntry
+                            .call(widget.origin, widget.path, widget.type));
 
                     if (moved) widget.onBottomSheetOpen.call(null, '');
                   }
