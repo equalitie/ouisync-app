@@ -80,9 +80,12 @@ mixin RepositoryActionsMixin {
     ShareToken? shareToken;
 
     AuthMode authenticationMode = repository.state.authenticationMode;
+    final isBiometricsAvailable =
+        await SecurityValidations.canCheckBiometrics();
 
     if (PlatformValues.isMobileDevice &&
-        authenticationMode == AuthMode.noLocalPassword) {
+        authenticationMode == AuthMode.noLocalPassword &&
+        isBiometricsAvailable) {
       final authorized = await biometricValidation();
       if (authorized == false) return;
     }
@@ -116,9 +119,6 @@ mixin RepositoryActionsMixin {
     }
 
     popDialog();
-
-    final isBiometricsAvailable =
-        await SecurityValidations.canCheckBiometrics();
 
     await Navigator.push(
         context,
