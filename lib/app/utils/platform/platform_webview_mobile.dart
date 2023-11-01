@@ -25,7 +25,8 @@ class PlatformWebViewMobile implements PlatformWebView {
 
     final initalizations = <Future>[];
 
-    initalizations.add(controller.setJavaScriptMode(JavaScriptMode.disabled));
+    initalizations
+        .add(controller.setJavaScriptMode(JavaScriptMode.unrestricted));
     initalizations.add(controller.setBackgroundColor(Colors.white));
     initalizations.add(controller.loadRequest(Uri.parse(url)));
 
