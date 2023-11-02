@@ -162,9 +162,8 @@ class _FileDetailState extends State<FileDetail> {
                   label: S.current.labelName, text: widget.data.name),
               Fields.labeledText(
                   label: S.current.labelLocation,
-                  text: widget.data.path
-                      .replaceAll(widget.data.name, '')
-                      .trimRight()),
+                  text: getDirname(widget.data.path),
+                  textAlign: TextAlign.start),
               Fields.labeledText(
                   label: S.current.labelSize,
                   text: formatSize(widget.data.size ?? 0)),

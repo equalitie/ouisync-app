@@ -114,9 +114,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 textMaxLines: 2),
             Fields.labeledText(
                 label: S.current.labelLocation,
-                text: widget.data.path
-                    .replaceAll(widget.data.name, '')
-                    .trimRight(),
+                text: getDirname(widget.data.path),
                 textAlign: TextAlign.start)
           ],
         ),
