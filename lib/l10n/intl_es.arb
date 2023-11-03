@@ -867,5 +867,9 @@
   "messageLogData3": "Dirección IP del usuario - para proporcionar asistencia técnica",
   "@messageLogData3": {},
   "messageSecurityPracticesP2": "Usted puede aprender más sobre las técnicas de cifrado por medio de nuestra documentación",
-  "@messageSecurityPracticesP2": {}
+  "@messageSecurityPracticesP2": {},
+  "messagePeerExchangeWikipedia": "Intercambio entre pares en Wikipedia",
+  "@messagePeerExchangeWikipedia": {},
+  "messagePIPEDA": "PIPEDA",
+  "@messagePIPEDA": {}
 }
