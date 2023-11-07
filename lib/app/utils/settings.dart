@@ -90,7 +90,7 @@ class Settings with AppLogger {
     final repoPaths = prefs.getStringList(_knownRepositoriesKey);
 
     if (repoPaths != null) {
-      String? iosDebugReposPath = await getiOSDebugReposPath();
+      String? iosDebugReposPath = await getiOSReposPath();
 
       for (var path in repoPaths) {
         if (iosDebugReposPath != null) {

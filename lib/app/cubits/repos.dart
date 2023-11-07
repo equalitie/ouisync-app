@@ -39,7 +39,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     var defaultRepo = _settings.getDefaultRepo();
 
-    String? iosDebugReposPath = await getiOSDebugReposPath();
+    String? iosDebugReposPath = await getiOSReposPath();
 
     for (final repo in _settings.repos(iosDebugReposPath)) {
       final repoName = repo.name;
