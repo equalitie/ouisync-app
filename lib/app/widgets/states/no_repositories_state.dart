@@ -22,8 +22,6 @@ class NoRepositoriesState extends HookWidget {
     final importRepoButtonFocus =
         useFocusNode(debugLabel: 'import_repo_button_focus');
 
-    newRepoButtonFocus.requestFocus();
-
     return Center(
         child: SingleChildScrollView(
       reverse: false,
