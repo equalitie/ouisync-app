@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:share_plus/share_plus.dart';
@@ -217,7 +219,14 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                   return;
                 }
 
-                await Share.share(_shareToken!);
+                Rect? origin;
+                /// We need the sharePositionOrigin parameter for iPads and macOS, or it would throw an exception.
+                if (Platform.isIOS || Platform.isMacOS) {
+                  final renderBox = context.findRenderObject() as RenderBox?;
+                  origin = (renderBox?.localToGlobal(Offset.zero) ?? Offset(0.0, 0.0)) & (renderBox?.size ?? Size.zero);  
+                }
+              
+                await Share.share(_shareToken!, sharePositionOrigin: origin);
               }),
               Fields.constrainedText(S.current.labelShareLink,
                   flex: 0, style: labelStyle),
