@@ -484,7 +484,14 @@ class _MainPageState extends State<MainPage>
       await launchUrl(url);
     } else {
       // Only the above platforms are supported right now.
-      showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
+      // showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
+
+      try {
+        final url = await repo.previewFileUrl(item.path);
+        await launchUrl(url);
+      } on Exception catch (e, st) {
+        loggy.app('Error previewing file using FileServer:\n${e.toString()}', e, st);
+      }
     }
   }
 
