@@ -119,6 +119,7 @@ dev_dependencies:
   git: ^2.2.1
   github: ^9.19.0
   icons_launcher: ^2.0.3
+  image: ^4.1.3
   # Use this command to generate internationalization files if you're not using
   # the vscode plugin:
   # # flutter pub run intl_utils:generate
