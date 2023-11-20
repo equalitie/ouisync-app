@@ -52,17 +52,12 @@ class PeerSet extends Equatable {
     return result;
   }
 
-  String stats() {
-    final active = peers.fold<int>(0, (prev, peer) {
-      if (peer.state == "Active") {
-        return prev + 1;
-      } else {
-        return prev;
-      }
-    });
-
-    return "$active/${peers.length}";
-  }
+  /// Number of connected peers
+  int get numConnected => peers
+      .where((peer) => peer.state == "Active")
+      .map((peer) => peer.runtimeId)
+      .toSet()
+      .length;
 
   @override
   List<Object> get props => [peers];

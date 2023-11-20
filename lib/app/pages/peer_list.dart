@@ -6,14 +6,17 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/peer_set.dart';
+import '../utils/platform/platform_values.dart';
 import '../utils/utils.dart';
 
 class PeerList extends StatelessWidget {
-  late final TextStyle? bodyMicroStyle;
+  late final TextStyle? bodyStyle;
 
   @override
   Widget build(BuildContext context) {
-    bodyMicroStyle = context.theme.appTextStyle.bodyMicro;
+    bodyStyle = PlatformValues.isMobileDevice
+        ? context.theme.appTextStyle.bodyMicro
+        : context.theme.appTextStyle.bodySmall;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.current.labelPeers)),
@@ -79,8 +82,8 @@ class PeerList extends StatelessWidget {
   ) =>
       TableRow(
         children: <TableCell>[
-          _buildCell(_LongText(peer.ip, style: bodyMicroStyle)),
-          _buildCell(Text(peer.port.toString(), style: bodyMicroStyle)),
+          _buildCell(_LongText(peer.ip, style: bodyStyle)),
+          _buildCell(Text(peer.port.toString(), style: bodyStyle)),
           _buildCell(_buildSource(context, peer.source)),
           index == 0
               ? _buildCell(_buildId(context, peer.state, runtimeId))
@@ -115,7 +118,7 @@ class PeerList extends StatelessWidget {
   Widget _buildActiveId(BuildContext context, String runtimeId) =>
       Row(children: [
         Icon(Icons.person, size: Dimensions.sizeIconBadge),
-        Expanded(child: _LongText(runtimeId, style: bodyMicroStyle)),
+        Expanded(child: _LongText(runtimeId, style: bodyStyle)),
       ]);
 
   Widget _buildInactiveId(BuildContext context, String state) {
@@ -125,7 +128,7 @@ class PeerList extends StatelessWidget {
       Icon(Icons.person_outline, size: Dimensions.sizeIconBadge, color: color),
       Text(
         state,
-        style: bodyMicroStyle?.copyWith(color: color),
+        style: bodyStyle?.copyWith(color: color),
       )
     ]);
   }
@@ -137,7 +140,7 @@ class PeerList extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: Dimensions.sizeIconBadge),
-        Text(source, style: bodyMicroStyle),
+        Text(source, style: bodyStyle),
       ],
     );
   }
