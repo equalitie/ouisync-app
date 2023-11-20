@@ -69,10 +69,6 @@ Future<void> main(List<String> args) async {
   if (options.deb) {
     final asset = await buildDeb(
       name: name,
-      // At some point we'll want to include the command line `ouisync`
-      // executable as well, so we rename this flutter app so as to not clash
-      // with it.
-      executableName: "$name-gui",
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
@@ -398,11 +394,19 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildDeb({
   required String name,
-  required String executableName,
   required Directory outputDir,
   required BuildDesc buildDesc,
   String description = '',
 }) async {
+  // At some point we'll want to include the command line `ouisync`
+  // executable as well, so we rename this flutter app so as to not clash
+  // with it.
+  // NOTE: This must be the same as `BINARY_NAME` defined in `linux/CMakeList.txt`.
+  final executableName = "$name-gui";
+  // Unique ID for the GTK application.
+  // NOTE: This must be the same as `APPLICATION_ID` defined in `linux/CMakeList.txt`.
+  final applicationId = "org.equalitie.$name";
+
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -433,10 +437,6 @@ Future<File> buildDeb({
   await libDir.create(recursive: true);
   await copyDirectory(bundleDir, libDir);
 
-  // HACK: rename the binary 'ouisync_app' -> 'ouisync-gui'
-  await File('${libDir.path}/ouisync_app')
-      .rename('${libDir.path}/$executableName');
-
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create();
   await Link('${binDir.path}/$executableName')
@@ -458,7 +458,8 @@ Future<File> buildDeb({
       'Type=Application\n'
       'Icon=$name\n'
       'Categories=Network;FileTransfer;P2P\n';
-  await File('${desktopDir.path}/$name.desktop').writeAsString(desktopContent);
+  await File('${desktopDir.path}/$applicationId.desktop')
+      .writeAsString(desktopContent);
 
   // Add icon
   final iconSrc = File('assets/ouisync_icon.png');
