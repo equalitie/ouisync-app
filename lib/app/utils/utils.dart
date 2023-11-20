@@ -9,6 +9,7 @@ export 'dimensions.dart';
 export 'dump.dart';
 export 'extensions.dart';
 export 'fields.dart';
+export 'file_server.dart';
 export 'format.dart';
 export 'hotspot.dart';
 export 'inline_text_styles.dart';
