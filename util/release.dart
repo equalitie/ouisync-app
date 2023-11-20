@@ -462,9 +462,9 @@ Future<File> buildDeb({
   // Add icon
   // TODO: other resolutions?
   final iconDir =
-      Directory('${packageDir.path}/usr/share/icons/hicolor/192x192/apps');
+      Directory('${packageDir.path}/usr/share/icons/hicolor/256x256/apps');
   await iconDir.create(recursive: true);
-  await File('assets/ic_launcher.png').copy('${iconDir.path}/$name.png');
+  await File('assets/ouisync_icon.png').copy('${iconDir.path}/$name.png');
 
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
