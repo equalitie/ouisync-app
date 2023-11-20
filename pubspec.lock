@@ -705,7 +705,7 @@ packages:
     source: hosted
     version: "2.1.4"
   image:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: image
       sha256: "028f61960d56f26414eb616b48b04eb37d700cbe477b7fb09bf1d7ce57fd9271"

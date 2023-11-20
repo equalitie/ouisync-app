@@ -8,6 +8,7 @@ import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
+import 'package:image/image.dart' as image;
 import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -460,11 +461,17 @@ Future<File> buildDeb({
   await File('${desktopDir.path}/$name.desktop').writeAsString(desktopContent);
 
   // Add icon
-  // TODO: other resolutions?
-  final iconDir =
-      Directory('${packageDir.path}/usr/share/icons/hicolor/256x256/apps');
-  await iconDir.create(recursive: true);
-  await File('assets/ouisync_icon.png').copy('${iconDir.path}/$name.png');
+  final iconSrc = File('assets/ouisync_icon.png');
+
+  for (final res in [16, 22, 24, 32, 48, 64, 128, 256]) {
+    final iconDir = Directory(
+        '${packageDir.path}/usr/share/icons/hicolor/${res}x$res/apps');
+    await iconDir.create(recursive: true);
+
+    final iconDst = File('${iconDir.path}/$name.png');
+
+    await createIcon(iconSrc, iconDst, res);
+  }
 
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
@@ -892,4 +899,17 @@ Future<bool> checkWorkingTreeIsClean(GitDir git) async {
     }
   }
   return true;
+}
+
+Future<void> createIcon(File src, File dst, int resolution) async {
+  final command = image.Command()
+    ..decodeImageFile(src.path)
+    ..copyResize(
+      width: resolution,
+      height: resolution,
+      interpolation: image.Interpolation.cubic,
+    )
+    ..writeToFile(dst.path);
+
+  await command.executeThread();
 }
