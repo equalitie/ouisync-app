@@ -15,12 +15,12 @@ import 'platform_window_manager.dart';
 class PlatformWindowManagerDesktop
     with WindowListener, AppLogger
     implements PlatformWindowManager {
+  final Session _session;
   final _systemTray = stray.SystemTray();
   final _appWindow = stray.AppWindow();
 
   late final String _appName;
   bool _showWindow = true;
-  Session _session;
 
   PlatformWindowManagerDesktop(List<String> args, this._session) {
     initialize(args).then((_) async {

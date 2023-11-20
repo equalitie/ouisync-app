@@ -179,7 +179,7 @@ class NetworkSection extends SettingsSection {
         builder: (context, state) => NavigationTile(
             leading: Icon(Icons.people),
             title: Text(S.current.labelPeers, style: bodyStyle),
-            value: Text(state.stats(), style: subtitleStyle),
+            value: Text(state.numConnected.toString(), style: subtitleStyle),
             onTap: () {
               final peerSetCubit = context.read<PeerSetCubit>();
 
