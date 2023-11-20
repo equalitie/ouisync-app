@@ -8,6 +8,7 @@ import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
+import 'package:image/image.dart' as image;
 import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -68,10 +69,6 @@ Future<void> main(List<String> args) async {
   if (options.deb) {
     final asset = await buildDeb(
       name: name,
-      // At some point we'll want to include the command line `ouisync`
-      // executable as well, so we rename this flutter app so as to not clash
-      // with it.
-      executableName: "$name-gui",
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
@@ -397,11 +394,19 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildDeb({
   required String name,
-  required String executableName,
   required Directory outputDir,
   required BuildDesc buildDesc,
   String description = '',
 }) async {
+  // At some point we'll want to include the command line `ouisync`
+  // executable as well, so we rename this flutter app so as to not clash
+  // with it.
+  // NOTE: This must be the same as `BINARY_NAME` defined in `linux/CMakeList.txt`.
+  final executableName = "$name-gui";
+  // Unique ID for the GTK application.
+  // NOTE: This must be the same as `APPLICATION_ID` defined in `linux/CMakeList.txt`.
+  final applicationId = "org.equalitie.$name";
+
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -432,10 +437,6 @@ Future<File> buildDeb({
   await libDir.create(recursive: true);
   await copyDirectory(bundleDir, libDir);
 
-  // HACK: rename the binary 'ouisync_app' -> 'ouisync-gui'
-  await File('${libDir.path}/ouisync_app')
-      .rename('${libDir.path}/$executableName');
-
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create();
   await Link('${binDir.path}/$executableName')
@@ -457,14 +458,21 @@ Future<File> buildDeb({
       'Type=Application\n'
       'Icon=$name\n'
       'Categories=Network;FileTransfer;P2P\n';
-  await File('${desktopDir.path}/$name.desktop').writeAsString(desktopContent);
+  await File('${desktopDir.path}/$applicationId.desktop')
+      .writeAsString(desktopContent);
 
   // Add icon
-  // TODO: other resolutions?
-  final iconDir =
-      Directory('${packageDir.path}/usr/share/icons/hicolor/256x256/apps');
-  await iconDir.create(recursive: true);
-  await File('assets/ouisync_icon.png').copy('${iconDir.path}/$name.png');
+  final iconSrc = File('assets/ouisync_icon.png');
+
+  for (final res in [16, 22, 24, 32, 48, 64, 128, 256]) {
+    final iconDir = Directory(
+        '${packageDir.path}/usr/share/icons/hicolor/${res}x$res/apps');
+    await iconDir.create(recursive: true);
+
+    final iconDst = File('${iconDir.path}/$name.png');
+
+    await createIcon(iconSrc, iconDst, res);
+  }
 
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
@@ -473,7 +481,7 @@ Future<File> buildDeb({
   final controlContent = 'Package: $name\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
-      'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1 | libappindicator3-1\n'
+      'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1, libappindicator3-1\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
@@ -892,4 +900,17 @@ Future<bool> checkWorkingTreeIsClean(GitDir git) async {
     }
   }
   return true;
+}
+
+Future<void> createIcon(File src, File dst, int resolution) async {
+  final command = image.Command()
+    ..decodeImageFile(src.path)
+    ..copyResize(
+      width: resolution,
+      height: resolution,
+      interpolation: image.Interpolation.cubic,
+    )
+    ..writeToFile(dst.path);
+
+  await command.executeThread();
 }
