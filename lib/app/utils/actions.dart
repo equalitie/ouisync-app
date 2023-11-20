@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
@@ -101,10 +100,10 @@ String generateRandomPassword() {
 }
 
 Future<String?> getiOSReposPath() async {
-    String? iosReposPath;
-    if (Platform.isIOS) {
-      final iosDirectory = await getApplicationDocumentsDirectory();  
-      iosReposPath = p.join(iosDirectory.path, 'ouisync');
-    }
-    return iosReposPath;
+  String? iosReposPath;
+  if (Platform.isIOS) {
+    final iosDirectory = await getApplicationDocumentsDirectory();
+    iosReposPath = p.join(iosDirectory.path, 'ouisync');
   }
+  return iosReposPath;
+}

@@ -133,18 +133,16 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
 
     bool gotIpv4 = false;
 
-    if (extIpStr != null) {
-      final extIp = InternetAddress.tryParse(extIpStr);
+    final extIp = InternetAddress.tryParse(extIpStr);
 
-      if (extIp != null) {
-        if (extIp.type == InternetAddressType.IPv4) {
-          gotIpv4 = true;
-          emit(state.copyWith(externalIPv4: extIpStr));
-        }
+    if (extIp != null) {
+      if (extIp.type == InternetAddressType.IPv4) {
+        gotIpv4 = true;
+        emit(state.copyWith(externalIPv4: extIpStr));
+      }
 
-        if (extIp.type == InternetAddressType.IPv6) {
-          emit(state.copyWith(externalIPv6: extIpStr));
-        }
+      if (extIp.type == InternetAddressType.IPv6) {
+        emit(state.copyWith(externalIPv6: extIpStr));
       }
     }
 
