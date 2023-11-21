@@ -8,7 +8,7 @@ import 'package:shelf/shelf_io.dart';
 
 import 'utils.dart';
 
-abstract class FileServer with AppLogger {
+abstract class FileServer {
   static final _defaultMimeTypeResolver = MimeTypeResolver();
 
   static Future<io.HttpServer> initServer(Object address, int port,
@@ -81,6 +81,7 @@ abstract class FileServer with AppLogger {
   }
 
   static void serveFileRequest(io.HttpServer server, Handler handler,
-          {String poweredByHeader = 'Ouisync using package:shelf'}) =>
-      serveRequests(server, handler, poweredByHeader: poweredByHeader);
+      {String poweredByHeader = 'Ouisync using package:shelf'}) {
+    serveRequests(server, handler, poweredByHeader: poweredByHeader);
+  }
 }
