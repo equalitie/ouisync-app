@@ -490,7 +490,11 @@ class _MainPageState extends State<MainPage>
         final url = await repo.previewFileUrl(item.path);
         await launchUrl(url);
       } on Exception catch (e, st) {
-        loggy.app('Error previewing file using FileServer:\n${e.toString()}', e, st);
+        loggy.app(
+          '(FileServer) Error previewing file ${item.path}:\n${e.toString()}',
+          e,
+          st,
+        );
       }
     }
   }
