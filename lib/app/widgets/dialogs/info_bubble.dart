@@ -191,12 +191,8 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
             duration: animationDuration,
             left: leftPosition,
             right: rightPosition,
-            top: topPosition != null
-                ? topPosition! // + animationTopHeight
-                : null,
-            bottom: bottomPosition != null
-                ? bottomPosition! // + animationBottomHeight
-                : null,
+            top: topPosition,
+            bottom: bottomPosition,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
