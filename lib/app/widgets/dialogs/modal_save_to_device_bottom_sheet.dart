@@ -75,14 +75,18 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
         PositiveButton(
             text: S.current.actionSave,
             onPressed: () async {
-              await _downloadFile(dst);
+              await _downloadFile(context, dst);
             },
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
     ];
   }
 
-  Future<void> _downloadFile(String destinationDir) async {
-    if (await Permission.storage.request().isGranted) {
+  Future<void> _downloadFile(
+      BuildContext context, String destinationDir) async {
+    final status =
+        await Permissions.requestPermission(context, Permission.storage);
+
+    if (status.isGranted) {
       final destinationPath = p.join(destinationDir, widget.data.name);
 
       loggy.debug('Storing file to $destinationPath');
@@ -91,9 +95,9 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
         sourcePath: widget.data.path,
         destinationPath: destinationPath,
       );
-
-      Navigator.of(context, rootNavigator: false).pop();
     }
+
+    Navigator.of(context, rootNavigator: false).pop();
   }
 }
 
@@ -183,7 +187,10 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
         title: S.current.messageSelectLocation,
         pickText: S.current.messageSaveToLocation,
         requestPermission: () async {
-          final status = await Permission.storage.request();
+          final status = await Permissions.requestPermission(
+            context,
+            Permission.storage,
+          );
           return status.isGranted;
         });
 

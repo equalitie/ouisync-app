@@ -1,12 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
 import 'utils.dart';
 
-class Permissions with AppLogger {
-  static Future<PermissionResult> requestPermission(
-      BuildContext context, Permission permission, String name) async {
+class Permissions {
+  static Future<PermissionStatus> requestPermission(
+    BuildContext context,
+    Permission permission,
+  ) async {
+    if (!Platform.isAndroid && !Platform.isIOS && !Platform.isWindows) {
+      // This platform doesn't support permissions. Assume granted.
+      return PermissionStatus.granted;
+    }
+
     PermissionStatus status =
         await Permission.byValue(permission.value).request();
 
@@ -18,13 +27,14 @@ class Permissions with AppLogger {
         break;
 
       case PermissionStatus.permanentlyDenied:
-        message =
-            '${ouiSyncPermissions[permission] ?? S.current.messagePermissionRequired}'
-            '\n\n${S.current.messageGrantingRequiresSettings}';
+        final header = _labels[permission]?.rationale ??
+            S.current.messagePermissionRequired;
+
+        message = '$header\n\n${S.current.messageGrantingRequiresSettings}';
         break;
 
       default:
-        message = ouiSyncPermissions[permission] ??
+        message = _labels[permission]?.rationale ??
             S.current.messagePermissionRequired;
         break;
     }
@@ -53,31 +63,35 @@ class Permissions with AppLogger {
               )
             ];
 
+      final name = (_labels[permission]?.name)!;
+
       await Dialogs.alertDialogWithActions(
-          context: context,
-          title: S.current.titleRequiredPermission,
-          body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
-          actions: actions);
+        context: context,
+        title: S.current.titleRequiredPermission,
+        body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
+        actions: actions,
+      );
     }
 
-    return PermissionResult(
-        permission: permission, status: status, resultMessage: message);
+    return status;
   }
 }
 
-class PermissionResult {
-  PermissionResult(
-      {required this.permission, required this.status, this.resultMessage});
-
-  final Permission permission;
-  final PermissionStatus status;
-  final String? resultMessage;
-}
-
-final ouiSyncPermissions = {
-  Permission.camera: S.current.messageCameraPermission,
-  Permission.ignoreBatteryOptimizations:
-      S.current.messageIgnoreBatteryOptimizationsPermission,
-  Permission.storage: S.current.messageStoragePermission,
-  Permission.accessMediaLocation: S.current.messageMediaLocationPermission
+final _labels = {
+  Permission.accessMediaLocation: (
+    name: S.current.messageMediaLocation,
+    rationale: S.current.messageMediaLocationPermission
+  ),
+  Permission.camera: (
+    name: S.current.messageCamera,
+    rationale: S.current.messageCameraPermission,
+  ),
+  //Permission.ignoreBatteryOptimizations: (
+  //  name: TODO,
+  //  rationale: S.current.messageIgnoreBatteryOptimizationsPermission,
+  //),
+  Permission.storage: (
+    name: S.current.messageStorage,
+    rationale: S.current.messageStoragePermission,
+  ),
 };
