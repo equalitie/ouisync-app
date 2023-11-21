@@ -197,10 +197,6 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid>
         );
         return status.isGranted;
       },
-      // FIXME: The "Go up" functionality is broken on Linux due to a bug in the filesystem_picker
-      // library. It's still possible to navigate up via the breadcrumbs so disabling it now to
-      // prevent bad UX.
-      showGoUp: false,
     );
 
     if (path == null) return;
