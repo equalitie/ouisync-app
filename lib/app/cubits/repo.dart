@@ -581,15 +581,19 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<Uri> previewFileUrl(String path) async {
-    final handleInfo = FileServer.getFileHandleInfoForPath(path);
-    final handler = FileServer.createFileHandler(handleInfo, openFile);
+    final handleInfo = await FileServer.getFileHandleInfoForPath(path);
+    final handler = await FileServer.createFileHandler(handleInfo, openFile);
 
-    final server = await FileServer.initServer(Constants.fileServerAuthority, 0);
+    final server =
+        await FileServer.initServer(Constants.fileServerAuthority, 0);
     FileServer.serveFileRequest(server, handler);
 
     loggy.app('Serving files at http://${server.address.host}:${server.port}');
-    
-    final url = Uri.http('${server.address.host}:${server.port}', Constants.fileServerPreviewPath, { Constants.fileServerHandleQuery: handleInfo.handle});
+
+    final url = Uri.http(
+        '${server.address.host}:${server.port}',
+        Constants.fileServerPreviewPath,
+        {Constants.fileServerHandleQuery: handleInfo.handle});
     return url;
   }
 }
