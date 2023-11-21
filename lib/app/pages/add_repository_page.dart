@@ -81,9 +81,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
       onPressed: _isDesktop
           ? null
           : () async {
-              final permissionName = S.current.messageCamera;
               final permissionGranted =
-                  await _checkPermission(Permission.camera, permissionName);
+                  await _checkPermission(Permission.camera);
 
               if (!permissionGranted) return;
 
@@ -109,17 +108,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
       leadingIcon: const Icon(Icons.qr_code_2_outlined),
       text: S.current.actionScanQR.toUpperCase());
 
-  Future<bool> _checkPermission(
-      Permission permission, String permissionName) async {
-    final result = await Permissions.requestPermission(
-        context, permission, permissionName);
-
-    if (result.status != PermissionStatus.granted) {
-      loggy.app(result.resultMessage);
-      return false;
-    }
-
-    return true;
+  Future<bool> _checkPermission(Permission permission) async {
+    final status = await Permissions.requestPermission(context, permission);
+    return status == PermissionStatus.granted;
   }
 
   Widget _buildOrSeparator() {

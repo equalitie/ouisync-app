@@ -75,14 +75,18 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
         PositiveButton(
             text: S.current.actionSave,
             onPressed: () async {
-              await _downloadFile(dst);
+              await _downloadFile(context, dst);
             },
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
     ];
   }
 
-  Future<void> _downloadFile(String destinationDir) async {
-    if (await Permission.storage.request().isGranted) {
+  Future<void> _downloadFile(
+      BuildContext context, String destinationDir) async {
+    final status =
+        await Permissions.requestPermission(context, Permission.storage);
+
+    if (status.isGranted) {
       final destinationPath = p.join(destinationDir, widget.data.name);
 
       loggy.debug('Storing file to $destinationPath');
@@ -91,9 +95,9 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
         sourcePath: widget.data.path,
         destinationPath: destinationPath,
       );
-
-      Navigator.of(context, rootNavigator: false).pop();
     }
+
+    Navigator.of(context, rootNavigator: false).pop();
   }
 }
 
@@ -110,7 +114,8 @@ class PickLocationNonAndroid extends StatefulWidget {
       _PickLocationNonAndroidState(onDestinationSelected);
 }
 
-class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
+class _PickLocationNonAndroidState extends State<PickLocationNonAndroid>
+    with AppLogger {
   String? _selectedPath;
   final void Function(String) _onDestinationSelected;
 
@@ -139,7 +144,10 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
     var selectedPath = _selectedPath;
     if (selectedPath != null) return selectedPath;
 
-    if (io.Platform.isWindows) {
+    if (io.Platform.isLinux ||
+        io.Platform.isWindows ||
+        io.Platform.isMacOS ||
+        io.Platform.isIOS) {
       selectedPath = (await getDownloadsDirectory())?.path;
     }
 
@@ -176,16 +184,20 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
 
   Future<void> _changeDestinationPath(String currentDestination) async {
     final path = await FilesystemPicker.open(
-        context: context,
-        fsType: FilesystemType.folder,
-        rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
-        directory: io.Directory(currentDestination),
-        title: S.current.messageSelectLocation,
-        pickText: S.current.messageSaveToLocation,
-        requestPermission: () async {
-          final status = await Permission.storage.request();
-          return status.isGranted;
-        });
+      context: context,
+      fsType: FilesystemType.folder,
+      rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
+      directory: io.Directory(currentDestination),
+      title: S.current.messageSelectLocation,
+      pickText: S.current.messageSaveToLocation,
+      requestPermission: () async {
+        final status = await Permissions.requestPermission(
+          context,
+          Permission.storage,
+        );
+        return status.isGranted;
+      },
+    );
 
     if (path == null) return;
     if (path.isEmpty) return;

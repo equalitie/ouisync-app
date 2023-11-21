@@ -90,16 +90,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    if (Platform.isAndroid || Platform.isIOS || Platform.isWindows) {
-      final storagePermission = Platform.isAndroid
-          ? await _getStoragePermissionForAndroidVersion()
-          : (permission: Permission.storage, name: S.current.messageStorage);
+    final storagePermission = Platform.isAndroid
+        ? await _getStoragePermissionForAndroidVersion()
+        : Permission.storage;
 
-      final permissionGranted = await _checkPermission(
-          storagePermission.permission, storagePermission.name);
-
-      if (!permissionGranted) return;
-    }
+    final permissionGranted = await _checkPermission(storagePermission);
+    if (!permissionGranted) return;
 
     final dstDir = repo.state.currentFolder.path;
 
@@ -159,18 +155,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     }
   }
 
-  Future<({Permission permission, String name})>
-      _getStoragePermissionForAndroidVersion() async {
+  Future<Permission> _getStoragePermissionForAndroidVersion() async {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
 
-    final storagePermission = androidInfo.version.sdkInt >= 33
-        ? (
-            permission: Permission.accessMediaLocation,
-            name: S.current.messageMediaLocation
-          )
-        : (permission: Permission.storage, name: S.current.messageStorage);
-
-    return storagePermission;
+    return androidInfo.version.sdkInt >= 33
+        ? Permission.accessMediaLocation
+        : Permission.storage;
   }
 
   Future<String> _renameFile(String dstPath, int versions) async {
@@ -186,18 +176,8 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     return newFileName;
   }
 
-  Future<bool> _checkPermission(
-    Permission permission,
-    String permissionName,
-  ) async {
-    final result = await Permissions.requestPermission(
-        context, permission, permissionName);
-
-    if (result.status != PermissionStatus.granted) {
-      loggy.app(result.resultMessage);
-      return false;
-    }
-
-    return true;
+  Future<bool> _checkPermission(Permission permission) async {
+    final status = await Permissions.requestPermission(context, permission);
+    return status == PermissionStatus.granted;
   }
 }
