@@ -42,7 +42,7 @@ dependencies:
   ffi: ^2.0.1
   file: ^6.1.4
   file_picker: ^5.2.5
-  filesystem_picker: ^3.1.0
+  filesystem_picker: ^4.0.0
   flutter:
     sdk: flutter
   # Fix for the issue "[BUG] Release 1.2.0 is broken"
@@ -84,7 +84,7 @@ dependencies:
     path: ouisync/bindings/dart
   package_info_plus: ^4.1.0
   path: ^1.8.2
-  path_provider: ^2.0.9
+  path_provider: ^2.1.1
   percent_indicator: ^4.2.2
   permission_handler: ^11.0.1
   qr_flutter: ^4.0.0

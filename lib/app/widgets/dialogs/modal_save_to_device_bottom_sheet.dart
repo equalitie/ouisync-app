@@ -114,7 +114,8 @@ class PickLocationNonAndroid extends StatefulWidget {
       _PickLocationNonAndroidState(onDestinationSelected);
 }
 
-class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
+class _PickLocationNonAndroidState extends State<PickLocationNonAndroid>
+    with AppLogger {
   String? _selectedPath;
   final void Function(String) _onDestinationSelected;
 
@@ -143,7 +144,10 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
     var selectedPath = _selectedPath;
     if (selectedPath != null) return selectedPath;
 
-    if (io.Platform.isWindows) {
+    if (io.Platform.isLinux ||
+        io.Platform.isWindows ||
+        io.Platform.isMacOS ||
+        io.Platform.isIOS) {
       selectedPath = (await getDownloadsDirectory())?.path;
     }
 
@@ -180,19 +184,24 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid> {
 
   Future<void> _changeDestinationPath(String currentDestination) async {
     final path = await FilesystemPicker.open(
-        context: context,
-        fsType: FilesystemType.folder,
-        rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
-        directory: io.Directory(currentDestination),
-        title: S.current.messageSelectLocation,
-        pickText: S.current.messageSaveToLocation,
-        requestPermission: () async {
-          final status = await Permissions.requestPermission(
-            context,
-            Permission.storage,
-          );
-          return status.isGranted;
-        });
+      context: context,
+      fsType: FilesystemType.folder,
+      rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
+      directory: io.Directory(currentDestination),
+      title: S.current.messageSelectLocation,
+      pickText: S.current.messageSaveToLocation,
+      requestPermission: () async {
+        final status = await Permissions.requestPermission(
+          context,
+          Permission.storage,
+        );
+        return status.isGranted;
+      },
+      // FIXME: The "Go up" functionality is broken on Linux due to a bug in the filesystem_picker
+      // library. It's still possible to navigate up via the breadcrumbs so disabling it now to
+      // prevent bad UX.
+      showGoUp: false,
+    );
 
     if (path == null) return;
     if (path.isEmpty) return;
