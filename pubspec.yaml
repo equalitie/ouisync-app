@@ -31,6 +31,8 @@ dependencies:
   collection: ^1.16.0
   connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
+  cryptography: ^2.7.0
+  cryptography_flutter: ^2.3.2
   cupertino_icons: ^1.0.4
   dart_ipify: ^1.1.1
   desktop_drop: ^0.4.1
