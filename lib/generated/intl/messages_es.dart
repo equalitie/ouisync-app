@@ -293,6 +293,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Crea un nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
         "messageCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Creando el token para compartir…"),
+        "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
+            "Declaración para servicios distribuidos en línea"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -308,6 +310,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Un directorio"),
         "messageEqValuesP1": MessageLookupByLibrary.simpleMessage(
             "Los derechos básicos y las libertades fundamentales son inherentes, inalienables y se aplican a todos por igual. Los derechos humanos son universales; protegido en el derecho internacional y consagrado en la "),
+        "messageEqValuesP10": MessageLookupByLibrary.simpleMessage(
+            "Como organización, buscamos ser transparentes con nuestras políticas y procedimientos. Con la mayor frecuencia posible, nuestro código fuente está abierto y disponible gratuitamente, protegido por licencias que fomentan el desarrollo, el intercambio y la propagación de estos principios impulsados por la comunidad"),
+        "messageEqValuesP11": MessageLookupByLibrary.simpleMessage(
+            "La capacidad de expresarse libremente y de acceder a la información pública es la columna vertebral de una verdadera democracia. La información pública debe ser de dominio público. La libertad de expresión incluye debates activos y acalorados, incluso argumentos mal articulados, mal construidos y que pueden considerarse ofensivos para algunos. Sin embargo, la libertad de expresión no es un derecho absoluto. Nos oponemos firmemente a la violencia y la incitación a violar los derechos de otros, especialmente la propagación de la violencia, el odio, la discriminación y la privación de derechos de cualquier grupo étnico o social identificable"),
+        "messageEqValuesP12": MessageLookupByLibrary.simpleMessage(
+            "Operamos desde diferentes países y venimos de diversos orígenes sociales. Trabajamos juntos por una sociedad que respete y defienda los derechos de los demás en el mundo físico y digital. La Declaración Internacional de Derechos articula el conjunto de derechos humanos que inspira nuestro trabajo; Creemos que las personas tienen el derecho y el deber de proteger estos derechos"),
+        "messageEqValuesP13": MessageLookupByLibrary.simpleMessage(
+            "Entendemos que se puede abusar de nuestras herramientas y servicios para contravenir estos principios y nuestros términos de servicio, por lo que condenamos y prohibimos firme y activamente dicho uso. No permitimos que nuestro software y servicios se utilicen para promover la comisión de actividades ilícitas, ni ayudaremos en la propagación del discurso de odio o la promoción de la violencia a través de Internet"),
+        "messageEqValuesP14": MessageLookupByLibrary.simpleMessage(
+            "Hemos implementado medidas de seguridad para mitigar el uso indebido de nuestros productos y servicios. Cuando tomamos conocimiento de cualquier uso que viole nuestros principios o términos de servicio, tomamos medidas para detenerle. Guiados por nuestras políticas internas, deliberamos cuidadosamente sobre actos que podrían comprometer nuestros principios. Nuestros procedimientos seguirán evolucionando en función de la experiencia y las mejores prácticas para que podamos lograr el equilibrio adecuado entre permitir el acceso abierto a nuestros productos y servicios y defender nuestros principios"),
         "messageEqValuesP2": MessageLookupByLibrary.simpleMessage(
             "Las personas valientes arriesgan la vida y la libertad para defender los derechos humanos, movilizarse, criticar y denunciar a los perpetradores de abusos. Las personas valientes expresan su apoyo a los demás, a las ideas y comunican sus preocupaciones al mundo. Estos valientes ejercen sus derechos humanos en línea"),
         "messageEqValuesP3": MessageLookupByLibrary.simpleMessage(
@@ -322,6 +334,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Inspirados en la Carta Internacional de Derechos Humanos, nuestros principios se aplican a todos los individuos, grupos y órganos de la sociedad con los que trabajamos, incluidos los beneficiarios del software y los servicios que lanzamos. Todos nuestros proyectos están diseñados teniendo en cuenta nuestros principios. Nuestros conocimientos, herramientas y servicios están disponibles para estos grupos e individuos siempre que se respeten nuestros principios y términos de servicio"),
         "messageEqValuesP8": MessageLookupByLibrary.simpleMessage(
             "El derecho a la privacidad es un derecho fundamental que pretendemos proteger siempre que sea posible. La privacidad de nuestros beneficiarios directos es sacrosanta para nuestras operaciones. Nuestras herramientas, servicios y políticas internas están diseñadas para este efecto. Utilizaremos todos los recursos técnicos y legales a nuestro alcance para proteger la privacidad de nuestros beneficiarios. Consulte nuestra Política de privacidad y nuestra "),
+        "messageEqValuesP9": MessageLookupByLibrary.simpleMessage(
+            "La seguridad es un tema constante en todos nuestros proyectos de desarrollo de software, prestación de servicios y desarrollo de capacidades. Diseñamos nuestros sistemas y procesos para mejorar la seguridad de la información en Internet y elevar el perfil de seguridad y la experiencia del usuario. Intentamos predicar con el ejemplo al no comprometer las propiedades de seguridad de una herramienta o sistema por razones de velocidad, usabilidad o costo. No creemos en la seguridad a través de la oscuridad y mantenemos la transparencia a través del acceso abierto a nuestro código base. Siempre pecamos de cautelosos y tratamos de implementar una buena seguridad tanto operativa como interna"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "esta construido en línea con nuestros valores.\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
@@ -490,6 +504,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Intercambio entre pares"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Este permiso es requerido"),
+        "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
+            "Esta sección se utiliza para informar a los visitantes sobre nuestras políticas con la recopilación, uso y divulgación de Información personal si alguien decide utilizar nuestro servicio"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
             "“El hombre nace libre, y en todas partes está encadenado.”"),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
@@ -578,6 +594,24 @@ class MessageLookup extends MessageLookupByLibrary {
             "Pulse aquí para leer nuestros Términos de Uso y Notas de Privacidad"),
         "messageTapForValues": MessageLookupByLibrary.simpleMessage(
             "Pulse aquí para leer nuestros valores"),
+        "messageTerms1_1": MessageLookupByLibrary.simpleMessage(
+            "Infringe los derechos de protección de la información personal, incluidos los valores subyacentes o la carta de "),
+        "messageTerms1_2": MessageLookupByLibrary.simpleMessage(
+            "(Ley de Protección de Información Personal y Documentos Electrónicos)"),
+        "messageTerms2": MessageLookupByLibrary.simpleMessage(
+            "Constituya material de explotación sexual infantil (incluido material que puede no ser material ilegal de abuso sexual infantil pero que, no obstante, explota o promueve la explotación sexual de menores), pornografía ilegal o que sea de otro modo indecente"),
+        "messageTerms3": MessageLookupByLibrary.simpleMessage(
+            "Contiene o promueve actos extremos de violencia o actividad terrorista, incluido el terror o la propaganda extremista violenta"),
+        "messageTerms4": MessageLookupByLibrary.simpleMessage(
+            "Defienda la intolerancia, el odio o la incitación a la violencia contra cualquier persona o grupo de personas por motivos de raza, religión, etnia, origen nacional, sexo, identidad de género, orientación sexual, discapacidad, impedimento o cualquier otra característica asociada con discriminación o marginación sistémica"),
+        "messageTerms5": MessageLookupByLibrary.simpleMessage(
+            "Archivos que contengan virus, troyanos, gusanos, bombas lógicas u otro material malicioso o tecnológicamente dañino"),
+        "messageTermsPrivacyP1": MessageLookupByLibrary.simpleMessage(
+            "Estos términos de uso de Ouisync (el \"Acuerdo\"), junto con nuestro aviso de privacidad (colectivamente, los \"Términos\"), rigen el uso de Ouisync - un protocolo y software de sincronización de archivos en línea."),
+        "messageTermsPrivacyP2": MessageLookupByLibrary.simpleMessage(
+            "Al instalar y ejecutar la aplicación Ouisync, usted indica su consentimiento para estar sujeto y cumplir con este acuerdo entre usted y eQualie inc. (“eQualie”, “nosotros”). El uso de la aplicación Ouisync y de la red Ouisync (el Servicio) es proporcionado por eQualie sin costo alguno y está diseñado para su uso tal como está"),
+        "messageTermsPrivacyP3": MessageLookupByLibrary.simpleMessage(
+            "La aplicación Ouisync está construida alineada con los valores de eQualie. Al utilizar este software, usted acepta que no utilizará Ouisync para publicar, compartir o almacenar materiales que sean contrarios a los valores subyacentes ni a la letra de las leyes de Quebec o Canadá o la Carta Internacional de Derechos Humanos, incluido el contenido que:"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Token de repositorio copiado al portapapeles."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(

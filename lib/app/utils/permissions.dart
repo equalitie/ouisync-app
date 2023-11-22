@@ -76,10 +76,6 @@ class Permissions {
 }
 
 final _labels = {
-  Permission.accessMediaLocation: (
-    name: S.current.messageMediaLocation,
-    rationale: S.current.messageMediaLocationPermission
-  ),
   Permission.camera: (
     name: S.current.messageCamera,
     rationale: S.current.messageCameraPermission,
