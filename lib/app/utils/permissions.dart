@@ -16,9 +16,7 @@ class Permissions {
       return PermissionStatus.granted;
     }
 
-    PermissionStatus status =
-        await Permission.byValue(permission.value).request();
-
+    final status = await permission.request();
     final String message;
 
     switch (status) {
