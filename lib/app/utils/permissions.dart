@@ -16,9 +16,7 @@ class Permissions {
       return PermissionStatus.granted;
     }
 
-    PermissionStatus status =
-        await Permission.byValue(permission.value).request();
-
+    final status = await permission.request();
     final String message;
 
     switch (status) {
@@ -78,10 +76,6 @@ class Permissions {
 }
 
 final _labels = {
-  Permission.accessMediaLocation: (
-    name: S.current.messageMediaLocation,
-    rationale: S.current.messageMediaLocationPermission
-  ),
   Permission.camera: (
     name: S.current.messageCamera,
     rationale: S.current.messageCameraPermission,

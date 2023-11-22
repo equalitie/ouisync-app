@@ -64,40 +64,45 @@ class RepositoryCreation extends HookWidget with AppLogger {
       addListeners();
 
       return BlocBuilder<CreateRepositoryCubit, CreateRepositoryState>(
-          bloc: createRepoCubit,
-          builder: (context, state) => WillPopScope(
-              onWillPop: () async {
-                if (state.deleteRepositoryBeforePop) {
-                  assert(state.repositoryMetaInfo != null,
-                      '_repositoryMetaInfo is null');
+        bloc: createRepoCubit,
+        builder: (context, state) => PopScope(
+          onPopInvoked: (didPop) async {
+            if (!didPop) {
+              return;
+            }
 
-                  if (state.repositoryMetaInfo == null) {
-                    throw ('A repository was created, but saving the password into the '
-                        'secure storage failed and it may be lost.\nMost likely this '
-                        'repository needs to be deleted.');
-                  }
+            if (!state.deleteRepositoryBeforePop) {
+              return;
+            }
 
-                  final repoName = state.repositoryMetaInfo!.name;
-                  final authMode =
-                      cubit.settings.getAuthenticationMode(repoName);
+            assert(state.repositoryMetaInfo != null,
+                '_repositoryMetaInfo is null');
 
-                  await cubit.deleteRepository(
-                      state.repositoryMetaInfo!, authMode);
-                }
+            if (state.repositoryMetaInfo == null) {
+              throw ('A repository was created, but saving the password into the '
+                  'secure storage failed and it may be lost.\nMost likely this '
+                  'repository needs to be deleted.');
+            }
 
-                return true;
-              },
-              child: Form(
-                  key: _formKey,
-                  child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SingleChildScrollView(
-                            reverse: true,
-                            child: newRepositoryWidget(context, state))
-                      ]))));
+            final repoName = state.repositoryMetaInfo!.name;
+            final authMode = cubit.settings.getAuthenticationMode(repoName);
+
+            await cubit.deleteRepository(state.repositoryMetaInfo!, authMode);
+          },
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SingleChildScrollView(
+                    reverse: true, child: newRepositoryWidget(context, state))
+              ],
+            ),
+          ),
+        ),
+      );
     } else if (snapshotCubit.hasError) {
       return Container(
           child: Center(
