@@ -1,11 +1,9 @@
 import 'dart:io' as io;
 
-import 'package:external_path/external_path.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -24,13 +22,11 @@ class SaveToDevice extends StatefulWidget with AppLogger {
 }
 
 class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
-  String? destinationDir;
-
-  TextStyle? bodyStyle;
+  String? destinationPath;
 
   @override
   Widget build(BuildContext context) {
-    bodyStyle = Theme.of(context)
+    final bodyStyle = Theme.of(context)
         .textTheme
         .bodyMedium
         ?.copyWith(color: Colors.grey.shade800);
@@ -45,122 +41,93 @@ class _SaveToDeviceState extends State<SaveToDevice> with AppLogger {
             Fields.constrainedText('"${widget.data.name}"', style: bodyStyle)
           ]),
           Dimensions.spacingVerticalDouble,
-          _locationPicker(),
+          _pickFile(),
           Dimensions.spacingVertical,
           Fields.dialogActions(context, buttons: _actions(context)),
         ]);
   }
 
-  Widget _locationPicker() {
-    if (io.Platform.isAndroid) {
-      return PickLocationAndroid((String d) => setState(() {
-            destinationDir = d;
-          }));
-    } else {
-      return PickLocationNonAndroid((String d) => setState(() {
-            destinationDir = d;
-          }));
-    }
-  }
+  Widget _pickFile() => PickFile(
+        value: destinationPath,
+        fileName: widget.data.name,
+        onChanged: (path) => setState(() {
+          destinationPath = path;
+        }),
+      );
 
   List<Widget> _actions(context) {
-    final dst = destinationDir;
+    final path = destinationPath;
 
     return [
       NegativeButton(
-          text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context, rootNavigator: false).pop(''),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
-      if (dst != null)
+        text: S.current.actionCancel,
+        onPressed: () => Navigator.of(context, rootNavigator: false).pop(''),
+        buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+      ),
+      if (path != null)
         PositiveButton(
-            text: S.current.actionSave,
-            onPressed: () async {
-              await _downloadFile(context, dst);
-            },
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+          text: S.current.actionSave,
+          onPressed: () => _downloadFile(context, path),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        )
     ];
   }
 
   Future<void> _downloadFile(
-      BuildContext context, String destinationDir) async {
-    final status =
-        await Permissions.requestPermission(context, Permission.storage);
+    BuildContext context,
+    String destinationPath,
+  ) async {
+    loggy.debug('Storing file to $destinationPath');
 
-    if (status.isGranted) {
-      final destinationPath = p.join(destinationDir, widget.data.name);
-
-      loggy.debug('Storing file to $destinationPath');
-
-      await widget.cubit.downloadFile(
-        sourcePath: widget.data.path,
-        destinationPath: destinationPath,
-      );
-    }
+    await widget.cubit.downloadFile(
+      sourcePath: widget.data.path,
+      destinationPath: destinationPath,
+    );
 
     Navigator.of(context, rootNavigator: false).pop();
   }
 }
 
-// ---------------------------------------------------------------------------------------
-// Non Android
-// ---------------------------------------------------------------------------------------
-class PickLocationNonAndroid extends StatefulWidget {
-  final void Function(String) onDestinationSelected;
+class PickFile extends StatelessWidget {
+  final String? value;
+  final void Function(String) onChanged;
+  final String fileName;
 
-  const PickLocationNonAndroid(this.onDestinationSelected);
-
-  @override
-  State<PickLocationNonAndroid> createState() =>
-      _PickLocationNonAndroidState(onDestinationSelected);
-}
-
-class _PickLocationNonAndroidState extends State<PickLocationNonAndroid>
-    with AppLogger {
-  String? _selectedPath;
-  final void Function(String) _onDestinationSelected;
-
-  _PickLocationNonAndroidState(this._onDestinationSelected);
+  const PickFile(
+      {required this.value, required this.onChanged, required this.fileName});
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) => FutureBuilder<String?>(
-      future: _determineDefault(),
-      builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-        final dst = snapshot.data;
-        return Column(
+  Widget build(BuildContext context) => FutureBuilder<io.File?>(
+        future: _getDefault(),
+        builder: (context, snapshot) => Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (dst != null) _buildDestinationSelection(dst),
-            ]);
-      });
+              if (snapshot.hasData) _buildPicker(snapshot.data),
+            ]),
+      );
 
-  Future<String?> _determineDefault() async {
-    var selectedPath = _selectedPath;
-    if (selectedPath != null) return selectedPath;
+  Future<io.File?> _getDefault() async {
+    final filePath = value;
 
-    if (io.Platform.isLinux ||
-        io.Platform.isWindows ||
-        io.Platform.isMacOS ||
-        io.Platform.isIOS) {
-      selectedPath = (await getDownloadsDirectory())?.path;
+    if (filePath != null) {
+      return io.File(filePath);
     }
 
-    selectedPath ??= (await getApplicationDocumentsDirectory()).path;
+    final parent = await getDownloadsDirectory();
+    if (parent == null) {
+      return null;
+    }
 
-    _selectedPath = selectedPath;
-    _onDestinationSelected(selectedPath);
+    final file = io.File(p.join(parent.path, fileName));
 
-    return selectedPath;
+    onChanged(file.path);
+
+    return file;
   }
 
-  Widget _buildDestinationSelection(String dst) {
-    return Container(
+  Widget _buildPicker(io.File? file) => Container(
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
@@ -172,227 +139,61 @@ class _PickLocationNonAndroidState extends State<PickLocationNonAndroid>
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Fields.constrainedText(dst),
-                Fields.actionIcon(const Icon(Icons.more_horiz),
-                    color: Colors.black,
-                    onPressed: () async => await _changeDestinationPath(dst))
+                Fields.constrainedText(
+                  file?.path ?? '',
+                  // TODO: It would be better here to have the ellipsis at the beginning rather
+                  // than the end of the text. Is there a way?
+                  textOverflow: TextOverflow.ellipsis,
+                ),
+                Fields.actionIcon(
+                  const Icon(Icons.more_horiz),
+                  color: Colors.black,
+                  onPressed: () => _openPicker(file),
+                )
               ],
             )
           ],
-        ));
-  }
-
-  Future<void> _changeDestinationPath(String currentDestination) async {
-    final path = await FilesystemPicker.open(
-      context: context,
-      fsType: FilesystemType.folder,
-      rootDirectory: io.Directory(p.rootPrefix(currentDestination)),
-      directory: io.Directory(currentDestination),
-      title: S.current.messageSelectLocation,
-      pickText: S.current.messageSaveToLocation,
-      requestPermission: () async {
-        final status = await Permissions.requestPermission(
-          context,
-          Permission.storage,
-        );
-        return status.isGranted;
-      },
-    );
-
-    if (path == null) return;
-    if (path.isEmpty) return;
-
-    setState(() {
-      _selectedPath = path;
-      _onDestinationSelected(path);
-    });
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-// Android
-// ---------------------------------------------------------------------------------------
-class PickLocationAndroid extends StatefulWidget {
-  final void Function(String) _onDestinationSelected;
-
-  const PickLocationAndroid(this._onDestinationSelected);
-
-  @override
-  State<PickLocationAndroid> createState() =>
-      _PickLocationAndroidState(_onDestinationSelected);
-}
-
-class _PickLocationAndroidState extends State<PickLocationAndroid> {
-  List<_Drive>? _drives;
-  int _selectedDrive = 0; // Assumes there will always be at least one drive.
-  final void Function(String) _onDestinationSelected;
-
-  _PickLocationAndroidState(this._onDestinationSelected);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) => FutureBuilder<List<_Drive>>(
-      future: _initDrives(),
-      builder: (BuildContext context, AsyncSnapshot<List<_Drive>> snapshot) {
-        final drives = snapshot.data;
-        return Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (drives != null) _buildExternalStorageSelection(drives),
-              Dimensions.spacingVertical,
-              if (drives != null) _buildDestinationSelection(drives),
-            ]);
-      });
-
-  Widget _buildExternalStorageSelection(List<_Drive> drives) {
-    if (drives.length <= 1) {
-      return SizedBox.shrink();
-    }
-
-    return DropdownButton<int>(
-      value: _selectedDrive,
-      isExpanded: true,
-      onChanged: (int? value) {
-        setState(() {
-          _selectedDrive = value!;
-        });
-      },
-      items:
-          Iterable<int>.generate(drives.length).map<DropdownMenuItem<int>>((i) {
-        return DropdownMenuItem<int>(
-          value: i,
-          child: Text(drives[i].name),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildDestinationSelection(List<_Drive> drives) {
-    final drive = drives[_selectedDrive];
-
-    return Container(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
-          ),
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Fields.constrainedText(drive.defaultDirRelative()),
-                Fields.actionIcon(const Icon(Icons.more_horiz),
-                    onPressed: () async => await _changeDestinationPath(drives))
-              ],
-            )
-          ],
-        ));
+      );
+
+  Future<void> _openPicker(io.File? oldFile) async {
+    final newFile = (io.Platform.isAndroid || io.Platform.isIOS)
+        ? await _openPickerMobile(oldFile)
+        : await _openPickerDesktop(oldFile);
+
+    if (newFile != null) {
+      onChanged(newFile.path);
+    }
   }
 
-  Future<void> _changeDestinationPath(List<_Drive> drives) async {
-    final drive = drives[_selectedDrive];
+  Future<io.File?> _openPickerMobile(io.File? file) async {
+    final initialDirectory = file?.parent;
 
-    final path = await FilesystemPicker.open(
-        context: context,
-        fsType: FilesystemType.folder,
-        rootDirectory: drive.root,
-        rootName: drive.name,
-        directory: drive.defaultDir(),
-        title: S.current.messageSelectLocation,
-        pickText: S.current.messageSaveToLocation,
-        requestPermission: () async {
-          final status = await Permission.storage.request();
-          return status.isGranted;
-        });
+    final directoryPath = await FilePicker.platform.getDirectoryPath(
+      initialDirectory: initialDirectory?.path,
+    );
 
-    if (path == null) return;
-    if (path.isEmpty) return;
+    if (directoryPath == null || directoryPath.isEmpty) {
+      return null;
+    }
 
-    setState(() {
-      if (drive.trySetDefaultDir(path)) {
-        _onDestinationSelected(drive.defaultDir().path);
-      }
-    });
+    return io.File(p.join(directoryPath, fileName));
   }
 
-  Future<List<_Drive>> _initDrives() async {
-    var drives = _drives;
-    if (drives != null) {
-      // Already initialized.
-      return drives;
+  Future<io.File?> _openPickerDesktop(io.File? file) async {
+    final filePath = await FilePicker.platform.saveFile(
+      fileName: file?.fileName ?? fileName,
+      initialDirectory: file?.parent.path,
+    );
+
+    if (filePath == null || filePath.isEmpty) {
+      return null;
     }
 
-    drives = [];
-    _drives = drives;
-    // This is a hack, there isn't really a guarantee that the first item is
-    // the internal memory and the others are external.
-    var i = 0;
-    final dirs = await ExternalPath.getExternalStorageDirectories();
-    final downloads = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DOWNLOADS);
-
-    if (dirs.isEmpty) {
-      drives.add(_Drive("Downloads", io.Directory(downloads)));
-      return drives;
-    }
-
-    for (final dirStr in dirs) {
-      final dir = io.Directory(dirStr);
-      _Drive storage;
-      if (i == 0) {
-        storage = _Drive("Internal drive", dir);
-      } else {
-        if (dirs.length <= 2) {
-          storage = _Drive("External drive", dir);
-        } else {
-          storage = _Drive("External drive #${i - 1}", dir);
-        }
-      }
-      storage.trySetDefaultDir(downloads);
-      drives.add(storage);
-      i += 1;
-    }
-
-    _onDestinationSelected(drives[_selectedDrive].defaultDir().path);
-
-    return drives;
+    return io.File(filePath);
   }
 }
 
-class _Drive {
-  final String name;
-  final io.Directory root;
-  io.Directory? _defaultDir; // If set, must be a subdirectory in `root`.
-
-  _Drive(this.name, this.root);
-
-  bool trySetDefaultDir(String defaultDir) {
-    if (defaultDir.startsWith(root.path)) {
-      _defaultDir = io.Directory(defaultDir);
-      return true;
-    }
-    return false;
-  }
-
-  io.Directory defaultDir() {
-    final d = _defaultDir;
-    if (d != null) {
-      return d;
-    } else {
-      return root;
-    }
-  }
-
-  String defaultDirRelative() {
-    var d = defaultDir().path;
-    return "${d.substring(root.path.length)}/";
-  }
+extension FileExtension on io.File {
+  String get fileName => p.basename(path);
 }

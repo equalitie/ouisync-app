@@ -38,19 +38,9 @@ dependencies:
   dns_client: ^0.2.1
   envied: ^0.3.0+3
   equatable: ^2.0.3
-  external_path: ^1.0.1
   ffi: ^2.0.1
   file: ^6.1.4
-  file_picker: ^5.2.5
-
-  # Fix for issue https://github.com/andyduke/filesystem_picker/issues/50
-  # filesystem_picker: ^4.0.0
-  filesystem_picker:
-    git:
-      url: https://github.com/madadam/filesystem_picker
-      ref: fix-go-up-on-linux
-      path: package
-
+  file_picker: ^6.1.1
   flutter:
     sdk: flutter
   # Fix for the issue "[BUG] Release 1.2.0 is broken"

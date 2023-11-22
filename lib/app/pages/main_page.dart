@@ -275,32 +275,43 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: _buildOuiSyncBar(),
-      body: WillPopScope(
-          child: Stack(
-              alignment: AlignmentDirectional.bottomEnd,
-              children: <Widget>[
-                Column(children: [Expanded(child: buildMainWidget())]),
-                _cubits.repositories.builder((repos) =>
-                    RepositoryProgress(repos.currentRepo?.maybeCubit))
-              ]),
-          onWillPop: _onBackPressed),
+      body: PopScope(
+        // Don't pop => don't exit
+        //
+        // We don't want to do the pop because that would destroy the current Isolate's execution
+        // context and we would lose track of open OuiSync objects (i.e. repositories, files,
+        // directories, network handles,...). This is bad because even though the current execution
+        // context is deleted, the OuiSync Rust global variables and threads stay alive. If the
+        // user at that point tried to open the app again, this widget would try to reinitialize
+        // all those variables without previously properly closing them.
+        canPop: false,
+        onPopInvoked: _onBackPressed,
+        child: Stack(
+          alignment: AlignmentDirectional.bottomEnd,
+          children: <Widget>[
+            Column(children: [Expanded(child: buildMainWidget())]),
+            _cubits.repositories.builder(
+                (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit))
+          ],
+        ),
+      ),
       floatingActionButton: _cubits.repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
       bottomSheet: _bottomSheet);
 
-  Future<bool> _onBackPressed() async {
+  Future<void> _onBackPressed(bool didPop) async {
     final currentRepo = _currentRepo;
 
     if (currentRepo is OpenRepoEntry) {
       final currentFolder = currentRepo.cubit.state.currentFolder;
       if (!currentFolder.isRoot) {
         await currentRepo.cubit.navigateTo(currentFolder.parent);
-        return false;
+        return;
       }
 
       if (!_cubits.repositories.showList) {
         _cubits.repositories.pushRepoList(true);
-        return false;
+        return;
       }
     }
 
@@ -308,21 +319,10 @@ class _MainPageState extends State<MainPage>
 
     if (clickCount <= 1) {
       showSnackBar(context, message: S.current.messageExitOuiSync);
-      // Don't pop => don't exit
     } else {
       exitClickCounter.reset();
-      // We still don't want to do the pop because that would destroy the
-      // current Isolate's execution context and we would lose track of
-      // open OuiSync objects (i.e. repositories, files, directories,
-      // network handles,...). This is bad because even though the current
-      // execution context is deleted, the OuiSync Rust global variables
-      // and threads stay alive. If the user at that point tried to open
-      // the app again, this widget would try to reinitialize all those
-      // variables without previously properly closing them.
       await MoveToBackground.moveTaskToBack();
     }
-
-    return false;
   }
 
   _buildOuiSyncBar() => OuiSyncBar(

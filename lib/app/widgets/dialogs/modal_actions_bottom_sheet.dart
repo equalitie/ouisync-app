@@ -1,10 +1,6 @@
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -90,13 +86,6 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Future<void> addFile(context, RepoCubit repo) async {
-    final storagePermission = Platform.isAndroid
-        ? await _getStoragePermissionForAndroidVersion()
-        : Permission.storage;
-
-    final permissionGranted = await _checkPermission(storagePermission);
-    if (!permissionGranted) return;
-
     final dstDir = repo.state.currentFolder.path;
 
     final result = await FilePicker.platform.pickFiles(
@@ -155,14 +144,6 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     }
   }
 
-  Future<Permission> _getStoragePermissionForAndroidVersion() async {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-
-    return androidInfo.version.sdkInt >= 33
-        ? Permission.accessMediaLocation
-        : Permission.storage;
-  }
-
   Future<String> _renameFile(String dstPath, int versions) async {
     final name = p.basenameWithoutExtension(dstPath);
     final extension = p.extension(dstPath);
@@ -174,10 +155,5 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     }
 
     return newFileName;
-  }
-
-  Future<bool> _checkPermission(Permission permission) async {
-    final status = await Permissions.requestPermission(context, permission);
-    return status == PermissionStatus.granted;
   }
 }

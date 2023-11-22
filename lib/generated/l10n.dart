@@ -2900,31 +2900,11 @@ class S {
     );
   }
 
-  /// `Needed for getting access to the media files`
-  String get messageMediaLocationPermission {
-    return Intl.message(
-      'Needed for getting access to the media files',
-      name: 'messageMediaLocationPermission',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Storage`
   String get messageStorage {
     return Intl.message(
       'Storage',
       name: 'messageStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Media Location`
-  String get messageMediaLocation {
-    return Intl.message(
-      'Media Location',
-      name: 'messageMediaLocation',
       desc: '',
       args: [],
     );

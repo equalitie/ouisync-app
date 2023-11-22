@@ -532,10 +532,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogLevelErrorWarnInfo":
             MessageLookupByLibrary.simpleMessage("Error, Warn and Info"),
         "messageLogViewer": MessageLookupByLibrary.simpleMessage("Log viewer"),
-        "messageMediaLocation":
-            MessageLookupByLibrary.simpleMessage("Media Location"),
-        "messageMediaLocationPermission": MessageLookupByLibrary.simpleMessage(
-            "Needed for getting access to the media files"),
         "messageMedium": MessageLookupByLibrary.simpleMessage("Medium"),
         "messageMissingBackgroundServicePermission":
             MessageLookupByLibrary.simpleMessage(
