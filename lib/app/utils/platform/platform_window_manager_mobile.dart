@@ -15,19 +15,7 @@ class PlatformWindowManagerMobile
   Future<void> setTitle(String title) async {}
 
   @override
-  Future<void> setPreventClose(bool isPreventClose) async {}
-
-  @override
   Future<void> initSystemTray() async {}
-
-  @override
-  Future<bool> get isVisible async => false;
-
-  @override
-  void onWindowClose() {}
-
-  @override
-  Future<void> close() async {}
 
   @override
   Future<bool> launchAtStartup(bool enable) async {

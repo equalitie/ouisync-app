@@ -31,23 +31,6 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
 
   final windowManager = PlatformWindowManager(args, session);
 
-  // NOTE: When the app exits, the `State.dispose()` methods are not guaranteed to be called for
-  // some reason. To ensure resources are properly disposed of, we need to do it via this lifecycle
-  // listener.
-  // NOTE: The lifecycle listener itself is never `dispose`d but that's OK because it's supposed to
-  // live as long as the app itself.
-  // NOTE: That the `onExitRequested` function is known to be called only on
-  // Linux and Windows, it is known to not get called on Android and iOS has
-  // not been tested yet.
-  AppLifecycleListener(
-    onExitRequested: () async {
-      await session.close();
-      windowManager.dispose();
-
-      return AppExitResponse.exit;
-    },
-  );
-
   // Make sure to only output logs after Session is created (which sets up the log subscriber),
   // otherwise the logs will go nowhere.
   Loggy.initLoggy(logPrinter: AppLogPrinter());

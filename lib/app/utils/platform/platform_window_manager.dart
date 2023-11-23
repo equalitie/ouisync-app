@@ -15,15 +15,7 @@ abstract class PlatformWindowManager {
 
   Future<void> initSystemTray();
 
-  Future<bool> get isVisible;
-
   void dispose() {}
-
-  Future<void> setPreventClose(bool isPreventClose);
-
-  void onWindowClose() {}
-
-  Future<void> close();
 
   Future<bool> launchAtStartup(bool enable);
 }

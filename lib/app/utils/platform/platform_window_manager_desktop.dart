@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,10 +18,10 @@ class PlatformWindowManagerDesktop
     implements PlatformWindowManager {
   final Session _session;
   final _systemTray = stray.SystemTray();
-  final _appWindow = stray.AppWindow();
 
   late final String _appName;
   bool _showWindow = true;
+  var _state = _State.open;
 
   PlatformWindowManagerDesktop(List<String> args, this._session) {
     initialize(args).then((_) async {
@@ -31,6 +32,10 @@ class PlatformWindowManagerDesktop
 
   Future<void> initialize(List<String> args) async {
     await windowManager.ensureInitialized();
+
+    // Graceful termination on SIGINT and SIGTERM.
+    unawaited(_handleSignal(ProcessSignal.sigint.watch()));
+    unawaited(_handleSignal(ProcessSignal.sigterm.watch()));
 
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _appName = packageInfo.appName;
@@ -102,19 +107,13 @@ class PlatformWindowManagerDesktop
     await menu.buildFrom([
       if (Platform.isLinux)
         stray.MenuItemLabel(
-            label: '${S.current.actionHide} / ${S.current.actionShow}',
-            onClicked: (_) async {
-              await windowManager.isVisible()
-                  ? await _appWindow.hide()
-                  : await _appWindow.show();
-            }),
+          label: '${S.current.actionHide} / ${S.current.actionShow}',
+          onClicked: (_) => _toggleVisible(),
+        ),
       stray.MenuItemLabel(
-          label: S.current.actionExit,
-          onClicked: (_) async {
-            await _session.close();
-            await windowManager.setPreventClose(false);
-            await windowManager.close();
-          }),
+        label: S.current.actionExit,
+        onClicked: (_) => _close(),
+      ),
     ]);
 
     await _systemTray.setContextMenu(menu);
@@ -124,20 +123,12 @@ class PlatformWindowManagerDesktop
 
       if (eventName == stray.kSystemTrayEventClick) {
         Platform.isWindows
-            ? {
-                await windowManager.isVisible()
-                    ? await _appWindow.hide()
-                    : await _appWindow.show()
-              }
-            : _systemTray.popUpContextMenu();
+            ? await _toggleVisible()
+            : await _systemTray.popUpContextMenu();
       } else if (eventName == stray.kSystemTrayEventRightClick) {
         Platform.isWindows
-            ? _systemTray.popUpContextMenu()
-            : {
-                await windowManager.isVisible()
-                    ? await _appWindow.hide()
-                    : await _appWindow.show()
-              };
+            ? await _systemTray.popUpContextMenu()
+            : await _toggleVisible();
       }
     });
   }
@@ -149,12 +140,6 @@ class PlatformWindowManagerDesktop
   }
 
   @override
-  Future<bool> get isVisible async {
-    return false;
-    /*windowManager.isVisible();*/
-  }
-
-  @override
   void dispose() {
     windowManager.removeListener(this);
 
@@ -162,21 +147,25 @@ class PlatformWindowManagerDesktop
   }
 
   @override
-  Future<void> setPreventClose(bool isPreventClose) async {
-    return windowManager.setPreventClose(isPreventClose);
-  }
-
-  @override
   void onWindowClose() async {
-    bool isPreventClose = await windowManager.isPreventClose();
-    if (isPreventClose) {
-      await _appWindow.hide();
+    // By default (when state is `open`), closing the window only minimizes it to the tray. When
+    // the user clicks "Exit" in the tray menu, state is switched to `closing` and the session
+    // close is initiated. Window close prevention is still enabled so the session closing can
+    // complete. Afterwards the close prevention is disabled and the window is closed again, which
+    // then actually closes the window and exits the app.
+    switch (_state) {
+      case _State.open:
+        await windowManager.hide();
+        break;
+      case _State.closing:
+        await _session.close();
+        _state = _State.closed;
+        await windowManager.setPreventClose(false);
+        await windowManager.close();
+        break;
+      case _State.closed:
+        break;
     }
-  }
-
-  @override
-  Future<void> close() async {
-    return windowManager.close();
   }
 
   @override
@@ -202,4 +191,32 @@ class PlatformWindowManagerDesktop
       print(args);
     });
   }
+
+  Future<void> _handleSignal(Stream<ProcessSignal> signals) async {
+    await signals.first;
+    await _close();
+  }
+
+  Future<void> _close() async {
+    if (_state != _State.open) {
+      return;
+    }
+
+    _state = _State.closing;
+    await windowManager.close();
+  }
+}
+
+Future<void> _toggleVisible() async {
+  if (await windowManager.isVisible()) {
+    await windowManager.hide();
+  } else {
+    await windowManager.show();
+  }
+}
+
+enum _State {
+  open,
+  closing,
+  closed,
 }
