@@ -439,6 +439,30 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
   }
 
+  Future<Uri> previewFileUrl(String path) async {
+    final encryptedHandle = await Encrypt.encrypt(path);
+    final mimeType = MimeTypeResolver().lookup(path);
+
+    final handler = createStaticFileHandler(
+      encryptedHandle,
+      mimeType,
+      openFile,
+    );
+
+    final server = await io.serve(handler, Constants.fileServerAuthority, 0);
+    final authority = '${server.address.host}:${server.port}';
+
+    print('Serving file at http://$authority');
+
+    final url = Uri.http(
+      authority,
+      Constants.fileServerPreviewPath,
+      {Constants.fileServerHandleQuery: encryptedHandle},
+    );
+
+    return url;
+  }
+
   Future<void> downloadFile({
     required String sourcePath,
     required String destinationPath,
@@ -580,29 +604,5 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<void> close() async {
     await _handle.close();
     await super.close();
-  }
-
-  Future<Uri> previewFileUrl(String path) async {
-    final encryptedHandle = await Encrypt.encrypt(path);
-    final mimeType = MimeTypeResolver().lookup(path);
-
-    final handler = createStaticFileHandler(
-      encryptedHandle,
-      mimeType,
-      openFile,
-    );
-
-    final server = await io.serve(handler, Constants.fileServerAuthority, 0);
-    final authority = '${server.address.host}:${server.port}';
-
-    print('Serving file at http://$authority');
-
-    final url = Uri.http(
-      authority,
-      Constants.fileServerPreviewPath,
-      {Constants.fileServerHandleQuery: encryptedHandle},
-    );
-
-    return url;
   }
 }
