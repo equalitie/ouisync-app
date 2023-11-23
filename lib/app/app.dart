@@ -24,12 +24,14 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
+  final windowManager = await PlatformWindowManager.create(args);
+
   final session = Session.create(
     configPath: configPath,
     logPath: logPath,
   );
 
-  final windowManager = PlatformWindowManager(args, session);
+  windowManager.session = session;
 
   // Make sure to only output logs after Session is created (which sets up the log subscriber),
   // otherwise the logs will go nowhere.
@@ -141,13 +143,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
     NativeChannels.init();
 
-    initWindowManager().then((_) async => await _backgroundServiceManager
-        .maybeRequestPermissionsAndStartService(context));
-  }
-
-  Future<void> initWindowManager() async {
-    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
-    await widget.windowManager.initSystemTray();
+    unawaited(_init());
   }
 
   @override
@@ -195,6 +191,13 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                 windowManager: widget.windowManager,
               ))),
     );
+  }
+
+  Future<void> _init() async {
+    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
+    await widget.windowManager.initSystemTray();
+    await _backgroundServiceManager
+        .maybeRequestPermissionsAndStartService(context);
   }
 }
 

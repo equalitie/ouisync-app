@@ -16,79 +16,50 @@ import 'platform_window_manager.dart';
 class PlatformWindowManagerDesktop
     with WindowListener, AppLogger
     implements PlatformWindowManager {
-  final Session _session;
-  final _systemTray = stray.SystemTray();
+  Session? _session;
 
-  late final String _appName;
+  final _systemTray = stray.SystemTray();
+  final String _appName;
   bool _showWindow = true;
   var _state = _State.open;
 
-  PlatformWindowManagerDesktop(List<String> args, this._session) {
-    initialize(args).then((_) async {
-      windowManager.addListener(this);
-      await windowManager.setPreventClose(true);
-    });
+  PlatformWindowManagerDesktop._(this._appName);
+
+  static Future<PlatformWindowManagerDesktop> create(List<String> args) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    final manager = PlatformWindowManagerDesktop._(packageInfo.appName);
+    await manager._init(args);
+    return manager;
   }
 
-  Future<void> initialize(List<String> args) async {
-    await windowManager.ensureInitialized();
+  @override
+  set session(Session value) {
+    _session = value;
+  }
 
-    // Graceful termination on SIGINT and SIGTERM.
-    unawaited(_handleSignal(ProcessSignal.sigint.watch()));
-    unawaited(_handleSignal(ProcessSignal.sigterm.watch()));
+  @override
+  Future<bool> launchAtStartup(bool enable) async {
+    LaunchAtStartup.instance.setup(
+        appName: _appName,
+        appPath: Platform.resolvedExecutable,
+        args: [Constants.launchAtStartupArg]);
 
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    _appName = packageInfo.appName;
+    return enable
+        ? await LaunchAtStartup.instance.enable()
+        : await LaunchAtStartup.instance.disable();
+  }
 
-    if (args.isNotEmpty) {
-      _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
-    }
-
-    await _ensureWindowsSingleInstance(args, _appName);
-
-    /// Neither these suations seems to be true any more [Tested on Ubuntu 22.04.3 LTS - 2023-09-22]
-    /// TODO: Remove this comment after more testing
-    /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
-    /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
-    /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
-    /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
-    /// *****************
-    /// For some reason, if we use a constant value for the title in the
-    /// WindowsOptions, the app hangs. This is true for the localized strings,
-    /// or a regular constant value in Constants.
-    /// So we use a harcoded string to start, then we use the localized string
-    /// in app.dart -for now.
-
-    // Make it usable on older HD displays.
-    const initWidth = 650.0;
-    const initHeight = 700.0;
-
-    const initialSize = Size(initWidth, initHeight);
-
-    const minWidth = 320.0;
-    const minHeight = 200.0;
-
-    const minSize = Size(minWidth, minHeight);
-
-    WindowOptions windowOptions = const WindowOptions(
-        center: true,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
-        title: 'Ouisync',
-        size: initialSize,
-        minimumSize: minSize);
-
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      if (_showWindow) {
-        await windowManager.show();
-        await windowManager.focus();
-      }
-    });
+  @override
+  Future<void> setTitle(String title) async {
+    WindowOptions windowOptions = WindowOptions(title: title);
+    return windowManager.waitUntilReadyToShow(windowOptions, () {});
   }
 
   @override
   Future<void> initSystemTray() async {
+    await windowManager.setPreventClose(true);
+
     String path =
         Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
 
@@ -134,16 +105,65 @@ class PlatformWindowManagerDesktop
   }
 
   @override
-  Future<void> setTitle(String title) async {
-    WindowOptions windowOptions = WindowOptions(title: title);
-    return windowManager.waitUntilReadyToShow(windowOptions, () {});
-  }
-
-  @override
   void dispose() {
     windowManager.removeListener(this);
 
     _systemTray.destroy();
+  }
+
+  Future<void> _init(List<String> args) async {
+    await _ensureWindowsSingleInstance(args, _appName);
+
+    await windowManager.ensureInitialized();
+    windowManager.addListener(this);
+
+    // Graceful termination on SIGINT and SIGTERM.
+    unawaited(_handleSignal(ProcessSignal.sigint.watch()));
+    unawaited(_handleSignal(ProcessSignal.sigterm.watch()));
+
+    if (args.isNotEmpty) {
+      _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
+    }
+
+    /// Neither these suations seems to be true any more [Tested on Ubuntu 22.04.3 LTS - 2023-09-22]
+    /// TODO: Remove this comment after more testing
+    /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
+    /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
+    /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
+    /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
+    /// *****************
+    /// For some reason, if we use a constant value for the title in the
+    /// WindowsOptions, the app hangs. This is true for the localized strings,
+    /// or a regular constant value in Constants.
+    /// So we use a harcoded string to start, then we use the localized string
+    /// in app.dart -for now.
+
+    // Make it usable on older HD displays.
+    const initWidth = 650.0;
+    const initHeight = 700.0;
+
+    const initialSize = Size(initWidth, initHeight);
+
+    const minWidth = 320.0;
+    const minHeight = 200.0;
+
+    const minSize = Size(minWidth, minHeight);
+
+    WindowOptions windowOptions = const WindowOptions(
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.normal,
+        title: 'Ouisync',
+        size: initialSize,
+        minimumSize: minSize);
+
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (_showWindow) {
+        await windowManager.show();
+        await windowManager.focus();
+      }
+    });
   }
 
   @override
@@ -158,7 +178,7 @@ class PlatformWindowManagerDesktop
         await windowManager.hide();
         break;
       case _State.closing:
-        await _session.close();
+        await _session?.close();
         _state = _State.closed;
         await windowManager.setPreventClose(false);
         await windowManager.close();
@@ -166,18 +186,6 @@ class PlatformWindowManagerDesktop
       case _State.closed:
         break;
     }
-  }
-
-  @override
-  Future<bool> launchAtStartup(bool enable) async {
-    LaunchAtStartup.instance.setup(
-        appName: _appName,
-        appPath: Platform.resolvedExecutable,
-        args: [Constants.launchAtStartupArg]);
-
-    return enable
-        ? await LaunchAtStartup.instance.enable()
-        : await LaunchAtStartup.instance.disable();
   }
 
   Future<void> _ensureWindowsSingleInstance(
