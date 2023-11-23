@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/env/env.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
+import 'env/env.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-
+    
   const appSuffix = String.fromEnvironment('DEV_SUFFIX');
   final dsn = Env.ouisyncDSN;
 

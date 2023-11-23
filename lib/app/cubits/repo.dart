@@ -5,9 +5,11 @@ import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mime/mime.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:shelf/shelf_io.dart' as io;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
@@ -578,5 +580,29 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<void> close() async {
     await _handle.close();
     await super.close();
+  }
+
+  Future<Uri> previewFileUrl(String path) async {
+    final encryptedHandle = await Encrypt.encrypt(path);
+    final mimeType = MimeTypeResolver().lookup(path);
+
+    final handler = createStaticFileHandler(
+      encryptedHandle,
+      mimeType,
+      openFile,
+    );
+
+    final server = await io.serve(handler, Constants.fileServerAuthority, 0);
+    final authority = '${server.address.host}:${server.port}';
+
+    print('Serving file at http://$authority');
+
+    final url = Uri.http(
+      authority,
+      Constants.fileServerPreviewPath,
+      {Constants.fileServerHandleQuery: encryptedHandle},
+    );
+
+    return url;
   }
 }

@@ -31,6 +31,8 @@ dependencies:
   collection: ^1.16.0
   connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
+  cryptography: ^2.7.0
+  cryptography_flutter: ^2.3.2
   cupertino_icons: ^1.0.4
   dart_ipify: ^1.1.1
   desktop_drop: ^0.4.1
@@ -75,6 +77,7 @@ dependencies:
   launch_at_startup: ^0.2.2
   local_auth: ^2.1.2
   loggy: ^2.0.1+1
+  mime: ^1.0.4
   mobile_scanner: ^2.0.0
   move_to_background: ^1.0.2
   network_info_plus: ^4.0.2
@@ -94,6 +97,7 @@ dependencies:
   settings_ui: ^2.0.2
   share_plus: ^7.1.0
   shared_preferences: ^2.0.13
+  shelf: ^1.4.1
   stream_transform: ^2.1.0
   styled_text: ^7.0.0
   system_tray: ^2.0.3
