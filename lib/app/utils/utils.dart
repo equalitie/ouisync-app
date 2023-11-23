@@ -19,4 +19,5 @@ export 'log_reader.dart';
 export 'permissions.dart';
 export 'settings.dart';
 export 'spinning_icon.dart';
+export 'static_file_handler.dart';
 export 'strings.dart';
