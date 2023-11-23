@@ -76,6 +76,10 @@ class Constants {
 
   static const int bufferSize = 64000;
 
+  static const String fileServerAuthority = 'localhost';
+  static const String fileServerPreviewPath = 'preview';
+  static const String fileServerHandleQuery = 'handle';
+
   static const String androidAppAuthority = 'org.equalitie.ouisync';
 
   static const int maxCharacterRepoTokenForDisplay = 8;
