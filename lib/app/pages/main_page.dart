@@ -487,7 +487,11 @@ class _MainPageState extends State<MainPage>
       // showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
 
       try {
-        final url = await repo.previewFileUrl(item.path);
+        final url = await Dialogs.executeFutureWithLoadingDialog(
+          context,
+          f: repo.previewFileUrl(item.path),
+        );
+
         await launchUrl(url);
       } on Exception catch (e, st) {
         loggy.app(
