@@ -226,7 +226,7 @@
   "@messageConfirmNotEmptyFolderDeletion": {},
   "messageError": "خطا!",
   "@messageError": {},
-  "messageAck": "",
+  "messageAck": "زمانی استفاده خواهد شد که مشکلی بروز کند. سورپرایز شدن یا واکنش منفی به چیزی که طبق انتظار عمل نمی‌کند.\nدر گفتگوی مرتبط با خطاها استفاده می‌شود.",
   "@messageAck": {},
   "messageCreatingToken": "در حال ایجاد توکن اشتراکی…",
   "@messageCreatingToken": {},
