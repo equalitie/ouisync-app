@@ -117,9 +117,13 @@ class PlatformWindowManagerDesktop
     await windowManager.ensureInitialized();
     windowManager.addListener(this);
 
-    // Graceful termination on SIGINT and SIGTERM.
+    // Graceful termination on SIGINT (e.g. Ctrl+C)
     unawaited(_handleSignal(ProcessSignal.sigint.watch()));
-    unawaited(_handleSignal(ProcessSignal.sigterm.watch()));
+
+    // Graceful termination on SIGTERM (e.g. 'killall ouisync-gui')
+    if (Platform.isLinux || Platform.isMacOS) {
+      unawaited(_handleSignal(ProcessSignal.sigterm.watch()));
+    }
 
     if (args.isNotEmpty) {
       _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
