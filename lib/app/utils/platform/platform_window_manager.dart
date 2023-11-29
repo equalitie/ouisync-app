@@ -1,29 +1,25 @@
 import 'dart:io';
+
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'platform.dart';
 
 abstract class PlatformWindowManager {
-  factory PlatformWindowManager(List<String> args, Session session) {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return PlatformWindowManagerMobile(args);
-    }
-    return PlatformWindowManagerDesktop(args, session);
-  }
+  static Future<PlatformWindowManager> create(List<String> args) =>
+      (Platform.isAndroid || Platform.isIOS)
+          ? Future.value(PlatformWindowManagerMobile())
+          : PlatformWindowManagerDesktop.create(args);
 
-  Future<void> setTitle(String title);
-
-  Future<void> initSystemTray();
-
-  Future<bool> get isVisible;
-
-  void dispose() {}
-
-  Future<void> setPreventClose(bool isPreventClose);
-
-  void onWindowClose() {}
-
-  Future<void> close();
+  set session(Session value);
 
   Future<bool> launchAtStartup(bool enable);
+
+  /// Sets the window title. Can be called only after localization has been initialized.
+  Future<void> setTitle(String title);
+
+  /// Initializes the system tray. Does nothing on platforms that don't have system tray. Can be
+  /// called only after localization has been initialized.
+  Future<void> initSystemTray();
+
+  void dispose() {}
 }

@@ -24,29 +24,14 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
+  final windowManager = await PlatformWindowManager.create(args);
+
   final session = Session.create(
     configPath: configPath,
     logPath: logPath,
   );
 
-  final windowManager = PlatformWindowManager(args, session);
-
-  // NOTE: When the app exits, the `State.dispose()` methods are not guaranteed to be called for
-  // some reason. To ensure resources are properly disposed of, we need to do it via this lifecycle
-  // listener.
-  // NOTE: The lifecycle listener itself is never `dispose`d but that's OK because it's supposed to
-  // live as long as the app itself.
-  // NOTE: That the `onExitRequested` function is known to be called only on
-  // Linux and Windows, it is known to not get called on Android and iOS has
-  // not been tested yet.
-  AppLifecycleListener(
-    onExitRequested: () async {
-      await session.close();
-      windowManager.dispose();
-
-      return AppExitResponse.exit;
-    },
-  );
+  windowManager.session = session;
 
   // Make sure to only output logs after Session is created (which sets up the log subscriber),
   // otherwise the logs will go nowhere.
@@ -158,13 +143,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
     NativeChannels.init();
 
-    initWindowManager().then((_) async => await _backgroundServiceManager
-        .maybeRequestPermissionsAndStartService(context));
-  }
-
-  Future<void> initWindowManager() async {
-    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
-    await widget.windowManager.initSystemTray();
+    unawaited(_init());
   }
 
   @override
@@ -212,6 +191,13 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                 windowManager: widget.windowManager,
               ))),
     );
+  }
+
+  Future<void> _init() async {
+    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
+    await widget.windowManager.initSystemTray();
+    await _backgroundServiceManager
+        .maybeRequestPermissionsAndStartService(context);
   }
 }
 
