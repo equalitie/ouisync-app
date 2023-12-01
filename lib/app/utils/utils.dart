@@ -16,6 +16,7 @@ export 'inline_text_styles.dart';
 export 'log.dart';
 export 'log_reader.dart';
 export 'permissions.dart';
+export 'save_file_to_device.dart';
 export 'settings.dart';
 export 'spinning_icon.dart';
 export 'static_file_handler.dart';
