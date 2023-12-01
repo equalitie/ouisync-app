@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -50,17 +51,15 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   Navigator.of(context, rootNavigator: false).pop();
 
-                  await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return ActionsDialog(
-                        title: S.current.titleDownloadToDevice,
-                        body: SaveToDevice(
-                            data: widget.data, cubit: widget.cubit),
-                      );
-                    },
-                  );
+                  final deafultDirectory = io.Platform.isIOS
+                      ? await getApplicationDocumentsDirectory()
+                      : await getDownloadsDirectory();
+
+                  if (deafultDirectory == null) return;
+
+                  final saveFileToDevice =
+                      SaveFileToDevice(data: widget.data, cubit: widget.cubit);
+                  await saveFileToDevice.save(deafultDirectory.path);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.download),
