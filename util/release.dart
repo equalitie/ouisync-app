@@ -363,7 +363,7 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
       ['/cc', 'build/inno-setup.iss']);
 
-  return File('build/windows/runner/Release/ouisync-installer.exe');
+  return File('build/windows/x64/runner/Release/ouisync-installer.exe');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -384,7 +384,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     '--store'
   ]);
 
-  return File('build/windows/runner/Release/ouisync_app.msix');
+  return File('build/windows/x64/runner/Release/ouisync_app.msix');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
