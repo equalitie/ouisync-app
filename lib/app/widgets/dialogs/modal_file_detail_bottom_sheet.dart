@@ -57,9 +57,8 @@ class _FileDetailState extends State<FileDetail> {
 
                   if (deafultDirectory == null) return;
 
-                  final saveFileToDevice =
-                      SaveFileToDevice(data: widget.data, cubit: widget.cubit);
-                  await saveFileToDevice.save(deafultDirectory.path);
+                  await SaveFileToDevice(data: widget.data, cubit: widget.cubit)
+                      .save(context, deafultDirectory.path);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.download),

@@ -2,13 +2,14 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'utils.dart';
+import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import 'platform/platform.dart';
+import 'utils.dart';
 
 class SaveFileToDevice with AppLogger {
   const SaveFileToDevice({required FileItem data, required RepoCubit cubit})
@@ -18,12 +19,15 @@ class SaveFileToDevice with AppLogger {
   final FileItem _data;
   final RepoCubit _cubit;
 
-  Future<void> save(String path) async {
+  Future<void> save(BuildContext context, String path) async {
     await _maybeRequestPermission();
 
     final destinationFilePath = await _getDestinationFilePath(path, _data.name);
 
     if (destinationFilePath == null || destinationFilePath.isEmpty) {
+      final errorMessage = 'Getting file destination failed';
+      showSnackBar(context, message: errorMessage);
+
       return;
     }
 

@@ -510,7 +510,9 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       loggy.app('Download file $sourcePath exception', e, st);
       showMessage(S.current.messageDownloadingFileError(sourcePath));
     } finally {
-      emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
+      emit(state.copyWith(
+          downloads: state.downloads.withRemoved(sourcePath),
+          message: 'File downloaded to $destinationPath'));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
