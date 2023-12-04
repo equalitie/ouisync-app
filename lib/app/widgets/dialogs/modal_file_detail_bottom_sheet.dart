@@ -113,12 +113,16 @@ class _FileDetailState extends State<FileDetail> {
                 iconData: Icons.drive_file_move_outlined,
                 title: S.current.iconMove,
                 dense: true,
-                onTap: () async => _showMoveEntryBottomSheet(
-                  widget.data.path,
-                  EntryType.file,
-                  widget.onMoveEntry,
-                  widget.onUpdateBottomSheet,
-                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+
+                  _showMoveEntryBottomSheet(
+                    widget.data.path,
+                    EntryType.file,
+                    widget.onMoveEntry,
+                    widget.onUpdateBottomSheet,
+                  );
+                },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.move),
                 disabledMessage: S.current.messageActionNotAvailable,
@@ -170,14 +174,12 @@ class _FileDetailState extends State<FileDetail> {
         ),
       );
 
-  _showMoveEntryBottomSheet(
+  void _showMoveEntryBottomSheet(
     String path,
     EntryType type,
     MoveEntryCallback moveEntryCallback,
     BottomSheetCallback bottomSheetControllerCallback,
   ) {
-    Navigator.of(context).pop();
-
     final origin = getDirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(widget.cubit,
         origin: origin,

@@ -236,7 +236,9 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current is OpenRepoEntry) {
-        current.cubit.navigateTo(Strings.root);
+        final navigationPath = current.cubit.state.currentFolder.path;
+        current.cubit.navigateTo(navigationPath);
+
         return _repositoryContentBuilder(current);
       }
 
