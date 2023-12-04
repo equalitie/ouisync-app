@@ -180,4 +180,6 @@ class Constants {
     "storage.ouisync.net", // TODO: remove
     "server-ca.ouisync.net",
   ];
+
+  static const int android12SDK = 32;
 }
