@@ -201,7 +201,7 @@ class _MainPageState extends State<MainPage>
 
   Widget buildMainWidget() {
     return _cubits.repositories.builder((repos) {
-      if (repos.showList) {
+      if (repos.repos.isNotEmpty && repos.showList) {
         /// This needs to be structured better
         /// TODO: Add sorting to repo list
         // _sortListCubit?.sortBy(SortBy.name);
@@ -236,7 +236,9 @@ class _MainPageState extends State<MainPage>
       }
 
       if (current is OpenRepoEntry) {
-        current.cubit.navigateTo(Strings.root);
+        final navigationPath = current.cubit.state.currentFolder.path;
+        current.cubit.navigateTo(navigationPath);
+
         return _repositoryContentBuilder(current);
       }
 

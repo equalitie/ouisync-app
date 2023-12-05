@@ -55,6 +55,8 @@ showSnackBar(BuildContext context,
     SnackBar(
       content: _SnackBarWrap(message),
       action: action,
+      showCloseIcon: true,
+      behavior: SnackBarBehavior.floating,
     ),
   );
 }
