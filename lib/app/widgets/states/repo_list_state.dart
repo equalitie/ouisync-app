@@ -33,14 +33,7 @@ class RepoListState extends StatelessWidget
     }
 
     final repoList = reposCubit.repos.toList();
-
-    if (repoList.isNotEmpty) {
-      return _buildRepoList(context, repoList, reposCubit.currentRepoName);
-    }
-
-    return NoRepositoriesState(
-        onNewRepositoryPressed: onNewRepositoryPressed,
-        onImportRepositoryPressed: onImportRepositoryPressed);
+    return _buildRepoList(context, repoList, reposCubit.currentRepoName);
   }
 
   Widget _buildRepoList(BuildContext parentContext, List<RepoEntry> reposList,
