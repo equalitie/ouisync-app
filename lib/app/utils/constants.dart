@@ -87,8 +87,7 @@ class Constants {
   static const String issueTrackerUrl =
       'https://github.com/equalitie/ouisync-app/issues';
   static const String supportEmail = 'support@ouisync.net';
-  static const String faqUrl =
-      'https://github.com/equalitie/ouisync-app/wiki/Frequently-Asked-Questions';
+  static const String faqUrl = 'https://ouisync.net/support/';
   static const String eqPrivacyPolicy = 'https://ouisync.net/privacy/';
   static const eqValuesUrl = 'https://equalit.ie/values/';
 
