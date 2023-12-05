@@ -367,7 +367,7 @@
   "@messageAddRepoLink": {},
   "messageActionNotAvailable": "This option is not available on read-only repositories",
   "@messageActionNotAvailable": {},
-  "messageAccessModeDisabled": "The permission cannot be higger than the repository current access mode: {access}",
+  "messageAccessModeDisabled": "The permission cannot be higher than the repository current access mode: {access}",
   "@messageAccessModeDisabled": {},
   "messageShareActionDisabled": "You need to select one permission to create a repository link first",
   "@messageShareActionDisabled": {},
