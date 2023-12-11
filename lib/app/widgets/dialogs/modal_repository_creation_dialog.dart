@@ -59,7 +59,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
       initTextStyles(context);
 
       populatePasswordControllers(generatePassword: true);
-      repositoryNameFocus.requestFocus();
+      updateNameController(createRepoCubit.state.suggestedName);
 
       addListeners();
 
@@ -97,7 +97,9 @@ class RepositoryCreation extends HookWidget with AppLogger {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SingleChildScrollView(
-                    reverse: true, child: newRepositoryWidget(context, state))
+                  reverse: true,
+                  child: newRepositoryWidget(context, state),
+                ),
               ],
             ),
           ),
@@ -332,15 +334,19 @@ class RepositoryCreation extends HookWidget with AppLogger {
           focusNode: repositoryNameFocus),
       repositoryNameTakenWarning(state),
       Visibility(
-          visible: state.showSuggestedName,
-          child: GestureDetector(
-              onTap: () => updateNameController(state.suggestedName),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Fields.constrainedText(
-                    S.current
-                        .messageRepositorySuggestedName(state.suggestedName),
-                    style: messageSmall)
-              ]))),
+        visible: state.showSuggestedName,
+        child: GestureDetector(
+          onTap: () => updateNameController(state.suggestedName),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Fields.constrainedText(
+                  S.current.messageRepositorySuggestedName(state.suggestedName),
+                  style: messageSmall)
+            ],
+          ),
+        ),
+      ),
       Dimensions.spacingVertical
     ];
 
