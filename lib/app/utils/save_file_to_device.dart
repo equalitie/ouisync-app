@@ -39,6 +39,8 @@ class SaveFileToDevice with AppLogger {
   }
 
   Future<void> _maybeRequestPermission() async {
+    if (!io.Platform.isAndroid) return;
+    
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
