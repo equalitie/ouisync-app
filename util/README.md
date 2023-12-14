@@ -1,4 +1,4 @@
-# Creating a relase
+# Creating a release
 
 ## Prerequisities
 

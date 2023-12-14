@@ -181,12 +181,24 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Прикрепить логи"),
         "labelBitTorrentDHT":
             MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
+        "labelConnectionType":
+            MessageLookupByLibrary.simpleMessage("Тип соединения"),
         "labelCopyLink":
             MessageLookupByLibrary.simpleMessage("Копировать ссылку"),
         "labelDestination": MessageLookupByLibrary.simpleMessage("Назначение"),
         "labelDownloadedTo": MessageLookupByLibrary.simpleMessage("Скачано в:"),
         "labelEndpoint":
             MessageLookupByLibrary.simpleMessage("Конечный пункт "),
+        "labelExternalIPv4":
+            MessageLookupByLibrary.simpleMessage("Внешний IPv4"),
+        "labelExternalIPv6":
+            MessageLookupByLibrary.simpleMessage("Внешний IPv6"),
+        "labelInternalIP":
+            MessageLookupByLibrary.simpleMessage("Внутренний IP"),
+        "labelLocalIPv4":
+            MessageLookupByLibrary.simpleMessage("Локальный IPv4"),
+        "labelLocalIPv6":
+            MessageLookupByLibrary.simpleMessage("Локальный IPv6"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Локация: "),
         "labelLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Всё заблокировать"),
@@ -195,6 +207,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelPassword": MessageLookupByLibrary.simpleMessage("Пароль: "),
         "labelPeers": MessageLookupByLibrary.simpleMessage("Пиры"),
         "labelQRCode": MessageLookupByLibrary.simpleMessage("QR код"),
+        "labelQuicListenerEndpointV4":
+            MessageLookupByLibrary.simpleMessage("Слушаю на QUIC/UDP IPv4"),
+        "labelQuicListenerEndpointV6":
+            MessageLookupByLibrary.simpleMessage("Слушаю на QUIC/UDP IPv6"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ввести новое имя: "),
         "labelRepositoryCurrentPassword":
@@ -212,6 +228,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Размер: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Статус синхронизации: "),
+        "labelTcpListenerEndpointV4":
+            MessageLookupByLibrary.simpleMessage("Слушаю на TCP IPv4"),
+        "labelTcpListenerEndpointV6":
+            MessageLookupByLibrary.simpleMessage("Слушаю на TCP IPv6"),
         "labelTokenLink":
             MessageLookupByLibrary.simpleMessage("Ссылка на хранилище"),
         "labelTypePassword":
@@ -244,7 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Скоро ваша операционная система попросит вас разрешения на работу приложения в фоновом режиме.\n\nЭто нужно чтобы продолжать синхронизацию когда приложение свернуто"),
         "messageBackgroundNotificationAndroid":
-            MessageLookupByLibrary.simpleMessage("Ouisync работает"),
+            MessageLookupByLibrary.simpleMessage("Работает"),
         "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Ошибка аутентификации по биометрии"),
         "messageBiometricValidationAdded": m1,
@@ -258,6 +278,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
             "Введенный <bold>пароль</bold> не дает вам доступа к контенту хранилища."),
         "messageBluetooth": MessageLookupByLibrary.simpleMessage("Bluetooth"),
+        "messageBy": MessageLookupByLibrary.simpleMessage("от"),
         "messageCamera": MessageLookupByLibrary.simpleMessage("Камера"),
         "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
             "Это разрешение требуется для использования камеры и чтения QR-кода"),
@@ -293,7 +314,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("Файл"),
         "messageEntryTypeFolder": MessageLookupByLibrary.simpleMessage("Папка"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
-            "Это приложение разработано в соответствии с нашими ценностями.\n\nИспользуя Ouisync вы соглашаетесь с этими приницами."),
+            "Это приложение разработано в соответствии с нашими ценностями.\n\nИспользуя Ouisync, вы соглашаетесь с этими приницами, и принимаете Условия Использования и Политику Конфиденциальности."),
         "messageError": MessageLookupByLibrary.simpleMessage("Ошибка !"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Ошибка добавления локального пароля"),
@@ -370,6 +391,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFolderName": MessageLookupByLibrary.simpleMessage("Имя папки"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("Сгенерировать пароль"),
+        "messageGood": MessageLookupByLibrary.simpleMessage("Хорошо"),
         "messageGranted": MessageLookupByLibrary.simpleMessage("Разрешено"),
         "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
             "Чтобы дать это разрешение, зайдите в настройки\n\nНастройки > Приложения и уведомления"),
@@ -405,6 +427,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ошибки, предупреждения и информация"),
         "messageLogViewer":
             MessageLookupByLibrary.simpleMessage("Просмотр логов"),
+        "messageMedium": MessageLookupByLibrary.simpleMessage("Нормально"),
         "messageMissingBackgroundServicePermission":
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync не имеет авторизации на работу в фоновом режиме, если вы запустите другое приложение, это может помешать синхронизации"),
@@ -432,6 +455,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNone": MessageLookupByLibrary.simpleMessage("Ни одного"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("Пока что тут пусто!"),
+        "messageOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Делитесь файлами со всеми своими устройствами или с другими и постройке своё защищённое облако!"),
+        "messageOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Репозиториями можно делится как на чтение-запись, только чтения, или слепо (вы можете добавить файлы для других, но не можете их просматривать)"),
+        "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "Все файлы и папки, добавленные в Ouisync, зашифрованны по умолчанию - и при передаче, и при хранении."),
         "messageOpenFileError": m15,
         "messageOr": MessageLookupByLibrary.simpleMessage("Или"),
         "messageOuiSyncDesktopTitle":
@@ -439,10 +468,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messagePassword": MessageLookupByLibrary.simpleMessage("Пароль"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Пароль сохранен у буфер обмена"),
+        "messagePasswordStrength":
+            MessageLookupByLibrary.simpleMessage("Безопасность пароля"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Обмен между пирами"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Это разрешение необходимо"),
+        "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
+            "\"Человек рождается свободным, и везде он в цепях\""),
         "messageReadOnlyContents": MessageLookupByLibrary.simpleMessage(
             "Это хранилище доступно только для <bold>чтения</bold>."),
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
@@ -455,9 +488,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить вход по биометрии"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Улалить биометрию"),
-        "messageRemoveBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Вы уверены что хотите удалить биометрию?"),
+        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
+            "Вы уверены что хотите удалить биометрию?\n\nХранилище будет разблокировано автоматически, если не будет добавлен локальный пароль."),
         "messageRemovedInBrackets":
             MessageLookupByLibrary.simpleMessage("<удалено>"),
         "messageRenameFile":
@@ -516,11 +548,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageStorage": MessageLookupByLibrary.simpleMessage("Память"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
             "Требуется чтобы дать доступ к файлам"),
+        "messageStrong": MessageLookupByLibrary.simpleMessage("Отлично"),
         "messageSyncMobileData": MessageLookupByLibrary.simpleMessage(
             "Синхронизировать используя мобильные данные"),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
                 "Синхронизация выключена при использовании мобильных данных"),
+        "messageTapForTermsPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Нажмите здесь, чтобы прочитать Условия Использования и Политику Конфиденциальности"),
+        "messageTapForValues": MessageLookupByLibrary.simpleMessage(
+            "Нажмите здесь, чтобы прочитать наши ценности"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Токен хранилища скопирован в буфер обмена."),
         "messageUnlockRepoFailed":
@@ -538,6 +575,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageVerbosity":
             MessageLookupByLibrary.simpleMessage("Выбор детализации логов"),
         "messageView": MessageLookupByLibrary.simpleMessage("Посмотреть"),
+        "messageWeak": MessageLookupByLibrary.simpleMessage("Слабо"),
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Полный доступ. Вашр пиры могут и просматривать, и изменять содержимое"),
@@ -570,10 +608,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Требуется разрешение"),
         "titleChangePassword":
             MessageLookupByLibrary.simpleMessage("Изменить пароль"),
+        "titleChangesToTerms":
+            MessageLookupByLibrary.simpleMessage("Правки в данные Условия"),
+        "titleContactUs":
+            MessageLookupByLibrary.simpleMessage("Свяжитесь с нами"),
+        "titleCookies": MessageLookupByLibrary.simpleMessage("Куки (Cookies)"),
         "titleCreateFolder":
             MessageLookupByLibrary.simpleMessage("Создать папку"),
         "titleCreateRepository":
             MessageLookupByLibrary.simpleMessage("Создать новое хранилище"),
+        "titleDataCollection":
+            MessageLookupByLibrary.simpleMessage("3.1 Сбор данных"),
+        "titleDataSharing":
+            MessageLookupByLibrary.simpleMessage("3.2 Передача данных"),
         "titleDeleteFile": MessageLookupByLibrary.simpleMessage("Удалить файл"),
         "titleDeleteFolder":
             MessageLookupByLibrary.simpleMessage("Удалить папку"),
@@ -581,6 +628,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить не пустую папку"),
         "titleDeleteRepository":
             MessageLookupByLibrary.simpleMessage("Удалить хранилище"),
+        "titleDeletionDataServer": MessageLookupByLibrary.simpleMessage(
+            "3.4 Удаление ваших данных с нашего Always-On-Peer сервера"),
+        "titleDigitalSecurity":
+            MessageLookupByLibrary.simpleMessage("Цифровая Безопасность"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Путь загрузок"),
         "titleDownloadToDevice":
@@ -597,18 +648,42 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Добавить"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Информация о папке"),
+        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+            "Свобода выражения и доступа к информации"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Трекер проблем"),
+        "titleLinksOtherSites":
+            MessageLookupByLibrary.simpleMessage("Ссылки на Другие сайты"),
         "titleLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Заблокировать все хранилища"),
+        "titleLogData": MessageLookupByLibrary.simpleMessage("Логи данных"),
         "titleLogs": MessageLookupByLibrary.simpleMessage("Логи"),
         "titleMovingEntry": MessageLookupByLibrary.simpleMessage("Переместить"),
         "titleNetwork": MessageLookupByLibrary.simpleMessage("Сеть"),
+        "titleOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "Доступ к файлам с нескольких устройств"),
+        "titleOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "Установите разрешения для совместной работы, передачи или просто хранения"),
+        "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "Отправляйте и получайте файлы безопасно"),
+        "titleOpennessTransparency":
+            MessageLookupByLibrary.simpleMessage("Открытость и Прозрачность"),
+        "titleOurMission": MessageLookupByLibrary.simpleMessage("Наша миссия"),
+        "titleOurPrinciples":
+            MessageLookupByLibrary.simpleMessage("Наши Принципы"),
         "titleOurValues": MessageLookupByLibrary.simpleMessage("Наши ценности"),
+        "titleOverview": MessageLookupByLibrary.simpleMessage("1. Обзор"),
+        "titlePIPEDA": MessageLookupByLibrary.simpleMessage(
+            "Закон о защите личных сведений и электронных документов"),
+        "titlePrivacy": MessageLookupByLibrary.simpleMessage("Приватность"),
+        "titlePrivacyNotice":
+            MessageLookupByLibrary.simpleMessage("3. Политика приватности"),
+        "titlePrivacyPolicy":
+            MessageLookupByLibrary.simpleMessage("Политика конфиденциальности"),
         "titleRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Удалить биометрию"),
         "titleRepositoriesList":
-            MessageLookupByLibrary.simpleMessage("Ваши хранилища"),
+            MessageLookupByLibrary.simpleMessage("Мои репозитории"),
         "titleRepository": MessageLookupByLibrary.simpleMessage("Хранилище"),
         "titleRepositoryName":
             MessageLookupByLibrary.simpleMessage("Название хранилища"),
@@ -619,18 +694,28 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleScanRepoQR": MessageLookupByLibrary.simpleMessage(
             "Сканировать QR-код хранилища"),
         "titleSecurity": MessageLookupByLibrary.simpleMessage("Безопасность"),
+        "titleSecurityPractices":
+            MessageLookupByLibrary.simpleMessage("3.3 Правила Безопасности"),
         "titleSendFeedback":
             MessageLookupByLibrary.simpleMessage("Отправить фидбек"),
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("Поставить пароль для"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Настройки"),
         "titleShareRepository": m33,
+        "titleSortBy": MessageLookupByLibrary.simpleMessage("Отсортировать по"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("Анализ состояния"),
+        "titleTermsOfUse":
+            MessageLookupByLibrary.simpleMessage("2. Условия использования"),
+        "titleTermsPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Условия использования и Уведомление о приватности Ouisync"),
+        "titleUPnP": MessageLookupByLibrary.simpleMessage(
+            "Универсальный Plug and Play (UPnP)"),
         "titleUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Разблокировать хранилише"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("Изменения не сохранены"),
+        "titleWeAreEq": MessageLookupByLibrary.simpleMessage("Мы — eQualit.ie"),
         "typeFile": MessageLookupByLibrary.simpleMessage("Файл"),
         "typeFolder": MessageLookupByLibrary.simpleMessage("Папка")
       };
