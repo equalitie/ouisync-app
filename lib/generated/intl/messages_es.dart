@@ -187,6 +187,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Descargado en:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Punto final: "),
+        "labelExternalIPv4":
+            MessageLookupByLibrary.simpleMessage("Dirección IPv4 externa"),
+        "labelExternalIPv6":
+            MessageLookupByLibrary.simpleMessage("Dirección IPv6 externa"),
         "labelInternalIP": MessageLookupByLibrary.simpleMessage("IP interna"),
         "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 local"),
         "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 local"),
@@ -278,6 +282,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cambiar la extensión del archivo puede hacerlo inutilizable"),
         "messageChangeLocalPassword":
             MessageLookupByLibrary.simpleMessage("Cambiar la contraseña local"),
+        "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
+            "Es posible que actualicemos nuestras Condiciones de vez en cuando. Por lo tanto, le recomendamos que revise periódicamente esta página para comprobar si se han producido cambios"),
+        "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
+            "Esta política entrará en vigor el 9 de Marzo de 2022"),
+        "messageChildrensPolicyP1": MessageLookupByLibrary.simpleMessage(
+            "No recopilamos conscientemente información personal de niños. Animamos a todos los niños a que nunca envíen información personal a través de la Aplicación y/o los Servicios. Animamos a los padres y tutores legales a que supervisen el uso que sus hijos hacen de Internet y a que ayuden a hacer cumplir esta Política indicando a sus hijos que nunca proporcionen información personal a través de la Aplicación y/o los Servicios sin su permiso. Si tiene motivos para creer que un menor nos ha proporcionado información personal a través de la Aplicación y/o los Servicios, póngase en contacto con nosotros. También debe tener al menos 16 años de edad para consentir el procesamiento de su información personal en su país (en algunos países podemos permitir que su padre o tutor lo haga en su nombre)"),
         "messageConfirmFileDeletion":
             MessageLookupByLibrary.simpleMessage("¿Borrar este archivo?"),
         "messageConfirmFolderDeletion":
@@ -287,14 +297,30 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Este directorio no está vacío.\n\n¿Aún así quiere borrarlo? (esto borrarar todos sus contenidos)"),
         "messageConfirmRepositoryDeletion":
             MessageLookupByLibrary.simpleMessage("¿Borrar este repositorio?"),
+        "messageContatUsP1": MessageLookupByLibrary.simpleMessage(
+            "Si tiene alguna pregunta o sugerencia sobre nuestra Política de Privacidad, no dude en ponerse en contacto con nosotros en"),
+        "messageCookiesP1": MessageLookupByLibrary.simpleMessage(
+            "La aplicación Ouisync no utiliza cookies"),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Crea un nuevo <bold>directorio</bold>, o agrega un <bold>archivo</bold>, usando <icon></icon>"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
             "Crea un nuevo <bold>repositorio</bold>, o agrega el de un colega usando un <bold>token</bold>"),
         "messageCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Creando el token para compartir…"),
+        "messageDataCollectionP1": MessageLookupByLibrary.simpleMessage(
+            "El equipo de Ouisync valora la privacidad de los usuarios y en consecuencia no recolecta ninguna información del usuario"),
+        "messageDataCollectionP2": MessageLookupByLibrary.simpleMessage(
+            "La aplicación Ouisync está diseñada para poder proporcionar servicios de intercambio de archivos sin una identificación de usuario, nombre, apodo, cuenta de usuario o cualquier otra forma de información del usuario. Nosotros no sabemos quién usa nuestra aplicación ni con quién sincroniza o comparte su información"),
+        "messageDataSharingP1": MessageLookupByLibrary.simpleMessage(
+            "Ouisync (y eQualit.ie) no comparte ningún dato con terceros"),
         "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
             "Declaración para servicios distribuidos en línea"),
+        "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
+            "El equipo de Ouisync no puede eliminar archivos individuales de los repositorios, ya que no es posible identificarlos porque están encriptados. Podemos eliminar repositorios enteros si nos envías el enlace al repositorio que necesitas eliminar"),
+        "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
+            "La forma más sencilla de eliminar sus datos es borrando los archivos o los repositorios desde su propio dispositivo. Cualquier eliminación se propagará a todos sus compañeros - es decir, si tiene acceso de escritura a un repositorio, puede eliminar cualquier archivo dentro de él y los mismos archivos se eliminarán de los repositorios de sus compañeros, así como de nuestro Always-On-Peer. Si necesita borrar sólo los repositorios de nuestro Always-On-Peer (pero mantenerlos en su propio repositorio o en su dispositivo), por favor contacta con nosotros en la siguiente dirección"),
+        "messageDistributedHashTables": MessageLookupByLibrary.simpleMessage(
+            "Tablas de control distribuidas"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -337,7 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqValuesP9": MessageLookupByLibrary.simpleMessage(
             "La seguridad es un tema constante en todos nuestros proyectos de desarrollo de software, prestación de servicios y desarrollo de capacidades. Diseñamos nuestros sistemas y procesos para mejorar la seguridad de la información en Internet y elevar el perfil de seguridad y la experiencia del usuario. Intentamos predicar con el ejemplo al no comprometer las propiedades de seguridad de una herramienta o sistema por razones de velocidad, usabilidad o costo. No creemos en la seguridad a través de la oscuridad y mantenemos la transparencia a través del acceso abierto a nuestro código base. Siempre pecamos de cautelosos y tratamos de implementar una buena seguridad tanto operativa como interna"),
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
-            "esta construido en línea con nuestros valores.\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad."),
+            "está construido en línea con nuestros valores.\n\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
         "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Error al añadir una contraseña local"),
@@ -434,8 +460,12 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Declaración Internacional de Derechos Humanos"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Guarde ambos archivos"),
+        "messageLaunchAtStartup":
+            MessageLookupByLibrary.simpleMessage("Iniciar al arrancar"),
         "messageLibraryPanic":
             MessageLookupByLibrary.simpleMessage("Fallo interno detectado."),
+        "messageLinksOtherSitesP1": MessageLookupByLibrary.simpleMessage(
+            "Este Servicio puede contener enlaces a otros sitios. Si hace clic en un enlace de terceros, será dirigido a ese sitio. Tenga en cuenta que estos sitios externos no son nuestros. Por lo tanto, le recomendamos encarecidamente que revise la Política de Privacidad de estos sitios web. No tenemos ningún control ni asumimos ninguna responsabilidad por el contenido, las políticas de privacidad o las prácticas de los sitios o servicios de terceros"),
         "messageLoadingDefault":
             MessageLookupByLibrary.simpleMessage("Cargando…"),
         "messageLocalDiscovery":
@@ -445,6 +475,18 @@ class MessageLookup extends MessageLookupByLibrary {
             "Este <bold>repositorio</bold> está cerrado."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
             "Bloqueando todos los repositorios abiertos…"),
+        "messageLogData1": MessageLookupByLibrary.simpleMessage(
+            "Dirección de correo electrónico - si el usuario decidió ponerse en contacto con nosotros por correo electrónico"),
+        "messageLogData2": MessageLookupByLibrary.simpleMessage(
+            "La información que el usuario pueda facilitar por correo electrónico, a través de los tickets de ayuda o de nuestra página web, y los metadatos asociados, con el fin de prestar asistencia técnica"),
+        "messageLogData3": MessageLookupByLibrary.simpleMessage(
+            "Dirección IP del usuario - para proporcionar asistencia técnica"),
+        "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
+            "La aplicación Ouisync crea archivos de registro en los dispositivos de los usuarios. Su única finalidad es registrar la actividad del dispositivo para facilitar el proceso de depuración en caso de que el usuario tenga dificultades para conectarse con sus compañeros o para utilizar la aplicación Ouisync. El archivo de registro permanece en el dispositivo del usuario a menos que éste decida enviárnoslo con fines de asistencia o soporte"),
+        "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
+            "Si el usuario decide ponerse en contacto con nosotros, los datos personales que podemos recopilar son:"),
+        "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
+            "Ninguno de estos datos se comparte con terceros"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Todos"),
         "messageLogLevelErroWarnInfoDebug":
             MessageLookupByLibrary.simpleMessage(
@@ -483,6 +525,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNoRepos":
             MessageLookupByLibrary.simpleMessage("No se hayaron repositorios"),
         "messageNone": MessageLookupByLibrary.simpleMessage("Ninguno"),
+        "messageNote": MessageLookupByLibrary.simpleMessage("Nota"),
         "messageNothingHereYet":
             MessageLookupByLibrary.simpleMessage("No hay nada aún!"),
         "messageOnboardingAccess": MessageLookupByLibrary.simpleMessage(
@@ -495,6 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("Ouisync"),
+        "messagePIPEDA": MessageLookupByLibrary.simpleMessage("PIPEDA"),
         "messagePassword": MessageLookupByLibrary.simpleMessage("Contraseña"),
         "messagePasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
             "Contraseña copiada al portapapeles"),
@@ -502,6 +546,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Fuerza de contraseña"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Intercambio entre pares"),
+        "messagePeerExchangeWikipedia": MessageLookupByLibrary.simpleMessage(
+            "Intercambio entre pares en Wikipedia"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Este permiso es requerido"),
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
@@ -553,6 +599,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nuevo nombre del repositorio"),
         "messageRepositoryNewPassword":
             MessageLookupByLibrary.simpleMessage("Nueva contraseña"),
+        "messageRepositoryNotMounted": MessageLookupByLibrary.simpleMessage(
+            "El repositorio no se ha montado. "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Contraseña"),
         "messageRepositorySuggestedName": m20,
@@ -570,6 +618,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Escanea este código con tu otro dispositivo or compartelo con tus pares"),
         "messageSecureUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Protección biométrica"),
+        "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
+            "Los datos que el usuario carga en los repositorios de Ouisync se cifran de extremo a extremo tanto en tránsito como en reposo. Esto incluye los metadatos como los nombres de los archivos, los tamaños, la estructura de las carpetas, etc. En Ouisync, sólo pueden leer los datos la persona que los ha cargado y las personas con las que comparte sus repositorios"),
+        "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
+            "Usted puede aprender más sobre las técnicas de cifrado por medio de nuestra documentación"),
+        "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
+            "La aplicación Ouisync almacena los datos de los usuarios en un \"par siempre activo\", que es un servidor ubicado en Canadá. Todos los datos se almacenan en trozos cifrados y ni el servidor ni sus operadores pueden leerlos. El propósito de este servidor es simplemente salvar las distancias entre pares que no están conectados al mismo tiempo. Todos los datos se eliminan periódicamente de este servidor: su objetivo no es proporcionar un almacenamiento permanente de datos, sino simplemente facilitar la sincronización de datos entre pares"),
+        "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
+            "Si tiene motivos para creer que sus datos personales han sido obtenidos y compartidos ilegalmente por otros usuarios de Ouisync, póngase en contacto con nosotros en la siguiente dirección"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
             "Escoge el nivel de acceso para crear el link para compartir"),
         "messageSelectLocation":

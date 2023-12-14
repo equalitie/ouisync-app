@@ -2210,10 +2210,10 @@ class S {
     );
   }
 
-  /// `The permission cannot be higger than the repository current access mode: {access}`
+  /// `The permission cannot be higher than the repository current access mode: {access}`
   String messageAccessModeDisabled(Object access) {
     return Intl.message(
-      'The permission cannot be higger than the repository current access mode: $access',
+      'The permission cannot be higher than the repository current access mode: $access',
       name: 'messageAccessModeDisabled',
       desc: '',
       args: [access],

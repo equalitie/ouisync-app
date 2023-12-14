@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
   static String m0(access) =>
-      "The permission cannot be higger than the repository current access mode: ${access}";
+      "The permission cannot be higher than the repository current access mode: ${access}";
 
   static String m1(name) =>
       "Biometric validation added for repository \"${name}\"";
