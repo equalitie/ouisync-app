@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -24,6 +26,9 @@ typedef BottomSheetCallback = void Function(Widget? widget, String entryPath);
 
 typedef MoveEntryCallback = Future<bool> Function(
     String origin, String path, EntryType type);
+
+typedef PreviewFileCallback = Future<void> Function(
+    RepoCubit repo, FileItem item, bool useDefaultApp);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -463,16 +468,28 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _previewFile(RepoCubit repo, FileItem item) async {
+  Future<void> _previewFile(
+      RepoCubit repo, FileItem item, bool useDefaultApp) async {
     if (io.Platform.isAndroid) {
       // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
 
-      await NativeChannels.previewOuiSyncFile(
+      final previewResult = await NativeChannels.previewOuiSyncFile(
         Constants.androidAppAuthority,
         item.path,
         item.size ?? 0,
-        useDefaultApp: true,
+        useDefaultApp: useDefaultApp,
       );
+
+      if (previewResult == PreviewFileResult.previewOK) return;
+
+      final message = switch (previewResult) {
+        PreviewFileResult.mimeTypeNull => 'Unknown file extension',
+        PreviewFileResult.noDefaultApp =>
+          'Not app available for this file type',
+        _ => 'We couldn\'t start the file preview'
+      };
+
+      showSnackBar(context, message: message);
     } else if (io.Platform.isWindows ||
         io.Platform.isLinux ||
         io.Platform.isMacOS) {
@@ -482,12 +499,27 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
-      final url = Uri.parse('file:$mountedDirectory${item.path}');
-      await launchUrl(url);
-    } else {
-      // Only the above platforms are supported right now.
-      // showSnackBar(context, message: S.current.messageFilePreviewNotAvailable);
+      bool previewOk = false;
+      try {
+        final url = Uri.parse('file:$mountedDirectory${item.path}');
+        previewOk = await launchUrl(url);
+      } on PlatformException catch (e, st) {
+        loggy.app(
+          'Preview file (desktop): Error previewing file ${item.path}:\n${e.toString()}',
+          e,
+          st,
+        );
 
+        showSnackBar(context, message: 'Previewing file ${item.path} failed');
+        return;
+      }
+
+      if (!previewOk) {
+        showSnackBar(context, message: 'Not app available for this file type');
+      }
+    } else {
+      /// Until we have a proper implementation for OSX (iOS, macOS), we are
+      /// using a local HTTP server and the internet navigator previewer.
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
           context,
@@ -495,7 +527,7 @@ class _MainPageState extends State<MainPage>
         );
 
         await launchUrl(url);
-      } on Exception catch (e, st) {
+      } on PlatformException catch (e, st) {
         loggy.app(
           '(FileServer) Error previewing file ${item.path}:\n${e.toString()}',
           e,
@@ -528,7 +560,7 @@ class _MainPageState extends State<MainPage>
                       return;
                     }
 
-                    await _previewFile(currentRepo, item);
+                    await _previewFile(currentRepo, item, true);
                   };
                 } else if (item is FolderItem) {
                   actionByType = () {
@@ -582,6 +614,7 @@ class _MainPageState extends State<MainPage>
               cubit: repoCubit,
               data: data as FileItem,
               onUpdateBottomSheet: updateBottomSheet,
+              onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(cubit, data, useDefaultApp),
               onMoveEntry: (origin, path, type) =>
                   moveEntry(repoCubit, origin, path, type),
               isActionAvailableValidator: _isEntryActionAvailable,

@@ -12,18 +12,21 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class FileDetail extends StatefulWidget {
-  const FileDetail(
-      {required this.context,
-      required this.cubit,
-      required this.data,
-      required this.onUpdateBottomSheet,
-      required this.onMoveEntry,
-      required this.isActionAvailableValidator});
+  const FileDetail({
+    required this.context,
+    required this.cubit,
+    required this.data,
+    required this.onUpdateBottomSheet,
+    required this.onPreviewFile,
+    required this.onMoveEntry,
+    required this.isActionAvailableValidator,
+  });
 
   final BuildContext context;
   final RepoCubit cubit;
   final FileItem data;
   final BottomSheetCallback onUpdateBottomSheet;
+  final PreviewFileCallback onPreviewFile;
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
@@ -71,11 +74,12 @@ class _FileDetailState extends State<FileDetail> {
                   iconData: Icons.preview_rounded,
                   title: S.current.iconPreview,
                   dense: true,
-                  onTap: () async => await NativeChannels.previewOuiSyncFile(
-                    Constants.androidAppAuthority,
-                    widget.data.path,
-                    widget.data.size ?? 0,
-                  ),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+
+                    await widget.onPreviewFile
+                        .call(widget.cubit, widget.data, false);
+                  },
                   enabledValidation: () => widget.isActionAvailableValidator(
                       widget.cubit.state.accessMode, EntryAction.preview),
                   disabledMessage: S.current.messageActionNotAvailable,
