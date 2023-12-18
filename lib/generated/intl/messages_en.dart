@@ -58,43 +58,45 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(name) => "Error opening file ${name}";
 
-  static String m16(name) => "We could not delete the repository \"${name}\"";
+  static String m16(path) => "Previewing file ${path} failed";
 
-  static String m17(name) =>
+  static String m17(name) => "We could not delete the repository \"${name}\"";
+
+  static String m18(name) =>
       "We could not find the repository \"${name}\" at the usual location";
 
-  static String m18(access) => "Access mode granted: ${access}";
+  static String m19(access) => "Access mode granted: ${access}";
 
-  static String m19(name) =>
+  static String m20(name) =>
       "This repository already exists in the app under the name \"${name}\".";
 
-  static String m20(name) => "Suggested: ${name}\n(tap here to use this name)";
+  static String m21(name) => "Suggested: ${name}\n(tap here to use this name)";
 
-  static String m21(access) => "Unlocked as a ${access} replica";
+  static String m22(access) => "Unlocked as a ${access} replica";
 
-  static String m22(name) => "${name} writing canceled";
+  static String m23(name) => "${name} writing canceled";
 
-  static String m23(name) => "${name} - writing failed";
+  static String m24(name) => "${name} - writing failed";
 
-  static String m24(name) => "Failed to import repository ${name}";
+  static String m25(name) => "Failed to import repository ${name}";
 
-  static String m25(name) => "Failed to create repository ${name}";
+  static String m26(name) => "Failed to create repository ${name}";
 
-  static String m26(access) => "${access}";
+  static String m27(access) => "${access}";
 
-  static String m27(changes) => "${changes}";
+  static String m28(changes) => "${changes}";
 
-  static String m28(entry) => "${entry}";
+  static String m29(entry) => "${entry}";
 
-  static String m29(name) => "${name}";
+  static String m30(name) => "${name}";
 
-  static String m30(number) => "${number}";
+  static String m31(number) => "${number}";
 
-  static String m31(path) => "${path}";
+  static String m32(path) => "${path}";
 
-  static String m32(status) => "${status}";
+  static String m33(status) => "${status}";
 
-  static String m33(name) => "Share repository \"${name}\"";
+  static String m34(name) => "Share repository \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -454,6 +456,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "File is already being uploaded"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
+        "messageFilePreviewFailed": MessageLookupByLibrary.simpleMessage(
+            "We couldn\'t start the file preview"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "File preview is not yet available"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("files"),
@@ -553,6 +557,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "New password copied to the clipboard"),
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("A new version is available."),
+        "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
+            "Not apps can perform this action"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding files, you need to create a repository"),
         "messageNoRepoIsSelected":
@@ -585,6 +591,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Peer Exchange on Wikipedia"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
+        "messagePreviewingFileFailed": m16,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -621,14 +628,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Replace existing file"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Repository authentication failed"),
-        "messageRepoDeletionErrorDescription": m16,
+        "messageRepoDeletionErrorDescription": m17,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "The repository deletion failed"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "The repository is not there anymore"),
-        "messageRepoMissingErrorDescription": m17,
-        "messageRepositoryAccessMode": m18,
-        "messageRepositoryAlreadyExist": m19,
+        "messageRepoMissingErrorDescription": m18,
+        "messageRepositoryAccessMode": m19,
+        "messageRepositoryAlreadyExist": m20,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("The current password"),
         "messageRepositoryIsNotOpen":
@@ -643,7 +650,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "The repository is not mounted "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Password"),
-        "messageRepositorySuggestedName": m20,
+        "messageRepositorySuggestedName": m21,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the link here"),
         "messageRousseau":
@@ -709,9 +716,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "The Ouisync application is built in-line with eQualitie’s values. By using this software you agree that you will not use Ouisync to publish, share, or store materials that is contrary to the underlying values nor the letter of the laws of Quebec or Canada or the International Bill of Human Rights, including content that:"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Repository token copied to the clipboard."),
+        "messageUnknownFileExtension":
+            MessageLookupByLibrary.simpleMessage("Unknown file extension"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "The password did not unlock the repository"),
-        "messageUnlockRepoOk": m21,
+        "messageUnlockRepoOk": m22,
         "messageUnlockRepository":
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageUnlockUsingBiometrics":
@@ -736,21 +745,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
-        "messageWritingFileCanceled": m22,
-        "messageWritingFileError": m23,
-        "messsageFailedAddRepository": m24,
-        "messsageFailedCreateRepository": m25,
+        "messageWritingFileCanceled": m23,
+        "messageWritingFileError": m24,
+        "messsageFailedAddRepository": m25,
+        "messsageFailedCreateRepository": m26,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("Copy password"),
-        "replacementAccess": m26,
-        "replacementChanges": m27,
-        "replacementEntry": m28,
-        "replacementName": m29,
-        "replacementNumber": m30,
-        "replacementPath": m31,
-        "replacementStatus": m32,
+        "replacementAccess": m27,
+        "replacementChanges": m28,
+        "replacementEntry": m29,
+        "replacementName": m30,
+        "replacementNumber": m31,
+        "replacementPath": m32,
+        "replacementStatus": m33,
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),
@@ -865,7 +874,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("Set password for"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "titleShareRepository": m33,
+        "titleShareRepository": m34,
         "titleSortBy": MessageLookupByLibrary.simpleMessage("Sort by"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("State Monitor"),

@@ -3800,6 +3800,46 @@ class S {
     );
   }
 
+  /// `Unknown file extension`
+  String get messageUnknownFileExtension {
+    return Intl.message(
+      'Unknown file extension',
+      name: 'messageUnknownFileExtension',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not apps can perform this action`
+  String get messageNoAppsForThisAction {
+    return Intl.message(
+      'Not apps can perform this action',
+      name: 'messageNoAppsForThisAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We couldn't start the file preview`
+  String get messageFilePreviewFailed {
+    return Intl.message(
+      'We couldn\'t start the file preview',
+      name: 'messageFilePreviewFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previewing file {path} failed`
+  String messagePreviewingFileFailed(Object path) {
+    return Intl.message(
+      'Previewing file $path failed',
+      name: 'messagePreviewingFileFailed',
+      desc: '',
+      args: [path],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

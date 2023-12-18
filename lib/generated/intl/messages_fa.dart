@@ -56,44 +56,44 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(name) => "خطا در بازکردن فایل ${name}";
 
-  static String m16(name) => "ما نتوانستیم مخزن را حذف کنیم \"${name}\"";
+  static String m17(name) => "ما نتوانستیم مخزن را حذف کنیم \"${name}\"";
 
-  static String m17(name) =>
+  static String m18(name) =>
       "ما نتوانستیم مخزن را در مکانی که معمولا هست، پیدا کنیم \"${name}\"";
 
-  static String m18(access) => "اجازه «دسترسی» داده شد: ${access}";
-
-  static String m19(name) =>
-      "این مخزن از قبل در برنامه با این نام وجود دارد \"${name}\".";
+  static String m19(access) => "اجازه «دسترسی» داده شد: ${access}";
 
   static String m20(name) =>
+      "این مخزن از قبل در برنامه با این نام وجود دارد \"${name}\".";
+
+  static String m21(name) =>
       "پیشنهاد: ${name}\n(برای استفاده از این نام این‌جا ضربه بزنید)";
 
-  static String m21(access) => "به‌عنوان کپی ${access} باز شد";
+  static String m22(access) => "به‌عنوان کپی ${access} باز شد";
 
-  static String m22(name) => "${name} نوشتن لغو شد";
+  static String m23(name) => "${name} نوشتن لغو شد";
 
-  static String m23(name) => "${name} - ناموفق در نوشتن";
+  static String m24(name) => "${name} - ناموفق در نوشتن";
 
-  static String m24(name) => "خطا در واردکردن مخزن ${name}";
+  static String m25(name) => "خطا در واردکردن مخزن ${name}";
 
-  static String m25(name) => "ایجاد مخزن ناموفق بود ${name}";
+  static String m26(name) => "ایجاد مخزن ناموفق بود ${name}";
 
-  static String m26(access) => "[دسترسی]";
+  static String m27(access) => "[دسترسی]";
 
-  static String m27(changes) => "${changes}";
+  static String m28(changes) => "${changes}";
 
-  static String m28(entry) => "${entry}";
+  static String m29(entry) => "${entry}";
 
-  static String m29(name) => "${name}";
+  static String m30(name) => "${name}";
 
-  static String m30(number) => "[شماره]";
+  static String m31(number) => "[شماره]";
 
-  static String m31(path) => "${path}";
+  static String m32(path) => "${path}";
 
-  static String m32(status) => "${status}";
+  static String m33(status) => "${status}";
 
-  static String m33(name) => "به‌اشتراک‌گذاری مخزن \"${name}\"";
+  static String m34(name) => "به‌اشتراک‌گذاری مخزن \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -626,14 +626,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("فایل موجود را جایگزین کنید"),
         "messageRepoAuthFailed":
             MessageLookupByLibrary.simpleMessage("خطا در احراز هویت مخزن"),
-        "messageRepoDeletionErrorDescription": m16,
+        "messageRepoDeletionErrorDescription": m17,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "(درخواست) حذف مخزن ناموفق بود"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "مخزن موردنظر دیگر آن‌جا نیست"),
-        "messageRepoMissingErrorDescription": m17,
-        "messageRepositoryAccessMode": m18,
-        "messageRepositoryAlreadyExist": m19,
+        "messageRepoMissingErrorDescription": m18,
+        "messageRepositoryAccessMode": m19,
+        "messageRepositoryAlreadyExist": m20,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور کنونی"),
         "messageRepositoryIsNotOpen":
@@ -648,7 +648,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مخرن موردنظر نصب نشده است "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور"),
-        "messageRepositorySuggestedName": m20,
+        "messageRepositorySuggestedName": m21,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("لینک را این‌جا قرار دهید"),
         "messageRousseau": MessageLookupByLibrary.simpleMessage("ژان ژاک روسو"),
@@ -716,7 +716,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "توکن مخزن در حافظه موقت کپی شد."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "رمز عبور موردنظر مخزن را باز نکرد"),
-        "messageUnlockRepoOk": m21,
+        "messageUnlockRepoOk": m22,
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "رمز عبور را برای باز کردن قفل وارد کنید"),
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
@@ -741,21 +741,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("وای‌فای"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "دسترسی کامل. همتاهای شما امکان خواندن و نوشتن دارند"),
-        "messageWritingFileCanceled": m22,
-        "messageWritingFileError": m23,
-        "messsageFailedAddRepository": m24,
-        "messsageFailedCreateRepository": m25,
+        "messageWritingFileCanceled": m23,
+        "messageWritingFileError": m24,
+        "messsageFailedAddRepository": m25,
+        "messsageFailedCreateRepository": m26,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("تغییر رمز عبور"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("کپی‌کردن رمز عبور"),
-        "replacementAccess": m26,
-        "replacementChanges": m27,
-        "replacementEntry": m28,
-        "replacementName": m29,
-        "replacementNumber": m30,
-        "replacementPath": m31,
-        "replacementStatus": m32,
+        "replacementAccess": m27,
+        "replacementChanges": m28,
+        "replacementEntry": m29,
+        "replacementName": m30,
+        "replacementNumber": m31,
+        "replacementPath": m32,
+        "replacementStatus": m33,
         "statusSync": MessageLookupByLibrary.simpleMessage("همگام‌سازی شد"),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage("نامشخص"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("درباره ما"),
@@ -869,7 +869,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("انتخاب رمز عبور"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("تنظیمات"),
-        "titleShareRepository": m33,
+        "titleShareRepository": m34,
         "titleSortBy":
             MessageLookupByLibrary.simpleMessage("مرتب‌سازی بر اساس"),
         "titleStateMonitor":

@@ -483,10 +483,9 @@ class _MainPageState extends State<MainPage>
       if (previewResult == PreviewFileResult.previewOK) return;
 
       final message = switch (previewResult) {
-        PreviewFileResult.mimeTypeNull => 'Unknown file extension',
-        PreviewFileResult.noDefaultApp =>
-          'Not app available for this file type',
-        _ => 'We couldn\'t start the file preview'
+        PreviewFileResult.mimeTypeNull => S.current.messageUnknownFileExtension,
+        PreviewFileResult.noDefaultApp => S.current.messageNoAppsForThisAction,
+        _ => S.current.messageFilePreviewFailed
       };
 
       showSnackBar(context, message: message);
@@ -510,12 +509,13 @@ class _MainPageState extends State<MainPage>
           st,
         );
 
-        showSnackBar(context, message: 'Previewing file ${item.path} failed');
+        showSnackBar(context,
+            message: S.current.messagePreviewingFileFailed(item.path));
         return;
       }
 
       if (!previewOk) {
-        showSnackBar(context, message: 'Not app available for this file type');
+        showSnackBar(context, message: S.current.messageNoAppsForThisAction);
       }
     } else {
       /// Until we have a proper implementation for OSX (iOS, macOS), we are
@@ -614,7 +614,8 @@ class _MainPageState extends State<MainPage>
               cubit: repoCubit,
               data: data as FileItem,
               onUpdateBottomSheet: updateBottomSheet,
-              onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(cubit, data, useDefaultApp),
+              onPreviewFile: (cubit, data, useDefaultApp) =>
+                  _previewFile(cubit, data, useDefaultApp),
               onMoveEntry: (origin, path, type) =>
                   moveEntry(repoCubit, origin, path, type),
               isActionAvailableValidator: _isEntryActionAvailable,

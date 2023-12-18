@@ -53,46 +53,46 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(name) => "Erreur d\'ouverture du fichier ${name}";
 
-  static String m16(name) =>
+  static String m17(name) =>
       "Nous n\'avons pas pu supprimer le dépôt « ${name} »";
 
-  static String m17(name) =>
+  static String m18(name) =>
       "Nous n\'avons pas pu trouver le dépôt « ${name} » à l\'emplacement habituel";
 
-  static String m18(access) => "Mode d\'accès accordé : ${access}";
-
-  static String m19(name) =>
-      "Ce dépôt existe déjà dans l\'application avec le nom « ${name} ».";
+  static String m19(access) => "Mode d\'accès accordé : ${access}";
 
   static String m20(name) =>
+      "Ce dépôt existe déjà dans l\'application avec le nom « ${name} ».";
+
+  static String m21(name) =>
       "Suggéré : ${name}\n(appuyez ici pour utiliser ce nom)";
 
-  static String m21(access) =>
+  static String m22(access) =>
       "Déverrouillé sous la forme d\'une réplique de ${access}";
 
-  static String m22(name) => "Écriture de ${name} annulée";
+  static String m23(name) => "Écriture de ${name} annulée";
 
-  static String m23(name) => "${name} - échec de l\'écriture";
+  static String m24(name) => "${name} - échec de l\'écriture";
 
-  static String m24(name) => "Échec de l\'import du dépôt ${name}";
+  static String m25(name) => "Échec de l\'import du dépôt ${name}";
 
-  static String m25(name) => "Échec de la création du dépôt ${name}";
+  static String m26(name) => "Échec de la création du dépôt ${name}";
 
-  static String m26(access) => "${access}";
+  static String m27(access) => "${access}";
 
-  static String m27(changes) => "${changes}";
+  static String m28(changes) => "${changes}";
 
-  static String m28(entry) => "${entry}";
+  static String m29(entry) => "${entry}";
 
-  static String m29(name) => "${name}";
+  static String m30(name) => "${name}";
 
-  static String m30(number) => "${number}";
+  static String m31(number) => "${number}";
 
-  static String m31(path) => "${path}";
+  static String m32(path) => "${path}";
 
-  static String m32(status) => "${status}";
+  static String m33(status) => "${status}";
 
-  static String m33(name) => "Partager le dépôt « ${name} »";
+  static String m34(name) => "Partager le dépôt « ${name} »";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -466,14 +466,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Remplacer le fichier existant"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "L\'authentification du dépôt a échoué"),
-        "messageRepoDeletionErrorDescription": m16,
+        "messageRepoDeletionErrorDescription": m17,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "La suppression du dépôt a échoué"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "Le dépôt ne se trouve plus ici"),
-        "messageRepoMissingErrorDescription": m17,
-        "messageRepositoryAccessMode": m18,
-        "messageRepositoryAlreadyExist": m19,
+        "messageRepoMissingErrorDescription": m18,
+        "messageRepositoryAccessMode": m19,
+        "messageRepositoryAlreadyExist": m20,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("Le mot de passe actuel"),
         "messageRepositoryIsNotOpen":
@@ -486,7 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nouveau mot de passe"),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Mot de passe"),
-        "messageRepositorySuggestedName": m20,
+        "messageRepositorySuggestedName": m21,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Collez le lien ici"),
         "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
@@ -521,7 +521,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Le jeton du dépôt a été copié dans le presse-papiers."),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "Le mot de passe n\'a pas déverrouillé le dépôt"),
-        "messageUnlockRepoOk": m21,
+        "messageUnlockRepoOk": m22,
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Entrez le mot de passe pour déverrouiller"),
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
@@ -537,21 +537,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Accès complet. Votre pair peut lire et écrire"),
-        "messageWritingFileCanceled": m22,
-        "messageWritingFileError": m23,
-        "messsageFailedAddRepository": m24,
-        "messsageFailedCreateRepository": m25,
+        "messageWritingFileCanceled": m23,
+        "messageWritingFileError": m24,
+        "messsageFailedAddRepository": m25,
+        "messsageFailedCreateRepository": m26,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Modifier le mot de passe"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("Copier le mot de passe"),
-        "replacementAccess": m26,
-        "replacementChanges": m27,
-        "replacementEntry": m28,
-        "replacementName": m29,
-        "replacementNumber": m30,
-        "replacementPath": m31,
-        "replacementStatus": m32,
+        "replacementAccess": m27,
+        "replacementChanges": m28,
+        "replacementEntry": m29,
+        "replacementName": m30,
+        "replacementNumber": m31,
+        "replacementPath": m32,
+        "replacementStatus": m33,
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCHRONISÉ"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Non spécifié"),
@@ -617,7 +617,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSetPasswordFor": MessageLookupByLibrary.simpleMessage(
             "Définir un mot de passe pour"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Paramètres"),
-        "titleShareRepository": m33,
+        "titleShareRepository": m34,
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("Moniteur d\'état"),
         "titleUnlockRepository":
