@@ -69,31 +69,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 title: S.current.iconDelete,
                 isDanger: true,
                 dense: true,
-                onTap: () async {
-                  final repo = widget.cubit;
-                  final path = widget.data.path;
-
-                  final recursiveDeletion =
-                      await deleteFolderWithContentsValidation(
-                          context, repo, path);
-
-                  if (recursiveDeletion == null) {
-                    // The item is not a folder or, most likely, the user canceled
-                    return;
-                  }
-
-                  final deletedFolderName =
-                      await Dialogs.deleteFolderAlertDialog(widget.context,
-                          widget.cubit, widget.data.path, recursiveDeletion);
-
-                  if (deletedFolderName != null &&
-                      deletedFolderName.isNotEmpty) {
-                    Navigator.of(context).pop(deletedFolderName);
-                    showSnackBar(context,
-                        message:
-                            S.current.messageFolderDeleted(widget.data.name));
-                  }
-                },
+                onTap: () async =>
+                    _deleteFolderWithValidation(widget.cubit, widget.data.path),
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.delete),
                 disabledMessage: S.current.messageActionNotAvailable,
@@ -120,48 +97,55 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         ),
       );
 
-  Future<bool?> deleteFolderWithContentsValidation(
-      BuildContext context, RepoCubit repo, String path) async {
-    bool? recursive = false;
+  Future<void> _deleteFolderWithValidation(RepoCubit repo, String path) async {
+    final isDirectory = await _isDirectory(repo, path);
+    if (!isDirectory) {
+      loggy.app('Entry $path is not a directory.');
+      return;
+    }
 
+    final isEmpty = await _isEmpty(repo, path, context);
+    final validationMessage = isEmpty
+        ? S.current.messageConfirmFolderDeletion
+        : S.current.messageConfirmNotEmptyFolderDeletion;
+
+    final deleteFolder = await Dialogs.deleteFolderAlertDialog(
+      widget.context,
+      widget.cubit,
+      widget.data.path,
+      validationMessage,
+    );
+    if (deleteFolder != true) return;
+
+    final recursive = !isEmpty;
+    final deleteFolderOk = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: repo.deleteFolder(path, recursive),
+    );
+    if (deleteFolderOk) {
+      Navigator.of(context).pop(deleteFolder);
+
+      showSnackBar(
+        context,
+        message: S.current.messageFolderDeleted(widget.data.name),
+      );
+    }
+  }
+
+  Future<bool> _isDirectory(RepoCubit repo, String path) async {
     final type = await repo.type(path);
+    return type == EntryType.directory;
+  }
 
-    if (type != EntryType.directory) {
-      loggy.app('Is directory empty: $path is not a directory.');
-      return null;
-    }
-
+  Future<bool> _isEmpty(
+      RepoCubit repo, String path, BuildContext context) async {
     final Directory directory = await repo.openDirectory(path);
-
     if (directory.isNotEmpty) {
-      String message = S.current.messageErrorPathNotEmpty(path);
-      showSnackBar(context, message: message);
+      loggy.app('Directory $path is not empty');
+      return false;
     }
 
-    if (directory.isNotEmpty) {
-      recursive = await Dialogs.alertDialogWithActions(
-          context: context,
-          title: S.current.titleDeleteNotEmptyFolder,
-          body: [
-            Text(S.current.messageConfirmNotEmptyFolderDeletion,
-                style: context.theme.appTextStyle.bodyMedium)
-          ],
-          actions: [
-            Fields.dialogActions(context, buttons: [
-              NegativeButton(
-                  text: S.current.actionCancelCapital,
-                  onPressed: () => Navigator.of(context).pop(null),
-                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
-              PositiveButton(
-                  text: S.current.actionDeleteCapital,
-                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-                  onPressed: () => Navigator.of(context).pop(true),
-                  isDangerButton: true)
-            ])
-          ]);
-    }
-
-    return recursive;
+    return true;
   }
 
   _showMoveEntryBottomSheet(

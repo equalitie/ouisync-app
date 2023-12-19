@@ -119,8 +119,7 @@ abstract class Dialogs {
       AlertDialog(
           title: Flex(direction: Axis.horizontal, children: [
             Fields.constrainedText(title,
-                style: context.theme.appTextStyle.titleMedium,
-                maxLines: 2)
+                style: context.theme.appTextStyle.titleMedium, maxLines: 2)
           ]),
           content: SingleChildScrollView(child: ListBody(children: body)),
           actions: actions);
@@ -162,35 +161,42 @@ abstract class Dialogs {
             ])));
   }
 
-  static Future<String?> deleteFolderAlertDialog(BuildContext context,
-          RepoCubit repo, String path, bool recursive) async =>
-      showDialog<String?>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => ActionsDialog(
-              title: S.current.titleDeleteFolder,
-              body: ListBody(children: <Widget>[
-                Text(path,
-                    style: context.theme.appTextStyle.bodyMedium
-                        .copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20.0),
-                Text(S.current.messageConfirmFolderDeletion),
-                Fields.dialogActions(context, buttons: [
+  static Future<bool?> deleteFolderAlertDialog(BuildContext context,
+          RepoCubit repo, String path, String validationMessage) async =>
+      showDialog<bool?>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => ActionsDialog(
+          title: S.current.titleDeleteFolder,
+          body: ListBody(
+            children: <Widget>[
+              Text(
+                path,
+                style: context.theme.appTextStyle.bodyMedium
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20.0),
+              Text(validationMessage),
+              Fields.dialogActions(
+                context,
+                buttons: [
                   NegativeButton(
-                      text: S.current.actionCancel,
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true).pop(),
-                      buttonsAspectRatio:
-                          Dimensions.aspectRatioModalDialogButton),
+                    text: S.current.actionCancel,
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(false),
+                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+                  ),
                   PositiveButton(
-                      text: S.current.actionDelete,
-                      isDangerButton: true,
-                      onPressed: () async {
-                        await repo.deleteFolder(path, recursive);
-                        Navigator.of(context).pop(path);
-                      },
-                      buttonsAspectRatio:
-                          Dimensions.aspectRatioModalDialogButton)
-                ])
-              ])));
+                    text: S.current.actionDelete,
+                    isDangerButton: true,
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(true),
+                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
 }
