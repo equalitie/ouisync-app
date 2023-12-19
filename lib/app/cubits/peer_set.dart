@@ -36,16 +36,13 @@ class PeerSet extends Equatable {
 
   const PeerSet(this.peers);
 
-  /// Group the peers by their runtime id. Entries without runtime id are not grouped.
+  /// Group the peers by their runtime id. Entries without runtime id are all grouped together.
+  /// Groups with runtime id are sorted before those without.
   SplayTreeMap<PeerKey, List<PeerInfo>> get grouped {
     var result = SplayTreeMap<PeerKey, List<PeerInfo>>();
 
     for (var peer in peers) {
-      final runtimeId = peer.runtimeId;
-      final key = runtimeId != null
-          ? PeerKey(runtimeId, 0)
-          : PeerKey('', result.length + 1);
-
+      final key = PeerKey(peer.runtimeId);
       result.putIfAbsent(key, () => <PeerInfo>[]).add(peer);
     }
 
@@ -64,33 +61,33 @@ class PeerSet extends Equatable {
 }
 
 class PeerKey implements Comparable<PeerKey> {
-  final String runtimeId;
-  final int fallback;
+  final String? runtimeId;
 
-  PeerKey(this.runtimeId, this.fallback);
+  PeerKey(this.runtimeId);
 
   @override
-  int get hashCode => Object.hash(runtimeId, fallback);
+  int get hashCode => runtimeId.hashCode;
 
   @override
   bool operator ==(Object other) =>
-      other is PeerKey &&
-      runtimeId == other.runtimeId &&
-      fallback == other.fallback;
+      other is PeerKey && runtimeId == other.runtimeId;
 
   @override
   int compareTo(PeerKey other) {
-    if (runtimeId.isNotEmpty) {
-      if (other.runtimeId.isNotEmpty) {
-        return Comparable.compare(runtimeId, other.runtimeId);
+    final lhs = runtimeId;
+    final rhs = other.runtimeId;
+
+    if (lhs != null) {
+      if (rhs != null) {
+        return Comparable.compare(lhs, rhs);
       } else {
         return -1;
       }
     } else {
-      if (other.runtimeId.isNotEmpty) {
+      if (rhs != null) {
         return 1;
       } else {
-        return Comparable.compare(fallback, other.fallback);
+        return 0;
       }
     }
   }
