@@ -8,14 +8,15 @@ import '../utils/utils.dart';
 import '../widgets/dialogs/add_peer_dialog.dart';
 
 class PeerList extends StatelessWidget {
-  final Session _session;
+  final PeerSetCubit _cubit;
 
-  PeerList(this._session);
+  PeerList(this._cubit);
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.labelPeers)),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
+          bloc: _cubit,
           builder: (context, state) => ListView(
             padding: Dimensions.paddingContents,
             children: _buildItems(context, state),
@@ -104,7 +105,7 @@ class PeerList extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _LongText(_formatAddress(peer)),
+                  _LongText(peer.addr),
                   _buildBadges(context, peer),
                 ],
               ),
@@ -116,18 +117,20 @@ class PeerList extends StatelessWidget {
 
   Widget _buildBadges(BuildContext context, PeerInfo peer) => Row(
         children: [
+          _buildBadge(context, Text(_formatPeerProto(peer.proto))),
           _buildBadge(
             context,
             Row(
               children: [
-                Icon(peer.source == 'Listener'
+                Icon(peer.source == PeerSource.listener
                     ? Icons.arrow_downward
                     : Icons.arrow_upward),
-                Text(peer.source),
+                Text(_formatPeerSource(peer.source)),
               ],
             ),
           ),
-          if (peer.state != 'Active') _buildBadge(context, Text(peer.state)),
+          if (peer.state != PeerStateKind.active)
+            _buildBadge(context, Text(_formatPeerState(peer.state))),
         ],
       );
 
@@ -167,7 +170,7 @@ class PeerList extends StatelessWidget {
       );
 
   Widget _buildRemoveButton(BuildContext context, PeerInfo peer) =>
-      (peer.source == 'UserProvided')
+      (peer.source == PeerSource.userProvided)
           ? IconButton(
               icon: Icon(
                 Icons.close_rounded,
@@ -178,7 +181,29 @@ class PeerList extends StatelessWidget {
             )
           : Container();
 
-  void _addPeer(BuildContext context) async {
+  // TODO: i18n this
+  String _formatPeerState(PeerStateKind state) => switch (state) {
+        PeerStateKind.known => 'Known',
+        PeerStateKind.connecting => 'Connecting',
+        PeerStateKind.handshaking => 'Handshaking',
+        PeerStateKind.active => 'Active',
+      };
+
+  // TODO: i18n this
+  String _formatPeerSource(PeerSource source) => switch (source) {
+        PeerSource.dht => 'DHT',
+        PeerSource.listener => 'Listener',
+        PeerSource.localDiscovery => 'Local discovery',
+        PeerSource.peerExchange => 'Peer exchange',
+        PeerSource.userProvided => 'User provided',
+      };
+
+  String _formatPeerProto(PeerProto proto) => switch (proto) {
+        PeerProto.tcp => 'TCP',
+        PeerProto.quic => 'QUIC',
+      };
+
+  Future<void> _addPeer(BuildContext context) async {
     final address = await showDialog<String>(
       context: context,
       builder: (context) => AddPeerDialog(),
@@ -188,24 +213,22 @@ class PeerList extends StatelessWidget {
       return;
     }
 
-    // TODO: When we enable TCP, consider adding both TCP and QUIC at the same time to avoid
-    // cluttering the UI with a protocol selector.
-    await _session.addUserProvidedPeer('quic/$address');
+    await _cubit.addPeer(address);
+
     showSnackBar(context, message: 'Peer added');
   }
 
-  void _removePeer(BuildContext context, PeerInfo peer) async {
-    final address = _formatAddress(peer);
-    await _session.removeUserProvidedPeer('quic/$address');
+  Future<void> _removePeer(BuildContext context, PeerInfo peer) async {
+    await _cubit.removePeer(peer.addr);
+
     showSnackBar(context, message: 'Peer removed');
   }
 }
 
 class _LongText extends StatelessWidget {
   final String text;
-  final TextStyle? style;
 
-  _LongText(this.text, {this.style});
+  _LongText(this.text);
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -214,11 +237,6 @@ class _LongText extends StatelessWidget {
         child: Text(
           text,
           overflow: TextOverflow.ellipsis,
-          style: style,
         ),
       );
 }
-
-String _formatAddress(PeerInfo peer) => peer.ip.contains(':')
-    ? '[${peer.ip}]:${peer.port}' // IPv6
-    : '${peer.ip}:${peer.port}'; // IPv4

@@ -908,7 +908,7 @@ class _MainPageState extends State<MainPage>
             providers: [
               BlocProvider.value(value: _cubits.upgradeExists),
             ],
-            child: SettingsPage(widget.session, _cubits),
+            child: SettingsPage(_cubits),
           ),
         ),
       );

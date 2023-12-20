@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
@@ -13,11 +12,11 @@ import 'network_section.dart';
 import 'settings_section.dart';
 
 class AppSettingsContainer extends StatefulHookWidget {
-  AppSettingsContainer(Session session, Cubits cubits)
+  AppSettingsContainer(Cubits cubits)
       : sections = [
-          NetworkSection(session),
+          NetworkSection(),
           LogsSection(cubits),
-          AboutSection(session, cubits),
+          AboutSection(cubits),
         ];
 
   final List<SettingsSection> sections;

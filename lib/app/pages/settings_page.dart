@@ -2,16 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage(this._session, this._cubits);
+  const SettingsPage(this._cubits);
 
-  final Session _session;
   final Cubits _cubits;
 
   @override
@@ -43,5 +41,5 @@ class SettingsPage extends StatelessWidget {
               listener: (context, state) {
                 unawaited(context.read<ConnectivityInfo>().update());
               },
-              child: AppSettingsContainer(_session, _cubits))));
+              child: AppSettingsContainer(_cubits))));
 }

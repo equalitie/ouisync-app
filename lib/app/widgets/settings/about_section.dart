@@ -4,7 +4,6 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,7 +19,7 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(this.session, this.cubits)
+  AboutSection(this.cubits)
       : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
           title: S.current.titleAbout,
@@ -29,7 +28,6 @@ class AboutSection extends SettingsSection with AppLogger {
         cubits.repositories.settings.getLaunchAtStartup() ?? true);
   }
 
-  final Session session;
   final Cubits cubits;
   late final ValueNotifier<bool> _launchAtStartup;
 
@@ -118,12 +116,11 @@ class AboutSection extends SettingsSection with AppLogger {
     final peerSetCubit = context.read<PeerSetCubit>();
 
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => BlocProvider.value(
-                  value: peerSetCubit,
-                  child: PeerList(session),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => PeerList(peerSetCubit),
+      ),
+    );
   }
 
   @override

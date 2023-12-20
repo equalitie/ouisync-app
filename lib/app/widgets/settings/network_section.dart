@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -14,13 +13,11 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
-  NetworkSection(this._session)
+  NetworkSection()
       : super(
           key: GlobalKey(debugLabel: 'key_network_section'),
           title: S.current.titleNetwork,
         );
-
-  final Session _session;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -187,12 +184,11 @@ class NetworkSection extends SettingsSection {
               final peerSetCubit = context.read<PeerSetCubit>();
 
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BlocProvider.value(
-                            value: peerSetCubit,
-                            child: PeerList(_session),
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PeerList(peerSetCubit),
+                ),
+              );
             }),
       );
 

@@ -24,6 +24,16 @@ class PeerSetCubit extends Cubit<PeerSet> {
         _session.onPeersChange.listen((peers) => emit(PeerSet(peers)));
   }
 
+  Future<void> addPeer(String addr) async {
+    // TODO: Consider adding both TCP and QUIC at the same time to avoid having to clutter the UI
+    // with a protocol selector.
+    await _session.addUserProvidedPeer('quic/$addr');
+  }
+
+  Future<void> removePeer(String addr) async {
+    await _session.removeUserProvidedPeer('quic/$addr');
+  }
+
   @override
   Future<void> close() async {
     await _subscription?.cancel();
@@ -51,7 +61,7 @@ class PeerSet extends Equatable {
 
   /// Number of connected peers
   int get numConnected => peers
-      .where((peer) => peer.state == "Active")
+      .where((peer) => peer.state == PeerStateKind.active)
       .map((peer) => peer.runtimeId)
       .toSet()
       .length;
