@@ -87,6 +87,14 @@ Future<void> main(List<String> args) async {
   final auth = options.token != null
       ? Authentication.withToken(options.token)
       : Authentication.anonymous();
+
+  if (options.action != null && options.awaitUpload) {
+    print("Press any key to start uploading to github");
+    // Doing async readline is a bit cumbersome, and the sync version will work just fine.
+    // https://gist.github.com/frencojobs/dca6a24e07ada2b9df1683ddc8fa45c6?permalink_comment_id=4057248#gistcomment-4057248
+    stdin.readLineSync();
+  }
+
   final client = GitHub(auth: auth);
 
   try {
@@ -130,6 +138,7 @@ class Options {
   final bool detailedLog;
   final String? identityName;
   final String? publisher;
+  final bool awaitUpload;
 
   Options._({
     this.apk = false,
@@ -144,6 +153,7 @@ class Options {
     this.detailedLog = true,
     this.identityName,
     this.publisher,
+    this.awaitUpload = false,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -185,6 +195,12 @@ class Options {
       help:
           'Do not create new release, upload the assets to the latest existing draft release instead (conflicts with --create)',
       defaultsTo: false,
+    );
+    parser.addFlag(
+      'await-upload',
+      defaultsTo: false,
+      help:
+          'Await user pressing enter to start uploading, useful for when doing --create and --update concurrently on two different PCs',
     );
 
     parser.addOption('first-commit',
@@ -264,6 +280,7 @@ class Options {
       detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
       publisher: results['publisher'],
+      awaitUpload: results['await-upload'],
     );
   }
 }
