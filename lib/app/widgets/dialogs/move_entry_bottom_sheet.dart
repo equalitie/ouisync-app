@@ -11,15 +11,19 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class MoveEntryDialog extends StatefulWidget {
-  const MoveEntryDialog(this._repo,
-      {required this.origin,
-      required this.path,
-      required this.type,
-      required this.onBottomSheetOpen,
-      required this.onMoveEntry});
+  const MoveEntryDialog(
+    this._repo, {
+    required this.navigation,
+    required this.originPath,
+    required this.path,
+    required this.type,
+    required this.onBottomSheetOpen,
+    required this.onMoveEntry,
+  });
 
   final RepoCubit _repo;
-  final String origin;
+  final NavigationCubit navigation;
+  final String originPath;
   final String path;
   final EntryType type;
   final BottomSheetCallback onBottomSheetOpen;
@@ -79,50 +83,64 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     widgetSize = widgetContext.size;
   }
 
-  _selectActions(context) => BlocBuilder<RepoCubit, RepoState>(
-        bloc: widget._repo,
-        builder: (context, state) {
-          bool canMove = false;
-          final folder = state.currentFolder;
+  _selectActions(context) {
+    final aspectRatio = _getButtonAspectRatio();
+    return Fields.dialogActions(context,
+        buttons: _actions(context, aspectRatio),
+        padding: const EdgeInsets.only(top: 0.0),
+        mainAxisAlignment: MainAxisAlignment.end);
+  }
 
-          if (folder.path != widget.origin && folder.path != widget.path) {
-            canMove = true;
-          }
-
-          final aspectRatio = _getButtonAspectRatio();
-          return Fields.dialogActions(context,
-              buttons: _actions(context, canMove, aspectRatio),
-              padding: const EdgeInsets.only(top: 0.0),
-              mainAxisAlignment: MainAxisAlignment.end);
-        },
-      );
-
-  List<Widget> _actions(
-          BuildContext context, bool canMove, double aspectRatio) =>
-      [
+  List<Widget> _actions(BuildContext context, double aspectRatio) => [
         NegativeButton(
             buttonsAspectRatio: aspectRatio,
             buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
             text: S.current.actionCancel,
             onPressed: () => widget.onBottomSheetOpen.call(null, '')),
-        PositiveButton(
-            buttonsAspectRatio: aspectRatio,
-            buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-            text: S.current.actionMove,
-            onPressed: canMove
-                ? () async {
-                    final moved = await Dialogs.executeFutureWithLoadingDialog(
-                        context,
-                        f: widget.onMoveEntry
-                            .call(widget.origin, widget.path, widget.type));
+        BlocBuilder<NavigationCubit, NavigationState>(
+            bloc: widget.navigation,
+            builder: (context, state) {
+              final canMove = state.isFolder
+                  ? _canMove(
+                      state.currentRepoId,
+                      state.currentPath,
+                      widget._repo.databaseId,
+                      widget.originPath,
+                    )
+                  : false;
+              return PositiveButton(
+                  buttonsAspectRatio: aspectRatio,
+                  buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+                  text: S.current.actionMove,
+                  onPressed: canMove
+                      ? () async {
+                          final moved =
+                              await Dialogs.executeFutureWithLoadingDialog(
+                                  context,
+                                  f: widget.onMoveEntry.call(widget.originPath,
+                                      widget.path, widget.type));
 
-                    if (moved) widget.onBottomSheetOpen.call(null, '');
-                  }
-                : null)
+                          if (moved) widget.onBottomSheetOpen.call(null, '');
+                        }
+                      : null);
+            }),
 
         /// If the entry can't be moved (the user selected the same entry/path, for example)
         /// Then null is used instead of the function, which disable the button.
       ];
+
+  bool _canMove(
+    String originRepoId,
+    String originPath,
+    String destinationRepoId,
+    String destinationPath,
+  ) {
+    if (originRepoId != destinationRepoId) return false;
+
+    if (originPath == destinationPath) return false;
+
+    return true;
+  }
 
   double _getButtonAspectRatio() {
     if (Platform.isWindows || Platform.isLinux) {

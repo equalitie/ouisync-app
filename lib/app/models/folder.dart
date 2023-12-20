@@ -36,11 +36,13 @@ class Folder {
 
   void goUp() {
     state = FolderState(path: state.parent, content: state.content);
+    repo.updateNavigation(isFolder: true);
   }
 
   void goTo(String path) {
     if (path != state.path) {
       state = FolderState(path: path);
+      repo.updateNavigation(isFolder: true);
     }
   }
 

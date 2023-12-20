@@ -38,6 +38,7 @@ class MainPage extends StatefulWidget {
     required this.mediaReceiver,
     required this.settings,
     required this.windowManager,
+    required this.navigation,
   });
 
   final Session session;
@@ -46,6 +47,7 @@ class MainPage extends StatefulWidget {
   final MediaReceiver mediaReceiver;
   final Settings settings;
   final PlatformWindowManager windowManager;
+  final NavigationCubit navigation;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
@@ -54,6 +56,7 @@ class MainPage extends StatefulWidget {
         backgroundServiceManager,
         settings,
         windowManager,
+        navigation,
       );
 }
 
@@ -84,10 +87,12 @@ class _MainPageState extends State<MainPage>
     BackgroundServiceManager backgroundServiceManager,
     Settings settings,
     PlatformWindowManager windowManager,
+    NavigationCubit navigation,
   ) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
+      navigation: navigation,
     );
     final powerControl = PowerControl(session, settings);
     final panicCounter = StateMonitorIntCubit(
@@ -110,6 +115,7 @@ class _MainPageState extends State<MainPage>
       backgroundServiceManager: backgroundServiceManager,
       windowManager: windowManager,
       mount: mount,
+      navigation: navigation,
     ));
   }
 
@@ -206,6 +212,14 @@ class _MainPageState extends State<MainPage>
 
   Widget buildMainWidget() {
     return _cubits.repositories.builder((repos) {
+      final currentRepo = repos.currentRepo;
+      final currentRepoCubit = currentRepo?.maybeCubit;
+
+      if (currentRepoCubit != null) {
+        final isFolder = !repos.showList;
+        currentRepoCubit.updateNavigation(isFolder: isFolder);
+      }
+
       if (repos.repos.isNotEmpty && repos.showList) {
         /// This needs to be structured better
         /// TODO: Add sorting to repo list
@@ -231,43 +245,41 @@ class _MainPageState extends State<MainPage>
         );
       }
 
-      final current = repos.currentRepo;
-
-      if (repos.isLoading || current is LoadingRepoEntry) {
+      if (repos.isLoading || currentRepo is LoadingRepoEntry) {
         // This one is mainly for when we're unlocking the repository,
         // because during that time the current repository is destroyed so we
         // can't show it's content.
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (current is OpenRepoEntry) {
-        final navigationPath = current.cubit.state.currentFolder.path;
-        current.cubit.navigateTo(navigationPath);
+      if (currentRepo is OpenRepoEntry) {
+        final navigationPath = currentRepo.cubit.state.currentFolder.path;
+        currentRepo.cubit.navigateTo(navigationPath);
 
-        return _repositoryContentBuilder(current);
+        return _repositoryContentBuilder(currentRepo);
       }
 
-      if (current is MissingRepoEntry) {
+      if (currentRepo is MissingRepoEntry) {
         return MissingRepositoryState(
-            repositoryName: current.name,
-            repositoryMetaInfo: current.metaInfo,
-            errorMessage: current.error,
-            errorDescription: current.errorDescription,
+            repositoryName: currentRepo.name,
+            repositoryMetaInfo: currentRepo.metaInfo,
+            errorMessage: currentRepo.error,
+            errorDescription: currentRepo.errorDescription,
             settings: widget.settings,
             onReloadRepository: null,
             onDelete: repos.deleteRepository);
       }
 
-      if (current is ErrorRepoEntry) {
+      if (currentRepo is ErrorRepoEntry) {
         // This is a general purpose error state.
         // errorDescription is required, but nullable.
         return ErrorState(
-            errorMessage: current.error,
-            errorDescription: current.errorDescription,
+            errorMessage: currentRepo.error,
+            errorDescription: currentRepo.errorDescription,
             onReload: null);
       }
 
-      if (current == null) {
+      if (currentRepo == null) {
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
@@ -612,6 +624,7 @@ class _MainPageState extends State<MainPage>
             return FileDetail(
               context: context,
               cubit: repoCubit,
+              navigation: widget.navigation,
               data: data as FileItem,
               onUpdateBottomSheet: updateBottomSheet,
               onPreviewFile: (cubit, data, useDefaultApp) =>
@@ -634,6 +647,7 @@ class _MainPageState extends State<MainPage>
             return FolderDetail(
               context: context,
               cubit: repoCubit,
+              navigation: widget.navigation,
               data: data as FolderItem,
               onUpdateBottomSheet: updateBottomSheet,
               onMoveEntry: (origin, path, type) =>

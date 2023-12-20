@@ -23,10 +23,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final oui.Session _session;
   StreamSubscription<void>? _subscription;
   final Settings _settings;
+  final NavigationCubit _navigation;
 
-  ReposCubit({required session, required settings})
-      : _session = session,
-        _settings = settings;
+  ReposCubit({
+    required session,
+    required settings,
+    required navigation,
+  })  : _session = session,
+        _settings = settings,
+        _navigation = navigation;
 
   Settings get settings => _settings;
 
@@ -56,7 +61,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       _isLoading = false;
     });
 
-     _putRepoList(RepoListEntry(reposCubit: this));
+    _putRepoList(RepoListEntry(reposCubit: this));
   }
 
   bool get isLoading => _isLoading;
@@ -437,9 +442,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
               store: store, token: reopenToken);
 
       final cubit = await RepoCubit.create(
-          settingsRepoEntry: settingsRepoEntry,
-          handle: repo,
-          settings: _settings);
+        settingsRepoEntry: settingsRepoEntry,
+        handle: repo,
+        settings: _settings,
+        navigation: _navigation,
+      );
 
       return OpenRepoEntry(cubit);
     } catch (e, st) {
@@ -499,6 +506,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         settingsRepoEntry: settingsRepoEntry!,
         handle: repo,
         settings: _settings,
+        navigation: _navigation,
       );
 
       return OpenRepoEntry(cubit);
