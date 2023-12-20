@@ -389,6 +389,14 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(String identityName, String publisher) async {
+  final artifactDir = 'build/windows/x64/runner/Release';
+
+  // We had a problem when creating the msix when there was an executable from
+  // previous non-msix builds, the executable was not regenerated and the
+  // package was unusable.
+  print("Removing artifacts from previous builds");
+  await new Directory(artifactDir).delete(recursive: true);
+
   await run('dart', [
     'run',
     'msix:create',
@@ -401,7 +409,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     '--store'
   ]);
 
-  return File('build/windows/x64/runner/Release/ouisync_app.msix');
+  return File('$artifactDir/ouisync_app.msix');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
