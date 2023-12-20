@@ -15,6 +15,7 @@ class FileDetail extends StatefulWidget {
   const FileDetail({
     required this.context,
     required this.cubit,
+    required this.navigation,
     required this.data,
     required this.onUpdateBottomSheet,
     required this.onPreviewFile,
@@ -24,6 +25,7 @@ class FileDetail extends StatefulWidget {
 
   final BuildContext context;
   final RepoCubit cubit;
+  final NavigationCubit navigation;
   final FileItem data;
   final BottomSheetCallback onUpdateBottomSheet;
   final PreviewFileCallback onPreviewFile;
@@ -184,13 +186,16 @@ class _FileDetailState extends State<FileDetail> {
     MoveEntryCallback moveEntryCallback,
     BottomSheetCallback bottomSheetControllerCallback,
   ) {
-    final origin = getDirname(path);
-    final bottomSheetMoveEntry = MoveEntryDialog(widget.cubit,
-        origin: origin,
-        path: path,
-        type: type,
-        onBottomSheetOpen: bottomSheetControllerCallback,
-        onMoveEntry: moveEntryCallback);
+    final originPath = getDirname(path);
+    final bottomSheetMoveEntry = MoveEntryDialog(
+      widget.cubit,
+      navigation: widget.navigation,
+      originPath: originPath,
+      path: path,
+      type: type,
+      onBottomSheetOpen: bottomSheetControllerCallback,
+      onMoveEntry: moveEntryCallback,
+    );
 
     widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
   }

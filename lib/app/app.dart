@@ -158,13 +158,16 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     final upgradeExists = UpgradeExistsCubit(
         widget.session.currentProtocolVersion, widget.settings);
 
+    final navigation = NavigationCubit();
+
     return Scaffold(
       body: MultiBlocProvider(
           providers: [
             // TODO: We have the Cubits class which we thread to widgets that
             // need it, consider getting rid of this BlocProvider pattern.
             BlocProvider<UpgradeExistsCubit>(
-                create: (BuildContext context) => upgradeExists),
+              create: (BuildContext context) => upgradeExists,
+            ),
           ],
           child: DropTarget(
               onDragDone: (detail) {
@@ -189,6 +192,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
                 mediaReceiver: _mediaReceiver,
                 settings: widget.settings,
                 windowManager: widget.windowManager,
+                navigation: navigation,
               ))),
     );
   }

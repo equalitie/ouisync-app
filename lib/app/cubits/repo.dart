@@ -6,7 +6,6 @@ import 'dart:io' as io;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:shelf/shelf_io.dart' as io;
@@ -14,6 +13,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/utils.dart';
+import 'cubits.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -94,11 +94,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final SettingsRepoEntry _settingsRepoEntry;
   final oui.Repository _handle;
   final Settings _settings;
+  final NavigationCubit _navigation;
 
   RepoCubit._(
     this._settingsRepoEntry,
     this._handle,
     this._settings,
+    this._navigation,
     RepoState state,
   ) : super(state) {
     _currentFolder.repo = this;
@@ -108,6 +110,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required SettingsRepoEntry settingsRepoEntry,
     required oui.Repository handle,
     required Settings settings,
+    required NavigationCubit navigation,
   }) async {
     var name = settingsRepoEntry.name;
     final authMode = settings.getAuthenticationMode(name);
@@ -131,14 +134,25 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isDhtEnabled: await handle.isDhtEnabled,
         isPexEnabled: await handle.isPexEnabled);
 
-    return RepoCubit._(settingsRepoEntry, handle, settings, state);
+    return RepoCubit._(
+      settingsRepoEntry,
+      handle,
+      settings,
+      navigation,
+      state,
+    );
   }
 
   oui.Repository get handle => _handle;
   String get databaseId => _settingsRepoEntry.databaseId;
   String get name => _settingsRepoEntry.name;
+  String get currentFolder => _currentFolder.state.path;
   RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
   SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
+
+  void updateNavigation({required bool isFolder}) {
+    _navigation.current(databaseId, currentFolder, isFolder);
+  }
 
   Future<void> setDhtEnabled(bool value) async {
     if (state.isDhtEnabled == value) {

@@ -5,6 +5,7 @@ import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'background_service_manager.dart';
 import 'mount.dart';
+import 'navigation.dart';
 import 'power_control.dart';
 import 'repos.dart';
 import 'state_monitor.dart';
@@ -26,6 +27,7 @@ export 'state_monitor.dart';
 export 'upgrade_exists.dart';
 export 'value.dart';
 export 'watch.dart';
+export 'navigation.dart';
 
 class Cubits {
   final ReposCubit repositories;
@@ -35,6 +37,7 @@ class Cubits {
   final BackgroundServiceManager backgroundServiceManager;
   final PlatformWindowManager windowManager;
   final MountCubit mount;
+  final NavigationCubit navigation;
 
   Cubits({
     required this.repositories,
@@ -44,6 +47,7 @@ class Cubits {
     required this.backgroundServiceManager,
     required this.windowManager,
     required this.mount,
+    required this.navigation,
   });
 
   Color? mainNotificationBadgeColor() {
