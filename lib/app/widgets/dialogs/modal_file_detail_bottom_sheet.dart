@@ -71,23 +71,22 @@ class _FileDetailState extends State<FileDetail> {
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
               ),
-              if (io.Platform.isAndroid)
-                EntryActionItem(
-                  iconData: Icons.preview_rounded,
-                  title: S.current.iconPreview,
-                  dense: true,
-                  onTap: () async {
-                    Navigator.of(context).pop();
+              EntryActionItem(
+                iconData: Icons.preview_rounded,
+                title: S.current.iconPreview,
+                dense: true,
+                onTap: () async {
+                  Navigator.of(context).pop();
 
-                    await widget.onPreviewFile
-                        .call(widget.cubit, widget.data, false);
-                  },
-                  enabledValidation: () => widget.isActionAvailableValidator(
-                      widget.cubit.state.accessMode, EntryAction.preview),
-                  disabledMessage: S.current.messageActionNotAvailable,
-                  disabledMessageDuration:
-                      Constants.notAvailableActionMessageDuration,
-                ),
+                  await widget.onPreviewFile
+                      .call(widget.cubit, widget.data, false);
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.cubit.state.accessMode, EntryAction.preview),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
               if (io.Platform.isAndroid)
                 EntryActionItem(
                   iconData: Icons.share_rounded,
