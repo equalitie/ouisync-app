@@ -5,26 +5,35 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../generated/l10n.dart';
 import '../cubits/peer_set.dart';
 import '../utils/utils.dart';
-import '../widgets/dialogs/add_peer_dialog.dart';
+import '../widgets/long_text.dart';
+import 'user_provided_peers_page.dart';
 
 class PeersPage extends StatelessWidget {
-  final PeerSetCubit _cubit;
+  final Session session;
+  final PeerSetCubit cubit;
 
-  PeersPage(this._cubit);
+  PeersPage(this.session, this.cubit);
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.labelPeers)),
+        appBar: AppBar(title: Text(S.current.labelPeers), actions: [
+          IconButton(
+            icon: const Icon(Icons.manage_accounts),
+            tooltip: 'User provided peers',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserProvidedPeersPage(session),
+              ),
+            ),
+          )
+        ]),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
-          bloc: _cubit,
+          bloc: cubit,
           builder: (context, state) => ListView(
             padding: Dimensions.paddingContents,
             children: _buildItems(context, state),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add_rounded),
-          onPressed: () => _addPeer(context),
         ),
       );
 
@@ -81,11 +90,11 @@ class PeersPage extends StatelessWidget {
                   style: context.theme.appTextStyle.titleMedium),
             ),
             Expanded(
-              flex: 16,
+              flex: 15,
               child: Row(children: [
                 Icon(Icons.person, size: Dimensions.sizeIconMicro),
                 Expanded(
-                  child: _LongText(
+                  child: LongText(
                     runtimeId,
                   ),
                 )
@@ -96,21 +105,20 @@ class PeersPage extends StatelessWidget {
       );
 
   Widget _buildPeer(BuildContext context, PeerInfo peer) => Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        padding: EdgeInsets.all(4.0),
         child: Row(
           children: [
             Spacer(flex: 1),
             Expanded(
-              flex: 14,
+              flex: 15,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _LongText(peer.addr),
+                  LongText(peer.addr),
                   _buildBadges(context, peer),
                 ],
               ),
             ),
-            Expanded(flex: 2, child: _buildRemoveButton(context, peer)),
           ],
         ),
       );
@@ -168,18 +176,6 @@ class PeersPage extends StatelessWidget {
         ),
       );
 
-  Widget _buildRemoveButton(BuildContext context, PeerInfo peer) =>
-      (peer.source == PeerSource.userProvided)
-          ? IconButton(
-              icon: Icon(
-                Icons.close_rounded,
-              ),
-              iconSize: Dimensions.sizeIconMicro,
-              visualDensity: VisualDensity.compact,
-              onPressed: () => _removePeer(context, peer),
-            )
-          : Container();
-
   // TODO: i18n this
   String _formatPeerState(PeerStateKind state) => switch (state) {
         PeerStateKind.known => 'Known',
@@ -196,41 +192,4 @@ class PeersPage extends StatelessWidget {
         PeerSource.peerExchange => 'Peer exchange',
         PeerSource.userProvided => 'User provided',
       };
-
-  Future<void> _addPeer(BuildContext context) async {
-    final address = await showDialog<String>(
-      context: context,
-      builder: (context) => AddPeerDialog(),
-    );
-
-    if (address == null) {
-      return;
-    }
-
-    await _cubit.addPeer(address);
-
-    showSnackBar(context, message: 'Peer added');
-  }
-
-  Future<void> _removePeer(BuildContext context, PeerInfo peer) async {
-    await _cubit.removePeer(peer.addr);
-
-    showSnackBar(context, message: 'Peer removed');
-  }
-}
-
-class _LongText extends StatelessWidget {
-  final String text;
-
-  _LongText(this.text);
-
-  @override
-  Widget build(BuildContext context) => Tooltip(
-        message: text,
-        triggerMode: TooltipTriggerMode.tap,
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
 }

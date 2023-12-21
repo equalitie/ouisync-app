@@ -42,6 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
           elevation: 0.0,
         ),
         body: AppSettingsContainer(
+          widget.session,
           widget.cubits,
           connectivityInfo: _connectivityInfo,
           natDetection: _natDetection,

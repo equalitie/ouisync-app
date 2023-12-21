@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -14,6 +15,7 @@ import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
   NetworkSection(
+    this.session,
     this.cubits, {
     required this.connectivityInfo,
     required this.natDetection,
@@ -23,6 +25,7 @@ class NetworkSection extends SettingsSection {
           title: S.current.titleNetwork,
         );
 
+  final Session session;
   final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
@@ -196,7 +199,7 @@ class NetworkSection extends SettingsSection {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PeersPage(peerSet),
+                  builder: (context) => PeersPage(session, peerSet),
                 ),
               );
             }),
