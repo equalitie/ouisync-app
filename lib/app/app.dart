@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -119,23 +118,28 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
 
 class OuiSyncApp extends StatefulWidget {
   const OuiSyncApp({
-    required this.session,
     required this.windowManager,
+    required this.session,
     required this.settings,
     Key? key,
   }) : super(key: key);
 
+  final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
-  final PlatformWindowManager windowManager;
 
   @override
-  State<OuiSyncApp> createState() => _OuiSyncAppState();
+  State<OuiSyncApp> createState() => _OuiSyncAppState(session, settings);
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
   final _backgroundServiceManager = BackgroundServiceManager();
+  final UpgradeExistsCubit _upgradeExists;
+
+  _OuiSyncAppState(Session session, Settings settings)
+      : _upgradeExists =
+            UpgradeExistsCubit(session.currentProtocolVersion, settings);
 
   @override
   void initState() {
@@ -154,46 +158,35 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: We are recreating this on every rebuild. Is that what we want?
-    final upgradeExists = UpgradeExistsCubit(
-        widget.session.currentProtocolVersion, widget.settings);
-
     final navigation = NavigationCubit();
 
     return Scaffold(
-      body: MultiBlocProvider(
-          providers: [
-            // TODO: We have the Cubits class which we thread to widgets that
-            // need it, consider getting rid of this BlocProvider pattern.
-            BlocProvider<UpgradeExistsCubit>(
-              create: (BuildContext context) => upgradeExists,
-            ),
-          ],
-          child: DropTarget(
-              onDragDone: (detail) {
-                loggy.app('Drop done: ${detail.files.first.path}');
+      body: DropTarget(
+        onDragDone: (detail) {
+          loggy.app('Drop done: ${detail.files.first.path}');
 
-                final xFile = detail.files.firstOrNull;
-                if (xFile != null) {
-                  final file = io.File(xFile.path);
-                  _mediaReceiver.controller.add(file);
-                }
-              },
-              onDragEntered: (detail) {
-                loggy.app('Drop entered: ${detail.localPosition}');
-              },
-              onDragExited: (detail) {
-                loggy.app('Drop exited: ${detail.localPosition}');
-              },
-              child: MainPage(
-                session: widget.session,
-                upgradeExists: upgradeExists,
-                backgroundServiceManager: _backgroundServiceManager,
-                mediaReceiver: _mediaReceiver,
-                settings: widget.settings,
-                windowManager: widget.windowManager,
-                navigation: navigation,
-              ))),
+          final xFile = detail.files.firstOrNull;
+          if (xFile != null) {
+            final file = io.File(xFile.path);
+            _mediaReceiver.controller.add(file);
+          }
+        },
+        onDragEntered: (detail) {
+          loggy.app('Drop entered: ${detail.localPosition}');
+        },
+        onDragExited: (detail) {
+          loggy.app('Drop exited: ${detail.localPosition}');
+        },
+        child: MainPage(
+          windowManager: widget.windowManager,
+          session: widget.session,
+          settings: widget.settings,
+          mediaReceiver: _mediaReceiver,
+          backgroundServiceManager: _backgroundServiceManager,
+          upgradeExists: _upgradeExists,
+          navigation: navigation,
+        ),
+      ),
     );
   }
 

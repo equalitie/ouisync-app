@@ -7,10 +7,10 @@ import '../cubits/peer_set.dart';
 import '../utils/utils.dart';
 import '../widgets/dialogs/add_peer_dialog.dart';
 
-class PeerList extends StatelessWidget {
+class PeersPage extends StatelessWidget {
   final PeerSetCubit _cubit;
 
-  PeerList(this._cubit);
+  PeersPage(this._cubit);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -117,7 +117,6 @@ class PeerList extends StatelessWidget {
 
   Widget _buildBadges(BuildContext context, PeerInfo peer) => Row(
         children: [
-          _buildBadge(context, Text(_formatPeerProto(peer.proto))),
           _buildBadge(
             context,
             Row(
@@ -196,11 +195,6 @@ class PeerList extends StatelessWidget {
         PeerSource.localDiscovery => 'Local discovery',
         PeerSource.peerExchange => 'Peer exchange',
         PeerSource.userProvided => 'User provided',
-      };
-
-  String _formatPeerProto(PeerProto proto) => switch (proto) {
-        PeerProto.tcp => 'TCP',
-        PeerProto.quic => 'QUIC',
       };
 
   Future<void> _addPeer(BuildContext context) async {

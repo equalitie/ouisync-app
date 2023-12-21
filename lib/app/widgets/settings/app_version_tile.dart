@@ -11,11 +11,13 @@ import '../../utils/click_counter.dart';
 
 class AppVersionTile extends StatefulWidget {
   final Session session;
+  final UpgradeExistsCubit upgradeExists;
   final Widget title;
   final Widget leading;
 
   AppVersionTile({
     required this.session,
+    required this.upgradeExists,
     required this.title,
     required this.leading,
   });
@@ -60,6 +62,7 @@ class _AppVersionTileState extends State<AppVersionTile> {
             children: [
               version,
               BlocBuilder<UpgradeExistsCubit, bool>(
+                bloc: widget.upgradeExists,
                 builder: (context, state) {
                   if (state) {
                     return Text(

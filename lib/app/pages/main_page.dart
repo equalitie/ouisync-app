@@ -32,31 +32,31 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
-    required this.session,
-    required this.upgradeExists,
-    required this.backgroundServiceManager,
-    required this.mediaReceiver,
-    required this.settings,
     required this.windowManager,
+    required this.session,
+    required this.settings,
+    required this.mediaReceiver,
+    required this.backgroundServiceManager,
+    required this.upgradeExists,
     required this.navigation,
   });
 
+  final PlatformWindowManager windowManager;
   final Session session;
-  final UpgradeExistsCubit upgradeExists;
+  final Settings settings;
   final BackgroundServiceManager backgroundServiceManager;
   final MediaReceiver mediaReceiver;
-  final Settings settings;
-  final PlatformWindowManager windowManager;
+  final UpgradeExistsCubit upgradeExists;
   final NavigationCubit navigation;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
-        session,
-        upgradeExists,
-        backgroundServiceManager,
-        settings,
-        windowManager,
-        navigation,
+        windowManager: windowManager,
+        session: session,
+        settings: settings,
+        backgroundServiceManager: backgroundServiceManager,
+        upgradeExists: upgradeExists,
+        navigation: navigation,
       );
 }
 
@@ -81,14 +81,14 @@ class _MainPageState extends State<MainPage>
 
   _MainPageState._(this._cubits);
 
-  factory _MainPageState(
-    Session session,
-    UpgradeExistsCubit upgradeExists,
-    BackgroundServiceManager backgroundServiceManager,
-    Settings settings,
-    PlatformWindowManager windowManager,
-    NavigationCubit navigation,
-  ) {
+  factory _MainPageState({
+    required PlatformWindowManager windowManager,
+    required Session session,
+    required Settings settings,
+    required BackgroundServiceManager backgroundServiceManager,
+    required UpgradeExistsCubit upgradeExists,
+    required NavigationCubit navigation,
+  }) {
     final repositories = ReposCubit(
       session: session,
       settings: settings,
@@ -901,20 +901,16 @@ class _MainPageState extends State<MainPage>
 
   void reloadRepository() => _cubits.repositories.init();
 
-  Future<void> _showAppSettings() async => await Navigator.push(
+  Future<void> _showAppSettings() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: _cubits.upgradeExists),
-            ],
-            child: SettingsPage(_cubits),
-          ),
-        ),
+            builder: (context) => SettingsPage(widget.session, _cubits)),
       );
 
-  Future<void> _showRepoSettings(BuildContext context,
-          {required RepoCubit repoCubit}) =>
+  Future<void> _showRepoSettings(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+  }) =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,

@@ -15,16 +15,18 @@ import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
 
 Future<File> dumpAll(
-  BuildContext context,
-  StateMonitor rootMonitor, {
+  BuildContext context, {
+  required StateMonitor rootMonitor,
+  required PowerControl powerControl,
+  required ConnectivityInfo connectivityInfo,
   bool compress = false,
 }) async {
   final dir = await getTemporaryDirectory();
   final info = await PackageInfo.fromPlatform();
   final name = info.appName.toLowerCase();
 
-  final connType = context.read<PowerControl>().state.connectivityType;
-  final connInfo = context.read<ConnectivityInfo>().state;
+  final connType = powerControl.state.connectivityType;
+  final connInfo = connectivityInfo.state;
   final natType = context.read<NatDetection>().state.message();
 
   // TODO: Add time zone, at time of this writing, time zones have not yet

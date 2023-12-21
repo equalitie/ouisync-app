@@ -10,7 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
-import '../../pages/peer_list.dart';
+import '../../pages/peers_page.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -19,8 +19,11 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(this.cubits)
-      : super(
+  AboutSection(
+    this.cubits, {
+    required this.connectivityInfo,
+    required this.peerSet,
+  }) : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
           title: S.current.titleAbout,
         ) {
@@ -29,6 +32,8 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   final Cubits cubits;
+  final ConnectivityInfo connectivityInfo;
+  final PeerSetCubit peerSet;
   late final ValueNotifier<bool> _launchAtStartup;
 
   TextStyle? bodyStyle;
@@ -90,11 +95,13 @@ class AboutSection extends SettingsSection with AppLogger {
       ),
       AppVersionTile(
         session: cubits.repositories.session,
+        upgradeExists: cubits.upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
       ),
       SettingsTile(
         title: BlocBuilder<PeerSetCubit, PeerSet>(
+            bloc: peerSet,
             builder: (context, state) => InfoBuble(
                     child: Text(S.current.messageSettingsRuntimeID,
                         style: bodyStyle),
@@ -112,16 +119,12 @@ class AboutSection extends SettingsSection with AppLogger {
     ];
   }
 
-  void _navigateToPeers(BuildContext context) async {
-    final peerSetCubit = context.read<PeerSetCubit>();
-
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PeerList(peerSetCubit),
-      ),
-    );
-  }
+  void _navigateToPeers(BuildContext context) => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PeersPage(peerSet),
+        ),
+      );
 
   @override
   bool containsErrorNotification() {
@@ -168,7 +171,9 @@ class AboutSection extends SettingsSection with AppLogger {
         context,
         f: dumpAll(
           context,
-          cubits.repositories.rootStateMonitor,
+          rootMonitor: cubits.repositories.rootStateMonitor,
+          powerControl: cubits.powerControl,
+          connectivityInfo: connectivityInfo,
           compress: true,
         ),
       );

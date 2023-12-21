@@ -12,11 +12,24 @@ import 'network_section.dart';
 import 'settings_section.dart';
 
 class AppSettingsContainer extends StatefulHookWidget {
-  AppSettingsContainer(Cubits cubits)
-      : sections = [
-          NetworkSection(),
-          LogsSection(cubits),
-          AboutSection(cubits),
+  AppSettingsContainer(
+    Cubits cubits, {
+    required ConnectivityInfo connectivityInfo,
+    required NatDetection natDetection,
+    required PeerSetCubit peerSet,
+  }) : sections = [
+          NetworkSection(
+            cubits,
+            connectivityInfo: connectivityInfo,
+            natDetection: natDetection,
+            peerSet: peerSet,
+          ),
+          LogsSection(cubits, connectivityInfo: connectivityInfo),
+          AboutSection(
+            cubits,
+            connectivityInfo: connectivityInfo,
+            peerSet: peerSet,
+          ),
         ];
 
   final List<SettingsSection> sections;

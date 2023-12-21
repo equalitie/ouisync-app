@@ -9,7 +9,7 @@ class PeerSetCubit extends Cubit<PeerSet> {
   final Session _session;
   StreamSubscription<List<PeerInfo>>? _subscription;
 
-  PeerSetCubit({required Session session})
+  PeerSetCubit(Session session)
       : _session = session,
         super(const PeerSet([]));
 
