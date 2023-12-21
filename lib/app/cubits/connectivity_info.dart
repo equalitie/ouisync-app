@@ -69,7 +69,7 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
   final _networkInfo = NetworkInfo();
   final _connectivity = Connectivity();
 
-  ConnectivityInfo({required Session session})
+  ConnectivityInfo(Session session)
       : _session = session,
         super(ConnectivityInfoState());
 

@@ -22,10 +22,11 @@ import 'settings_tile.dart';
 
 class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
-  final Cubits _cubits;
+  final Cubits cubits;
+  final ConnectivityInfo connectivityInfo;
 
-  LogsSection(this._cubits)
-      : stateMonitor = _cubits.repositories.rootStateMonitor,
+  LogsSection(this.cubits, {required this.connectivityInfo})
+      : stateMonitor = cubits.repositories.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
           title: S.current.titleLogs,
@@ -37,7 +38,7 @@ class LogsSection extends SettingsSection with AppLogger {
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
 
-    final mountCubit = _cubits.mount;
+    final mountCubit = cubits.mount;
 
     return [
       NavigationTile(
@@ -58,7 +59,7 @@ class LogsSection extends SettingsSection with AppLogger {
         onTap: () => _viewLogs(context),
       ),
       BlocBuilder<StateMonitorIntCubit, int?>(
-          bloc: _cubits.panicCounter,
+          bloc: cubits.panicCounter,
           builder: (context, count) {
             if ((count ?? 0) == 0) {
               return SizedBox.shrink();
@@ -66,9 +67,9 @@ class LogsSection extends SettingsSection with AppLogger {
             return _errorTile(context, S.current.messageLibraryPanic);
           }),
       BlocBuilder<BackgroundServiceManager, BackgroundServiceManagerState>(
-          bloc: _cubits.backgroundServiceManager,
+          bloc: cubits.backgroundServiceManager,
           builder: (context, _) {
-            if (!_cubits.backgroundServiceManager.showWarning()) {
+            if (!cubits.backgroundServiceManager.showWarning()) {
               return SizedBox.shrink();
             }
             return _warningTile(
@@ -121,13 +122,13 @@ class LogsSection extends SettingsSection with AppLogger {
 
   @override
   bool containsErrorNotification() {
-    return (_cubits.panicCounter.state ?? 0) > 0 ||
-        _cubits.mount.state is MountStateError;
+    return (cubits.panicCounter.state ?? 0) > 0 ||
+        cubits.mount.state is MountStateError;
   }
 
   @override
   bool containsWarningNotification() {
-    return _cubits.backgroundServiceManager.showWarning();
+    return cubits.backgroundServiceManager.showWarning();
   }
 
   Future<void> _saveLogs(BuildContext context) async {
@@ -181,5 +182,10 @@ class LogsSection extends SettingsSection with AppLogger {
   Future<File> _dumpInfo(
     BuildContext context,
   ) =>
-      dumpAll(context, stateMonitor);
+      dumpAll(
+        context,
+        rootMonitor: stateMonitor,
+        powerControl: cubits.powerControl,
+        connectivityInfo: connectivityInfo,
+      );
 }

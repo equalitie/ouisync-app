@@ -3,21 +3,33 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../pages/peer_list.dart';
+import '../../pages/peers_page.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
-  NetworkSection()
-      : super(
+  NetworkSection(
+    this.session,
+    this.cubits, {
+    required this.connectivityInfo,
+    required this.natDetection,
+    required this.peerSet,
+  }) : super(
           key: GlobalKey(debugLabel: 'key_network_section'),
           title: S.current.titleNetwork,
         );
+
+  final Session session;
+  final Cubits cubits;
+  final ConnectivityInfo connectivityInfo;
+  final NatDetection natDetection;
+  final PeerSetCubit peerSet;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -40,6 +52,7 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildConnectivityTypeTile(BuildContext context) =>
       BlocBuilder<PowerControl, PowerControlState>(
+        bloc: cubits.powerControl,
         builder: (context, state) => SettingsTile(
           leading: Icon(Icons.wifi),
           title: Text(S.current.labelConnectionType, style: bodyStyle),
@@ -60,12 +73,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildPortForwardingTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
+        bloc: cubits.powerControl,
         selector: (state) => state.portForwardingEnabled,
         builder: (context, value) => SwitchSettingsTile(
             value: value,
             onChanged: (value) {
-              final powerControl = context.read<PowerControl>();
-              unawaited(powerControl.setPortForwardingEnabled(value));
+              unawaited(cubits.powerControl.setPortForwardingEnabled(value));
             },
             title: InfoBuble(
                 child: Text(Strings.upNP, style: bodyStyle),
@@ -76,12 +89,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
+        bloc: cubits.powerControl,
         selector: (state) => state.localDiscoveryEnabled,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
-            final powerControl = context.read<PowerControl>();
-            unawaited(powerControl.setLocalDiscoveryEnabled(value));
+            unawaited(cubits.powerControl.setLocalDiscoveryEnabled(value));
           },
           title: InfoBuble(
               child: Text(S.current.messageLocalDiscovery, style: bodyStyle),
@@ -95,12 +108,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildSyncOnMobileSwitch(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
+        bloc: cubits.powerControl,
         selector: (state) => state.syncOnMobile,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
-            final powerControl = context.read<PowerControl>();
-            unawaited(powerControl.setSyncOnMobileEnabled(value));
+            unawaited(cubits.powerControl.setSyncOnMobileEnabled(value));
           },
           title: InfoBuble(
               child: Text(S.current.messageSyncMobileData, style: bodyStyle),
@@ -161,6 +174,7 @@ class NetworkSection extends SettingsSection {
     String Function(ConnectivityInfoState) selector,
   ) =>
       BlocSelector<ConnectivityInfo, ConnectivityInfoState, String>(
+          bloc: connectivityInfo,
           selector: selector,
           builder: (context, value) {
             if (value.isNotEmpty) {
@@ -176,25 +190,24 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildPeerListTile(BuildContext context) =>
       BlocBuilder<PeerSetCubit, PeerSet>(
+        bloc: peerSet,
         builder: (context, state) => NavigationTile(
             leading: Icon(Icons.people),
             title: Text(S.current.labelPeers, style: bodyStyle),
             value: Text(state.numConnected.toString(), style: subtitleStyle),
             onTap: () {
-              final peerSetCubit = context.read<PeerSetCubit>();
-
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BlocProvider.value(
-                            value: peerSetCubit,
-                            child: PeerList(),
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PeersPage(session, peerSet),
+                ),
+              );
             }),
       );
 
   Widget _buildNatDetectionTile(BuildContext context) =>
       BlocBuilder<NatDetection, NatDetectionType>(
+        bloc: natDetection,
         builder: (context, type) => SettingsTile(
           leading: Icon(Icons.nat),
           title: InfoBuble(

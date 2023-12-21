@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/pages.dart';
-import '../../pages/peer_list.dart';
+import '../../pages/peers_page.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -19,16 +20,23 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(this._cubits)
-      : super(
+  AboutSection(
+    this.session,
+    this.cubits, {
+    required this.connectivityInfo,
+    required this.peerSet,
+  }) : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
           title: S.current.titleAbout,
         ) {
     _launchAtStartup = ValueNotifier<bool>(
-        _cubits.repositories.settings.getLaunchAtStartup() ?? true);
+        cubits.repositories.settings.getLaunchAtStartup() ?? true);
   }
 
-  final Cubits _cubits;
+  final Session session;
+  final Cubits cubits;
+  final ConnectivityInfo connectivityInfo;
+  final PeerSetCubit peerSet;
   late final ValueNotifier<bool> _launchAtStartup;
 
   TextStyle? bodyStyle;
@@ -89,12 +97,14 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
-        session: _cubits.repositories.session,
+        session: cubits.repositories.session,
+        upgradeExists: cubits.upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
       ),
       SettingsTile(
         title: BlocBuilder<PeerSetCubit, PeerSet>(
+            bloc: peerSet,
             builder: (context, state) => InfoBuble(
                     child: Text(S.current.messageSettingsRuntimeID,
                         style: bodyStyle),
@@ -112,26 +122,21 @@ class AboutSection extends SettingsSection with AppLogger {
     ];
   }
 
-  void _navigateToPeers(BuildContext context) async {
-    final peerSetCubit = context.read<PeerSetCubit>();
-
-    await Navigator.push(
+  void _navigateToPeers(BuildContext context) => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => BlocProvider.value(
-                  value: peerSetCubit,
-                  child: PeerList(),
-                )));
-  }
+          builder: (context) => PeersPage(session, peerSet),
+        ),
+      );
 
   @override
   bool containsErrorNotification() {
-    return _cubits.upgradeExists.state;
+    return cubits.upgradeExists.state;
   }
 
   Future<void> _updateLaunchAtStartup(bool value) async {
-    await _cubits.windowManager.launchAtStartup(value);
-    await _cubits.repositories.settings.setLaunchAtStartup(value);
+    await cubits.windowManager.launchAtStartup(value);
+    await cubits.repositories.settings.setLaunchAtStartup(value);
 
     _launchAtStartup.value = value;
   }
@@ -169,7 +174,9 @@ class AboutSection extends SettingsSection with AppLogger {
         context,
         f: dumpAll(
           context,
-          _cubits.repositories.rootStateMonitor,
+          rootMonitor: cubits.repositories.rootStateMonitor,
+          powerControl: cubits.powerControl,
+          connectivityInfo: connectivityInfo,
           compress: true,
         ),
       );
@@ -184,7 +191,7 @@ class AboutSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<void> _sendFeedback(File? logs) async {
+  Future<void> _sendFeedback(io.File? logs) async {
     final email = Email(
       recipients: const [Constants.supportEmail],
       attachmentPaths: [if (logs != null) logs.path],
@@ -203,14 +210,14 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: _cubits.repositories.session.thisRuntimeId,
+      future: cubits.repositories.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
         final runtimeIdWidget = Text(runtimeId,
             overflow: TextOverflow.ellipsis,
             style: context.theme.appTextStyle.bodySmall);
 
-        if (Platform.isIOS) {
+        if (io.Platform.isIOS) {
           return Expanded(
             child: Row(children: [Expanded(child: runtimeIdWidget)]),
           );

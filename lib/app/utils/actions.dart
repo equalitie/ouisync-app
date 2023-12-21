@@ -41,8 +41,11 @@ class _SnackBarWrapState extends State<_SnackBarWrap> {
 
 //------------------------------------------------------------------------------
 
-showSnackBar(BuildContext context,
-    {required String message, SnackBarAction? action}) {
+showSnackBar(
+  BuildContext context, {
+  required String message,
+  SnackBarAction? action,
+}) {
   final messenger = ScaffoldMessenger.of(context);
 
   if (_snackbars.contains(message)) {
