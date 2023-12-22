@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import 'platform/platform.dart';
@@ -25,7 +26,7 @@ class SaveFileToDevice with AppLogger {
     final destinationFilePath = await _getDestinationFilePath(path, _data.name);
 
     if (destinationFilePath == null || destinationFilePath.isEmpty) {
-      final errorMessage = 'Getting file destination failed';
+      final errorMessage = S.current.messageDownloadFileCanceled;
       showSnackBar(context, message: errorMessage);
 
       return;
