@@ -615,14 +615,16 @@ class _MainPageState extends State<MainPage>
   Future<dynamic> _showFileDetails({
     required RepoCubit repoCubit,
     required BaseItem data,
-  }) =>
-      showModalBottomSheet(
+  }) {
+    final mainContext = context;
+
+    return  showModalBottomSheet(
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
           builder: (context) {
             return FileDetail(
-              context: context,
+              context: mainContext,
               cubit: repoCubit,
               navigation: widget.navigation,
               data: data as FileItem,
@@ -634,6 +636,7 @@ class _MainPageState extends State<MainPage>
               isActionAvailableValidator: _isEntryActionAvailable,
             );
           });
+  }
 
   Future<dynamic> _showFolderDetails({
     required RepoCubit repoCubit,

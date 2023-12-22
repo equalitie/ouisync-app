@@ -340,6 +340,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
+        "messageDownloadFileCanceled":
+            MessageLookupByLibrary.simpleMessage("File download canceled"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(

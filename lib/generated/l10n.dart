@@ -3840,6 +3840,16 @@ class S {
     );
   }
 
+  /// `File download canceled`
+  String get messageDownloadFileCanceled {
+    return Intl.message(
+      'File download canceled',
+      name: 'messageDownloadFileCanceled',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
