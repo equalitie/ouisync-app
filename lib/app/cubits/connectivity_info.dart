@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:dart_ipify/dart_ipify.dart';
+
+import '../utils/log.dart';
 
 class ConnectivityInfoState extends Equatable {
   final String tcpListenerV4;
@@ -13,21 +13,16 @@ class ConnectivityInfoState extends Equatable {
   final String quicListenerV4;
   final String quicListenerV6;
 
-  final String localIPv4;
-  final String localIPv6;
-
-  final String externalIPv4;
-  final String externalIPv6;
+  final List<String> localAddresses;
+  final List<String> externalAddresses;
 
   ConnectivityInfoState({
     this.tcpListenerV4 = "",
     this.tcpListenerV6 = "",
     this.quicListenerV4 = "",
     this.quicListenerV6 = "",
-    this.localIPv4 = "",
-    this.localIPv6 = "",
-    this.externalIPv4 = "",
-    this.externalIPv6 = "",
+    this.localAddresses = const [],
+    this.externalAddresses = const [],
   });
 
   ConnectivityInfoState copyWith({
@@ -35,20 +30,16 @@ class ConnectivityInfoState extends Equatable {
     String? tcpListenerV6,
     String? quicListenerV4,
     String? quicListenerV6,
-    String? localIPv4,
-    String? localIPv6,
-    String? externalIPv4,
-    String? externalIPv6,
+    List<String>? localAddresses,
+    List<String>? externalAddresses,
   }) =>
       ConnectivityInfoState(
         tcpListenerV4: tcpListenerV4 ?? this.tcpListenerV4,
         tcpListenerV6: tcpListenerV4 ?? this.tcpListenerV6,
         quicListenerV4: quicListenerV4 ?? this.quicListenerV4,
         quicListenerV6: quicListenerV6 ?? this.quicListenerV6,
-        localIPv4: localIPv4 ?? this.localIPv4,
-        localIPv6: localIPv6 ?? this.localIPv6,
-        externalIPv4: externalIPv4 ?? this.externalIPv4,
-        externalIPv6: externalIPv6 ?? this.externalIPv6,
+        localAddresses: localAddresses ?? this.localAddresses,
+        externalAddresses: externalAddresses ?? this.externalAddresses,
       );
 
   @override
@@ -57,17 +48,14 @@ class ConnectivityInfoState extends Equatable {
         tcpListenerV6,
         quicListenerV4,
         quicListenerV4,
-        localIPv4,
-        localIPv6,
-        externalIPv4,
-        externalIPv6,
+        localAddresses,
+        externalAddresses,
       ];
 }
 
-class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
+class ConnectivityInfo extends Cubit<ConnectivityInfoState> with AppLogger {
   final Session _session;
   final _networkInfo = NetworkInfo();
-  final _connectivity = Connectivity();
 
   ConnectivityInfo(Session session)
       : _session = session,
@@ -93,12 +81,6 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
     // This really works only when connected using WiFi.
     final localIPv4 = await _networkInfo.getWifiIP();
 
-    if (isClosed) {
-      return;
-    }
-
-    emit(state.copyWith(localIPv4: localIPv4 ?? ""));
-
     /// The plugin network_info_plus is currently (2023-02-01) missing the
     /// implementation for this method on desktop platforms (except macOS).
     ///
@@ -112,62 +94,18 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> {
     /// The native implementation in the Windows project for the method getWifiIP
     /// (and where the getWifiIPv6 should be located) can be found here:
     /// https://github.com/fluttercommunity/plus_plugins/blob/a8d38112e069d738c91dc590d1866a8afc6a4bbd/packages/network_info_plus/network_info_plus/windows/network_info.cpp#L74
-    String? localIPv6;
-    if (Platform.isAndroid || Platform.isIOS) {
-      localIPv6 = await _networkInfo.getWifiIPv6();
-
-      if (isClosed) {
-        return;
-      }
-    }
-
-    emit(state.copyWith(localIPv6: localIPv6 ?? ""));
-
-    String? extIpStr;
-
-    extIpStr = await Ipify.ipv64();
+    final localIPv6 = (Platform.isAndroid || Platform.isIOS)
+        ? await _networkInfo.getWifiIPv6()
+        : null;
 
     if (isClosed) {
       return;
     }
 
-    bool gotIpv4 = false;
+    emit(state.copyWith(
+      localAddresses: [localIPv4, localIPv6].whereType<String>().toList(),
+    ));
 
-    final extIp = InternetAddress.tryParse(extIpStr);
-
-    if (extIp != null) {
-      if (extIp.type == InternetAddressType.IPv4) {
-        gotIpv4 = true;
-        emit(state.copyWith(externalIPv4: extIpStr));
-      }
-
-      if (extIp.type == InternetAddressType.IPv6) {
-        emit(state.copyWith(externalIPv6: extIpStr));
-      }
-    }
-
-    if (!gotIpv4) {
-      final connectivity = await _connectivity.checkConnectivity();
-
-      if (connectivity != ConnectivityResult.none) {
-        final extIpStr = await Ipify.ipv4();
-
-        if (isClosed) {
-          return;
-        }
-
-        final extIp = InternetAddress.tryParse(extIpStr);
-
-        if (extIp != null) {
-          if (extIp.type == InternetAddressType.IPv4) {
-            emit(state.copyWith(externalIPv4: extIpStr));
-          }
-
-          if (extIp.type == InternetAddressType.IPv6) {
-            emit(state.copyWith(externalIPv6: extIpStr));
-          }
-        }
-      }
-    }
+    emit(state.copyWith(externalAddresses: await _session.externalAddresses));
   }
 }

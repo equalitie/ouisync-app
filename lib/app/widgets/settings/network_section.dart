@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
@@ -9,6 +10,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peers_page.dart';
 import '../../utils/utils.dart';
+import '../long_text.dart';
 import '../widgets.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
@@ -146,25 +148,15 @@ class NetworkSection extends SettingsSection {
           Icons.computer,
           (state) => state.quicListenerV6,
         ),
-        _buildConnectivityInfoTile(
-          S.current.labelExternalIPv4,
+        _buildAddressesTile(
+          S.current.labelExternalAddresses,
           Icons.cloud_outlined,
-          (state) => state.externalIPv4,
+          (state) => state.externalAddresses,
         ),
-        _buildConnectivityInfoTile(
-          S.current.labelExternalIPv6,
-          Icons.cloud_outlined,
-          (state) => state.externalIPv6,
-        ),
-        _buildConnectivityInfoTile(
-          S.current.labelLocalIPv4,
+        _buildAddressesTile(
+          S.current.labelLocalAddresses,
           Icons.lan_outlined,
-          (state) => state.localIPv4,
-        ),
-        _buildConnectivityInfoTile(
-          S.current.labelLocalIPv6,
-          Icons.lan_outlined,
-          (state) => state.localIPv6,
+          (state) => state.localAddresses,
         ),
       ];
 
@@ -182,6 +174,36 @@ class NetworkSection extends SettingsSection {
                 leading: Icon(icon),
                 title: Text(title, style: bodyStyle),
                 value: Text(value, style: subtitleStyle),
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          });
+
+  Widget _buildAddressesTile(
+    String title,
+    IconData icon,
+    List<String> Function(ConnectivityInfoState) selector,
+  ) =>
+      BlocSelector<ConnectivityInfo, ConnectivityInfoState, List<String>>(
+          bloc: connectivityInfo,
+          selector: selector,
+          builder: (context, list) {
+            if (list.isNotEmpty) {
+              return SettingsTile(
+                leading: Icon(icon),
+                title: Text(title, style: bodyStyle),
+                value: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: list
+                      .map(
+                        (address) => _AddressWidget(
+                          address,
+                          style: subtitleStyle,
+                        ),
+                      )
+                      .toList(),
+                ),
               );
             } else {
               return SizedBox.shrink();
@@ -246,5 +268,37 @@ String _connectivityTypeName(ConnectivityResult result) {
       return S.current.messageNone;
     case ConnectivityResult.other:
       return 'other';
+  }
+}
+
+class _AddressWidget extends StatelessWidget {
+  final String address;
+  final TextStyle? style;
+
+  const _AddressWidget(this.address, {this.style});
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Expanded(
+            child: SelectionArea(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Text(address, style: style),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.copy),
+            iconSize: style?.fontSize,
+            visualDensity: VisualDensity.compact,
+            onPressed: () => _onPressed(context),
+          )
+        ],
+      );
+
+  Future<void> _onPressed(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: address));
+    showSnackBar(context, message: S.current.messageCopiedToClipboard);
   }
 }

@@ -195,13 +195,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
-        "labelExternalIPv4":
-            MessageLookupByLibrary.simpleMessage("External IPv4"),
-        "labelExternalIPv6":
-            MessageLookupByLibrary.simpleMessage("External IPv6"),
-        "labelInternalIP": MessageLookupByLibrary.simpleMessage("Internal IP"),
-        "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("Local IPv4"),
-        "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("Local IPv6"),
+        "labelExternalAddresses":
+            MessageLookupByLibrary.simpleMessage("External addresses"),
+        "labelLocalAddresses":
+            MessageLookupByLibrary.simpleMessage("Local addresses"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelLockAllRepos": MessageLookupByLibrary.simpleMessage("Lock all"),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
@@ -320,6 +317,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at"),
         "messageCookiesP1": MessageLookupByLibrary.simpleMessage(
             "The Ouisync app does not use cookies"),
+        "messageCopiedToClipboard":
+            MessageLookupByLibrary.simpleMessage("Copied to the clipboard."),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Create a new <bold>folder</bold>, or add a <bold>file</bold>, using <icon></icon>"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(

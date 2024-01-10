@@ -44,10 +44,8 @@ Future<File> dumpAll(
     sink.writeln("buildNumber: ${info.buildNumber}");
 
     sink.writeln("connectionType: $connType");
-    sink.writeln("externalIPv4: ${connInfo.externalIPv4}");
-    sink.writeln("externalIPv6: ${connInfo.externalIPv6}");
-    sink.writeln("localIPv4: ${connInfo.localIPv4}");
-    sink.writeln("localIPv6: ${connInfo.localIPv6}");
+    sink.writeln("localAddresses: ${connInfo.localAddresses.join(', ')}");
+    sink.writeln("externalAddresses: ${connInfo.externalAddresses.join(', ')}");
     sink.writeln("NAT type: $natType");
     sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
     sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");

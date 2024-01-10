@@ -195,11 +195,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("دانلود شده در:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("گرهِ انتهایی "),
-        "labelExternalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 خارجی"),
-        "labelExternalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 خارجی"),
-        "labelInternalIP": MessageLookupByLibrary.simpleMessage("آی‌پی داخلی"),
-        "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 محلی"),
-        "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 محلی"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("موقعیت مکانی: "),
         "labelLockAllRepos":
             MessageLookupByLibrary.simpleMessage("قفل‌کردن تمام مخزن‌ها"),

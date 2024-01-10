@@ -1110,51 +1110,21 @@ class S {
     );
   }
 
-  /// `Internal IP`
-  String get labelInternalIP {
+  /// `External addresses`
+  String get labelExternalAddresses {
     return Intl.message(
-      'Internal IP',
-      name: 'labelInternalIP',
+      'External addresses',
+      name: 'labelExternalAddresses',
       desc: '',
       args: [],
     );
   }
 
-  /// `External IPv4`
-  String get labelExternalIPv4 {
+  /// `Local addresses`
+  String get labelLocalAddresses {
     return Intl.message(
-      'External IPv4',
-      name: 'labelExternalIPv4',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `External IPv6`
-  String get labelExternalIPv6 {
-    return Intl.message(
-      'External IPv6',
-      name: 'labelExternalIPv6',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local IPv4`
-  String get labelLocalIPv4 {
-    return Intl.message(
-      'Local IPv4',
-      name: 'labelLocalIPv4',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local IPv6`
-  String get labelLocalIPv6 {
-    return Intl.message(
-      'Local IPv6',
-      name: 'labelLocalIPv6',
+      'Local addresses',
+      name: 'labelLocalAddresses',
       desc: '',
       args: [],
     );
@@ -3845,6 +3815,16 @@ class S {
     return Intl.message(
       'File download canceled',
       name: 'messageDownloadFileCanceled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copied to the clipboard.`
+  String get messageCopiedToClipboard {
+    return Intl.message(
+      'Copied to the clipboard.',
+      name: 'messageCopiedToClipboard',
       desc: '',
       args: [],
     );

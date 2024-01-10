@@ -189,16 +189,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo": MessageLookupByLibrary.simpleMessage("Скачано в:"),
         "labelEndpoint":
             MessageLookupByLibrary.simpleMessage("Конечный пункт "),
-        "labelExternalIPv4":
-            MessageLookupByLibrary.simpleMessage("Внешний IPv4"),
-        "labelExternalIPv6":
-            MessageLookupByLibrary.simpleMessage("Внешний IPv6"),
-        "labelInternalIP":
-            MessageLookupByLibrary.simpleMessage("Внутренний IP"),
-        "labelLocalIPv4":
-            MessageLookupByLibrary.simpleMessage("Локальный IPv4"),
-        "labelLocalIPv6":
-            MessageLookupByLibrary.simpleMessage("Локальный IPv6"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Локация: "),
         "labelLockAllRepos":
             MessageLookupByLibrary.simpleMessage("Всё заблокировать"),

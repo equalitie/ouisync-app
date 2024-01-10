@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 /// Text that shows ellipsis on overflow but that has a tooltip with the full content.
 class LongText extends StatelessWidget {
   final String text;
+  final TextStyle? style;
 
-  LongText(this.text);
+  const LongText(this.text, {this.style});
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -13,6 +14,7 @@ class LongText extends StatelessWidget {
         child: Text(
           text,
           overflow: TextOverflow.ellipsis,
+          style: style,
         ),
       );
 }
