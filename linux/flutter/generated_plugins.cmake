@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   biometric_storage
   desktop_drop
+  file_saver
   flutter_secure_storage_linux
   ouisync_plugin
   screen_retriever
