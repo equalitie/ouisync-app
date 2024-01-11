@@ -1110,16 +1110,6 @@ class S {
     );
   }
 
-  /// `Internal IP`
-  String get labelInternalIP {
-    return Intl.message(
-      'Internal IP',
-      name: 'labelInternalIP',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `External IPv4`
   String get labelExternalIPv4 {
     return Intl.message(
@@ -3670,10 +3660,10 @@ class S {
     );
   }
 
-  /// `This value is set by your internet service provider.\n\nConnectivity with your peers it's best achieved when this setting is Non Symetric`
+  /// `This value depends on your router and/or your Internet service provider.\n\nConnectivity with your peers is best achieved when it is Endpoint Independent`
   String get messageInfoNATType {
     return Intl.message(
-      'This value is set by your internet service provider.\n\nConnectivity with your peers it\'s best achieved when this setting is Non Symetric',
+      'This value depends on your router and/or your Internet service provider.\n\nConnectivity with your peers is best achieved when it is Endpoint Independent',
       name: 'messageInfoNATType',
       desc: '',
       args: [],
@@ -3845,6 +3835,16 @@ class S {
     return Intl.message(
       'File download canceled',
       name: 'messageDownloadFileCanceled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copied to the clipboard.`
+  String get messageCopiedToClipboard {
+    return Intl.message(
+      'Copied to the clipboard.',
+      name: 'messageCopiedToClipboard',
       desc: '',
       args: [],
     );

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -19,6 +18,7 @@ Future<File> dumpAll(
   required StateMonitor rootMonitor,
   required PowerControl powerControl,
   required ConnectivityInfo connectivityInfo,
+  required NatDetection natDetection,
   bool compress = false,
 }) async {
   final dir = await getTemporaryDirectory();
@@ -27,7 +27,7 @@ Future<File> dumpAll(
 
   final connType = powerControl.state.connectivityType;
   final connInfo = connectivityInfo.state;
-  final natType = context.read<NatDetection>().state.message();
+  final natType = natDetection.state;
 
   // TODO: Add time zone, at time of this writing, time zones have not yet
   // been implemented by DateFormat.
@@ -44,10 +44,10 @@ Future<File> dumpAll(
     sink.writeln("buildNumber: ${info.buildNumber}");
 
     sink.writeln("connectionType: $connType");
-    sink.writeln("externalIPv4: ${connInfo.externalIPv4}");
-    sink.writeln("externalIPv6: ${connInfo.externalIPv6}");
-    sink.writeln("localIPv4: ${connInfo.localIPv4}");
-    sink.writeln("localIPv6: ${connInfo.localIPv6}");
+    sink.writeln("localAddressV4: ${connInfo.localAddressV4}");
+    sink.writeln("localAddressV6: ${connInfo.localAddressV6}");
+    sink.writeln("externalAddressV4: ${connInfo.externalAddressV4}");
+    sink.writeln("externalAddressV6: ${connInfo.externalAddressV6}");
     sink.writeln("NAT type: $natType");
     sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
     sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");

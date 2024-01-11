@@ -191,7 +191,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dirección IPv4 externa"),
         "labelExternalIPv6":
             MessageLookupByLibrary.simpleMessage("Dirección IPv6 externa"),
-        "labelInternalIP": MessageLookupByLibrary.simpleMessage("IP interna"),
         "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("IPv4 local"),
         "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("IPv6 local"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Localización: "),
