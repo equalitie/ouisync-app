@@ -24,9 +24,13 @@ class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
   final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
+  final NatDetection natDetection;
 
-  LogsSection(this.cubits, {required this.connectivityInfo})
-      : stateMonitor = cubits.repositories.rootStateMonitor,
+  LogsSection(
+    this.cubits, {
+    required this.connectivityInfo,
+    required this.natDetection,
+  })  : stateMonitor = cubits.repositories.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
           title: S.current.titleLogs,
@@ -184,8 +188,9 @@ class LogsSection extends SettingsSection with AppLogger {
   ) =>
       dumpAll(
         context,
-        rootMonitor: stateMonitor,
-        powerControl: cubits.powerControl,
         connectivityInfo: connectivityInfo,
+        natDetection: natDetection,
+        powerControl: cubits.powerControl,
+        rootMonitor: stateMonitor,
       );
 }
