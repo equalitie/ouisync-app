@@ -939,5 +939,7 @@
   "messageDataSharingP1": "Ouisync (и eQualit.ie) не передает никаких данных третьим лицам",
   "@messageDataSharingP1": {},
   "messageSecurityPracticesP1": "Данные, которые пользователь загружает в хранилища Ouisync, подвергаются сквозному шифрованию как при передаче, так и при хранении. Сюда входят метаданные, такие как имена файлов, размеры, структура папок и т.д. В Ouisync данные доступны для чтения только человеку, который загрузил данные, и тем людям, с которыми они поделились своими хранилищами",
-  "@messageSecurityPracticesP1": {}
+  "@messageSecurityPracticesP1": {},
+  "titleChildrensPrivacy": "Конфиденциальность детей",
+  "@titleChildrensPrivacy": {}
 }
