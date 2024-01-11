@@ -10,7 +10,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peers_page.dart';
 import '../../utils/utils.dart';
-import '../long_text.dart';
 import '../widgets.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
@@ -148,15 +147,25 @@ class NetworkSection extends SettingsSection {
           Icons.computer,
           (state) => state.quicListenerV6,
         ),
-        _buildAddressesTile(
-          S.current.labelExternalAddresses,
+        _buildAddressTile(
+          S.current.labelExternalIPv4,
           Icons.cloud_outlined,
-          (state) => state.externalAddresses,
+          (state) => state.externalAddressV4,
         ),
-        _buildAddressesTile(
-          S.current.labelLocalAddresses,
+        _buildAddressTile(
+          S.current.labelExternalIPv6,
+          Icons.cloud_outlined,
+          (state) => state.externalAddressV6,
+        ),
+        _buildAddressTile(
+          S.current.labelLocalIPv4,
           Icons.lan_outlined,
-          (state) => state.localAddresses,
+          (state) => state.localAddressV4,
+        ),
+        _buildAddressTile(
+          S.current.labelLocalIPv6,
+          Icons.lan_outlined,
+          (state) => state.localAddressV6,
         ),
       ];
 
@@ -180,30 +189,22 @@ class NetworkSection extends SettingsSection {
             }
           });
 
-  Widget _buildAddressesTile(
+  Widget _buildAddressTile(
     String title,
     IconData icon,
-    List<String> Function(ConnectivityInfoState) selector,
+    String Function(ConnectivityInfoState) selector,
   ) =>
-      BlocSelector<ConnectivityInfo, ConnectivityInfoState, List<String>>(
+      BlocSelector<ConnectivityInfo, ConnectivityInfoState, String>(
           bloc: connectivityInfo,
           selector: selector,
-          builder: (context, list) {
-            if (list.isNotEmpty) {
-              return SettingsTile(
-                leading: Icon(icon),
-                title: Text(title, style: bodyStyle),
-                value: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: list
-                      .map(
-                        (address) => _AddressWidget(
-                          address,
-                          style: subtitleStyle,
-                        ),
-                      )
-                      .toList(),
-                ),
+          builder: (context, address) {
+            if (address.isNotEmpty) {
+              return _AddressTile(
+                icon: icon,
+                title: title,
+                titleStyle: bodyStyle,
+                value: address,
+                valueStyle: subtitleStyle,
               );
             } else {
               return SizedBox.shrink();
@@ -228,9 +229,9 @@ class NetworkSection extends SettingsSection {
       );
 
   Widget _buildNatDetectionTile(BuildContext context) =>
-      BlocBuilder<NatDetection, NatDetectionType>(
+      BlocBuilder<NatDetection, NatBehavior>(
         bloc: natDetection,
-        builder: (context, type) => SettingsTile(
+        builder: (context, state) => SettingsTile(
           leading: Icon(Icons.nat),
           title: InfoBuble(
               child: Text(S.current.messageNATType, style: bodyStyle),
@@ -242,7 +243,7 @@ class NetworkSection extends SettingsSection {
                     '\n\n${S.current.messageNATOnWikipedia}',
                     _launchNATOnWikipedia)
               ]),
-          value: Text(type.message(), style: subtitleStyle),
+          value: Text(_natBehaviorText(state), style: subtitleStyle),
         ),
       );
 
@@ -271,34 +272,49 @@ String _connectivityTypeName(ConnectivityResult result) {
   }
 }
 
-class _AddressWidget extends StatelessWidget {
-  final String address;
-  final TextStyle? style;
+class _AddressTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String value;
+  final TextStyle? titleStyle;
+  final TextStyle? valueStyle;
 
-  const _AddressWidget(this.address, {this.style});
+  const _AddressTile({
+    required this.title,
+    required this.icon,
+    required this.value,
+    this.titleStyle,
+    this.valueStyle,
+  });
 
   @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          Expanded(
-            child: SelectionArea(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Text(address, style: style),
-              ),
-            ),
+  Widget build(BuildContext context) => SettingsTile(
+        leading: Icon(icon),
+        title: Text(title, style: titleStyle),
+        value: SelectionArea(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Text(value, style: valueStyle),
           ),
-          IconButton(
-            icon: Icon(Icons.copy),
-            iconSize: style?.fontSize,
-            visualDensity: VisualDensity.compact,
-            onPressed: () => _onPressed(context),
-          )
-        ],
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.copy),
+          onPressed: () => _onCopyPressed(context),
+        ),
       );
 
-  Future<void> _onPressed(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: address));
+  Future<void> _onCopyPressed(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: value));
     showSnackBar(context, message: S.current.messageCopiedToClipboard);
   }
 }
+
+// TODO: Localize these
+String _natBehaviorText(NatBehavior nat) => switch (nat) {
+      NatBehavior.pending => '...',
+      NatBehavior.offline => 'Offline',
+      NatBehavior.endpointIndependent => 'Endpoint independent',
+      NatBehavior.addressDependent => 'Address dependent',
+      NatBehavior.addressAndPortDependent => 'Address and port dependent',
+      NatBehavior.unknown => 'Unknown'
+    };

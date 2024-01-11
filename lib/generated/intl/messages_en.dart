@@ -195,10 +195,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelDownloadedTo":
             MessageLookupByLibrary.simpleMessage("Downloaded to:"),
         "labelEndpoint": MessageLookupByLibrary.simpleMessage("Endpoint: "),
-        "labelExternalAddresses":
-            MessageLookupByLibrary.simpleMessage("External addresses"),
-        "labelLocalAddresses":
-            MessageLookupByLibrary.simpleMessage("Local addresses"),
+        "labelExternalIPv4":
+            MessageLookupByLibrary.simpleMessage("External IPv4"),
+        "labelExternalIPv6":
+            MessageLookupByLibrary.simpleMessage("External IPv6"),
+        "labelLocalIPv4": MessageLookupByLibrary.simpleMessage("Local IPv4"),
+        "labelLocalIPv6": MessageLookupByLibrary.simpleMessage("Local IPv6"),
         "labelLocation": MessageLookupByLibrary.simpleMessage("Location: "),
         "labelLockAllRepos": MessageLookupByLibrary.simpleMessage("Lock all"),
         "labelName": MessageLookupByLibrary.simpleMessage("Name: "),
@@ -482,7 +484,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageInfoLocalDiscovery": MessageLookupByLibrary.simpleMessage(
             "The Local Peer Discovery allows your Ouisync apps to share files with your peers without going through internet service providers, where a local WiFi or other network is available.\n\nFor local connectivity this setting needs to be ON"),
         "messageInfoNATType": MessageLookupByLibrary.simpleMessage(
-            "This value is set by your internet service provider.\n\nConnectivity with your peers it\'s best achieved when this setting is Non Symetric"),
+            "This value depends on your router and/or your Internet service provider.\n\nConnectivity with your peers is best achieved when it is Endpoint Independent"),
         "messageInfoPeerExchange": MessageLookupByLibrary.simpleMessage(
             "Is a tool used for exchanging peer list with the peers you are connected to"),
         "messageInfoRuntimeID": MessageLookupByLibrary.simpleMessage(

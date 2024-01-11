@@ -20,11 +20,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final ConnectivityInfo _connectivityInfo;
   final PeerSetCubit _peerSet;
-  final _natDetection = NatDetection();
+  final NatDetection _natDetection;
 
   _SettingsPageState(Session session)
       : _connectivityInfo = ConnectivityInfo(session),
-        _peerSet = PeerSetCubit(session);
+        _peerSet = PeerSetCubit(session),
+        _natDetection = NatDetection(session);
 
   @override
   @override

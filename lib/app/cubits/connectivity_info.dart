@@ -13,16 +13,20 @@ class ConnectivityInfoState extends Equatable {
   final String quicListenerV4;
   final String quicListenerV6;
 
-  final List<String> localAddresses;
-  final List<String> externalAddresses;
+  final String localAddressV4;
+  final String localAddressV6;
+  final String externalAddressV4;
+  final String externalAddressV6;
 
   ConnectivityInfoState({
     this.tcpListenerV4 = "",
     this.tcpListenerV6 = "",
     this.quicListenerV4 = "",
     this.quicListenerV6 = "",
-    this.localAddresses = const [],
-    this.externalAddresses = const [],
+    this.localAddressV4 = "",
+    this.localAddressV6 = "",
+    this.externalAddressV4 = "",
+    this.externalAddressV6 = "",
   });
 
   ConnectivityInfoState copyWith({
@@ -30,16 +34,20 @@ class ConnectivityInfoState extends Equatable {
     String? tcpListenerV6,
     String? quicListenerV4,
     String? quicListenerV6,
-    List<String>? localAddresses,
-    List<String>? externalAddresses,
+    String? localAddressV4,
+    String? localAddressV6,
+    String? externalAddressV4,
+    String? externalAddressV6,
   }) =>
       ConnectivityInfoState(
         tcpListenerV4: tcpListenerV4 ?? this.tcpListenerV4,
         tcpListenerV6: tcpListenerV4 ?? this.tcpListenerV6,
         quicListenerV4: quicListenerV4 ?? this.quicListenerV4,
         quicListenerV6: quicListenerV6 ?? this.quicListenerV6,
-        localAddresses: localAddresses ?? this.localAddresses,
-        externalAddresses: externalAddresses ?? this.externalAddresses,
+        localAddressV4: localAddressV4 ?? this.localAddressV4,
+        localAddressV6: localAddressV6 ?? this.localAddressV6,
+        externalAddressV4: externalAddressV4 ?? this.externalAddressV4,
+        externalAddressV6: externalAddressV6 ?? this.externalAddressV6,
       );
 
   @override
@@ -48,8 +56,10 @@ class ConnectivityInfoState extends Equatable {
         tcpListenerV6,
         quicListenerV4,
         quicListenerV4,
-        localAddresses,
-        externalAddresses,
+        localAddressV4,
+        localAddressV6,
+        externalAddressV4,
+        externalAddressV6,
       ];
 }
 
@@ -81,6 +91,12 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> with AppLogger {
     // This really works only when connected using WiFi.
     final localIPv4 = await _networkInfo.getWifiIP();
 
+    if (isClosed) {
+      return;
+    }
+
+    emit(state.copyWith(localAddressV4: localIPv4));
+
     /// The plugin network_info_plus is currently (2023-02-01) missing the
     /// implementation for this method on desktop platforms (except macOS).
     ///
@@ -102,10 +118,24 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState> with AppLogger {
       return;
     }
 
-    emit(state.copyWith(
-      localAddresses: [localIPv4, localIPv6].whereType<String>().toList(),
-    ));
+    if (localIPv6 != null) {
+      emit(state.copyWith(localAddressV6: localIPv6));
+    }
 
-    emit(state.copyWith(externalAddresses: await _session.externalAddresses));
+    final externalAddressV4 = await _session.externalAddressV4 ?? "";
+
+    if (isClosed) {
+      return;
+    }
+
+    emit(state.copyWith(externalAddressV4: externalAddressV4));
+
+    final externalAddressV6 = await _session.externalAddressV6 ?? "";
+
+    if (isClosed) {
+      return;
+    }
+
+    emit(state.copyWith(externalAddressV6: externalAddressV6));
   }
 }

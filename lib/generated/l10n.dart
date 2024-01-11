@@ -1110,21 +1110,41 @@ class S {
     );
   }
 
-  /// `External addresses`
-  String get labelExternalAddresses {
+  /// `External IPv4`
+  String get labelExternalIPv4 {
     return Intl.message(
-      'External addresses',
-      name: 'labelExternalAddresses',
+      'External IPv4',
+      name: 'labelExternalIPv4',
       desc: '',
       args: [],
     );
   }
 
-  /// `Local addresses`
-  String get labelLocalAddresses {
+  /// `External IPv6`
+  String get labelExternalIPv6 {
     return Intl.message(
-      'Local addresses',
-      name: 'labelLocalAddresses',
+      'External IPv6',
+      name: 'labelExternalIPv6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local IPv4`
+  String get labelLocalIPv4 {
+    return Intl.message(
+      'Local IPv4',
+      name: 'labelLocalIPv4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local IPv6`
+  String get labelLocalIPv6 {
+    return Intl.message(
+      'Local IPv6',
+      name: 'labelLocalIPv6',
       desc: '',
       args: [],
     );
@@ -3640,10 +3660,10 @@ class S {
     );
   }
 
-  /// `This value is set by your internet service provider.\n\nConnectivity with your peers it's best achieved when this setting is Non Symetric`
+  /// `This value depends on your router and/or your Internet service provider.\n\nConnectivity with your peers is best achieved when it is Endpoint Independent`
   String get messageInfoNATType {
     return Intl.message(
-      'This value is set by your internet service provider.\n\nConnectivity with your peers it\'s best achieved when this setting is Non Symetric',
+      'This value depends on your router and/or your Internet service provider.\n\nConnectivity with your peers is best achieved when it is Endpoint Independent',
       name: 'messageInfoNATType',
       desc: '',
       args: [],
