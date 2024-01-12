@@ -20,11 +20,17 @@ class SaveFileToDevice with AppLogger {
   final FileItem _data;
   final RepoCubit _cubit;
 
-  Future<void> save(BuildContext context, String path) async {
+  Future<void> save(BuildContext context, String defaultPath) async {
     await _maybeRequestPermission();
 
-    final destinationFilePath = await _getDestinationFilePath(path, _data.name);
+    String parentPath = p.basename(defaultPath);
 
+    if (io.Platform.isAndroid) {
+      parentPath = p.join(parentPath, 'Ouisync');
+      defaultPath = p.join(defaultPath, 'Ouisync');
+    }
+    
+    final destinationFilePath = await _getDestinationFilePath(defaultPath, _data.name);
     if (destinationFilePath == null || destinationFilePath.isEmpty) {
       final errorMessage = S.current.messageDownloadFileCanceled;
       showSnackBar(context, message: errorMessage);
@@ -35,6 +41,7 @@ class SaveFileToDevice with AppLogger {
     final destinationFile = io.File(destinationFilePath);
     await _cubit.downloadFile(
       sourcePath: _data.path,
+      parentPath: parentPath,
       destinationPath: destinationFile.path,
     );
   }
@@ -65,28 +72,12 @@ class SaveFileToDevice with AppLogger {
   }
 
   Future<String?> _getDestinationFilePath(
-      String parentPath, String fileName) async {
-    final filePath = PlatformValues.isMobileDevice
-        ? await _mobilePath(parentPath, fileName)
-        : await _desktopPath(parentPath, fileName);
+      String defaultPath, String fileName) async {    
+      if (PlatformValues.isDesktopDevice) {
+        return await _desktopPath(defaultPath, fileName);
+      }
 
-    if (filePath == null || filePath.isEmpty) {
-      return null;
-    }
-
-    return filePath;
-  }
-
-  Future<String?> _mobilePath(String parentPath, String fileName) async {
-    final directoryPath = await FilePicker.platform.getDirectoryPath(
-      initialDirectory: parentPath,
-    );
-
-    if (directoryPath == null || directoryPath.isEmpty) {
-      return null;
-    }
-
-    return p.join(directoryPath, fileName);
+      return p.join(defaultPath, _data.name);
   }
 
   Future<String?> _desktopPath(String parentPath, String fileName) async {

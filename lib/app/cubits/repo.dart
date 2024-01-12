@@ -479,6 +479,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<void> downloadFile({
     required String sourcePath,
+    required String parentPath,
     required String destinationPath,
   }) async {
     if (state.downloads.containsKey(sourcePath)) {
@@ -526,7 +527,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     } finally {
       emit(state.copyWith(
           downloads: state.downloads.withRemoved(sourcePath),
-          message: 'File downloaded to $destinationPath'));
+          message: 'File downloaded to $parentPath'));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
