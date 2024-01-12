@@ -9,14 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "61.0.0"
-  amdjs:
-    dependency: transitive
-    description:
-      name: amdjs
-      sha256: "97e6d96fd0e64d3eeb6fc85f386160322a23b1192662aac1fa4139569add2434"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
   analyzer:
     dependency: transitive
     description:
@@ -49,14 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  async_extension:
-    dependency: transitive
-    description:
-      name: async_extension
-      sha256: f5589e5e0611648f610b7ad00c40fbee4cb7398061ea73463bbeb8ec29fc8a28
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.5"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -369,14 +353,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  dom_tools:
-    dependency: transitive
-    description:
-      name: dom_tools
-      sha256: ef6cfbec7651a5c5f2bbd48812f3f087895055849e12256ced51ba5b13d516e7
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   dots_indicator:
     dependency: transitive
     description:
@@ -385,14 +361,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  enum_to_string:
-    dependency: transitive
-    description:
-      name: enum_to_string
-      sha256: bd9e83a33b754cb43a75b36a9af2a0b92a757bfd9847d2621ca0b1bed45f8e7a
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   envied:
     dependency: "direct main"
     description:
@@ -449,14 +417,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.1"
-  file_saver:
-    dependency: "direct main"
-    description:
-      name: file_saver
-      sha256: "566c0029cccf79848cb5c261c7fb161873d4109dbc145bfeea1f7e4097b62dc7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.6"
   fixnum:
     dependency: transitive
     description:
@@ -809,14 +769,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.1"
-  json_object_mapper:
-    dependency: transitive
-    description:
-      name: json_object_mapper
-      sha256: "8566947565045eb2a8dd679029c4fcbb84dfd0e10309a1693e67e83e174893a2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   launch_at_startup:
     dependency: "direct main"
     description:
@@ -889,14 +841,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
-  markdown:
-    dependency: transitive
-    description:
-      name: markdown
-      sha256: c2b81e184067b41d0264d514f7cdaa2c02d38511e39d6521a1ccc238f6d7b3f2
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.1"
   matcher:
     dependency: transitive
     description:
@@ -1249,14 +1193,6 @@ packages:
       url: "https://github.com/J-Pabon/receive_sharing_intent"
     source: git
     version: "1.4.5"
-  resource_portable:
-    dependency: transitive
-    description:
-      name: resource_portable
-      sha256: "76af61ea5af4719f0a5a9776dddb7bc61e0a85fa5b7978423cc20566f2f97b53"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   result_type:
     dependency: "direct main"
     description:
@@ -1486,14 +1422,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
-  swiss_knife:
-    dependency: transitive
-    description:
-      name: swiss_knife
-      sha256: cf89dc6f698d0a9ca899fee788ee945725b080631025714d822595dad30f29a2
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.6"
   system_tray:
     dependency: "direct main"
     description:

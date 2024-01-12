@@ -43,7 +43,6 @@ dependencies:
   ffi: ^2.0.1
   file: ^6.1.4
   file_picker: ^6.1.1
-  file_saver: ^0.2.6
   flutter:
     sdk: flutter
   # Fix for the issue "[BUG] Release 1.2.0 is broken"
