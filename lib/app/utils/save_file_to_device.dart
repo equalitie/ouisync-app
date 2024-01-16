@@ -29,8 +29,10 @@ class SaveFileToDevice with AppLogger {
       parentPath = p.join(parentPath, 'Ouisync');
       defaultPath = p.join(defaultPath, 'Ouisync');
     }
-    
-    final destinationFilePath = await _getDestinationFilePath(defaultPath, _data.name);
+
+    final destinationFilePath =
+        await _getDestinationFilePath(defaultPath, _data.name);
+
     if (destinationFilePath == null || destinationFilePath.isEmpty) {
       final errorMessage = S.current.messageDownloadFileCanceled;
       showSnackBar(context, message: errorMessage);
@@ -38,7 +40,9 @@ class SaveFileToDevice with AppLogger {
       return;
     }
 
-    final destinationFile = io.File(destinationFilePath);
+    final destinationFile =
+        await io.File(destinationFilePath).create(recursive: true);
+        
     await _cubit.downloadFile(
       sourcePath: _data.path,
       parentPath: parentPath,
@@ -48,7 +52,7 @@ class SaveFileToDevice with AppLogger {
 
   Future<void> _maybeRequestPermission() async {
     if (!io.Platform.isAndroid) return;
-    
+
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
@@ -72,12 +76,12 @@ class SaveFileToDevice with AppLogger {
   }
 
   Future<String?> _getDestinationFilePath(
-      String defaultPath, String fileName) async {    
-      if (PlatformValues.isDesktopDevice) {
-        return await _desktopPath(defaultPath, fileName);
-      }
+      String defaultPath, String fileName) async {
+    if (PlatformValues.isDesktopDevice) {
+      return await _desktopPath(defaultPath, fileName);
+    }
 
-      return p.join(defaultPath, _data.name);
+    return p.join(defaultPath, _data.name);
   }
 
   Future<String?> _desktopPath(String parentPath, String fileName) async {
