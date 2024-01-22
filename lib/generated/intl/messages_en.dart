@@ -141,6 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("Folder"),
+        "actionNewMediaFile": MessageLookupByLibrary.simpleMessage("Media"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Create repository"),
         "actionNext": MessageLookupByLibrary.simpleMessage("Next"),

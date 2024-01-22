@@ -53,7 +53,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   ),
                   if (io.Platform.isIOS)
                     _buildAction(
-                      name: 'Media',
+                      name: S.current.actionNewMediaFile,
                       icon: Icons.photo_library_outlined,
                       action: () async =>
                           await addFile(context, cubit, FileType.media),

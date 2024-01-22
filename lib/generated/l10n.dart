@@ -4660,6 +4660,16 @@ class S {
     );
   }
 
+  /// `Media`
+  String get actionNewMediaFile {
+    return Intl.message(
+      'Media',
+      name: 'actionNewMediaFile',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Failed to mount: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(
