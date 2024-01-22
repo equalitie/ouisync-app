@@ -294,7 +294,7 @@
   "@messageAddRepoLink": {},
   "messageActionNotAvailable": "این گزینه در مخازنی که فقط قابل هستند، موجود نیست",
   "@messageActionNotAvailable": {},
-  "messageAccessModeDisabled": "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد :{access}",
+  "messageAccessModeDisabled": "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد: {access}",
   "@messageAccessModeDisabled": {},
   "messageShareActionDisabled": "برای ایجاد پیوند مخزن ابتدا باید یک مجوز انتخاب کنید",
   "@messageShareActionDisabled": {},
