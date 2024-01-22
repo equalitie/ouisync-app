@@ -56,14 +56,22 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   Navigator.of(context, rootNavigator: false).pop();
 
-                  final deafultDirectory = io.Platform.isIOS
-                      ? await getApplicationDocumentsDirectory()
-                      : await getDownloadsDirectory();
+                  String? defaultDirectoryPath;
+                  if (io.Platform.isAndroid) {
+                    defaultDirectoryPath =
+                        await NativeChannels.getDownloadPathForAndroid();
+                  } else {
+                    final defaultDirectory = io.Platform.isIOS
+                        ? await getApplicationDocumentsDirectory()
+                        : await getDownloadsDirectory();
 
-                  if (deafultDirectory == null) return;
+                    defaultDirectoryPath = defaultDirectory?.path;
+                  }
+
+                  if (defaultDirectoryPath == null) return;
 
                   await SaveFileToDevice(data: widget.data, cubit: widget.cubit)
-                      .save(widget.context, deafultDirectory.path);
+                      .save(widget.context, defaultDirectoryPath);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.download),

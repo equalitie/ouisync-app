@@ -23,29 +23,39 @@ class SaveFileToDevice with AppLogger {
   Future<void> save(BuildContext context, String defaultPath) async {
     await _maybeRequestPermission();
 
-    String parentPath = p.basename(defaultPath);
+    final fileName = _data.name;
 
-    if (io.Platform.isAndroid) {
-      parentPath = p.join(parentPath, 'Ouisync');
-      defaultPath = p.join(defaultPath, 'Ouisync');
-    }
+    String? parentDir;
+    String? destinationFilePath;
 
-    final destinationFilePath =
-        await _getDestinationFilePath(defaultPath, _data.name);
+    if (PlatformValues.isDesktopDevice) {
+      destinationFilePath = await _desktopPath(defaultPath, fileName);
 
-    if (destinationFilePath == null || destinationFilePath.isEmpty) {
-      final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(context, message: errorMessage);
+      if (destinationFilePath == null || destinationFilePath.isEmpty) {
+        final errorMessage = S.current.messageDownloadFileCanceled;
+        showSnackBar(context, message: errorMessage);
 
-      return;
+        return;
+      }
+
+      final dirName = p.dirname(destinationFilePath);
+      parentDir = p.basename(dirName);
+    } else {
+      parentDir = p.basename(defaultPath);
+      if (io.Platform.isAndroid) {
+        parentDir = p.join(parentDir, 'Ouisync');
+        defaultPath = p.join(defaultPath, 'Ouisync');
+      }
+
+      destinationFilePath = p.join(defaultPath, fileName);
     }
 
     final destinationFile =
         await io.File(destinationFilePath).create(recursive: true);
-        
+
     await _cubit.downloadFile(
       sourcePath: _data.path,
-      parentPath: parentPath,
+      parentPath: parentDir,
       destinationPath: destinationFile.path,
     );
   }
@@ -73,15 +83,6 @@ class SaveFileToDevice with AppLogger {
 
       loggy.app('STORAGE permission granted by the user (SDK $androidSDK)');
     }
-  }
-
-  Future<String?> _getDestinationFilePath(
-      String defaultPath, String fileName) async {
-    if (PlatformValues.isDesktopDevice) {
-      return await _desktopPath(defaultPath, fileName);
-    }
-
-    return p.join(defaultPath, _data.name);
   }
 
   Future<String?> _desktopPath(String parentPath, String fileName) async {
