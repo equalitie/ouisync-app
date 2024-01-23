@@ -24,6 +24,7 @@ class AboutSection extends SettingsSection with AppLogger {
     this.session,
     this.cubits, {
     required this.connectivityInfo,
+    required this.natDetection,
     required this.peerSet,
   }) : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
@@ -36,6 +37,7 @@ class AboutSection extends SettingsSection with AppLogger {
   final Session session;
   final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
+  final NatDetection natDetection;
   final PeerSetCubit peerSet;
   late final ValueNotifier<bool> _launchAtStartup;
 
@@ -177,6 +179,7 @@ class AboutSection extends SettingsSection with AppLogger {
           rootMonitor: cubits.repositories.rootStateMonitor,
           powerControl: cubits.powerControl,
           connectivityInfo: connectivityInfo,
+          natDetection: natDetection,
           compress: true,
         ),
       );

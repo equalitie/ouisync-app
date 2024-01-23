@@ -2,23 +2,23 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'log.dart';
 import '../cubits/connectivity_info.dart';
 import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
+import 'log.dart';
 
 Future<File> dumpAll(
   BuildContext context, {
   required StateMonitor rootMonitor,
   required PowerControl powerControl,
   required ConnectivityInfo connectivityInfo,
+  required NatDetection natDetection,
   bool compress = false,
 }) async {
   final dir = await getTemporaryDirectory();
@@ -27,7 +27,7 @@ Future<File> dumpAll(
 
   final connType = powerControl.state.connectivityType;
   final connInfo = connectivityInfo.state;
-  final natType = context.read<NatDetection>().state.message();
+  final natType = natDetection.state.message();
 
   // TODO: Add time zone, at time of this writing, time zones have not yet
   // been implemented by DateFormat.

@@ -27,11 +27,13 @@ class AppSettingsContainer extends StatefulHookWidget {
             natDetection: natDetection,
             peerSet: peerSet,
           ),
-          LogsSection(cubits, connectivityInfo: connectivityInfo),
+          LogsSection(cubits,
+              connectivityInfo: connectivityInfo, natDetection: natDetection),
           AboutSection(
             session,
             cubits,
             connectivityInfo: connectivityInfo,
+            natDetection: natDetection,
             peerSet: peerSet,
           ),
         ];
