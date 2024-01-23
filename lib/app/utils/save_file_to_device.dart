@@ -23,7 +23,7 @@ class SaveFileToDevice with AppLogger {
   Future<void> save(BuildContext context, String defaultPath) async {
     await _maybeRequestPermission();
 
-    final fileName = _data.name;
+    String fileName = _data.name;
 
     String? parentDir;
     String? destinationFilePath;
@@ -48,6 +48,15 @@ class SaveFileToDevice with AppLogger {
       }
 
       destinationFilePath = p.join(defaultPath, fileName);
+
+      final exist = await io.File(destinationFilePath).exists();
+      if (exist) {
+        destinationFilePath = await _renameFileWithVersion(
+          fileName,
+          defaultPath,
+          destinationFilePath,
+        );
+      }
     }
 
     final destinationFile =
@@ -92,5 +101,36 @@ class SaveFileToDevice with AppLogger {
     );
 
     return filePath;
+  }
+
+  Future<String> _renameFileWithVersion(
+      String fileName, String defaultPath, String? destinationFilePath) async {
+    loggy.app(
+        'File $fileName already exist on location $defaultPath. Renaming...');
+    fileName = await _renameFile(defaultPath, fileName, 0);
+
+    loggy.app('The new name is $fileName');
+    destinationFilePath = p.join(defaultPath, fileName);
+
+    loggy.app('The new path is $destinationFilePath');
+    return destinationFilePath;
+  }
+
+  Future<String> _renameFile(
+    String destinationPath,
+    String originalFileName,
+    int versions,
+  ) async {
+    final name = p.basenameWithoutExtension(originalFileName);
+    final extension = p.extension(originalFileName);
+
+    final newFileName = '$name (${versions += 1})$extension';
+    final newDestinationPath = p.join(destinationPath, newFileName);
+
+    if (await io.File(newDestinationPath).exists()) {
+      return await _renameFile(destinationPath, originalFileName, versions);
+    }
+
+    return newFileName;
   }
 }
