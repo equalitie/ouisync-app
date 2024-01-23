@@ -59,7 +59,7 @@ class _FileDetailState extends State<FileDetail> {
                   String? defaultDirectoryPath;
                   if (io.Platform.isAndroid) {
                     defaultDirectoryPath =
-                        await NativeChannels.getDownloadPathForAndroid();
+                        await Native.getDownloadPathForAndroid();
                   } else {
                     final defaultDirectory = io.Platform.isIOS
                         ? await getApplicationDocumentsDirectory()
