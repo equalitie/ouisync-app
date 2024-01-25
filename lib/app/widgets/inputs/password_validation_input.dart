@@ -166,8 +166,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               if (password.isEmpty) return;
 
               await copyStringToClipboard(password);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
@@ -191,8 +190,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               if (retypedPassword.isEmpty) return;
 
               await copyStringToClipboard(retypedPassword);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,

@@ -27,7 +27,7 @@ class SaveFileToDevice with AppLogger {
 
     if (destinationFilePath == null || destinationFilePath.isEmpty) {
       final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(context, message: errorMessage);
+      showSnackBar(errorMessage);
 
       return;
     }
@@ -41,7 +41,7 @@ class SaveFileToDevice with AppLogger {
 
   Future<void> _maybeRequestPermission() async {
     if (!io.Platform.isAndroid) return;
-    
+
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 

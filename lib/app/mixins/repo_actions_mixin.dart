@@ -113,7 +113,7 @@ mixin RepositoryActionsMixin {
     final accessMode = await shareToken.mode;
 
     if (accessMode == AccessMode.blind) {
-      showSnackBar(context, message: S.current.messageUnlockRepoFailed);
+      showSnackBar(S.current.messageUnlockRepoFailed);
 
       return;
     }
@@ -140,7 +140,7 @@ mixin RepositoryActionsMixin {
       final message = result.failure;
 
       if (message != null) {
-        showSnackBar(context, message: message);
+        showSnackBar(message);
       }
 
       return null;
@@ -255,7 +255,7 @@ mixin RepositoryActionsMixin {
 
       if (unlockResult == null) return;
 
-      showSnackBar(context, message: unlockResult.message);
+      showSnackBar(unlockResult.message);
 
       return;
     }
@@ -267,7 +267,7 @@ mixin RepositoryActionsMixin {
       final message = authenticationMode == AuthMode.noLocalPassword
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
-      showSnackBar(context, message: message);
+      showSnackBar(message);
       return;
     }
 
@@ -278,7 +278,7 @@ mixin RepositoryActionsMixin {
         ? S.current.messageUnlockRepoOk(accessMode.name)
         : S.current.messageUnlockRepoFailed;
 
-    showSnackBar(context, message: message);
+    showSnackBar(message);
   }
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository

@@ -98,7 +98,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
                   await widget.reposCubit.validateTokenLink(data);
 
               if (tokenValidationError != null) {
-                showSnackBar(context, message: tokenValidationError);
+                showSnackBar(tokenValidationError);
 
                 return;
               }

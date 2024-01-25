@@ -68,15 +68,14 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     await _cubit.addPeer('tcp/$addr');
     await _cubit.addPeer('quic/$addr');
 
-    showSnackBar(context, message: 'Peer added');
+    showSnackBar('Peer added');
   }
 
   Future<void> _removePeer(BuildContext context, String addr) async {
     await _cubit.removePeer(addr);
 
     showSnackBar(
-      context,
-      message: 'Peer removed',
+      'Peer removed',
       action: SnackBarAction(
         label: S.current.actionUndo,
         onPressed: () => _cubit.addPeer(addr),

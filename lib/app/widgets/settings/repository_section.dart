@@ -212,7 +212,7 @@ class _SecurityTileState extends State<SecurityTile>
                     await _security?.addLocalPassword(newPassword);
 
                 if (addLocalPasswordResult != null) {
-                  showSnackBar(context, message: addLocalPasswordResult);
+                  showSnackBar(addLocalPasswordResult);
                 }
               })
           : const SizedBox.shrink();
@@ -299,8 +299,7 @@ class _SecurityTileState extends State<SecurityTile>
                         await _security?.updateLocalPassword(newPassword);
 
                     if (updateRepoLocalPasswordResult != null) {
-                      showSnackBar(context,
-                          message: updateRepoLocalPasswordResult);
+                      showSnackBar(updateRepoLocalPasswordResult);
                       return;
                     }
                   }),
@@ -342,8 +341,7 @@ class _SecurityTileState extends State<SecurityTile>
                         await _security?.removeLocalPassword();
 
                     if (removeRepoLocalPasswordResult != null) {
-                      showSnackBar(context,
-                          message: removeRepoLocalPasswordResult);
+                      showSnackBar(removeRepoLocalPasswordResult);
                     }
                   }),
             ])
@@ -387,7 +385,7 @@ class _SecurityTileState extends State<SecurityTile>
                           state.authMode == AuthMode.noLocalPassword
                               ? S.current.messageRepoAuthFailed
                               : S.current.messageBioAuthFailed;
-                      showSnackBar(context, message: userAuthenticationFailed);
+                      showSnackBar(userAuthenticationFailed);
                     }
 
                     return;
@@ -401,7 +399,7 @@ class _SecurityTileState extends State<SecurityTile>
                     final message = validateCurrentPassword.failure;
 
                     if (message != null) {
-                      showSnackBar(context, message: message);
+                      showSnackBar(message);
                     }
 
                     return;
@@ -437,8 +435,7 @@ class _SecurityTileState extends State<SecurityTile>
                     ?.updateUnlockRepoWithBiometrics(useBiometrics);
 
                 if (updateUnlockRepoWithBiometricsResult != null) {
-                  showSnackBar(context,
-                      message: updateUnlockRepoWithBiometricsResult);
+                  showSnackBar(updateUnlockRepoWithBiometricsResult);
                   return;
                 }
               },
