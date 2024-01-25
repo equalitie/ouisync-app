@@ -75,14 +75,18 @@ class Settings with AppLogger {
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
 
+  final _OsPathConverter _osPathConverter;
+
   // Key is the repository name (file name without the extension), Value is the
   // path to the directory where the repository file is located.
   final Map<String, String> _repos;
 
-  Settings._(this._prefs, this._repos)
+  Settings._(this._prefs, this._repos, this._osPathConverter)
       : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
 
   static Future<Settings> init() async {
+    final osPathConverter = await _OsPathConverter.create();
+
     final prefs = await SharedPreferences.getInstance();
 
     final repos = <String, String>{};
@@ -90,15 +94,8 @@ class Settings with AppLogger {
     final repoPaths = prefs.getStringList(_knownRepositoriesKey);
 
     if (repoPaths != null) {
-      String? iosDebugReposPath = await getiOSReposPath();
-
       for (var path in repoPaths) {
-        if (iosDebugReposPath != null) {
-          final repoFile = p.basename(path);
-          path = p.join(iosDebugReposPath, repoFile);
-        }
-
-        final repo = RepoMetaInfo.fromDbPath(path);
+        final repo = RepoMetaInfo.fromDbPath(osPathConverter.convertPath(path));
         repos[repo.name] = repo.dir.path;
       }
     }
@@ -107,7 +104,7 @@ class Settings with AppLogger {
       await _storeRepos(prefs, repos);
     }
 
-    final settings = Settings._(prefs, repos);
+    final settings = Settings._(prefs, repos, osPathConverter);
 
     await settings._migrateIds();
 
@@ -169,19 +166,20 @@ class Settings with AppLogger {
     // also gets deleted when the app is un/re-installed.
     final alternativeDir =
         await path_provider.getApplicationDocumentsDirectory();
+
     if (Platform.isAndroid) {
       return alternativeDir;
     }
 
     final context = p.Context(style: p.Style.posix);
+
     final nonAndroidAlternativePath =
         context.join(alternativeDir.path, 'ouisync');
 
-    final documents = await Directory(nonAndroidAlternativePath).create();
-    return documents;
+    return await Directory(nonAndroidAlternativePath).create();
   }
 
-  List<SettingsRepoEntry> repos(String? iosDebugReposPath) {
+  List<SettingsRepoEntry> repos() {
     final paths = _prefs.getStringList(_knownRepositoriesKey);
 
     if (paths == null) {
@@ -189,12 +187,7 @@ class Settings with AppLogger {
     }
 
     return paths.map((path) {
-      if (iosDebugReposPath != null) {
-        final repoFile = p.basename(path);
-        path = p.join(iosDebugReposPath, repoFile);
-      }
-
-      final info = RepoMetaInfo.fromDbPath(path);
+      final info = RepoMetaInfo.fromDbPath(_osPathConverter.convertPath(path));
       final id = getDatabaseId(info.name);
       return SettingsRepoEntry(id, info);
     }).toList();
@@ -430,5 +423,33 @@ String? _defaultMountPoint() {
     return 'O:';
   } else {
     return null;
+  }
+}
+
+class _OsPathConverter {
+  final Directory? _iosRootPath;
+
+  _OsPathConverter._(this._iosRootPath);
+
+  static Future<_OsPathConverter> create() async {
+    Directory? iosRootPath;
+
+    if (Platform.isIOS) {
+      // Note that on iOS the value returned from this function changes every
+      // time the application starts.
+      iosRootPath = await path_provider.getApplicationDocumentsDirectory();
+    }
+
+    return _OsPathConverter._(iosRootPath);
+  }
+
+  String convertPath(String path) {
+    final iosRootPath = _iosRootPath;
+
+    if (iosRootPath == null) {
+      return path;
+    } else {
+      return p.join(iosRootPath.path, 'ouisync', p.basename(path));
+    }
   }
 }
