@@ -588,10 +588,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password copied to the clipboard"),
         "messagePasswordStrength":
             MessageLookupByLibrary.simpleMessage("Password strength"),
+        "messagePeerAdded": MessageLookupByLibrary.simpleMessage("Peer added"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Peer Exchange"),
         "messagePeerExchangeWikipedia":
             MessageLookupByLibrary.simpleMessage("Peer Exchange on Wikipedia"),
+        "messagePeerRemoved":
+            MessageLookupByLibrary.simpleMessage("Peer removed"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
         "messagePreviewingFileFailed": m16,
@@ -891,6 +894,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unlock repository"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("Unsaved changes"),
+        "titleUserProvidedPeers":
+            MessageLookupByLibrary.simpleMessage("User provided peers"),
         "titleWeAreEq":
             MessageLookupByLibrary.simpleMessage("We are eQualit.ie"),
         "typeFile": MessageLookupByLibrary.simpleMessage("File"),
