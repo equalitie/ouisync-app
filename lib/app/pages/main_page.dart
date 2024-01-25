@@ -413,14 +413,9 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget _repositoryContentBuilder(OpenRepoEntry repo) =>
-      BlocConsumer<RepoCubit, RepoState>(
+      BlocBuilder<RepoCubit, RepoState>(
         bloc: repo.cubit,
         builder: (context, state) => _selectLayoutWidget(),
-        listener: (context, state) {
-          if (state.message.isNotEmpty) {
-            showSnackBar(state.message);
-          }
-        },
       );
 
   Widget _selectLayoutWidget() {
@@ -620,24 +615,32 @@ class _MainPageState extends State<MainPage>
   }) {
     final mainContext = context;
 
-    return  showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return FileDetail(
-              context: mainContext,
-              cubit: repoCubit,
-              navigation: widget.navigation,
-              data: data as FileItem,
-              onUpdateBottomSheet: updateBottomSheet,
-              onPreviewFile: (cubit, data, useDefaultApp) =>
-                  _previewFile(cubit, data, useDefaultApp),
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
-              isActionAvailableValidator: _isEntryActionAvailable,
-            );
-          });
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: Dimensions.borderBottomSheetTop,
+      builder: (context) {
+        return FileDetail(
+          context: mainContext,
+          cubit: repoCubit,
+          navigation: widget.navigation,
+          data: data as FileItem,
+          onUpdateBottomSheet: updateBottomSheet,
+          onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
+            cubit,
+            data,
+            useDefaultApp,
+          ),
+          onMoveEntry: (origin, path, type) => moveEntry(
+            repoCubit,
+            origin,
+            path,
+            type,
+          ),
+          isActionAvailableValidator: _isEntryActionAvailable,
+        );
+      },
+    );
   }
 
   Future<dynamic> _showFolderDetails({
