@@ -4,8 +4,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/repo_meta_info.dart';
-import 'utils.dart';
+import '../../models/repo_meta_info.dart';
+import '../utils.dart';
 
 class SettingsRepoEntry {
   String databaseId;

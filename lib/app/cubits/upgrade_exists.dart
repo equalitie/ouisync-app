@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/log.dart';
-import '../utils/settings.dart';
+import '../utils/utils.dart';
 
 class UpgradeExistsCubit extends Cubit<bool> with AppLogger {
   final Future<int> _currentProtocolVersion;

@@ -3,9 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
-import '../utils/hotspot.dart';
-import '../utils/log.dart';
-import '../utils/settings.dart';
+import '../utils/utils.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
