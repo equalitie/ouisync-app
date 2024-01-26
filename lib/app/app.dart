@@ -67,7 +67,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
-  final settings = await Settings.init();
+  final settings = await loadAndMigrateSettings();
 
   var launchAtStartup = settings.getLaunchAtStartup();
   if (launchAtStartup == null) {

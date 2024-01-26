@@ -117,17 +117,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     var state = RepoState(authenticationMode: authMode);
 
-    // Migrate settings
-    final legacyDhtEnabled = settings.takeRepositoryBool(name, 'DHT_ENABLED');
-    if (legacyDhtEnabled != null) {
-      await handle.setDhtEnabled(legacyDhtEnabled);
-    }
-
-    final legacyPexEnabled = settings.takeRepositoryBool(name, 'PEX_ENABLED');
-    if (legacyPexEnabled != null) {
-      await handle.setPexEnabled(legacyPexEnabled);
-    }
-
     state = state.copyWith(
         infoHash: await handle.infoHash,
         accessMode: await handle.accessMode,

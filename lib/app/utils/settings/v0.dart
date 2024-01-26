@@ -81,10 +81,8 @@ class Settings with AppLogger {
   Settings._(this._prefs, this._repos, this._osPathConverter)
       : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
 
-  static Future<Settings> init() async {
+  static Future<Settings> init(SharedPreferences prefs) async {
     final osPathConverter = await _OsPathConverter.create();
-
-    final prefs = await SharedPreferences.getInstance();
 
     final repos = <String, String>{};
 
@@ -309,15 +307,6 @@ class Settings with AppLogger {
   }
 
   String? getMountPoint() => _defaultMountPoint();
-
-  // Read and remove a bool property. This functions exists to facilitate migration to the new
-  // repository config system where config values are stored in the repository metadata.
-  bool? takeRepositoryBool(String repoName, String key) {
-    final fullKey = _repositoryKey(repoName, key);
-    final value = _prefs.getBool(fullKey);
-    _prefs.remove(fullKey);
-    return value;
-  }
 
   Future<void> _setRepositoryString(
       String repoName, String key, String? value) async {
