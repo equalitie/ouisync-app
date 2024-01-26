@@ -5,10 +5,13 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'platform.dart';
 
 abstract class PlatformWindowManager {
-  static Future<PlatformWindowManager> create(List<String> args) =>
+  static Future<PlatformWindowManager> create(
+    List<String> args,
+    String appName,
+  ) =>
       (Platform.isAndroid || Platform.isIOS)
           ? Future.value(PlatformWindowManagerMobile())
-          : PlatformWindowManagerDesktop.create(args);
+          : PlatformWindowManagerDesktop.create(args, appName);
 
   set session(Session value);
 

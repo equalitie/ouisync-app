@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
@@ -25,10 +24,9 @@ class PlatformWindowManagerDesktop
 
   PlatformWindowManagerDesktop._(this._appName);
 
-  static Future<PlatformWindowManagerDesktop> create(List<String> args) async {
-    final packageInfo = await PackageInfo.fromPlatform();
-
-    final manager = PlatformWindowManagerDesktop._(packageInfo.appName);
+  static Future<PlatformWindowManagerDesktop> create(
+      List<String> args, String appName) async {
+    final manager = PlatformWindowManagerDesktop._(appName);
     await manager._init(args);
     return manager;
   }

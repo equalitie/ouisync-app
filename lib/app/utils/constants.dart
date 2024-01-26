@@ -80,8 +80,6 @@ class Constants {
   static const String fileServerPreviewPath = 'preview';
   static const String fileServerHandleQuery = 'handle';
 
-  static const String androidAppAuthority = 'org.equalitie.ouisync';
-
   static const int maxCharacterRepoTokenForDisplay = 8;
   static const String ouisyncUrl = 'https://ouisync.net';
   static const String issueTrackerUrl =

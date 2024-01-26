@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
@@ -13,7 +14,6 @@ import '../widgets.dart';
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
-    required this.context,
     required this.cubit,
     required this.navigation,
     required this.data,
@@ -21,9 +21,9 @@ class FileDetail extends StatefulWidget {
     required this.onPreviewFile,
     required this.onMoveEntry,
     required this.isActionAvailableValidator,
+    required this.packageInfo,
   });
 
-  final BuildContext context;
   final RepoCubit cubit;
   final NavigationCubit navigation;
   final FileItem data;
@@ -31,6 +31,7 @@ class FileDetail extends StatefulWidget {
   final PreviewFileCallback onPreviewFile;
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
+  final PackageInfo packageInfo;
 
   @override
   State<FileDetail> createState() => _FileDetailState();
@@ -63,7 +64,7 @@ class _FileDetailState extends State<FileDetail> {
                   if (deafultDirectory == null) return;
 
                   await SaveFileToDevice(data: widget.data, cubit: widget.cubit)
-                      .save(widget.context, deafultDirectory.path);
+                      .save(context, deafultDirectory.path);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                     widget.cubit.state.accessMode, EntryAction.download),
@@ -93,7 +94,7 @@ class _FileDetailState extends State<FileDetail> {
                   title: S.current.iconShare,
                   dense: true,
                   onTap: () async => await NativeChannels.shareOuiSyncFile(
-                    Constants.androidAppAuthority,
+                    widget.packageInfo.packageName,
                     widget.data.path,
                     widget.data.size ?? 0,
                   ),
