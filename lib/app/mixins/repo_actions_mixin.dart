@@ -206,7 +206,7 @@ mixin RepositoryActionsMixin {
         actions: [
           Fields.dialogActions(context, buttons: [
             NegativeButton(
-                text: S.current.actionCloseCapital,
+                text: S.current.actionCancelCapital,
                 onPressed: () => Navigator.of(context).pop(false),
                 buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
             PositiveButton(
