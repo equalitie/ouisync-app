@@ -82,7 +82,7 @@ dependencies:
   network_info_plus: ^4.0.2
   ouisync_plugin:
     path: ouisync/bindings/dart
-  package_info_plus: ^4.1.0
+  package_info_plus: ^5.0.1
   path: ^1.8.2
   path_provider: ^2.1.1
   percent_indicator: ^4.2.2
