@@ -69,9 +69,6 @@ class Settings with AppLogger {
   // directory and moved everything there into this settings.
   static const String _legacyReposIncluded = "LEGACY_REPOS_INCLUDED";
 
-  // Path to mount repositories at
-  static const String _mountPoint = "MOUNT_POINT";
-
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
 
@@ -311,8 +308,7 @@ class Settings with AppLogger {
     await _setRepositoryString(repoName, _authenticationMode, str);
   }
 
-  String? getMountPoint() =>
-      _prefs.getString(_mountPoint) ?? _defaultMountPoint();
+  String? getMountPoint() => _defaultMountPoint();
 
   // Read and remove a bool property. This functions exists to facilitate migration to the new
   // repository config system where config values are stored in the repository metadata.
