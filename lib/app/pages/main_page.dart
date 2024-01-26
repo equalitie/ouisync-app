@@ -8,6 +8,7 @@ import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -39,6 +40,7 @@ class MainPage extends StatefulWidget {
     required this.backgroundServiceManager,
     required this.upgradeExists,
     required this.navigation,
+    required this.packageInfo,
   });
 
   final PlatformWindowManager windowManager;
@@ -48,6 +50,7 @@ class MainPage extends StatefulWidget {
   final MediaReceiver mediaReceiver;
   final UpgradeExistsCubit upgradeExists;
   final NavigationCubit navigation;
+  final PackageInfo packageInfo;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
@@ -481,12 +484,15 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _previewFile(
-      RepoCubit repo, FileItem item, bool useDefaultApp) async {
+    RepoCubit repo,
+    FileItem item,
+    bool useDefaultApp,
+  ) async {
     if (io.Platform.isAndroid) {
       // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
 
       final previewResult = await NativeChannels.previewOuiSyncFile(
-        Constants.androidAppAuthority,
+        widget.packageInfo.packageName,
         item.path,
         item.size ?? 0,
         useDefaultApp: useDefaultApp,
@@ -616,26 +622,24 @@ class _MainPageState extends State<MainPage>
     required RepoCubit repoCubit,
     required BaseItem data,
   }) {
-    final mainContext = context;
-
-    return  showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return FileDetail(
-              context: mainContext,
-              cubit: repoCubit,
-              navigation: widget.navigation,
-              data: data as FileItem,
-              onUpdateBottomSheet: updateBottomSheet,
-              onPreviewFile: (cubit, data, useDefaultApp) =>
-                  _previewFile(cubit, data, useDefaultApp),
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
-              isActionAvailableValidator: _isEntryActionAvailable,
-            );
-          });
+    return showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        shape: Dimensions.borderBottomSheetTop,
+        builder: (context) {
+          return FileDetail(
+            cubit: repoCubit,
+            navigation: widget.navigation,
+            data: data as FileItem,
+            onUpdateBottomSheet: updateBottomSheet,
+            onPreviewFile: (cubit, data, useDefaultApp) =>
+                _previewFile(cubit, data, useDefaultApp),
+            onMoveEntry: (origin, path, type) =>
+                moveEntry(repoCubit, origin, path, type),
+            isActionAvailableValidator: _isEntryActionAvailable,
+            packageInfo: widget.packageInfo,
+          );
+        });
   }
 
   Future<dynamic> _showFolderDetails({

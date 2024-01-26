@@ -72,3 +72,9 @@ Ouisync integrates Sentry, via the `sentry_flutter` plugin.
 For initialization, you need to get a client key, called _DSN_, from a Sentry instance, making it available via an `.env` file, or as a environment variable using `export`, and then using [envied](https://github.com/petercinibulk/envied)
 
 Please follow the instructions in the package repository for [envied in GitHub](https://github.com/petercinibulk/envied#table-of-contents) to add a key called `DSN`, that contains the client key.
+
+## App suffix
+
+To install multiple versions of the app on the same device (e.g., one production and one development), you can differentiate them with the "app suffix". This can be done either with the `APP_SUFFIX` environment variable during build, or with the `app.suffix` property in `android/local.properties` (if both are specified, the env var takes priority).
+
+

@@ -27,19 +27,6 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-def dartEnvironmentVariables = [
-    DEV_SUFFIX: null
-];
-if (project.hasProperty('dart-defines')) {
-    dartEnvironmentVariables = dartEnvironmentVariables + project.property('dart-defines')
-        .split(',')
-        .collectEntries { entry ->
-            def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')
-            [(pair.first()): pair.last()]
-        }
-}
-
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
@@ -61,19 +48,25 @@ android {
     }
 
     def appId = "org.equalitie.ouisync"
-    def appName = "Ouisync"
-    if (dartEnvironmentVariables.DEV_SUFFIX != null) {
-        appId = "$appId$dartEnvironmentVariables.DEV_SUFFIX"
-        appName = "$appName$dartEnvironmentVariables.DEV_SUFFIX"
-    } 
+
+    // Suffix to append to the application id, name and version. This allows installing multiple
+    // versions of the app on the same device (e.g., production and development).
+    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
 
     defaultConfig {
         applicationId appId
-        resValue "string", "app_name", appName
+        namespace appId
+        resValue "string", "app_name", "Ouisync"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+
+        if (appSuffix != null) {
+            applicationIdSuffix = ".$appSuffix"
+            versionNameSuffix = "-$appSuffix"
+            resValue "string", "app_name", "Ouisync $appSuffix"
+        }
     }
 
     signingConfigs {
@@ -95,7 +88,7 @@ android {
         }
 
         debug {
-            android.packagingOptions.doNotStrip '**.so'
+            android.packagingOptions.doNotStrip "**.so"
         }
     }
 }

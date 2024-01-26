@@ -6,17 +6,18 @@ import 'env/env.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-    
-  const appSuffix = String.fromEnvironment('DEV_SUFFIX');
+
   final dsn = Env.ouisyncDSN;
 
-  await setupSentry(
-      () async => runApp(await initOuiSyncApp(args, appSuffix)), dsn);
+  await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
 }
 
-Future<void> setupSentry(AppRunner ouisyncAppRunner, String ouisyncDSN,
-    {bool isIntegrationTest = false,
-    BeforeSendCallback? beforeSendCallback}) async {
+Future<void> setupSentry(
+  AppRunner ouisyncAppRunner,
+  String ouisyncDSN, {
+  bool isIntegrationTest = false,
+  BeforeSendCallback? beforeSendCallback,
+}) async {
   await SentryFlutter.init((options) {
     options
       ..dsn = ouisyncDSN

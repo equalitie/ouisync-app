@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -18,12 +19,16 @@ import 'pages/pages.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
-Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
+Future<Widget> initOuiSyncApp(List<String> args) async {
   final appDir = await getApplicationSupportDirectory();
   final configPath = p.join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
-  final windowManager = await PlatformWindowManager.create(args);
+  final packageInfo = await PackageInfo.fromPlatform();
+  final windowManager = await PlatformWindowManager.create(
+    args,
+    packageInfo.appName,
+  );
 
   final session = Session.create(
     configPath: configPath,
@@ -39,7 +44,8 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
   // When dumping log from logcat, we get logs from past ouisync runs as well,
   // so add a line on each start of the app to know which part of the log
   // belongs to the last app instance.
-  logInfo("-------------------- OuiSync$appSuffix Start --------------------");
+  logInfo(
+      "-------------------- ${packageInfo.appName} Start --------------------");
 
   _setupErrorReporting();
 
@@ -90,6 +96,7 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
     session: session,
     windowManager: windowManager,
     settings: settings,
+    packageInfo: packageInfo,
   );
 
   var root = eqValuesAccepted
@@ -101,11 +108,9 @@ Future<Widget> initOuiSyncApp(List<String> args, String appSuffix) async {
       ? OnboardingPage(settings: settings, ouisyncAppHome: root)
       : root;
 
-  final suffixColor = appSuffix.isNotEmpty ? Constants.devColor : null;
-
   return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: _setupAppThemeData(suffixColor),
+      theme: _setupAppThemeData(),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -121,12 +126,14 @@ class OuiSyncApp extends StatefulWidget {
     required this.windowManager,
     required this.session,
     required this.settings,
+    required this.packageInfo,
     Key? key,
   }) : super(key: key);
 
   final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
+  final PackageInfo packageInfo;
 
   @override
   State<OuiSyncApp> createState() => _OuiSyncAppState(session, settings);
@@ -178,13 +185,14 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
           loggy.app('Drop exited: ${detail.localPosition}');
         },
         child: MainPage(
-          windowManager: widget.windowManager,
+          backgroundServiceManager: _backgroundServiceManager,
+          mediaReceiver: _mediaReceiver,
+          navigation: navigation,
+          packageInfo: widget.packageInfo,
           session: widget.session,
           settings: widget.settings,
-          mediaReceiver: _mediaReceiver,
-          backgroundServiceManager: _backgroundServiceManager,
           upgradeExists: _upgradeExists,
-          navigation: navigation,
+          windowManager: widget.windowManager,
         ),
       ),
     );
@@ -198,8 +206,8 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   }
 }
 
-ThemeData _setupAppThemeData(Color? suffixColor) => ThemeData().copyWith(
-        appBarTheme: AppBarTheme(backgroundColor: suffixColor),
+ThemeData _setupAppThemeData() => ThemeData().copyWith(
+        appBarTheme: AppBarTheme(),
         focusColor: Colors.black26,
         textTheme: TextTheme().copyWith(
             bodyLarge: AppTypography.bodyBig,
