@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-
 import '../log.dart';
 import 'platform_window_manager.dart';
 
@@ -9,7 +7,7 @@ class PlatformWindowManagerMobile
     with AppLogger
     implements PlatformWindowManager {
   @override
-  set session(Session value) {}
+  void onClose(CloseHandler handler) {}
 
   @override
   Future<bool> launchAtStartup(bool enable) async {

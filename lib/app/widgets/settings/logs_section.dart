@@ -70,15 +70,6 @@ class LogsSection extends SettingsSection with AppLogger {
             }
             return _errorTile(context, S.current.messageLibraryPanic);
           }),
-      BlocBuilder<BackgroundServiceManager, BackgroundServiceManagerState>(
-          bloc: cubits.backgroundServiceManager,
-          builder: (context, _) {
-            if (!cubits.backgroundServiceManager.showWarning()) {
-              return SizedBox.shrink();
-            }
-            return _warningTile(
-                context, S.current.messageMissingBackgroundServicePermission);
-          }),
       BlocBuilder<MountCubit, MountState>(
           bloc: mountCubit,
           builder: (context, error) {
@@ -117,22 +108,10 @@ class LogsSection extends SettingsSection with AppLogger {
         onTap: onTap);
   }
 
-  Widget _warningTile(BuildContext context, String str) {
-    final color = Constants.warningColor;
-    return SettingsTile(
-        title: Text(str, style: bodyStyle?.copyWith(color: color)),
-        leading: Icon(Icons.warning, color: color));
-  }
-
   @override
   bool containsErrorNotification() {
     return (cubits.panicCounter.state ?? 0) > 0 ||
         cubits.mount.state is MountStateError;
-  }
-
-  @override
-  bool containsWarningNotification() {
-    return cubits.backgroundServiceManager.showWarning();
   }
 
   Future<void> _saveLogs(BuildContext context) async {

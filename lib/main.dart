@@ -1,14 +1,32 @@
+import 'dart:io';
+
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/session.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
 import 'env/env.dart';
 
+const syncInBackgroundPeriod = Duration(minutes: 1);
+
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final dsn = Env.ouisyncDSN;
+  if (Platform.isAndroid) {
+    await AndroidAlarmManager.initialize();
+    await AndroidAlarmManager.periodic(
+      syncInBackgroundPeriod,
+      0,
+      syncInBackground,
+      allowWhileIdle: true,
+      exact: false,
+      wakeup: true,
+      rescheduleOnReboot: true,
+    );
+  }
 
+  final dsn = Env.ouisyncDSN;
   if (dsn == '""') {
     runApp(await initOuiSyncApp(args));
   } else {

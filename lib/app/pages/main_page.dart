@@ -37,7 +37,6 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.mediaReceiver,
-    required this.backgroundServiceManager,
     required this.upgradeExists,
     required this.navigation,
     required this.packageInfo,
@@ -46,7 +45,6 @@ class MainPage extends StatefulWidget {
   final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
-  final BackgroundServiceManager backgroundServiceManager;
   final MediaReceiver mediaReceiver;
   final UpgradeExistsCubit upgradeExists;
   final NavigationCubit navigation;
@@ -57,7 +55,6 @@ class MainPage extends StatefulWidget {
         windowManager: windowManager,
         session: session,
         settings: settings,
-        backgroundServiceManager: backgroundServiceManager,
         upgradeExists: upgradeExists,
         navigation: navigation,
       );
@@ -88,7 +85,6 @@ class _MainPageState extends State<MainPage>
     required PlatformWindowManager windowManager,
     required Session session,
     required Settings settings,
-    required BackgroundServiceManager backgroundServiceManager,
     required UpgradeExistsCubit upgradeExists,
     required NavigationCubit navigation,
   }) {
@@ -115,7 +111,6 @@ class _MainPageState extends State<MainPage>
       powerControl: powerControl,
       panicCounter: panicCounter,
       upgradeExists: upgradeExists,
-      backgroundServiceManager: backgroundServiceManager,
       windowManager: windowManager,
       mount: mount,
       navigation: navigation,
@@ -362,7 +357,6 @@ class _MainPageState extends State<MainPage>
       _cubits.upgradeExists,
       _cubits.powerControl,
       _cubits.panicCounter,
-      _cubits.backgroundServiceManager
     ], () {
       Color? color = _cubits.mainNotificationBadgeColor();
 
