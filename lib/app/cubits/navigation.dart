@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/utils/log.dart';
+import '../utils/utils.dart';
 
 class NavigationState {
-  final String currentRepoId;
+  final DatabaseId? currentRepoId;
   final String currentPath;
   final bool isFolder;
 
@@ -16,12 +17,12 @@ class NavigationState {
 class NavigationCubit extends Cubit<NavigationState> with AppLogger {
   NavigationCubit()
       : super(NavigationState(
-          currentRepoId: '',
+          currentRepoId: null,
           currentPath: '',
           isFolder: false,
         ));
 
-  void current(String databaseId, String path, bool isFolder) =>
+  void current(DatabaseId databaseId, String path, bool isFolder) =>
       emit(NavigationState(
         currentRepoId: databaseId,
         currentPath: path,

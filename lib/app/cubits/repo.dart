@@ -91,7 +91,7 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
-  final SettingsRepoEntry _settingsRepoEntry;
+  final RepoSettings _settingsRepoEntry;
   final oui.Repository _handle;
   final Settings _settings;
   final NavigationCubit _navigation;
@@ -107,12 +107,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   static Future<RepoCubit> create({
-    required SettingsRepoEntry settingsRepoEntry,
+    required RepoSettings repoSettings,
     required oui.Repository handle,
     required Settings settings,
     required NavigationCubit navigation,
   }) async {
-    var name = settingsRepoEntry.name;
+    var name = repoSettings.name;
     final authMode = settings.getAuthenticationMode(name);
 
     var state = RepoState(authenticationMode: authMode);
@@ -124,7 +124,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isPexEnabled: await handle.isPexEnabled);
 
     return RepoCubit._(
-      settingsRepoEntry,
+      repoSettings,
       handle,
       settings,
       navigation,
@@ -133,11 +133,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   oui.Repository get handle => _handle;
-  String get databaseId => _settingsRepoEntry.databaseId;
+  DatabaseId get databaseId => _settingsRepoEntry.databaseId;
   String get name => _settingsRepoEntry.name;
   String get currentFolder => _currentFolder.state.path;
   RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
-  SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
+  RepoSettings get repoSettings => _settingsRepoEntry;
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(databaseId, currentFolder, isFolder);

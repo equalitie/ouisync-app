@@ -16,7 +16,7 @@ class LockedRepositoryState extends HookWidget
 
   final BuildContext parentContext;
 
-  final String databaseId;
+  final DatabaseId databaseId;
   final String repositoryName;
 
   final Settings settings;

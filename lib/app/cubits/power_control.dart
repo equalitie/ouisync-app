@@ -7,7 +7,6 @@ import '../utils/utils.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
-const bool _syncOnMobileDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
@@ -83,8 +82,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
   PowerControl(this._session, this._settings) : super(PowerControlState());
 
   Future<void> init() async {
-    final syncOnMobile =
-        _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
+    final syncOnMobile = _settings.getSyncOnMobileEnabled();
     await setSyncOnMobileEnabled(syncOnMobile);
 
     emit(state.copyWith(

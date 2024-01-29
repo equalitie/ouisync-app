@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:result_type/result_type.dart';
 
-import '../utils/constants.dart';
+import '../utils/utils.dart';
 import 'storage.dart';
 
 BiometricStorage _chooseStorageByPlatform() {
@@ -30,12 +30,12 @@ class BiometricSecure {
     return _storage.getStorage(key, options: initOptions);
   }
 
-  static _getKey(String databaseId, AuthMode authMode) {
+  static _getKey(DatabaseId databaseId, AuthMode authMode) {
     if (authMode == AuthMode.version2) {
-      return '$databaseId-v2';
+      return '${databaseId}-v2';
     }
 
-    return databaseId;
+    return databaseId.toString();
   }
 
   static _isAuthenticationRequired(AuthMode authMode) {
@@ -47,7 +47,7 @@ class BiometricSecure {
   }
 
   static Future<Result<Void, Error>> addRepositoryPassword(
-      {required String databaseId,
+      {required DatabaseId databaseId,
       required String password,
       required AuthMode authMode}) async {
     final key = _getKey(databaseId, authMode);
@@ -65,7 +65,7 @@ class BiometricSecure {
   }
 
   static Future<Result<String?, Error>> getRepositoryPassword(
-      {required String databaseId, required AuthMode authMode}) async {
+      {required DatabaseId databaseId, required AuthMode authMode}) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
 
@@ -80,7 +80,7 @@ class BiometricSecure {
   }
 
   static Future<Result<Void, Error>> deleteRepositoryPassword(
-      {required String databaseId,
+      {required DatabaseId databaseId,
       required AuthMode authMode,
       required bool authenticationRequired}) async {
     final key = _getKey(databaseId, authMode);

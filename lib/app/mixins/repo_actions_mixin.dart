@@ -235,7 +235,7 @@ mixin RepositoryActionsMixin {
   /// setAuthenticationMode => Settings.setAuthenticationMode
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
-      {required String databaseId,
+      {required DatabaseId databaseId,
       required String repositoryName,
       required AuthMode authenticationMode,
       required Settings settings,
@@ -284,7 +284,7 @@ mixin RepositoryActionsMixin {
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
-          {required String databaseId,
+          {required DatabaseId databaseId,
           required String repositoryName,
           required bool isBiometricsAvailable,
           required Settings settings,
@@ -348,12 +348,12 @@ mixin RepositoryActionsMixin {
 
 Future<void> lockRepository(
     RepoEntry repositoryEntry,
-    Future<void> Function(SettingsRepoEntry settingsRepoEntry)
+    Future<void> Function(RepoSettings repoSettings)
         lockRepositoryFunction) async {
   if (repositoryEntry.accessMode == AccessMode.blind) return;
 
   if (repositoryEntry is OpenRepoEntry) {
-    await lockRepositoryFunction(repositoryEntry.settingsRepoEntry);
+    await lockRepositoryFunction(repositoryEntry.repoSettings);
   }
 }
 

@@ -126,17 +126,19 @@ class Settings with AppLogger {
         repos.entries.map((e) => p.join(e.value, e.key)).toList());
   }
 
-  bool? getEqualitieValues() => _prefs.getBool(_eqValuesKey);
+  // Returns true if the user accepted eQ values.
+  bool getEqualitieValues() => _prefs.getBool(_eqValuesKey) ?? false;
   Future<void> setEqualitieValues(bool value) async {
     await _prefs.setBool(_eqValuesKey, value);
   }
 
-  bool? getShowOnboarding() => _prefs.getBool(_showOnboardingKey);
+  bool getShowOnboarding() => _prefs.getBool(_showOnboardingKey) ?? true;
   Future<void> setShowOnboarding(bool value) async {
     await _prefs.setBool(_showOnboardingKey, value);
   }
 
-  bool? getLaunchAtStartup() => _prefs.getBool(_launchAtStartup);
+  bool getLaunchAtStartup() => _prefs.getBool(_launchAtStartup) ?? true;
+
   Future<void> setLaunchAtStartup(bool value) async {
     await _prefs.setBool(_launchAtStartup, value);
   }
@@ -278,7 +280,7 @@ class Settings with AppLogger {
   Future<void> _setDatabaseId(String repoName, String? databaseId) =>
       _setRepositoryString(repoName, _databaseId, databaseId);
 
-  bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
+  bool getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey) ?? true;
 
   Future<void> setSyncOnMobileEnabled(bool enable) async {
     await _prefs.setBool(_syncOnMobileKey, enable);

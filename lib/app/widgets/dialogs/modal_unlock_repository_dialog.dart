@@ -18,7 +18,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
   });
 
   final BuildContext parentContext;
-  final String databaseId;
+  final DatabaseId databaseId;
   final String repositoryName;
   final bool isBiometricsAvailable;
   final bool isPasswordValidation;

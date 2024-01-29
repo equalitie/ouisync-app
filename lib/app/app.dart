@@ -70,23 +70,9 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   final settings = await loadAndMigrateSettings();
 
   var launchAtStartup = settings.getLaunchAtStartup();
-  if (launchAtStartup == null) {
-    launchAtStartup = true;
-    await settings.setLaunchAtStartup(launchAtStartup);
-  }
   await windowManager.launchAtStartup(launchAtStartup);
-
   var showOnboarding = settings.getShowOnboarding();
-  if (showOnboarding == null) {
-    showOnboarding = true;
-    await settings.setShowOnboarding(showOnboarding);
-  }
-
   var eqValuesAccepted = settings.getEqualitieValues();
-  if (eqValuesAccepted == null) {
-    eqValuesAccepted = false;
-    await settings.setEqualitieValues(eqValuesAccepted);
-  }
 
   /// We show the onboarding the first time the app starts.
   /// Then, we show the page for accepting eQ values, until the user taps YES.

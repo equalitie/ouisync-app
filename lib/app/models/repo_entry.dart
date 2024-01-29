@@ -70,7 +70,7 @@ class OpenRepoEntry extends RepoEntry {
 
   RepoCubit get cubit => _cubit;
 
-  String get databaseId => _cubit.databaseId;
+  DatabaseId get databaseId => _cubit.databaseId;
 
   @override
   RepoCubit? get maybeCubit => _cubit;
@@ -86,7 +86,7 @@ class OpenRepoEntry extends RepoEntry {
   @override
   AuthMode? get authenticationMode => _cubit.state.authenticationMode;
 
-  SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
+  RepoSettings get repoSettings => _cubit.repoSettings;
 }
 
 class MissingRepoEntry extends RepoEntry {

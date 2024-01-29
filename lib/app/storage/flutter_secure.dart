@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:result_type/result_type.dart';
 
 import 'storage.dart';
+import '../utils/utils.dart';
 
 class FlutterSecure {
   FlutterSecure._();
@@ -9,9 +10,9 @@ class FlutterSecure {
   static final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
   static Future<Result<Void, Error>> writeValue(
-      {required String databaseId, required String password}) async {
+      {required DatabaseId databaseId, required String password}) async {
     try {
-      await _storage.write(key: databaseId, value: password);
+      await _storage.write(key: databaseId.toString(), value: password);
       return Success(Void());
     } on Exception catch (e, st) {
       return Failure(Error(e, st));
@@ -19,27 +20,28 @@ class FlutterSecure {
   }
 
   static Future<Result<String?, Error>> readValue(
-      {required String databaseId}) async {
+      {required DatabaseId databaseId}) async {
     try {
-      return Success(await _storage.read(key: databaseId));
+      return Success(await _storage.read(key: databaseId.toString()));
     } on Exception catch (e, st) {
       return Failure(Error(e, st));
     }
   }
 
   static Future<Result<Void, Error>> deleteValue(
-      {required String databaseId}) async {
+      {required DatabaseId databaseId}) async {
     try {
-      await _storage.delete(key: databaseId);
+      await _storage.delete(key: databaseId.toString());
       return Success(Void());
     } on Exception catch (e, st) {
       return Failure(Error(e, st));
     }
   }
 
-  static Future<Result<bool, Error>> exist({required String databaseId}) async {
+  static Future<Result<bool, Error>> exist(
+      {required DatabaseId databaseId}) async {
     try {
-      return Success(await _storage.containsKey(key: databaseId));
+      return Success(await _storage.containsKey(key: databaseId.toString()));
     } on Exception catch (e, st) {
       return Failure(Error(e, st));
     }
