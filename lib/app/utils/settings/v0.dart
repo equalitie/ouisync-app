@@ -339,6 +339,11 @@ class Settings with AppLogger {
 
   static Future<bool> _includeLegacyRepos(
       SharedPreferences prefs, Map<String, String> repos) async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      // The path_provider.getApplicationSupportDirectory() function fails in tests.
+      return false;
+    }
+
     final includedAlready = prefs.getBool(_legacyReposIncluded);
 
     if (includedAlready != null && includedAlready == true) {
