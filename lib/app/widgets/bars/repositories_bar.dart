@@ -135,7 +135,7 @@ class RepositoriesBar extends StatelessWidget
       if (color != null) {
         // TODO: Why does the badge appear to move quickly after entering this screen?
         return Fields.addBadge(button,
-            color: color, moveDownwards: 3, moveRight: 3);
+            color: color, moveDownwards: 5, moveRight: 6);
       } else {
         return button;
       }

@@ -9,7 +9,11 @@ Future<void> main(List<String> args) async {
 
   final dsn = Env.ouisyncDSN;
 
-  await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
+  if (dsn == '""') {
+    runApp(await initOuiSyncApp(args));
+  } else {
+    await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
+  }
 }
 
 Future<void> setupSentry(

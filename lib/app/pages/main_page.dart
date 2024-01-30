@@ -367,7 +367,8 @@ class _MainPageState extends State<MainPage>
       Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
-        return Fields.addBadge(button, color: color);
+        return Fields.addBadge(button,
+            color: color, moveDownwards: 5, moveRight: 3);
       } else {
         return button;
       }
