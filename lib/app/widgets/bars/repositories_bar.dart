@@ -123,13 +123,6 @@ class RepositoriesBar extends StatelessWidget
           onPressed: () => _cubits.repositories.pushRepoList(true),
           size: Dimensions.sizeIconSmall);
 
-      if (PlatformValues.isDesktopDevice) {
-        // At time of writing this function we also have the gear settings
-        // button on this page which shows the badge notification, so no need
-        // to show it again on the back button.
-        return button;
-      }
-
       Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
