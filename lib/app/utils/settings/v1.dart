@@ -1,5 +1,6 @@
 import 'dart:io' show Directory, Platform;
 import 'dart:convert';
+import 'dart:collection';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -141,29 +142,58 @@ class Settings with AppLogger {
       // The previous migration did not finish correctly, prefs should only
       // contain the `SETTINGS_VERSION` key and the `SETTINGS_KEY` key after
       // success.
-      return await initFromMigration(root, prefs);
+      await Settings._removeValuesFromV0(prefs);
     }
 
     return Settings._(root, prefs);
   }
 
-  static Future<Settings> initFromMigration(
-      SettingsRoot root, SharedPreferences prefs) async {
-    final settings = Settings._(root, prefs);
+  static Future<Settings> initMigrateFromV0(SharedPreferences prefs) async {
+    final s0 = await v0.Settings.init(prefs);
+    final eqValues = s0.getEqualitieValues();
+    final showOnboarding = s0.getShowOnboarding();
+    final launchAtStartup = s0.getLaunchAtStartup();
+    final enableSyncOnMobileInternet = s0.getSyncOnMobileEnabled();
+    final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
+    final currentRepo = s0.getDefaultRepo();
 
-    await settings._storeRoot();
+    final Map<DatabaseId, SettingsRepoEntry> repos = HashMap();
+
+    for (final repo in s0.repos()) {
+      final auth = s0.getAuthenticationMode(repo.name);
+      final id = DatabaseId(repo.databaseId);
+      repos[id] = SettingsRepoEntry(auth, repo.info);
+    }
+
+    final root = SettingsRoot(
+      acceptedEqualitieValues: eqValues,
+      showOnboarding: showOnboarding,
+      launchAtStartup: launchAtStartup,
+      enableSyncOnMobileInternet: enableSyncOnMobileInternet,
+      highestSeenProtocolNumber: highestSeenProtocolNumber,
+      currentRepo: (currentRepo != null) ? DatabaseId(currentRepo) : null,
+      repos: repos,
+    );
+
+    final s1 = Settings._(root, prefs);
+
+    // The order of these operations is extremely important to avoid data loss.
+    await s1._storeRoot();
     await prefs.setInt(SETTINGS_VERSION_KEY, 1);
+    await Settings._removeValuesFromV0(prefs);
 
-    // Remove keys that don't belong to this version of settings.  It's
-    // important to do this **after** we've stored the root and version number
-    // above to avoid data loss.
+    return s1;
+  }
+
+  // Remove keys that don't belong to this version of settings.  It's important
+  // to do this **after** we've stored the root and version number of this
+  // settings.
+  static Future<void> _removeValuesFromV0(SharedPreferences prefs) async {
     for (final key in prefs.getKeys()) {
       if (key != SETTINGS_VERSION_KEY && key != SETTINGS_KEY) {
         await prefs.remove(key);
       }
     }
-
-    return settings;
   }
 
   //------------------------------------------------------------------
