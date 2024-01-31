@@ -120,7 +120,7 @@ class RepositoriesBar extends StatelessWidget
         [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
         () {
       final button = Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
-          onPressed: () => _cubits.repositories.pushRepoList(true),
+          onPressed: () => _cubits.repositories.showRepoList(),
           size: Dimensions.sizeIconSmall);
 
       Color? color = _cubits.mainNotificationBadgeColor();

@@ -18,7 +18,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;
-  bool _showList = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
   StreamSubscription<void>? _subscription;
@@ -58,8 +57,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     _update(() {
       _isLoading = false;
     });
-
-    _putRepoList(RepoListEntry(reposCubit: this));
   }
 
   bool get isLoading => _isLoading;
@@ -67,18 +64,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   String? get currentRepoName => currentRepo?.name;
 
-  Iterable<String> repositoryNames() =>
-      _repos.keys.where((key) => key != Constants.repoListEntryName);
+  Iterable<String> repositoryNames() => _repos.keys;
 
-  bool get showList => _showList || _currentRepo == null;
+  bool get showList => _currentRepo == null;
 
   RepoEntry? get currentRepo => _currentRepo;
 
   StateMonitor get rootStateMonitor => _session.rootStateMonitor;
 
-  Iterable<RepoEntry> get repos => _repos.entries
-      .map((entry) => entry.value)
-      .where((entry) => entry.name != Constants.repoListEntryName);
+  Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
   Future<oui.ShareToken> createToken(String tokenString) =>
       oui.ShareToken.fromString(session, tokenString);
@@ -147,15 +141,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     return _repos[name];
   }
 
-  void _putRepoList(RepoEntry repoList) {
-    _repos[repoList.name] = repoList;
-    _showList = true;
-
-    changed();
-  }
-
-  void pushRepoList(bool showList) {
-    _showList = showList;
+  void showRepoList() {
+    _currentRepo = null;
     changed();
   }
 
@@ -405,8 +392,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       return;
     }
 
-    final nextRepo = _repos.values.firstWhereOrNull(
-        (element) => element.name != Constants.repoListEntryName);
+    final nextRepo = _repos.values.firstOrNull;
 
     await setCurrent(nextRepo);
     await _settings.setDefaultRepo(nextRepo?.name);

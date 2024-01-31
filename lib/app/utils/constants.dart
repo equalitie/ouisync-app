@@ -127,17 +127,6 @@ class Constants {
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
   static const String heroTagRepoListActions = 'REPO_LIST_ACTIONS';
 
-  /// Authentication modes
-
-  //static const String authModeManual = 'manual';
-  //static const String authModeVersion1 =
-  //    'version1'; // Using built in biometric validation in biometrics_storage
-  //static const String authModeVersion2 =
-  //    'version2'; // Using local_auth for biometric validation
-  //static const String authModeNoLocalPassword = 'no_local_password';
-
-  static const String repoListEntryName = 'repo_list';
-
   static const IconData iconVisibilityOn = Icons.visibility;
   static const IconData iconVisibilityOff = Icons.visibility_off;
 

@@ -79,9 +79,7 @@ class RepoListState extends StatelessWidget
                     itemData: repoItem,
                     mainAction: () async {
                       final repoName = repoEntry.name;
-
                       await reposCubit.setCurrentByName(repoName);
-                      reposCubit.pushRepoList(false);
                     },
                     verticalDotsAction: () async {
                       final cubit = repoEntry.maybeCubit;

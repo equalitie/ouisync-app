@@ -24,43 +24,19 @@ abstract class RepoEntry extends Equatable {
 class LoadingRepoEntry extends RepoEntry {
   final RepoMetaInfo _metaInfo;
 
-  // FIXME: unused_field
-  // bool _closeAfter = false;
-
   LoadingRepoEntry(this._metaInfo);
 
   @override
   RepoMetaInfo get metaInfo => _metaInfo;
 
   @override
-  Future<void> close() async {
-    // FIXME: unused_field
-    //_closeAfter = true;
-  }
+  Future<void> close() async {}
 
   @override
   AuthMode? get authenticationMode => null;
 
   @override
   RepoCubit? get maybeCubit => null;
-}
-
-class RepoListEntry extends RepoEntry {
-  RepoListEntry({required this.reposCubit});
-
-  final ReposCubit reposCubit;
-
-  @override
-  String get name => Constants.repoListEntryName;
-
-  @override
-  AuthMode? get authenticationMode => null;
-
-  @override
-  Future<void> close() async {}
-
-  @override
-  RepoMetaInfo? get metaInfo => null;
 }
 
 class OpenRepoEntry extends RepoEntry {
