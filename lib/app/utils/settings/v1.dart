@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/repo_meta_info.dart';
+import '../../models/repo_location.dart';
 import '../utils.dart';
 
 class DatabaseId {
@@ -18,23 +18,23 @@ class DatabaseId {
 
 class SettingsRepoEntry {
   AuthMode authenticationMode;
-  RepoMetaInfo info;
+  RepoLocation location;
 
-  String get name => info.name;
-  Directory get dir => info.dir;
+  String get name => location.name;
+  Directory get dir => location.dir;
 
-  SettingsRepoEntry(this.authenticationMode, this.info);
+  SettingsRepoEntry(this.authenticationMode, this.location);
 
   Map toJson() {
     return {
       'authMode': authModeToString(authenticationMode),
-      'location': info.path(),
+      'location': location.path(),
     };
   }
 
   factory SettingsRepoEntry.fromJson(dynamic data) {
     return SettingsRepoEntry(authModeFromString(data['authMode']!)!,
-        RepoMetaInfo.fromDbPath(data['location']!));
+        RepoLocation.fromDbPath(data['location']!));
   }
 }
 
@@ -44,7 +44,7 @@ class RepoSettings {
 
   RepoSettings(this._databaseId, this._entry);
 
-  RepoMetaInfo get info => _entry.info;
+  RepoLocation get location => _entry.location;
   SettingsRepoEntry get entry => _entry;
   DatabaseId get databaseId => _databaseId;
   AuthMode get authenticationMode => _entry.authenticationMode;
@@ -236,7 +236,7 @@ class Settings with AppLogger {
     if (current == null) {
       return null;
     }
-    _root.repos[current]?.info.name;
+    _root.repos[current]?.location.name;
   }
 
   Future<void> setDefaultRepo(String? name) async {
@@ -273,15 +273,16 @@ class Settings with AppLogger {
       throw 'Failed to rename repo: "$newName" already exists';
     }
 
-    final oldInfo = repoSettings.entry.info;
-    repoSettings.entry.info = RepoMetaInfo.fromDirAndName(oldInfo.dir, newName);
+    final oldInfo = repoSettings.entry.location;
+    repoSettings.entry.location =
+        RepoLocation.fromDirAndName(oldInfo.dir, newName);
     await _storeRoot();
   }
 
   //------------------------------------------------------------------
 
   Future<RepoSettings?> addRepo(
-    RepoMetaInfo info, {
+    RepoLocation location, {
     required DatabaseId databaseId,
     required AuthMode authenticationMode,
   }) async {
@@ -291,13 +292,13 @@ class Settings with AppLogger {
       return null;
     }
 
-    if (repoSettingsByName(info.name) != null) {
+    if (repoSettingsByName(location.name) != null) {
       loggy.debug(
-          'Settings already contains a repo with the name "${info.name}"');
+          'Settings already contains a repo with the name "${location.name}"');
       return null;
     }
 
-    final entry = SettingsRepoEntry(authenticationMode, info);
+    final entry = SettingsRepoEntry(authenticationMode, location);
     _root.repos[databaseId] = entry;
 
     await _storeRoot();

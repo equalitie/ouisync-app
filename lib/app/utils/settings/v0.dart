@@ -4,12 +4,12 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/repo_meta_info.dart';
+import '../../models/repo_location.dart';
 import '../utils.dart';
 
 class SettingsRepoEntry {
   String databaseId;
-  RepoMetaInfo info;
+  RepoLocation info;
 
   String get name => info.name;
   Directory get dir => info.dir;
@@ -90,7 +90,7 @@ class Settings with AppLogger {
 
     if (repoPaths != null) {
       for (var path in repoPaths) {
-        final repo = RepoMetaInfo.fromDbPath(osPathConverter.convertPath(path));
+        final repo = RepoLocation.fromDbPath(osPathConverter.convertPath(path));
         repos[repo.name] = repo.dir.path;
       }
     }
@@ -184,23 +184,23 @@ class Settings with AppLogger {
     }
 
     return paths.map((path) {
-      final info = RepoMetaInfo.fromDbPath(_osPathConverter.convertPath(path));
+      final info = RepoLocation.fromDbPath(_osPathConverter.convertPath(path));
       final id = getDatabaseId(info.name);
       return SettingsRepoEntry(id, info);
     }).toList();
   }
 
   SettingsRepoEntry? entryByName(String name) {
-    final info = repoMetaInfo(name);
+    final info = repoLocation(name);
     if (info == null) return null;
     final id = getDatabaseId(name);
     return SettingsRepoEntry(id, info);
   }
 
-  RepoMetaInfo? repoMetaInfo(String repoName) {
+  RepoLocation? repoLocation(String repoName) {
     final dir = _repos[repoName];
     if (dir == null) return null;
-    return RepoMetaInfo.fromDirAndName(Directory(dir), repoName);
+    return RepoLocation.fromDirAndName(Directory(dir), repoName);
   }
 
   Future<void> setDefaultRepo(String? name) async {
@@ -237,12 +237,12 @@ class Settings with AppLogger {
 
     return SettingsRepoEntry(
       databaseId,
-      RepoMetaInfo.fromDirAndName(Directory(path), newName),
+      RepoLocation.fromDirAndName(Directory(path), newName),
     );
   }
 
   Future<SettingsRepoEntry?> addRepo(
-    RepoMetaInfo info, {
+    RepoLocation info, {
     required String databaseId,
     required AuthMode authenticationMode,
   }) async {
@@ -367,7 +367,7 @@ class Settings with AppLogger {
       }
 
       assert(p.isAbsolute(file.path));
-      final info = RepoMetaInfo.fromDbPath(file.path);
+      final info = RepoLocation.fromDbPath(file.path);
       repos[info.name] = info.dir.path;
     }
 

@@ -265,7 +265,7 @@ class _MainPageState extends State<MainPage>
       if (currentRepo is MissingRepoEntry) {
         return MissingRepositoryState(
             repositoryName: currentRepo.name,
-            repositoryMetaInfo: currentRepo.metaInfo,
+            repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
             settings: widget.settings,

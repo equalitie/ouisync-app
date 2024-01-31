@@ -3,12 +3,12 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
-import 'repo_meta_info.dart';
+import 'repo_location.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
-  RepoMetaInfo? get metaInfo;
-  String get name => metaInfo?.name ?? '';
+  RepoLocation? get location;
+  String get name => location?.name ?? '';
   AuthMode? get authenticationMode;
   RepoCubit? get maybeCubit => null;
 
@@ -22,12 +22,12 @@ abstract class RepoEntry extends Equatable {
 }
 
 class LoadingRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
 
-  LoadingRepoEntry(this._metaInfo);
+  LoadingRepoEntry(this._location);
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 
   @override
   Future<void> close() async {}
@@ -57,7 +57,7 @@ class OpenRepoEntry extends RepoEntry {
   }
 
   @override
-  RepoMetaInfo get metaInfo => _cubit.metaInfo;
+  RepoLocation get location => _cubit.location;
 
   @override
   AuthMode? get authenticationMode => _cubit.state.authenticationMode;
@@ -66,11 +66,11 @@ class OpenRepoEntry extends RepoEntry {
 }
 
 class MissingRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
   final String _error;
   final String? _errorDescription;
 
-  MissingRepoEntry(this._metaInfo, this._error, this._errorDescription);
+  MissingRepoEntry(this._location, this._error, this._errorDescription);
 
   String get error => _error;
 
@@ -83,15 +83,15 @@ class MissingRepoEntry extends RepoEntry {
   AuthMode? get authenticationMode => null;
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 }
 
 class ErrorRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
   final String _error;
   final String? _errorDescription;
 
-  ErrorRepoEntry(this._metaInfo, this._error, this._errorDescription);
+  ErrorRepoEntry(this._location, this._error, this._errorDescription);
 
   String get error => _error;
 
@@ -104,5 +104,5 @@ class ErrorRepoEntry extends RepoEntry {
   AuthMode? get authenticationMode => null;
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 }

@@ -75,19 +75,18 @@ class RepositoryCreation extends HookWidget with AppLogger {
               return;
             }
 
-            assert(state.repositoryMetaInfo != null,
-                '_repositoryMetaInfo is null');
+            assert(state.repoLocation != null, 'repoLocation is null');
 
-            if (state.repositoryMetaInfo == null) {
+            if (state.repoLocation == null) {
               throw ('A repository was created, but saving the password into the '
                   'secure storage failed and it may be lost.\nMost likely this '
                   'repository needs to be deleted.');
             }
 
-            final repoName = state.repositoryMetaInfo!.name;
+            final repoName = state.repoLocation!.name;
             final authMode = cubit.settings.getAuthenticationMode(repoName);
 
-            await cubit.deleteRepository(state.repositoryMetaInfo!, authMode);
+            await cubit.deleteRepository(state.repoLocation!, authMode);
           },
           child: Form(
             key: _formKey,
@@ -654,10 +653,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
     }
 
     final defaultRepoLocation = await createRepoCubit.defaultRepoLocation;
-    final repoMetaInfo = RepoMetaInfo.fromDirAndName(defaultRepoLocation, name);
+    final repoLocation = RepoLocation.fromDirAndName(defaultRepoLocation, name);
 
     final exist = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: io.File(repoMetaInfo.path()).exists());
+        f: io.File(repoLocation.path()).exists());
     createRepoCubit.showRepositoryNameInUseWarning(exist);
 
     if (exist) return;
@@ -687,7 +686,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
         : AuthMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: createRepoCubit.createRepository(repoMetaInfo, password,
+        f: createRepoCubit.createRepository(repoLocation, password,
             state.shareToken, authenticationMode, true));
 
     if (repoEntry is! OpenRepoEntry) {
@@ -737,7 +736,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             .saveOrUpdatePassword(value: password));
 
     if (savedPassword == null || savedPassword.isEmpty) {
-      setDeleteRepoBeforePop(true, repoEntry.metaInfo);
+      setDeleteRepoBeforePop(true, repoEntry.location);
 
       // TODO: Check if this still can be determined or even occur
       // if (savedPassword.exception is AuthException) {
@@ -758,8 +757,8 @@ class RepositoryCreation extends HookWidget with AppLogger {
     Navigator.of(context).pop(name);
   }
 
-  void setDeleteRepoBeforePop(bool delete, RepoMetaInfo? repoMetaInfo) {
+  void setDeleteRepoBeforePop(bool delete, RepoLocation? location) {
     createRepoCubit.deleteRepositoryBeforePop(delete);
-    createRepoCubit.repositoryMetaInfo(repoMetaInfo);
+    createRepoCubit.repoLocation(location);
   }
 }

@@ -24,8 +24,7 @@ class RepositorySettings extends StatefulWidget {
   final Settings settings;
   final Future<void> Function(
       String oldName, String newName, Uint8List reopenToken) renameRepository;
-  final Future<void> Function(RepoMetaInfo info, AuthMode authMode)
-      deleteRepository;
+  final Future<void> Function(RepoLocation, AuthMode) deleteRepository;
 
   @override
   State<RepositorySettings> createState() => _RepositorySettingsState();
@@ -118,7 +117,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           isDanger: true,
                           onTap: () async => await deleteRepository(context,
                               repositoryName: widget.cubit.name,
-                              repositoryMetaInfo: widget.cubit.metaInfo,
+                              repositoryLocation: widget.cubit.location,
                               settings: widget.settings,
                               delete: widget.deleteRepository,
                               popDialog: () => Navigator.of(context).pop()))

@@ -10,7 +10,7 @@ class MissingRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
   const MissingRepositoryState(
       {required this.repositoryName,
-      required this.repositoryMetaInfo,
+      required this.repositoryLocation,
       required this.errorMessage,
       this.errorDescription,
       required this.settings,
@@ -20,13 +20,13 @@ class MissingRepositoryState extends HookWidget
       : super(key: key);
 
   final String repositoryName;
-  final RepoMetaInfo repositoryMetaInfo;
+  final RepoLocation repositoryLocation;
   final String errorMessage;
   final String? errorDescription;
 
   final Settings settings;
   final void Function()? onReloadRepository;
-  final Future<void> Function(RepoMetaInfo, AuthMode) onDelete;
+  final Future<void> Function(RepoLocation, AuthMode) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class MissingRepositoryState extends HookWidget
           Fields.inPageButton(
               onPressed: () => deleteRepository(context,
                   repositoryName: repositoryName,
-                  repositoryMetaInfo: repositoryMetaInfo,
+                  repositoryLocation: repositoryLocation,
                   settings: settings,
                   delete: onDelete),
               text: S.current.actionRemoveRepo,

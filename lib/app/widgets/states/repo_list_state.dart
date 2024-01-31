@@ -62,7 +62,7 @@ class RepoListState extends StatelessWidget
                       mainAction: () {},
                       verticalDotsAction: () async => deleteRepository(context,
                           repositoryName: repoEntry.name,
-                          repositoryMetaInfo: repoEntry.metaInfo!,
+                          repositoryLocation: repoEntry.location!,
                           settings: settings,
                           delete: reposCubit.deleteRepository));
                 }

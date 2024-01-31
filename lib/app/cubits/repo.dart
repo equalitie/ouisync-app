@@ -136,7 +136,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   DatabaseId get databaseId => _settingsRepoEntry.databaseId;
   String get name => _settingsRepoEntry.name;
   String get currentFolder => _currentFolder.state.path;
-  RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
+  RepoLocation get location => _settingsRepoEntry.location;
   RepoSettings get repoSettings => _settingsRepoEntry;
 
   void updateNavigation({required bool isFolder}) {
@@ -376,12 +376,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<bool> setReadWritePassword(
-    RepoMetaInfo info,
+    RepoLocation location,
     String oldPassword,
     String newPassword,
     oui.ShareToken? shareToken,
   ) async {
-    final name = info.name;
+    final name = location.name;
 
     try {
       await _handle.setReadWriteAccess(
@@ -400,11 +400,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<bool> setReadPassword(
-    RepoMetaInfo info,
+    RepoLocation location,
     String newPassword,
     oui.ShareToken? shareToken,
   ) async {
-    final name = info.name;
+    final name = location.name;
 
     try {
       await _handle.setReadAccess(
