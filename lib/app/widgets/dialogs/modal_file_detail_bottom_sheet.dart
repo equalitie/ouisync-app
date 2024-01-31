@@ -161,19 +161,11 @@ class _FileDetailState extends State<FileDetail> {
                       Constants.notAvailableActionMessageDuration),
               const Divider(
                   height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-              Fields.iconLabel(
-                  icon: Icons.info_rounded,
-                  text: S.current.iconInformation,
-                  style: context.theme.appTextStyle.titleMedium),
-              Fields.autosizedLabeledText(
-                  label: S.current.labelName, text: widget.data.name),
-              Fields.labeledText(
-                  label: S.current.labelLocation,
-                  text: getDirname(widget.data.path),
-                  textAlign: TextAlign.start),
-              Fields.labeledText(
-                  label: S.current.labelSize,
-                  text: formatSize(widget.data.size ?? 0)),
+              EntryInfoTable(entryInfo: {
+                S.current.labelName: widget.data.name,
+                S.current.labelLocation: getDirname(widget.data.path),
+                S.current.labelSize: formatSize(widget.data.size ?? 0),
+              })
             ],
           ),
         ),
