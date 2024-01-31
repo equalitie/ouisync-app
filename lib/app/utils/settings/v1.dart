@@ -215,10 +215,6 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  SettingsRepoEntry? entryByName(String name) {
-    return repoSettingsByName(name)?.entry;
-  }
-
   RepoSettings? repoSettingsByName(String name) {
     var e = null;
     for (final kv in _root.repos.entries) {
@@ -244,6 +240,9 @@ class Settings with AppLogger {
   }
 
   Future<void> setDefaultRepo(String? name) async {
+    // TODO: We should not set repositories that are protected by passwords as
+    // default because that could imply that those repositories are not blind
+    // and thus compromise plausible deniability.
     if (_root.currentRepo == name) {
       return;
     }
@@ -266,10 +265,11 @@ class Settings with AppLogger {
   Future<void> renameRepository(
       RepoSettings repoSettings, String newName) async {
     if (repoSettings.name == newName) {
+      // TODO: This should just return without throwing, but check where it's used.
       throw 'Failed to rename repo: "$newName" to same name';
     }
 
-    if (entryByName(newName) != newName) {
+    if (repoSettingsByName(newName) != null) {
       throw 'Failed to rename repo: "$newName" already exists';
     }
 
