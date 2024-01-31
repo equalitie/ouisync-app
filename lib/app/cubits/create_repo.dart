@@ -17,7 +17,7 @@ class CreateRepositoryState extends Equatable {
 
   final AccessMode accessModeGranted;
   final String suggestedName;
-  final RepoMetaInfo? repositoryMetaInfo;
+  final RepoLocation? repoLocation;
 
   final bool obscurePassword;
   final bool obscureRetypePassword;
@@ -37,7 +37,7 @@ class CreateRepositoryState extends Equatable {
       required this.addPassword,
       required this.accessModeGranted,
       required this.suggestedName,
-      required this.repositoryMetaInfo,
+      required this.repoLocation,
       required this.obscurePassword,
       required this.obscureRetypePassword,
       required this.showSuggestedName,
@@ -54,7 +54,7 @@ class CreateRepositoryState extends Equatable {
           bool? addPassword,
           AccessMode? accessModeGranted,
           String? suggestedName,
-          RepoMetaInfo? repositoryMetaInfo,
+          RepoLocation? repoLocation,
           bool? obscurePassword,
           bool? obscureRetypePassword,
           bool? showSuggestedName,
@@ -72,7 +72,7 @@ class CreateRepositoryState extends Equatable {
           addPassword: addPassword ?? this.addPassword,
           accessModeGranted: accessModeGranted ?? this.accessModeGranted,
           suggestedName: suggestedName ?? this.suggestedName,
-          repositoryMetaInfo: repositoryMetaInfo ?? this.repositoryMetaInfo,
+          repoLocation: repoLocation ?? this.repoLocation,
           obscurePassword: obscurePassword ?? this.obscurePassword,
           obscureRetypePassword:
               obscureRetypePassword ?? this.obscureRetypePassword,
@@ -95,7 +95,7 @@ class CreateRepositoryState extends Equatable {
         addPassword,
         accessModeGranted,
         suggestedName,
-        repositoryMetaInfo,
+        repoLocation,
         obscurePassword,
         obscureRetypePassword,
         showSuggestedName,
@@ -132,7 +132,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
         addPassword: false,
         accessModeGranted: accessModeGranted ?? AccessMode.blind,
         suggestedName: suggestedName ?? '',
-        repositoryMetaInfo: null,
+        repoLocation: null,
         obscurePassword: true,
         obscureRetypePassword: true,
         showSuggestedName: showSuggestedName,
@@ -145,12 +145,12 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
   }
 
   Future<RepoEntry> createRepository(
-          RepoMetaInfo repositoryMetaInfo,
+          RepoLocation repoLocation,
           String password,
           ShareToken? shareToken,
           AuthMode authenticationMode,
           bool setCurrent) async =>
-      _reposCubit.createRepository(repositoryMetaInfo,
+      _reposCubit.createRepository(repoLocation,
           password: password,
           token: shareToken,
           authenticationMode: authenticationMode,
@@ -179,6 +179,6 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
   void deleteRepositoryBeforePop(bool delete) =>
       emit(state.copyWith(deleteRepositoryBeforePop: delete));
 
-  void repositoryMetaInfo(RepoMetaInfo? metaInfo) =>
-      emit(state.copyWith(repositoryMetaInfo: metaInfo));
+  void repoLocation(RepoLocation? repoLocation) =>
+      emit(state.copyWith(repoLocation: repoLocation));
 }

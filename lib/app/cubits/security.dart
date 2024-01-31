@@ -197,14 +197,14 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     }
 
     final mode = await _shareToken?.mode;
-    final metaInfo = _repoCubit.metaInfo;
+    final location = _repoCubit.location;
 
     if (mode == AccessMode.write) {
       return _repoCubit.setReadWritePassword(
-          metaInfo, state.password, newPassword, _shareToken);
+          location, state.password, newPassword, _shareToken);
     } else {
       assert(mode == AccessMode.read);
-      return _repoCubit.setReadPassword(metaInfo, newPassword, _shareToken);
+      return _repoCubit.setReadPassword(location, newPassword, _shareToken);
     }
   }
 

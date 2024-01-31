@@ -3,13 +3,70 @@ import 'dart:io' show Directory, Platform;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:loggy/loggy.dart';
 
-import '../models/repo_meta_info.dart';
-import 'utils.dart';
+import '../../models/repo_location.dart';
+import '../utils.dart';
+
+enum AuthMode {
+  manual,
+  version1,
+  version2,
+  noLocalPassword,
+}
+
+String authModeToString(AuthMode authMode) {
+  switch (authMode) {
+    case AuthMode.manual:
+      {
+        return "manual";
+      }
+    case AuthMode.version1:
+      {
+        return "version1";
+      }
+    case AuthMode.version2:
+      {
+        return "version2";
+      }
+    case AuthMode.noLocalPassword:
+      {
+        return "noLocalPassword";
+      }
+  }
+}
+
+AuthMode? authModeFromString(String authMode) {
+  switch (authMode) {
+    case "manual":
+      {
+        return AuthMode.manual;
+      }
+    case "version1":
+      {
+        return AuthMode.version1;
+      }
+    case "version2":
+      {
+        return AuthMode.version2;
+      }
+    case "noLocalPassword":
+      {
+        return AuthMode.noLocalPassword;
+      }
+    // Legacy, for backward compatibility.
+    case "no_local_password":
+      {
+        return AuthMode.noLocalPassword;
+      }
+  }
+  logError("Failed to convert string \"$authMode\" to enum");
+  return null;
+}
 
 class SettingsRepoEntry {
   String databaseId;
-  RepoMetaInfo info;
+  RepoLocation info;
 
   String get name => info.name;
   Directory get dir => info.dir;
@@ -69,36 +126,28 @@ class Settings with AppLogger {
   // directory and moved everything there into this settings.
   static const String _legacyReposIncluded = "LEGACY_REPOS_INCLUDED";
 
-  // Path to mount repositories at
-  static const String _mountPoint = "MOUNT_POINT";
-
   final SharedPreferences _prefs;
   final _CachedString _defaultRepo;
+
+  final _OsPathConverter _osPathConverter;
 
   // Key is the repository name (file name without the extension), Value is the
   // path to the directory where the repository file is located.
   final Map<String, String> _repos;
 
-  Settings._(this._prefs, this._repos)
+  Settings._(this._prefs, this._repos, this._osPathConverter)
       : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
 
-  static Future<Settings> init() async {
-    final prefs = await SharedPreferences.getInstance();
+  static Future<Settings> init(SharedPreferences prefs) async {
+    final osPathConverter = await _OsPathConverter.create();
 
     final repos = <String, String>{};
 
     final repoPaths = prefs.getStringList(_knownRepositoriesKey);
 
     if (repoPaths != null) {
-      String? iosDebugReposPath = await getiOSReposPath();
-
       for (var path in repoPaths) {
-        if (iosDebugReposPath != null) {
-          final repoFile = p.basename(path);
-          path = p.join(iosDebugReposPath, repoFile);
-        }
-
-        final repo = RepoMetaInfo.fromDbPath(path);
+        final repo = RepoLocation.fromDbPath(osPathConverter.convertPath(path));
         repos[repo.name] = repo.dir.path;
       }
     }
@@ -107,7 +156,7 @@ class Settings with AppLogger {
       await _storeRepos(prefs, repos);
     }
 
-    final settings = Settings._(prefs, repos);
+    final settings = Settings._(prefs, repos, osPathConverter);
 
     await settings._migrateIds();
 
@@ -134,17 +183,19 @@ class Settings with AppLogger {
         repos.entries.map((e) => p.join(e.value, e.key)).toList());
   }
 
-  bool? getEqualitieValues() => _prefs.getBool(_eqValuesKey);
+  // Returns true if the user accepted eQ values.
+  bool getEqualitieValues() => _prefs.getBool(_eqValuesKey) ?? false;
   Future<void> setEqualitieValues(bool value) async {
     await _prefs.setBool(_eqValuesKey, value);
   }
 
-  bool? getShowOnboarding() => _prefs.getBool(_showOnboardingKey);
+  bool getShowOnboarding() => _prefs.getBool(_showOnboardingKey) ?? true;
   Future<void> setShowOnboarding(bool value) async {
     await _prefs.setBool(_showOnboardingKey, value);
   }
 
-  bool? getLaunchAtStartup() => _prefs.getBool(_launchAtStartup);
+  bool getLaunchAtStartup() => _prefs.getBool(_launchAtStartup) ?? true;
+
   Future<void> setLaunchAtStartup(bool value) async {
     await _prefs.setBool(_launchAtStartup, value);
   }
@@ -169,19 +220,20 @@ class Settings with AppLogger {
     // also gets deleted when the app is un/re-installed.
     final alternativeDir =
         await path_provider.getApplicationDocumentsDirectory();
+
     if (Platform.isAndroid) {
       return alternativeDir;
     }
 
     final context = p.Context(style: p.Style.posix);
+
     final nonAndroidAlternativePath =
         context.join(alternativeDir.path, 'ouisync');
 
-    final documents = await Directory(nonAndroidAlternativePath).create();
-    return documents;
+    return await Directory(nonAndroidAlternativePath).create();
   }
 
-  List<SettingsRepoEntry> repos(String? iosDebugReposPath) {
+  List<SettingsRepoEntry> repos() {
     final paths = _prefs.getStringList(_knownRepositoriesKey);
 
     if (paths == null) {
@@ -189,28 +241,23 @@ class Settings with AppLogger {
     }
 
     return paths.map((path) {
-      if (iosDebugReposPath != null) {
-        final repoFile = p.basename(path);
-        path = p.join(iosDebugReposPath, repoFile);
-      }
-
-      final info = RepoMetaInfo.fromDbPath(path);
+      final info = RepoLocation.fromDbPath(_osPathConverter.convertPath(path));
       final id = getDatabaseId(info.name);
       return SettingsRepoEntry(id, info);
     }).toList();
   }
 
   SettingsRepoEntry? entryByName(String name) {
-    final info = repoMetaInfo(name);
+    final info = repoLocation(name);
     if (info == null) return null;
     final id = getDatabaseId(name);
     return SettingsRepoEntry(id, info);
   }
 
-  RepoMetaInfo? repoMetaInfo(String repoName) {
+  RepoLocation? repoLocation(String repoName) {
     final dir = _repos[repoName];
     if (dir == null) return null;
-    return RepoMetaInfo.fromDirAndName(Directory(dir), repoName);
+    return RepoLocation.fromDirAndName(Directory(dir), repoName);
   }
 
   Future<void> setDefaultRepo(String? name) async {
@@ -247,12 +294,12 @@ class Settings with AppLogger {
 
     return SettingsRepoEntry(
       databaseId,
-      RepoMetaInfo.fromDirAndName(Directory(path), newName),
+      RepoLocation.fromDirAndName(Directory(path), newName),
     );
   }
 
   Future<SettingsRepoEntry?> addRepo(
-    RepoMetaInfo info, {
+    RepoLocation info, {
     required String databaseId,
     required AuthMode authenticationMode,
   }) async {
@@ -290,7 +337,7 @@ class Settings with AppLogger {
   Future<void> _setDatabaseId(String repoName, String? databaseId) =>
       _setRepositoryString(repoName, _databaseId, databaseId);
 
-  bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
+  bool getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey) ?? true;
 
   Future<void> setSyncOnMobileEnabled(bool enable) async {
     await _prefs.setBool(_syncOnMobileKey, enable);
@@ -318,17 +365,7 @@ class Settings with AppLogger {
     await _setRepositoryString(repoName, _authenticationMode, str);
   }
 
-  String? getMountPoint() =>
-      _prefs.getString(_mountPoint) ?? _defaultMountPoint();
-
-  // Read and remove a bool property. This functions exists to facilitate migration to the new
-  // repository config system where config values are stored in the repository metadata.
-  bool? takeRepositoryBool(String repoName, String key) {
-    final fullKey = _repositoryKey(repoName, key);
-    final value = _prefs.getBool(fullKey);
-    _prefs.remove(fullKey);
-    return value;
-  }
+  String? getMountPoint() => _defaultMountPoint();
 
   Future<void> _setRepositoryString(
       String repoName, String key, String? value) async {
@@ -359,6 +396,11 @@ class Settings with AppLogger {
 
   static Future<bool> _includeLegacyRepos(
       SharedPreferences prefs, Map<String, String> repos) async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      // The path_provider.getApplicationSupportDirectory() function fails in tests.
+      return false;
+    }
+
     final includedAlready = prefs.getBool(_legacyReposIncluded);
 
     if (includedAlready != null && includedAlready == true) {
@@ -382,7 +424,7 @@ class Settings with AppLogger {
       }
 
       assert(p.isAbsolute(file.path));
-      final info = RepoMetaInfo.fromDbPath(file.path);
+      final info = RepoLocation.fromDbPath(file.path);
       repos[info.name] = info.dir.path;
     }
 
@@ -430,5 +472,33 @@ String? _defaultMountPoint() {
     return 'O:';
   } else {
     return null;
+  }
+}
+
+class _OsPathConverter {
+  final Directory? _iosRootPath;
+
+  _OsPathConverter._(this._iosRootPath);
+
+  static Future<_OsPathConverter> create() async {
+    Directory? iosRootPath;
+
+    if (Platform.isIOS) {
+      // Note that on iOS the value returned from this function changes every
+      // time the application starts.
+      iosRootPath = await path_provider.getApplicationDocumentsDirectory();
+    }
+
+    return _OsPathConverter._(iosRootPath);
+  }
+
+  String convertPath(String path) {
+    final iosRootPath = _iosRootPath;
+
+    if (iosRootPath == null) {
+      return path;
+    } else {
+      return p.join(iosRootPath.path, 'ouisync', p.basename(path));
+    }
   }
 }

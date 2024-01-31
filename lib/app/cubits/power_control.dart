@@ -3,13 +3,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
-import '../utils/hotspot.dart';
-import '../utils/log.dart';
-import '../utils/settings.dart';
+import '../utils/utils.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
-const bool _syncOnMobileDefault = true;
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
@@ -85,8 +82,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
   PowerControl(this._session, this._settings) : super(PowerControlState());
 
   Future<void> init() async {
-    final syncOnMobile =
-        _settings.getSyncOnMobileEnabled() ?? _syncOnMobileDefault;
+    final syncOnMobile = _settings.getSyncOnMobileEnabled();
     await setSyncOnMobileEnabled(syncOnMobile);
 
     emit(state.copyWith(

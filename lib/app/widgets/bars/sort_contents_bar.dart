@@ -57,10 +57,10 @@ class _SortContentsBarState extends State<SortContentsBar> {
     final newDirection = state.direction == SortDirection.asc
         ? SortDirection.desc
         : SortDirection.asc;
+
     widget.sortListCubit.switchSortDirection(newDirection);
 
     if (widget.reposCubit.showList) {
-      widget.reposCubit.pushRepoList(true);
       return;
     }
 
@@ -149,10 +149,7 @@ class _SortByList extends StatelessWidget with AppLogger {
 
                   if (_reposCubit.showList) {
                     if (sortByItem.name != sortBy.name) return;
-
-                    _reposCubit.pushRepoList(true);
                     Navigator.of(context).pop();
-
                     return;
                   }
 

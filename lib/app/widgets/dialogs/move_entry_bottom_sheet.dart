@@ -130,9 +130,9 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
       ];
 
   bool _canMove(
-    String originRepoId,
+    DatabaseId? originRepoId,
     String originPath,
-    String destinationRepoId,
+    DatabaseId destinationRepoId,
     String destinationPath,
   ) {
     if (originRepoId != destinationRepoId) return false;

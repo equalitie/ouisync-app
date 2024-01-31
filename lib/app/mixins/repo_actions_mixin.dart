@@ -184,9 +184,9 @@ mixin RepositoryActionsMixin {
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(BuildContext context,
       {required String repositoryName,
-      required RepoMetaInfo repositoryMetaInfo,
+      required RepoLocation repositoryLocation,
       required Settings settings,
-      required Future<void> Function(RepoMetaInfo, AuthMode) delete,
+      required Future<void> Function(RepoLocation, AuthMode) delete,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -224,7 +224,7 @@ mixin RepositoryActionsMixin {
       final authMode = settings.getAuthenticationMode(repositoryName);
 
       await Dialogs.executeFutureWithLoadingDialog(context,
-          f: delete(repositoryMetaInfo, authMode));
+          f: delete(repositoryLocation, authMode));
 
       if (popDialog != null) {
         popDialog();
@@ -235,7 +235,7 @@ mixin RepositoryActionsMixin {
   /// setAuthenticationMode => Settings.setAuthenticationMode
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
-      {required String databaseId,
+      {required DatabaseId databaseId,
       required String repositoryName,
       required AuthMode authenticationMode,
       required Settings settings,
@@ -284,7 +284,7 @@ mixin RepositoryActionsMixin {
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
-          {required String databaseId,
+          {required DatabaseId databaseId,
           required String repositoryName,
           required bool isBiometricsAvailable,
           required Settings settings,
@@ -348,12 +348,12 @@ mixin RepositoryActionsMixin {
 
 Future<void> lockRepository(
     RepoEntry repositoryEntry,
-    Future<void> Function(SettingsRepoEntry settingsRepoEntry)
+    Future<void> Function(RepoSettings repoSettings)
         lockRepositoryFunction) async {
   if (repositoryEntry.accessMode == AccessMode.blind) return;
 
   if (repositoryEntry is OpenRepoEntry) {
-    await lockRepositoryFunction(repositoryEntry.settingsRepoEntry);
+    await lockRepositoryFunction(repositoryEntry.repoSettings);
   }
 }
 

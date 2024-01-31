@@ -3,7 +3,7 @@ import '../utils/utils.dart';
 import 'storage.dart';
 
 class SecureStorage with AppLogger {
-  final String databaseId;
+  final DatabaseId databaseId;
 
   SecureStorage({required this.databaseId});
 
@@ -107,7 +107,7 @@ class SecureStorage with AppLogger {
   }
 
   Future<String?> _readFlutterSecureStorage(
-      String databaseId, AuthMode authMode) async {
+      DatabaseId databaseId, AuthMode authMode) async {
     if (PlatformValues.isMobileDevice &&
         [AuthMode.version1, AuthMode.version2].contains(authMode)) {
       final authorized = await _validateBiometrics();
@@ -130,7 +130,7 @@ class SecureStorage with AppLogger {
   }
 
   Future<String?> _readLegacyBiometricStorage(
-      {required String databaseId, required AuthMode authMode}) async {
+      {required DatabaseId databaseId, required AuthMode authMode}) async {
     final result = await BiometricSecure.getRepositoryPassword(
         databaseId: databaseId, authMode: authMode);
 
@@ -145,7 +145,7 @@ class SecureStorage with AppLogger {
   }
 
   Future<void> _migrateToSecureAuthMode(
-      String databaseId, String password, AuthMode authMode) async {
+      DatabaseId databaseId, String password, AuthMode authMode) async {
     final result = await FlutterSecure.writeValue(
         databaseId: databaseId, password: password);
 

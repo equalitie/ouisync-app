@@ -265,7 +265,7 @@ class _MainPageState extends State<MainPage>
       if (currentRepo is MissingRepoEntry) {
         return MissingRepositoryState(
             repositoryName: currentRepo.name,
-            repositoryMetaInfo: currentRepo.metaInfo,
+            repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
             settings: widget.settings,
@@ -324,17 +324,17 @@ class _MainPageState extends State<MainPage>
   Future<void> _onBackPressed(bool didPop) async {
     final currentRepo = _currentRepo;
 
-    if (currentRepo is OpenRepoEntry) {
-      final currentFolder = currentRepo.cubit.state.currentFolder;
-      if (!currentFolder.isRoot) {
-        await currentRepo.cubit.navigateTo(currentFolder.parent);
-        return;
+    if (currentRepo != null) {
+      if (currentRepo is OpenRepoEntry) {
+        final currentFolder = currentRepo.cubit.state.currentFolder;
+        if (!currentFolder.isRoot) {
+          await currentRepo.cubit.navigateTo(currentFolder.parent);
+          return;
+        }
       }
 
-      if (!_cubits.repositories.showList) {
-        _cubits.repositories.pushRepoList(true);
-        return;
-      }
+      _cubits.repositories.showRepoList();
+      return;
     }
 
     int clickCount = exitClickCounter.registerClick();
@@ -367,7 +367,8 @@ class _MainPageState extends State<MainPage>
       Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
-        return Fields.addBadge(button, color: color);
+        return Fields.addBadge(button,
+            color: color, moveDownwards: 5, moveRight: 3);
       } else {
         return button;
       }
@@ -820,7 +821,7 @@ class _MainPageState extends State<MainPage>
     }
 
     await _cubits.repositories.setCurrentByName(newRepoName);
-    _cubits.repositories.pushRepoList(false);
+    //_cubits.repositories.pushRepoList(false);
 
     return newRepoName;
   }

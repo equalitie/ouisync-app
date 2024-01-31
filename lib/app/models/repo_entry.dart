@@ -3,12 +3,12 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
-import 'repo_meta_info.dart';
+import 'repo_location.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
-  RepoMetaInfo? get metaInfo;
-  String get name => metaInfo?.name ?? '';
+  RepoLocation? get location;
+  String get name => location?.name ?? '';
   AuthMode? get authenticationMode;
   RepoCubit? get maybeCubit => null;
 
@@ -22,45 +22,21 @@ abstract class RepoEntry extends Equatable {
 }
 
 class LoadingRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
 
-  // FIXME: unused_field
-  // bool _closeAfter = false;
-
-  LoadingRepoEntry(this._metaInfo);
+  LoadingRepoEntry(this._location);
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 
   @override
-  Future<void> close() async {
-    // FIXME: unused_field
-    //_closeAfter = true;
-  }
+  Future<void> close() async {}
 
   @override
   AuthMode? get authenticationMode => null;
 
   @override
   RepoCubit? get maybeCubit => null;
-}
-
-class RepoListEntry extends RepoEntry {
-  RepoListEntry({required this.reposCubit});
-
-  final ReposCubit reposCubit;
-
-  @override
-  String get name => Constants.repoListEntryName;
-
-  @override
-  AuthMode? get authenticationMode => null;
-
-  @override
-  Future<void> close() async {}
-
-  @override
-  RepoMetaInfo? get metaInfo => null;
 }
 
 class OpenRepoEntry extends RepoEntry {
@@ -70,7 +46,7 @@ class OpenRepoEntry extends RepoEntry {
 
   RepoCubit get cubit => _cubit;
 
-  String get databaseId => _cubit.databaseId;
+  DatabaseId get databaseId => _cubit.databaseId;
 
   @override
   RepoCubit? get maybeCubit => _cubit;
@@ -81,20 +57,20 @@ class OpenRepoEntry extends RepoEntry {
   }
 
   @override
-  RepoMetaInfo get metaInfo => _cubit.metaInfo;
+  RepoLocation get location => _cubit.location;
 
   @override
   AuthMode? get authenticationMode => _cubit.state.authenticationMode;
 
-  SettingsRepoEntry get settingsRepoEntry => _cubit.settingsRepoEntry;
+  RepoSettings get repoSettings => _cubit.repoSettings;
 }
 
 class MissingRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
   final String _error;
   final String? _errorDescription;
 
-  MissingRepoEntry(this._metaInfo, this._error, this._errorDescription);
+  MissingRepoEntry(this._location, this._error, this._errorDescription);
 
   String get error => _error;
 
@@ -107,15 +83,15 @@ class MissingRepoEntry extends RepoEntry {
   AuthMode? get authenticationMode => null;
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 }
 
 class ErrorRepoEntry extends RepoEntry {
-  final RepoMetaInfo _metaInfo;
+  final RepoLocation _location;
   final String _error;
   final String? _errorDescription;
 
-  ErrorRepoEntry(this._metaInfo, this._error, this._errorDescription);
+  ErrorRepoEntry(this._location, this._error, this._errorDescription);
 
   String get error => _error;
 
@@ -128,5 +104,5 @@ class ErrorRepoEntry extends RepoEntry {
   AuthMode? get authenticationMode => null;
 
   @override
-  RepoMetaInfo get metaInfo => _metaInfo;
+  RepoLocation get location => _location;
 }

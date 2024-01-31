@@ -117,7 +117,7 @@ class RepositorySection extends SettingsSection
           leading: Icon(Icons.delete, color: Constants.dangerColor),
           onTap: () async {
             final repoName = repository.name;
-            final metaInfo = repository.metaInfo;
+            final location = repository.location;
             final settings = _cubits.repositories.settings;
             final deleteRepositoryCallback =
                 _cubits.repositories.deleteRepository;
@@ -125,7 +125,7 @@ class RepositorySection extends SettingsSection
             await deleteRepository(
               context,
               repositoryName: repoName,
-              repositoryMetaInfo: metaInfo,
+              repositoryLocation: location,
               settings: settings,
               delete: deleteRepositoryCallback,
             );

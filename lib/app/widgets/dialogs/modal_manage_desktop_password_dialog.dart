@@ -68,7 +68,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     super.initState();
   }
 
-  Future<bool> _userAuthentication(String databaseId, AuthMode authMode) async {
+  Future<bool> _userAuthentication(
+      DatabaseId databaseId, AuthMode authMode) async {
     String currentPassword = '';
 
     if (authMode != AuthMode.manual) {

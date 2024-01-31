@@ -3,19 +3,19 @@ import 'package:path/path.dart' as p;
 import 'dart:io' as io;
 
 // Information about a repository that we can deduce without opening it.
-class RepoMetaInfo extends Equatable {
+class RepoLocation extends Equatable {
   final String _dir;
   final String _name; // Repo name (without the '.db' extension)
 
-  RepoMetaInfo._(this._dir, this._name);
+  RepoLocation._(this._dir, this._name);
 
-  static RepoMetaInfo fromDbPath(String pathToDbFile) {
-    return RepoMetaInfo._(
+  static RepoLocation fromDbPath(String pathToDbFile) {
+    return RepoLocation._(
         p.dirname(pathToDbFile), p.basenameWithoutExtension(pathToDbFile));
   }
 
-  static RepoMetaInfo fromDirAndName(io.Directory dir, String repoName) {
-    return RepoMetaInfo._(dir.path, repoName);
+  static RepoLocation fromDirAndName(io.Directory dir, String repoName) {
+    return RepoLocation._(dir.path, repoName);
   }
 
   String path({ext = "db"}) {

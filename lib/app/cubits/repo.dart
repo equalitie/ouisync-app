@@ -91,7 +91,7 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
-  final SettingsRepoEntry _settingsRepoEntry;
+  final RepoSettings _settingsRepoEntry;
   final oui.Repository _handle;
   final Settings _settings;
   final NavigationCubit _navigation;
@@ -107,26 +107,15 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   static Future<RepoCubit> create({
-    required SettingsRepoEntry settingsRepoEntry,
+    required RepoSettings repoSettings,
     required oui.Repository handle,
     required Settings settings,
     required NavigationCubit navigation,
   }) async {
-    var name = settingsRepoEntry.name;
+    var name = repoSettings.name;
     final authMode = settings.getAuthenticationMode(name);
 
     var state = RepoState(authenticationMode: authMode);
-
-    // Migrate settings
-    final legacyDhtEnabled = settings.takeRepositoryBool(name, 'DHT_ENABLED');
-    if (legacyDhtEnabled != null) {
-      await handle.setDhtEnabled(legacyDhtEnabled);
-    }
-
-    final legacyPexEnabled = settings.takeRepositoryBool(name, 'PEX_ENABLED');
-    if (legacyPexEnabled != null) {
-      await handle.setPexEnabled(legacyPexEnabled);
-    }
 
     state = state.copyWith(
         infoHash: await handle.infoHash,
@@ -135,7 +124,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isPexEnabled: await handle.isPexEnabled);
 
     return RepoCubit._(
-      settingsRepoEntry,
+      repoSettings,
       handle,
       settings,
       navigation,
@@ -144,11 +133,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   oui.Repository get handle => _handle;
-  String get databaseId => _settingsRepoEntry.databaseId;
+  DatabaseId get databaseId => _settingsRepoEntry.databaseId;
   String get name => _settingsRepoEntry.name;
   String get currentFolder => _currentFolder.state.path;
-  RepoMetaInfo get metaInfo => _settingsRepoEntry.info;
-  SettingsRepoEntry get settingsRepoEntry => _settingsRepoEntry;
+  RepoLocation get location => _settingsRepoEntry.location;
+  RepoSettings get repoSettings => _settingsRepoEntry;
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(databaseId, currentFolder, isFolder);
@@ -387,12 +376,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<bool> setReadWritePassword(
-    RepoMetaInfo info,
+    RepoLocation location,
     String oldPassword,
     String newPassword,
     oui.ShareToken? shareToken,
   ) async {
-    final name = info.name;
+    final name = location.name;
 
     try {
       await _handle.setReadWriteAccess(
@@ -411,11 +400,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<bool> setReadPassword(
-    RepoMetaInfo info,
+    RepoLocation location,
     String newPassword,
     oui.ShareToken? shareToken,
   ) async {
-    final name = info.name;
+    final name = location.name;
 
     try {
       await _handle.setReadAccess(

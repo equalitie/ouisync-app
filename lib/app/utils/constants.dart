@@ -1,62 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 
-enum AuthMode {
-  manual,
-  version1,
-  version2,
-  noLocalPassword,
-}
-
-String authModeToString(AuthMode authMode) {
-  switch (authMode) {
-    case AuthMode.manual:
-      {
-        return "manual";
-      }
-    case AuthMode.version1:
-      {
-        return "version1";
-      }
-    case AuthMode.version2:
-      {
-        return "version2";
-      }
-    case AuthMode.noLocalPassword:
-      {
-        return "noLocalPassword";
-      }
-  }
-}
-
-AuthMode? authModeFromString(String authMode) {
-  switch (authMode) {
-    case "manual":
-      {
-        return AuthMode.manual;
-      }
-    case "version1":
-      {
-        return AuthMode.version1;
-      }
-    case "version2":
-      {
-        return AuthMode.version2;
-      }
-    case "noLocalPassword":
-      {
-        return AuthMode.noLocalPassword;
-      }
-    // Legacy, for backward compatibility.
-    case "no_local_password":
-      {
-        return AuthMode.noLocalPassword;
-      }
-  }
-  logError("Failed to convert string \"$authMode\" to enum");
-  return null;
-}
-
 enum PasswordAction { add, change, remove, biometrics }
 
 class Constants {
@@ -126,17 +70,6 @@ class Constants {
 
   static const String heroTagMainPageActions = 'MAIN_PAGE_ACTIONS';
   static const String heroTagRepoListActions = 'REPO_LIST_ACTIONS';
-
-  /// Authentication modes
-
-  //static const String authModeManual = 'manual';
-  //static const String authModeVersion1 =
-  //    'version1'; // Using built in biometric validation in biometrics_storage
-  //static const String authModeVersion2 =
-  //    'version2'; // Using local_auth for biometric validation
-  //static const String authModeNoLocalPassword = 'no_local_password';
-
-  static const String repoListEntryName = 'repo_list';
 
   static const IconData iconVisibilityOn = Icons.visibility;
   static const IconData iconVisibilityOff = Icons.visibility_off;

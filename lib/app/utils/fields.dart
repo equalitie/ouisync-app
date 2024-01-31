@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart' as b;
+import 'package:badges/badges.dart' as b;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -23,12 +24,12 @@ class Fields {
     return b.Badge(
         showBadge: show,
         ignorePointer: true,
-        badgeContent: SizedBox(width: 10, height: 10),
-        badgeColor: color,
-        position:
-            b.BadgePosition(bottom: 12 - moveDownwards, end: 10 - moveRight),
-        padding: const EdgeInsets.all(0.0),
-        shape: b.BadgeShape.circle,
+        badgeStyle: b.BadgeStyle(
+          badgeColor: color,
+          shape: b.BadgeShape.circle,
+        ),
+        position: b.BadgePosition.custom(
+            bottom: 12 - moveDownwards, end: 10 - moveRight),
         child: child);
   }
 

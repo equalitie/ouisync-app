@@ -67,26 +67,12 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
-  final settings = await Settings.init();
+  final settings = await loadAndMigrateSettings();
 
   var launchAtStartup = settings.getLaunchAtStartup();
-  if (launchAtStartup == null) {
-    launchAtStartup = true;
-    await settings.setLaunchAtStartup(launchAtStartup);
-  }
   await windowManager.launchAtStartup(launchAtStartup);
-
   var showOnboarding = settings.getShowOnboarding();
-  if (showOnboarding == null) {
-    showOnboarding = true;
-    await settings.setShowOnboarding(showOnboarding);
-  }
-
   var eqValuesAccepted = settings.getEqualitieValues();
-  if (eqValuesAccepted == null) {
-    eqValuesAccepted = false;
-    await settings.setEqualitieValues(eqValuesAccepted);
-  }
 
   /// We show the onboarding the first time the app starts.
   /// Then, we show the page for accepting eQ values, until the user taps YES.

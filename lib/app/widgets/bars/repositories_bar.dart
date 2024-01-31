@@ -120,22 +120,15 @@ class RepositoriesBar extends StatelessWidget
         [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
         () {
       final button = Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
-          onPressed: () => _cubits.repositories.pushRepoList(true),
+          onPressed: () => _cubits.repositories.showRepoList(),
           size: Dimensions.sizeIconSmall);
-
-      if (PlatformValues.isDesktopDevice) {
-        // At time of writing this function we also have the gear settings
-        // button on this page which shows the badge notification, so no need
-        // to show it again on the back button.
-        return button;
-      }
 
       Color? color = _cubits.mainNotificationBadgeColor();
 
       if (color != null) {
         // TODO: Why does the badge appear to move quickly after entering this screen?
         return Fields.addBadge(button,
-            color: color, moveDownwards: 3, moveRight: 3);
+            color: color, moveDownwards: 5, moveRight: 6);
       } else {
         return button;
       }

@@ -62,7 +62,7 @@ class RepoListState extends StatelessWidget
                       mainAction: () {},
                       verticalDotsAction: () async => deleteRepository(context,
                           repositoryName: repoEntry.name,
-                          repositoryMetaInfo: repoEntry.metaInfo!,
+                          repositoryLocation: repoEntry.location!,
                           settings: settings,
                           delete: reposCubit.deleteRepository));
                 }
@@ -79,9 +79,7 @@ class RepoListState extends StatelessWidget
                     itemData: repoItem,
                     mainAction: () async {
                       final repoName = repoEntry.name;
-
                       await reposCubit.setCurrentByName(repoName);
-                      reposCubit.pushRepoList(false);
                     },
                     verticalDotsAction: () async {
                       final cubit = repoEntry.maybeCubit;
