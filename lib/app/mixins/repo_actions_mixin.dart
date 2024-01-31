@@ -17,10 +17,12 @@ typedef CheckForBiometricsFunction = Future<bool?> Function();
 
 mixin RepositoryActionsMixin {
   /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(BuildContext context,
-      {required RepoCubit repository,
-      required Future<void> Function(String, String, Uint8List) rename,
-      void Function()? popDialog}) async {
+  Future<void> renameRepository(
+    BuildContext context, {
+    required RepoCubit repository,
+    required Future<void> Function(String, String, Uint8List) rename,
+    void Function()? popDialog,
+  }) async {
     final currentName = repository.name;
 
     final newName = await showDialog<String>(
@@ -34,7 +36,7 @@ mixin RepositoryActionsMixin {
       return;
     }
 
-    final reopenToken = await repository.handle.createReopenToken();
+    final reopenToken = await repository.createReopenToken();
 
     await Dialogs.executeFutureWithLoadingDialog(context,
         f: rename(currentName, newName, reopenToken));

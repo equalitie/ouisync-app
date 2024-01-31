@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/session.dart';
+import 'package:ouisync_app/app/background.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
 import 'env/env.dart';
 
-const syncInBackgroundPeriod = Duration(minutes: 1);
+/// How often the background syncing runs
+const _syncInBackgroundPeriod = Duration(minutes: 15);
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,7 @@ Future<void> main(List<String> args) async {
   if (Platform.isAndroid) {
     await AndroidAlarmManager.initialize();
     await AndroidAlarmManager.periodic(
-      syncInBackgroundPeriod,
+      _syncInBackgroundPeriod,
       0,
       syncInBackground,
       allowWhileIdle: true,

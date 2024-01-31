@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -90,12 +91,14 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
-  final oui.Repository _handle;
+  final oui.Session _session;
+  final oui.Repository _repo;
   final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
 
   RepoCubit._(
-    this._handle,
+    this._session,
+    this._repo,
     this._repoSettings,
     this._navigation,
     RepoState state,
@@ -105,7 +108,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   static Future<RepoCubit> create({
     required RepoSettings repoSettings,
-    required oui.Repository handle,
+    required oui.Session session,
+    required oui.Repository repo,
     required NavigationCubit navigation,
   }) async {
     var name = repoSettings.name;
@@ -113,25 +117,31 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     var state = RepoState(passwordMode: repoSettings.passwordMode());
 
     state = state.copyWith(
-        infoHash: await handle.infoHash,
-        accessMode: await handle.accessMode,
-        isDhtEnabled: await handle.isDhtEnabled,
-        isPexEnabled: await handle.isPexEnabled);
+        infoHash: await repo.infoHash,
+        accessMode: await repo.accessMode,
+        isDhtEnabled: await repo.isDhtEnabled,
+        isPexEnabled: await repo.isPexEnabled);
 
     return RepoCubit._(
-      handle,
+      session,
+      repo,
       repoSettings,
       navigation,
       state,
     );
   }
 
-  oui.Repository get handle => _handle;
   DatabaseId get databaseId => _repoSettings.databaseId;
   String get name => _repoSettings.name;
   String get currentFolder => _currentFolder.state.path;
   RepoLocation get location => _repoSettings.location;
   RepoSettings get repoSettings => _repoSettings;
+
+  Stream<void> get events => _repo.events;
+
+  void setCurrent() {
+    oui.NativeChannels.setRepository(_repo);
+  }
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(databaseId, currentFolder, isFolder);
@@ -142,7 +152,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return;
     }
 
-    await _handle.setDhtEnabled(value);
+    await _repo.setDhtEnabled(value);
 
     emit(state.copyWith(isDhtEnabled: value));
   }
@@ -152,13 +162,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return;
     }
 
-    await _handle.setPexEnabled(value);
+    await _repo.setPexEnabled(value);
 
     emit(state.copyWith(isPexEnabled: value));
   }
 
   Future<oui.Directory> openDirectory(String path) async {
-    return await oui.Directory.open(_handle, path);
+    return await oui.Directory.open(_repo, path);
   }
 
   void emitPasswordMode(PasswordMode value) {
@@ -184,15 +194,17 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     oui.AccessMode accessMode, {
     String? password,
   }) async {
-    return await _handle.createShareToken(
+    return await _repo.createShareToken(
       accessMode: accessMode,
       name: name,
       password: password,
     );
   }
 
+  Future<Uint8List> createReopenToken() => _repo.createReopenToken();
+
   String? mountedDirectory() {
-    final mountPoint = _handle.session.mountPoint;
+    final mountPoint = _session.mountPoint;
     if (mountPoint == null) {
       return null;
     }
@@ -200,16 +212,16 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<bool> exists(String path) async {
-    return await _handle.exists(path);
+    return await _repo.exists(path);
   }
 
-  Future<oui.EntryType?> type(String path) => _handle.type(path);
+  Future<oui.EntryType?> type(String path) => _repo.type(path);
 
-  Future<oui.Progress> get syncProgress => _handle.syncProgress;
+  Future<oui.Progress> get syncProgress => _repo.syncProgress;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  StateMonitor get stateMonitor => _handle.stateMonitor;
+  StateMonitor? get stateMonitor => _repo.stateMonitor;
 
   Future<void> navigateTo(String destination) async {
     emit(state.copyWith(isLoading: true));
@@ -224,7 +236,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.create(_handle, folderPath);
+      await oui.Directory.create(_repo, folderPath);
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
@@ -239,7 +251,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.remove(_handle, path, recursive: recursive);
+      await oui.Directory.remove(_repo, path, recursive: recursive);
       return true;
     } catch (e, st) {
       loggy.app('Directory $path deletion failed', e, st);
@@ -337,7 +349,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final content = <BaseItem>[];
 
     // If the directory does not exist, the following command will throw.
-    final directory = await oui.Directory.open(_handle, path);
+    final directory = await oui.Directory.open(_repo, path);
     final iterator = directory.iterator;
 
     try {
@@ -376,7 +388,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final name = location.name;
 
     try {
-      await _handle.setReadWriteAccess(
+      await _repo.setReadWriteAccess(
         oldPassword: oldPassword,
         newPassword: newPassword,
         shareToken: shareToken,
@@ -399,7 +411,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final name = location.name;
 
     try {
-      await _handle.setReadAccess(
+      await _repo.setReadAccess(
         newPassword: newPassword,
         shareToken: shareToken,
       );
@@ -467,7 +479,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return;
     }
 
-    final ouisyncFile = await oui.File.open(_handle, sourcePath);
+    final ouisyncFile = await oui.File.open(_repo, sourcePath);
     final length = await ouisyncFile.length;
 
     final newFile = io.File(destinationPath);
@@ -521,7 +533,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await _handle.move(source, destination);
+      await _repo.move(source, destination);
       return true;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
@@ -535,7 +547,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.File.remove(_handle, filePath);
+      await oui.File.remove(_repo, filePath);
       return true;
     } catch (e, st) {
       loggy.app('Delete file $filePath failed', e, st);
@@ -577,7 +589,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   StreamSubscription<void> autoRefresh() =>
-      _handle.events.listen((_) => refresh());
+      _repo.events.listen((_) => refresh());
 
   void showMessage(String message) {
     emit(state.copyWith(message: message));
@@ -587,7 +599,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     oui.File? newFile;
 
     try {
-      newFile = await oui.File.create(_handle, newFilePath);
+      newFile = await oui.File.create(_repo, newFilePath);
     } catch (e, st) {
       loggy.app('File creation $newFilePath failed', e, st);
     }
@@ -595,11 +607,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return newFile;
   }
 
-  Future<oui.File> openFile(String path) => oui.File.open(_handle, path);
+  Future<oui.File> openFile(String path) => oui.File.open(_repo, path);
 
   @override
   Future<void> close() async {
-    await _handle.close();
+    await _repo.close();
     await super.close();
   }
 }

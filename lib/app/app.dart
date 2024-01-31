@@ -30,6 +30,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   final session = await createSession(
     packageInfo: packageInfo,
     windowManager: windowManager,
+    logger: Loggy<AppLogger>('foreground'),
   );
 
   // TODO: Maybe we don't need to await for this, instead just get the future

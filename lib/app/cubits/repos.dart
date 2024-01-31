@@ -112,23 +112,23 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
   }
 
-  Future<void> setCurrent(RepoEntry? repo) async {
-    if (currentRepo == repo) {
+  Future<void> setCurrent(RepoEntry? entry) async {
+    if (currentRepo == entry) {
       return;
     }
 
-    oui.NativeChannels.setRepository(repo?.maybeCubit?.handle);
+    entry?.maybeCubit?.setCurrent();
 
     await _subscription?.cancel();
     _subscription = null;
 
-    if (repo is OpenRepoEntry) {
-      _subscription = repo.cubit.autoRefresh();
+    if (entry is OpenRepoEntry) {
+      _subscription = entry.cubit.autoRefresh();
     }
 
-    await _settings.setDefaultRepo(repo?.name);
+    await _settings.setDefaultRepo(entry?.name);
 
-    _currentRepo = repo;
+    _currentRepo = entry;
     changed();
   }
 
@@ -397,8 +397,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<RepoEntry> _open(RepoSettings repoSettings,
-      {String? password, Uint8List? reopenToken}) async {
+  Future<RepoEntry> _open(
+    RepoSettings repoSettings, {
+    String? password,
+    Uint8List? reopenToken,
+  }) async {
     final name = repoSettings.name;
     final store = repoSettings.location.path();
 
@@ -418,7 +421,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,
-        handle: repo,
+        session: _session,
+        repo: repo,
         navigation: _navigation,
       );
 
@@ -451,11 +455,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       // TODO: readPassword and writePassword may be different, they can also
       // be null (together or separately). Consult documentation to
       // `Repository.create` for details.
-      final repo = await oui.Repository.create(_session,
-          store: store,
-          readPassword: password,
-          writePassword: password,
-          shareToken: token);
+      final repo = await oui.Repository.create(
+        _session,
+        store: store,
+        readPassword: password,
+        writePassword: password,
+        shareToken: token,
+      );
 
       // Enable server storage.
       // TODO: This should be configurable by the user
@@ -485,7 +491,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings!,
-        handle: repo,
+        session: _session,
+        repo: repo,
         navigation: _navigation,
       );
 
