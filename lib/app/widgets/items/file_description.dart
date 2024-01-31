@@ -1,3 +1,4 @@
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,10 +22,10 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.autosizeText(fileData.name,
-              minFontSize: context.theme.appTextStyle.bodyMicro.fontSize,
-              maxFontSize: context.theme.appTextStyle.bodyMedium.fontSize,
-              maxLines: 1),
+          Fields.ellipsedText(
+            fileData.name,
+            ellipsisPosition: TextOverflowPosition.middle,
+          ),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),
         ],
