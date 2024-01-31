@@ -10,6 +10,7 @@ const String SETTINGS_VERSION_KEY = 'SETTINGS_VERSION';
 typedef DatabaseId = v1.DatabaseId;
 typedef RepoSettings = v1.RepoSettings;
 typedef Settings = v1.Settings;
+typedef AuthMode = v0.AuthMode;
 
 Future<Settings> loadAndMigrateSettings() async {
   final prefs = await SharedPreferences.getInstance();

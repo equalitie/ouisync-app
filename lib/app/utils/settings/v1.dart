@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/repo_location.dart';
 import '../utils.dart';
+import 'v0.dart' as v0;
+
+typedef AuthMode = v0.AuthMode;
 
 class DatabaseId {
   String _id;
@@ -27,13 +30,13 @@ class SettingsRepoEntry {
 
   Map toJson() {
     return {
-      'authMode': authModeToString(authenticationMode),
+      'authMode': v0.authModeToString(authenticationMode),
       'location': location.path(),
     };
   }
 
   factory SettingsRepoEntry.fromJson(dynamic data) {
-    return SettingsRepoEntry(authModeFromString(data['authMode']!)!,
+    return SettingsRepoEntry(v0.authModeFromString(data['authMode']!)!,
         RepoLocation.fromDbPath(data['location']!));
   }
 }

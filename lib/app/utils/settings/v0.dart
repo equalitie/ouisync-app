@@ -3,9 +3,66 @@ import 'dart:io' show Directory, Platform;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:loggy/loggy.dart';
 
 import '../../models/repo_location.dart';
 import '../utils.dart';
+
+enum AuthMode {
+  manual,
+  version1,
+  version2,
+  noLocalPassword,
+}
+
+String authModeToString(AuthMode authMode) {
+  switch (authMode) {
+    case AuthMode.manual:
+      {
+        return "manual";
+      }
+    case AuthMode.version1:
+      {
+        return "version1";
+      }
+    case AuthMode.version2:
+      {
+        return "version2";
+      }
+    case AuthMode.noLocalPassword:
+      {
+        return "noLocalPassword";
+      }
+  }
+}
+
+AuthMode? authModeFromString(String authMode) {
+  switch (authMode) {
+    case "manual":
+      {
+        return AuthMode.manual;
+      }
+    case "version1":
+      {
+        return AuthMode.version1;
+      }
+    case "version2":
+      {
+        return AuthMode.version2;
+      }
+    case "noLocalPassword":
+      {
+        return AuthMode.noLocalPassword;
+      }
+    // Legacy, for backward compatibility.
+    case "no_local_password":
+      {
+        return AuthMode.noLocalPassword;
+      }
+  }
+  logError("Failed to convert string \"$authMode\" to enum");
+  return null;
+}
 
 class SettingsRepoEntry {
   String databaseId;
