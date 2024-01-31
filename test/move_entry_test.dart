@@ -16,15 +16,15 @@ void main() {
 
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
-    final info = RepoMetaInfo.fromDbPath(p.join(dir.path, "store.db"));
+    final location = RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
     session = Session.create(configPath: dir.path);
 
     pluginRepo = await Repository.create(session,
-        store: info.path(), readPassword: null, writePassword: null);
+        store: location.path(), readPassword: null, writePassword: null);
 
     // final settings = await Settings.init();
     // final settingsRepoEntry =
-    //     SettingsRepoEntry(await pluginRepo.hexDatabaseId(), info);
+    //     SettingsRepoEntry(await pluginRepo.hexDatabaseId(), location);
 
     // repository = await RepoCubit.create(
     //     settingsRepoEntry: settingsRepoEntry,

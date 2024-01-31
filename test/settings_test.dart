@@ -1,7 +1,7 @@
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
-import 'package:ouisync_app/app/models/repo_meta_info.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,7 +22,7 @@ void main() {
     await s0.setLaunchAtStartup(true);
     await s0.setSyncOnMobileEnabled(true);
     await s0.setHighestSeenProtocolNumber(1);
-    await s0.addRepo(RepoMetaInfo.fromDbPath("/foo/bar.db"),
+    await s0.addRepo(RepoLocation.fromDbPath("/foo/bar.db"),
         databaseId: "123", authenticationMode: AuthMode.manual);
     await s0.setDefaultRepo("bar");
 
@@ -36,7 +36,7 @@ void main() {
 
     expect(s1.repos().length, 1);
 
-    s1.addRepo(RepoMetaInfo.fromDbPath("/foo/baz.db"),
+    s1.addRepo(RepoLocation.fromDbPath("/foo/baz.db"),
         databaseId: DatabaseId("234"), authenticationMode: AuthMode.manual);
 
     expect(s1.repos().length, 2);
