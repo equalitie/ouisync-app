@@ -9,9 +9,17 @@ import '../../../models/repo_location.dart';
 import '../../utils.dart';
 
 enum AuthMode {
+  // Manual means the user provides the password.
   manual,
+  // These two mean that we store the password, but:
+  // When getting the password from `biometric_storage` plugin, `version1` would
+  // do an implicit biometric validation inside the plugin. With `version2` we do
+  // the validation ourselves. When using the `flutter_secure_storage`, with both
+  // `version1` and `version2` we do the validation.
   version1,
   version2,
+  // No local password means that we store the password for the user and don't
+  // ask for biometrics.
   noLocalPassword,
 }
 
@@ -90,28 +98,6 @@ class Settings with AppLogger {
   static const String _repositoryPrefix = "REPOSITORIES";
   static const String _databaseId = "DATABASE_ID";
 
-  /// When securing the password using biometrics, we used the biometric_storage
-  /// plugin, and its built in biometrics authentication (by default:
-  /// authenticationRequired=true).
-  ///
-  /// Now we are still using the biometric_storage, but not its built in
-  /// biometrics authentication. The biometric authentication it's done using
-  /// the Dart package, local_auth.
-  ///
-  /// AUTH_MODE is null, if the repository was created before this update,
-  /// in which case the value is determined as follow:
-  ///
-  /// manual = Manual password input by the user.
-  ///
-  /// version1 = Password secured with biometrics, using built in validation
-  /// in biometrics_storage. (authenticationRequired=true)
-  ///
-  /// version2 = Password secured with biometrics, using biometrics_storage for
-  /// storage, and local_auth for biometric validation.
-  /// (authenticationRequired=false)
-  ///
-  /// no_local_password = Password saved to biometric_storage, no biometric
-  /// validation for retrieving. It's equivalent to automatic unlocking.
   static const String _authenticationMode = "AUTH_MODE";
 
   // List of all repositories this app is concerned about
