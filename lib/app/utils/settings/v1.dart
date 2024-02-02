@@ -20,14 +20,14 @@ class DatabaseId {
   String toString() => _id;
 }
 
-class SettingsRepoEntry {
+class _SettingsRepoEntry {
   AuthMode authenticationMode;
   RepoLocation location;
 
   String get name => location.name;
   Directory get dir => location.dir;
 
-  SettingsRepoEntry(this.authenticationMode, this.location);
+  _SettingsRepoEntry(this.authenticationMode, this.location);
 
   Map toJson() {
     return {
@@ -36,20 +36,19 @@ class SettingsRepoEntry {
     };
   }
 
-  factory SettingsRepoEntry.fromJson(dynamic data) {
-    return SettingsRepoEntry(v0.authModeFromString(data['authMode']!)!,
+  factory _SettingsRepoEntry.fromJson(dynamic data) {
+    return _SettingsRepoEntry(v0.authModeFromString(data['authMode']!)!,
         RepoLocation.fromDbPath(data['location']!));
   }
 }
 
 class RepoSettings {
   DatabaseId _databaseId;
-  SettingsRepoEntry _entry;
+  _SettingsRepoEntry _entry;
 
   RepoSettings(this._databaseId, this._entry);
 
   RepoLocation get location => _entry.location;
-  SettingsRepoEntry get entry => _entry;
   DatabaseId get databaseId => _databaseId;
   AuthMode get authenticationMode => _entry.authenticationMode;
   String get name => _entry.name;
@@ -67,7 +66,7 @@ class SettingsRoot {
   // TODO: In order to preserve plausible deniability, make sure that when a
   // current repo is locked, that this value is set to `null`.
   DatabaseId? currentRepo = null;
-  Map<DatabaseId, SettingsRepoEntry> repos = {};
+  Map<DatabaseId, _SettingsRepoEntry> repos = {};
 
   SettingsRoot._();
 
@@ -103,9 +102,9 @@ class SettingsRoot {
 
     final data = json.decode(s);
 
-    final repos = <DatabaseId, SettingsRepoEntry>{
+    final repos = <DatabaseId, _SettingsRepoEntry>{
       for (var kv in data['repos']!.entries)
-        DatabaseId(kv.key): SettingsRepoEntry.fromJson(kv.value)
+        DatabaseId(kv.key): _SettingsRepoEntry.fromJson(kv.value)
     };
 
     return SettingsRoot(
@@ -157,12 +156,12 @@ class Settings with AppLogger {
     final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
     final currentRepo = s0.getDefaultRepo();
 
-    final Map<DatabaseId, SettingsRepoEntry> repos = HashMap();
+    final Map<DatabaseId, _SettingsRepoEntry> repos = HashMap();
 
     for (final repo in s0.repos()) {
       final auth = s0.getAuthenticationMode(repo.name);
       final id = DatabaseId(repo.databaseId);
-      repos[id] = SettingsRepoEntry(auth, repo.info);
+      repos[id] = _SettingsRepoEntry(auth, repo.info);
     }
 
     final root = SettingsRoot(
@@ -306,8 +305,8 @@ class Settings with AppLogger {
       throw 'Failed to rename repo: "$newName" already exists';
     }
 
-    final oldInfo = repoSettings.entry.location;
-    repoSettings.entry.location =
+    final oldInfo = repoSettings._entry.location;
+    repoSettings._entry.location =
         RepoLocation.fromDirAndName(oldInfo.dir, newName);
     await _storeRoot();
   }
@@ -331,7 +330,7 @@ class Settings with AppLogger {
       return null;
     }
 
-    final entry = SettingsRepoEntry(authenticationMode, location);
+    final entry = _SettingsRepoEntry(authenticationMode, location);
     _root.repos[databaseId] = entry;
 
     await _storeRoot();
