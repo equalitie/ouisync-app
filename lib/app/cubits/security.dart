@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
-import '../storage/storage.dart';
 import '../utils/utils.dart';
+import '../utils/settings/v0/secure_storage.dart';
 import '../widgets/inputs/password_validation_input.dart';
 import 'cubits.dart';
 

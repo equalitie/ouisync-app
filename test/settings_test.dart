@@ -1,5 +1,5 @@
 import 'package:ouisync_app/app/utils/utils.dart';
-import 'package:ouisync_app/app/utils/settings/v0.dart' as v0;
+import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:flutter_test/flutter_test.dart';

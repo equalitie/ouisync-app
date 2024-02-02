@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../storage/storage.dart';
 import '../../utils/utils.dart';
+import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {

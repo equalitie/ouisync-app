@@ -10,9 +10,9 @@ import '../../../generated/l10n.dart';
 import '../../cubits/create_repo.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../storage/storage.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
+import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends HookWidget with AppLogger {

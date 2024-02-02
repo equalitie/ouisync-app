@@ -2,9 +2,8 @@ import 'dart:io' show Platform;
 
 import 'package:biometric_storage/biometric_storage.dart';
 import 'package:result_type/result_type.dart';
-
-import '../utils/utils.dart';
-import 'storage.dart';
+import './secure_storage.dart';
+import '../../utils.dart';
 
 BiometricStorage _chooseStorageByPlatform() {
   if (Platform.isAndroid ||

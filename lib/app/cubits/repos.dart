@@ -10,8 +10,8 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../storage/storage.dart';
 import '../utils/utils.dart';
+import '../utils/settings/v0/secure_storage.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {

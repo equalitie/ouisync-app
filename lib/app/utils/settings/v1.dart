@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/repo_location.dart';
 import '../utils.dart';
-import 'v0.dart' as v0;
+import 'v0/v0.dart' as v0;
 
 typedef AuthMode = v0.AuthMode;
 

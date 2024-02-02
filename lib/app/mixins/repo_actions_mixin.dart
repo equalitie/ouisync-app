@@ -8,9 +8,9 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
-import '../storage/storage.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../utils/settings/v0/secure_storage.dart';
 import '../widgets/widgets.dart';
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
