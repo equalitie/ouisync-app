@@ -148,12 +148,12 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
           RepoLocation repoLocation,
           String password,
           ShareToken? shareToken,
-          AuthMode authenticationMode,
+          PasswordMode passwordMode,
           bool setCurrent) async =>
       _reposCubit.createRepository(repoLocation,
           password: password,
           token: shareToken,
-          authenticationMode: authenticationMode,
+          passwordMode: passwordMode,
           setCurrent: setCurrent);
 
   void addPassword(bool add) => emit(state.copyWith(addPassword: add));

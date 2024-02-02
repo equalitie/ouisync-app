@@ -67,13 +67,10 @@ class LockedRepositoryState extends HookWidget
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
             onPressed: () async {
-              final authMode = settings.getAuthenticationMode(repositoryName);
-
               await unlockRepository(
                 parentContext,
                 databaseId: databaseId,
                 repositoryName: repositoryName,
-                authenticationMode: authMode,
                 settings: settings,
                 cubitUnlockRepository: unlockRepositoryCallback,
               );

@@ -8,7 +8,9 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/settings/v0/secure_storage.dart';
+import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../../utils/platform/platform.dart';
 import '../widgets.dart';
 
 class ManageDesktopPassword extends StatefulWidget {
@@ -62,32 +64,49 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
   @override
   void initState() {
-    _buildingFuture = _userAuthentication(
-        widget.repoCubit.databaseId, widget.repoCubit.state.authenticationMode);
+    _buildingFuture = _userAuthentication();
 
     super.initState();
   }
 
-  Future<bool> _userAuthentication(
-      DatabaseId databaseId, AuthMode authMode) async {
+  Future<bool> _userAuthentication() async {
+    final repoSettings = widget.repoCubit.repoSettings;
+    final passwordMode = repoSettings.passwordMode();
+
     String currentPassword = '';
 
-    if (authMode != AuthMode.manual) {
-      final securePassword = await SecureStorage(databaseId: databaseId)
-          .tryGetPassword(authMode: authMode);
+    if (passwordMode != PasswordMode.manual) {
+      var validated = true;
 
-      if (securePassword == null || securePassword.isEmpty) {
-        if (securePassword != null) {
-          final userAuthenticationFailed = authMode == AuthMode.noLocalPassword
-              ? S.current.messageRepoAuthFailed
-              : S.current.messageBioAuthFailed;
-          showSnackBar(context, message: userAuthenticationFailed);
+      if (PlatformValues.isMobileDevice && passwordMode == PasswordMode.bio) {
+        try {
+          validated = await SecurityValidations.validateBiometrics();
+        } on Exception catch (e, st) {
+          loggy.app('Biometric authentication (local_auth) failed', e, st);
+          validated = false;
         }
 
-        return false;
+        if (!validated) {
+          showSnackBar(context, message: S.current.messageBioAuthFailed);
+          return false;
+        }
       }
 
-      currentPassword = securePassword;
+      currentPassword = repoSettings.getPassword()!;
+
+      //final securePassword = await SecureStorage(databaseId: databaseId)
+      //    .tryGetPassword(authMode: authMode);
+
+      //if (securePassword == null || securePassword.isEmpty) {
+      //  if (securePassword != null) {
+      //    final userAuthenticationFailed = passwordMode == PasswordMode.none
+      //        ? S.current.messageRepoAuthFailed
+      //        : S.current.messageBioAuthFailed;
+      //    showSnackBar(context, message: userAuthenticationFailed);
+      //  }
+
+      //  return false;
+      //}
     }
 
     _initStateValues(currentPassword);

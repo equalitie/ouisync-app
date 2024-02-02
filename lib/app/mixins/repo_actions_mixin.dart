@@ -78,19 +78,20 @@ mixin RepositoryActionsMixin {
       required void Function() popDialog}) async {
     String? password;
     ShareToken? shareToken;
+    final repoSettings = repository.repoSettings;
+    final passwordMode = repoSettings.passwordMode();
 
-    AuthMode authenticationMode = repository.state.authenticationMode;
     final isBiometricsAvailable =
         await SecurityValidations.canCheckBiometrics();
 
     if (PlatformValues.isMobileDevice &&
-        authenticationMode == AuthMode.noLocalPassword &&
+        passwordMode == PasswordMode.none &&
         isBiometricsAvailable) {
       final authorized = await biometricValidation();
       if (authorized == false) return;
     }
 
-    if (authenticationMode == AuthMode.manual) {
+    if (passwordMode == PasswordMode.manual) {
       final unlockResult = await manualUnlock(context, repository);
 
       if (unlockResult == null) return;
@@ -99,8 +100,9 @@ mixin RepositoryActionsMixin {
       shareToken = unlockResult.shareToken;
     } else {
       final databaseId = repository.databaseId;
-      final securePassword = await SecureStorage(databaseId: databaseId)
-          .tryGetPassword(authMode: authenticationMode);
+      final securePassword = repoSettings.getPassword();
+      //final securePassword = await SecureStorage(databaseId: databaseId)
+      //    .tryGetPassword(authMode: authenticationMode);
 
       if (securePassword == null || securePassword.isEmpty) return;
 
@@ -127,8 +129,7 @@ mixin RepositoryActionsMixin {
               repo: repository,
               password: password!,
               shareToken: shareToken!,
-              isBiometricsAvailable: isBiometricsAvailable,
-              authenticationMode: authenticationMode),
+              isBiometricsAvailable: isBiometricsAvailable),
         ));
   }
 
@@ -186,7 +187,7 @@ mixin RepositoryActionsMixin {
       {required String repositoryName,
       required RepoLocation repositoryLocation,
       required Settings settings,
-      required Future<void> Function(RepoLocation, AuthMode) delete,
+      required Future<void> Function(RepoLocation) delete,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -221,10 +222,8 @@ mixin RepositoryActionsMixin {
     );
 
     if (deleteRepo ?? false) {
-      final authMode = settings.getAuthenticationMode(repositoryName);
-
       await Dialogs.executeFutureWithLoadingDialog(context,
-          f: delete(repositoryLocation, authMode));
+          f: delete(repositoryLocation));
 
       if (popDialog != null) {
         popDialog();
@@ -237,12 +236,14 @@ mixin RepositoryActionsMixin {
   Future<void> unlockRepository(BuildContext context,
       {required DatabaseId databaseId,
       required String repositoryName,
-      required AuthMode authenticationMode,
       required Settings settings,
       required Future<AccessMode?> Function(String repositoryName,
               {required String password})
           cubitUnlockRepository}) async {
-    if (authenticationMode == AuthMode.manual) {
+    final repoSettings = settings.repoSettingsById(databaseId)!;
+    final passwordMode = repoSettings.passwordMode();
+
+    if (passwordMode == PasswordMode.manual) {
       final isBiometricsAvailable =
           await SecurityValidations.canCheckBiometrics();
 
@@ -260,11 +261,12 @@ mixin RepositoryActionsMixin {
       return;
     }
 
-    final securePassword = await SecureStorage(databaseId: databaseId)
-        .tryGetPassword(authMode: authenticationMode);
+    //final securePassword = await SecureStorage(databaseId: databaseId)
+    //    .tryGetPassword(authMode: authenticationMode);
+    final securePassword = settings.repoSettingsById(databaseId)!.getPassword();
 
     if (securePassword == null || securePassword.isEmpty) {
-      final message = authenticationMode == AuthMode.noLocalPassword
+      final message = PasswordMode == PasswordMode.none
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
       showSnackBar(context, message: message);

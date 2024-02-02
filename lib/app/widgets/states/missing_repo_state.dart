@@ -26,7 +26,7 @@ class MissingRepositoryState extends HookWidget
 
   final Settings settings;
   final void Function()? onReloadRepository;
-  final Future<void> Function(RepoLocation, AuthMode) onDelete;
+  final Future<void> Function(RepoLocation) onDelete;
 
   @override
   Widget build(BuildContext context) {

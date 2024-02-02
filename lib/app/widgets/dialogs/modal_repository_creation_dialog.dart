@@ -84,9 +84,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             }
 
             final repoName = state.repoLocation!.name;
-            final authMode = cubit.settings.getAuthenticationMode(repoName);
-
-            await cubit.deleteRepository(state.repoLocation!, authMode);
+            await cubit.deleteRepository(state.repoLocation!);
           },
           child: Form(
             key: _formKey,
@@ -679,15 +677,15 @@ class RepositoryCreation extends HookWidget with AppLogger {
     final authenticationRequired =
         state.secureWithBiometrics ? true : state.addPassword;
 
-    final authenticationMode = savePasswordToSecureStorage
+    final passwordMode = savePasswordToSecureStorage
         ? authenticationRequired
-            ? AuthMode.version2
-            : AuthMode.noLocalPassword
-        : AuthMode.manual;
+            ? PasswordMode.bio
+            : PasswordMode.none
+        : PasswordMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: createRepoCubit.createRepository(repoLocation, password,
-            state.shareToken, authenticationMode, true));
+        f: createRepoCubit.createRepository(
+            repoLocation, password, state.shareToken, passwordMode, true));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";

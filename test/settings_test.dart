@@ -13,6 +13,9 @@ void main() {
 
   test('Settings migration', () async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
+
+    final masterKey = await MasterKey.init();
     final prefs = await SharedPreferences.getInstance();
 
     expect(prefs.getKeys().isEmpty, true);
@@ -28,7 +31,7 @@ void main() {
         databaseId: "123", authenticationMode: AuthMode.manual);
     await s0.setDefaultRepo("bar");
 
-    final s1 = await loadAndMigrateSettings();
+    final s1 = await loadAndMigrateSettings(masterKey);
 
     await prefs.reload();
 
@@ -38,8 +41,8 @@ void main() {
 
     expect(s1.repos().length, 1);
 
-    s1.addRepo(RepoLocation.fromDbPath("/foo/baz.db"),
-        databaseId: DatabaseId("234"), authenticationMode: AuthMode.manual);
+    s1.addRepoWithUserProvidedPassword(RepoLocation.fromDbPath("/foo/baz.db"),
+        databaseId: DatabaseId("234"));
 
     expect(s1.repos().length, 2);
   });

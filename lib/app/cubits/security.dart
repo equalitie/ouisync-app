@@ -4,55 +4,49 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
+import '../models/models.dart';
 import '../utils/settings/v0/secure_storage.dart';
 import '../widgets/inputs/password_validation_input.dart';
 import 'cubits.dart';
 
 class SecurityState extends Equatable {
   final bool isBiometricsAvailable;
-  final AuthMode authMode;
+  final PasswordMode passwordMode;
   final String password;
   final bool previewPassword;
   final String message;
 
-  PasswordMode get passwordMode => authMode == AuthMode.manual
-      ? PasswordMode.manual
-      : authMode == AuthMode.noLocalPassword
-          ? PasswordMode.none
-          : PasswordMode.bio;
-
-  String get passwordModeTitle => authMode == AuthMode.manual
+  String get passwordModeTitle => passwordMode == PasswordMode.manual
       ? S.current.messageUpdateLocalPassword
       : S.current.messageAddLocalPassword;
 
   SecurityState(
-      {required this.authMode,
+      {required this.passwordMode,
       required this.isBiometricsAvailable,
       required this.password,
       this.previewPassword = false,
       this.message = ''});
 
-  bool get unlockWithBiometrics =>
-      [AuthMode.version1, AuthMode.version2].contains(authMode);
+  bool get unlockWithBiometrics => passwordMode == PasswordMode.bio;
 
   SecurityState copyWith(
           {bool? isBiometricsAvailable,
           bool? unlockWithBiometrics,
-          AuthMode? authMode,
+          PasswordMode? passwordMode,
           String? password,
           bool? previewPassword,
           String? message}) =>
       SecurityState(
           isBiometricsAvailable:
               isBiometricsAvailable ?? this.isBiometricsAvailable,
-          authMode: authMode ?? this.authMode,
+          passwordMode: passwordMode ?? this.passwordMode,
           password: password ?? this.password,
           previewPassword: previewPassword ?? this.previewPassword,
           message: message ?? this.message);
 
   @override
   List<Object?> get props =>
-      [isBiometricsAvailable, authMode, password, previewPassword, message];
+      [isBiometricsAvailable, passwordMode, password, previewPassword, message];
 }
 
 class SecurityCubit extends Cubit<SecurityState> with AppLogger {
@@ -62,80 +56,84 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   final RepoCubit _repoCubit;
   ShareToken? _shareToken;
 
+  RepoSettings get repoSettings => _repoCubit.repoSettings;
+
   void setShareToken(ShareToken shareToken) => _shareToken = shareToken;
 
   static SecurityCubit create(
       {required RepoCubit repoCubit,
       required ShareToken? shareToken,
       required bool isBiometricsAvailable,
-      required AuthMode authenticationMode,
       required String password}) {
     var initialState = SecurityState(
         isBiometricsAvailable: isBiometricsAvailable,
-        authMode: authenticationMode,
+        passwordMode: repoCubit.repoSettings.passwordMode(),
         password: password);
 
     return SecurityCubit._(repoCubit, shareToken, initialState);
   }
 
+  // Returns error message on error.
   Future<String?> addLocalPassword(String newPassword) async {
-    final deleted = await _removePasswordFromSecureStorage();
-    if (deleted == false) {
-      setAuthMode(AuthMode.noLocalPassword);
+    // TODO: If any of the async functions here fail, the user may lose their data.
 
+    try {
+      await repoSettings.setAuthModePasswordProvidedByUser();
+    } catch (e) {
       return S.current.messageErrorRemovingSecureStorage;
     }
 
     final changed = await _changeRepositoryPassword(newPassword);
+
     if (changed == false) {
       return S.current.messageErrorAddingLocalPassword;
     }
 
-    setPassword(newPassword);
-    setAuthMode(AuthMode.manual);
+    emitPassword(newPassword);
+    emitPasswordMode(PasswordMode.manual);
 
     return null;
   }
 
+  // Returns error message on error.
   Future<String?> updateLocalPassword(String newPassword) async {
     final changed = await _changeRepositoryPassword(newPassword);
     if (changed == false) {
       return S.current.messageErrorAddingLocalPassword;
     }
 
-    setPassword(newPassword);
+    emitPassword(newPassword);
+
     return null;
   }
 
   Future<String?> removeLocalPassword() async {
+    // TODO: If any of the async functions here fail, the user may lose their data.
     final newPassword = generateRandomPassword();
-    final passwordChanged = await _changeRepositoryPassword(newPassword);
 
+    final passwordChanged = await _changeRepositoryPassword(newPassword);
     if (passwordChanged == false) {
       return S.current.messageErrorAddingSecureStorge;
     }
 
-    setPassword(newPassword);
-
-    final databaseId = _repoCubit.databaseId;
-    final updatedPassword = await SecureStorage(databaseId: databaseId)
-        .saveOrUpdatePassword(value: newPassword);
-
-    if (updatedPassword == null || updatedPassword.isEmpty) {
+    try {
+      await repoSettings.setAuthModePasswordStoredOnDevice(newPassword, false);
+    } catch (e) {
       return S.current.messageErrorRemovingPassword;
     }
 
-    setAuthMode(AuthMode.noLocalPassword);
+    emitPassword(newPassword);
+    emitPasswordMode(PasswordMode.none);
 
     return null;
   }
 
   Future<String?> updateUnlockRepoWithBiometrics(
       bool unlockWithBiometrics) async {
+    // TODO: If any of the async functions here fail, the user may lose their data.
     if (unlockWithBiometrics == false) {
-      setUnlockWithBiometrics(false);
-      setAuthMode(AuthMode.noLocalPassword);
-
+      emitUnlockWithBiometrics(false);
+      emitPasswordMode(PasswordMode.none);
       return null;
     }
 
@@ -146,46 +144,18 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
       return S.current.messageErrorAddingSecureStorge;
     }
 
-    setPassword(newPassword);
-
-    final updated = await _updatePasswordInSecureStorage(newPassword);
-    if (updated == false) {
-      setUnlockWithBiometrics(false);
-      setPassword(newPassword);
-      setAuthMode(AuthMode.manual);
-
-      //TODO: Check this is correct
-
+    try {
+      repoSettings.setAuthModePasswordStoredOnDevice(
+          newPassword, unlockWithBiometrics);
+    } catch (e) {
       return S.current.messageErrorUpdatingSecureStorage;
     }
 
-    setUnlockWithBiometrics(true);
-    setAuthMode(AuthMode.version2);
+    emitPassword(newPassword);
+    emitUnlockWithBiometrics(unlockWithBiometrics);
+    emitPasswordMode(PasswordMode.bio);
 
     return null;
-  }
-
-  Future<bool> _updatePasswordInSecureStorage(String newPassword) async {
-    final databaseId = _repoCubit.databaseId;
-    final updatedPassword = await SecureStorage(databaseId: databaseId)
-        .saveOrUpdatePassword(value: state.password);
-
-    if (updatedPassword == null || updatedPassword.isEmpty) return false;
-
-    emit(state.copyWith(password: newPassword));
-
-    return true;
-  }
-
-  Future<bool> _removePasswordFromSecureStorage() async {
-    final databaseId = _repoCubit.databaseId;
-    final passwordDeleted =
-        await SecureStorage(databaseId: databaseId).deletePassword();
-
-    if (!passwordDeleted) return false;
-
-    emit(state.copyWith(unlockWithBiometrics: false, previewPassword: false));
-    return true;
   }
 
   Future<bool> _changeRepositoryPassword(String newPassword) async {
@@ -208,18 +178,12 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     }
   }
 
-  void setUnlockWithBiometrics(bool value) =>
+  void emitUnlockWithBiometrics(bool value) =>
       emit(state.copyWith(unlockWithBiometrics: value));
 
-  void setPassword(String password) => emit(state.copyWith(password: password));
+  void emitPassword(String password) =>
+      emit(state.copyWith(password: password));
 
-  void setAuthMode(AuthMode authMode) {
-    if (state.authMode == authMode) {
-      return;
-    }
-
-    _repoCubit.setAuthenticationMode(authMode);
-
-    emit(state.copyWith(authMode: authMode));
-  }
+  void emitPasswordMode(PasswordMode passwordMode) =>
+      _repoCubit.emitPasswordMode(passwordMode);
 }

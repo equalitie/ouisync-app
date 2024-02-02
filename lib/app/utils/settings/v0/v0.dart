@@ -7,6 +7,7 @@ import 'package:loggy/loggy.dart';
 
 import '../../../models/repo_location.dart';
 import '../../utils.dart';
+export 'secure_storage.dart';
 
 enum AuthMode {
   // Manual means the user provides the password.

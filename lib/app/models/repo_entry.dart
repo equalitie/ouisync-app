@@ -3,13 +3,14 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
+import '../models/models.dart';
 import 'repo_location.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
   RepoLocation? get location;
   String get name => location?.name ?? '';
-  AuthMode? get authenticationMode;
+  PasswordMode? get passwordMode;
   RepoCubit? get maybeCubit => null;
 
   String? get infoHash => maybeCubit?.state.infoHash;
@@ -33,7 +34,7 @@ class LoadingRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  AuthMode? get authenticationMode => null;
+  PasswordMode? get passwordMode => null;
 
   @override
   RepoCubit? get maybeCubit => null;
@@ -60,7 +61,7 @@ class OpenRepoEntry extends RepoEntry {
   RepoLocation get location => _cubit.location;
 
   @override
-  AuthMode? get authenticationMode => _cubit.state.authenticationMode;
+  PasswordMode? get passwordMode => _cubit.state.passwordMode;
 
   RepoSettings get repoSettings => _cubit.repoSettings;
 }
@@ -80,7 +81,7 @@ class MissingRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  AuthMode? get authenticationMode => null;
+  PasswordMode? get passwordMode => null;
 
   @override
   RepoLocation get location => _location;
@@ -101,7 +102,7 @@ class ErrorRepoEntry extends RepoEntry {
   Future<void> close() async {}
 
   @override
-  AuthMode? get authenticationMode => null;
+  PasswordMode? get passwordMode => null;
 
   @override
   RepoLocation get location => _location;
