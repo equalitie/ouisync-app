@@ -37,6 +37,7 @@ dependencies:
   desktop_drop: ^0.4.1
   device_info_plus: ^9.0.3
   dns_client: ^0.2.1
+  encrypt: ^5.0.3
   envied: ^0.5.3
   equatable: ^2.0.3
   ffi: ^2.0.1
@@ -79,6 +80,7 @@ dependencies:
   mime: ^1.0.4
   mobile_scanner: ^4.0.0
   move_to_background: ^1.0.2
+  mutex: ^3.1.0
   network_info_plus: ^4.0.2
   ouisync_plugin:
     path: ouisync/bindings/dart
