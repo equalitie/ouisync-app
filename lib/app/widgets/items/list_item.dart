@@ -6,7 +6,7 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class ListItem extends StatelessWidget with AppLogger, RepositoryActionsMixin {
+class ListItem extends StatelessWidget with AppLogger {
   const ListItem({
     super.key,
     required this.reposCubit,

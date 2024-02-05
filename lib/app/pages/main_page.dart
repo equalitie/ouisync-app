@@ -64,7 +64,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage>
-    with TickerProviderStateMixin, AppLogger, RepositoryActionsMixin {
+    with TickerProviderStateMixin, AppLogger {
   final Cubits _cubits;
 
   String _pathEntryToMove = '';

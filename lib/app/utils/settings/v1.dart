@@ -101,8 +101,6 @@ class _SettingsRepoEntry {
   }
 
   factory _SettingsRepoEntry.fromJson(dynamic data) {
-    print(">>>>>>>>>>>> ${data['authMode']}");
-    print(">>>>>>>>>>>> ${data['location']}");
     return _SettingsRepoEntry(NewAuthMode._fromJson(data['authMode']!)!,
         RepoLocation.fromDbPath(data['location']!));
   }

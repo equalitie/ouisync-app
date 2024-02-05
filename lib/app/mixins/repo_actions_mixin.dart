@@ -99,10 +99,7 @@ mixin RepositoryActionsMixin {
       password = unlockResult.password;
       shareToken = unlockResult.shareToken;
     } else {
-      final databaseId = repository.databaseId;
       final securePassword = repoSettings.getPassword();
-      //final securePassword = await SecureStorage(databaseId: databaseId)
-      //    .tryGetPassword(authMode: authenticationMode);
 
       if (securePassword == null || securePassword.isEmpty) return;
 

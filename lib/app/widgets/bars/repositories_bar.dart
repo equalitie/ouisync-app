@@ -8,7 +8,7 @@ import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 
 class RepositoriesBar extends StatelessWidget
-    with RepositoryActionsMixin, AppLogger
+    with AppLogger
     implements PreferredSizeWidget {
   const RepositoriesBar(this._cubits);
 
