@@ -23,8 +23,7 @@ class RepoState extends Equatable {
   final bool isDhtEnabled;
   final bool isPexEnabled;
   final bool requestPassword;
-  final AuthMode
-      authenticationMode; // manual, version1 (built in biometrics validation on package biometrics_storage), version2 (local_atuh for biometric validation), no local password
+  final PasswordMode passwordMode;
   final oui.AccessMode accessMode;
   final String infoHash;
   final FolderState currentFolder;
@@ -37,7 +36,7 @@ class RepoState extends Equatable {
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
     this.requestPassword = false,
-    required this.authenticationMode,
+    required this.passwordMode,
     this.infoHash = "",
     this.accessMode = oui.AccessMode.blind,
     this.currentFolder = const FolderState(),
@@ -51,7 +50,7 @@ class RepoState extends Equatable {
     bool? isDhtEnabled,
     bool? isPexEnabled,
     bool? requestPassword,
-    AuthMode? authenticationMode,
+    PasswordMode? passwordMode,
     oui.AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
@@ -64,7 +63,7 @@ class RepoState extends Equatable {
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
         requestPassword: requestPassword ?? this.requestPassword,
-        authenticationMode: authenticationMode ?? this.authenticationMode,
+        passwordMode: passwordMode ?? this.passwordMode,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
         currentFolder: currentFolder ?? this.currentFolder,
@@ -79,7 +78,7 @@ class RepoState extends Equatable {
         isDhtEnabled,
         isPexEnabled,
         requestPassword,
-        authenticationMode,
+        passwordMode,
         accessMode,
         infoHash,
         currentFolder,
@@ -91,15 +90,13 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
-  final RepoSettings _settingsRepoEntry;
   final oui.Repository _handle;
-  final Settings _settings;
+  final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
 
   RepoCubit._(
-    this._settingsRepoEntry,
     this._handle,
-    this._settings,
+    this._repoSettings,
     this._navigation,
     RepoState state,
   ) : super(state) {
@@ -109,13 +106,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   static Future<RepoCubit> create({
     required RepoSettings repoSettings,
     required oui.Repository handle,
-    required Settings settings,
     required NavigationCubit navigation,
   }) async {
     var name = repoSettings.name;
-    final authMode = settings.getAuthenticationMode(name);
 
-    var state = RepoState(authenticationMode: authMode);
+    var state = RepoState(passwordMode: repoSettings.passwordMode());
 
     state = state.copyWith(
         infoHash: await handle.infoHash,
@@ -124,20 +119,19 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isPexEnabled: await handle.isPexEnabled);
 
     return RepoCubit._(
-      repoSettings,
       handle,
-      settings,
+      repoSettings,
       navigation,
       state,
     );
   }
 
   oui.Repository get handle => _handle;
-  DatabaseId get databaseId => _settingsRepoEntry.databaseId;
-  String get name => _settingsRepoEntry.name;
+  DatabaseId get databaseId => _repoSettings.databaseId;
+  String get name => _repoSettings.name;
   String get currentFolder => _currentFolder.state.path;
-  RepoLocation get location => _settingsRepoEntry.location;
-  RepoSettings get repoSettings => _settingsRepoEntry;
+  RepoLocation get location => _repoSettings.location;
+  RepoSettings get repoSettings => _repoSettings;
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(databaseId, currentFolder, isFolder);
@@ -167,14 +161,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return await oui.Directory.open(_handle, path);
   }
 
-  Future<void> setAuthenticationMode(AuthMode value) async {
-    if (state.authenticationMode == value) {
+  void emitPasswordMode(PasswordMode value) {
+    if (state.passwordMode == value) {
       return;
     }
 
-    await _settings.setAuthenticationMode(name, value);
-
-    emit(state.copyWith(authenticationMode: value));
+    emit(state.copyWith(passwordMode: value));
   }
 
   // This operator is required for the DropdownMenuButton to show entries properly.

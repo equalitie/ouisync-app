@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
-import '../../storage/storage.dart';
 import '../../utils/utils.dart';
+import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
@@ -129,15 +129,30 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     // Only if the password successfuly unlocked the repo, then we add it
     // to the secure storage -if the user selected the option.
+    // TODO: Why are we storing the password from inside this UnlockRepository
+    // dialog? And why are we doing it only when `_useBiometrics.value` is
+    // true?
     if (_useBiometrics.value) {
-      final savedPassword =
-          await Dialogs.executeFutureWithLoadingDialog<String?>(parentContext,
-              f: SecureStorage(databaseId: databaseId)
-                  .saveOrUpdatePassword(value: password));
+      var exception = null;
 
-      if (savedPassword == null || savedPassword.isEmpty) return;
+      await Dialogs.executeFutureWithLoadingDialog<Null>(parentContext,
+          f: () async {
+        try {
+          await settings
+              .repoSettingsById(databaseId)!
+              .setAuthModePasswordStoredOnDevice(
+                  password, _useBiometrics.value);
+        } catch (e) {
+          exception = e;
+        }
+      }());
 
-      await settings.setAuthenticationMode(repositoryName, AuthMode.version2);
+      // TODO: The user should learn about the failure.
+      if (exception != null) {
+        loggy
+            .error("Failed to store password for repo $databaseId: $exception");
+        return;
+      }
     }
 
     final message = _useBiometrics.value

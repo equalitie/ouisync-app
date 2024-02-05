@@ -9,6 +9,7 @@ import '../cubits/repo.dart';
 import '../cubits/security.dart';
 import '../mixins/repo_actions_mixin.dart';
 import '../utils/utils.dart';
+import '../models/models.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
@@ -16,14 +17,12 @@ class RepositorySecurity extends StatefulWidget {
       {required this.repo,
       required this.password,
       required this.shareToken,
-      required this.isBiometricsAvailable,
-      required this.authenticationMode});
+      required this.isBiometricsAvailable});
 
   final RepoCubit repo;
   final String password;
   final ShareToken shareToken;
   final bool isBiometricsAvailable;
-  final AuthMode authenticationMode;
 
   @override
   State<RepositorySecurity> createState() => _RepositorySecurityState();
@@ -49,7 +48,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         repoCubit: widget.repo,
         shareToken: widget.shareToken,
         isBiometricsAvailable: widget.isBiometricsAvailable,
-        authenticationMode: widget.authenticationMode,
         password: widget.password);
 
     super.initState();
@@ -194,7 +192,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                             : S.current.messageRemoveBiometricsConfirmation;
 
                         if (useBiometrics &&
-                            state.authMode == AuthMode.manual) {
+                            state.passwordMode == PasswordMode.manual) {
                           confirmationMessage +=
                               '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
                         }

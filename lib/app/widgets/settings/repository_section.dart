@@ -8,7 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/repo_entry.dart';
-import '../../storage/secure_storage.dart';
+import '../../utils/settings/v0/secure_storage.dart';
 import '../../utils/utils.dart';
 import '../../widgets/widgets.dart';
 import 'repository_selector.dart';

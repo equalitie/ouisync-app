@@ -1,9 +1,11 @@
 import 'package:ouisync_app/app/utils/utils.dart';
-import 'package:ouisync_app/app/utils/settings/v0.dart' as v0;
+import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
+import 'package:ouisync_app/app/master_key.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
@@ -11,6 +13,9 @@ void main() {
 
   test('Settings migration', () async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
+
+    final masterKey = await MasterKey.init();
     final prefs = await SharedPreferences.getInstance();
 
     expect(prefs.getKeys().isEmpty, true);
@@ -26,7 +31,7 @@ void main() {
         databaseId: "123", authenticationMode: AuthMode.manual);
     await s0.setDefaultRepo("bar");
 
-    final s1 = await loadAndMigrateSettings();
+    final s1 = await loadAndMigrateSettings(masterKey);
 
     await prefs.reload();
 
@@ -36,9 +41,20 @@ void main() {
 
     expect(s1.repos().length, 1);
 
-    s1.addRepo(RepoLocation.fromDbPath("/foo/baz.db"),
-        databaseId: DatabaseId("234"), authenticationMode: AuthMode.manual);
+    s1.addRepoWithUserProvidedPassword(RepoLocation.fromDbPath("/foo/baz.db"),
+        databaseId: DatabaseId("234"));
 
     expect(s1.repos().length, 2);
+  });
+
+  test('master key', () async {
+    FlutterSecureStorage.setMockInitialValues({});
+
+    final key = await MasterKey.init();
+
+    final encrypted = key.encrypt("foobar");
+    final decrypted = key.decrypt(encrypted);
+
+    expect(decrypted, "foobar");
   });
 }

@@ -10,8 +10,8 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../storage/storage.dart';
 import '../utils/utils.dart';
+import '../utils/settings/v0/secure_storage.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
@@ -210,42 +210,36 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<void> _openRepository(RepoSettings repoSettings,
       {bool setCurrent = false}) async {
-    final password =
-        await _tryGetSecurePassword(repoSettings.name, repoSettings.databaseId);
+    var password = null;
+
+    if (repoSettings.hasPassword() &&
+        !repoSettings.shouldCheckBiometricsBeforeUnlock()) {
+      password = repoSettings.getPassword();
+
+      if (password == null) {
+        loggy
+            .app('Failed to load password for ${repoSettings.location.path()}');
+      }
+    }
 
     final repo = await _open(repoSettings, password: password);
-    if (repo is! OpenRepoEntry) {
+
+    if (password != null && repo is! OpenRepoEntry) {
       loggy.app('Failed to open repository ${repoSettings.location.path()}');
     }
 
     await _put(repo, setCurrent: setCurrent);
   }
 
-  Future<String?> _tryGetSecurePassword(
-      String repoName, DatabaseId databaseId) async {
-    final authenticationMode = settings.getAuthenticationMode(repoName);
-
-    if (authenticationMode == AuthMode.noLocalPassword) {
-      final securePassword = await SecureStorage(databaseId: databaseId)
-          .tryGetPassword(authMode: authenticationMode);
-
-      return securePassword;
-    }
-
-    return null;
-  }
-
   Future<RepoEntry> createRepository(RepoLocation location,
       {required String password,
       oui.ShareToken? token,
-      required AuthMode authenticationMode,
+      required PasswordMode passwordMode,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
 
     final repo = await _create(location,
-        password: password,
-        token: token,
-        authenticationMode: authenticationMode);
+        password: password, token: token, passwordMode: passwordMode);
 
     if (repo is! OpenRepoEntry) {
       loggy.app('Failed to create repository ${location.name}');
@@ -364,8 +358,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<void> deleteRepository(
-      RepoLocation location, AuthMode authMode) async {
+  Future<void> deleteRepository(RepoLocation location) async {
     final repoName = location.name;
     final wasCurrent = currentRepoName == repoName;
     final databaseId = _settings.repoSettingsByName(repoName)!.databaseId;
@@ -423,7 +416,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,
         handle: repo,
-        settings: _settings,
         navigation: _navigation,
       );
 
@@ -442,7 +434,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoLocation location, {
     required String password,
     oui.ShareToken? token,
-    required AuthMode authenticationMode,
+    required PasswordMode passwordMode,
   }) async {
     final name = location.name;
     final store = location.path();
@@ -475,16 +467,22 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       await repo.setDhtEnabled(true);
       await repo.setPexEnabled(true);
 
-      final repoSettings = await _settings.addRepo(
-        location,
-        databaseId: DatabaseId(await repo.hexDatabaseId()),
-        authenticationMode: authenticationMode,
-      );
+      var repoSettings;
+
+      if (passwordMode == PasswordMode.manual) {
+        repoSettings = await _settings.addRepoWithUserProvidedPassword(location,
+            databaseId: DatabaseId(await repo.hexDatabaseId()));
+      } else {
+        repoSettings = await _settings.addRepoWithPasswordStoredOnDevice(
+            location,
+            databaseId: DatabaseId(await repo.hexDatabaseId()),
+            password: password,
+            requireBiometricCheck: passwordMode == PasswordMode.bio);
+      }
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings!,
         handle: repo,
-        settings: _settings,
         navigation: _navigation,
       );
 

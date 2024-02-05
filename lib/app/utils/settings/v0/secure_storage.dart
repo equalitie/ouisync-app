@@ -1,6 +1,7 @@
-import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
-import 'storage.dart';
+import './flutter_secure.dart';
+import './biometric_secure.dart';
+import '../../../utils/platform/platform.dart';
+import '../../../utils/utils.dart';
 
 class SecureStorage with AppLogger {
   final DatabaseId databaseId;

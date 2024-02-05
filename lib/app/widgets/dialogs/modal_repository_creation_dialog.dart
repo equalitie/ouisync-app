@@ -10,9 +10,9 @@ import '../../../generated/l10n.dart';
 import '../../cubits/create_repo.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../storage/storage.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
+import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends HookWidget with AppLogger {
@@ -84,9 +84,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             }
 
             final repoName = state.repoLocation!.name;
-            final authMode = cubit.settings.getAuthenticationMode(repoName);
-
-            await cubit.deleteRepository(state.repoLocation!, authMode);
+            await cubit.deleteRepository(state.repoLocation!);
           },
           child: Form(
             key: _formKey,
@@ -679,15 +677,15 @@ class RepositoryCreation extends HookWidget with AppLogger {
     final authenticationRequired =
         state.secureWithBiometrics ? true : state.addPassword;
 
-    final authenticationMode = savePasswordToSecureStorage
+    final passwordMode = savePasswordToSecureStorage
         ? authenticationRequired
-            ? AuthMode.version2
-            : AuthMode.noLocalPassword
-        : AuthMode.manual;
+            ? PasswordMode.bio
+            : PasswordMode.none
+        : PasswordMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: createRepoCubit.createRepository(repoLocation, password,
-            state.shareToken, authenticationMode, true));
+        f: createRepoCubit.createRepository(
+            repoLocation, password, state.shareToken, passwordMode, true));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";

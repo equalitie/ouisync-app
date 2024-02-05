@@ -1,8 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:result_type/result_type.dart';
-
-import 'storage.dart';
-import '../utils/utils.dart';
+import './secure_storage.dart';
+import '../../utils.dart';
 
 class FlutterSecure {
   FlutterSecure._();
