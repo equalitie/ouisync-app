@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:mutex/mutex.dart';
+import 'package:meta/meta.dart'; // for `@visibleForTesting`
 
 class MasterKey {
   static const String _masterKey = 'masterKey';
@@ -60,4 +61,11 @@ class MasterKey {
 
     return _encrypter.decrypt64(cipherText, iv: iv);
   }
+
+  @visibleForTesting
+  static MasterKey initWithKey(String keyBase64) =>
+      MasterKey._(Key.fromBase64(keyBase64));
+
+  @visibleForTesting
+  static String generateKey() => Key.fromLength(_keyLengthInBytes).base64;
 }

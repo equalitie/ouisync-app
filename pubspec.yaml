@@ -71,6 +71,7 @@ dependencies:
   launch_at_startup: ^0.2.2
   local_auth: ^2.1.2
   loggy: ^2.0.1+1
+  meta: ^1.10.0
   mime: ^1.0.4
   mobile_scanner: ^4.0.0
   move_to_background: ^1.0.2

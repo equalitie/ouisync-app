@@ -1,6 +1,5 @@
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
-import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,7 +38,8 @@ void main() {
 
     expect(s1.repos().length, 1);
 
-    s1.addRepoWithUserProvidedPassword(RepoLocation.fromDbPath("/foo/baz.db"),
+    await s1.addRepoWithUserProvidedPassword(
+        RepoLocation.fromDbPath("/foo/baz.db"),
         databaseId: DatabaseId("234"));
 
     expect(s1.repos().length, 2);
@@ -54,5 +54,34 @@ void main() {
     final decrypted = key.decrypt(encrypted);
 
     expect(decrypted, "foobar");
+  });
+
+  //
+  // It sometimes happens that crypto libraries change default parameters in
+  // their encryption algorithms which would make the master key unusable. So
+  // check here if what we could encrypt in previous version can still be
+  // decrypted.
+  //
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!! If this test fails, we need to implement settings migrations, !!!!
+  // !!!! not just change the test.                                     !!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //
+  test('compatible encryption', () async {
+    final teststring = "foobar";
+
+    // Use this commented code if you need to generate new values.
+    //{
+    //  final rawKey = MasterKey.generateKey();
+    //  print("key: $rawKey");
+    //  final key = MasterKey.initWithKey(rawKey);
+    //  final encrypted = key.encrypt(teststring);
+    //  print("encrypted: $encrypted");
+    //}
+
+    final key =
+        MasterKey.initWithKey("/ZoHMTLAv2LQZ/Lof1JHxvtcS6ewXABQB7vZ8tfmd5o=");
+    final encrypted = "V9rn49kfJeg=:gaGaKjJf"; // key.encrypt(teststring);
+    expect(key.decrypt(encrypted), teststring);
   });
 }
