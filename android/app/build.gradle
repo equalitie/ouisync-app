@@ -36,7 +36,24 @@ android {
         checkReleaseBuilds false
     }
 
-    compileSdkVersion 33
+
+    // This was suggested as a solution for this exception:
+    //
+    // Caused by: org.gradle.api.InvalidUserCodeException: Inconsistent JVM-target compatibility
+    // detected for tasks 'compileDebugJavaWithJavac' (1.8) and 'compileDebugKotlin' (17).
+    //
+    // But it doesn't seems to do anything.
+    // TODO: Remove it? try to make it work?
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
+
+    compileSdkVersion 34
     ndkVersion '25.2.9519653'
 
     sourceSets {
@@ -91,6 +108,7 @@ android {
             android.packagingOptions.doNotStrip "**.so"
         }
     }
+    namespace 'org.equalitie.ouisync'
 }
 
 flutter {
@@ -99,6 +117,6 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
 
 }

@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.8.20'
+    ext.kotlin_version = '1.9.22'
     repositories {
         google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -16,9 +16,42 @@ allprojects {
         google()
         jcenter()
     }
+    // After removing the package from the manifest file, upgrade Gradle and Android Gradle Plugin
+    // to 8.x, and using namespace in the app build.gradle, the following exception was thrown:
+    //
+    //Namespace not specified. Specify a namespace in the module's build file.
+    // See https://d.android.com/r/tools/upgrade-assistant/set-namespace for information about
+    // setting the namespace.
+    //
+    //If you've specified the package attribute in the source AndroidManifest.xml, you can use the
+    // AGP Upgrade Assistant to migrate to the namespace value in the build file.
+    // Refer to https://d.android.com/r/tools/upgrade-assistant/agp-upgrade-assistant for general
+    // information about using the AGP Upgrade Assistant.
+
+    // The fix was found here:
+    // https://stackoverflow.com/questions/76108428/how-do-i-fix-namespace-not-specified-error-in-android-studio
+
+    // 2024-02-06 - J-Pabon
+    subprojects {
+        afterEvaluate { project ->
+            if (project.hasProperty('android')) {
+                project.android {
+                    if (namespace == null) {
+                        namespace project.group
+                    }
+                }
+            }
+        }
+    }
 }
 
 rootProject.buildDir = '../build'
+
+// This section was added by the AGP upgrade assistant, but it throws an exception:
+// TODO: Get it to work
+//android {
+//    namespace 'dev.fluttercommunity.plus.network_info'
+//}
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
