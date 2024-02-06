@@ -280,23 +280,27 @@ class Settings with AppLogger {
       final id = DatabaseId(repo.databaseId);
       final auth = s0.getAuthenticationMode(repo.name);
       var newAuth = null;
+      var oldPwdStorage = null;
       switch (auth) {
-        // TODO: Remove passwords stored in oldStorage
         case v0.AuthMode.manual:
           newAuth = _AuthModePasswordProvidedByUser();
         case v0.AuthMode.version1:
         case v0.AuthMode.version2:
-          final oldStorage = v0.SecureStorage(databaseId: id);
-          final password = await oldStorage.tryGetPassword(
+          oldPwdStorage = v0.SecureStorage(databaseId: id);
+          final password = await oldPwdStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
           newAuth = _AuthModePasswordStoredOnDevice(
               masterKey.encrypt(password!), true);
         case v0.AuthMode.noLocalPassword:
-          final oldStorage = v0.SecureStorage(databaseId: id);
-          final password = await oldStorage.tryGetPassword(
+          oldPwdStorage = v0.SecureStorage(databaseId: id);
+          final password = await oldPwdStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
           newAuth = _AuthModePasswordStoredOnDevice(
               masterKey.encrypt(password!), false);
+      }
+      // Remove the password from the old storage.
+      if (oldPwdStorage != null) {
+        await oldPwdStorage.deletePassword();
       }
       repos[id] = _SettingsRepoEntry(newAuth, repo.info);
     }
