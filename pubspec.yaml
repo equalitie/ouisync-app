@@ -42,6 +42,7 @@ dependencies:
   encrypt: ^5.0.3
   envied: ^0.5.3
   equatable: ^2.0.3
+  extended_text: ^12.0.1
   ffi: ^2.0.1
   file: ^7.0.0
   file_picker: ^6.1.1
