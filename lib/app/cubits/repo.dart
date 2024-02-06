@@ -477,6 +477,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<void> downloadFile({
     required String sourcePath,
+    required String parentPath,
     required String destinationPath,
   }) async {
     if (state.downloads.containsKey(sourcePath)) {

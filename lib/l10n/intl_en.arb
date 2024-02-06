@@ -673,6 +673,7 @@
   "actionRemoveLocalPassword":"Remove local password",
   "actionUpdate":"Update",
   "actionAdd":"Add",
+  "actionNewMediaFile":"Media",
   "messageFailedToMount": "Failed to mount: {reason}",
   "@messageFailedToMount": {
     "placeholders": {

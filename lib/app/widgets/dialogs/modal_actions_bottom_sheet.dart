@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -46,8 +48,16 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   _buildAction(
                     name: S.current.actionNewFile,
                     icon: Icons.upload_file_outlined,
-                    action: () async => await addFile(context, cubit),
+                    action: () async =>
+                        await addFile(context, cubit, FileType.any),
                   ),
+                  if (io.Platform.isIOS)
+                    _buildAction(
+                      name: S.current.actionNewMediaFile,
+                      icon: Icons.photo_library_outlined,
+                      action: () async =>
+                          await addFile(context, cubit, FileType.media),
+                    ),
                 ],
               ),
             ]));
@@ -85,11 +95,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     });
   }
 
-  Future<void> addFile(context, RepoCubit repo) async {
+  Future<void> addFile(context, RepoCubit repo, FileType type) async {
     final dstDir = repo.state.currentFolder.path;
 
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
+      type: type,
       withReadStream: true,
       allowMultiple: true,
     );
