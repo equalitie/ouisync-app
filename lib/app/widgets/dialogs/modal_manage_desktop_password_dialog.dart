@@ -6,9 +6,13 @@ import 'package:result_type/result_type.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+<<<<<<< HEAD
 import '../../mixins/repo_actions_mixin.dart';
 import '../../utils/settings/v0/secure_storage.dart';
 import '../../models/models.dart';
+=======
+import '../../storage/secure_storage.dart';
+>>>>>>> b448ecee (Update to the new local secrets / access mode API)
 import '../../utils/utils.dart';
 import '../../utils/platform/platform.dart';
 import '../widgets.dart';
@@ -344,10 +348,11 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       if (isSamePassword) return;
     }
 
-    UnlockResult? unlockResult;
-
     final validateCurrentPassword = await _validateCurrentPassword(
-        widget.context, currentPassword, widget.repoCubit);
+      widget.context,
+      currentPassword,
+      widget.repoCubit,
+    );
 
     if (validateCurrentPassword.isFailure) {
       final message = validateCurrentPassword.failure;
@@ -359,42 +364,25 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       return null;
     }
 
-    unlockResult = validateCurrentPassword.success;
-
     final result = SetPasswordResult(
-        repositoryName: repositoryName,
-        newPassword: newPassword,
-        message: '',
-        unlockResult: unlockResult);
+      repositoryName: repositoryName,
+      oldPassword: validateCurrentPassword.success,
+      newPassword: newPassword,
+      message: '',
+    );
 
     Navigator.of(widget.context).pop(result);
   }
 
-  Future<Result<UnlockResult, String?>> _validateCurrentPassword(
-      BuildContext parentContext,
-      String currentPassword,
-      RepoCubit repoCubit) async {
-    final unlockResult =
-        await _unlockShareToken(parentContext, repoCubit, currentPassword);
-
-    final accessMode = await unlockResult.shareToken.mode;
-    if (accessMode == AccessMode.blind) {
-      return Failure(S.current.messageUnlockRepoFailed);
-    }
-
-    return Success(unlockResult);
-  }
-
-  Future<ShareToken> _loadShareToken(
-          BuildContext context, RepoCubit repo, String password) =>
-      Dialogs.executeFutureWithLoadingDialog(context,
-          f: repo.createShareToken(AccessMode.write, password: password));
-
-  Future<UnlockResult> _unlockShareToken(
-      BuildContext context, RepoCubit repo, String password) async {
-    final token = await _loadShareToken(context, repo, password);
-    return UnlockResult(password: password, shareToken: token);
-  }
+  Future<Result<String, String?>> _validateCurrentPassword(
+    BuildContext parentContext,
+    String currentPassword,
+    RepoCubit repoCubit,
+  ) async =>
+      switch (await repoCubit.getPasswordAccessMode(currentPassword)) {
+        AccessMode.write || AccessMode.read => Success(currentPassword),
+        AccessMode.blind => Failure(S.current.messageUnlockRepoFailed),
+      };
 
   @override
   void dispose() {
@@ -408,14 +396,15 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 }
 
 class SetPasswordResult {
-  SetPasswordResult(
-      {required this.repositoryName,
-      required this.newPassword,
-      required this.message,
-      this.unlockResult});
+  SetPasswordResult({
+    required this.repositoryName,
+    required this.newPassword,
+    required this.message,
+    this.oldPassword,
+  });
 
   final String repositoryName;
+  final String? oldPassword;
   final String newPassword;
   final String message;
-  final UnlockResult? unlockResult;
 }

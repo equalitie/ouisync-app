@@ -8,7 +8,11 @@ import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 
 class RepositoriesBar extends StatelessWidget
+<<<<<<< HEAD
     with AppLogger
+=======
+    with AppLogger, RepositoryActionsMixin
+>>>>>>> b448ecee (Update to the new local secrets / access mode API)
     implements PreferredSizeWidget {
   const RepositoriesBar(this._cubits);
 

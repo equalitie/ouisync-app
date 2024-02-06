@@ -201,7 +201,10 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     );
   }
 
-  Future<Uint8List> createReopenToken() => _repo.createReopenToken();
+  Future<Uint8List> get credentials => _repo.credentials;
+
+  Future<void> setCredentials(Uint8List credentials) =>
+      _repo.setCredentials(credentials);
 
   String? mountedDirectory() {
     final mountPoint = _session.mountPoint;
@@ -379,50 +382,58 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return content;
   }
 
-  Future<bool> setReadWritePassword(
-    RepoLocation location,
-    String oldPassword,
-    String newPassword,
-    oui.ShareToken? shareToken,
-  ) async {
-    final name = location.name;
+  Future<bool> setPassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    // Grab the current credentials so we can restore the access mode when we are done.
+    final credentials = await _repo.credentials;
 
     try {
-      await _repo.setReadWriteAccess(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        shareToken: shareToken,
-      );
+      // First try to switch the repo to the write mode using `oldPassword`. If the password is
+      // the correct write password we end up in write mode. If it's the correct read password we
+      // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
+      // in, we change the corresponding password to `newPassword`.
+      await _repo.setAccessMode(oui.AccessMode.write, password: oldPassword);
+
+      switch (await _repo.accessMode) {
+        case oui.AccessMode.write:
+          await _repo.setAccess(
+            read: oui.EnableAccess(newPassword),
+            write: oui.EnableAccess(newPassword),
+          );
+          break;
+        case oui.AccessMode.read:
+          await _repo.setAccess(
+            read: oui.EnableAccess(newPassword),
+          );
+          break;
+        case oui.AccessMode.blind:
+          loggy.warning('Incorrect local password');
+          return false;
+      }
+
+      // TODO: should we update state.accessMode here ?
+      return true;
     } catch (e, st) {
-      loggy.app('Password change for repository $name failed', e, st);
+      loggy.error(
+          'Password change for repository ${metaInfo.name} failed', e, st);
       return false;
+    } finally {
+      await _repo.setCredentials(credentials);
     }
-
-    // TODO: should we update state.accessMode here ?
-
-    return true;
   }
 
-  Future<bool> setReadPassword(
-    RepoLocation location,
-    String newPassword,
-    oui.ShareToken? shareToken,
-  ) async {
-    final name = location.name;
+  /// Returns which access mode does the given password provide.
+  Future<oui.AccessMode> getPasswordAccessMode(String password) async {
+    final credentials = await _repo.credentials;
 
     try {
-      await _repo.setReadAccess(
-        newPassword: newPassword,
-        shareToken: shareToken,
-      );
-    } catch (e, st) {
-      loggy.app('Password change for repository $name failed', e, st);
-      return false;
+      await _repo.setAccessMode(oui.AccessMode.write, password: password);
+      return await _repo.accessMode;
+    } finally {
+      await _repo.setCredentials(credentials);
     }
-
-    // TODO: should we update state.accessMode here ?
-
-    return true;
   }
 
   Future<int?> _getFileSize(String path) async {

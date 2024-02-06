@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
@@ -50,11 +49,9 @@ class SecurityState extends Equatable {
 }
 
 class SecurityCubit extends Cubit<SecurityState> with AppLogger {
-  SecurityCubit._(this._repoCubit, this._shareToken, SecurityState state)
-      : super(state);
+  SecurityCubit._(this._repoCubit, SecurityState state) : super(state);
 
   final RepoCubit _repoCubit;
-  ShareToken? _shareToken;
 
   RepoSettings get repoSettings => _repoCubit.repoSettings;
 
@@ -62,7 +59,6 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
   static SecurityCubit create(
       {required RepoCubit repoCubit,
-      required ShareToken? shareToken,
       required bool isBiometricsAvailable,
       required String password}) {
     var initialState = SecurityState(
@@ -70,7 +66,7 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
         passwordMode: repoCubit.repoSettings.passwordMode(),
         password: password);
 
-    return SecurityCubit._(repoCubit, shareToken, initialState);
+    return SecurityCubit._(repoCubit, initialState);
   }
 
   // Returns error message on error.
@@ -159,23 +155,16 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   }
 
   Future<bool> _changeRepositoryPassword(String newPassword) async {
-    assert(_shareToken != null, 'ERROR: shareToken is null');
     assert(state.password.isNotEmpty, 'ERROR: currentPassword is empty');
 
-    if (_shareToken == null || state.password.isEmpty) {
+    if (state.password.isEmpty) {
       return false;
     }
 
-    final mode = await _shareToken?.mode;
-    final location = _repoCubit.location;
-
-    if (mode == AccessMode.write) {
-      return _repoCubit.setReadWritePassword(
-          location, state.password, newPassword, _shareToken);
-    } else {
-      assert(mode == AccessMode.read);
-      return _repoCubit.setReadPassword(location, newPassword, _shareToken);
-    }
+    return _repoCubit.setPassword(
+      oldPassword: state.password,
+      newPassword: newPassword,
+    );
   }
 
   void emitUnlockWithBiometrics(bool value) =>

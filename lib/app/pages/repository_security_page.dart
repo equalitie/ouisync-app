@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
@@ -13,15 +12,23 @@ import '../models/models.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
+<<<<<<< HEAD
   const RepositorySecurity(
       {required this.repo,
       required this.password,
       required this.shareToken,
       required this.isBiometricsAvailable});
+=======
+  const RepositorySecurity({
+    required this.repo,
+    required this.password,
+    required this.isBiometricsAvailable,
+    required this.authenticationMode,
+  });
+>>>>>>> b448ecee (Update to the new local secrets / access mode API)
 
   final RepoCubit repo;
   final String password;
-  final ShareToken shareToken;
   final bool isBiometricsAvailable;
 
   @override
@@ -46,7 +53,6 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   void initState() {
     security = SecurityCubit.create(
         repoCubit: widget.repo,
-        shareToken: widget.shareToken,
         isBiometricsAvailable: widget.isBiometricsAvailable,
         password: widget.password);
 
