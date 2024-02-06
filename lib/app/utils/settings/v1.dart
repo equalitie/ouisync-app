@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
 import '../utils.dart';
-import '../../master_key.dart';
+import '../master_key.dart';
 import 'v0/v0.dart' as v0;
 
 class DatabaseId {
