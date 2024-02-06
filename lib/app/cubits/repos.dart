@@ -15,6 +15,9 @@ import '../utils/settings/v0/secure_storage.dart';
 import 'cubits.dart';
 
 class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
+  // NOTE: These can't be indexed by DatabaseId because one of the RepoEntry
+  // instances is LoadingRepoEntry and when we're **creating** (as opposed to
+  // opening an existing one) the repository we don't know the DatabaseId.
   final SplayTreeMap<String, RepoEntry> _repos =
       SplayTreeMap<String, RepoEntry>((key1, key2) => key1.compareTo(key2));
   bool _isLoading = false;
@@ -163,7 +166,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     _repos[newRepo.name] = newRepo;
 
     if (didChange) {
-      if (setCurrent || currentRepo == null) {
+      if (setCurrent) {
         await this.setCurrent(newRepo);
       } else {
         changed();
