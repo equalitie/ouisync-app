@@ -210,7 +210,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
       shareToken = await ShareToken.fromString(cubit.session, initialToken);
     } catch (e, st) {
       loggy.error('Extract repository token exception:', e, st);
-      showSnackBar(context, message: S.current.messageErrorTokenInvalid);
+      showSnackBar(S.current.messageErrorTokenInvalid);
     }
 
     return shareToken;
@@ -496,8 +496,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
               if (password.isEmpty) return;
 
               await copyStringToClipboard(password);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
@@ -521,8 +520,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
               if (retypedPassword.isEmpty) return;
 
               await copyStringToClipboard(retypedPassword);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,

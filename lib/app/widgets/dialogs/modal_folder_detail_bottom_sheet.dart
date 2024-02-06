@@ -128,10 +128,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     if (deleteFolderOk) {
       Navigator.of(context).pop(deleteFolder);
 
-      showSnackBar(
-        context,
-        message: S.current.messageFolderDeleted(widget.data.name),
-      );
+      showSnackBar(S.current.messageFolderDeleted(widget.data.name));
     }
   }
 

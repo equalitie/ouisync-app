@@ -1,3 +1,4 @@
+import 'package:build_context_provider/build_context_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
@@ -39,26 +40,29 @@ class _SnackBarWrapState extends State<_SnackBarWrap> {
 //------------------------------------------------------------------------------
 
 showSnackBar(
-  BuildContext context, {
-  required String message,
+  String message, {
   SnackBarAction? action,
+  bool showCloseIcon = true,
+  SnackBarBehavior behavior = SnackBarBehavior.floating,
 }) {
-  final messenger = ScaffoldMessenger.of(context);
+  BuildContextProvider().call((context) {
+    final messenger = ScaffoldMessenger.of(context);
 
-  if (_snackbars.contains(message)) {
-    return;
-  }
+    if (_snackbars.contains(message)) {
+      return;
+    }
 
-  _snackbars.add(message);
+    _snackbars.add(message);
 
-  messenger.showSnackBar(
-    SnackBar(
-      content: _SnackBarWrap(message),
-      action: action,
-      showCloseIcon: true,
-      behavior: SnackBarBehavior.floating,
-    ),
-  );
+    messenger.showSnackBar(
+      SnackBar(
+        content: _SnackBarWrap(message),
+        action: action,
+        showCloseIcon: showCloseIcon,
+        behavior: behavior,
+      ),
+    );
+  });
 }
 
 hideSnackBar(context) => SnackBarAction(

@@ -209,7 +209,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final addLocalPasswordResult = await security.addLocalPassword(newPassword);
 
     if (addLocalPasswordResult != null) {
-      showSnackBar(context, message: addLocalPasswordResult);
+      showSnackBar(addLocalPasswordResult);
       return;
     }
 
@@ -221,7 +221,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         await security.updateLocalPassword(newPassword);
 
     if (updateRepoLocalPasswordResult != null) {
-      showSnackBar(context, message: updateRepoLocalPasswordResult);
+      showSnackBar(updateRepoLocalPasswordResult);
       return;
     }
 
@@ -239,7 +239,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     final removeRepoLocalPasswordResult = await security.removeLocalPassword();
 
     if (removeRepoLocalPasswordResult != null) {
-      showSnackBar(context, message: removeRepoLocalPasswordResult);
+      showSnackBar(removeRepoLocalPasswordResult);
     }
   }
 
@@ -248,7 +248,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         await security.updateUnlockRepoWithBiometrics(unlockWithBiometrics);
 
     if (updateUnlockRepoWithBiometricsResult != null) {
-      showSnackBar(context, message: updateUnlockRepoWithBiometricsResult);
+      showSnackBar(updateUnlockRepoWithBiometricsResult);
       return;
     }
 

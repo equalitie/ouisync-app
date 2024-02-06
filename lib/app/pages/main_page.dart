@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:build_context_provider/build_context_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -307,7 +308,9 @@ class _MainPageState extends State<MainPage>
           children: <Widget>[
             Column(children: [Expanded(child: buildMainWidget())]),
             _cubits.repositories.builder(
-                (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit))
+              (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit),
+            ),
+            const ListenerThatRunsFunctionsWithBuildContext(),
           ],
         ),
       ),
@@ -334,7 +337,7 @@ class _MainPageState extends State<MainPage>
     int clickCount = exitClickCounter.registerClick();
 
     if (clickCount <= 1) {
-      showSnackBar(context, message: S.current.messageExitOuiSync);
+      showSnackBar(S.current.messageExitOuiSync);
     } else {
       exitClickCounter.reset();
       await MoveToBackground.moveTaskToBack();
@@ -407,14 +410,9 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget _repositoryContentBuilder(OpenRepoEntry repo) =>
-      BlocConsumer<RepoCubit, RepoState>(
+      BlocBuilder<RepoCubit, RepoState>(
         bloc: repo.cubit,
         builder: (context, state) => _selectLayoutWidget(),
-        listener: (context, state) {
-          if (state.message.isNotEmpty) {
-            showSnackBar(context, message: state.message);
-          }
-        },
       );
 
   Widget _selectLayoutWidget() {
@@ -500,13 +498,13 @@ class _MainPageState extends State<MainPage>
         _ => S.current.messageFilePreviewFailed
       };
 
-      showSnackBar(context, message: message);
+      showSnackBar(message);
     } else if (io.Platform.isWindows ||
         io.Platform.isLinux ||
         io.Platform.isMacOS) {
       final mountedDirectory = repo.mountedDirectory();
       if (mountedDirectory == null) {
-        showSnackBar(context, message: S.current.messageRepositoryNotMounted);
+        showSnackBar(S.current.messageRepositoryNotMounted);
         return;
       }
 
@@ -521,13 +519,12 @@ class _MainPageState extends State<MainPage>
           st,
         );
 
-        showSnackBar(context,
-            message: S.current.messagePreviewingFileFailed(item.path));
+        showSnackBar(S.current.messagePreviewingFileFailed(item.path));
         return;
       }
 
       if (!previewOk) {
-        showSnackBar(context, message: S.current.messageNoAppsForThisAction);
+        showSnackBar(S.current.messageNoAppsForThisAction);
       }
     } else {
       /// Until we have a proper implementation for OSX (iOS, macOS), we are

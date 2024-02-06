@@ -85,7 +85,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
         }
 
         if (!validated) {
-          showSnackBar(context, message: S.current.messageBioAuthFailed);
+          showSnackBar(S.current.messageBioAuthFailed);
           return false;
         }
       }
@@ -250,8 +250,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
               if (password.isEmpty) return;
 
               await copyStringToClipboard(password);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
@@ -275,8 +274,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
               if (retypedPassword.isEmpty) return;
 
               await copyStringToClipboard(retypedPassword);
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
@@ -352,7 +350,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       final message = validateCurrentPassword.failure;
 
       if (message != null) {
-        showSnackBar(context, message: message);
+        showSnackBar(message);
       }
 
       return null;
