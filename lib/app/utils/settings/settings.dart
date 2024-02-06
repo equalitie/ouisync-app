@@ -4,22 +4,19 @@ import '../../master_key.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String SETTINGS_VERSION_KEY = 'SETTINGS_VERSION';
-
 typedef DatabaseId = v1.DatabaseId;
 typedef RepoSettings = v1.RepoSettings;
 typedef Settings = v1.Settings;
 
-Future<Settings> loadAndMigrateSettings(MasterKey masterKey) async {
+Future<Settings> loadAndMigrateSettings() async {
   final prefs = await SharedPreferences.getInstance();
-  var version = prefs.getInt(SETTINGS_VERSION_KEY) ?? 0;
+  var isVersionZero = !prefs.containsKey(v1.Settings.SETTINGS_KEY);
 
-  switch (version) {
-    case 0:
-      return await v1.Settings.initMigrateFromV0(prefs, masterKey);
-    case 1:
-      return await v1.Settings.init(prefs, masterKey);
-    default:
-      throw "Invalid settings version number $version";
+  final masterKey = await MasterKey.init();
+
+  if (isVersionZero) {
+    return await v1.Settings.initMigrateFromV0(prefs, masterKey);
+  } else {
+    return await v1.Settings.init(prefs, masterKey);
   }
 }

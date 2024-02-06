@@ -18,7 +18,6 @@ import 'cubits/cubits.dart';
 import 'pages/pages.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
-import 'master_key.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
   final appDir = await getApplicationSupportDirectory();
@@ -68,8 +67,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
-  final masterKey = await MasterKey.init();
-  final settings = await loadAndMigrateSettings(masterKey);
+  final settings = await loadAndMigrateSettings();
 
   var launchAtStartup = settings.getLaunchAtStartup();
   await windowManager.launchAtStartup(launchAtStartup);

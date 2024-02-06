@@ -15,7 +15,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
 
-    final masterKey = await MasterKey.init();
     final prefs = await SharedPreferences.getInstance();
 
     expect(prefs.getKeys().isEmpty, true);
@@ -28,16 +27,15 @@ void main() {
     await s0.setSyncOnMobileEnabled(true);
     await s0.setHighestSeenProtocolNumber(1);
     await s0.addRepo(RepoLocation.fromDbPath("/foo/bar.db"),
-        databaseId: "123", authenticationMode: AuthMode.manual);
+        databaseId: "123", authenticationMode: v0.AuthMode.manual);
     await s0.setDefaultRepo("bar");
 
-    final s1 = await loadAndMigrateSettings(masterKey);
+    final s1 = await loadAndMigrateSettings();
 
     await prefs.reload();
 
-    // In version 1 we only expect the `SETTINGS_VERSION_KEY` and
-    // `SETTINGS_VERSION` values to be present.
-    expect(prefs.getKeys().length, 2);
+    // In version 1 we only expect the `SETTINGS_KEY` value to be present.
+    expect(prefs.getKeys().length, 1);
 
     expect(s1.repos().length, 1);
 

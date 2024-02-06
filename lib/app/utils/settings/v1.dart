@@ -161,6 +161,8 @@ class RepoSettings {
 //--------------------------------------------------------------------
 
 class SettingsRoot {
+  static const int VERSION = 1;
+
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
   // Show onboarding (will flip to false once shown).
@@ -187,6 +189,7 @@ class SettingsRoot {
 
   Map<String, dynamic> toJson() {
     final r = {
+      'version': VERSION,
       'acceptedEqualitieValues': acceptedEqualitieValues,
       'showOnboarding': showOnboarding,
       'launchAtStartup': launchAtStartup,
@@ -206,6 +209,12 @@ class SettingsRoot {
     }
 
     final data = json.decode(s);
+
+    int version = data['version'];
+
+    if (version != VERSION) {
+      throw "Invalid settings version ($version)";
+    }
 
     final repos = <DatabaseId, _SettingsRepoEntry>{
       for (var kv in data['repos']!.entries)
@@ -227,7 +236,7 @@ class SettingsRoot {
 }
 
 class Settings with AppLogger {
-  static const String SETTINGS_KEY = "settingsV1";
+  static const String SETTINGS_KEY = "settings";
 
   final SettingsRoot _root;
   final SharedPreferences _prefs;
@@ -246,10 +255,9 @@ class Settings with AppLogger {
     final json = prefs.getString(SETTINGS_KEY);
     final root = SettingsRoot.fromJson(json);
 
-    if (prefs.getKeys().length > 2) {
+    if (prefs.getKeys().length > 1) {
       // The previous migration did not finish correctly, prefs should only
-      // contain the `SETTINGS_VERSION` key and the `SETTINGS_KEY` key after
-      // success.
+      // `SETTINGS_KEY` key after success.
       await Settings._removeValuesFromV0(prefs);
     }
 
@@ -305,9 +313,8 @@ class Settings with AppLogger {
 
     final s1 = Settings._(root, prefs, masterKey);
 
-    // The order of these operations is extremely important to avoid data loss.
+    // The order of these operations is important to avoid data loss.
     await s1._storeRoot();
-    await prefs.setInt(SETTINGS_VERSION_KEY, 1);
     await Settings._removeValuesFromV0(prefs);
 
     return s1;
@@ -318,7 +325,7 @@ class Settings with AppLogger {
   // settings.
   static Future<void> _removeValuesFromV0(SharedPreferences prefs) async {
     for (final key in prefs.getKeys()) {
-      if (key != SETTINGS_VERSION_KEY && key != SETTINGS_KEY) {
+      if (key != SETTINGS_KEY) {
         await prefs.remove(key);
       }
     }
