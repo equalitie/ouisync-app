@@ -418,9 +418,6 @@ class Settings with AppLogger {
   }
 
   Future<void> setDefaultRepo(String? name) async {
-    // TODO: We should not set repositories that are protected by passwords as
-    // default because that could imply that those repositories are not blind
-    // and thus compromise plausible deniability.
     if (_root.currentRepo == name) {
       return;
     }
@@ -430,7 +427,13 @@ class Settings with AppLogger {
     } else {
       final rs = repoSettingsByName(name);
       if (rs == null) {
-        return null;
+        return;
+      }
+      // We must not set repositories for which the user provides the password
+      // as "default" because they must be indistinguishable from blind
+      // repositories.
+      if (rs.passwordMode == PasswordMode.manual) {
+        return;
       }
       _root.currentRepo = rs.databaseId;
     }
