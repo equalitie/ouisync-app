@@ -19,14 +19,14 @@ class ManageDesktopPassword extends StatefulWidget {
       required this.repoCubit,
       required this.action,
       required this.repositoryName,
-      required this.authMode,
+      required this.passwordMode,
       required this.usesBiometrics});
 
   final BuildContext context;
   final RepoCubit repoCubit;
   final PasswordAction action;
   final String repositoryName;
-  final AuthMode authMode;
+  final PasswordMode passwordMode;
   final bool usesBiometrics;
 
   @override
@@ -93,20 +93,6 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
       }
 
       currentPassword = repoSettings.getPassword()!;
-
-      //final securePassword = await SecureStorage(databaseId: databaseId)
-      //    .tryGetPassword(authMode: authMode);
-
-      //if (securePassword == null || securePassword.isEmpty) {
-      //  if (securePassword != null) {
-      //    final userAuthenticationFailed = passwordMode == PasswordMode.none
-      //        ? S.current.messageRepoAuthFailed
-      //        : S.current.messageBioAuthFailed;
-      //    showSnackBar(context, message: userAuthenticationFailed);
-      //  }
-
-      //  return false;
-      //}
     }
 
     _initStateValues(currentPassword);
@@ -120,7 +106,8 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
     _currentPasswordController.text =
         _requiresManualAuthentication == false ? currentPassword : '';
 
-    if (widget.authMode == AuthMode.manual && _requiresManualAuthentication) {
+    if (widget.passwordMode == PasswordMode.manual &&
+        _requiresManualAuthentication) {
       _currentPasswordFocus.requestFocus();
       return;
     }

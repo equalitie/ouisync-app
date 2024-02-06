@@ -11,8 +11,6 @@ import '../utils.dart';
 import '../../master_key.dart';
 import 'v0/v0.dart' as v0;
 
-typedef AuthMode = v0.AuthMode;
-
 class DatabaseId {
   String _id;
   DatabaseId(String databaseId) : _id = databaseId {}
@@ -23,17 +21,17 @@ class DatabaseId {
 
 //--------------------------------------------------------------------
 
-abstract class NewAuthMode {
+abstract class _AuthMode {
   Map _toJson();
 
-  static NewAuthMode? _fromJson(dynamic data) {
-    var decoded = NewAuthModePasswordProvidedByUser._fromJson(data);
+  static _AuthMode? _fromJson(dynamic data) {
+    var decoded = _AuthModePasswordProvidedByUser._fromJson(data);
     if (decoded != null) return decoded;
-    return NewAuthModePasswordStoredOnDevice._fromJson(data);
+    return _AuthModePasswordStoredOnDevice._fromJson(data);
   }
 }
 
-class NewAuthModePasswordProvidedByUser extends NewAuthMode {
+class _AuthModePasswordProvidedByUser extends _AuthMode {
   static String _tag() => "password-provided-by-user";
 
   @override
@@ -41,22 +39,22 @@ class NewAuthModePasswordProvidedByUser extends NewAuthMode {
         _tag(): null,
       };
 
-  static NewAuthMode? _fromJson(dynamic data) {
-    if (data.containsKey(_tag())) return NewAuthModePasswordProvidedByUser();
+  static _AuthMode? _fromJson(dynamic data) {
+    if (data.containsKey(_tag())) return _AuthModePasswordProvidedByUser();
   }
 }
 
-class NewAuthModePasswordStoredOnDevice extends NewAuthMode {
+class _AuthModePasswordStoredOnDevice extends _AuthMode {
   final String encryptedPwd;
   final bool confirmWithBiometrics;
 
-  NewAuthModePasswordStoredOnDevice(
+  _AuthModePasswordStoredOnDevice(
       this.encryptedPwd, this.confirmWithBiometrics);
 
   // Returns `null` if the decryption fails. Note that this means an error and
   // it is *not* the case that the user simply chose not to store the password
   // on the device. The latter should be handled by the
-  // `NewAuthModePasswordStoredOnDevice` class.
+  // `_AuthModePasswordStoredOnDevice` class.
   String? getRepositoryPassword(MasterKey masterKey) =>
       masterKey.decrypt(encryptedPwd);
 
@@ -70,22 +68,21 @@ class NewAuthModePasswordStoredOnDevice extends NewAuthMode {
         }
       };
 
-  static NewAuthMode? _fromJson(dynamic data) {
+  static _AuthMode? _fromJson(dynamic data) {
     final values = data[_tag()];
     if (values == null) return null;
     String? encryptedPwd = values["encryptedPwd"];
     if (encryptedPwd == null) return null;
     bool? confirmWithBiometrics = values["confirmWithBiometrics"];
     if (confirmWithBiometrics == null) return null;
-    return NewAuthModePasswordStoredOnDevice(
-        encryptedPwd, confirmWithBiometrics);
+    return _AuthModePasswordStoredOnDevice(encryptedPwd, confirmWithBiometrics);
   }
 }
 
 //--------------------------------------------------------------------
 
 class _SettingsRepoEntry {
-  NewAuthMode authMode;
+  _AuthMode authMode;
   RepoLocation location;
 
   String get name => location.name;
@@ -101,7 +98,7 @@ class _SettingsRepoEntry {
   }
 
   factory _SettingsRepoEntry.fromJson(dynamic data) {
-    return _SettingsRepoEntry(NewAuthMode._fromJson(data['authMode']!)!,
+    return _SettingsRepoEntry(_AuthMode._fromJson(data['authMode']!)!,
         RepoLocation.fromDbPath(data['location']!));
   }
 }
@@ -117,12 +114,12 @@ class RepoSettings {
 
   RepoLocation get location => _entry.location;
   DatabaseId get databaseId => _databaseId;
-  NewAuthMode get authMode => _entry.authMode;
+  _AuthMode get authMode => _entry.authMode;
   String get name => _entry.name;
   Directory get dir => _entry.dir;
 
   Future<void> setAuthModePasswordProvidedByUser() async {
-    _entry.authMode = NewAuthModePasswordProvidedByUser();
+    _entry.authMode = _AuthModePasswordProvidedByUser();
     await _settings._storeRoot();
   }
 
@@ -130,23 +127,23 @@ class RepoSettings {
       String password, bool requireAuthentication) async {
     final encryptedPwd = _settings._masterKey.encrypt(password);
     _entry.authMode =
-        NewAuthModePasswordStoredOnDevice(encryptedPwd, requireAuthentication);
+        _AuthModePasswordStoredOnDevice(encryptedPwd, requireAuthentication);
     await _settings._storeRoot();
   }
 
   bool hasPassword() {
-    return authMode is NewAuthModePasswordStoredOnDevice;
+    return authMode is _AuthModePasswordStoredOnDevice;
   }
 
   bool shouldCheckBiometricsBeforeUnlock() {
     final authMode = _entry.authMode;
-    return (authMode is NewAuthModePasswordStoredOnDevice) &&
+    return (authMode is _AuthModePasswordStoredOnDevice) &&
         authMode.confirmWithBiometrics;
   }
 
   String? getPassword() {
     final authMode = _entry.authMode;
-    if (authMode is NewAuthModePasswordStoredOnDevice) {
+    if (authMode is _AuthModePasswordStoredOnDevice) {
       return _settings._masterKey.decrypt(authMode.encryptedPwd);
     }
     return null;
@@ -278,19 +275,19 @@ class Settings with AppLogger {
       switch (auth) {
         // TODO: Remove passwords stored in oldStorage
         case v0.AuthMode.manual:
-          newAuth = NewAuthModePasswordProvidedByUser();
+          newAuth = _AuthModePasswordProvidedByUser();
         case v0.AuthMode.version1:
         case v0.AuthMode.version2:
           final oldStorage = v0.SecureStorage(databaseId: id);
           final password = await oldStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
-          newAuth = NewAuthModePasswordStoredOnDevice(
+          newAuth = _AuthModePasswordStoredOnDevice(
               masterKey.encrypt(password!), true);
         case v0.AuthMode.noLocalPassword:
           final oldStorage = v0.SecureStorage(databaseId: id);
           final password = await oldStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
-          newAuth = NewAuthModePasswordStoredOnDevice(
+          newAuth = _AuthModePasswordStoredOnDevice(
               masterKey.encrypt(password!), false);
       }
       repos[id] = _SettingsRepoEntry(newAuth, repo.info);
@@ -455,7 +452,7 @@ class Settings with AppLogger {
       {required DatabaseId databaseId,
       required String password,
       required requireBiometricCheck}) async {
-    final authMode = NewAuthModePasswordStoredOnDevice(
+    final authMode = _AuthModePasswordStoredOnDevice(
         _masterKey.encrypt(password), requireBiometricCheck);
     return await _addRepo(location, databaseId: databaseId, authMode: authMode);
   }
@@ -464,14 +461,14 @@ class Settings with AppLogger {
     RepoLocation location, {
     required DatabaseId databaseId,
   }) async {
-    final authMode = NewAuthModePasswordProvidedByUser();
+    final authMode = _AuthModePasswordProvidedByUser();
     return await _addRepo(location, databaseId: databaseId, authMode: authMode);
   }
 
   Future<RepoSettings?> _addRepo(
     RepoLocation location, {
     required DatabaseId databaseId,
-    required NewAuthMode authMode,
+    required _AuthMode authMode,
   }) async {
     if (_root.repos.containsKey(databaseId)) {
       loggy.debug(
@@ -500,17 +497,6 @@ class Settings with AppLogger {
       _root.currentRepo = null;
     }
     _root.repos.remove(databaseId);
-    await _storeRoot();
-  }
-
-  //------------------------------------------------------------------
-
-  NewAuthMode getAuthenticationMode(String repoName) {
-    return repoSettingsByName(repoName)!.authMode;
-  }
-
-  Future<void> setAuthenticationMode(String repoName, NewAuthMode value) async {
-    repoSettingsByName(repoName)!._entry.authMode = value;
     await _storeRoot();
   }
 

@@ -1,5 +1,6 @@
 import './flutter_secure.dart';
 import './biometric_secure.dart';
+import './v0.dart';
 import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
 
