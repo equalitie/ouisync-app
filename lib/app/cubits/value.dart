@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 // The simplest cubit. We can't use `Cubit` directly because that is abstract.
 class Value<State> extends Cubit<State> {
-  Value(State initial) : super(initial);
+  Value(super.initial);
 
   Widget builder(Widget Function(State) func) {
     return BlocBuilder<Value<State>, State>(

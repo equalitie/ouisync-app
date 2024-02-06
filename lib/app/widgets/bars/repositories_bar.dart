@@ -4,7 +4,6 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
-import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 
 class RepositoriesBar extends StatelessWidget

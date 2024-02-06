@@ -24,8 +24,8 @@ class EntryActionItem extends StatefulWidget {
     this.titleTextStyle = AppTypography.bodyMedium,
     this.subtitleTextStyle = AppTypography.bodySmall,
     this.isDanger = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final IconData? iconData;
   final String title;

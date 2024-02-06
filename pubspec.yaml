@@ -22,6 +22,7 @@ environment:
   flutter: ^3.3.2
 
 dependencies:
+  android_alarm_manager_plus: ^3.0.4
   archive: ^3.3.7
   async: ^2.8.2
   auto_size_text: ^3.0.0
@@ -45,13 +46,6 @@ dependencies:
   file_picker: ^6.1.1
   flutter:
     sdk: flutter
-  # Fix for the issue "[BUG] Release 1.2.0 is broken"
-  # https://github.com/JulianAssmann/flutter_background/issues/69
-  #flutter_background: ^1.2.0
-  flutter_background:
-    git:
-      url: https://github.com/inetic/flutter_background
-      ref: issue-69
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^6.0.0
   flutter_file_dialog: ^3.0.2

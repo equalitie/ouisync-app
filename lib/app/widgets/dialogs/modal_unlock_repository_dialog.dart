@@ -3,7 +3,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
-import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
@@ -133,24 +132,26 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     // dialog? And why are we doing it only when `_useBiometrics.value` is
     // true?
     if (_useBiometrics.value) {
-      var exception = null;
+      final success = await Dialogs.executeFutureWithLoadingDialog<bool>(
+        parentContext,
+        f: () async {
+          try {
+            await settings
+                .repoSettingsById(databaseId)!
+                .setAuthModePasswordStoredOnDevice(
+                  password,
+                  _useBiometrics.value,
+                );
+            return true;
+          } catch (e, st) {
+            // TODO: The user should learn about the failure.
+            loggy.error('Failed to store password for repo $databaseId', e, st);
+            return false;
+          }
+        }(),
+      );
 
-      await Dialogs.executeFutureWithLoadingDialog<Null>(parentContext,
-          f: () async {
-        try {
-          await settings
-              .repoSettingsById(databaseId)!
-              .setAuthModePasswordStoredOnDevice(
-                  password, _useBiometrics.value);
-        } catch (e) {
-          exception = e;
-        }
-      }());
-
-      // TODO: The user should learn about the failure.
-      if (exception != null) {
-        loggy
-            .error("Failed to store password for repo $databaseId: $exception");
+      if (!success) {
         return;
       }
     }

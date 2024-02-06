@@ -7,7 +7,7 @@ import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
 class RepositoryQRPage extends StatefulWidget {
-  const RepositoryQRPage({required this.shareLink, Key? key}) : super(key: key);
+  const RepositoryQRPage({required this.shareLink, super.key});
 
   final String shareLink;
 

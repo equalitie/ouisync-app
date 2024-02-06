@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -10,17 +9,18 @@ import '../models/models.dart';
 import '../pages/pages.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../utils/settings/v0/secure_storage.dart';
 import '../widgets/widgets.dart';
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
-mixin RepositoryActionsMixin {
+mixin RepositoryActionsMixin on LoggyType {
   /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(BuildContext context,
-      {required RepoCubit repository,
-      required Future<void> Function(String, String, Uint8List) rename,
-      void Function()? popDialog}) async {
+  Future<void> renameRepository(
+    BuildContext context, {
+    required RepoCubit repository,
+    required Future<void> Function(String, String) rename,
+    void Function()? popDialog,
+  }) async {
     final currentName = repository.name;
 
     final newName = await showDialog<String>(
@@ -34,10 +34,8 @@ mixin RepositoryActionsMixin {
       return;
     }
 
-    final reopenToken = await repository.handle.createReopenToken();
-
     await Dialogs.executeFutureWithLoadingDialog(context,
-        f: rename(currentName, newName, reopenToken));
+        f: rename(currentName, newName));
 
     if (popDialog != null) {
       popDialog();
@@ -72,14 +70,15 @@ mixin RepositoryActionsMixin {
 
   /// checkForBiometrics => main_page._checkForBiometricsCallback
   /// getAuthenticationMode => Settings.getAuthenticationMode
-  Future<void> navigateToRepositorySecurity(BuildContext context,
-      {required RepoCubit repository,
-      required Settings settings,
-      required void Function() popDialog}) async {
+  Future<void> navigateToRepositorySecurity(
+    BuildContext context, {
+    required RepoCubit repository,
+    required Settings settings,
+    required void Function() popDialog,
+  }) async {
     String? password;
-    ShareToken? shareToken;
     final repoSettings = repository.repoSettings;
-    final passwordMode = repoSettings.passwordMode();
+    final passwordMode = repoSettings.passwordMode;
 
     final isBiometricsAvailable =
         await SecurityValidations.canCheckBiometrics();
@@ -92,30 +91,12 @@ mixin RepositoryActionsMixin {
     }
 
     if (passwordMode == PasswordMode.manual) {
-      final unlockResult = await manualUnlock(context, repository);
-
-      if (unlockResult == null) return;
-
-      password = unlockResult.password;
-      shareToken = unlockResult.shareToken;
+      password = await manualUnlock(context, repository);
     } else {
-      final securePassword = repoSettings.getPassword();
-
-      if (securePassword == null || securePassword.isEmpty) return;
-
-      password = securePassword;
-      shareToken = await Dialogs.executeFutureWithLoadingDialog<ShareToken>(
-          context,
-          f: repository.createShareToken(AccessMode.write, password: password));
+      password = repoSettings.getPassword();
     }
 
-    final accessMode = await shareToken.mode;
-
-    if (accessMode == AccessMode.blind) {
-      showSnackBar(context, message: S.current.messageUnlockRepoFailed);
-
-      return;
-    }
+    if (password == null || password.isEmpty) return;
 
     popDialog();
 
@@ -123,15 +104,17 @@ mixin RepositoryActionsMixin {
         context,
         MaterialPageRoute(
           builder: (context) => RepositorySecurity(
-              repo: repository,
-              password: password!,
-              shareToken: shareToken!,
-              isBiometricsAvailable: isBiometricsAvailable),
+            repo: repository,
+            password: password!,
+            isBiometricsAvailable: isBiometricsAvailable,
+          ),
         ));
   }
 
-  Future<UnlockResult?> manualUnlock(
-      BuildContext context, RepoCubit repository) async {
+  Future<String?> manualUnlock(
+    BuildContext context,
+    RepoCubit repository,
+  ) async {
     final result = await manualUnlockDialog(context, repository: repository);
 
     if (result.isFailure) {
@@ -147,36 +130,30 @@ mixin RepositoryActionsMixin {
     return result.success;
   }
 
-  Future<Result<UnlockResult, String?>> manualUnlockDialog(BuildContext context,
-      {required RepoCubit repository}) async {
-    final result = await showDialog<UnlockResult>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageValidateLocalPassword,
-            body: UnlockDialog<UnlockResult>(
-                context: context,
-                repository: repository,
-                manualUnlockCallback: getShareTokenAtUnlock)));
+  Future<Result<String, String?>> manualUnlockDialog(
+    BuildContext context, {
+    required RepoCubit repository,
+  }) async {
+    final password = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => ActionsDialog(
+        title: S.current.messageValidateLocalPassword,
+        body: UnlockDialog<String>(
+          context: context,
+          repository: repository,
+        ),
+      ),
+    );
 
-    if (result == null) {
+    if (password == null) {
       // User cancelled
       return Failure(null);
     }
 
-    final accessMode = await result.shareToken.mode;
-    if (accessMode == AccessMode.blind) {
-      return Failure(S.current.messageUnlockRepoFailed);
-    }
-
-    return Success(result);
-  }
-
-  Future<UnlockResult> getShareTokenAtUnlock(repository,
-      {required String password}) async {
-    final token =
-        await repository.createShareToken(AccessMode.write, password: password);
-
-    return UnlockResult(password: password, shareToken: token);
+    return switch (await repository.getPasswordAccessMode(password)) {
+      AccessMode.write || AccessMode.read => Success(password),
+      AccessMode.blind => Failure(S.current.messageUnlockRepoFailed),
+    };
   }
 
   /// delete => ReposCubit.deleteRepository
@@ -238,7 +215,7 @@ mixin RepositoryActionsMixin {
               {required String password})
           cubitUnlockRepository}) async {
     final repoSettings = settings.repoSettingsById(databaseId)!;
-    final passwordMode = repoSettings.passwordMode();
+    final passwordMode = repoSettings.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
       final isBiometricsAvailable =
@@ -263,7 +240,7 @@ mixin RepositoryActionsMixin {
     final securePassword = settings.repoSettingsById(databaseId)!.getPassword();
 
     if (securePassword == null || securePassword.isEmpty) {
-      final message = PasswordMode == PasswordMode.none
+      final message = passwordMode == PasswordMode.none
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
       showSnackBar(context, message: message);

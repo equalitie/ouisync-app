@@ -9,13 +9,11 @@ import 'repo.dart';
 /// Cubit representing sync progress of a file.
 class FileProgress extends Cubit<int?> with AppLogger {
   FileProgress(RepoCubit repo, this.path) : super(null) {
-    _subscription = repo.handle.events
-        .startWith(null)
-        .asyncMapSample((_) => _fetch(repo))
-        .listen(
-          emit,
-          onError: (e, st) {}, // these errors are not important - ignore
-        );
+    _subscription =
+        repo.events.startWith(null).asyncMapSample((_) => _fetch(repo)).listen(
+              emit,
+              onError: (e, st) {}, // these errors are not important - ignore
+            );
 
     loggy.debug('$runtimeType for $path created');
   }

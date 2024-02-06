@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,8 +20,7 @@ class RepositorySettings extends StatefulWidget {
   final RepoCubit cubit;
 
   final Settings settings;
-  final Future<void> Function(
-      String oldName, String newName, Uint8List reopenToken) renameRepository;
+  final Future<void> Function(String oldName, String newName) renameRepository;
   final Future<void> Function(RepoLocation) deleteRepository;
 
   @override

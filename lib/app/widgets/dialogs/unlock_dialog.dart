@@ -6,20 +6,12 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class UnlockDialog<T> extends StatelessWidget with AppLogger {
-  UnlockDialog(
-      {Key? key,
-      required this.context,
-      required this.repository,
-      required this.manualUnlockCallback})
-      : super(key: key);
+  UnlockDialog({super.key, required this.context, required this.repository});
 
   final BuildContext context;
   final RepoCubit repository;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  final Future<T> Function(RepoCubit repository, {required String password})
-      manualUnlockCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -82,16 +74,11 @@ class UnlockDialog<T> extends StatelessWidget with AppLogger {
   }
 
   Future<void> _validatePasswordAndReturn(String? password) async {
-    final pwd = password;
-
-    if (pwd == null || pwd.isEmpty) {
+    if (password == null || password.isEmpty) {
       return;
     }
 
-    final result = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: manualUnlockCallback(repository, password: pwd));
-
-    Navigator.of(context).pop(result);
+    Navigator.of(context).pop(password);
   }
 
   List<Widget> _actions(context) => [

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class SpinningIcon extends AnimatedWidget {
-  const SpinningIcon(
-      {Key? key,
-      required this.controller,
-      required this.icon,
-      required this.onPressed})
-      : super(key: key, listenable: controller);
+  const SpinningIcon({
+    super.key,
+    required this.controller,
+    required this.icon,
+    required this.onPressed,
+  }) : super(listenable: controller);
 
   final VoidCallback onPressed;
   final Icon icon;

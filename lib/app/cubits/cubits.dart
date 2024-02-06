@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import 'background_service_manager.dart';
 import 'mount.dart';
 import 'navigation.dart';
 import 'power_control.dart';
@@ -11,7 +10,6 @@ import 'repos.dart';
 import 'state_monitor.dart';
 import 'upgrade_exists.dart';
 
-export 'background_service_manager.dart';
 export 'connectivity_info.dart';
 export 'file_progress.dart';
 export 'job.dart';
@@ -34,7 +32,6 @@ class Cubits {
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
-  final BackgroundServiceManager backgroundServiceManager;
   final PlatformWindowManager windowManager;
   final MountCubit mount;
   final NavigationCubit navigation;
@@ -44,7 +41,6 @@ class Cubits {
     required this.powerControl,
     required this.panicCounter,
     required this.upgradeExists,
-    required this.backgroundServiceManager,
     required this.windowManager,
     required this.mount,
     required this.navigation,
@@ -54,12 +50,11 @@ class Cubits {
     final upgradeExists = this.upgradeExists.state;
     final panicCount = panicCounter.state ?? 0;
     final isNetworkEnabled = powerControl.state.isNetworkEnabled ?? true;
-    final showWarning = backgroundServiceManager.showWarning();
     final mountState = mount.state;
 
     if (upgradeExists || panicCount > 0 || mountState is MountStateError) {
       return Constants.errorColor;
-    } else if (!isNetworkEnabled || showWarning) {
+    } else if (!isNetworkEnabled) {
       return Constants.warningColor;
     } else {
       return null;

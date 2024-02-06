@@ -1,4 +1,3 @@
-import 'v0/v0.dart' as v0;
 import 'v1.dart' as v1;
 import '../../utils/master_key.dart';
 
@@ -10,7 +9,7 @@ typedef Settings = v1.Settings;
 
 Future<Settings> loadAndMigrateSettings() async {
   final prefs = await SharedPreferences.getInstance();
-  var isVersionZero = !prefs.containsKey(v1.Settings.SETTINGS_KEY);
+  var isVersionZero = !prefs.containsKey(v1.Settings.settingsKey);
 
   final masterKey = await MasterKey.init();
 

@@ -9,8 +9,8 @@ class NegativeButton extends StatelessWidget {
     required this.buttonsAspectRatio,
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     this.focusNode,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? text;
   final GestureTapCallback? onPressed;

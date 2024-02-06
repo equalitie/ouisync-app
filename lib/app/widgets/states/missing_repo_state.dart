@@ -8,16 +8,16 @@ import '../../utils/utils.dart';
 
 class MissingRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
-  const MissingRepositoryState(
-      {required this.repositoryName,
-      required this.repositoryLocation,
-      required this.errorMessage,
-      this.errorDescription,
-      required this.settings,
-      required this.onReloadRepository,
-      required this.onDelete,
-      Key? key})
-      : super(key: key);
+  const MissingRepositoryState({
+    required this.repositoryName,
+    required this.repositoryLocation,
+    required this.errorMessage,
+    this.errorDescription,
+    required this.settings,
+    required this.onReloadRepository,
+    required this.onDelete,
+    super.key,
+  });
 
   final String repositoryName;
   final RepoLocation repositoryLocation;

@@ -4,7 +4,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import '../cubits/cubits.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
-import 'repo_location.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();

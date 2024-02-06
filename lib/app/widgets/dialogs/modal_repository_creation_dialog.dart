@@ -83,7 +83,6 @@ class RepositoryCreation extends HookWidget with AppLogger {
                   'repository needs to be deleted.');
             }
 
-            final repoName = state.repoLocation!.name;
             await cubit.deleteRepository(state.repoLocation!);
           },
           child: Form(

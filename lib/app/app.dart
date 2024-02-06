@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -7,63 +7,31 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart'
+    show Session, NativeChannels;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
 import 'pages/pages.dart';
+import 'session.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
-  final appDir = await getApplicationSupportDirectory();
-  final configPath = p.join(appDir.path, Constants.configDirName);
-  final logPath = await LogUtils.path;
+  _setupErrorReporting();
 
   final packageInfo = await PackageInfo.fromPlatform();
   final windowManager = await PlatformWindowManager.create(
     args,
     packageInfo.appName,
   );
-
-  final session = Session.create(
-    configPath: configPath,
-    logPath: logPath,
+  final session = await createSession(
+    packageInfo: packageInfo,
+    windowManager: windowManager,
+    logger: Loggy<AppLogger>('foreground'),
   );
-
-  windowManager.session = session;
-
-  // Make sure to only output logs after Session is created (which sets up the log subscriber),
-  // otherwise the logs will go nowhere.
-  Loggy.initLoggy(logPrinter: AppLogPrinter());
-
-  // When dumping log from logcat, we get logs from past ouisync runs as well,
-  // so add a line on each start of the app to know which part of the log
-  // belongs to the last app instance.
-  logInfo(
-      "-------------------- ${packageInfo.appName} Start --------------------");
-
-  _setupErrorReporting();
-
-  logDebug('app dir: ${appDir.path}');
-  logDebug('log dir: ${io.File(logPath).parent.path}');
-
-  await session.initNetwork(
-    defaultPortForwardingEnabled: true,
-    defaultLocalDiscoveryEnabled: true,
-  );
-
-  for (final host in Constants.storageServers) {
-    try {
-      await session.addStorageServer(host);
-    } catch (e) {
-      logError('failed to add storage server $host:', e);
-    }
-  }
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
@@ -113,8 +81,8 @@ class OuiSyncApp extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.packageInfo,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final PlatformWindowManager windowManager;
   final Session session;
@@ -127,7 +95,6 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final _mediaReceiver = MediaReceiver();
-  final _backgroundServiceManager = BackgroundServiceManager();
   final UpgradeExistsCubit _upgradeExists;
 
   _OuiSyncAppState(Session session, Settings settings)
@@ -160,7 +127,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
           final xFile = detail.files.firstOrNull;
           if (xFile != null) {
-            final file = io.File(xFile.path);
+            final file = File(xFile.path);
             _mediaReceiver.controller.add(file);
           }
         },
@@ -171,7 +138,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
           loggy.app('Drop exited: ${detail.localPosition}');
         },
         child: MainPage(
-          backgroundServiceManager: _backgroundServiceManager,
           mediaReceiver: _mediaReceiver,
           navigation: navigation,
           packageInfo: widget.packageInfo,
@@ -187,8 +153,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   Future<void> _init() async {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
     await widget.windowManager.initSystemTray();
-    await _backgroundServiceManager
-        .maybeRequestPermissionsAndStartService(context);
   }
 }
 

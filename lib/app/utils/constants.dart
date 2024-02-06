@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:loggy/loggy.dart';
 
 enum PasswordAction { add, change, remove, biometrics }
 
@@ -104,9 +103,8 @@ class Constants {
 
   static const String dokanUrl = "https://dokan-dev.github.io";
 
-  // List of available storage servers.
-  static const List<String> storageServers = [
-    "storage.ouisync.net", // TODO: remove
+  // List of available cache servers.
+  static const List<String> cacheServers = [
     "server-ca.ouisync.net",
   ];
 

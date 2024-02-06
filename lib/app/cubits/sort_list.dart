@@ -25,7 +25,7 @@ class SortListState extends Equatable {
 }
 
 class SortListCubit extends Cubit<SortListState> with AppLogger {
-  SortListCubit._(SortListState state) : super(state);
+  SortListCubit._(super.state);
 
   static SortListCubit create(
       {required SortBy sortBy,

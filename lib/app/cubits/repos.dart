@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
@@ -112,23 +111,23 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
   }
 
-  Future<void> setCurrent(RepoEntry? repo) async {
-    if (currentRepo == repo) {
+  Future<void> setCurrent(RepoEntry? entry) async {
+    if (currentRepo == entry) {
       return;
     }
 
-    oui.NativeChannels.setRepository(repo?.maybeCubit?.handle);
+    entry?.maybeCubit?.setCurrent();
 
     await _subscription?.cancel();
     _subscription = null;
 
-    if (repo is OpenRepoEntry) {
-      _subscription = repo.cubit.autoRefresh();
+    if (entry is OpenRepoEntry) {
+      _subscription = entry.cubit.autoRefresh();
     }
 
-    await _settings.setDefaultRepo(repo?.name);
+    await _settings.setDefaultRepo(entry?.name);
 
-    _currentRepo = repo;
+    _currentRepo = entry;
     changed();
   }
 
@@ -211,9 +210,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<void> _openRepository(RepoSettings repoSettings,
-      {bool setCurrent = false}) async {
-    var password = null;
+  Future<void> _openRepository(
+    RepoSettings repoSettings, {
+    bool setCurrent = false,
+  }) async {
+    String? password;
 
     if (repoSettings.hasPassword() &&
         !repoSettings.shouldCheckBiometricsBeforeUnlock()) {
@@ -311,8 +312,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
   }
 
-  Future<void> renameRepository(
-      String oldName, String newName, Uint8List reopenToken) async {
+  Future<void> renameRepository(String oldName, String newName) async {
     if (!_repos.containsKey(oldName)) {
       loggy.error("Error renaming repository \"$oldName\": Does not exist");
       return;
@@ -326,11 +326,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     final repoSettings = _settings.repoSettingsByName(oldName)!;
     final wasCurrent = currentRepoName == oldName;
+    final credentials = await _repos[oldName]?.maybeCubit?.credentials;
 
     await _forget(oldName);
 
     final renamed = await _renameRepositoryFiles(
-        oldInfo: repoSettings.location, newName: newName);
+      oldInfo: repoSettings.location,
+      newName: newName,
+    );
 
     if (!renamed) {
       loggy.app('The repository $oldName renaming failed');
@@ -350,7 +353,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
 
-    final repo = await _open(repoSettings, reopenToken: reopenToken);
+    final repo = await _open(repoSettings);
+
+    if (credentials != null) {
+      await repo.maybeCubit?.setCredentials(credentials);
+    }
 
     if (repo is ErrorRepoEntry) {
       await setCurrent(null);
@@ -397,8 +404,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<RepoEntry> _open(RepoSettings repoSettings,
-      {String? password, Uint8List? reopenToken}) async {
+  Future<RepoEntry> _open(
+    RepoSettings repoSettings, {
+    String? password,
+  }) async {
     final name = repoSettings.name;
     final store = repoSettings.location.path();
 
@@ -410,15 +419,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
             S.current.messageRepoMissingErrorDescription(name));
       }
 
-      final repo = reopenToken == null
-          ? await oui.Repository.open(_session,
-              store: store, password: password)
-          : await oui.Repository.reopen(session,
-              store: store, token: reopenToken);
+      final repo = await oui.Repository.open(
+        _session,
+        store: store,
+        password: password,
+      );
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,
-        handle: repo,
+        session: _session,
+        repo: repo,
         navigation: _navigation,
       );
 
@@ -451,11 +461,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       // TODO: readPassword and writePassword may be different, they can also
       // be null (together or separately). Consult documentation to
       // `Repository.create` for details.
-      final repo = await oui.Repository.create(_session,
-          store: store,
-          readPassword: password,
-          writePassword: password,
-          shareToken: token);
+      final repo = await oui.Repository.create(
+        _session,
+        store: store,
+        readPassword: password,
+        writePassword: password,
+        shareToken: token,
+      );
 
       // Enable server storage.
       // TODO: This should be configurable by the user
@@ -470,7 +482,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       await repo.setDhtEnabled(true);
       await repo.setPexEnabled(true);
 
-      var repoSettings;
+      RepoSettings? repoSettings;
 
       if (passwordMode == PasswordMode.manual) {
         repoSettings = await _settings.addRepoWithUserProvidedPassword(location,
@@ -485,7 +497,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings!,
-        handle: repo,
+        session: _session,
+        repo: repo,
         navigation: _navigation,
       );
 

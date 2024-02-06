@@ -6,7 +6,6 @@ import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../utils.dart';
@@ -15,12 +14,11 @@ import 'platform_window_manager.dart';
 class PlatformWindowManagerDesktop
     with WindowListener, AppLogger
     implements PlatformWindowManager {
-  Session? _session;
-
   final _systemTray = stray.SystemTray();
   final String _appName;
-  bool _showWindow = true;
+  var _showWindow = true;
   var _state = _State.open;
+  CloseHandler? _onClose;
 
   PlatformWindowManagerDesktop._(this._appName);
 
@@ -32,8 +30,8 @@ class PlatformWindowManagerDesktop
   }
 
   @override
-  set session(Session value) {
-    _session = value;
+  void onClose(CloseHandler handler) {
+    _onClose = handler;
   }
 
   @override
@@ -105,7 +103,6 @@ class PlatformWindowManagerDesktop
   @override
   void dispose() {
     windowManager.removeListener(this);
-
     _systemTray.destroy();
   }
 
@@ -171,8 +168,8 @@ class PlatformWindowManagerDesktop
   @override
   void onWindowClose() async {
     // By default (when state is `open`), closing the window only minimizes it to the tray. When
-    // the user clicks "Exit" in the tray menu, state is switched to `closing` and the session
-    // close is initiated. Window close prevention is still enabled so the session closing can
+    // the user clicks "Exit" in the tray menu, state is switched to `closing` and the onClose
+    // handler is called. Window close prevention is still enabled so the close handler can
     // complete. Afterwards the close prevention is disabled and the window is closed again, which
     // then actually closes the window and exits the app.
     switch (_state) {
@@ -180,7 +177,11 @@ class PlatformWindowManagerDesktop
         await windowManager.hide();
         break;
       case _State.closing:
-        await _session?.close();
+        final onClose = _onClose;
+        if (onClose != null) {
+          await onClose();
+        }
+
         _state = _State.closed;
         await windowManager.setPreventClose(false);
         await windowManager.close();

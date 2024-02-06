@@ -14,8 +14,8 @@ class ShareRepository extends StatefulWidget {
   const ShareRepository({
     required this.repository,
     required this.availableAccessModes,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;
@@ -88,8 +88,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
 
   Future<String> createShareToken(RepoCubit repo, AccessMode accessMode) async {
     final shareToken = await repo.createShareToken(accessMode);
-
-    return shareToken.token;
+    return shareToken.toString();
   }
 
   Future<void> _onChanged(AccessMode? accessMode) async {
@@ -220,12 +219,15 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                 }
 
                 Rect? origin;
+
                 /// We need the sharePositionOrigin parameter for iPads and macOS, or it would throw an exception.
                 if (Platform.isIOS || Platform.isMacOS) {
                   final renderBox = context.findRenderObject() as RenderBox?;
-                  origin = (renderBox?.localToGlobal(Offset.zero) ?? Offset(0.0, 0.0)) & (renderBox?.size ?? Size.zero);  
+                  origin = (renderBox?.localToGlobal(Offset.zero) ??
+                          Offset(0.0, 0.0)) &
+                      (renderBox?.size ?? Size.zero);
                 }
-              
+
                 await Share.share(_shareToken!, sharePositionOrigin: origin);
               }),
               Fields.constrainedText(S.current.labelShareLink,

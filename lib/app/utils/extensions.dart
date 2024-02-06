@@ -2,6 +2,24 @@ import 'package:flutter/material.dart';
 
 import 'utils.dart';
 
+extension AnyExtension<T> on T {
+  /// This is inspired by
+  /// [the let function in kotlin](https://kotlinlang.org/docs/scope-functions.html#let).
+  /// It allows us to call a non-member function using a postfix notation which is mostly useful
+  /// for null-aware function call chaining. For example, say we want a result of calling a
+  /// non-member function on an expression which might evaluate to null. Normally we would have to
+  /// do something like this:
+  ///
+  ///     var input = expression;
+  ///     return input != null ? fun(input) : null;
+  ///
+  /// This extension allows us to take advantage of the null-aware member access operator instead:
+  ///
+  ///     return expression?.let(fun);
+  ///
+  R let<R>(R Function(T) f) => f(this);
+}
+
 extension StringExtension on String {
   String capitalize() {
     return '${this[0].toUpperCase()}${substring(1)}';

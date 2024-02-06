@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-
 import 'platform.dart';
+
+typedef CloseHandler = Future<void> Function();
 
 abstract class PlatformWindowManager {
   static Future<PlatformWindowManager> create(
@@ -13,7 +13,8 @@ abstract class PlatformWindowManager {
           ? Future.value(PlatformWindowManagerMobile())
           : PlatformWindowManagerDesktop.create(args, appName);
 
-  set session(Session value);
+  /// Sets the function to be called when the app is about to be closed.
+  void onClose(CloseHandler handler);
 
   Future<bool> launchAtStartup(bool enable);
 
