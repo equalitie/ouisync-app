@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:loggy/loggy.dart';
 
 enum PasswordAction { add, change, remove, biometrics }
 

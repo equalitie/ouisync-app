@@ -12,8 +12,8 @@ import '../master_key.dart';
 import 'v0/v0.dart' as v0;
 
 class DatabaseId {
-  String _id;
-  DatabaseId(String databaseId) : _id = databaseId {}
+  final String _id;
+  DatabaseId(String databaseId) : _id = databaseId;
 
   @override
   String toString() => _id;
@@ -21,17 +21,17 @@ class DatabaseId {
 
 //--------------------------------------------------------------------
 
-abstract class _AuthMode {
+abstract class AuthMode {
   Map _toJson();
 
-  static _AuthMode? _fromJson(dynamic data) {
+  static AuthMode? fromJson(dynamic data) {
     var decoded = _AuthModePasswordProvidedByUser._fromJson(data);
     if (decoded != null) return decoded;
     return _AuthModePasswordStoredOnDevice._fromJson(data);
   }
 }
 
-class _AuthModePasswordProvidedByUser extends _AuthMode {
+class _AuthModePasswordProvidedByUser extends AuthMode {
   static String _tag() => "password-provided-by-user";
 
   @override
@@ -39,12 +39,16 @@ class _AuthModePasswordProvidedByUser extends _AuthMode {
         _tag(): null,
       };
 
-  static _AuthMode? _fromJson(dynamic data) {
-    if (data.containsKey(_tag())) return _AuthModePasswordProvidedByUser();
+  static AuthMode? _fromJson(dynamic data) {
+    if (data.containsKey(_tag())) {
+      return _AuthModePasswordProvidedByUser();
+    } else {
+      return null;
+    }
   }
 }
 
-class _AuthModePasswordStoredOnDevice extends _AuthMode {
+class _AuthModePasswordStoredOnDevice extends AuthMode {
   final String encryptedPwd;
   final bool confirmWithBiometrics;
 
@@ -68,7 +72,7 @@ class _AuthModePasswordStoredOnDevice extends _AuthMode {
         }
       };
 
-  static _AuthMode? _fromJson(dynamic data) {
+  static AuthMode? _fromJson(dynamic data) {
     final values = data[_tag()];
     if (values == null) return null;
     String? encryptedPwd = values["encryptedPwd"];
@@ -81,14 +85,14 @@ class _AuthModePasswordStoredOnDevice extends _AuthMode {
 
 //--------------------------------------------------------------------
 
-class _SettingsRepoEntry {
-  _AuthMode authMode;
+class SettingsRepoEntry {
+  AuthMode authMode;
   RepoLocation location;
 
   String get name => location.name;
   Directory get dir => location.dir;
 
-  _SettingsRepoEntry(this.authMode, this.location);
+  SettingsRepoEntry(this.authMode, this.location);
 
   Map toJson() {
     return {
@@ -97,24 +101,25 @@ class _SettingsRepoEntry {
     };
   }
 
-  factory _SettingsRepoEntry.fromJson(dynamic data) {
-    return _SettingsRepoEntry(_AuthMode._fromJson(data['authMode']!)!,
-        RepoLocation.fromDbPath(data['location']!));
+  factory SettingsRepoEntry.fromJson(dynamic data) {
+    return SettingsRepoEntry(
+      AuthMode.fromJson(data['authMode']!)!,
+      RepoLocation.fromDbPath(data['location']!),
+    );
   }
 }
 
 //--------------------------------------------------------------------
 
 class RepoSettings {
-  Settings _settings;
-  DatabaseId _databaseId;
-  _SettingsRepoEntry _entry;
+  final Settings _settings;
+  final DatabaseId _databaseId;
+  final SettingsRepoEntry _entry;
 
   RepoSettings(this._settings, this._databaseId, this._entry);
 
   RepoLocation get location => _entry.location;
   DatabaseId get databaseId => _databaseId;
-  _AuthMode get authMode => _entry.authMode;
   String get name => _entry.name;
   Directory get dir => _entry.dir;
 
@@ -132,7 +137,7 @@ class RepoSettings {
   }
 
   bool hasPassword() {
-    return authMode is _AuthModePasswordStoredOnDevice;
+    return _entry.authMode is _AuthModePasswordStoredOnDevice;
   }
 
   bool shouldCheckBiometricsBeforeUnlock() {
@@ -149,19 +154,17 @@ class RepoSettings {
     return null;
   }
 
-  PasswordMode passwordMode() {
-    return !hasPassword()
-        ? PasswordMode.manual
-        : shouldCheckBiometricsBeforeUnlock()
-            ? PasswordMode.bio
-            : PasswordMode.none;
-  }
+  PasswordMode get passwordMode => !hasPassword()
+      ? PasswordMode.manual
+      : shouldCheckBiometricsBeforeUnlock()
+          ? PasswordMode.bio
+          : PasswordMode.none;
 }
 
 //--------------------------------------------------------------------
 
 class SettingsRoot {
-  static const int VERSION = 1;
+  static const int version = 1;
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -172,8 +175,8 @@ class SettingsRoot {
   int? highestSeenProtocolNumber;
   // TODO: In order to preserve plausible deniability, make sure that when a
   // current repo is locked, that this value is set to `null`.
-  DatabaseId? currentRepo = null;
-  Map<DatabaseId, _SettingsRepoEntry> repos = {};
+  DatabaseId? currentRepo;
+  Map<DatabaseId, SettingsRepoEntry> repos = {};
 
   SettingsRoot._();
 
@@ -189,7 +192,7 @@ class SettingsRoot {
 
   Map<String, dynamic> toJson() {
     final r = {
-      'version': VERSION,
+      'version': version,
       'acceptedEqualitieValues': acceptedEqualitieValues,
       'showOnboarding': showOnboarding,
       'launchAtStartup': launchAtStartup,
@@ -210,15 +213,15 @@ class SettingsRoot {
 
     final data = json.decode(s);
 
-    int version = data['version'];
+    int inputVersion = data['version'];
 
-    if (version != VERSION) {
-      throw "Invalid settings version ($version)";
+    if (inputVersion != version) {
+      throw "Invalid settings version ($inputVersion)";
     }
 
-    final repos = <DatabaseId, _SettingsRepoEntry>{
+    final repos = <DatabaseId, SettingsRepoEntry>{
       for (var kv in data['repos']!.entries)
-        DatabaseId(kv.key): _SettingsRepoEntry.fromJson(kv.value)
+        DatabaseId(kv.key): SettingsRepoEntry.fromJson(kv.value)
     };
 
     String? currentRepo = data['currentRepo'];
@@ -236,7 +239,7 @@ class SettingsRoot {
 }
 
 class Settings with AppLogger {
-  static const String SETTINGS_KEY = "settings";
+  static const String settingsKey = "settings";
 
   final SettingsRoot _root;
   final SharedPreferences _prefs;
@@ -247,17 +250,17 @@ class Settings with AppLogger {
   Settings._(this._root, this._prefs, this._masterKey);
 
   Future<void> _storeRoot() async {
-    await _prefs.setString(SETTINGS_KEY, json.encode(_root.toJson()));
+    await _prefs.setString(settingsKey, json.encode(_root.toJson()));
   }
 
   static Future<Settings> init(
       SharedPreferences prefs, MasterKey masterKey) async {
-    final json = prefs.getString(SETTINGS_KEY);
+    final json = prefs.getString(settingsKey);
     final root = SettingsRoot.fromJson(json);
 
     if (prefs.getKeys().length > 1) {
       // The previous migration did not finish correctly, prefs should only
-      // `SETTINGS_KEY` key after success.
+      // `settingsKey` key after success.
       await Settings._removeValuesFromV0(prefs);
     }
 
@@ -274,13 +277,13 @@ class Settings with AppLogger {
     final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
     final currentRepo = s0.getDefaultRepo();
 
-    final Map<DatabaseId, _SettingsRepoEntry> repos = HashMap();
+    final Map<DatabaseId, SettingsRepoEntry> repos = HashMap();
 
     for (final repo in s0.repos()) {
       final id = DatabaseId(repo.databaseId);
       final auth = s0.getAuthenticationMode(repo.name);
-      var newAuth = null;
-      var oldPwdStorage = null;
+      AuthMode? newAuth;
+      v0.SecureStorage? oldPwdStorage;
       switch (auth) {
         case v0.AuthMode.manual:
           newAuth = _AuthModePasswordProvidedByUser();
@@ -302,7 +305,7 @@ class Settings with AppLogger {
       if (oldPwdStorage != null) {
         await oldPwdStorage.deletePassword();
       }
-      repos[id] = _SettingsRepoEntry(newAuth, repo.info);
+      repos[id] = SettingsRepoEntry(newAuth, repo.info);
     }
 
     final root = SettingsRoot(
@@ -329,7 +332,7 @@ class Settings with AppLogger {
   // settings.
   static Future<void> _removeValuesFromV0(SharedPreferences prefs) async {
     for (final key in prefs.getKeys()) {
-      if (key != SETTINGS_KEY) {
+      if (key != settingsKey) {
         await prefs.remove(key);
       }
     }
@@ -388,17 +391,13 @@ class Settings with AppLogger {
   //------------------------------------------------------------------
 
   RepoSettings? repoSettingsByName(String name) {
-    var e = null;
     for (final kv in _root.repos.entries) {
       if (kv.value.name == name) {
-        e = kv;
-        break;
+        return RepoSettings(this, kv.key, kv.value);
       }
     }
-    if (e == null) {
-      return null;
-    }
-    return RepoSettings(this, e.key, e.value);
+
+    return null;
   }
 
   RepoSettings? repoSettingsById(DatabaseId repoId) {
@@ -413,20 +412,20 @@ class Settings with AppLogger {
     final current = _root.currentRepo;
     if (current == null) {
       return null;
+    } else {
+      return _root.repos[current]?.location.name;
     }
-    _root.repos[current]?.location.name;
   }
 
   Future<void> setDefaultRepo(String? name) async {
-    if (_root.currentRepo == name) {
-      return;
-    }
-
     if (name == null) {
+      if (_root.currentRepo == null) {
+        return;
+      }
       _root.currentRepo = null;
     } else {
       final rs = repoSettingsByName(name);
-      if (rs == null) {
+      if (rs == null || rs.name == name) {
         return;
       }
       // We must not set repositories for which the user provides the password
@@ -440,7 +439,6 @@ class Settings with AppLogger {
 
     await _storeRoot();
   }
-
   //------------------------------------------------------------------
 
   Future<void> renameRepository(
@@ -482,11 +480,10 @@ class Settings with AppLogger {
   Future<RepoSettings?> _addRepo(
     RepoLocation location, {
     required DatabaseId databaseId,
-    required _AuthMode authMode,
+    required AuthMode authMode,
   }) async {
     if (_root.repos.containsKey(databaseId)) {
-      loggy.debug(
-          'Settings already contains a repo with the id "${databaseId}"');
+      loggy.debug('Settings already contains a repo with the id "$databaseId"');
       return null;
     }
 
@@ -496,7 +493,7 @@ class Settings with AppLogger {
       return null;
     }
 
-    final entry = _SettingsRepoEntry(authMode, location);
+    final entry = SettingsRepoEntry(authMode, location);
     _root.repos[databaseId] = entry;
 
     await _storeRoot();

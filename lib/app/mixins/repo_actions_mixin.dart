@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:result_type/result_type.dart';
 
@@ -8,12 +9,11 @@ import '../models/models.dart';
 import '../pages/pages.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../utils/settings/v0/secure_storage.dart';
 import '../widgets/widgets.dart';
 
 typedef CheckForBiometricsFunction = Future<bool?> Function();
 
-mixin RepositoryActionsMixin on AppLogger {
+mixin RepositoryActionsMixin on LoggyType {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(
     BuildContext context, {
@@ -78,7 +78,7 @@ mixin RepositoryActionsMixin on AppLogger {
   }) async {
     String? password;
     final repoSettings = repository.repoSettings;
-    final passwordMode = repoSettings.passwordMode();
+    final passwordMode = repoSettings.passwordMode;
 
     final isBiometricsAvailable =
         await SecurityValidations.canCheckBiometrics();
@@ -104,9 +104,10 @@ mixin RepositoryActionsMixin on AppLogger {
         context,
         MaterialPageRoute(
           builder: (context) => RepositorySecurity(
-              repo: repository,
-              password: password!,
-              isBiometricsAvailable: isBiometricsAvailable),
+            repo: repository,
+            password: password!,
+            isBiometricsAvailable: isBiometricsAvailable,
+          ),
         ));
   }
 
@@ -214,7 +215,7 @@ mixin RepositoryActionsMixin on AppLogger {
               {required String password})
           cubitUnlockRepository}) async {
     final repoSettings = settings.repoSettingsById(databaseId)!;
-    final passwordMode = repoSettings.passwordMode();
+    final passwordMode = repoSettings.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
       final isBiometricsAvailable =
@@ -239,7 +240,7 @@ mixin RepositoryActionsMixin on AppLogger {
     final securePassword = settings.repoSettingsById(databaseId)!.getPassword();
 
     if (securePassword == null || securePassword.isEmpty) {
-      final message = PasswordMode == PasswordMode.none
+      final message = passwordMode == PasswordMode.none
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
       showSnackBar(context, message: message);

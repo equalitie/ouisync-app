@@ -20,15 +20,8 @@ class RepositorySettings extends StatefulWidget {
   final RepoCubit cubit;
 
   final Settings settings;
-<<<<<<< HEAD
-  final Future<void> Function(
-      String oldName, String newName, Uint8List reopenToken) renameRepository;
-  final Future<void> Function(RepoLocation) deleteRepository;
-=======
   final Future<void> Function(String oldName, String newName) renameRepository;
-  final Future<void> Function(RepoMetaInfo info, AuthMode authMode)
-      deleteRepository;
->>>>>>> b448ecee (Update to the new local secrets / access mode API)
+  final Future<void> Function(RepoLocation) deleteRepository;
 
   @override
   State<RepositorySettings> createState() => _RepositorySettingsState();

@@ -112,9 +112,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required oui.Repository repo,
     required NavigationCubit navigation,
   }) async {
-    var name = repoSettings.name;
-
-    var state = RepoState(passwordMode: repoSettings.passwordMode());
+    var state = RepoState(passwordMode: repoSettings.passwordMode);
 
     state = state.copyWith(
         infoHash: await repo.infoHash,
@@ -417,7 +415,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return true;
     } catch (e, st) {
       loggy.error(
-          'Password change for repository ${metaInfo.name} failed', e, st);
+          'Password change for repository ${location.name} failed', e, st);
       return false;
     } finally {
       await _repo.setCredentials(credentials);

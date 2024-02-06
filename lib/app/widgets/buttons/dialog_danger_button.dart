@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../utils/utils.dart';
 
 class DangerButton extends StatelessWidget {
-  const DangerButton({required this.text, required this.onPressed, Key? key})
-      : super(key: key);
+  const DangerButton({required this.text, required this.onPressed, super.key});
 
   final String? text;
   final GestureTapCallback? onPressed;

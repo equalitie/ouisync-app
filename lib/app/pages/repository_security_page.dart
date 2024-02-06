@@ -12,20 +12,11 @@ import '../models/models.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurity extends StatefulWidget {
-<<<<<<< HEAD
-  const RepositorySecurity(
-      {required this.repo,
-      required this.password,
-      required this.shareToken,
-      required this.isBiometricsAvailable});
-=======
   const RepositorySecurity({
     required this.repo,
     required this.password,
     required this.isBiometricsAvailable,
-    required this.authenticationMode,
   });
->>>>>>> b448ecee (Update to the new local secrets / access mode API)
 
   final RepoCubit repo;
   final String password;

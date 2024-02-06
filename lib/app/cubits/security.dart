@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
-import '../utils/settings/v0/secure_storage.dart';
-import '../widgets/inputs/password_validation_input.dart';
 import 'cubits.dart';
 
 class SecurityState extends Equatable {
@@ -55,16 +53,16 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
   RepoSettings get repoSettings => _repoCubit.repoSettings;
 
-  void setShareToken(ShareToken shareToken) => _shareToken = shareToken;
-
-  static SecurityCubit create(
-      {required RepoCubit repoCubit,
-      required bool isBiometricsAvailable,
-      required String password}) {
+  static SecurityCubit create({
+    required RepoCubit repoCubit,
+    required bool isBiometricsAvailable,
+    required String password,
+  }) {
     var initialState = SecurityState(
-        isBiometricsAvailable: isBiometricsAvailable,
-        passwordMode: repoCubit.repoSettings.passwordMode(),
-        password: password);
+      isBiometricsAvailable: isBiometricsAvailable,
+      passwordMode: repoCubit.repoSettings.passwordMode,
+      password: password,
+    );
 
     return SecurityCubit._(repoCubit, initialState);
   }
@@ -125,7 +123,8 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   }
 
   Future<String?> updateUnlockRepoWithBiometrics(
-      bool unlockWithBiometrics) async {
+    bool unlockWithBiometrics,
+  ) async {
     // TODO: If any of the async functions here fail, the user may lose their data.
     if (unlockWithBiometrics == false) {
       emitUnlockWithBiometrics(false);
@@ -141,8 +140,10 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     }
 
     try {
-      repoSettings.setAuthModePasswordStoredOnDevice(
-          newPassword, unlockWithBiometrics);
+      await repoSettings.setAuthModePasswordStoredOnDevice(
+        newPassword,
+        unlockWithBiometrics,
+      );
     } catch (e) {
       return S.current.messageErrorUpdatingSecureStorage;
     }

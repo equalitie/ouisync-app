@@ -8,7 +8,7 @@ import '../utils/utils.dart';
 class QRScanner extends StatefulWidget {
   final plugin.Session session;
 
-  const QRScanner(this.session, {Key? key}) : super(key: key);
+  const QRScanner(this.session, {super.key});
 
   @override
   State<QRScanner> createState() => _QRScannerState();

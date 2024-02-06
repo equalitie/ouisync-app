@@ -14,7 +14,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../mixins/mixins.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';

@@ -81,8 +81,8 @@ class OuiSyncApp extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.packageInfo,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final PlatformWindowManager windowManager;
   final Session session;

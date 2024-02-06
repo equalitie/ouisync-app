@@ -31,7 +31,8 @@ class AboutSection extends SettingsSection with AppLogger {
           title: S.current.titleAbout,
         ) {
     _launchAtStartup = ValueNotifier<bool>(
-        cubits.repositories.settings.getLaunchAtStartup() ?? true);
+      cubits.repositories.settings.getLaunchAtStartup(),
+    );
   }
 
   final Session session;

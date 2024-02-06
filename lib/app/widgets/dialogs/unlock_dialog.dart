@@ -6,8 +6,7 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class UnlockDialog<T> extends StatelessWidget with AppLogger {
-  UnlockDialog({Key? key, required this.context, required this.repository})
-      : super(key: key);
+  UnlockDialog({super.key, required this.context, required this.repository});
 
   final BuildContext context;
   final RepoCubit repository;

@@ -10,8 +10,8 @@ class AccessModeSelector extends StatefulWidget {
     required this.availableAccessMode,
     required this.onChanged,
     required this.onDisabledMessage,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final AccessMode currentAccessMode;
   final List<AccessMode> availableAccessMode;

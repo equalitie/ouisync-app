@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' show Repository, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'utils/log.dart';
-import 'utils/settings.dart';
+import 'utils/settings/settings.dart';
 
 /// If not data is sent or received within this period we consider the sync to be complete (either
 /// because everything has been synced or because no peer has anything we need).
@@ -27,7 +27,7 @@ void syncInBackground() async {
   final start = DateTime.now();
 
   try {
-    final settings = await Settings.init();
+    final settings = await loadAndMigrateSettings();
     final repos = await _fetchRepositories(session, settings);
 
     await Future.any([
@@ -48,9 +48,9 @@ Future<List<Repository>> _fetchRepositories(
   Session session,
   Settings settings,
 ) =>
-    Future.wait(settings
-        .repos()
-        .map((entry) => Repository.open(session, store: entry.info.path())));
+    Future.wait(settings.repos().map(
+          (entry) => Repository.open(session, store: entry.location.path()),
+        ));
 
 Future<void> _waitForAllSynced(List<Repository> repos) async {
   await Future.wait(repos.map((repo) => _waitForSynced(repo)));

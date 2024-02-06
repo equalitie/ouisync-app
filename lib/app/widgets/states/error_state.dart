@@ -5,12 +5,12 @@ import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class ErrorState extends HookWidget {
-  const ErrorState(
-      {required this.errorMessage,
-      this.errorDescription,
-      required this.onReload,
-      Key? key})
-      : super(key: key);
+  const ErrorState({
+    required this.errorMessage,
+    this.errorDescription,
+    required this.onReload,
+    super.key,
+  });
 
   final String errorMessage;
   final String? errorDescription;

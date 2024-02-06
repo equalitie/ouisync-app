@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/utils/log.dart';
 import '../utils/utils.dart';
 
 class NavigationState {

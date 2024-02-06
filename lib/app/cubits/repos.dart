@@ -210,9 +210,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<void> _openRepository(RepoSettings repoSettings,
-      {bool setCurrent = false}) async {
-    var password = null;
+  Future<void> _openRepository(
+    RepoSettings repoSettings, {
+    bool setCurrent = false,
+  }) async {
+    String? password;
 
     if (repoSettings.hasPassword() &&
         !repoSettings.shouldCheckBiometricsBeforeUnlock()) {
@@ -351,7 +353,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
 
-    final repo = await _open(newSettingsRepoEntry);
+    final repo = await _open(repoSettings);
 
     if (credentials != null) {
       await repo.maybeCubit?.setCredentials(credentials);
@@ -480,7 +482,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       await repo.setDhtEnabled(true);
       await repo.setPexEnabled(true);
 
-      var repoSettings;
+      RepoSettings? repoSettings;
 
       if (passwordMode == PasswordMode.manual) {
         repoSettings = await _settings.addRepoWithUserProvidedPassword(location,

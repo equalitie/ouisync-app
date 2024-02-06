@@ -6,13 +6,7 @@ import 'package:result_type/result_type.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-<<<<<<< HEAD
-import '../../mixins/repo_actions_mixin.dart';
-import '../../utils/settings/v0/secure_storage.dart';
-import '../../models/models.dart';
-=======
-import '../../storage/secure_storage.dart';
->>>>>>> b448ecee (Update to the new local secrets / access mode API)
+import '../../models/password_mode.dart';
 import '../../utils/utils.dart';
 import '../../utils/platform/platform.dart';
 import '../widgets.dart';
@@ -75,7 +69,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
 
   Future<bool> _userAuthentication() async {
     final repoSettings = widget.repoCubit.repoSettings;
-    final passwordMode = repoSettings.passwordMode();
+    final passwordMode = repoSettings.passwordMode;
 
     String currentPassword = '';
 

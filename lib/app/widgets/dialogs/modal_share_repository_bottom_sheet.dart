@@ -14,8 +14,8 @@ class ShareRepository extends StatefulWidget {
   const ShareRepository({
     required this.repository,
     required this.availableAccessModes,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;
