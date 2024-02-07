@@ -8,11 +8,10 @@ import 'platform.dart';
 class MediaReceiverMobile with AppLogger implements MediaReceiver {
   MediaReceiverMobile() {
     _setupReceivingMediaIntents();
-    _setupReceivingTextIntents();
   }
 
   @override
-  StreamController controller = StreamController<dynamic>();
+  StreamController controller = StreamController<SharedMediaFile>();
 
   StreamSubscription? _mediaIntentSubscription;
   StreamSubscription? _textIntentSubscription;
@@ -45,26 +44,6 @@ class MediaReceiverMobile with AppLogger implements MediaReceiver {
       loggy.app(
           'Media shared: ${(listOfMedia.map((f) => f.path).join(","))} (intent)');
       controller.add(listOfMedia);
-    });
-  }
-
-  // For receiving share tokens intents.
-  void _setupReceivingTextIntents() {
-    // For sharing intents coming from outside the app while the app is in the memory.
-    _textIntentSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String text) {
-      controller.add(text);
-    }, onError: (err) {
-      loggy.app("Error: $err (intent_listener)");
-    });
-
-    // For sharing intents coming from outside the app while the app is closed.
-    ReceiveSharingIntent.getInitialText().then((String? text) {
-      if (text == null) {
-        return;
-      }
-
-      controller.add(text);
     });
   }
 

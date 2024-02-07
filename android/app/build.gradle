@@ -36,14 +36,10 @@ android {
         checkReleaseBuilds false
     }
 
-
-    // This was suggested as a solution for this exception:
+    // Fix for:
     //
-    // Caused by: org.gradle.api.InvalidUserCodeException: Inconsistent JVM-target compatibility
-    // detected for tasks 'compileDebugJavaWithJavac' (1.8) and 'compileDebugKotlin' (17).
-    //
-    // But it doesn't seems to do anything.
-    // TODO: Remove it? try to make it work?
+    // Inconsistent JVM-target compatibility detected for tasks 'compileDebugJavaWithJavac'
+    // (1.8) and 'compileDebugKotlin' (17).
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
