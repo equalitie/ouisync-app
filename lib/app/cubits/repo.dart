@@ -200,7 +200,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return await _repo.createShareToken(
       accessMode: accessMode,
       name: name,
-      password: password,
+      secret: password != null ? oui.LocalPassword(password) : null,
     );
   }
 
@@ -397,18 +397,19 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       // the correct write password we end up in write mode. If it's the correct read password we
       // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
       // in, we change the corresponding password to `newPassword`.
-      await _repo.setAccessMode(oui.AccessMode.write, password: oldPassword);
+      await _repo.setAccessMode(oui.AccessMode.write,
+          secret: oui.LocalPassword(oldPassword));
 
       switch (await _repo.accessMode) {
         case oui.AccessMode.write:
           await _repo.setAccess(
-            read: oui.EnableAccess(newPassword),
-            write: oui.EnableAccess(newPassword),
+            read: oui.EnableAccess(oui.LocalPassword(newPassword)),
+            write: oui.EnableAccess(oui.LocalPassword(newPassword)),
           );
           break;
         case oui.AccessMode.read:
           await _repo.setAccess(
-            read: oui.EnableAccess(newPassword),
+            read: oui.EnableAccess(oui.LocalPassword(newPassword)),
           );
           break;
         case oui.AccessMode.blind:
@@ -432,7 +433,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final credentials = await _repo.credentials;
 
     try {
-      await _repo.setAccessMode(oui.AccessMode.write, password: password);
+      await _repo.setAccessMode(oui.AccessMode.write,
+          secret: oui.LocalPassword(password));
       return await _repo.accessMode;
     } finally {
       await _repo.setCredentials(credentials);

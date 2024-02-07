@@ -426,7 +426,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final repo = await oui.Repository.open(
         _session,
         store: store,
-        password: password,
+        secret: password != null ? oui.LocalPassword(password) : null,
       );
 
       final cubit = await RepoCubit.create(
@@ -469,8 +469,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final repo = await oui.Repository.create(
         _session,
         store: store,
-        readPassword: password,
-        writePassword: password,
+        readSecret: oui.LocalPassword(password),
+        writeSecret: oui.LocalPassword(password),
         shareToken: token,
       );
 
