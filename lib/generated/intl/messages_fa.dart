@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
   static String m0(access) =>
-      "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد :${access}";
+      "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد: ${access}";
 
   static String m1(name) => "احرازهویت بیومتریکی برای مخزن اضافه شد";
 

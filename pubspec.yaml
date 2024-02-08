@@ -119,7 +119,7 @@ dev_dependencies:
   image: ^4.1.3
   # Use this command to generate internationalization files if you're not using
   # the vscode plugin:
-  # # flutter pub run intl_utils:generate
+  # # dart run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^3.0.0
   msix: ^3.16.4
