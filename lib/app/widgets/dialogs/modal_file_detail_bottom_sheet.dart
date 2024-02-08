@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,6 +23,7 @@ class FileDetail extends StatefulWidget {
     required this.onMoveEntry,
     required this.isActionAvailableValidator,
     required this.packageInfo,
+    required this.nativeChannels,
   });
 
   final RepoCubit cubit;
@@ -32,6 +34,7 @@ class FileDetail extends StatefulWidget {
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
   final PackageInfo packageInfo;
+  final NativeChannels nativeChannels;
 
   @override
   State<FileDetail> createState() => _FileDetailState();
@@ -93,7 +96,8 @@ class _FileDetailState extends State<FileDetail> {
                   iconData: Icons.share_rounded,
                   title: S.current.iconShare,
                   dense: true,
-                  onTap: () async => await NativeChannels.shareOuiSyncFile(
+                  onTap: () async =>
+                      await widget.nativeChannels.shareOuiSyncFile(
                     widget.packageInfo.packageName,
                     widget.data.path,
                     widget.data.size ?? 0,

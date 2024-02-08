@@ -9,7 +9,9 @@ import 'app/app.dart';
 import 'env/env.dart';
 
 /// How often the background syncing runs
-const _syncInBackgroundPeriod = Duration(minutes: 15);
+// TODO: using short period of 5 minutes for now to simplify debugging but once things stabilize
+// a bit we should increase it (say to 15 minutes) to reduce battery drain.
+const _syncInBackgroundPeriod = Duration(minutes: 5);
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
+import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:path/path.dart' as p;
@@ -22,15 +23,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   bool _isLoading = false;
   RepoEntry? _currentRepo;
   final oui.Session _session;
+  final NativeChannels _nativeChannels;
   StreamSubscription<void>? _subscription;
   final Settings _settings;
   final NavigationCubit _navigation;
 
   ReposCubit({
     required session,
+    required nativeChannels,
     required settings,
     required navigation,
   })  : _session = session,
+        _nativeChannels = nativeChannels,
         _settings = settings,
         _navigation = navigation;
 
@@ -428,6 +432,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,
         session: _session,
+        nativeChannels: _nativeChannels,
         repo: repo,
         navigation: _navigation,
       );
@@ -498,6 +503,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings!,
         session: _session,
+        nativeChannels: _nativeChannels,
         repo: repo,
         navigation: _navigation,
       );

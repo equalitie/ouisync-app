@@ -8,6 +8,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:shelf/shelf_io.dart' as io;
 
@@ -92,12 +93,14 @@ class RepoState extends Equatable {
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Folder _currentFolder = Folder();
   final oui.Session _session;
+  final NativeChannels _nativeChannels;
   final oui.Repository _repo;
   final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
 
   RepoCubit._(
     this._session,
+    this._nativeChannels,
     this._repo,
     this._repoSettings,
     this._navigation,
@@ -109,6 +112,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   static Future<RepoCubit> create({
     required RepoSettings repoSettings,
     required oui.Session session,
+    required NativeChannels nativeChannels,
     required oui.Repository repo,
     required NavigationCubit navigation,
   }) async {
@@ -122,6 +126,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     return RepoCubit._(
       session,
+      nativeChannels,
       repo,
       repoSettings,
       navigation,
@@ -138,7 +143,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Stream<void> get events => _repo.events;
 
   void setCurrent() {
-    oui.NativeChannels.setRepository(_repo);
+    _nativeChannels.repository = _repo;
   }
 
   void updateNavigation({required bool isFolder}) {

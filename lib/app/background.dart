@@ -13,7 +13,7 @@ const _syncInactivityPeriod = Duration(seconds: 30);
 /// This function gets called periodically to ensure syncing happens even when the app is in the
 /// background.
 @pragma('vm:entry-point')
-void syncInBackground() async {
+Future<void> syncInBackground() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final logger = Loggy<AppLogger>('background');
 

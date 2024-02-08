@@ -7,8 +7,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart'
-    show Session, NativeChannels;
+import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
+import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -76,16 +76,17 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 }
 
 class OuiSyncApp extends StatefulWidget {
-  const OuiSyncApp({
+  OuiSyncApp({
     required this.windowManager,
     required this.session,
     required this.settings,
     required this.packageInfo,
     super.key,
-  });
+  }) : nativeChannels = NativeChannels(session);
 
   final PlatformWindowManager windowManager;
   final Session session;
+  final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
 
@@ -104,9 +105,6 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   @override
   void initState() {
     super.initState();
-
-    NativeChannels.init();
-
     unawaited(_init());
   }
 
@@ -142,6 +140,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
           navigation: navigation,
           packageInfo: widget.packageInfo,
           session: widget.session,
+          nativeChannels: widget.nativeChannels,
           settings: widget.settings,
           upgradeExists: _upgradeExists,
           windowManager: widget.windowManager,

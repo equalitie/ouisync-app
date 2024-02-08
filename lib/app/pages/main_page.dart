@@ -34,6 +34,7 @@ class MainPage extends StatefulWidget {
   const MainPage({
     required this.windowManager,
     required this.session,
+    required this.nativeChannels,
     required this.settings,
     required this.mediaReceiver,
     required this.upgradeExists,
@@ -43,6 +44,7 @@ class MainPage extends StatefulWidget {
 
   final PlatformWindowManager windowManager;
   final Session session;
+  final NativeChannels nativeChannels;
   final Settings settings;
   final MediaReceiver mediaReceiver;
   final UpgradeExistsCubit upgradeExists;
@@ -53,6 +55,7 @@ class MainPage extends StatefulWidget {
   State<StatefulWidget> createState() => _MainPageState(
         windowManager: windowManager,
         session: session,
+        nativeChannels: nativeChannels,
         settings: settings,
         upgradeExists: upgradeExists,
         navigation: navigation,
@@ -83,12 +86,14 @@ class _MainPageState extends State<MainPage>
   factory _MainPageState({
     required PlatformWindowManager windowManager,
     required Session session,
+    required NativeChannels nativeChannels,
     required Settings settings,
     required UpgradeExistsCubit upgradeExists,
     required NavigationCubit navigation,
   }) {
     final repositories = ReposCubit(
       session: session,
+      nativeChannels: nativeChannels,
       settings: settings,
       navigation: navigation,
     );
@@ -485,7 +490,7 @@ class _MainPageState extends State<MainPage>
     if (io.Platform.isAndroid) {
       // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
 
-      final previewResult = await NativeChannels.previewOuiSyncFile(
+      final previewResult = await widget.nativeChannels.previewOuiSyncFile(
         widget.packageInfo.packageName,
         item.path,
         item.size ?? 0,
@@ -632,6 +637,7 @@ class _MainPageState extends State<MainPage>
                 moveEntry(repoCubit, origin, path, type),
             isActionAvailableValidator: _isEntryActionAvailable,
             packageInfo: widget.packageInfo,
+            nativeChannels: widget.nativeChannels,
           );
         });
   }
