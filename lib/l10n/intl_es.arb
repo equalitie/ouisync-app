@@ -871,5 +871,13 @@
   "messagePeerExchangeWikipedia": "Intercambio entre pares en Wikipedia",
   "@messagePeerExchangeWikipedia": {},
   "messagePIPEDA": "PIPEDA",
-  "@messagePIPEDA": {}
+  "@messagePIPEDA": {},
+  "messageInfoRuntimeID": "Es un identificador único generado por Ouisync cada vez que inicia.\n\nPuedes usarlo para confirmar tu conexión con otros en la sección Pares de la aplicación",
+  "@messageInfoRuntimeID": {},
+  "messageInfoPeerExchange": "Es una herramienta para intercambiar la lista de pares con los pares a los que estás conectado",
+  "@messageInfoPeerExchange": {},
+  "messageNATOnWikipedia": "NAT en Wikipedia",
+  "@messageNATOnWikipedia": {},
+  "messageInfoBittorrentDHT": "Es una herramienta que permite a los pares encontrarse entre si en la red P2P (red de pares) sin un servidor central",
+  "@messageInfoBittorrentDHT": {}
 }
