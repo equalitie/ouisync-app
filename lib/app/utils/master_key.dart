@@ -13,11 +13,7 @@ class MasterKey {
   MasterKey._(Key masterKey) : _encrypter = Encrypter(Salsa20(masterKey));
 
   static Future<MasterKey> init() async {
-    // Don't use the `encryptedSharedPreferences: true` option as that is
-    // available only on Android version >= 7.0.  Before that, and since
-    // Android 4.3 (API level 18), the KeyStore was used, and that is enough
-    // for our use case.
-    final storage = FlutterSecureStorage(aOptions: AndroidOptions());
+    final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
     // Ensure nothing else tries to initialize the MasterKey concurrently or data
     // loss could happen.
@@ -69,3 +65,8 @@ class MasterKey {
   @visibleForTesting
   static String generateKey() => Key.fromLength(_keyLengthInBytes).base64;
 }
+
+// I think we need the `encryptedSharedPreferense: true` option on Android,
+// otherwise we the stored values don't seem to be preserved after app restart.
+AndroidOptions _getAndroidOptions() =>
+    const AndroidOptions(encryptedSharedPreferences: true);
