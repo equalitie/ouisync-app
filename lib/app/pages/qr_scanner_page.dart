@@ -70,7 +70,10 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
     return MobileScanner(
         controller: cameraController,
         onDetect: (capture) async {
-          final code = capture.raw;
+          String? code;
+          if (capture.raw.isNotEmpty) {
+            code = capture.raw[0]['rawValue'];
+          }
 
           if (code == null) {
             loggy.debug('Failed to scan Barcode');
