@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
-import '../models/models.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -17,7 +16,6 @@ class CreateRepositoryState extends Equatable {
 
   final AccessMode accessModeGranted;
   final String suggestedName;
-  final RepoLocation? repoLocation;
 
   final bool obscurePassword;
   final bool obscureRetypePassword;
@@ -27,8 +25,6 @@ class CreateRepositoryState extends Equatable {
   final bool showSavePasswordWarning;
   final bool showRepositoryNameInUseWarning;
 
-  final bool deleteRepositoryBeforePop;
-
   CreateRepositoryState(
       {required this.isBiometricsAvailable,
       required this.shareToken,
@@ -37,14 +33,12 @@ class CreateRepositoryState extends Equatable {
       required this.addPassword,
       required this.accessModeGranted,
       required this.suggestedName,
-      required this.repoLocation,
       required this.obscurePassword,
       required this.obscureRetypePassword,
       required this.showSuggestedName,
       required this.showAccessModeMessage,
       required this.showSavePasswordWarning,
-      required this.showRepositoryNameInUseWarning,
-      required this.deleteRepositoryBeforePop});
+      required this.showRepositoryNameInUseWarning});
 
   CreateRepositoryState copyWith(
           {bool? isBiometricsAvailable,
@@ -54,14 +48,12 @@ class CreateRepositoryState extends Equatable {
           bool? addPassword,
           AccessMode? accessModeGranted,
           String? suggestedName,
-          RepoLocation? repoLocation,
           bool? obscurePassword,
           bool? obscureRetypePassword,
           bool? showSuggestedName,
           bool? showAccessModeMessage,
           bool? showSavePasswordWarning,
-          bool? showRepositoryNameInUseWarning,
-          bool? deleteRepositoryBeforePop}) =>
+          bool? showRepositoryNameInUseWarning}) =>
       CreateRepositoryState(
           isBiometricsAvailable:
               isBiometricsAvailable ?? this.isBiometricsAvailable,
@@ -72,7 +64,6 @@ class CreateRepositoryState extends Equatable {
           addPassword: addPassword ?? this.addPassword,
           accessModeGranted: accessModeGranted ?? this.accessModeGranted,
           suggestedName: suggestedName ?? this.suggestedName,
-          repoLocation: repoLocation ?? this.repoLocation,
           obscurePassword: obscurePassword ?? this.obscurePassword,
           obscureRetypePassword:
               obscureRetypePassword ?? this.obscureRetypePassword,
@@ -82,9 +73,7 @@ class CreateRepositoryState extends Equatable {
           showSavePasswordWarning:
               showSavePasswordWarning ?? this.showSavePasswordWarning,
           showRepositoryNameInUseWarning: showRepositoryNameInUseWarning ??
-              this.showRepositoryNameInUseWarning,
-          deleteRepositoryBeforePop:
-              deleteRepositoryBeforePop ?? this.deleteRepositoryBeforePop);
+              this.showRepositoryNameInUseWarning);
 
   @override
   List<Object?> get props => [
@@ -95,14 +84,12 @@ class CreateRepositoryState extends Equatable {
         addPassword,
         accessModeGranted,
         suggestedName,
-        repoLocation,
         obscurePassword,
         obscureRetypePassword,
         showSuggestedName,
         showAccessModeMessage,
         showSavePasswordWarning,
         showRepositoryNameInUseWarning,
-        deleteRepositoryBeforePop
       ];
 }
 
@@ -132,29 +119,15 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
         addPassword: false,
         accessModeGranted: accessModeGranted ?? AccessMode.blind,
         suggestedName: suggestedName ?? '',
-        repoLocation: null,
         obscurePassword: true,
         obscureRetypePassword: true,
         showSuggestedName: showSuggestedName,
         showAccessModeMessage: showAccessModeMessage,
         showSavePasswordWarning: false,
-        showRepositoryNameInUseWarning: false,
-        deleteRepositoryBeforePop: false);
+        showRepositoryNameInUseWarning: false);
 
     return CreateRepositoryCubit._(reposCubit, initialState);
   }
-
-  Future<RepoEntry> createRepository(
-          RepoLocation repoLocation,
-          String password,
-          ShareToken? shareToken,
-          PasswordMode passwordMode,
-          bool setCurrent) async =>
-      _reposCubit.createRepository(repoLocation,
-          password: password,
-          token: shareToken,
-          passwordMode: passwordMode,
-          setCurrent: setCurrent);
 
   void addPassword(bool add) => emit(state.copyWith(addPassword: add));
 
@@ -175,10 +148,4 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
 
   void obscureRetypePassword(bool obscure) =>
       emit(state.copyWith(obscureRetypePassword: obscure));
-
-  void deleteRepositoryBeforePop(bool delete) =>
-      emit(state.copyWith(deleteRepositoryBeforePop: delete));
-
-  void repoLocation(RepoLocation? repoLocation) =>
-      emit(state.copyWith(repoLocation: repoLocation));
 }

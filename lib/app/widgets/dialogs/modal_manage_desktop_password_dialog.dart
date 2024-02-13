@@ -90,7 +90,7 @@ class _ManageDesktopPasswordState extends State<ManageDesktopPassword>
         }
       }
 
-      currentPassword = repoSettings.getPassword()!;
+      currentPassword = repoSettings.getLocalPassword()!.string;
     }
 
     _initStateValues(currentPassword);

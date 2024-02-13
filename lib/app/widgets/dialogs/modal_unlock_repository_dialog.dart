@@ -25,8 +25,8 @@ class UnlockRepository extends StatelessWidget with AppLogger {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final Settings settings;
-  final Future<AccessMode?> Function(String repositoryName,
-      {required String password}) unlockRepositoryCallback;
+  final Future<AccessMode?> Function(
+      String repositoryName, LocalPassword password) unlockRepositoryCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -104,14 +104,16 @@ class UnlockRepository extends StatelessWidget with AppLogger {
                 contentPadding: EdgeInsets.zero));
       });
 
-  Future<void> _unlockRepository(String? password) async {
-    if (password == null || password.isEmpty) {
+  Future<void> _unlockRepository(String? passwordStr) async {
+    if (passwordStr == null || passwordStr.isEmpty) {
       return;
     }
 
+    final password = LocalPassword(passwordStr);
+
     final accessMode = await Dialogs.executeFutureWithLoadingDialog(
         parentContext,
-        f: unlockRepositoryCallback(repositoryName, password: password));
+        f: unlockRepositoryCallback(repositoryName, password));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
@@ -195,7 +197,7 @@ class UnlockRepositoryResult {
       required this.message});
 
   final String repositoryName;
-  final String password;
+  final LocalPassword password;
   final AccessMode accessMode;
   final String message;
 }

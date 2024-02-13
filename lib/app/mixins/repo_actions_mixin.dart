@@ -76,7 +76,6 @@ mixin RepositoryActionsMixin on LoggyType {
     required Settings settings,
     required void Function() popDialog,
   }) async {
-    String? password;
     final repoSettings = repository.repoSettings;
     final passwordMode = repoSettings.passwordMode;
 
@@ -90,10 +89,11 @@ mixin RepositoryActionsMixin on LoggyType {
       if (authorized == false) return;
     }
 
+    String? password;
     if (passwordMode == PasswordMode.manual) {
       password = await manualUnlock(context, repository);
     } else {
-      password = repoSettings.getPassword();
+      password = repoSettings.getLocalPassword()?.string;
     }
 
     if (password == null || password.isEmpty) return;
@@ -211,8 +211,8 @@ mixin RepositoryActionsMixin on LoggyType {
       {required DatabaseId databaseId,
       required String repositoryName,
       required Settings settings,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
+      required Future<AccessMode?> Function(
+              String repositoryName, LocalPassword password)
           cubitUnlockRepository}) async {
     final repoSettings = settings.repoSettingsById(databaseId)!;
     final passwordMode = repoSettings.passwordMode;
@@ -235,9 +235,8 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    //final securePassword = await SecureStorage(databaseId: databaseId)
-    //    .tryGetPassword(authMode: authenticationMode);
-    final securePassword = settings.repoSettingsById(databaseId)!.getPassword();
+    final securePassword =
+        settings.repoSettingsById(databaseId)!.getLocalPassword();
 
     if (securePassword == null || securePassword.isEmpty) {
       final message = passwordMode == PasswordMode.none
@@ -248,7 +247,7 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     final accessMode =
-        await cubitUnlockRepository(repositoryName, password: securePassword);
+        await cubitUnlockRepository(repositoryName, securePassword);
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
@@ -264,8 +263,8 @@ mixin RepositoryActionsMixin on LoggyType {
           required String repositoryName,
           required bool isBiometricsAvailable,
           required Settings settings,
-          required Future<AccessMode?> Function(String repositoryName,
-                  {required String password})
+          required Future<AccessMode?> Function(
+                  String repositoryName, LocalPassword password)
               cubitUnlockRepository}) async =>
       await showDialog<UnlockRepositoryResult?>(
           context: context,

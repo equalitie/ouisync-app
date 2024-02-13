@@ -68,9 +68,8 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
   }
 
   // Returns error message on error.
+  // TODO: If any of the async functions here fail, the user may lose their data.
   Future<String?> addLocalPassword(String newPassword) async {
-    // TODO: If any of the async functions here fail, the user may lose their data.
-
     try {
       await repoSettings.setAuthModePasswordProvidedByUser();
     } catch (e) {
@@ -101,8 +100,8 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     return null;
   }
 
+  // TODO: If any of the async functions here fail, the user may lose their data.
   Future<String?> removeLocalPassword() async {
-    // TODO: If any of the async functions here fail, the user may lose their data.
     final newPassword = generateRandomPassword();
 
     final passwordChanged = await _changeRepositoryPassword(newPassword);
@@ -111,7 +110,8 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     }
 
     try {
-      await repoSettings.setAuthModePasswordStoredOnDevice(newPassword, false);
+      await repoSettings.setAuthModePasswordStoredOnDevice(
+          LocalPassword(newPassword), false);
     } catch (e) {
       return S.current.messageErrorRemovingPassword;
     }
@@ -122,10 +122,10 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
     return null;
   }
 
+  // TODO: If any of the async functions here fail, the user may lose their data.
   Future<String?> updateUnlockRepoWithBiometrics(
     bool unlockWithBiometrics,
   ) async {
-    // TODO: If any of the async functions here fail, the user may lose their data.
     if (unlockWithBiometrics == false) {
       emitUnlockWithBiometrics(false);
       emitPasswordMode(PasswordMode.none);
@@ -141,7 +141,7 @@ class SecurityCubit extends Cubit<SecurityState> with AppLogger {
 
     try {
       await repoSettings.setAuthModePasswordStoredOnDevice(
-        newPassword,
+        LocalPassword(newPassword),
         unlockWithBiometrics,
       );
     } catch (e) {
