@@ -19,7 +19,6 @@ export 'peer_set.dart';
 export 'power_control.dart';
 export 'repo.dart';
 export 'repos.dart';
-export 'security.dart';
 export 'sort_list.dart';
 export 'state_monitor.dart';
 export 'upgrade_exists.dart';
