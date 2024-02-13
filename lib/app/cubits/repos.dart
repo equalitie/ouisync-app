@@ -217,21 +217,21 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoSettings repoSettings, {
     bool setCurrent = false,
   }) async {
-    LocalPassword? password;
+    LocalSecret? secret;
 
-    if (repoSettings.hasLocalPassword() &&
+    if (repoSettings.hasLocalSecret() &&
         !repoSettings.shouldCheckBiometricsBeforeUnlock()) {
-      password = repoSettings.getLocalPassword();
+      secret = repoSettings.getLocalSecret();
 
-      if (password == null) {
+      if (secret == null) {
         loggy.app(
             'Failed to load secret key for ${repoSettings.location.path()}');
       }
     }
 
-    final repo = await _open(repoSettings, password);
+    final repo = await _open(repoSettings, secret);
 
-    if (password != null && repo is! OpenRepoEntry) {
+    if (secret != null && repo is! OpenRepoEntry) {
       loggy.app('Failed to open repository ${repoSettings.location.path()}');
     }
 
@@ -258,7 +258,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<oui.AccessMode?> unlockRepository(
-      String repoName, LocalPassword password) async {
+      String repoName, LocalSecret secret) async {
     final wasCurrent = currentRepoName == repoName;
 
     final repoSettings = _settings.repoSettingsByName(repoName)!;
@@ -268,7 +268,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
 
     try {
-      final repo = await _open(repoSettings, password);
+      final repo = await _open(repoSettings, secret);
 
       if (repo is ErrorRepoEntry) {
         loggy.app('Failed to open repository: ${repoSettings.location.path()}');
@@ -396,7 +396,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<RepoEntry> _open(RepoSettings repoSettings,
-      [LocalPassword? password]) async {
+      [LocalSecret? secret]) async {
     final name = repoSettings.name;
     final store = repoSettings.location.path();
 
@@ -409,7 +409,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       }
 
       final repo =
-          await oui.Repository.open(_session, store: store, secret: password);
+          await oui.Repository.open(_session, store: store, secret: secret);
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,

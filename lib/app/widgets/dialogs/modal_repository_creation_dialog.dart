@@ -596,10 +596,11 @@ class RepositoryCreation extends HookWidget with AppLogger {
   }
 
   void populatePasswordControllers({required bool generatePassword}) {
-    final autoPassword = generatePassword ? generateRandomPassword() : '';
+    final autoPassword = generatePassword ? generateRandomPassword() : null;
 
-    passwordController.text = autoPassword;
-    retypedPasswordController.text = autoPassword;
+    passwordController.text = autoPassword == null ? "" : autoPassword.string;
+    retypedPasswordController.text =
+        autoPassword == null ? "" : autoPassword.string;
 
     if (nameController.text.isEmpty) {
       repositoryNameFocus.requestFocus();

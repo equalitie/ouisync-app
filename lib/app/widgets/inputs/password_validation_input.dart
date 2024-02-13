@@ -54,7 +54,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   bool _inputEnabled() => widget.passwordMode != PasswordMode.bio;
 
   @override
-  Widget build(BuildContext) => Opacity(
+  Widget build(BuildContext context) => Opacity(
       opacity: _inputOpacity(),
       child: Container(
           child: Column(children: [

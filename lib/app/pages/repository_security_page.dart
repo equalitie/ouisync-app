@@ -12,17 +12,17 @@ import '../widgets/widgets.dart';
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity({
     required this.repo,
-    required this.currentPassword,
+    required this.currentSecret,
     required this.isBiometricsAvailable,
   });
 
   final RepoCubit repo;
-  final String currentPassword;
+  final LocalSecret currentSecret;
   final bool isBiometricsAvailable;
 
   @override
   State<RepositorySecurity> createState() =>
-      _RepositorySecurityState(isBiometricsAvailable, repo, currentPassword);
+      _RepositorySecurityState(isBiometricsAvailable, repo, currentSecret);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
@@ -39,12 +39,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   final bool _isBiometricsAvailable;
   final RepoCubit _repo;
-  String _currentPassword;
+  LocalSecret _currentSecret;
 
   PasswordMode get _passwordMode => _repo.repoSettings.passwordMode;
 
   _RepositorySecurityState(
-      this._isBiometricsAvailable, this._repo, this._currentPassword);
+      this._isBiometricsAvailable, this._repo, this._currentSecret);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -128,7 +128,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       if (saveChanges == null || !saveChanges) return;
 
                       await Dialogs.executeFutureWithLoadingDialog(context,
-                          f: _updateLocalPassword(newPassword));
+                          f: _updateLocalPassword(LocalPassword(newPassword)));
                     },
                     text: S.current.actionUpdate,
                     size: Dimensions.sizeInPageButtonLong,
@@ -161,7 +161,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           _retypedPasswordController.clear();
 
                           await Dialogs.executeFutureWithLoadingDialog(context,
-                              f: _addLocalPassword(newPassword));
+                              f: _addLocalPassword(LocalPassword(newPassword)));
                         }
                       : null,
                   text: S.current.actionCreate,
@@ -201,7 +201,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       : SizedBox();
 
   // TODO: If any of the async functions here fail, the user may lose their data.
-  Future<void> _addLocalPassword(String newPassword) async {
+  Future<void> _addLocalPassword(LocalPassword newPassword) async {
     try {
       await _repo.repoSettings.setAuthModePasswordProvidedByUser();
     } catch (e) {
@@ -210,29 +210,29 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    final changed = await _changeRepositoryPassword(newPassword);
+    final changed = await _changeRepositorySecret(newPassword);
 
     if (changed == false) {
       showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
       return;
     }
 
-    _emitPassword(newPassword);
+    _emitSecret(newPassword);
     _emitPasswordMode(PasswordMode.manual);
 
     _clearPasswordInputs();
   }
 
   // Returns error message on error.
-  Future<void> _updateLocalPassword(String newPassword) async {
-    final changed = await _changeRepositoryPassword(newPassword);
+  Future<void> _updateLocalPassword(LocalPassword newPassword) async {
+    final changed = await _changeRepositorySecret(newPassword);
 
     if (changed == false) {
       showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
       return;
     }
 
-    _emitPassword(newPassword);
+    _emitSecret(newPassword);
   }
 
   void _clearPasswordInputs() {
@@ -246,7 +246,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   Future<void> _removePassword() async {
     final newPassword = generateRandomPassword();
 
-    final passwordChanged = await _changeRepositoryPassword(newPassword);
+    final passwordChanged = await _changeRepositorySecret(newPassword);
     if (passwordChanged == false) {
       showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
       return;
@@ -254,13 +254,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings
-          .setAuthModePasswordStoredOnDevice(LocalPassword(newPassword), false);
+          .setAuthModePasswordStoredOnDevice(newPassword, false);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
     }
 
-    _emitPassword(newPassword);
+    _emitSecret(newPassword);
     _emitPasswordMode(PasswordMode.none);
   }
 
@@ -274,7 +274,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     final newPassword = generateRandomPassword();
-    final passwordChanged = await _changeRepositoryPassword(newPassword);
+    final passwordChanged = await _changeRepositorySecret(newPassword);
 
     if (passwordChanged == false) {
       showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
@@ -283,7 +283,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings.setAuthModePasswordStoredOnDevice(
-        LocalPassword(newPassword),
+        newPassword,
         unlockWithBiometrics,
       );
     } catch (e) {
@@ -292,24 +292,24 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    _emitPassword(newPassword);
+    _emitSecret(newPassword);
     _emitPasswordMode(PasswordMode.bio);
 
     _clearPasswordInputs();
   }
 
-  Future<bool> _changeRepositoryPassword(String newPassword) async {
-    return _repo.setPassword(
-      oldPassword: _currentPassword,
-      newPassword: newPassword,
+  Future<bool> _changeRepositorySecret(LocalSecret newSecret) async {
+    return _repo.setSecret(
+      oldSecret: _currentSecret,
+      newSecret: newSecret,
     );
   }
 
-  void _emitPassword(String newPassword) => setState(() {
-        _currentPassword = newPassword;
+  void _emitSecret(LocalSecret newSecret) => setState(() {
+        _currentSecret = newSecret;
       });
 
   void _emitPasswordMode(PasswordMode passwordMode) => setState(() {
-        _repo._emitPasswordMode(passwordMode);
+        _repo.emitPasswordMode(passwordMode);
       });
 }

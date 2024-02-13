@@ -385,31 +385,30 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return content;
   }
 
-  Future<bool> setPassword({
-    required String oldPassword,
-    required String newPassword,
+  Future<bool> setSecret({
+    required LocalSecret oldSecret,
+    required LocalSecret newSecret,
   }) async {
     // Grab the current credentials so we can restore the access mode when we are done.
     final credentials = await _repo.credentials;
 
     try {
-      // First try to switch the repo to the write mode using `oldPassword`. If the password is
-      // the correct write password we end up in write mode. If it's the correct read password we
+      // First try to switch the repo to the write mode using `oldSecret`. If the secret is
+      // the correct write secret we end up in write mode. If it's the correct read secret we
       // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
-      // in, we change the corresponding password to `newPassword`.
-      await _repo.setAccessMode(oui.AccessMode.write,
-          secret: oui.LocalPassword(oldPassword));
+      // in, we change the corresponding secret to `newSecret`.
+      await _repo.setAccessMode(oui.AccessMode.write, secret: oldSecret);
 
       switch (await _repo.accessMode) {
         case oui.AccessMode.write:
           await _repo.setAccess(
-            read: oui.EnableAccess(oui.LocalPassword(newPassword)),
-            write: oui.EnableAccess(oui.LocalPassword(newPassword)),
+            read: oui.EnableAccess(newSecret),
+            write: oui.EnableAccess(newSecret),
           );
           break;
         case oui.AccessMode.read:
           await _repo.setAccess(
-            read: oui.EnableAccess(oui.LocalPassword(newPassword)),
+            read: oui.EnableAccess(newSecret),
           );
           break;
         case oui.AccessMode.blind:

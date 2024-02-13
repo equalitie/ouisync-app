@@ -20,7 +20,7 @@ class LockedRepositoryState extends HookWidget
   final String repositoryName;
 
   final Settings settings;
-  final Future<AccessMode?> Function(String repositoryName, LocalPassword)
+  final Future<AccessMode?> Function(String repositoryName, LocalSecret)
       unlockRepositoryCallback;
 
   @override

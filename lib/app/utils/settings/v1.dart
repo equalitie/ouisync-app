@@ -159,7 +159,7 @@ class RepoSettings {
     await _settings._storeRoot();
   }
 
-  bool hasLocalPassword() {
+  bool hasLocalSecret() {
     return _entry.authMode is _AuthModePasswordStoredOnDevice;
   }
 
@@ -171,7 +171,7 @@ class RepoSettings {
 
   /// May throw if the function failed to decrypt the stored key.
   /// Returns null if the authMode is _AuthModeBlindOrManual.
-  LocalPassword? getLocalPassword() {
+  LocalSecret? getLocalSecret() {
     final authMode = _entry.authMode;
     switch (authMode) {
       case _AuthModeBlindOrManual():
@@ -183,7 +183,7 @@ class RepoSettings {
     }
   }
 
-  PasswordMode get passwordMode => !hasLocalPassword()
+  PasswordMode get passwordMode => !hasLocalSecret()
       ? PasswordMode.manual
       : shouldCheckBiometricsBeforeUnlock()
           ? PasswordMode.bio
