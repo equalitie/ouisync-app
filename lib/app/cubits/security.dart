@@ -10,40 +10,38 @@ class SecurityState extends Equatable {
   final bool isBiometricsAvailable;
   final PasswordMode passwordMode;
   final String password;
-  final bool previewPassword;
-  final String message;
 
   String get passwordModeTitle => passwordMode == PasswordMode.manual
       ? S.current.messageUpdateLocalPassword
       : S.current.messageAddLocalPassword;
 
-  SecurityState(
-      {required this.passwordMode,
-      required this.isBiometricsAvailable,
-      required this.password,
-      this.previewPassword = false,
-      this.message = ''});
+  SecurityState({
+    required this.passwordMode,
+    required this.isBiometricsAvailable,
+    required this.password,
+  });
 
   bool get unlockWithBiometrics => passwordMode == PasswordMode.bio;
 
-  SecurityState copyWith(
-          {bool? isBiometricsAvailable,
-          bool? unlockWithBiometrics,
-          PasswordMode? passwordMode,
-          String? password,
-          bool? previewPassword,
-          String? message}) =>
+  SecurityState copyWith({
+    bool? isBiometricsAvailable,
+    bool? unlockWithBiometrics,
+    PasswordMode? passwordMode,
+    String? password,
+  }) =>
       SecurityState(
-          isBiometricsAvailable:
-              isBiometricsAvailable ?? this.isBiometricsAvailable,
-          passwordMode: passwordMode ?? this.passwordMode,
-          password: password ?? this.password,
-          previewPassword: previewPassword ?? this.previewPassword,
-          message: message ?? this.message);
+        isBiometricsAvailable:
+            isBiometricsAvailable ?? this.isBiometricsAvailable,
+        passwordMode: passwordMode ?? this.passwordMode,
+        password: password ?? this.password,
+      );
 
   @override
-  List<Object?> get props =>
-      [isBiometricsAvailable, passwordMode, password, previewPassword, message];
+  List<Object?> get props => [
+        isBiometricsAvailable,
+        passwordMode,
+        password,
+      ];
 }
 
 class SecurityCubit extends Cubit<SecurityState> with AppLogger {
