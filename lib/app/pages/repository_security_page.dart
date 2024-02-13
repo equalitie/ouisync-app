@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
@@ -13,17 +12,17 @@ import '../widgets/widgets.dart';
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity({
     required this.repo,
-    required this.password,
+    required this.currentPassword,
     required this.isBiometricsAvailable,
   });
 
   final RepoCubit repo;
-  final String password;
+  final String currentPassword;
   final bool isBiometricsAvailable;
 
   @override
   State<RepositorySecurity> createState() =>
-      _RepositorySecurityState(isBiometricsAvailable, repo, password);
+      _RepositorySecurityState(isBiometricsAvailable, repo, currentPassword);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
@@ -38,14 +37,14 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
 
-  final bool isBiometricsAvailable;
-  final RepoCubit repo;
-  String password;
+  final bool _isBiometricsAvailable;
+  final RepoCubit _repo;
+  String _currentPassword;
 
-  PasswordMode get passwordMode => repo.repoSettings.passwordMode;
+  PasswordMode get _passwordMode => _repo.repoSettings.passwordMode;
 
   _RepositorySecurityState(
-      this.isBiometricsAvailable, this.repo, this.password);
+      this._isBiometricsAvailable, this._repo, this._currentPassword);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -58,7 +57,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         _biometrics()
       ]))));
 
-  String get passwordModeTitle => passwordMode == PasswordMode.manual
+  String get _passwordModeTitle => _passwordMode == PasswordMode.manual
       ? S.current.messageUpdateLocalPassword
       : S.current.messageAddLocalPassword;
 
@@ -66,10 +65,10 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     return Container(
         padding: Dimensions.paddingDialog,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(passwordModeTitle),
+          Text(_passwordModeTitle),
           Dimensions.spacingVerticalDouble,
           PasswordValidation(
-              passwordMode: passwordMode,
+              passwordMode: _passwordMode,
               passwordInputKey: _passwordInputKey,
               retypePasswordInputKey: _retypePasswordInputKey,
               passwordController: _passwordController,
@@ -81,7 +80,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   Widget _passwordActions() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: passwordMode == PasswordMode.manual
+      children: _passwordMode == PasswordMode.manual
           ? [
               Row(children: [
                 TextButton(
@@ -138,7 +137,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             ]
           : [
               Fields.inPageButton(
-                  onPressed: passwordMode == PasswordMode.none
+                  onPressed: _passwordMode == PasswordMode.none
                       ? () async {
                           final password = _retypedPasswordController.text;
                           if (password.isEmpty) return;
@@ -170,12 +169,12 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   focusNode: _passwordAction)
             ]);
 
-  bool get unlockWithBiometrics => passwordMode == PasswordMode.bio;
+  bool get _unlockWithBiometrics => _passwordMode == PasswordMode.bio;
 
-  Widget _biometrics() => isBiometricsAvailable
+  Widget _biometrics() => _isBiometricsAvailable
       ? Column(children: [
           SwitchListTile.adaptive(
-              value: unlockWithBiometrics,
+              value: _unlockWithBiometrics,
               secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
               title: Text(S.current.messageUnlockUsingBiometrics,
                   style: context.theme.appTextStyle.bodyMedium),
@@ -185,7 +184,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                     ? S.current.messageUnlockUsingBiometricsConfirmation
                     : S.current.messageRemoveBiometricsConfirmation;
 
-                if (useBiometrics && passwordMode == PasswordMode.manual) {
+                if (useBiometrics && _passwordMode == PasswordMode.manual) {
                   confirmationMessage +=
                       '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
                 }
@@ -204,7 +203,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   // TODO: If any of the async functions here fail, the user may lose their data.
   Future<void> _addLocalPassword(String newPassword) async {
     try {
-      await repo.repoSettings.setAuthModePasswordProvidedByUser();
+      await _repo.repoSettings.setAuthModePasswordProvidedByUser();
     } catch (e) {
       showSnackBar(context,
           message: S.current.messageErrorRemovingSecureStorage);
@@ -218,8 +217,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    emitPassword(newPassword);
-    emitPasswordMode(PasswordMode.manual);
+    _emitPassword(newPassword);
+    _emitPasswordMode(PasswordMode.manual);
 
     _clearPasswordInputs();
   }
@@ -233,7 +232,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    emitPassword(newPassword);
+    _emitPassword(newPassword);
   }
 
   void _clearPasswordInputs() {
@@ -254,15 +253,15 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     try {
-      await repo.repoSettings
+      await _repo.repoSettings
           .setAuthModePasswordStoredOnDevice(LocalPassword(newPassword), false);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
     }
 
-    emitPassword(newPassword);
-    emitPasswordMode(PasswordMode.none);
+    _emitPassword(newPassword);
+    _emitPasswordMode(PasswordMode.none);
   }
 
   // TODO: If any of the async functions here fail, the user may lose their data.
@@ -270,7 +269,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     bool unlockWithBiometrics,
   ) async {
     if (unlockWithBiometrics == false) {
-      emitPasswordMode(PasswordMode.none);
+      _emitPasswordMode(PasswordMode.none);
       return;
     }
 
@@ -283,7 +282,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     try {
-      await repo.repoSettings.setAuthModePasswordStoredOnDevice(
+      await _repo.repoSettings.setAuthModePasswordStoredOnDevice(
         LocalPassword(newPassword),
         unlockWithBiometrics,
       );
@@ -293,30 +292,24 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    emitPassword(newPassword);
-    emitPasswordMode(PasswordMode.bio);
+    _emitPassword(newPassword);
+    _emitPasswordMode(PasswordMode.bio);
 
     _clearPasswordInputs();
   }
 
   Future<bool> _changeRepositoryPassword(String newPassword) async {
-    assert(password.isNotEmpty, 'ERROR: currentPassword is empty');
-
-    if (password.isEmpty) {
-      return false;
-    }
-
-    return repo.setPassword(
-      oldPassword: password,
+    return _repo.setPassword(
+      oldPassword: _currentPassword,
       newPassword: newPassword,
     );
   }
 
-  void emitPassword(String newPassword) => setState(() {
-        password = newPassword;
+  void _emitPassword(String newPassword) => setState(() {
+        _currentPassword = newPassword;
       });
 
-  void emitPasswordMode(PasswordMode passwordMode) => setState(() {
-        repo.emitPasswordMode(passwordMode);
+  void _emitPasswordMode(PasswordMode passwordMode) => setState(() {
+        _repo._emitPasswordMode(passwordMode);
       });
 }

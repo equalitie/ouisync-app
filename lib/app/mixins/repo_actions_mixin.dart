@@ -105,7 +105,7 @@ mixin RepositoryActionsMixin on LoggyType {
         MaterialPageRoute(
           builder: (context) => RepositorySecurity(
             repo: repository,
-            password: password!,
+            currentPassword: password!,
             isBiometricsAvailable: isBiometricsAvailable,
           ),
         ));
