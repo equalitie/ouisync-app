@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
-import '../cubits/security.dart';
 import '../mixins/repo_actions_mixin.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
@@ -14,16 +12,17 @@ import '../widgets/widgets.dart';
 class RepositorySecurity extends StatefulWidget {
   const RepositorySecurity({
     required this.repo,
-    required this.password,
+    required this.currentSecret,
     required this.isBiometricsAvailable,
   });
 
   final RepoCubit repo;
-  final String password;
+  final LocalSecret currentSecret;
   final bool isBiometricsAvailable;
 
   @override
-  State<RepositorySecurity> createState() => _RepositorySecurityState();
+  State<RepositorySecurity> createState() =>
+      _RepositorySecurityState(isBiometricsAvailable, repo, currentSecret);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurity>
@@ -36,41 +35,40 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   final TextEditingController _retypedPasswordController =
       TextEditingController(text: null);
 
-  late final SecurityCubit security;
-
   final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
 
-  @override
-  void initState() {
-    security = SecurityCubit.create(
-        repoCubit: widget.repo,
-        isBiometricsAvailable: widget.isBiometricsAvailable,
-        password: widget.password);
+  final bool _isBiometricsAvailable;
+  final RepoCubit _repo;
+  LocalSecret _currentSecret;
 
-    super.initState();
-  }
+  PasswordMode get _passwordMode => _repo.repoSettings.passwordMode;
+
+  _RepositorySecurityState(
+      this._isBiometricsAvailable, this._repo, this._currentSecret);
 
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
       body: SingleChildScrollView(
           child: Container(
-              child: BlocBuilder<SecurityCubit, SecurityState>(
-                  bloc: security,
-                  builder: (context, state) => Column(children: [
-                        _pasword(state),
-                        Divider(height: 30.0),
-                        _biometrics(state)
-                      ])))));
+              child: Column(children: [
+        _pasword(),
+        Divider(height: 30.0),
+        _biometrics()
+      ]))));
 
-  Widget _pasword(SecurityState state) {
+  String get _passwordModeTitle => _passwordMode == PasswordMode.manual
+      ? S.current.messageUpdateLocalPassword
+      : S.current.messageAddLocalPassword;
+
+  Widget _pasword() {
     return Container(
         padding: Dimensions.paddingDialog,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(state.passwordModeTitle),
+          Text(_passwordModeTitle),
           Dimensions.spacingVerticalDouble,
           PasswordValidation(
-              passwordMode: state.passwordMode,
+              passwordMode: _passwordMode,
               passwordInputKey: _passwordInputKey,
               retypePasswordInputKey: _retypePasswordInputKey,
               passwordController: _passwordController,
@@ -80,9 +78,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         ]));
   }
 
-  Widget _passwordActions(PasswordMode passwordMode) => Column(
+  Widget _passwordActions() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: passwordMode == PasswordMode.manual
+      children: _passwordMode == PasswordMode.manual
           ? [
               Row(children: [
                 TextButton(
@@ -130,7 +128,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                       if (saveChanges == null || !saveChanges) return;
 
                       await Dialogs.executeFutureWithLoadingDialog(context,
-                          f: _updateLocalPassword(newPassword));
+                          f: _updateLocalPassword(LocalPassword(newPassword)));
                     },
                     text: S.current.actionUpdate,
                     size: Dimensions.sizeInPageButtonLong,
@@ -139,7 +137,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
             ]
           : [
               Fields.inPageButton(
-                  onPressed: passwordMode == PasswordMode.none
+                  onPressed: _passwordMode == PasswordMode.none
                       ? () async {
                           final password = _retypedPasswordController.text;
                           if (password.isEmpty) return;
@@ -163,7 +161,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                           _retypedPasswordController.clear();
 
                           await Dialogs.executeFutureWithLoadingDialog(context,
-                              f: _addLocalPassword(newPassword));
+                              f: _addLocalPassword(LocalPassword(newPassword)));
                         }
                       : null,
                   text: S.current.actionCreate,
@@ -171,61 +169,70 @@ class _RepositorySecurityState extends State<RepositorySecurity>
                   focusNode: _passwordAction)
             ]);
 
-  Widget _biometrics(SecurityState state) =>
-      BlocBuilder<SecurityCubit, SecurityState>(
-          bloc: security,
-          builder: (context, state) => state.isBiometricsAvailable
-              ? Column(children: [
-                  SwitchListTile.adaptive(
-                      value: state.unlockWithBiometrics,
-                      secondary:
-                          Icon(Icons.fingerprint_rounded, color: Colors.black),
-                      title: Text(S.current.messageUnlockUsingBiometrics,
-                          style: context.theme.appTextStyle.bodyMedium),
-                      onChanged: (useBiometrics) async {
-                        final positiveButtonText = S.current.actionAccept;
-                        String confirmationMessage = useBiometrics
-                            ? S.current.messageUnlockUsingBiometricsConfirmation
-                            : S.current.messageRemoveBiometricsConfirmation;
+  bool get _unlockWithBiometrics => _passwordMode == PasswordMode.bio;
 
-                        if (useBiometrics &&
-                            state.passwordMode == PasswordMode.manual) {
-                          confirmationMessage +=
-                              '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
-                        }
+  Widget _biometrics() => _isBiometricsAvailable
+      ? Column(children: [
+          SwitchListTile.adaptive(
+              value: _unlockWithBiometrics,
+              secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
+              title: Text(S.current.messageUnlockUsingBiometrics,
+                  style: context.theme.appTextStyle.bodyMedium),
+              onChanged: (useBiometrics) async {
+                final positiveButtonText = S.current.actionAccept;
+                String confirmationMessage = useBiometrics
+                    ? S.current.messageUnlockUsingBiometricsConfirmation
+                    : S.current.messageRemoveBiometricsConfirmation;
 
-                        final saveChanges = await confirmSaveChanges(
-                            context, positiveButtonText, confirmationMessage);
+                if (useBiometrics && _passwordMode == PasswordMode.manual) {
+                  confirmationMessage +=
+                      '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
+                }
 
-                        if (saveChanges == null || !saveChanges) return;
+                final saveChanges = await confirmSaveChanges(
+                    context, positiveButtonText, confirmationMessage);
 
-                        await Dialogs.executeFutureWithLoadingDialog(context,
-                            f: _updateUnlockWithBiometrics(useBiometrics));
-                      })
-                ])
-              : SizedBox());
+                if (saveChanges == null || !saveChanges) return;
 
-  Future<void> _addLocalPassword(String newPassword) async {
-    final addLocalPasswordResult = await security.addLocalPassword(newPassword);
+                await Dialogs.executeFutureWithLoadingDialog(context,
+                    f: _updateUnlockRepoWithBiometrics(useBiometrics));
+              })
+        ])
+      : SizedBox();
 
-    if (addLocalPasswordResult != null) {
-      showSnackBar(context, message: addLocalPasswordResult);
+  // TODO: If any of the async functions here fail, the user may lose their data.
+  Future<void> _addLocalPassword(LocalPassword newPassword) async {
+    try {
+      await _repo.repoSettings.setAuthModePasswordProvidedByUser();
+    } catch (e) {
+      showSnackBar(context,
+          message: S.current.messageErrorRemovingSecureStorage);
       return;
     }
+
+    final changed = await _changeRepositorySecret(newPassword);
+
+    if (changed == false) {
+      showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
+      return;
+    }
+
+    _emitSecret(newPassword);
+    _emitPasswordMode(PasswordMode.manual);
 
     _clearPasswordInputs();
   }
 
-  Future<void> _updateLocalPassword(String newPassword) async {
-    final updateRepoLocalPasswordResult =
-        await security.updateLocalPassword(newPassword);
+  // Returns error message on error.
+  Future<void> _updateLocalPassword(LocalPassword newPassword) async {
+    final changed = await _changeRepositorySecret(newPassword);
 
-    if (updateRepoLocalPasswordResult != null) {
-      showSnackBar(context, message: updateRepoLocalPasswordResult);
+    if (changed == false) {
+      showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
       return;
     }
 
-    _clearPasswordInputs();
+    _emitSecret(newPassword);
   }
 
   void _clearPasswordInputs() {
@@ -235,23 +242,74 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     _passwordAction.requestFocus();
   }
 
+  // TODO: If any of the async functions here fail, the user may lose their data.
   Future<void> _removePassword() async {
-    final removeRepoLocalPasswordResult = await security.removeLocalPassword();
+    final newSecret = LocalSecretKey.generateRandom();
 
-    if (removeRepoLocalPasswordResult != null) {
-      showSnackBar(context, message: removeRepoLocalPasswordResult);
-    }
-  }
-
-  Future<void> _updateUnlockWithBiometrics(bool unlockWithBiometrics) async {
-    final updateUnlockRepoWithBiometricsResult =
-        await security.updateUnlockRepoWithBiometrics(unlockWithBiometrics);
-
-    if (updateUnlockRepoWithBiometricsResult != null) {
-      showSnackBar(context, message: updateUnlockRepoWithBiometricsResult);
+    final passwordChanged = await _changeRepositorySecret(newSecret);
+    if (passwordChanged == false) {
+      showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
       return;
     }
 
+    try {
+      await _repo.repoSettings
+          .setAuthModeSecretStoredOnDevice(newSecret, false);
+    } catch (e) {
+      showSnackBar(context, message: S.current.messageErrorRemovingPassword);
+      return;
+    }
+
+    _emitSecret(newSecret);
+    _emitPasswordMode(PasswordMode.none);
+  }
+
+  // TODO: If any of the async functions here fail, the user may lose their data.
+  Future<void> _updateUnlockRepoWithBiometrics(
+    bool unlockWithBiometrics,
+  ) async {
+    if (unlockWithBiometrics == false) {
+      _emitPasswordMode(PasswordMode.none);
+      return;
+    }
+
+    final newSecret = LocalSecretKey.generateRandom();
+    final passwordChanged = await _changeRepositorySecret(newSecret);
+
+    if (passwordChanged == false) {
+      showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
+      return;
+    }
+
+    try {
+      await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
+        newSecret,
+        unlockWithBiometrics,
+      );
+    } catch (e) {
+      showSnackBar(context,
+          message: S.current.messageErrorUpdatingSecureStorage);
+      return;
+    }
+
+    _emitSecret(newSecret);
+    _emitPasswordMode(PasswordMode.bio);
+
     _clearPasswordInputs();
   }
+
+  Future<bool> _changeRepositorySecret(LocalSecret newSecret) async {
+    return _repo.setSecret(
+      oldSecret: _currentSecret,
+      newSecret: newSecret,
+    );
+  }
+
+  void _emitSecret(LocalSecret newSecret) => setState(() {
+        _currentSecret = newSecret;
+      });
+
+  void _emitPasswordMode(PasswordMode passwordMode) => setState(() {
+        _repo.emitPasswordMode(passwordMode);
+      });
 }

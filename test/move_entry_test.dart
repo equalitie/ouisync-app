@@ -20,7 +20,7 @@ void main() {
     session = Session.create(configPath: dir.path);
 
     pluginRepo = await Repository.create(session,
-        store: location.path(), readPassword: null, writePassword: null);
+        store: location.path(), readSecret: null, writeSecret: null);
 
     // final settings = await Settings.init();
     // final settingsRepoEntry =

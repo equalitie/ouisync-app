@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:mutex/mutex.dart';
 import 'package:meta/meta.dart'; // for `@visibleForTesting`
+import 'dart:typed_data';
 
 class MasterKey {
   static const String _masterKey = 'masterKey';
@@ -44,6 +45,15 @@ class MasterKey {
     return '${iv.base64}:${encrypted.base64}';
   }
 
+  String encryptBytes(Uint8List plainText) {
+    final iv = IV.fromLength(_ivLengthInBytes);
+    // Note that Salsa20 is not AEAD and thus the `associatedData` parameter to
+    // `encrypt` is not used.
+    final encrypted = _encrypter.encryptBytes(plainText, iv: iv);
+    // Pack the IV with the ciphertext for convenience.
+    return '${iv.base64}:${encrypted.base64}';
+  }
+
   // Returns `null` if decryption fails.
   String? decrypt(String encrypted) {
     final ivAndCipherText = encrypted.split(':');
@@ -56,6 +66,21 @@ class MasterKey {
     final cipherText = ivAndCipherText[1];
 
     return _encrypter.decrypt64(cipherText, iv: iv);
+  }
+
+  // Returns `null` if decryption fails.
+  Uint8List? decryptBytes(String encrypted) {
+    final ivAndCipherText = encrypted.split(':');
+
+    if (ivAndCipherText.length != 2) {
+      return null;
+    }
+
+    final iv = IV.fromBase64(ivAndCipherText[0]);
+    final cipherText = ivAndCipherText[1];
+
+    return Uint8List.fromList(
+        _encrypter.decryptBytes(Encrypted.fromBase64(cipherText), iv: iv));
   }
 
   @visibleForTesting
