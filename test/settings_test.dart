@@ -39,8 +39,7 @@ void main() {
     expect(s1.repos().length, 1);
 
     await s1.addRepoWithUserProvidedPassword(
-        RepoLocation.fromDbPath("/foo/baz.db"),
-        databaseId: DatabaseId("234"));
+        RepoLocation.fromDbPath("/foo/baz.db"), DatabaseId("234"));
 
     expect(s1.repos().length, 2);
   });

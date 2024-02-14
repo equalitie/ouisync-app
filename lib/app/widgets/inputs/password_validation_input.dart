@@ -22,7 +22,7 @@ class PasswordValidation extends StatefulWidget {
   final TextEditingController passwordController;
   final TextEditingController retypedPasswordController;
 
-  final Widget Function(PasswordMode) actions;
+  final Widget Function() actions;
 
   @override
   State<PasswordValidation> createState() => _PasswordValidationState();
@@ -49,14 +49,12 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) => _passwordInputs();
-
   double _inputOpacity() => widget.passwordMode != PasswordMode.bio ? 1 : 0.5;
 
   bool _inputEnabled() => widget.passwordMode != PasswordMode.bio;
 
-  Widget _passwordInputs() => Opacity(
+  @override
+  Widget build(BuildContext context) => Opacity(
       opacity: _inputOpacity(),
       child: Container(
           child: Column(children: [
@@ -113,7 +111,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             password: _password,
             strengthCallback: _updatePasswordStrengthMessage),
         Dimensions.spacingVerticalDouble,
-        widget.actions(widget.passwordMode)
+        widget.actions()
       ])));
 
   void _updatePasswordStrengthMessage(double strength) {
