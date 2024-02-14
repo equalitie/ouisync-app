@@ -301,7 +301,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             final nameFieldOk = await submitNameField(newName);
             if (!nameFieldOk) return;
 
-            _onSaved(newName!, generateRandomPassword(), state);
+            _onSaved(newName!, LocalSecretKey.generateRandom(), state);
           },
           validator: validateNoEmptyMaybeRegExpr(
               emptyError: S.current.messageErrorFormValidatorNameDefault,
@@ -576,7 +576,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
               bool valuesAreOk;
 
               if (state.isBlindReplica || !state.addPassword) {
-                secret = generateRandomPassword();
+                secret = LocalSecretKey.generateRandom();
                 valuesAreOk = await submitNameField(newName);
               } else {
                 final password = passwordController.text;

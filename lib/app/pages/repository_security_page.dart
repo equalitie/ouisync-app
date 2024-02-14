@@ -244,9 +244,9 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   // TODO: If any of the async functions here fail, the user may lose their data.
   Future<void> _removePassword() async {
-    final newPassword = generateRandomPassword();
+    final newSecret = LocalSecretKey.generateRandom();
 
-    final passwordChanged = await _changeRepositorySecret(newPassword);
+    final passwordChanged = await _changeRepositorySecret(newSecret);
     if (passwordChanged == false) {
       showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
       return;
@@ -254,13 +254,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings
-          .setAuthModeSecretStoredOnDevice(newPassword, false);
+          .setAuthModeSecretStoredOnDevice(newSecret, false);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
     }
 
-    _emitSecret(newPassword);
+    _emitSecret(newSecret);
     _emitPasswordMode(PasswordMode.none);
   }
 
@@ -273,8 +273,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    final newPassword = generateRandomPassword();
-    final passwordChanged = await _changeRepositorySecret(newPassword);
+    final newSecret = LocalSecretKey.generateRandom();
+    final passwordChanged = await _changeRepositorySecret(newSecret);
 
     if (passwordChanged == false) {
       showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
@@ -283,7 +283,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
-        newPassword,
+        newSecret,
         unlockWithBiometrics,
       );
     } catch (e) {
@@ -292,7 +292,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    _emitSecret(newPassword);
+    _emitSecret(newSecret);
     _emitPasswordMode(PasswordMode.bio);
 
     _clearPasswordInputs();
