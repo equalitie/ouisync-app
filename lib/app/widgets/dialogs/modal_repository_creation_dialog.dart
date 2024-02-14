@@ -301,6 +301,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             final nameFieldOk = await submitNameField(newName);
             if (!nameFieldOk) return;
 
+            // We know `addPassword` is false from above, so generate the key.
             _onSaved(newName!, LocalSecretKey.generateRandom(), state);
           },
           validator: validateNoEmptyMaybeRegExpr(
