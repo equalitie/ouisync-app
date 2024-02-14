@@ -76,7 +76,6 @@ mixin RepositoryActionsMixin on LoggyType {
     required Settings settings,
     required void Function() popDialog,
   }) async {
-    String? password;
     final repoSettings = repository.repoSettings;
     final passwordMode = repoSettings.passwordMode;
 
@@ -90,13 +89,15 @@ mixin RepositoryActionsMixin on LoggyType {
       if (authorized == false) return;
     }
 
-    if (passwordMode == PasswordMode.manual) {
-      password = await manualUnlock(context, repository);
-    } else {
-      password = repoSettings.getPassword();
-    }
+    LocalSecret? secret;
 
-    if (password == null || password.isEmpty) return;
+    if (passwordMode == PasswordMode.manual) {
+      final password = await manualUnlock(context, repository);
+      if (password == null || password.isEmpty) return;
+      secret = LocalPassword(password);
+    } else {
+      secret = repoSettings.getLocalSecret();
+    }
 
     popDialog();
 
@@ -105,7 +106,7 @@ mixin RepositoryActionsMixin on LoggyType {
         MaterialPageRoute(
           builder: (context) => RepositorySecurity(
             repo: repository,
-            password: password!,
+            currentSecret: secret!,
             isBiometricsAvailable: isBiometricsAvailable,
           ),
         ));
@@ -211,8 +212,7 @@ mixin RepositoryActionsMixin on LoggyType {
       {required DatabaseId databaseId,
       required String repositoryName,
       required Settings settings,
-      required Future<AccessMode?> Function(String repositoryName,
-              {required String password})
+      required Future<AccessMode?> Function(String repositoryName, LocalSecret)
           cubitUnlockRepository}) async {
     final repoSettings = settings.repoSettingsById(databaseId)!;
     final passwordMode = repoSettings.passwordMode;
@@ -235,11 +235,9 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    //final securePassword = await SecureStorage(databaseId: databaseId)
-    //    .tryGetPassword(authMode: authenticationMode);
-    final securePassword = settings.repoSettingsById(databaseId)!.getPassword();
+    final secret = settings.repoSettingsById(databaseId)!.getLocalSecret();
 
-    if (securePassword == null || securePassword.isEmpty) {
+    if (secret == null) {
       final message = passwordMode == PasswordMode.none
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
@@ -247,8 +245,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final accessMode =
-        await cubitUnlockRepository(repositoryName, password: securePassword);
+    final accessMode = await cubitUnlockRepository(repositoryName, secret);
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
@@ -264,8 +261,8 @@ mixin RepositoryActionsMixin on LoggyType {
           required String repositoryName,
           required bool isBiometricsAvailable,
           required Settings settings,
-          required Future<AccessMode?> Function(String repositoryName,
-                  {required String password})
+          required Future<AccessMode?> Function(
+                  String repositoryName, LocalPassword password)
               cubitUnlockRepository}) async =>
       await showDialog<UnlockRepositoryResult?>(
           context: context,

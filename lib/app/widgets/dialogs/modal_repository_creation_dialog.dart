@@ -12,7 +12,6 @@ import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
-import '../../utils/settings/v0/secure_storage.dart';
 import '../widgets.dart';
 
 class RepositoryCreation extends HookWidget with AppLogger {
@@ -58,7 +57,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
       initHooks();
       initTextStyles(context);
 
-      populatePasswordControllers(generatePassword: true);
+      populatePasswordControllers();
       updateNameController(createRepoCubit.state.suggestedName);
 
       addListeners();
@@ -66,25 +65,6 @@ class RepositoryCreation extends HookWidget with AppLogger {
       return BlocBuilder<CreateRepositoryCubit, CreateRepositoryState>(
         bloc: createRepoCubit,
         builder: (context, state) => PopScope(
-          onPopInvoked: (didPop) async {
-            if (!didPop) {
-              return;
-            }
-
-            if (!state.deleteRepositoryBeforePop) {
-              return;
-            }
-
-            assert(state.repoLocation != null, 'repoLocation is null');
-
-            if (state.repoLocation == null) {
-              throw ('A repository was created, but saving the password into the '
-                  'secure storage failed and it may be lost.\nMost likely this '
-                  'repository needs to be deleted.');
-            }
-
-            await cubit.deleteRepository(state.repoLocation!);
-          },
           child: Form(
             key: _formKey,
             child: Column(
@@ -315,12 +295,14 @@ class RepositoryCreation extends HookWidget with AppLogger {
               return;
             }
 
-            final submitted = await submitNameField(newName);
-            if (submitted && PlatformValues.isDesktopDevice) {
-              final password =
-                  state.isBlindReplica ? '' : passwordController.text;
-              onSaved(newName!, password, state);
-            }
+            // This is to support pressing the Enter button to submit creation.
+            if (!PlatformValues.isDesktopDevice) return;
+
+            final nameFieldOk = await submitNameField(newName);
+            if (!nameFieldOk) return;
+
+            // We know `addPassword` is false from above, so generate the key.
+            _onSaved(newName!, LocalSecretKey.generateRandom(), state);
           },
           validator: validateNoEmptyMaybeRegExpr(
               emptyError: S.current.messageErrorFormValidatorNameDefault,
@@ -436,7 +418,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
                         await submitRetypedPasswordField(retypedPassword);
                     if (submitted && PlatformValues.isDesktopDevice) {
                       final newName = nameController.text;
-                      onSaved(newName, retypedPassword!, state);
+                      _onSaved(newName, LocalPassword(retypedPassword!), state);
                     }
                   },
                   validator: (retypedPassword) => retypedPasswordValidator(
@@ -559,7 +541,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             createRepoCubit.secureWithBiometrics(enableBiometrics);
             createRepoCubit.showSavePasswordWarning(!enableBiometrics);
 
-            populatePasswordControllers(generatePassword: true);
+            populatePasswordControllers();
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
@@ -590,15 +572,21 @@ class RepositoryCreation extends HookWidget with AppLogger {
                 : S.current.actionImport,
             onPressed: () async {
               final newName = nameController.text;
-              final password =
-                  state.isBlindReplica ? '' : passwordController.text;
 
-              final submitted = state.addPassword
-                  ? await submitRetypedPasswordField(password)
-                  : await submitNameField(newName);
+              LocalSecret secret;
+              bool valuesAreOk;
 
-              if (submitted) {
-                onSaved(newName, password, state);
+              if (state.isBlindReplica || !state.addPassword) {
+                secret = LocalSecretKey.generateRandom();
+                valuesAreOk = await submitNameField(newName);
+              } else {
+                final password = passwordController.text;
+                secret = LocalPassword(passwordController.text);
+                valuesAreOk = await submitRetypedPasswordField(password);
+              }
+
+              if (valuesAreOk) {
+                _onSaved(newName, secret, state);
               }
             },
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
@@ -612,27 +600,23 @@ class RepositoryCreation extends HookWidget with AppLogger {
     createRepoCubit.secureWithBiometrics(false);
     createRepoCubit.showSavePasswordWarning(addPassword);
 
-    populatePasswordControllers(generatePassword: !addPassword);
+    populatePasswordControllers();
   }
 
-  void populatePasswordControllers({required bool generatePassword}) {
-    final autoPassword = generatePassword ? generateRandomPassword() : '';
-
-    passwordController.text = autoPassword;
-    retypedPasswordController.text = autoPassword;
+  void populatePasswordControllers() {
+    passwordController.text = "";
+    retypedPasswordController.text = "";
 
     if (nameController.text.isEmpty) {
       repositoryNameFocus.requestFocus();
       return;
     }
 
-    if (!generatePassword) {
-      passwordFocus.requestFocus();
-    }
+    passwordFocus.requestFocus();
   }
 
-  void onSaved(
-      String name, String password, CreateRepositoryState state) async {
+  void _onSaved(
+      String name, LocalSecret secret, CreateRepositoryState state) async {
     final isRepoNameOk =
         _repositoryNameInputKey.currentState?.validate() ?? false;
     final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
@@ -659,10 +643,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
     if (exist) return;
 
     /// We savePasswordToSecureStorage when: is not a blind replica AND there is
-    /// not local password (authenticationRequired=false) OR using biometric
+    /// not local secret (authenticationRequired=false) OR using biometric
     /// validation (authenticationRequired=true).
     ///
-    /// We authenticationRequired when: there is local password
+    /// We authenticationRequired when: there is local secret
     /// (authenticationRequired=false) AND using biometric validation
     /// (authenticationRequired=true).
     ///
@@ -683,8 +667,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
         : PasswordMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: createRepoCubit.createRepository(
-            repoLocation, password, state.shareToken, passwordMode, true));
+        f: cubit.createRepository(repoLocation, secret,
+            token: state.shareToken,
+            passwordMode: passwordMode,
+            setCurrent: true));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";
@@ -701,61 +687,6 @@ class RepositoryCreation extends HookWidget with AppLogger {
       return;
     }
 
-    /// MANUAL PASSWORD - NO BIOMETRICS (ALSO: BLIND REPLICAS)
-    /// ====================================================
-    if (savePasswordToSecureStorage == false) {
-      Navigator.of(context).pop(name);
-
-      return;
-    }
-
-    /// NO LOCAL PASSWORD (MAYBE BIOMETRICS) - AUTOGENERATED PASSWORD
-    /// ====================================================
-
-    /// We need to first create the repository (above), before saving the
-    /// password to the secure storage, because we need the repository's
-    /// database ID.
-    ///
-    /// If adding the password to the secure storage fail, we stay in the
-    /// dialog, the user then can try again, or if the issue persist, opt out
-    /// from using biometrics.
-    ///
-    /// If the issue is not related to the biometric authentication
-    /// (StorageFileInitOptions.authenticationRequired = false), but saving the
-    /// data to the secure storage all together, and since we already created
-    /// the repository, we need to delete the repository before leaving this
-    /// dialog if the user tap the CANCEL button, hence this:
-    /// _deleteRepositoryBeforePop = true;
-    final databaseId = repoEntry.databaseId;
-    final savedPassword = await Dialogs.executeFutureWithLoadingDialog<String?>(
-        context,
-        f: SecureStorage(databaseId: databaseId)
-            .saveOrUpdatePassword(value: password));
-
-    if (savedPassword == null || savedPassword.isEmpty) {
-      setDeleteRepoBeforePop(true, repoEntry.location);
-
-      // TODO: Check if this still can be determined or even occur
-      // if (savedPassword.exception is AuthException) {
-      //   if ((savedPassword.exception as AuthException).code !=
-      //       AuthExceptionCode.userCanceled) {
-      //     await Dialogs.simpleAlertDialog(
-      //         context: context,
-      //         title: S.current.messsageFailedCreateRepository(name),
-      //         message: S.current.messageErrorAuthenticatingBiometrics);
-      //   }
-      // }
-
-      return;
-    }
-
-    setDeleteRepoBeforePop(false, null);
-
     Navigator.of(context).pop(name);
-  }
-
-  void setDeleteRepoBeforePop(bool delete, RepoLocation? location) {
-    createRepoCubit.deleteRepositoryBeforePop(delete);
-    createRepoCubit.repoLocation(location);
   }
 }

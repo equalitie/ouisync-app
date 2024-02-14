@@ -1,5 +1,5 @@
 import 'v1.dart' as v1;
-import '../../utils/master_key.dart';
+import '../master_key.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
