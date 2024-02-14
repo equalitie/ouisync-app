@@ -140,7 +140,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
           try {
             await settings
                 .repoSettingsById(databaseId)!
-                .setAuthModePasswordStoredOnDevice(
+                .setAuthModeSecretStoredOnDevice(
                   password,
                   _useBiometrics.value,
                 );

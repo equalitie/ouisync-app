@@ -57,7 +57,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
       initHooks();
       initTextStyles(context);
 
-      populatePasswordControllers(generatePassword: true);
+      populatePasswordControllers();
       updateNameController(createRepoCubit.state.suggestedName);
 
       addListeners();
@@ -295,12 +295,13 @@ class RepositoryCreation extends HookWidget with AppLogger {
               return;
             }
 
-            final submitted = await submitNameField(newName);
-            if (submitted && PlatformValues.isDesktopDevice) {
-              final password =
-                  state.isBlindReplica ? '' : passwordController.text;
-              _onSaved(newName!, password, state);
-            }
+            // This is to support pressing the Enter button to submit creation.
+            if (!PlatformValues.isDesktopDevice) return;
+
+            final nameFieldOk = await submitNameField(newName);
+            if (!nameFieldOk) return;
+
+            _onSaved(newName!, generateRandomPassword(), state);
           },
           validator: validateNoEmptyMaybeRegExpr(
               emptyError: S.current.messageErrorFormValidatorNameDefault,
@@ -416,7 +417,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
                         await submitRetypedPasswordField(retypedPassword);
                     if (submitted && PlatformValues.isDesktopDevice) {
                       final newName = nameController.text;
-                      _onSaved(newName, retypedPassword!, state);
+                      _onSaved(newName, LocalPassword(retypedPassword!), state);
                     }
                   },
                   validator: (retypedPassword) => retypedPasswordValidator(
@@ -539,7 +540,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             createRepoCubit.secureWithBiometrics(enableBiometrics);
             createRepoCubit.showSavePasswordWarning(!enableBiometrics);
 
-            populatePasswordControllers(generatePassword: true);
+            populatePasswordControllers();
           },
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact));
@@ -570,15 +571,21 @@ class RepositoryCreation extends HookWidget with AppLogger {
                 : S.current.actionImport,
             onPressed: () async {
               final newName = nameController.text;
-              final password =
-                  state.isBlindReplica ? '' : passwordController.text;
 
-              final submitted = state.addPassword
-                  ? await submitRetypedPasswordField(password)
-                  : await submitNameField(newName);
+              LocalSecret secret;
+              bool valuesAreOk;
 
-              if (submitted) {
-                _onSaved(newName, password, state);
+              if (state.isBlindReplica || !state.addPassword) {
+                secret = generateRandomPassword();
+                valuesAreOk = await submitNameField(newName);
+              } else {
+                final password = passwordController.text;
+                secret = LocalPassword(passwordController.text);
+                valuesAreOk = await submitRetypedPasswordField(password);
+              }
+
+              if (valuesAreOk) {
+                _onSaved(newName, secret, state);
               }
             },
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
@@ -592,30 +599,23 @@ class RepositoryCreation extends HookWidget with AppLogger {
     createRepoCubit.secureWithBiometrics(false);
     createRepoCubit.showSavePasswordWarning(addPassword);
 
-    populatePasswordControllers(generatePassword: !addPassword);
+    populatePasswordControllers();
   }
 
-  void populatePasswordControllers({required bool generatePassword}) {
-    final autoPassword = generatePassword ? generateRandomPassword() : null;
-
-    passwordController.text = autoPassword == null ? "" : autoPassword.string;
-    retypedPasswordController.text =
-        autoPassword == null ? "" : autoPassword.string;
+  void populatePasswordControllers() {
+    passwordController.text = "";
+    retypedPasswordController.text = "";
 
     if (nameController.text.isEmpty) {
       repositoryNameFocus.requestFocus();
       return;
     }
 
-    if (!generatePassword) {
-      passwordFocus.requestFocus();
-    }
+    passwordFocus.requestFocus();
   }
 
   void _onSaved(
-      String name, String passwordStr, CreateRepositoryState state) async {
-    final password = LocalPassword(passwordStr);
-
+      String name, LocalSecret secret, CreateRepositoryState state) async {
     final isRepoNameOk =
         _repositoryNameInputKey.currentState?.validate() ?? false;
     final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;
@@ -642,10 +642,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
     if (exist) return;
 
     /// We savePasswordToSecureStorage when: is not a blind replica AND there is
-    /// not local password (authenticationRequired=false) OR using biometric
+    /// not local secret (authenticationRequired=false) OR using biometric
     /// validation (authenticationRequired=true).
     ///
-    /// We authenticationRequired when: there is local password
+    /// We authenticationRequired when: there is local secret
     /// (authenticationRequired=false) AND using biometric validation
     /// (authenticationRequired=true).
     ///
@@ -666,7 +666,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
         : PasswordMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: cubit.createRepository(repoLocation, password,
+        f: cubit.createRepository(repoLocation, secret,
             token: state.shareToken,
             passwordMode: passwordMode,
             setCurrent: true));

@@ -29,6 +29,8 @@ sealed class AuthMode {
     var decoded = _AuthModeBlindOrManual._fromJson(data);
     if (decoded != null) return decoded;
     decoded = _AuthModePasswordStoredOnDevice._fromJson(data);
+    if (decoded != null) return decoded;
+    decoded = _AuthModeKeyStoredOnDevice._fromJson(data);
     if (decoded == null) throw FailedToParseAuthMode();
     return decoded;
   }
@@ -93,6 +95,40 @@ class _AuthModePasswordStoredOnDevice extends AuthMode {
   }
 }
 
+class _AuthModeKeyStoredOnDevice extends AuthMode {
+  final String encryptedKey;
+  final bool confirmWithBiometrics;
+
+  _AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
+
+  // May throw.
+  LocalSecretKey getRepositoryPassword(MasterKey masterKey) {
+    final decrypted = masterKey.decryptBytes(encryptedKey);
+    if (decrypted == null) throw FailedToDecryptError();
+    return LocalSecretKey(decrypted);
+  }
+
+  static String _tag() => "key-stored-on-device";
+
+  @override
+  Map _toJson() => {
+        _tag(): {
+          "encryptedKey": encryptedKey,
+          "confirmWithBiometrics": confirmWithBiometrics,
+        }
+      };
+
+  static AuthMode? _fromJson(dynamic data) {
+    final values = data[_tag()];
+    if (values == null) return null;
+    String? encryptedKey = values["encryptedKey"];
+    if (encryptedKey == null) return null;
+    bool? confirmWithBiometrics = values["confirmWithBiometrics"];
+    if (confirmWithBiometrics == null) return null;
+    return _AuthModeKeyStoredOnDevice(encryptedKey, confirmWithBiometrics);
+  }
+}
+
 //--------------------------------------------------------------------
 
 class SettingsRepoEntry {
@@ -126,6 +162,25 @@ class SettingsRepoEntry {
 }
 
 //--------------------------------------------------------------------
+AuthMode _secretToAuthMode(
+    LocalSecret secret, MasterKey masterKey, bool requireAuthentication) {
+  switch (secret) {
+    case LocalPassword():
+      // We currently use a random generator to generate passwords of length 24
+      // and we only store those.  This assertion here is just a reminder that we
+      // must not use this function for user provided passwords.
+      final passwordStr = secret.string;
+      assert(passwordStr.length >= 24);
+      final encryptedPwd = masterKey.encrypt(passwordStr);
+      return _AuthModePasswordStoredOnDevice(
+          encryptedPwd, requireAuthentication);
+    case LocalSecretKey():
+      final key = secret.bytes;
+      final encryptedKey = masterKey.encryptBytes(key);
+      return _AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
+  }
+}
+//--------------------------------------------------------------------
 
 class RepoSettings {
   final Settings _settings;
@@ -144,18 +199,10 @@ class RepoSettings {
     await _settings._storeRoot();
   }
 
-  Future<void> setAuthModePasswordStoredOnDevice(
-      LocalPassword password, bool requireAuthentication) async {
-    // We currently use a random generator to generate passwords of length 24
-    // and we only store those.  This assertion here is just a reminder that we
-    // must not use this function for user provided passwords.
-    assert(password.length >= 24);
-
-    final encryptedPwd = _settings._masterKey.encrypt(password.string);
-
+  Future<void> setAuthModeSecretStoredOnDevice(
+      LocalSecret secret, bool requireAuthentication) async {
     _entry.authMode =
-        _AuthModePasswordStoredOnDevice(encryptedPwd, requireAuthentication);
-
+        _secretToAuthMode(secret, _settings._masterKey, requireAuthentication);
     await _settings._storeRoot();
   }
 
@@ -180,6 +227,10 @@ class RepoSettings {
         final pwd = _settings._masterKey.decrypt(authMode.encryptedPassword);
         if (pwd == null) throw FailedToDecryptError();
         return LocalPassword(pwd);
+      case _AuthModeKeyStoredOnDevice():
+        final key = _settings._masterKey.decryptBytes(authMode.encryptedKey);
+        if (key == null) throw FailedToDecryptError();
+        return LocalSecretKey(key);
     }
   }
 
@@ -487,11 +538,11 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  Future<RepoSettings?> addRepoWithPasswordStoredOnDevice(
-      RepoLocation location, LocalPassword password, DatabaseId databaseId,
+  Future<RepoSettings?> addRepoWithSecretStoredOnDevice(
+      RepoLocation location, LocalSecret secret, DatabaseId databaseId,
       {required requireBiometricCheck}) async {
-    final authMode = _AuthModePasswordStoredOnDevice(
-        _masterKey.encrypt(password.string), requireBiometricCheck);
+    final authMode =
+        _secretToAuthMode(secret, _masterKey, requireBiometricCheck);
     return await _addRepo(location, databaseId: databaseId, authMode: authMode);
   }
 

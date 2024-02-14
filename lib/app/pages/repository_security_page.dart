@@ -254,7 +254,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings
-          .setAuthModePasswordStoredOnDevice(newPassword, false);
+          .setAuthModeSecretStoredOnDevice(newPassword, false);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
@@ -282,7 +282,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     try {
-      await _repo.repoSettings.setAuthModePasswordStoredOnDevice(
+      await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
         newPassword,
         unlockWithBiometrics,
       );
