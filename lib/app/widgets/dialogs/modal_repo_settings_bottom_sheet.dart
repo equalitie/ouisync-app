@@ -9,16 +9,11 @@ import '../widgets.dart';
 
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings(
-      {required this.context,
-      required this.cubit,
-      required this.reposCubit,
-      required this.settings});
+      {required this.context, required this.cubit, required this.reposCubit});
 
   final BuildContext context;
   final RepoCubit cubit;
   final ReposCubit reposCubit;
-
-  final Settings settings;
 
   @override
   State<RepositorySettings> createState() => _RepositorySettingsState();
@@ -101,7 +96,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
                                 repository: widget.cubit,
-                                settings: widget.settings,
                                 popDialog: () => Navigator.of(context).pop(),
                               )),
                       EntryActionItem(
@@ -111,7 +105,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           isDanger: true,
                           onTap: () async => await deleteRepository(context,
                               repositoryLocation: widget.cubit.location,
-                              settings: widget.settings,
                               reposCubit: widget.reposCubit,
                               popDialog: () => Navigator.of(context).pop()))
                     ]))),

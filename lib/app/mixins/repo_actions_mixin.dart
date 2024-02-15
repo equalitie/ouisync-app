@@ -71,7 +71,6 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
     required RepoCubit repository,
-    required Settings settings,
     required void Function() popDialog,
   }) async {
     final repoSettings = repository.repoSettings;
@@ -158,7 +157,6 @@ mixin RepositoryActionsMixin on LoggyType {
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(BuildContext context,
       {required RepoLocation repositoryLocation,
-      required Settings settings,
       required ReposCubit reposCubit,
       void Function()? popDialog}) async {
     final deleteRepo = await showDialog<bool>(

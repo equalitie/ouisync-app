@@ -13,7 +13,6 @@ class MissingRepositoryState extends HookWidget
     required this.repositoryLocation,
     required this.errorMessage,
     this.errorDescription,
-    required this.settings,
     required this.onReloadRepository,
     required this.reposCubit,
     super.key,
@@ -24,7 +23,6 @@ class MissingRepositoryState extends HookWidget
   final String? errorDescription;
   final ReposCubit reposCubit;
 
-  final Settings settings;
   final void Function()? onReloadRepository;
 
   @override
@@ -75,7 +73,6 @@ class MissingRepositoryState extends HookWidget
           Fields.inPageButton(
               onPressed: () => deleteRepository(context,
                   repositoryLocation: repositoryLocation,
-                  settings: settings,
                   reposCubit: reposCubit),
               text: S.current.actionRemoveRepo,
               size: Dimensions.sizeInPageButtonLong,

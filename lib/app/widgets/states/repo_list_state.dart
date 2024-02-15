@@ -12,7 +12,6 @@ class RepoListState extends StatelessWidget
   const RepoListState(
       {required this.reposCubit,
       required this.bottomPaddingWithBottomSheet,
-      required this.settings,
       required this.onShowRepoSettings,
       required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed});
@@ -20,7 +19,6 @@ class RepoListState extends StatelessWidget
   final ReposCubit reposCubit;
   final ValueNotifier<double> bottomPaddingWithBottomSheet;
 
-  final Settings settings;
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
   final Future<RepoLocation?> Function() onNewRepositoryPressed;
@@ -60,7 +58,6 @@ class RepoListState extends StatelessWidget
                       mainAction: () {},
                       verticalDotsAction: () async => deleteRepository(context,
                           repositoryLocation: repoEntry.location,
-                          settings: settings,
                           reposCubit: reposCubit));
                 }
 

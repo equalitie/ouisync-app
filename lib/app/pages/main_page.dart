@@ -240,7 +240,6 @@ class _MainPageState extends State<MainPage>
         return RepoListState(
           reposCubit: repos,
           bottomPaddingWithBottomSheet: _bottomPaddingWithBottomSheet,
-          settings: widget.settings,
           onShowRepoSettings: _showRepoSettings,
           onNewRepositoryPressed: _addRepository,
           onImportRepositoryPressed: _importRepository,
@@ -266,7 +265,6 @@ class _MainPageState extends State<MainPage>
             repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
-            settings: widget.settings,
             onReloadRepository: null,
             reposCubit: repos);
       }
@@ -925,7 +923,6 @@ class _MainPageState extends State<MainPage>
           return RepositorySettings(
             context: context,
             cubit: repoCubit,
-            settings: widget.settings,
             reposCubit: _cubits.repositories,
           );
         },
