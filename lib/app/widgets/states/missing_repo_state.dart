@@ -3,30 +3,29 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../mixins/repo_actions_mixin.dart';
+import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
 class MissingRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
   const MissingRepositoryState({
-    required this.repositoryName,
     required this.repositoryLocation,
     required this.errorMessage,
     this.errorDescription,
     required this.settings,
     required this.onReloadRepository,
-    required this.onDelete,
+    required this.reposCubit,
     super.key,
   });
 
-  final String repositoryName;
   final RepoLocation repositoryLocation;
   final String errorMessage;
   final String? errorDescription;
+  final ReposCubit reposCubit;
 
   final Settings settings;
   final void Function()? onReloadRepository;
-  final Future<void> Function(RepoLocation) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +76,7 @@ class MissingRepositoryState extends HookWidget
               onPressed: () => deleteRepository(context,
                   repositoryLocation: repositoryLocation,
                   settings: settings,
-                  delete: onDelete),
+                  reposCubit: reposCubit),
               text: S.current.actionRemoveRepo,
               size: Dimensions.sizeInPageButtonLong,
               alignment: Alignment.center,

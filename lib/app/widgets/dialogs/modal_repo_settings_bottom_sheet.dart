@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
-import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -13,15 +12,13 @@ class RepositorySettings extends StatefulWidget {
       {required this.context,
       required this.cubit,
       required this.reposCubit,
-      required this.settings,
-      required this.deleteRepository});
+      required this.settings});
 
   final BuildContext context;
   final RepoCubit cubit;
   final ReposCubit reposCubit;
 
   final Settings settings;
-  final Future<void> Function(RepoLocation) deleteRepository;
 
   @override
   State<RepositorySettings> createState() => _RepositorySettingsState();
@@ -115,7 +112,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await deleteRepository(context,
                               repositoryLocation: widget.cubit.location,
                               settings: widget.settings,
-                              delete: widget.deleteRepository,
+                              reposCubit: widget.reposCubit,
                               popDialog: () => Navigator.of(context).pop()))
                     ]))),
       );

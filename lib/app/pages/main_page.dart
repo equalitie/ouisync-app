@@ -263,13 +263,12 @@ class _MainPageState extends State<MainPage>
 
       if (currentRepo is MissingRepoEntry) {
         return MissingRepositoryState(
-            repositoryName: currentRepo.name,
             repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
             settings: widget.settings,
             onReloadRepository: null,
-            onDelete: repos.deleteRepository);
+            reposCubit: repos);
       }
 
       if (currentRepo is ErrorRepoEntry) {
@@ -928,7 +927,6 @@ class _MainPageState extends State<MainPage>
             cubit: repoCubit,
             settings: widget.settings,
             reposCubit: _cubits.repositories,
-            deleteRepository: _cubits.repositories.deleteRepository,
           );
         },
       );
