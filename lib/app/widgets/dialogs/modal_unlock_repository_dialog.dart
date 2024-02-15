@@ -4,6 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart';
+import '../../cubits/cubits.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
@@ -13,8 +14,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     required this.repoLocation,
     required this.isBiometricsAvailable,
     required this.isPasswordValidation,
-    required this.settings,
-    required this.unlockRepositoryCallback,
+    required this.reposCubit,
   });
 
   final BuildContext parentContext;
@@ -25,9 +25,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  final Settings settings;
-  final Future<AccessMode?> Function(RepoLocation, LocalPassword)
-      unlockRepositoryCallback;
+  final ReposCubit reposCubit;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -114,7 +112,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     final accessMode = await Dialogs.executeFutureWithLoadingDialog(
         parentContext,
-        f: unlockRepositoryCallback(repoLocation, password));
+        f: reposCubit.unlockRepository(repoLocation, password));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
@@ -139,7 +137,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         parentContext,
         f: () async {
           try {
-            await settings
+            await reposCubit.settings
                 .repoSettingsById(databaseId)!
                 .setAuthModeSecretStoredOnDevice(
                   password,

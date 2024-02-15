@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
+import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart';
@@ -12,17 +12,13 @@ class LockedRepositoryState extends HookWidget
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
       required this.repoLocation,
-      required this.settings,
-      required this.unlockRepositoryCallback});
+      required this.reposCubit});
 
   final BuildContext parentContext;
 
   final DatabaseId databaseId;
   final RepoLocation repoLocation;
-
-  final Settings settings;
-  final Future<AccessMode?> Function(RepoLocation, LocalSecret)
-      unlockRepositoryCallback;
+  final ReposCubit reposCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +68,7 @@ class LockedRepositoryState extends HookWidget
                 parentContext,
                 databaseId: databaseId,
                 repoLocation: repoLocation,
-                settings: settings,
-                cubitUnlockRepository: unlockRepositoryCallback,
+                reposCubit: reposCubit,
               );
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),

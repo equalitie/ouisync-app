@@ -11,8 +11,6 @@ import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
-typedef CheckForBiometricsFunction = Future<bool?> Function();
-
 mixin RepositoryActionsMixin on LoggyType {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(
@@ -206,10 +204,8 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> unlockRepository(BuildContext context,
       {required DatabaseId databaseId,
       required RepoLocation repoLocation,
-      required Settings settings,
-      required Future<AccessMode?> Function(RepoLocation, LocalSecret)
-          cubitUnlockRepository}) async {
-    final repoSettings = settings.repoSettingsById(databaseId)!;
+      required ReposCubit reposCubit}) async {
+    final repoSettings = reposCubit.settings.repoSettingsById(databaseId)!;
     final passwordMode = repoSettings.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
@@ -220,8 +216,7 @@ mixin RepositoryActionsMixin on LoggyType {
           databaseId: databaseId,
           repoLocation: repoLocation,
           isBiometricsAvailable: isBiometricsAvailable,
-          settings: settings,
-          cubitUnlockRepository: cubitUnlockRepository);
+          reposCubit: reposCubit);
 
       if (unlockResult == null) return;
 
@@ -230,7 +225,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final secret = settings.repoSettingsById(databaseId)!.getLocalSecret();
+    final secret = repoSettings.getLocalSecret();
 
     if (secret == null) {
       final message = passwordMode == PasswordMode.none
@@ -240,7 +235,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final accessMode = await cubitUnlockRepository(repoLocation, secret);
+    final accessMode = await reposCubit.unlockRepository(repoLocation, secret);
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
@@ -255,9 +250,7 @@ mixin RepositoryActionsMixin on LoggyType {
           {required DatabaseId databaseId,
           required RepoLocation repoLocation,
           required bool isBiometricsAvailable,
-          required Settings settings,
-          required Future<AccessMode?> Function(RepoLocation, LocalPassword)
-              cubitUnlockRepository}) async =>
+          required ReposCubit reposCubit}) async =>
       await showDialog<UnlockRepositoryResult?>(
           context: context,
           builder: (BuildContext context) =>
@@ -272,8 +265,7 @@ mixin RepositoryActionsMixin on LoggyType {
                           repoLocation: repoLocation,
                           isPasswordValidation: false,
                           isBiometricsAvailable: isBiometricsAvailable,
-                          settings: settings,
-                          unlockRepositoryCallback: cubitUnlockRepository),
+                          reposCubit: reposCubit),
                     ));
               }))));
 

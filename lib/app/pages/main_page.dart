@@ -433,8 +433,7 @@ class _MainPageState extends State<MainPage>
         return LockedRepositoryState(context,
             databaseId: current.databaseId,
             repoLocation: current.location,
-            settings: widget.settings,
-            unlockRepositoryCallback: _cubits.repositories.unlockRepository);
+            reposCubit: _cubits.repositories);
       }
 
       _appSettingsIconFocus.unfocus();
