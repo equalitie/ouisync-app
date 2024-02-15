@@ -927,7 +927,7 @@ class _MainPageState extends State<MainPage>
             context: context,
             cubit: repoCubit,
             settings: widget.settings,
-            renameRepository: _cubits.repositories.renameRepository,
+            reposCubit: _cubits.repositories,
             deleteRepository: _cubits.repositories.deleteRepository,
           );
         },

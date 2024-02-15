@@ -12,16 +12,15 @@ class RepositorySettings extends StatefulWidget {
   const RepositorySettings(
       {required this.context,
       required this.cubit,
+      required this.reposCubit,
       required this.settings,
-      required this.renameRepository,
       required this.deleteRepository});
 
   final BuildContext context;
   final RepoCubit cubit;
+  final ReposCubit reposCubit;
 
   final Settings settings;
-  final Future<void> Function(RepoLocation oldLocation, String newName)
-      renameRepository;
   final Future<void> Function(RepoLocation) deleteRepository;
 
   @override
@@ -87,7 +86,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await renameRepository(
                               widget.context,
                               repository: widget.cubit,
-                              rename: widget.renameRepository,
+                              reposCubit: widget.reposCubit,
                               popDialog: () => Navigator.of(context).pop())),
                       EntryActionItem(
                           iconData: Icons.share,

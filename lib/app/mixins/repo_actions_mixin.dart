@@ -18,7 +18,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> renameRepository(
     BuildContext context, {
     required RepoCubit repository,
-    required Future<void> Function(RepoLocation, String) rename,
+    required ReposCubit reposCubit,
     void Function()? popDialog,
   }) async {
     final newName = await showDialog<String>(
@@ -33,7 +33,7 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await Dialogs.executeFutureWithLoadingDialog(context,
-        f: rename(repository.location, newName));
+        f: reposCubit.renameRepository(repository.location, newName));
 
     if (popDialog != null) {
       popDialog();
