@@ -564,7 +564,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
                 : S.current.actionCancel,
             onPressed: () => state.addPassword
                 ? updatePasswordSection(false)
-                : Navigator.of(context).pop(''),
+                : Navigator.of(context).pop(null),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: state.shareToken == null
@@ -681,12 +681,12 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
       await Dialogs.simpleAlertDialog(
           context: context,
-          title: S.current.messsageFailedCreateRepository(name),
+          title: S.current.messsageFailedCreateRepository(repoLocation.path()),
           message: err);
 
       return;
     }
 
-    Navigator.of(context).pop(name);
+    Navigator.of(context).pop(repoLocation);
   }
 }

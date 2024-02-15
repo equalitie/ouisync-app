@@ -435,7 +435,7 @@ class _MainPageState extends State<MainPage>
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(context,
             databaseId: current.databaseId,
-            repositoryName: current.name,
+            repoLocation: current.location,
             settings: widget.settings,
             unlockRepositoryCallback: _cubits.repositories.unlockRepository);
       }
@@ -806,27 +806,27 @@ class _MainPageState extends State<MainPage>
                 onImportRepositoryPressed: _importRepository);
           });
 
-  Future<String?> _addRepository() async =>
+  Future<RepoLocation?> _addRepository() async =>
       _addRepoAndNavigate(createRepoDialog(context));
 
-  Future<String?> _importRepository() async =>
+  Future<RepoLocation?> _importRepository() async =>
       _addRepoAndNavigate(addRepoWithTokenDialog(context));
 
-  Future<String?> _addRepoAndNavigate(Future<String?> repoFunction) async {
-    final newRepoName = await repoFunction;
+  Future<RepoLocation?> _addRepoAndNavigate(
+      Future<RepoLocation?> repoFunction) async {
+    final newRepoLocation = await repoFunction;
 
-    if (newRepoName == null || newRepoName.isEmpty) {
+    if (newRepoLocation == null || newRepoLocation.name.isEmpty) {
       return null;
     }
 
-    await _cubits.repositories.setCurrentByName(newRepoName);
-    //_cubits.repositories.pushRepoList(false);
+    await _cubits.repositories.setCurrentByLocation(newRepoLocation);
 
-    return newRepoName;
+    return newRepoLocation;
   }
 
-  Future<String?> createRepoDialog(BuildContext parentContext) async =>
-      showDialog<String>(
+  Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
+      showDialog<RepoLocation>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => ScaffoldMessenger(
@@ -847,7 +847,7 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<String?> addRepoWithTokenDialog(BuildContext parentContext,
+  Future<RepoLocation?> addRepoWithTokenDialog(BuildContext parentContext,
       {String? initialTokenValue}) async {
     initialTokenValue ??= await Navigator.push(
       context,
@@ -883,7 +883,7 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    return showDialog<String>(
+    return showDialog<RepoLocation>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => ScaffoldMessenger(

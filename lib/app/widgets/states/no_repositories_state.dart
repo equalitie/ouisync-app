@@ -3,14 +3,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../../models/models.dart';
 
 class NoRepositoriesState extends HookWidget {
   const NoRepositoriesState(
       {required this.onNewRepositoryPressed,
       required this.onImportRepositoryPressed});
 
-  final Future<String?> Function() onNewRepositoryPressed;
-  final Future<String?> Function() onImportRepositoryPressed;
+  final Future<RepoLocation?> Function() onNewRepositoryPressed;
+  final Future<RepoLocation?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {

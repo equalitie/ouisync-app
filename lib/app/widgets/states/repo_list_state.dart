@@ -23,8 +23,8 @@ class RepoListState extends StatelessWidget
   final Settings settings;
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
-  final Future<String?> Function() onNewRepositoryPressed;
-  final Future<String?> Function() onImportRepositoryPressed;
+  final Future<RepoLocation?> Function() onNewRepositoryPressed;
+  final Future<RepoLocation?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +50,7 @@ class RepoListState extends StatelessWidget
                 bool isDefault = currentRepoName == repoEntry.name;
 
                 if (repoEntry.maybeCubit == null) {
-                  final repoMissingItem = RepoMissingItem(
-                      name: repoEntry.name,
-                      path: '',
+                  final repoMissingItem = RepoMissingItem(repoEntry.location,
                       message: S.current.messageRepoMissing);
 
                   return ListItem(
@@ -61,25 +59,20 @@ class RepoListState extends StatelessWidget
                       itemData: repoMissingItem,
                       mainAction: () {},
                       verticalDotsAction: () async => deleteRepository(context,
-                          repositoryName: repoEntry.name,
-                          repositoryLocation: repoEntry.location!,
+                          repositoryLocation: repoEntry.location,
                           settings: settings,
                           delete: reposCubit.deleteRepository));
                 }
 
-                final repoItem = RepoItem(
-                    name: repoEntry.name,
-                    path: '',
-                    accessMode: repoEntry.accessMode,
-                    isDefault: isDefault);
+                final repoItem = RepoItem(repoEntry.location,
+                    accessMode: repoEntry.accessMode, isDefault: isDefault);
 
                 final listItem = ListItem(
                     reposCubit: reposCubit,
                     repository: repoEntry.maybeCubit!,
                     itemData: repoItem,
                     mainAction: () async {
-                      final repoName = repoEntry.name;
-                      await reposCubit.setCurrentByName(repoName);
+                      await reposCubit.setCurrentByLocation(repoEntry.location);
                     },
                     verticalDotsAction: () async {
                       final cubit = repoEntry.maybeCubit;

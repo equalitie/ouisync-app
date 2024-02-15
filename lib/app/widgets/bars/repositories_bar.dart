@@ -42,23 +42,15 @@ class RepositoriesBar extends StatelessWidget
         }
 
         final repo = state.currentRepo;
-        final name = _repoName(repo);
+        IconData icon;
 
         if (repo == null) {
-          return _buildState(
-            context,
-            icon: Fields.accessModeIcon(null),
-            repoName: name,
-          );
+          icon = Fields.accessModeIcon(null);
+        } else {
+          icon = Fields.accessModeIcon(repo.accessMode);
         }
 
-        final icon = Fields.accessModeIcon(repo.accessMode);
-
-        return _buildState(
-          context,
-          icon: icon,
-          repoName: name,
-        );
+        return _buildState(context, repo, icon: icon);
       });
 
   String _repoName(RepoEntry? repo) {
@@ -86,9 +78,9 @@ class RepositoriesBar extends StatelessWidget
           ])));
 
   Widget _buildState(
-    BuildContext context, {
+    BuildContext context,
+    RepoEntry? entry, {
     required IconData icon,
-    required String repoName,
   }) =>
       Row(children: [
         _buildBackButton(),
@@ -100,16 +92,11 @@ class RepositoriesBar extends StatelessWidget
                     icon: Icon(icon),
                     iconSize: Dimensions.sizeIconSmall,
                     onPressed: () async {
-                      final entry = _cubits.repositories.get(repoName);
                       if (entry == null) return;
-
-                      final lockRepoFunction =
-                          _cubits.repositories.lockRepository;
-
-                      await lockRepository(entry, lockRepoFunction);
+                      await lockRepository(entry, _cubits.repositories);
                     },
                   ),
-                  Fields.constrainedText(repoName,
+                  Fields.constrainedText(_repoName(entry),
                       softWrap: false, textOverflow: TextOverflow.fade)
                 ])))
       ]);

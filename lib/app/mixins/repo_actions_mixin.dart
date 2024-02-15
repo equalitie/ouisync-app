@@ -18,24 +18,22 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> renameRepository(
     BuildContext context, {
     required RepoCubit repository,
-    required Future<void> Function(String, String) rename,
+    required Future<void> Function(RepoLocation, String) rename,
     void Function()? popDialog,
   }) async {
-    final currentName = repository.name;
-
     final newName = await showDialog<String>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
             title: S.current.messageRenameRepository,
             body: RenameRepository(
-                parentContext: context, oldName: currentName)));
+                parentContext: context, oldName: repository.name)));
 
     if (newName == null || newName.isEmpty) {
       return;
     }
 
     await Dialogs.executeFutureWithLoadingDialog(context,
-        f: rename(currentName, newName));
+        f: rename(repository.location, newName));
 
     if (popDialog != null) {
       popDialog();
@@ -159,8 +157,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(BuildContext context,
-      {required String repositoryName,
-      required RepoLocation repositoryLocation,
+      {required RepoLocation repositoryLocation,
       required Settings settings,
       required Future<void> Function(RepoLocation) delete,
       void Function()? popDialog}) async {
@@ -210,9 +207,9 @@ mixin RepositoryActionsMixin on LoggyType {
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   Future<void> unlockRepository(BuildContext context,
       {required DatabaseId databaseId,
-      required String repositoryName,
+      required RepoLocation repoLocation,
       required Settings settings,
-      required Future<AccessMode?> Function(String repositoryName, LocalSecret)
+      required Future<AccessMode?> Function(RepoLocation, LocalSecret)
           cubitUnlockRepository}) async {
     final repoSettings = settings.repoSettingsById(databaseId)!;
     final passwordMode = repoSettings.passwordMode;
@@ -223,7 +220,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
       final unlockResult = await unlockRepositoryManually(context,
           databaseId: databaseId,
-          repositoryName: repositoryName,
+          repoLocation: repoLocation,
           isBiometricsAvailable: isBiometricsAvailable,
           settings: settings,
           cubitUnlockRepository: cubitUnlockRepository);
@@ -245,7 +242,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final accessMode = await cubitUnlockRepository(repositoryName, secret);
+    final accessMode = await cubitUnlockRepository(repoLocation, secret);
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
@@ -258,11 +255,10 @@ mixin RepositoryActionsMixin on LoggyType {
   /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
           {required DatabaseId databaseId,
-          required String repositoryName,
+          required RepoLocation repoLocation,
           required bool isBiometricsAvailable,
           required Settings settings,
-          required Future<AccessMode?> Function(
-                  String repositoryName, LocalPassword password)
+          required Future<AccessMode?> Function(RepoLocation, LocalPassword)
               cubitUnlockRepository}) async =>
       await showDialog<UnlockRepositoryResult?>(
           context: context,
@@ -275,7 +271,7 @@ mixin RepositoryActionsMixin on LoggyType {
                       body: UnlockRepository(
                           parentContext: context,
                           databaseId: databaseId,
-                          repositoryName: repositoryName,
+                          repoLocation: repoLocation,
                           isPasswordValidation: false,
                           isBiometricsAvailable: isBiometricsAvailable,
                           settings: settings,
@@ -320,13 +316,11 @@ mixin RepositoryActionsMixin on LoggyType {
 }
 
 Future<void> lockRepository(
-    RepoEntry repositoryEntry,
-    Future<void> Function(RepoSettings repoSettings)
-        lockRepositoryFunction) async {
+    RepoEntry repositoryEntry, ReposCubit reposCubit) async {
   if (repositoryEntry.accessMode == AccessMode.blind) return;
 
   if (repositoryEntry is OpenRepoEntry) {
-    await lockRepositoryFunction(repositoryEntry.repoSettings);
+    await reposCubit.lockRepository(repositoryEntry.repoSettings);
   }
 }
 

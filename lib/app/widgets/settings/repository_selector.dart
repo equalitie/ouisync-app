@@ -63,8 +63,8 @@ class RepositorySelector extends StatelessWidget with AppLogger {
                       ])))
               .toList(),
           onChanged: (repo) async {
-            loggy.app('Selected repository: ${repo?.name}');
-            await repos.setCurrentByName(repo?.name);
+            loggy.app('Selected repository: ${repo?.location.path()}');
+            await repos.setCurrentByLocation(repo?.location);
           },
         ),
       );

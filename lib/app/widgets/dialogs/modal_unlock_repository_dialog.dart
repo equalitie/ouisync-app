@@ -3,13 +3,14 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../../models/models.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
   UnlockRepository({
     required this.parentContext,
     required this.databaseId,
-    required this.repositoryName,
+    required this.repoLocation,
     required this.isBiometricsAvailable,
     required this.isPasswordValidation,
     required this.settings,
@@ -18,15 +19,15 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
   final BuildContext parentContext;
   final DatabaseId databaseId;
-  final String repositoryName;
+  final RepoLocation repoLocation;
   final bool isBiometricsAvailable;
   final bool isPasswordValidation;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final Settings settings;
-  final Future<AccessMode?> Function(
-      String repositoryName, LocalPassword password) unlockRepositoryCallback;
+  final Future<AccessMode?> Function(RepoLocation, LocalPassword)
+      unlockRepositoryCallback;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -52,7 +53,7 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.constrainedText('"$repositoryName"',
+          Fields.constrainedText('"${repoLocation.name}"',
               flex: 0, style: bodyStyle),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
@@ -113,11 +114,11 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     final accessMode = await Dialogs.executeFutureWithLoadingDialog(
         parentContext,
-        f: unlockRepositoryCallback(repositoryName, password));
+        f: unlockRepositoryCallback(repoLocation, password));
 
     if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
-          repositoryName: repositoryName,
+          repoLocation: repoLocation,
           password: password,
           accessMode: AccessMode.blind,
           message: S.current.messageUnlockRepoFailed);
@@ -159,11 +160,11 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     }
 
     final message = _useBiometrics.value
-        ? S.current.messageBiometricValidationAdded(repositoryName)
+        ? S.current.messageBiometricValidationAdded(repoLocation.name)
         : S.current.messageUnlockRepoOk(accessMode!.name);
 
     final unlockedResponse = UnlockRepositoryResult(
-        repositoryName: repositoryName,
+        repoLocation: repoLocation,
         password: password,
         accessMode: accessMode!,
         message: message);
@@ -191,12 +192,12 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
 class UnlockRepositoryResult {
   UnlockRepositoryResult(
-      {required this.repositoryName,
+      {required this.repoLocation,
       required this.password,
       required this.accessMode,
       required this.message});
 
-  final String repositoryName;
+  final RepoLocation repoLocation;
   final LocalPassword password;
   final AccessMode accessMode;
   final String message;

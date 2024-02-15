@@ -5,22 +5,23 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
+import '../../models/models.dart';
 
 class LockedRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
   const LockedRepositoryState(this.parentContext,
       {required this.databaseId,
-      required this.repositoryName,
+      required this.repoLocation,
       required this.settings,
       required this.unlockRepositoryCallback});
 
   final BuildContext parentContext;
 
   final DatabaseId databaseId;
-  final String repositoryName;
+  final RepoLocation repoLocation;
 
   final Settings settings;
-  final Future<AccessMode?> Function(String repositoryName, LocalSecret)
+  final Future<AccessMode?> Function(RepoLocation, LocalSecret)
       unlockRepositoryCallback;
 
   @override
@@ -70,7 +71,7 @@ class LockedRepositoryState extends HookWidget
               await unlockRepository(
                 parentContext,
                 databaseId: databaseId,
-                repositoryName: repositoryName,
+                repoLocation: repoLocation,
                 settings: settings,
                 cubitUnlockRepository: unlockRepositoryCallback,
               );

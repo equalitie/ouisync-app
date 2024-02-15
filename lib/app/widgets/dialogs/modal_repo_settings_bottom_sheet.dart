@@ -20,7 +20,8 @@ class RepositorySettings extends StatefulWidget {
   final RepoCubit cubit;
 
   final Settings settings;
-  final Future<void> Function(String oldName, String newName) renameRepository;
+  final Future<void> Function(RepoLocation oldLocation, String newName)
+      renameRepository;
   final Future<void> Function(RepoLocation) deleteRepository;
 
   @override
@@ -113,7 +114,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           dense: true,
                           isDanger: true,
                           onTap: () async => await deleteRepository(context,
-                              repositoryName: widget.cubit.name,
                               repositoryLocation: widget.cubit.location,
                               settings: widget.settings,
                               delete: widget.deleteRepository,

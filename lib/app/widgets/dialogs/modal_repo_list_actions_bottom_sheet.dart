@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
+import '../../models/models.dart';
 
 class RepoListActions extends StatelessWidget with AppLogger {
   RepoListActions(
@@ -14,8 +15,8 @@ class RepoListActions extends StatelessWidget with AppLogger {
   final BuildContext context;
   final ReposCubit reposCubit;
 
-  final Future<String?> Function() onNewRepositoryPressed;
-  final Future<String?> Function() onImportRepositoryPressed;
+  final Future<RepoLocation?> Function() onNewRepositoryPressed;
+  final Future<RepoLocation?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -29,9 +30,9 @@ class RepoListActions extends StatelessWidget with AppLogger {
                   name: S.current.actionNewRepo,
                   icon: Icons.archive_outlined,
                   action: () async {
-                    final newRepoName = await onNewRepositoryPressed.call();
+                    final newRepoLocation = await onNewRepositoryPressed.call();
 
-                    if (newRepoName == null) {
+                    if (newRepoLocation == null) {
                       return;
                     }
 
@@ -41,10 +42,10 @@ class RepoListActions extends StatelessWidget with AppLogger {
                   name: S.current.actionImportRepo,
                   icon: Icons.unarchive_outlined,
                   action: () async {
-                    final importedRepoName =
+                    final importedRepoLocation =
                         await onImportRepositoryPressed.call();
 
-                    if (importedRepoName == null) {
+                    if (importedRepoLocation == null) {
                       return;
                     }
 

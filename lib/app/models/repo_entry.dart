@@ -7,8 +7,8 @@ import '../models/models.dart';
 
 abstract class RepoEntry extends Equatable {
   Future<void> close();
-  RepoLocation? get location;
-  String get name => location?.name ?? '';
+  RepoLocation get location;
+  String get name => location.name;
   PasswordMode? get passwordMode;
   RepoCubit? get maybeCubit => null;
 

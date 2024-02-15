@@ -474,9 +474,9 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  RepoSettings? repoSettingsByName(String name) {
+  RepoSettings? repoSettingsByLocation(RepoLocation location) {
     for (final kv in _root.repos.entries) {
-      if (kv.value.name == name) {
+      if (kv.value.location == location) {
         return RepoSettings(this, kv.key, kv.value);
       }
     }
@@ -492,24 +492,24 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  String? getDefaultRepo() {
+  RepoLocation? getDefaultRepo() {
     final current = _root.currentRepo;
     if (current == null) {
       return null;
     } else {
-      return _root.repos[current]?.location.name;
+      return _root.repos[current]?.location;
     }
   }
 
-  Future<void> setDefaultRepo(String? name) async {
-    if (name == null) {
+  Future<void> setDefaultRepo(RepoLocation? location) async {
+    if (location == null) {
       if (_root.currentRepo == null) {
         return;
       }
       _root.currentRepo = null;
     } else {
-      final rs = repoSettingsByName(name);
-      if (rs == null || rs.name == name) {
+      final rs = repoSettingsByLocation(location);
+      if (rs == null || rs.location == location) {
         return;
       }
       // We must not set repositories for which the user provides the password
@@ -526,19 +526,17 @@ class Settings with AppLogger {
   //------------------------------------------------------------------
 
   Future<void> renameRepository(
-      RepoSettings repoSettings, String newName) async {
-    if (repoSettings.name == newName) {
+      RepoSettings repoSettings, RepoLocation newLocation) async {
+    if (repoSettings.location == newLocation) {
       // TODO: This should just return without throwing, but check where it's used.
-      throw 'Failed to rename repo: "$newName" to same name';
+      throw 'Failed to rename repo: "${newLocation.path()}" to same name';
     }
 
-    if (repoSettingsByName(newName) != null) {
-      throw 'Failed to rename repo: "$newName" already exists';
+    if (repoSettingsByLocation(newLocation) != null) {
+      throw 'Failed to rename repo: "${newLocation.path()}" already exists';
     }
 
-    final oldInfo = repoSettings._entry.location;
-    repoSettings._entry.location =
-        RepoLocation.fromDirAndName(oldInfo.dir, newName);
+    repoSettings._entry.location = newLocation;
     await _storeRoot();
   }
 
@@ -570,9 +568,9 @@ class Settings with AppLogger {
       return null;
     }
 
-    if (repoSettingsByName(location.name) != null) {
+    if (repoSettingsByLocation(location) != null) {
       loggy.debug(
-          'Settings already contains a repo with the name "${location.name}"');
+          'Settings already contains a repo with the location "${location.path()}"');
       return null;
     }
 

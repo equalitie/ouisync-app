@@ -75,7 +75,6 @@ class MissingRepositoryState extends HookWidget
           if (onReloadRepository != null) Dimensions.spacingVertical,
           Fields.inPageButton(
               onPressed: () => deleteRepository(context,
-                  repositoryName: repositoryName,
                   repositoryLocation: repositoryLocation,
                   settings: settings,
                   delete: onDelete),

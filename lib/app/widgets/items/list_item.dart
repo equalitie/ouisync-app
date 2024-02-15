@@ -74,12 +74,10 @@ class ListItem extends StatelessWidget with AppLogger {
               color: Constants.folderIconColor,
               padding: EdgeInsets.all(0.0),
               onPressed: () async {
-                final entry = reposCubit?.get(repoItem.name);
-                final lockRepoFunction = reposCubit?.lockRepository;
-
-                if (entry == null || lockRepoFunction == null) return;
-
-                await lockRepository(entry, lockRepoFunction);
+                final repos = reposCubit;
+                final entry = repos?.get(repoItem.location);
+                if (entry == null || repos == null) return;
+                await lockRepository(entry, repos);
               },
             )),
         Expanded(
