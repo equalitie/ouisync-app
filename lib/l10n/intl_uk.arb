@@ -880,7 +880,7 @@
   "@messageInfoLocalDiscovery": {},
   "messageInfoSyncMobileData": "Якщо цей параметр увімкнено, ваш мобільний оператор може стягувати плату за дані, використані під час синхронізації сховищ, до яких ви надаєте спільний доступ своїм колегам",
   "@messageInfoSyncMobileData": {},
-  "messageInfoNATType": "Це значення встановлюється вашим інтернет-провайдером.\n\nНайкращий зв'язок з одноранговими користувачами досягається, коли для цього параметра вибрано значення Несиметричний",
+  "messageInfoNATType": "Це значення залежить від вашого маршрутизатора та/або інтернет-провайдера.\n\nЗв'язок з одноранговими пристроями найкраще досягається, коли він не залежить від кінцевих точок",
   "@messageInfoNATType": {},
   "messageGoToMailApp": "Перейдіть до поштового застосунку",
   "@messageGoToMailApp": {},
@@ -939,5 +939,7 @@
   "messageNoAppsForThisAction": "Не всі застосунки можуть виконувати цю дію",
   "@messageNoAppsForThisAction": {},
   "messageEnterDifferentName": "Будь ласка, введіть інше ім'я",
-  "@messageEnterDifferentName": {}
+  "@messageEnterDifferentName": {},
+  "messageCopiedToClipboard": "Скопійовано в буфер обміну.",
+  "@messageCopiedToClipboard": {}
 }
