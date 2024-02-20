@@ -387,7 +387,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<bool> setSecret({
     required LocalSecret oldSecret,
-    required LocalSecret newSecret,
+    required SetLocalSecret newSecret,
   }) async {
     // Grab the current credentials so we can restore the access mode when we are done.
     final credentials = await _repo.credentials;

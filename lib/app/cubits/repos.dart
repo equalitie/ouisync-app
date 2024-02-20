@@ -241,7 +241,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     await _put(repo, setCurrent: setCurrent);
   }
 
-  Future<RepoEntry> createRepository(RepoLocation location, LocalSecret secret,
+  Future<RepoEntry> createRepository(
+      RepoLocation location, SetLocalSecret secret,
       {oui.ShareToken? token,
       required PasswordMode passwordMode,
       bool setCurrent = false}) async {
@@ -435,7 +436,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<RepoEntry> _create(
     RepoLocation location,
-    LocalSecret secret, {
+    SetLocalSecret secret, {
     oui.ShareToken? token,
     required PasswordMode passwordMode,
   }) async {
@@ -480,7 +481,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         case PasswordMode.none:
         case PasswordMode.bio:
           repoSettings = await _settings.addRepoWithSecretStoredOnDevice(
-              location, secret, DatabaseId(await repo.hexDatabaseId()),
+              location,
+              secret.toLocalSecret(),
+              DatabaseId(await repo.hexDatabaseId()),
               requireBiometricCheck: passwordMode == PasswordMode.bio);
       }
 
