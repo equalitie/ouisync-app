@@ -201,10 +201,9 @@ mixin RepositoryActionsMixin on LoggyType {
 
   /// setAuthenticationMode => Settings.setAuthenticationMode
   /// cubitUnlockRepository => ReposCubit.unlockRepository
-  Future<void> unlockRepository(BuildContext context,
+  Future<void> unlockRepository(BuildContext context, ReposCubit reposCubit,
       {required DatabaseId databaseId,
-      required RepoLocation repoLocation,
-      required ReposCubit reposCubit}) async {
+      required RepoLocation repoLocation}) async {
     final repoSettings = reposCubit.settings.repoSettingsById(databaseId)!;
     final passwordMode = repoSettings.passwordMode;
 
@@ -212,11 +211,10 @@ mixin RepositoryActionsMixin on LoggyType {
       final isBiometricsAvailable =
           await SecurityValidations.canCheckBiometrics();
 
-      final unlockResult = await unlockRepositoryManually(context,
+      final unlockResult = await unlockRepositoryManually(context, reposCubit,
           databaseId: databaseId,
           repoLocation: repoLocation,
-          isBiometricsAvailable: isBiometricsAvailable,
-          reposCubit: reposCubit);
+          isBiometricsAvailable: isBiometricsAvailable);
 
       if (unlockResult == null) return;
 
@@ -235,7 +233,9 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final accessMode = await reposCubit.unlockRepository(repoLocation, secret);
+    final repoCubit = await reposCubit.unlockRepository(repoLocation, secret);
+
+    final accessMode = repoCubit?.accessMode;
 
     final message = (accessMode != null && accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
@@ -246,11 +246,11 @@ mixin RepositoryActionsMixin on LoggyType {
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
-  Future<UnlockRepositoryResult?> unlockRepositoryManually(BuildContext context,
+  Future<UnlockRepositoryResult?> unlockRepositoryManually(
+          BuildContext context, ReposCubit reposCubit,
           {required DatabaseId databaseId,
           required RepoLocation repoLocation,
-          required bool isBiometricsAvailable,
-          required ReposCubit reposCubit}) async =>
+          required bool isBiometricsAvailable}) async =>
       await showDialog<UnlockRepositoryResult?>(
           context: context,
           builder: (BuildContext context) =>
@@ -259,13 +259,12 @@ mixin RepositoryActionsMixin on LoggyType {
                     backgroundColor: Colors.transparent,
                     body: ActionsDialog(
                       title: S.current.messageUnlockRepository,
-                      body: UnlockRepository(
+                      body: UnlockRepository(reposCubit,
                           parentContext: context,
                           databaseId: databaseId,
                           repoLocation: repoLocation,
                           isPasswordValidation: false,
-                          isBiometricsAvailable: isBiometricsAvailable,
-                          reposCubit: reposCubit),
+                          isBiometricsAvailable: isBiometricsAvailable),
                     ));
               }))));
 

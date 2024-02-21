@@ -165,26 +165,9 @@ class SettingsRepoEntry {
 
 //--------------------------------------------------------------------
 AuthMode _secretToAuthModeStoredOnDevice(
-    LocalSecret secret, MasterKey masterKey, bool requireAuthentication) {
-  switch (secret) {
-    case LocalPassword():
-      // We used to generate passwords with high entropy and store those
-      // encrypted. But we no longer do that. For more info see comment above
-      // the `_AuthModePasswordStoredOnDevice` class definition.
-
-      /*
-       * final passwordStr = secret.string;
-       * assert(passwordStr.length >= 24);
-       * final encryptedPwd = masterKey.encrypt(passwordStr);
-       * return _AuthModePasswordStoredOnDevice(
-       *     encryptedPwd, requireAuthentication);
-       */
-      throw StoringPasswordsIsNoLongerSupported();
-    case LocalSecretKey():
-      final key = secret.bytes;
-      final encryptedKey = masterKey.encryptBytes(key);
-      return _AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
-  }
+    LocalSecretKey key, MasterKey masterKey, bool requireAuthentication) {
+  final encryptedKey = masterKey.encryptBytes(key.bytes);
+  return _AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
 }
 //--------------------------------------------------------------------
 
@@ -206,7 +189,7 @@ class RepoSettings {
   }
 
   Future<void> setAuthModeSecretStoredOnDevice(
-      LocalSecret secret, bool requireAuthentication) async {
+      LocalSecretKey secret, bool requireAuthentication) async {
     _entry.authMode = _secretToAuthModeStoredOnDevice(
         secret, _settings._masterKey, requireAuthentication);
     await _settings._storeRoot();
@@ -544,7 +527,7 @@ class Settings with AppLogger {
   //------------------------------------------------------------------
 
   Future<RepoSettings?> addRepoWithSecretStoredOnDevice(
-      RepoLocation location, LocalSecret secret, DatabaseId databaseId,
+      RepoLocation location, LocalSecretKey secret, DatabaseId databaseId,
       {required requireBiometricCheck}) async {
     final authMode = _secretToAuthModeStoredOnDevice(
         secret, _masterKey, requireBiometricCheck);
