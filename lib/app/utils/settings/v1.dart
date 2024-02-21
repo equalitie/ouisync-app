@@ -213,7 +213,8 @@ class RepoSettings {
   }
 
   bool hasLocalSecret() {
-    return _entry.authMode is _AuthModePasswordStoredOnDevice;
+    return _entry.authMode is _AuthModePasswordStoredOnDevice ||
+        _entry.authMode is _AuthModeKeyStoredOnDevice;
   }
 
   bool shouldCheckBiometricsBeforeUnlock() {
