@@ -302,7 +302,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
             if (!nameFieldOk) return;
 
             // We know `addPassword` is false from above, so generate the key.
-            _onSaved(newName!, LocalSecretKey.generateRandom(), state);
+            _onSaved(newName!, LocalSecretKeyAndSalt.random(), state);
           },
           validator: validateNoEmptyMaybeRegExpr(
               emptyError: S.current.messageErrorFormValidatorNameDefault,
@@ -573,11 +573,11 @@ class RepositoryCreation extends HookWidget with AppLogger {
             onPressed: () async {
               final newName = nameController.text;
 
-              LocalSecret secret;
+              SetLocalSecret secret;
               bool valuesAreOk;
 
               if (state.isBlindReplica || !state.addPassword) {
-                secret = LocalSecretKey.generateRandom();
+                secret = LocalSecretKeyAndSalt.random();
                 valuesAreOk = await submitNameField(newName);
               } else {
                 final password = passwordController.text;
@@ -616,7 +616,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
   }
 
   void _onSaved(
-      String name, LocalSecret secret, CreateRepositoryState state) async {
+      String name, SetLocalSecret secret, CreateRepositoryState state) async {
     final isRepoNameOk =
         _repositoryNameInputKey.currentState?.validate() ?? false;
     final isPasswordOk = _passwordInputKey.currentState?.validate() ?? false;

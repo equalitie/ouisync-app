@@ -431,9 +431,9 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(context,
+            reposCubit: _cubits.repositories,
             databaseId: current.databaseId,
-            repoLocation: current.location,
-            reposCubit: _cubits.repositories);
+            repoLocation: current.location);
       }
 
       _appSettingsIconFocus.unfocus();

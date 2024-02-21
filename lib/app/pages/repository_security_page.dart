@@ -244,7 +244,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
   // TODO: If any of the async functions here fail, the user may lose their data.
   Future<void> _removePassword() async {
-    final newSecret = LocalSecretKey.generateRandom();
+    final newSecret = LocalSecretKeyAndSalt.random();
 
     final passwordChanged = await _changeRepositorySecret(newSecret);
     if (passwordChanged == false) {
@@ -254,13 +254,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings
-          .setAuthModeSecretStoredOnDevice(newSecret, false);
+          .setAuthModeSecretStoredOnDevice(newSecret.key, false);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
     }
 
-    _emitSecret(newSecret);
+    _emitSecret(newSecret.key);
     _emitPasswordMode(PasswordMode.none);
   }
 
@@ -273,7 +273,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    final newSecret = LocalSecretKey.generateRandom();
+    final newSecret = LocalSecretKeyAndSalt.random();
     final passwordChanged = await _changeRepositorySecret(newSecret);
 
     if (passwordChanged == false) {
@@ -283,7 +283,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
 
     try {
       await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
-        newSecret,
+        newSecret.key,
         unlockWithBiometrics,
       );
     } catch (e) {
@@ -292,13 +292,13 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       return;
     }
 
-    _emitSecret(newSecret);
+    _emitSecret(newSecret.key);
     _emitPasswordMode(PasswordMode.bio);
 
     _clearPasswordInputs();
   }
 
-  Future<bool> _changeRepositorySecret(LocalSecret newSecret) async {
+  Future<bool> _changeRepositorySecret(SetLocalSecret newSecret) async {
     return _repo.setSecret(
       oldSecret: _currentSecret,
       newSecret: newSecret,

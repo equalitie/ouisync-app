@@ -25,6 +25,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   StreamSubscription<void>? _subscription;
   final Settings _settings;
   final NavigationCubit _navigation;
+  final PasswordHasher passwordHasher;
 
   ReposCubit({
     required session,
@@ -34,7 +35,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
-        _navigation = navigation;
+        _navigation = navigation,
+        passwordHasher = PasswordHasher(session);
 
   Settings get settings => _settings;
 
@@ -241,13 +243,25 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     await _put(repo, setCurrent: setCurrent);
   }
 
-  Future<RepoEntry> createRepository(RepoLocation location, LocalSecret secret,
+  Future<RepoEntry> createRepository(
+      RepoLocation location, SetLocalSecret secret,
       {oui.ShareToken? token,
       required PasswordMode passwordMode,
       bool setCurrent = false}) async {
     await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
 
-    final repo = await _create(location, secret,
+    LocalSecretKeyAndSalt localKey;
+
+    switch (secret) {
+      case LocalPassword():
+        final salt = PasswordSalt.random();
+        final key = await passwordHasher.hashPassword(secret, salt);
+        localKey = LocalSecretKeyAndSalt(key, salt);
+      case LocalSecretKeyAndSalt():
+        localKey = secret;
+    }
+
+    final repo = await _create(location, localKey,
         token: token, passwordMode: passwordMode);
 
     if (repo is! OpenRepoEntry) {
@@ -259,7 +273,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     return repo;
   }
 
-  Future<oui.AccessMode?> unlockRepository(
+  Future<RepoCubit?> unlockRepository(
       RepoLocation repoLocation, LocalSecret secret) async {
     final wasCurrent = currentRepoLocation == repoLocation;
 
@@ -274,12 +288,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       if (repo is ErrorRepoEntry) {
         loggy.app('Failed to open repository: ${repoSettings.location.path()}');
-        return null;
       }
 
       await _put(repo, setCurrent: wasCurrent);
 
-      return repo.accessMode;
+      return repo.maybeCubit;
     } catch (e, st) {
       loggy.app(
           'Unlocking of the repository ${repoSettings.location.path()} failed',
@@ -435,7 +448,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<RepoEntry> _create(
     RepoLocation location,
-    LocalSecret secret, {
+    LocalSecretKeyAndSalt secret, {
     oui.ShareToken? token,
     required PasswordMode passwordMode,
   }) async {
@@ -453,7 +466,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final repo = await oui.Repository.create(
         _session,
         store: store,
-        readSecret: secret,
+        readSecret: LocalSecretKeyAndSalt.random(),
         writeSecret: secret,
         shareToken: token,
       );
@@ -480,7 +493,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         case PasswordMode.none:
         case PasswordMode.bio:
           repoSettings = await _settings.addRepoWithSecretStoredOnDevice(
-              location, secret, DatabaseId(await repo.hexDatabaseId()),
+              location, secret.key, DatabaseId(await repo.hexDatabaseId()),
               requireBiometricCheck: passwordMode == PasswordMode.bio);
       }
 

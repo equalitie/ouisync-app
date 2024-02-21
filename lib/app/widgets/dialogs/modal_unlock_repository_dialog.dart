@@ -8,15 +8,16 @@ import '../../cubits/cubits.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
-  UnlockRepository({
+  UnlockRepository(
+    this.reposCubit, {
     required this.parentContext,
     required this.databaseId,
     required this.repoLocation,
     required this.isBiometricsAvailable,
     required this.isPasswordValidation,
-    required this.reposCubit,
   });
 
+  final ReposCubit reposCubit;
   final BuildContext parentContext;
   final DatabaseId databaseId;
   final RepoLocation repoLocation;
@@ -24,8 +25,6 @@ class UnlockRepository extends StatelessWidget with AppLogger {
   final bool isPasswordValidation;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  final ReposCubit reposCubit;
 
   final TextEditingController _passwordController =
       TextEditingController(text: null);
@@ -110,11 +109,11 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     final password = LocalPassword(passwordStr);
 
-    final accessMode = await Dialogs.executeFutureWithLoadingDialog(
+    final repoCubit = await Dialogs.executeFutureWithLoadingDialog(
         parentContext,
         f: reposCubit.unlockRepository(repoLocation, password));
 
-    if ((accessMode ?? AccessMode.blind) == AccessMode.blind) {
+    if (repoCubit == null) {
       final notUnlockedResponse = UnlockRepositoryResult(
           repoLocation: repoLocation,
           password: password,
@@ -125,7 +124,18 @@ class UnlockRepository extends StatelessWidget with AppLogger {
       return;
     }
 
-    assert(accessMode != null, 'Error: accessMode is null');
+    final accessMode = repoCubit.accessMode;
+
+    if (accessMode == AccessMode.blind) {
+      final notUnlockedResponse = UnlockRepositoryResult(
+          repoLocation: repoLocation,
+          password: password,
+          accessMode: AccessMode.blind,
+          message: S.current.messageUnlockRepoFailed);
+
+      Navigator.of(parentContext).pop(notUnlockedResponse);
+      return;
+    }
 
     // Only if the password successfuly unlocked the repo, then we add it
     // to the secure storage -if the user selected the option.
@@ -137,10 +147,13 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         parentContext,
         f: () async {
           try {
+            final salt = (await repoCubit.getCurrentModePasswordSalt())!;
+            final key =
+                await reposCubit.passwordHasher.hashPassword(password, salt);
             await reposCubit.settings
                 .repoSettingsById(databaseId)!
                 .setAuthModeSecretStoredOnDevice(
-                  password,
+                  key,
                   _useBiometrics.value,
                 );
             return true;
@@ -159,12 +172,12 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     final message = _useBiometrics.value
         ? S.current.messageBiometricValidationAdded(repoLocation.name)
-        : S.current.messageUnlockRepoOk(accessMode!.name);
+        : S.current.messageUnlockRepoOk(accessMode.name);
 
     final unlockedResponse = UnlockRepositoryResult(
         repoLocation: repoLocation,
         password: password,
-        accessMode: accessMode!,
+        accessMode: accessMode,
         message: message);
 
     Navigator.of(parentContext).pop(unlockedResponse);

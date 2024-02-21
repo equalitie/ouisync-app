@@ -16,9 +16,9 @@ class LockedRepositoryState extends HookWidget
 
   final BuildContext parentContext;
 
+  final ReposCubit reposCubit;
   final DatabaseId databaseId;
   final RepoLocation repoLocation;
-  final ReposCubit reposCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +64,8 @@ class LockedRepositoryState extends HookWidget
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
             onPressed: () async {
-              await unlockRepository(
-                parentContext,
-                databaseId: databaseId,
-                repoLocation: repoLocation,
-                reposCubit: reposCubit,
-              );
+              await unlockRepository(parentContext, reposCubit,
+                  databaseId: databaseId, repoLocation: repoLocation);
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,
