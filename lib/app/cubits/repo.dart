@@ -134,6 +134,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     );
   }
 
+  oui.AccessMode get accessMode => state.accessMode;
   DatabaseId get databaseId => _repoSettings.databaseId;
   String get name => _repoSettings.name;
   String get currentFolder => _currentFolder.state.path;
@@ -387,7 +388,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<bool> setSecret({
     required LocalSecret oldSecret,
-    required LocalSecret newSecret,
+    required SetLocalSecret newSecret,
   }) async {
     // Grab the current credentials so we can restore the access mode when we are done.
     final credentials = await _repo.credentials;
@@ -628,5 +629,16 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<void> close() async {
     await _repo.close();
     await super.close();
+  }
+
+  Future<PasswordSalt?> getCurrentModePasswordSalt() async {
+    switch (accessMode) {
+      case oui.AccessMode.blind:
+        return null;
+      case oui.AccessMode.read:
+        return await _repo.getReadPasswordSalt();
+      case oui.AccessMode.write:
+        return await _repo.getWritePasswordSalt();
+    }
   }
 }

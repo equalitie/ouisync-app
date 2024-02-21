@@ -15,7 +15,7 @@ abstract class RepoEntry extends Equatable {
   String? get infoHash => maybeCubit?.state.infoHash;
 
   oui.AccessMode get accessMode =>
-      maybeCubit?.state.accessMode ?? oui.AccessMode.blind;
+      maybeCubit?.accessMode ?? oui.AccessMode.blind;
 
   @override
   List<Object> get props => [name, runtimeType];
