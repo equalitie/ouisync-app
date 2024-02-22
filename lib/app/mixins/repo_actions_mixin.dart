@@ -91,7 +91,7 @@ mixin RepositoryActionsMixin on LoggyType {
       if (password == null || password.isEmpty) return;
       secret = LocalPassword(password);
     } else {
-      secret = repoSettings.getLocalSecret();
+      secret = await repoSettings.getLocalSecret();
     }
 
     popDialog();
@@ -223,7 +223,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final secret = repoSettings.getLocalSecret();
+    final secret = await repoSettings.getLocalSecret();
 
     if (secret == null) {
       final message = passwordMode == PasswordMode.none

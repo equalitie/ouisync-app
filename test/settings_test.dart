@@ -49,8 +49,8 @@ void main() {
 
     final key = await MasterKey.init();
 
-    final encrypted = key.encrypt("foobar");
-    final decrypted = key.decrypt(encrypted);
+    final encrypted = await key.encrypt("foobar");
+    final decrypted = await key.decrypt(encrypted);
 
     expect(decrypted, "foobar");
   });
@@ -69,18 +69,20 @@ void main() {
   test('compatible encryption', () async {
     final teststring = "foobar";
 
-    // Use this commented code if you need to generate new values.
+    ////Use this commented code if you need to generate new values.
     //{
     //  final rawKey = MasterKey.generateKey();
     //  print("key: $rawKey");
     //  final key = MasterKey.initWithKey(rawKey);
-    //  final encrypted = key.encrypt(teststring);
+    //  final encrypted = await key.encrypt(teststring);
     //  print("encrypted: $encrypted");
     //}
 
     final key =
-        MasterKey.initWithKey("/ZoHMTLAv2LQZ/Lof1JHxvtcS6ewXABQB7vZ8tfmd5o=");
-    final encrypted = "V9rn49kfJeg=:gaGaKjJf"; // key.encrypt(teststring);
-    expect(key.decrypt(encrypted), teststring);
+        MasterKey.initWithKey("eZcpF/CdFblXXhFP4LHk49lGtDEY4c1Gn/qQKBU0QmA=");
+
+    final encrypted = "cKMbibnjHsni8olld2sUXjxNsAroR/DOKNj3rUOOrFtUrA==";
+
+    expect(await key.decrypt(encrypted), teststring);
   });
 }
