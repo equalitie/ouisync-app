@@ -97,7 +97,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final oui.Repository _repo;
   final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
-  final Encrypt _pathCipher;
+  final Cipher _pathCipher;
 
   RepoCubit._(
     this._session,
@@ -126,7 +126,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isDhtEnabled: await repo.isDhtEnabled,
         isPexEnabled: await repo.isPexEnabled);
 
-    final pathCipher = await Encrypt.newWithRandomKey();
+    final pathCipher = await Cipher.newWithRandomKey();
 
     return RepoCubit._(
       session,

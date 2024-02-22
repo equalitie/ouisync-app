@@ -3,19 +3,19 @@ import 'dart:convert';
 import 'package:cryptography/cryptography.dart';
 import 'package:cryptography_flutter/cryptography_flutter.dart';
 
-class Encrypt {
+class Cipher {
   final FlutterChacha20 _algorithm;
   final SecretKey secretKey;
 
-  Encrypt(this.secretKey) : _algorithm = FlutterChacha20.poly1305Aead();
+  Cipher(this.secretKey) : _algorithm = FlutterChacha20.poly1305Aead();
 
-  static Future<Encrypt> newWithRandomKey() async {
+  static Future<Cipher> newWithRandomKey() async {
     final algorithm = FlutterChacha20.poly1305Aead();
     final key = await algorithm.newSecretKey();
-    return Encrypt._(key, algorithm);
+    return Cipher._(key, algorithm);
   }
 
-  Encrypt._(this.secretKey, this._algorithm);
+  Cipher._(this.secretKey, this._algorithm);
 
   Future<String> encrypt(String data) async {
     final dataBytes = utf8.encode(data);

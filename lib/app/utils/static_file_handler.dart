@@ -10,7 +10,7 @@ Handler createStaticFileHandler(
   String fileHandle,
   String? contentType,
   Future<File> Function(String path) openFile,
-  Encrypt pathCipher,
+  Cipher pathCipher,
 ) {
   return (request) {
     return _handleFile(
@@ -28,7 +28,7 @@ Future<Response> _handleFile(
   String handle,
   FutureOr<String>? Function() getContentType,
   Future<File> Function(String path) openFile,
-  Encrypt pathCipher,
+  Cipher pathCipher,
 ) async {
   final contentType = await getContentType();
   final headers = {
