@@ -3,16 +3,23 @@ import 'dart:convert';
 import 'package:cryptography/cryptography.dart';
 import 'package:cryptography_flutter/cryptography_flutter.dart';
 
-abstract class Encrypt {
-  static final FlutterChacha20 _algorithm = FlutterChacha20.poly1305Aead();
-  static SecretKey? _secretKey;
+class Encrypt {
+  final FlutterChacha20 _algorithm;
+  final SecretKey secretKey;
 
-  static Future<String> encrypt(String data) async {
-    _secretKey ??= await _algorithm.newSecretKey();
+  Encrypt(this.secretKey) : _algorithm = FlutterChacha20.poly1305Aead();
 
+  static Future<Encrypt> newWithRandomKey() async {
+    final algorithm = FlutterChacha20.poly1305Aead();
+    final key = await algorithm.newSecretKey();
+    return Encrypt._(key, algorithm);
+  }
+
+  Encrypt._(this.secretKey, this._algorithm);
+
+  Future<String> encrypt(String data) async {
     final dataBytes = utf8.encode(data);
-    final secretBox =
-        await _algorithm.encrypt(dataBytes, secretKey: _secretKey!);
+    final secretBox = await _algorithm.encrypt(dataBytes, secretKey: secretKey);
 
     final encryptedBytes = secretBox.concatenation();
     final encryptedData = base64Encode(encryptedBytes);
@@ -20,18 +27,16 @@ abstract class Encrypt {
     return encryptedData;
   }
 
-  static Future<String> decrypt(String encryptedData) async {
-    if (_secretKey == null) return '';
-
+  Future<String> decrypt(String encryptedData) async {
     final nonceLength = _algorithm.nonceLength;
     final macLength = _algorithm.macAlgorithm.macLength;
     final encryptedDataBytes = base64Decode(encryptedData);
-    
+
     final secretBox = SecretBox.fromConcatenation(encryptedDataBytes,
         nonceLength: nonceLength, macLength: macLength);
 
     final decryptedData =
-        await _algorithm.decryptString(secretBox, secretKey: _secretKey!);
+        await _algorithm.decryptString(secretBox, secretKey: secretKey);
 
     return decryptedData;
   }
