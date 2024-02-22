@@ -10,6 +10,7 @@ Handler createStaticFileHandler(
   String fileHandle,
   String? contentType,
   Future<File> Function(String path) openFile,
+  Cipher pathCipher,
 ) {
   return (request) {
     return _handleFile(
@@ -17,6 +18,7 @@ Handler createStaticFileHandler(
       fileHandle,
       () => contentType,
       openFile,
+      pathCipher,
     );
   };
 }
@@ -26,6 +28,7 @@ Future<Response> _handleFile(
   String handle,
   FutureOr<String>? Function() getContentType,
   Future<File> Function(String path) openFile,
+  Cipher pathCipher,
 ) async {
   final contentType = await getContentType();
   final headers = {
@@ -43,7 +46,11 @@ Future<Response> _handleFile(
     return Response.notFound('\n\nFile not found for handle');
   }
 
-  final filePath = await Encrypt.decrypt(handle);
+  final filePath = await pathCipher.decrypt(handle);
+
+  if (filePath == null) {
+    return Response.notFound('\n\nFailed to decrypt path');
+  }
 
   final file = await openFile(filePath);
   final fileSize = await file.length;

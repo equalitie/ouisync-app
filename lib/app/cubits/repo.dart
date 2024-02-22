@@ -97,6 +97,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final oui.Repository _repo;
   final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
+  final Cipher _pathCipher;
 
   RepoCubit._(
     this._session,
@@ -104,6 +105,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     this._repo,
     this._repoSettings,
     this._navigation,
+    this._pathCipher,
     RepoState state,
   ) : super(state) {
     _currentFolder.repo = this;
@@ -124,12 +126,15 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         isDhtEnabled: await repo.isDhtEnabled,
         isPexEnabled: await repo.isPexEnabled);
 
+    final pathCipher = await Cipher.newWithRandomKey();
+
     return RepoCubit._(
       session,
       nativeChannels,
       repo,
       repoSettings,
       navigation,
+      pathCipher,
       state,
     );
   }
@@ -463,14 +468,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<Uri> previewFileUrl(String path) async {
-    final encryptedHandle = await Encrypt.encrypt(path);
+    final encryptedHandle = await _pathCipher.encrypt(path);
     final mimeType = MimeTypeResolver().lookup(path);
 
     final handler = createStaticFileHandler(
-      encryptedHandle,
-      mimeType,
-      openFile,
-    );
+        encryptedHandle, mimeType, openFile, _pathCipher);
 
     final server = await io.serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';

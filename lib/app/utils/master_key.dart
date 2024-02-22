@@ -1,17 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:mutex/mutex.dart';
 import 'package:meta/meta.dart'; // for `@visibleForTesting`
 import 'dart:typed_data';
+import 'dart:convert';
+import './cipher.dart' as cipher;
 
 class MasterKey {
   static const String _masterKey = 'masterKey';
-  static const int _keyLengthInBytes = 32; // For Salsa20
-  static const int _ivLengthInBytes = 8; // For Salsa20
 
-  final Encrypter _encrypter;
+  final cipher.Cipher _cipher;
 
-  MasterKey._(Key masterKey) : _encrypter = Encrypter(Salsa20(masterKey));
+  MasterKey._(cipher.SecretKey masterKey) : _cipher = cipher.Cipher(masterKey);
 
   static Future<MasterKey> init() async {
     final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
@@ -26,69 +25,45 @@ class MasterKey {
 
       if (masterKeyBase64 == null) {
         // No master password was generated yet, generate one now.
-        masterKeyBase64 = Key.fromLength(_keyLengthInBytes).base64;
+        final algo = cipher.Cipher.newAlgorithm();
+        final key = cipher.Cipher.randomSecretKey(algo);
+        masterKeyBase64 = base64.encode(key.bytes);
         await storage.write(key: _masterKey, value: masterKeyBase64);
       }
 
-      return MasterKey._(Key.fromBase64(masterKeyBase64));
+      return MasterKey._(cipher.SecretKey(base64.decode(masterKeyBase64)));
     } finally {
       mutex.release();
     }
   }
 
-  String encrypt(String plainText) {
-    final iv = IV.fromLength(_ivLengthInBytes);
-    // Note that Salsa20 is not AEAD and thus the `associatedData` parameter to
-    // `encrypt` is not used.
-    final encrypted = _encrypter.encrypt(plainText, iv: iv);
-    // Pack the IV with the ciphertext for convenience.
-    return '${iv.base64}:${encrypted.base64}';
+  Future<String> encrypt(String plainText) async {
+    return await _cipher.encrypt(plainText);
   }
 
-  String encryptBytes(Uint8List plainText) {
-    final iv = IV.fromLength(_ivLengthInBytes);
-    // Note that Salsa20 is not AEAD and thus the `associatedData` parameter to
-    // `encrypt` is not used.
-    final encrypted = _encrypter.encryptBytes(plainText, iv: iv);
-    // Pack the IV with the ciphertext for convenience.
-    return '${iv.base64}:${encrypted.base64}';
+  Future<String> encryptBytes(Uint8List plainText) async {
+    return await _cipher.encryptBytes(plainText);
   }
 
   // Returns `null` if decryption fails.
-  String? decrypt(String encrypted) {
-    final ivAndCipherText = encrypted.split(':');
-
-    if (ivAndCipherText.length != 2) {
-      return null;
-    }
-
-    final iv = IV.fromBase64(ivAndCipherText[0]);
-    final cipherText = ivAndCipherText[1];
-
-    return _encrypter.decrypt64(cipherText, iv: iv);
+  Future<String?> decrypt(String encrypted) async {
+    return await _cipher.decrypt(encrypted);
   }
 
   // Returns `null` if decryption fails.
-  Uint8List? decryptBytes(String encrypted) {
-    final ivAndCipherText = encrypted.split(':');
-
-    if (ivAndCipherText.length != 2) {
-      return null;
-    }
-
-    final iv = IV.fromBase64(ivAndCipherText[0]);
-    final cipherText = ivAndCipherText[1];
-
-    return Uint8List.fromList(
-        _encrypter.decryptBytes(Encrypted.fromBase64(cipherText), iv: iv));
+  Future<Uint8List?> decryptBytes(String encrypted) async {
+    return await _cipher.decryptBytes(encrypted);
   }
 
   @visibleForTesting
   static MasterKey initWithKey(String keyBase64) =>
-      MasterKey._(Key.fromBase64(keyBase64));
+      MasterKey._(cipher.SecretKey(base64.decode(keyBase64)));
 
   @visibleForTesting
-  static String generateKey() => Key.fromLength(_keyLengthInBytes).base64;
+  static String generateKey() {
+    final algo = cipher.Cipher.newAlgorithm();
+    return base64.encode(cipher.Cipher.randomSecretKey(algo).bytes);
+  }
 }
 
 // I think we need the `encryptedSharedPreferense: true` option on Android,

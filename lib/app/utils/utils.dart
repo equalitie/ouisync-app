@@ -8,7 +8,7 @@ export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
 export 'dump.dart';
-export 'encrypt.dart';
+export 'cipher.dart';
 export 'extensions.dart';
 export 'fields.dart';
 export 'format.dart';
