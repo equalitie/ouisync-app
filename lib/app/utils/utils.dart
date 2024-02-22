@@ -3,7 +3,7 @@ export 'themes/app_typography.dart';
 
 export 'actions.dart';
 export 'ansi_parser.dart';
-export 'biometric_check.dart';
+export 'local_auth.dart';
 export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';

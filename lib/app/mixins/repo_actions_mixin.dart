@@ -7,7 +7,6 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
-import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -74,15 +73,8 @@ mixin RepositoryActionsMixin on LoggyType {
     final repoSettings = repository.repoSettings;
     final passwordMode = repoSettings.passwordMode;
 
-    final isBiometricsAvailable =
-        await SecurityValidations.canCheckBiometrics();
-
-    if (PlatformValues.isMobileDevice &&
-        passwordMode == PasswordMode.none &&
-        isBiometricsAvailable) {
-      final authorized = await biometricValidation();
-      if (authorized == false) return;
-    }
+    if (!await LocalAuth.authenticateIfPossible(
+        localizedReason: S.current.messageAccessingSecureStorage)) return;
 
     LocalSecret? secret;
 
@@ -95,6 +87,8 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     popDialog();
+
+    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     await Navigator.push(
         context,
@@ -208,19 +202,17 @@ mixin RepositoryActionsMixin on LoggyType {
     final passwordMode = repoSettings.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
-      final isBiometricsAvailable =
-          await SecurityValidations.canCheckBiometrics();
-
       final unlockResult = await unlockRepositoryManually(context, reposCubit,
-          databaseId: databaseId,
-          repoLocation: repoLocation,
-          isBiometricsAvailable: isBiometricsAvailable);
+          databaseId: databaseId, repoLocation: repoLocation);
 
       if (unlockResult == null) return;
-
       showSnackBar(context, message: unlockResult.message);
-
       return;
+    }
+
+    if (passwordMode == PasswordMode.bio) {
+      if (!await LocalAuth.authenticateIfPossible(
+          localizedReason: S.current.messageAccessingSecureStorage)) return;
     }
 
     final secret = await repoSettings.getLocalSecret();
@@ -247,26 +239,28 @@ mixin RepositoryActionsMixin on LoggyType {
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(
-          BuildContext context, ReposCubit reposCubit,
-          {required DatabaseId databaseId,
-          required RepoLocation repoLocation,
-          required bool isBiometricsAvailable}) async =>
-      await showDialog<UnlockRepositoryResult?>(
-          context: context,
-          builder: (BuildContext context) =>
-              ScaffoldMessenger(child: Builder(builder: ((context) {
-                return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: ActionsDialog(
-                      title: S.current.messageUnlockRepository,
-                      body: UnlockRepository(reposCubit,
-                          parentContext: context,
-                          databaseId: databaseId,
-                          repoLocation: repoLocation,
-                          isPasswordValidation: false,
-                          isBiometricsAvailable: isBiometricsAvailable),
-                    ));
-              }))));
+      BuildContext context, ReposCubit reposCubit,
+      {required DatabaseId databaseId,
+      required RepoLocation repoLocation}) async {
+    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
+
+    return await showDialog<UnlockRepositoryResult?>(
+        context: context,
+        builder: (BuildContext context) =>
+            ScaffoldMessenger(child: Builder(builder: ((context) {
+              return Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: ActionsDialog(
+                    title: S.current.messageUnlockRepository,
+                    body: UnlockRepository(reposCubit,
+                        parentContext: context,
+                        databaseId: databaseId,
+                        repoLocation: repoLocation,
+                        isPasswordValidation: false,
+                        isBiometricsAvailable: isBiometricsAvailable),
+                  ));
+            }))));
+  }
 
   String? validatePassword(String password,
       {required GlobalKey<FormFieldState> passwordInputKey,
@@ -311,47 +305,6 @@ Future<void> lockRepository(
   if (repositoryEntry is OpenRepoEntry) {
     await reposCubit.lockRepository(repositoryEntry.repoSettings);
   }
-}
-
-/// For repositories with no local password, if the device supports biometrics
-/// (currently we only do this for mobile devices), we use the biometric
-/// validation to secure the settings page.
-Future<bool> biometricValidation() async {
-  if (PlatformValues.isDesktopDevice) return false;
-
-  final isSupported = await SecurityValidations.isBiometricSupported();
-
-  /// LocalAuthentication can tell us three (3) things:
-  ///
-  /// - canCheck: If the device has biometrics capabilities, maybe even just
-  ///   PIN, pattern or password protection, it returns TRUE. Basically, it
-  ///   always returns TRUE.
-  ///
-  ///   NOTE: This needs to be confirmed on a phone without any biometric
-  ///   capability
-  ///
-  /// - available: The list of enrolled biometrics.
-  ///   If the user has PIN (Password, pattern, even?), but no biometric
-  ///   method in use, it returns an empty list.
-  ///   If the user has a biometric method in use, it returns a list with
-  ///   BiometricType.WEAK (PIN, password, pattern), and any biometric method
-  ///   used by the user (Fingerprint, face, etc.) as BiometricType.STRONG.
-  ///
-  /// - isSupported: Only if the user doesn't use any screen lock method
-  ///   (Pattern, PIN, password), which also means it doesn't use any
-  ///   biometric method, it returns FALSE.
-  ///
-  /// We don't use isBiometricsAvailable here because it only validates that
-  /// the user has at least one biometric method enrolled
-  /// (BiometricType.STRONG); if the user only uses weak methods
-  /// (BiometricType.WEAK) like PIN, password, pattern; it returns FALSE.
-  var authorized = false;
-  if (isSupported) {
-    authorized = await SecurityValidations.validateBiometrics(
-        localizedReason: S.current.messageAccessingSecureStorage);
-  }
-
-  return authorized;
 }
 
 class UnlockResult {
