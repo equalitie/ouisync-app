@@ -48,6 +48,10 @@ Future<Response> _handleFile(
 
   final filePath = await pathCipher.decrypt(handle);
 
+  if (filePath == null) {
+    return Response.notFound('\n\nFailed to decrypt path');
+  }
+
   final file = await openFile(filePath);
   final fileSize = await file.length;
 

@@ -69,8 +69,8 @@ class _AuthModePasswordStoredOnDevice extends AuthMode {
       this.encryptedPassword, this.confirmWithBiometrics);
 
   // May throw.
-  LocalPassword getRepositoryPassword(MasterKey masterKey) {
-    final decrypted = masterKey.decrypt(encryptedPassword);
+  Future<LocalPassword> getRepositoryPassword(MasterKey masterKey) async {
+    final decrypted = await masterKey.decrypt(encryptedPassword);
     if (decrypted == null) throw FailedToDecryptError();
     return LocalPassword(decrypted);
   }
@@ -104,8 +104,8 @@ class _AuthModeKeyStoredOnDevice extends AuthMode {
   _AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
 
   // May throw.
-  LocalSecretKey getRepositoryPassword(MasterKey masterKey) {
-    final decrypted = masterKey.decryptBytes(encryptedKey);
+  Future<LocalSecretKey> getRepositoryPassword(MasterKey masterKey) async {
+    final decrypted = await masterKey.decryptBytes(encryptedKey);
     if (decrypted == null) throw FailedToDecryptError();
     return LocalSecretKey(decrypted);
   }
@@ -164,9 +164,9 @@ class SettingsRepoEntry {
 }
 
 //--------------------------------------------------------------------
-AuthMode _secretToAuthModeStoredOnDevice(
-    LocalSecretKey key, MasterKey masterKey, bool requireAuthentication) {
-  final encryptedKey = masterKey.encryptBytes(key.bytes);
+Future<AuthMode> _secretToAuthModeStoredOnDevice(
+    LocalSecretKey key, MasterKey masterKey, bool requireAuthentication) async {
+  final encryptedKey = await masterKey.encryptBytes(key.bytes);
   return _AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
 }
 //--------------------------------------------------------------------
@@ -190,7 +190,7 @@ class RepoSettings {
 
   Future<void> setAuthModeSecretStoredOnDevice(
       LocalSecretKey secret, bool requireAuthentication) async {
-    _entry.authMode = _secretToAuthModeStoredOnDevice(
+    _entry.authMode = await _secretToAuthModeStoredOnDevice(
         secret, _settings._masterKey, requireAuthentication);
     await _settings._storeRoot();
   }
@@ -208,17 +208,19 @@ class RepoSettings {
 
   /// May throw if the function failed to decrypt the stored key.
   /// Returns null if the authMode is _AuthModeBlindOrManual.
-  LocalSecret? getLocalSecret() {
+  Future<LocalSecret?> getLocalSecret() async {
     final authMode = _entry.authMode;
     switch (authMode) {
       case _AuthModeBlindOrManual():
         return null;
       case _AuthModePasswordStoredOnDevice():
-        final pwd = _settings._masterKey.decrypt(authMode.encryptedPassword);
+        final pwd =
+            await _settings._masterKey.decrypt(authMode.encryptedPassword);
         if (pwd == null) throw FailedToDecryptError();
         return LocalPassword(pwd);
       case _AuthModeKeyStoredOnDevice():
-        final key = _settings._masterKey.decryptBytes(authMode.encryptedKey);
+        final key =
+            await _settings._masterKey.decryptBytes(authMode.encryptedKey);
         if (key == null) throw FailedToDecryptError();
         return LocalSecretKey(key);
     }
@@ -529,7 +531,7 @@ class Settings with AppLogger {
   Future<RepoSettings?> addRepoWithSecretStoredOnDevice(
       RepoLocation location, LocalSecretKey secret, DatabaseId databaseId,
       {required requireBiometricCheck}) async {
-    final authMode = _secretToAuthModeStoredOnDevice(
+    final authMode = await _secretToAuthModeStoredOnDevice(
         secret, _masterKey, requireBiometricCheck);
     return await _addRepo(location, databaseId: databaseId, authMode: authMode);
   }
