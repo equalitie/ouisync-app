@@ -218,7 +218,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     _emitSecret(newPassword);
-    _emitPasswordMode(PasswordMode.manual);
+    _emitPasswordMode();
 
     _clearPasswordInputs();
   }
@@ -261,41 +261,26 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     _emitSecret(newSecret.key);
-    _emitPasswordMode(PasswordMode.none);
+    _emitPasswordMode();
   }
 
   // TODO: If any of the async functions here fail, the user may lose their data.
   Future<void> _updateUnlockRepoWithBiometrics(
     bool unlockWithBiometrics,
   ) async {
-    if (unlockWithBiometrics == false) {
-      _emitPasswordMode(PasswordMode.none);
-      return;
-    }
-
-    final newSecret = LocalSecretKeyAndSalt.random();
-    final passwordChanged = await _changeRepositorySecret(newSecret);
-
-    if (passwordChanged == false) {
-      showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
-      return;
-    }
-
     try {
-      await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
-        newSecret.key,
-        unlockWithBiometrics,
-      );
+      if (!await _repo.repoSettings
+          .setConfirmWithBiometrics(unlockWithBiometrics)) {
+        // Did not change.
+        return;
+      }
     } catch (e) {
       showSnackBar(context,
           message: S.current.messageErrorUpdatingSecureStorage);
       return;
     }
 
-    _emitSecret(newSecret.key);
-    _emitPasswordMode(PasswordMode.bio);
-
-    _clearPasswordInputs();
+    _emitPasswordMode();
   }
 
   Future<bool> _changeRepositorySecret(SetLocalSecret newSecret) async {
@@ -309,7 +294,7 @@ class _RepositorySecurityState extends State<RepositorySecurity>
         _currentSecret = newSecret;
       });
 
-  void _emitPasswordMode(PasswordMode passwordMode) => setState(() {
-        _repo.emitPasswordMode(passwordMode);
+  void _emitPasswordMode() => setState(() {
+        _repo.emitPasswordMode();
       });
 }
