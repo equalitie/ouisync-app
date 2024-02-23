@@ -73,9 +73,6 @@ mixin RepositoryActionsMixin on LoggyType {
     final repoSettings = repository.repoSettings;
     final passwordMode = repoSettings.passwordMode;
 
-    if (!await LocalAuth.authenticateIfPossible(
-        context, S.current.messageAccessingSecureStorage)) return;
-
     LocalSecret? secret;
 
     if (passwordMode == PasswordMode.manual) {
@@ -83,6 +80,9 @@ mixin RepositoryActionsMixin on LoggyType {
       if (password == null || password.isEmpty) return;
       secret = LocalPassword(password);
     } else {
+      if (!await LocalAuth.authenticateIfPossible(
+          context, S.current.messageAccessingSecureStorage)) return;
+
       secret = await repoSettings.getLocalSecret();
     }
 
