@@ -99,7 +99,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("تایید"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("تایید"),
-        "actionAdd": MessageLookupByLibrary.simpleMessage("اضافه کردن"),
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("وارد کردن یک مخزن"),
         "actionAddRepositoryWithToken":
@@ -254,9 +253,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "این گزینه در مخازنی که فقط قابل هستند، موجود نیست"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("اضافه‌کردن رمز عبور محلی"),
-        "messageAddLocalPasswordConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "یک رمز عبور محلی برای این مخزن اضافه کنید؟"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "یک مخزن را با استفاده از پیوند (لینک) توکن وارد کنید"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -605,8 +601,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("حذف اعتبارسنجی بیومتریکی"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("حذف روش‌های بیومتریکی"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "اعتبار‌سنجی بیومتریک برای این مخزن حذف شود؟\n\nقفل مخزن به‌طور خودکار باز می‌شود، مگر اینکه رمز عبور محلی اضافه شود."),
         "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(
                 "با این عمل رمز مخزن حذف می‌شود و از اعتبارسنجی بیومتریک برای باز‌کردن قفل استفاده می‌شود"),
@@ -720,13 +714,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "رمز عبور را برای باز کردن قفل وارد کنید"),
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
             "با استفاده از بیومتریک قفل را باز کنید"),
-        "messageUnlockUsingBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "قفل این مخزن را با استفاده از بیومتریک باز کنید؟"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "شما تغییرات ذخیره‌نشده‌ای دارید\n\nآیا می خواهید آن‌ها را نادیده بگیرید؟"),
-        "messageUpdateLocalPassword":
-            MessageLookupByLibrary.simpleMessage("به‌روزرسانی رمز عبور محلی"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "رمز عبور محلی این مخزن به‌روز شود؟"),

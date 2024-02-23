@@ -180,7 +180,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return await oui.Directory.open(_repo, path);
   }
 
-  void emitPasswordMode(PasswordMode value) {
+  void emitPasswordMode() {
+    final value = _repoSettings.passwordMode;
     if (state.passwordMode == value) {
       return;
     }

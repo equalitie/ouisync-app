@@ -103,7 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("Прийняти"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ПРИЙНЯТИ"),
-        "actionAdd": MessageLookupByLibrary.simpleMessage("Додати"),
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("Імпортувати репозиторій"),
         "actionAddRepositoryWithToken":
@@ -269,9 +268,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не доступно для сховищ в режимі читання"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("Додати локальний пароль"),
-        "messageAddLocalPasswordConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Додати локальний пароль до цього сховища?"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Імпортувати репозиторій за допомогою токен-посилання"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -632,8 +628,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Прибрати біометричну перевірку"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Видалити біометричні дані"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "Видалити перевірку біометричних даних для цього сховища?\n\nСховище буде розблоковано автоматично, якщо не буде додано локальний пароль."),
         "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(
                 "Це видалить пароль сховища і використовуватиме біометричну перевірку для розблокування"),
@@ -749,13 +743,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Введіть пароль для розблокування"),
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
             "Розблокувати за допомогою біометричних даних"),
-        "messageUnlockUsingBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Розблокувати цей репозиторій за допомогою біометрії?"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "У вас є незбережені зміни.\n\nВи хочете їх скасувати?"),
-        "messageUpdateLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Оновіть локальний пароль"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Оновити локальний пароль для цього сховища?"),

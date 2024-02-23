@@ -94,7 +94,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage(""),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage(""),
-        "actionAdd": MessageLookupByLibrary.simpleMessage(""),
         "actionAddRepository": MessageLookupByLibrary.simpleMessage(""),
         "actionAddRepositoryWithToken":
             MessageLookupByLibrary.simpleMessage(""),
@@ -206,8 +205,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage(""),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(""),
         "messageAddLocalPassword": MessageLookupByLibrary.simpleMessage(""),
-        "messageAddLocalPasswordConfirmation":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(""),
         "messageAddingFileToLockedRepository":
@@ -439,8 +436,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),
-        "messageRemoveBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveLocalPasswordConfirmation":
@@ -509,10 +504,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage(""),
-        "messageUnlockUsingBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(""),
-        "messageUpdateLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageVPN": MessageLookupByLibrary.simpleMessage(""),

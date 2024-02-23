@@ -102,7 +102,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("Accept"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACCEPT"),
-        "actionAdd": MessageLookupByLibrary.simpleMessage("Add"),
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("Import a Repository"),
         "actionAddRepositoryWithToken":
@@ -166,9 +165,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
+        "actionStoreSecretOnDevice":
+            MessageLookupByLibrary.simpleMessage("Store secret on this device"),
+        "actionSubmit": MessageLookupByLibrary.simpleMessage("Submit"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
+        "actionUseCustomLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Use custom local password"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
@@ -253,9 +257,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "This option is not available on read-only repositories"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("Add local password"),
-        "messageAddLocalPasswordConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Add a local password for this repository?"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Import a repository using a token link"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -309,6 +310,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to delete this file?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to delete this folder?"),
+        "messageConfirmIrreversibleChange":
+            MessageLookupByLibrary.simpleMessage(
+                "This action is irreversible, would you like to proceed?"),
         "messageConfirmNotEmptyFolderDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "This folder is not empty.\n\nDo you still want to delete it? (this will delete all its contents)"),
@@ -611,8 +615,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Remove biometrics"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added."),
         "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(
                 "This will remove the repository password and use the biometric validation for unlocking"),
@@ -728,13 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Unlock using biometrics"),
-        "messageUnlockUsingBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Unlock this repository using biometrics?"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "You have unsaved changes.\n\nDo you want to discard them?"),
-        "messageUpdateLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Update local password"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),

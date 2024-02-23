@@ -96,6 +96,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
                                 repository: widget.cubit,
+                                passwordHasher:
+                                    widget.reposCubit.passwordHasher,
                                 popDialog: () => Navigator.of(context).pop(),
                               )),
                       EntryActionItem(

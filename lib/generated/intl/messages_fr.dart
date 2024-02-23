@@ -452,8 +452,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Validation par biométrie supprimée"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Supprimer la biométrie"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "Voulez-vous vraiment supprimer l\'accès par biométrie de ce dépôt ?"),
         "messageRemovedInBrackets":
             MessageLookupByLibrary.simpleMessage("<supprimé>"),
         "messageRenameFile":
