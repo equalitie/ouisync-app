@@ -7,6 +7,7 @@ class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final bool? enabled;
   final Function(String?)? onSaved;
+  final Function(String)? onChanged;
   final Function(String)? onFieldSubmitted;
   final Future<String?> Function(String?) validator;
   final AutovalidateMode? autovalidateMode;
@@ -23,6 +24,7 @@ class AsyncTextFormField extends StatefulWidget {
       this.controller,
       this.enabled,
       this.onSaved,
+      this.onChanged,
       this.onFieldSubmitted,
       required this.validator,
       this.autovalidateMode,
@@ -81,5 +83,11 @@ class _State extends State<AsyncTextFormField> {
     }
 
     _validating = false;
+
+    final onChanged = widget.onChanged;
+
+    if (onChanged != null) {
+      onChanged(value);
+    }
   }
 }

@@ -68,6 +68,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
     required RepoCubit repository,
+    required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
     final repoSettings = repository.repoSettings;
@@ -97,6 +98,7 @@ mixin RepositoryActionsMixin on LoggyType {
             repo: repository,
             currentSecret: secret!,
             isBiometricsAvailable: isBiometricsAvailable,
+            passwordHasher: passwordHasher,
           ),
         ));
   }
@@ -260,41 +262,6 @@ mixin RepositoryActionsMixin on LoggyType {
                         isBiometricsAvailable: isBiometricsAvailable),
                   ));
             }))));
-  }
-
-  String? validatePassword(String password,
-      {required GlobalKey<FormFieldState> passwordInputKey,
-      required GlobalKey<FormFieldState> retypePasswordInputKey}) {
-    final isPasswordOk = passwordInputKey.currentState?.validate() ?? false;
-    final isRetypePasswordOk =
-        retypePasswordInputKey.currentState?.validate() ?? false;
-
-    if (!(isPasswordOk && isRetypePasswordOk)) return null;
-
-    passwordInputKey.currentState!.save();
-    retypePasswordInputKey.currentState!.save();
-
-    return password;
-  }
-
-  Future<bool?> confirmSaveChanges(
-      BuildContext context, String positiveButtonText, String message) async {
-    final saveChanges = await Dialogs.alertDialogWithActions(
-        context: context,
-        title: S.current.titleSaveChanges,
-        body: [
-          Text(message, style: context.theme.appTextStyle.bodyMedium)
-        ],
-        actions: [
-          TextButton(
-              child: Text(S.current.actionCancel.toUpperCase()),
-              onPressed: () => Navigator.of(context).pop(false)),
-          TextButton(
-              child: Text(positiveButtonText.toUpperCase()),
-              onPressed: () => Navigator.of(context).pop(true))
-        ]);
-
-    return saveChanges;
   }
 }
 

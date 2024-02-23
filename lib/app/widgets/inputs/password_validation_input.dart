@@ -6,23 +6,9 @@ import '../../utils/utils.dart';
 import '../../models/models.dart';
 
 class PasswordValidation extends StatefulWidget {
-  PasswordValidation(
-      {required this.passwordMode,
-      required this.passwordInputKey,
-      required this.retypePasswordInputKey,
-      required this.passwordController,
-      required this.retypedPasswordController,
-      required this.actions});
+  PasswordValidation({required this.onPasswordChange});
 
-  final PasswordMode passwordMode;
-
-  final GlobalKey<FormFieldState> passwordInputKey;
-  final GlobalKey<FormFieldState> retypePasswordInputKey;
-
-  final TextEditingController passwordController;
-  final TextEditingController retypedPasswordController;
-
-  final Widget Function() actions;
+  final void Function(String?) onPasswordChange;
 
   @override
   State<PasswordValidation> createState() => _PasswordValidationState();
@@ -37,82 +23,66 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   bool _obscureRetypePassword = true;
 
   String? _password;
+  String? _retypedPassword;
 
   String? _passwordStrength;
   Color? _passwordStrengthColorValue;
 
   @override
-  void initState() {
-    widget.passwordController.addListener(
-        () => setState(() => _password = widget.passwordController.text));
-
-    super.initState();
+  Widget build(BuildContext context) {
+    return Container(
+        child: Column(children: [
+      Row(children: [
+        Expanded(
+            child: Fields.formTextField(
+                context: context,
+                obscureText: _obscurePassword,
+                label: S.current.labelPassword,
+                suffixIcon: _passwordActions(),
+                hint: S.current.messageRepositoryPassword,
+                onSaved: (_) {},
+                onChanged: (value) => _passwordChanged(value, _retypedPassword),
+                validator: validateNoEmptyMaybeRegExpr(
+                    emptyError:
+                        S.current.messageErrorRepositoryPasswordValidation),
+                autovalidateMode: AutovalidateMode.disabled,
+                focusNode: _passwordFocus))
+      ]),
+      Dimensions.spacingVertical,
+      Row(children: [
+        Expanded(
+            child: Fields.formTextField(
+                context: context,
+                obscureText: _obscureRetypePassword,
+                label: S.current.labelRetypePassword,
+                suffixIcon: _retypePasswordActions(),
+                hint: S.current.messageRepositoryPassword,
+                onSaved: (_) {},
+                onChanged: (value) => _passwordChanged(_password, value),
+                validator: (retypedPassword) => retypedPasswordValidator(
+                      _password,
+                      retypedPassword,
+                    ),
+                autovalidateMode: AutovalidateMode.disabled,
+                focusNode: _retypePasswordFocus))
+      ]),
+      Dimensions.spacingVertical,
+      Row(children: [
+        Text('${S.current.messagePasswordStrength}:',
+            style: context.theme.appTextStyle.bodySmall
+                .copyWith(color: Colors.black54)),
+        Dimensions.spacingHorizontalHalf,
+        Text(_passwordStrength ?? '',
+            style: context.theme.appTextStyle.bodySmall
+                .copyWith(color: _passwordStrengthColorValue))
+      ]),
+      Dimensions.spacingVertical,
+      FlutterPasswordStrength(
+          password: _password,
+          strengthCallback: _updatePasswordStrengthMessage),
+      Dimensions.spacingVerticalDouble,
+    ]));
   }
-
-  double _inputOpacity() => widget.passwordMode != PasswordMode.bio ? 1 : 0.5;
-
-  bool _inputEnabled() => widget.passwordMode != PasswordMode.bio;
-
-  @override
-  Widget build(BuildContext context) => Opacity(
-      opacity: _inputOpacity(),
-      child: Container(
-          child: Column(children: [
-        Row(children: [
-          Expanded(
-              child: Fields.formTextField(
-                  key: widget.passwordInputKey,
-                  context: context,
-                  textEditingController: widget.passwordController,
-                  enabled: _inputEnabled(),
-                  obscureText: _obscurePassword,
-                  label: S.current.labelPassword,
-                  suffixIcon: _passwordActions(),
-                  hint: S.current.messageRepositoryPassword,
-                  onSaved: (_) {},
-                  validator: validateNoEmptyMaybeRegExpr(
-                      emptyError:
-                          S.current.messageErrorRepositoryPasswordValidation),
-                  autovalidateMode: AutovalidateMode.disabled,
-                  focusNode: _passwordFocus))
-        ]),
-        Dimensions.spacingVertical,
-        Row(children: [
-          Expanded(
-              child: Fields.formTextField(
-                  key: widget.retypePasswordInputKey,
-                  context: context,
-                  textEditingController: widget.retypedPasswordController,
-                  enabled: _inputEnabled(),
-                  obscureText: _obscureRetypePassword,
-                  label: S.current.labelRetypePassword,
-                  suffixIcon: _retypePasswordActions(),
-                  hint: S.current.messageRepositoryPassword,
-                  onSaved: (_) {},
-                  validator: (retypedPassword) => retypedPasswordValidator(
-                        password: widget.passwordController.text,
-                        retypedPassword: retypedPassword,
-                      ),
-                  autovalidateMode: AutovalidateMode.disabled,
-                  focusNode: _retypePasswordFocus))
-        ]),
-        Dimensions.spacingVertical,
-        Row(children: [
-          Text('${S.current.messagePasswordStrength}:',
-              style: context.theme.appTextStyle.bodySmall
-                  .copyWith(color: Colors.black54)),
-          Dimensions.spacingHorizontalHalf,
-          Text(_passwordStrength ?? '',
-              style: context.theme.appTextStyle.bodySmall
-                  .copyWith(color: _passwordStrengthColorValue))
-        ]),
-        Dimensions.spacingVertical,
-        FlutterPasswordStrength(
-            password: _password,
-            strengthCallback: _updatePasswordStrengthMessage),
-        Dimensions.spacingVerticalDouble,
-        widget.actions()
-      ])));
 
   void _updatePasswordStrengthMessage(double strength) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -161,10 +131,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             color: Colors.black),
         IconButton(
             onPressed: () async {
-              final password = widget.passwordController.text;
-              if (password.isEmpty) return;
-
-              await copyStringToClipboard(password);
+              await copyStringToClipboard(_password ?? "");
               showSnackBar(context,
                   message: S.current.messagePasswordCopiedClipboard);
             },
@@ -186,10 +153,8 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             color: Colors.black),
         IconButton(
             onPressed: () async {
-              final retypedPassword = widget.retypedPasswordController.text;
-              if (retypedPassword.isEmpty) return;
+              await copyStringToClipboard(_retypedPassword ?? "");
 
-              await copyStringToClipboard(retypedPassword);
               showSnackBar(context,
                   message: S.current.messagePasswordCopiedClipboard);
             },
@@ -199,20 +164,31 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             color: Colors.black)
       ]);
 
-  String? retypedPasswordValidator(
-      {required String password, required String? retypedPassword}) {
-    if (retypedPassword == null || password != retypedPassword) {
+  String? retypedPasswordValidator(String? password, String? retypedPassword) {
+    if (password == null ||
+        retypedPassword == null ||
+        password != retypedPassword) {
       return S.current.messageErrorRetypePassword;
     }
 
     return null;
   }
 
+  void _passwordChanged(String? password, String? retypedPassword) {
+    if (retypedPasswordValidator(password, retypedPassword) == null) {
+      widget.onPasswordChange(password);
+    } else {
+      widget.onPasswordChange(null);
+    }
+
+    setState(() {
+      _password = password;
+      _retypedPassword = retypedPassword;
+    });
+  }
+
   @override
   void dispose() {
-    widget.passwordController.dispose();
-    widget.retypedPasswordController.dispose();
-
     _passwordFocus.dispose();
     _retypePasswordFocus.dispose();
 

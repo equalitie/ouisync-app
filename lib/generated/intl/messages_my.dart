@@ -323,8 +323,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),
-        "messageRemoveBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameFile": MessageLookupByLibrary.simpleMessage(""),
         "messageRenameFolder": MessageLookupByLibrary.simpleMessage(""),

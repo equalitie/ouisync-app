@@ -14,11 +14,13 @@ class RepositorySecurity extends StatefulWidget {
     required this.repo,
     required this.currentSecret,
     required this.isBiometricsAvailable,
+    required this.passwordHasher,
   });
 
   final RepoCubit repo;
   final LocalSecret currentSecret;
   final bool isBiometricsAvailable;
+  final PasswordHasher passwordHasher;
 
   @override
   State<RepositorySecurity> createState() =>
@@ -27,15 +29,11 @@ class RepositorySecurity extends StatefulWidget {
 
 class _RepositorySecurityState extends State<RepositorySecurity>
     with AppLogger, RepositoryActionsMixin {
-  final _passwordInputKey = GlobalKey<FormFieldState>();
-  final _retypePasswordInputKey = GlobalKey<FormFieldState>();
-
-  final TextEditingController _passwordController =
-      TextEditingController(text: null);
-  final TextEditingController _retypedPasswordController =
-      TextEditingController(text: null);
-
   final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
+
+  bool _useCustomPassword = false;
+  String? _validPassword;
+  bool _storeUserPasswordAsKey = true;
 
   final bool _isBiometricsAvailable;
   final RepoCubit _repo;
@@ -47,203 +45,142 @@ class _RepositorySecurityState extends State<RepositorySecurity>
       this._isBiometricsAvailable, this._repo, this._currentSecret);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
-      body: SingleChildScrollView(
-          child: Container(
-              child: Column(children: [
-        _pasword(),
-        Divider(height: 30.0),
-        _biometrics()
-      ]))));
-
-  String get _passwordModeTitle => _passwordMode == PasswordMode.manual
-      ? S.current.messageUpdateLocalPassword
-      : S.current.messageAddLocalPassword;
-
-  Widget _pasword() {
-    return Container(
-        padding: Dimensions.paddingDialog,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_passwordModeTitle),
-          Dimensions.spacingVerticalDouble,
-          PasswordValidation(
-              passwordMode: _passwordMode,
-              passwordInputKey: _passwordInputKey,
-              retypePasswordInputKey: _retypePasswordInputKey,
-              passwordController: _passwordController,
-              retypedPasswordController: _retypedPasswordController,
-              actions: _passwordActions),
-          Dimensions.spacingVertical
-        ]));
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
+        body: SingleChildScrollView(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+              padding: Dimensions.paddingDialog,
+              child: Text("Reset local secret", style: AppTypography.titleBig)),
+          _buildUseCustomPasswordSwitch(),
+          _paswordInput(),
+          _submitButton(),
+          Dimensions.spacingVertical,
+          Divider(height: 30.0),
+          _biometrics()
+        ])));
   }
 
-  Widget _passwordActions() => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _passwordMode == PasswordMode.manual
-          ? [
-              Row(children: [
-                TextButton(
-                    focusNode: _passwordAction,
-                    child: Text(S.current.actionRemoveLocalPassword,
-                        style: context.theme.appTextStyle.bodyMedium
-                            .copyWith(color: Constants.dangerColor)),
-                    onPressed: () async {
-                      final positiveButtonText = S.current.actionRemove;
-                      final confirmationMessage =
-                          S.current.messageRemoveLocalPasswordConfirmation;
+  Widget _paswordInput() {
+    if (_useCustomPassword) {
+      return Container(
+          padding: Dimensions.paddingDialog,
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Dimensions.spacingVerticalDouble,
+            PasswordValidation(
+                onPasswordChange: (password) =>
+                    setState(() => _validPassword = password)),
+            _buildStoreUserPassworAsKey(),
+          ]));
+    } else {
+      return SizedBox();
+    }
+  }
 
-                      final saveChanges = await confirmSaveChanges(
-                        context,
-                        positiveButtonText,
-                        confirmationMessage,
-                      );
+  Widget _submitButton() => Container(
+        padding: Dimensions.paddingDialog,
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Fields.inPageButton(
+              onPressed: (_useCustomPassword ? _validPassword != null : true)
+                  ? () async {
+                      if (_useCustomPassword) {
+                        final password = _validPassword;
+                        if (password == null) return;
 
-                      if (saveChanges == null || !saveChanges) return;
+                        if (!await _confirmSaveChanges(context)) return;
 
-                      await Dialogs.executeFutureWithLoadingDialog(context,
-                          f: _removePassword());
-                    })
-              ]),
-              Dimensions.spacingVertical,
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Fields.inPageButton(
-                    onPressed: () async {
-                      final password = _retypedPasswordController.text;
-                      if (password.isEmpty) return;
+                        await Dialogs.executeFutureWithLoadingDialog(context,
+                            f: _submitPassword(LocalPassword(password),
+                                _storeUserPasswordAsKey));
+                      } else {
+                        if (!await _confirmSaveChanges(context)) return;
 
-                      final newPassword = validatePassword(password,
-                          passwordInputKey: _passwordInputKey,
-                          retypePasswordInputKey: _retypePasswordInputKey);
+                        await Dialogs.executeFutureWithLoadingDialog(context,
+                            f: _submitGenerateKey());
+                      }
+                    }
+                  : null,
+              text: S.current.actionSubmit,
+              size: Dimensions.sizeInPageButtonLong,
+              focusNode: _passwordAction)
+        ]),
+      );
 
-                      if (newPassword == null) return;
+  Widget _buildRowWithSwitch(
+          {required bool value,
+          required IconData icon,
+          required String text,
+          required void Function(bool) onChange}) =>
+      SwitchListTile.adaptive(
+          value: value,
+          secondary: Icon(icon, color: Colors.black),
+          title: Text(text, style: context.theme.appTextStyle.bodyMedium),
+          onChanged: onChange);
 
-                      final positiveButtonText = S.current.actionUpdate;
-                      final confirmationMessage =
-                          S.current.messageUpdateLocalPasswordConfirmation;
+  Widget _buildStoreUserPassworAsKey() => _buildRowWithSwitch(
+      value: _storeUserPasswordAsKey,
+      icon: Icons.account_balance,
+      text: S.current.actionStoreSecretOnDevice,
+      onChange: (bool value) =>
+          setState(() => _storeUserPasswordAsKey = value));
 
-                      final saveChanges = await confirmSaveChanges(
-                          context, positiveButtonText, confirmationMessage);
+  Widget _buildUseCustomPasswordSwitch() => _buildRowWithSwitch(
+      value: _useCustomPassword,
+      icon: Icons.password_outlined,
+      text: S.current.actionUseCustomLocalPassword,
+      onChange: (bool value) => setState(() => _useCustomPassword = value));
 
-                      if (saveChanges == null || !saveChanges) return;
-
-                      await Dialogs.executeFutureWithLoadingDialog(context,
-                          f: _updateLocalPassword(LocalPassword(newPassword)));
-                    },
-                    text: S.current.actionUpdate,
-                    size: Dimensions.sizeInPageButtonLong,
-                    focusNode: _passwordAction)
-              ])
-            ]
-          : [
-              Fields.inPageButton(
-                  onPressed: _passwordMode == PasswordMode.none
-                      ? () async {
-                          final password = _retypedPasswordController.text;
-                          if (password.isEmpty) return;
-
-                          final newPassword = validatePassword(password,
-                              passwordInputKey: _passwordInputKey,
-                              retypePasswordInputKey: _retypePasswordInputKey);
-
-                          if (newPassword == null) return;
-
-                          final positiveButtonText = S.current.actionAdd;
-                          final confirmationMessage =
-                              S.current.messageAddLocalPasswordConfirmation;
-
-                          final saveChanges = await confirmSaveChanges(
-                              context, positiveButtonText, confirmationMessage);
-
-                          if (saveChanges == null || !saveChanges) return;
-
-                          _passwordController.clear();
-                          _retypedPasswordController.clear();
-
-                          await Dialogs.executeFutureWithLoadingDialog(context,
-                              f: _addLocalPassword(LocalPassword(newPassword)));
-                        }
-                      : null,
-                  text: S.current.actionCreate,
-                  size: Dimensions.sizeInPageButtonLong,
-                  focusNode: _passwordAction)
-            ]);
-
-  bool get _unlockWithBiometrics => _passwordMode == PasswordMode.bio;
-
-  Widget _biometrics() => _isBiometricsAvailable
-      ? Column(children: [
-          SwitchListTile.adaptive(
-              value: _unlockWithBiometrics,
-              secondary: Icon(Icons.fingerprint_rounded, color: Colors.black),
-              title: Text(S.current.messageUnlockUsingBiometrics,
-                  style: context.theme.appTextStyle.bodyMedium),
-              onChanged: (useBiometrics) async {
-                final positiveButtonText = S.current.actionAccept;
-                String confirmationMessage = useBiometrics
-                    ? S.current.messageUnlockUsingBiometricsConfirmation
-                    : S.current.messageRemoveBiometricsConfirmation;
-
-                if (useBiometrics && _passwordMode == PasswordMode.manual) {
-                  confirmationMessage +=
-                      '\n\n${S.current.messageRemoveBiometricsConfirmationMoreInfo}.';
-                }
-
-                final saveChanges = await confirmSaveChanges(
-                    context, positiveButtonText, confirmationMessage);
-
-                if (saveChanges == null || !saveChanges) return;
-
+  Widget _biometrics() =>
+      (_isBiometricsAvailable && _passwordMode != PasswordMode.manual)
+          ? _buildRowWithSwitch(
+              value: _passwordMode == PasswordMode.bio,
+              icon: Icons.fingerprint_rounded,
+              text: S.current.messageUnlockUsingBiometrics,
+              onChange: (useBiometrics) async {
                 await Dialogs.executeFutureWithLoadingDialog(context,
                     f: _updateUnlockRepoWithBiometrics(useBiometrics));
               })
-        ])
-      : SizedBox();
+          : SizedBox();
 
   // TODO: If any of the async functions here fail, the user may lose their data.
-  Future<void> _addLocalPassword(LocalPassword newPassword) async {
+  Future<void> _submitPassword(LocalPassword newPassword, bool store) async {
+    final salt = PasswordSalt.random();
+    final key = await widget.passwordHasher.hashPassword(newPassword, salt);
+    final newSecret = LocalSecretKeyAndSalt(key, salt);
+
     try {
-      await _repo.repoSettings.setAuthModePasswordProvidedByUser();
+      if (store) {
+        bool requireLocalAuth = _passwordMode == PasswordMode.bio;
+        await _repo.repoSettings
+            .setAuthModeSecretStoredOnDevice(key, requireLocalAuth);
+      } else {
+        await _repo.repoSettings.setAuthModePasswordProvidedByUser();
+      }
     } catch (e) {
       showSnackBar(context,
           message: S.current.messageErrorRemovingSecureStorage);
       return;
     }
 
-    final changed = await _changeRepositorySecret(newPassword);
+    final changed = await _changeRepositorySecret(newSecret);
 
     if (changed == false) {
       showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
       return;
     }
 
-    _emitSecret(newPassword);
+    _emitSecret(newSecret.key);
     _emitPasswordMode();
 
-    _clearPasswordInputs();
-  }
-
-  // Returns error message on error.
-  Future<void> _updateLocalPassword(LocalPassword newPassword) async {
-    final changed = await _changeRepositorySecret(newPassword);
-
-    if (changed == false) {
-      showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
-      return;
-    }
-
-    _emitSecret(newPassword);
-  }
-
-  void _clearPasswordInputs() {
-    _passwordController.clear();
-    _retypedPasswordController.clear();
-
-    _passwordAction.requestFocus();
+    // TODO
+    //_clearPasswordInputs();
   }
 
   // TODO: If any of the async functions here fail, the user may lose their data.
-  Future<void> _removePassword() async {
+  Future<void> _submitGenerateKey() async {
     final newSecret = LocalSecretKeyAndSalt.random();
 
     final passwordChanged = await _changeRepositorySecret(newSecret);
@@ -253,8 +190,8 @@ class _RepositorySecurityState extends State<RepositorySecurity>
     }
 
     try {
-      await _repo.repoSettings
-          .setAuthModeSecretStoredOnDevice(newSecret.key, false);
+      await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
+          newSecret.key, _passwordMode == PasswordMode.bio);
     } catch (e) {
       showSnackBar(context, message: S.current.messageErrorRemovingPassword);
       return;
@@ -297,4 +234,26 @@ class _RepositorySecurityState extends State<RepositorySecurity>
   void _emitPasswordMode() => setState(() {
         _repo.emitPasswordMode();
       });
+
+  Future<bool> _confirmSaveChanges(BuildContext context) async {
+    final positiveButtonText = S.current.actionSubmit;
+    final message = S.current.messageConfirmIrreversibleChange;
+
+    final saveChanges = await Dialogs.alertDialogWithActions(
+        context: context,
+        title: S.current.titleSaveChanges,
+        body: [
+          Text(message, style: context.theme.appTextStyle.bodyMedium)
+        ],
+        actions: [
+          TextButton(
+              child: Text(S.current.actionCancel.toUpperCase()),
+              onPressed: () => Navigator.of(context).pop(false)),
+          TextButton(
+              child: Text(positiveButtonText.toUpperCase()),
+              onPressed: () => Navigator.of(context).pop(true))
+        ]);
+
+    return saveChanges ?? false;
+  }
 }
