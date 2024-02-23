@@ -3,7 +3,6 @@ import 'package:flutter_password_strength/flutter_password_strength.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
-import '../../models/models.dart';
 
 class PasswordValidation extends StatefulWidget {
   PasswordValidation({required this.onPasswordChange});

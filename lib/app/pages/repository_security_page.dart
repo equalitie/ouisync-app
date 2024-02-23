@@ -9,8 +9,22 @@ import '../utils/utils.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 
-class RepositorySecurity extends StatefulWidget {
-  const RepositorySecurity({
+class RepositorySecurityPage extends StatefulWidget {
+  static Future<RepositorySecurityPage> create(
+      {required RepoCubit repo,
+      required LocalSecret currentSecret,
+      required PasswordHasher passwordHasher}) async {
+    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
+
+    return RepositorySecurityPage._(
+      repo: repo,
+      currentSecret: currentSecret,
+      isBiometricsAvailable: isBiometricsAvailable,
+      passwordHasher: passwordHasher,
+    );
+  }
+
+  const RepositorySecurityPage._({
     required this.repo,
     required this.currentSecret,
     required this.isBiometricsAvailable,
@@ -23,11 +37,11 @@ class RepositorySecurity extends StatefulWidget {
   final PasswordHasher passwordHasher;
 
   @override
-  State<RepositorySecurity> createState() =>
+  State<RepositorySecurityPage> createState() =>
       _RepositorySecurityState(isBiometricsAvailable, repo, currentSecret);
 }
 
-class _RepositorySecurityState extends State<RepositorySecurity>
+class _RepositorySecurityState extends State<RepositorySecurityPage>
     with AppLogger, RepositoryActionsMixin {
   final FocusNode _passwordAction = FocusNode(debugLabel: 'password_input');
 

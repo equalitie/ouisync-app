@@ -74,7 +74,7 @@ mixin RepositoryActionsMixin on LoggyType {
     final repoSettings = repository.repoSettings;
     final passwordMode = repoSettings.passwordMode;
 
-    LocalSecret? secret;
+    LocalSecret secret;
 
     if (passwordMode == PasswordMode.manual) {
       final password = await manualUnlock(context, repository);
@@ -84,23 +84,19 @@ mixin RepositoryActionsMixin on LoggyType {
       if (!await LocalAuth.authenticateIfPossible(
           context, S.current.messageAccessingSecureStorage)) return;
 
-      secret = await repoSettings.getLocalSecret();
+      secret = (await repoSettings.getLocalSecret())!;
     }
 
     popDialog();
 
-    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
+    final securityPage = await RepositorySecurityPage.create(
+      repo: repository,
+      currentSecret: secret,
+      passwordHasher: passwordHasher,
+    );
 
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepositorySecurity(
-            repo: repository,
-            currentSecret: secret!,
-            isBiometricsAvailable: isBiometricsAvailable,
-            passwordHasher: passwordHasher,
-          ),
-        ));
+        context, MaterialPageRoute(builder: (context) => securityPage));
   }
 
   Future<String?> manualUnlock(
