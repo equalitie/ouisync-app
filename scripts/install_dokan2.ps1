@@ -11,11 +11,17 @@ $root_directory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 ######################
 # FUNCTIONS          #
 ######################
-    
-function Get-DockanVersionInSystem {
-    $dokan_version_in_system = Get-Package -Name dokan* -EA Ignore | Select-Object -ExpandProperty Version
-    #TODO: Also check if dokan2.sys is in %WINDIR%/system32/drivers
-    return $dokan_version_in_system
+
+function Get-DokanLatestVersionInSystem {
+    $latest_dokan_driver_version = (Get-ChildItem -Path "$env:WINDIR\system32\drivers" -Filter dokan*.sys).VersionInfo.FileVersionRaw | Sort-Object -Descending | Select-Object -First 1
+
+    if ($null -ne $latest_dokan_driver_version) {
+        Write-Host "Dokan driver version $latest_dokan_driver_version"
+    } else {
+        Write-Host "No Dokan drivers found"
+    }
+
+    return $latest_dokan_driver_version
 }
 
 
