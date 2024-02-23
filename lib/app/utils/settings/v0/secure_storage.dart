@@ -100,12 +100,14 @@ class SecureStorage with AppLogger {
   /////////////////////////////////
 
   Future<bool> _validateBiometrics() async {
-    try {
-      return await SecurityValidations.validateBiometrics();
-    } on Exception catch (e, st) {
-      loggy.app('Biometric authentication (local_auth) failed', e, st);
-      return false;
-    }
+    // No longer necessary when we have newer version of settings.
+    return true;
+    //try {
+    //  return await SecurityValidations.validateBiometrics();
+    //} on Exception catch (e, st) {
+    //  loggy.app('Biometric authentication (local_auth) failed', e, st);
+    //  return false;
+    //}
   }
 
   Future<String?> _readFlutterSecureStorage(

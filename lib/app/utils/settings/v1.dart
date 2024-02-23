@@ -68,6 +68,12 @@ class _AuthModePasswordStoredOnDevice extends AuthMode {
   _AuthModePasswordStoredOnDevice(
       this.encryptedPassword, this.confirmWithBiometrics);
 
+  _AuthModePasswordStoredOnDevice copyWith(
+          {String? encryptedPassword, bool? confirmWithBiometrics}) =>
+      _AuthModePasswordStoredOnDevice(
+          encryptedPassword ?? this.encryptedPassword,
+          confirmWithBiometrics ?? this.confirmWithBiometrics);
+
   // May throw.
   Future<LocalPassword> getRepositoryPassword(MasterKey masterKey) async {
     final decrypted = await masterKey.decrypt(encryptedPassword);
@@ -102,6 +108,11 @@ class _AuthModeKeyStoredOnDevice extends AuthMode {
   final bool confirmWithBiometrics;
 
   _AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
+
+  _AuthModeKeyStoredOnDevice copyWith(
+          {String? encryptedKey, bool? confirmWithBiometrics}) =>
+      _AuthModeKeyStoredOnDevice(encryptedKey ?? this.encryptedKey,
+          confirmWithBiometrics ?? this.confirmWithBiometrics);
 
   // May throw.
   Future<LocalSecretKey> getRepositoryPassword(MasterKey masterKey) async {
@@ -202,8 +213,36 @@ class RepoSettings {
 
   bool shouldCheckBiometricsBeforeUnlock() {
     final authMode = _entry.authMode;
-    return (authMode is _AuthModePasswordStoredOnDevice) &&
-        authMode.confirmWithBiometrics;
+    if (authMode is _AuthModePasswordStoredOnDevice) {
+      return authMode.confirmWithBiometrics;
+    }
+    if (authMode is _AuthModeKeyStoredOnDevice) {
+      return authMode.confirmWithBiometrics;
+    }
+    return false;
+  }
+
+  // Return true if changed.
+  Future<bool> setConfirmWithBiometrics(bool value) async {
+    final authMode = _entry.authMode;
+
+    switch (authMode) {
+      case _AuthModeBlindOrManual():
+        return false;
+      case _AuthModePasswordStoredOnDevice():
+        if (authMode.confirmWithBiometrics == value) {
+          return false;
+        }
+        _entry.authMode = authMode.copyWith(confirmWithBiometrics: value);
+      case _AuthModeKeyStoredOnDevice():
+        if (authMode.confirmWithBiometrics == value) {
+          return false;
+        }
+        _entry.authMode = authMode.copyWith(confirmWithBiometrics: value);
+    }
+
+    await _settings._storeRoot();
+    return true;
   }
 
   /// May throw if the function failed to decrypt the stored key.

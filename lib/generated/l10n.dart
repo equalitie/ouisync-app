@@ -3710,41 +3710,11 @@ class S {
     );
   }
 
-  /// `Update local password`
-  String get messageUpdateLocalPassword {
+  /// `This action is irreversible, would you like to proceed?`
+  String get messageConfirmIrreversibleChange {
     return Intl.message(
-      'Update local password',
-      name: 'messageUpdateLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a local password for this repository?`
-  String get messageAddLocalPasswordConfirmation {
-    return Intl.message(
-      'Add a local password for this repository?',
-      name: 'messageAddLocalPasswordConfirmation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Unlock this repository using biometrics?`
-  String get messageUnlockUsingBiometricsConfirmation {
-    return Intl.message(
-      'Unlock this repository using biometrics?',
-      name: 'messageUnlockUsingBiometricsConfirmation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.`
-  String get messageRemoveBiometricsConfirmation {
-    return Intl.message(
-      'Remove the biometrics validation for this repository?\n\nThe repository will unlock automatically, unless a local password is added.',
-      name: 'messageRemoveBiometricsConfirmation',
+      'This action is irreversible, would you like to proceed?',
+      name: 'messageConfirmIrreversibleChange',
       desc: '',
       args: [],
     );
@@ -4420,6 +4390,26 @@ class S {
     );
   }
 
+  /// `Store secret on this device`
+  String get actionStoreSecretOnDevice {
+    return Intl.message(
+      'Store secret on this device',
+      name: 'actionStoreSecretOnDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use custom local password`
+  String get actionUseCustomLocalPassword {
+    return Intl.message(
+      'Use custom local password',
+      name: 'actionUseCustomLocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ACCEPT`
   String get actionAcceptCapital {
     return Intl.message(
@@ -4650,11 +4640,11 @@ class S {
     );
   }
 
-  /// `Add`
-  String get actionAdd {
+  /// `Submit`
+  String get actionSubmit {
     return Intl.message(
-      'Add',
-      name: 'actionAdd',
+      'Submit',
+      name: 'actionSubmit',
       desc: '',
       args: [],
     );

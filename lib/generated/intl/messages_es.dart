@@ -450,6 +450,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageIgnoreBatteryOptimizationsPermission":
             MessageLookupByLibrary.simpleMessage(
                 "Permite que la aplicación siga sincronizándose en segundo plano"),
+        "messageInfoBittorrentDHT": MessageLookupByLibrary.simpleMessage(
+            "Es una herramienta que permite a los pares encontrarse entre si en la red P2P (red de pares) sin un servidor central"),
+        "messageInfoPeerExchange": MessageLookupByLibrary.simpleMessage(
+            "Es una herramienta para intercambiar la lista de pares con los pares a los que estás conectado"),
+        "messageInfoRuntimeID": MessageLookupByLibrary.simpleMessage(
+            "Es un identificador único generado por Ouisync cada vez que inicia.\n\nPuedes usarlo para confirmar tu conexión con otros en la sección Pares de la aplicación"),
         "messageInitializing":
             MessageLookupByLibrary.simpleMessage("Inicializando…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
@@ -506,6 +512,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageMoveEntryOrigin": m13,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "Esta función no está disponible mientras se está moviendo una entrada."),
+        "messageNATOnWikipedia":
+            MessageLookupByLibrary.simpleMessage("NAT en Wikipedia"),
         "messageNATType": MessageLookupByLibrary.simpleMessage("Tipo de NAT"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Red no disponible"),
@@ -566,8 +574,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Remover validación biométrica"),
         "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(
             "Eliminar los datos biométricos"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "¿Remover la validación biométrica para este repositorio?\n\nEl repositorio se desbloqueará automáticamente, a menos que se agregue una contraseña local."),
         "messageRemovedInBrackets":
             MessageLookupByLibrary.simpleMessage("<eliminado>"),
         "messageRenameFile":

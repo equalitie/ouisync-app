@@ -103,7 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "actionAccept": MessageLookupByLibrary.simpleMessage("Принять"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ПРИНЯТЬ"),
-        "actionAdd": MessageLookupByLibrary.simpleMessage("Добавить"),
         "actionAddRepository":
             MessageLookupByLibrary.simpleMessage("Импортировать хранилище"),
         "actionAddRepositoryWithToken":
@@ -267,9 +266,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Эта опция недоступна в хранилищах только для чтения"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("Добавить локальный пароль"),
-        "messageAddLocalPasswordConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Добавить локальный пароль для этого хранилища?"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Импортировать хранилище используя ссылку-токен"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -626,8 +622,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить вход по биометрии"),
         "messageRemoveBiometrics":
             MessageLookupByLibrary.simpleMessage("Улалить биометрию"),
-        "messageRemoveBiometricsConfirmation": MessageLookupByLibrary.simpleMessage(
-            "Вы уверены что хотите удалить биометрию?\n\nХранилище будет разблокировано автоматически, если не будет добавлен локальный пароль."),
         "messageRemoveBiometricsConfirmationMoreInfo":
             MessageLookupByLibrary.simpleMessage(
                 "Это позволит удалить пароль хранилища и использовать биометрическую проверку для разблокировки"),
@@ -743,13 +737,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Введите пароль чтобы разблокировать"),
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Открыть с помощью биометрии"),
-        "messageUnlockUsingBiometricsConfirmation":
-            MessageLookupByLibrary.simpleMessage(
-                "Разблокировать это хранилище с помощью биометрических данных?"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
             "У вас есть несохраненные изменения.\n\nВы хотите отменить их?"),
-        "messageUpdateLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Обновить локальный пароль"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Обновить локальный пароль этого хранилища?"),

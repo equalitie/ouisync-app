@@ -387,6 +387,7 @@ class Fields {
       String? label,
       required String hint,
       Function(String?)? onSaved,
+      Function(String)? onChanged,
       Function(String)? onFieldSubmitted,
       FutureOr<String?> Function(String?)? validator,
       AutovalidateMode? autovalidateMode,
@@ -429,6 +430,7 @@ class Fields {
           style: style,
           validator: validator,
           onSaved: onSaved,
+          onChanged: onChanged,
           onFieldSubmitted: onFieldSubmitted);
     } else {
       return TextFormField(
@@ -445,6 +447,7 @@ class Fields {
           style: style,
           validator: validator as String? Function(String?)?,
           onSaved: onSaved,
+          onChanged: onChanged,
           onFieldSubmitted: onFieldSubmitted);
     }
   }
@@ -461,6 +464,7 @@ class Fields {
           String? label,
           required String hint,
           Function(String?)? onSaved,
+          Function(String)? onChanged,
           Function(String?)? onFieldSubmitted,
           FutureOr<String?> Function(String? value)? validator,
           AutovalidateMode? autovalidateMode,
@@ -487,6 +491,7 @@ class Fields {
                   label: label,
                   hint: hint,
                   onSaved: onSaved,
+                  onChanged: onChanged,
                   onFieldSubmitted: onFieldSubmitted,
                   validator: validator,
                   autovalidateMode: autovalidateMode,
