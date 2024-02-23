@@ -54,15 +54,18 @@ function Install-Dokan {
     $prog="cmd.exe"
 
     $windir_system32_drivers_directory = "$env:WINDIR\system32\drivers"
-
+    
     $dokan_sys_file = "$root_directory\dokan2.sys"
     $dokan_exe = "$root_directory\dokanctl.exe"
     
-    $install_driver_params=@("/C";"copy $dokan_sys_file $windir_system32_drivers_directory&&$dokan_exe /i d";" >c:\temp\result_driver.txt")
+    $install_driver_params=@("/C";"copy $dokan_sys_file $windir_system32_drivers_directory&&$dokan_exe /i d";">C:\log_dokan_install_ouisync.txt")
     
-    Start-Process -Verb runas $prog $install_driver_params
-
-    return $true
+    $process = Start-Process -Verb runas $prog $install_driver_params -Wait -PassThru
+    $cmd_result = $process.ExitCode
+    
+    Write-Host "Dokan driver installation returned $cmd_result"
+    
+    return $cmd_result
 }
 
 function Get-InstallDokanConfirmation {
@@ -116,8 +119,8 @@ if ($null -eq $dokan_version) {
         return
     }
 
-    $dokan_install_result = Install-Dokan
-    if ($dokan_install_result) {
+    $result = Install-Dokan
+    if ($result -eq 0) {
         Show-AlertDialog -Title "Dokan installation - Ouisync" -Message "Dokan $full_minimum_ouisync_dokan_version installed successfully."
     } else {
         Show-AlertDialog -Title "Dokan installation - Ouisync" -Message  "Dokan $full_minimum_ouisync_dokan_version installation failed. You may need to install Dokan manually for Ouisync to work properly.`n`nMinimum required version: $minimum_ouisync_dokan_version"
