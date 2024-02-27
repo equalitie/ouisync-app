@@ -213,8 +213,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<Uint8List> get credentials => _repo.credentials;
 
-  Future<void> setCredentials(Uint8List credentials) =>
-      _repo.setCredentials(credentials);
+  Future<void> setCredentials(Uint8List credentials) async {
+    await _repo.setCredentials(credentials);
+    final accessMode = await _repo.accessMode;
+    emit(state.copyWith(accessMode: accessMode));
+  }
 
   String? mountedDirectory() {
     final mountPoint = _session.mountPoint;
