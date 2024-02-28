@@ -460,8 +460,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
             location, S.current.messageErrorRepositoryNameExist, null);
       }
 
-      final readSecret;
-      final writeSecret;
+      LocalSecretKeyAndSalt readSecret;
+      LocalSecretKeyAndSalt writeSecret;
 
       if (token != null) {
         switch (await token.mode) {
