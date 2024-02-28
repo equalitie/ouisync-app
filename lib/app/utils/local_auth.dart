@@ -13,10 +13,7 @@ abstract class LocalAuth {
     }
 
     try {
-      final bool canAuthenticateWithBiometrics =
-          await _localAuth.canCheckBiometrics;
-      return canAuthenticateWithBiometrics ||
-          await _localAuth.isDeviceSupported();
+      return await _localAuth.isDeviceSupported();
     } catch (e) {
       // We get here on Linux as there this plugin isn't supported.
       return false;
