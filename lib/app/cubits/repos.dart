@@ -460,14 +460,34 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
             location, S.current.messageErrorRepositoryNameExist, null);
       }
 
+      final readSecret;
+      final writeSecret;
+
+      if (token != null) {
+        switch (await token.mode) {
+          case oui.AccessMode.blind:
+            readSecret = LocalSecretKeyAndSalt.random();
+            writeSecret = LocalSecretKeyAndSalt.random();
+          case oui.AccessMode.read:
+            readSecret = secret;
+            writeSecret = LocalSecretKeyAndSalt.random();
+          case oui.AccessMode.write:
+            readSecret = LocalSecretKeyAndSalt.random();
+            writeSecret = secret;
+        }
+      } else {
+        readSecret = LocalSecretKeyAndSalt.random();
+        writeSecret = secret;
+      }
+
       // TODO: readSecret and writeSecret may be different, they can also
       // be null (together or separately). Consult documentation to
       // `Repository.create` for details.
       final repo = await oui.Repository.create(
         _session,
         store: store,
-        readSecret: LocalSecretKeyAndSalt.random(),
-        writeSecret: secret,
+        readSecret: readSecret,
+        writeSecret: writeSecret,
         shareToken: token,
       );
 
