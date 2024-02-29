@@ -2,6 +2,7 @@ import 'dart:io' show Directory, Platform;
 import 'dart:convert';
 import 'dart:collection';
 
+import 'package:equatable/equatable.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,12 +12,15 @@ import '../utils.dart';
 import '../master_key.dart';
 import 'v0/v0.dart' as v0;
 
-class DatabaseId {
+class DatabaseId extends Equatable {
   final String _id;
   DatabaseId(String databaseId) : _id = databaseId;
 
   @override
   String toString() => _id;
+
+  @override
+  List<Object> get props => [_id];
 }
 
 //--------------------------------------------------------------------
