@@ -13,6 +13,10 @@ abstract class MediaReceiver {
       return MediaReceiverLinux();
     }
 
+    if (Platform.isMacOS) {
+      return MediaReceiverMacOS();
+    }
+
     return MediaReceiverMobile();
   }
 
