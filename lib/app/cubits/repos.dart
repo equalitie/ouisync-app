@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:collection/collection.dart';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/native_channels.dart';
@@ -243,15 +244,69 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     await _put(repo, setCurrent: setCurrent);
   }
 
+  MapEntry<RepoLocation, RepoEntry>? repoById(DatabaseId id) {
+    return _repos.entries
+        .firstWhereOrNull((kv) => kv.value.repoSettings?.databaseId == id);
+  }
+
+  Future<void> importRepoFromLocation(RepoLocation location) async {
+    if (_repos.containsKey(location)) {
+      return;
+    }
+
+    oui.Repository repo;
+
+    try {
+      repo = await oui.Repository.open(_session, store: location.path());
+    } catch (e) {
+      loggy.app("Failed to open repository ${location.path()}: $e");
+      return;
+    }
+
+    final repoId = DatabaseId(await repo.hexDatabaseId());
+    var repoSettings = _settings.repoSettingsById(repoId);
+
+    if (repoSettings == null) {
+      repoSettings =
+          (await _settings.addRepoWithUserProvidedPassword(location, repoId))!;
+    } else {
+      final existingEntry = repoById(repoId);
+
+      if (existingEntry != null) {
+        if (existingEntry! is MissingRepoEntry) {
+          loggy.app(
+              "Same repository but from different location is already loaded");
+          return;
+        }
+
+        // It's a MissingRepoEntry, we'll replace it with this new one.
+        _repos.remove(existingEntry.key);
+        await repoSettings.setLocation(location);
+      }
+    }
+
+    final cubit = await RepoCubit.create(
+      repoSettings: repoSettings,
+      session: _session,
+      nativeChannels: _nativeChannels,
+      repo: repo,
+      navigation: _navigation,
+    );
+
+    final entry = OpenRepoEntry(cubit);
+
+    _repos[location] = entry;
+
+    changed();
+  }
+
   Future<RepoEntry> createRepository(
-    RepoLocation location,
-    SetLocalSecret secret, {
-    oui.ShareToken? token,
-    required PasswordMode passwordMode,
-    bool useCacheServers = false,
-    bool setCurrent = false,
-  }) async {
-    await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
+      RepoLocation location, SetLocalSecret secret,
+      {oui.ShareToken? token,
+      required PasswordMode passwordMode,
+      bool useCacheServers = false,
+      bool setCurrent = false}) async {
+    await _put(LoadingRepoEntry(location, null), setCurrent: setCurrent);
 
     LocalSecretKeyAndSalt localKey;
 
@@ -289,7 +344,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _forget(repoLocation);
 
-    await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
+    await _put(LoadingRepoEntry(repoSettings.location, repoSettings),
+        setCurrent: wasCurrent);
 
     try {
       final repo = await _open(repoSettings, secret);
@@ -315,7 +371,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _forget(repoSettings.location);
 
-    await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
+    await _put(LoadingRepoEntry(repoSettings.location, repoSettings),
+        setCurrent: wasCurrent);
 
     try {
       final repo = await _open(repoSettings);
@@ -374,7 +431,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _settings.renameRepository(repoSettings, newLocation);
 
-    await _put(LoadingRepoEntry(repoSettings.location), setCurrent: wasCurrent);
+    await _put(LoadingRepoEntry(repoSettings.location, repoSettings),
+        setCurrent: wasCurrent);
 
     final repo = await _open(repoSettings);
 
@@ -393,7 +451,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<void> deleteRepository(RepoLocation location) async {
     final wasCurrent = currentRepoLocation == location;
-    final databaseId = _settings.repoSettingsByLocation(location)!.databaseId;
+    final repoSettings = _settings.repoSettingsByLocation(location)!;
+    final databaseId = repoSettings.databaseId;
 
     await _forget(location);
     await _settings.forgetRepository(databaseId);
@@ -405,8 +464,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
           'The deletion of files for the repository "${location.path()}" failed');
 
       await _put(
-          ErrorRepoEntry(location, S.current.messageRepoDeletionFailed,
-              S.current.messageRepoDeletionErrorDescription(location.path())),
+          ErrorRepoEntry(
+              location,
+              S.current.messageRepoDeletionFailed,
+              S.current.messageRepoDeletionErrorDescription(location.path()),
+              repoSettings),
           setCurrent: wasCurrent);
 
       changed();
@@ -429,7 +491,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         return MissingRepoEntry(
             repoSettings.location,
             S.current.messageRepoMissing,
-            S.current.messageRepoMissingErrorDescription(store));
+            S.current.messageRepoMissingErrorDescription(store),
+            repoSettings);
       }
 
       final repo =
@@ -451,7 +514,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     return ErrorRepoEntry(
         repoSettings.location,
         S.current.messageErrorOpeningRepo,
-        S.current.messageErrorOpeningRepoDescription(store));
+        S.current.messageErrorOpeningRepoDescription(store),
+        repoSettings);
   }
 
   Future<RepoEntry> _create(
@@ -466,7 +530,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     try {
       if (await io.File(store).exists()) {
         return ErrorRepoEntry(
-            location, S.current.messageErrorRepositoryNameExist, null);
+            location, S.current.messageErrorRepositoryNameExist, null, null);
       }
 
       LocalSecretKeyAndSalt readSecret;
@@ -511,14 +575,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       RepoSettings? repoSettings;
 
+      final repoId = DatabaseId(await repo.hexDatabaseId());
+
       switch (passwordMode) {
         case PasswordMode.manual:
-          repoSettings = await _settings.addRepoWithUserProvidedPassword(
-              location, DatabaseId(await repo.hexDatabaseId()));
+          repoSettings =
+              await _settings.addRepoWithUserProvidedPassword(location, repoId);
         case PasswordMode.none:
         case PasswordMode.bio:
           repoSettings = await _settings.addRepoWithSecretStoredOnDevice(
-              location, secret.key, DatabaseId(await repo.hexDatabaseId()),
+              location, secret.key, repoId,
               requireBiometricCheck: passwordMode == PasswordMode.bio);
       }
 
@@ -536,7 +602,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     return ErrorRepoEntry(location, S.current.messageErrorCreatingRepository,
-        S.current.messageErrorOpeningRepoDescription(store));
+        S.current.messageErrorOpeningRepoDescription(store), null);
   }
 
   void _update(void Function() changeState) {

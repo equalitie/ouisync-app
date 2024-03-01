@@ -2200,6 +2200,16 @@ class S {
     );
   }
 
+  /// `Import repository from file system`
+  String get messageAddRepoDb {
+    return Intl.message(
+      'Import repository from file system',
+      name: 'messageAddRepoDb',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This option is not available on read-only repositories`
   String get messageActionNotAvailable {
     return Intl.message(
