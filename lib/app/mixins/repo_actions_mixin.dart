@@ -109,7 +109,7 @@ mixin RepositoryActionsMixin on LoggyType {
       final message = result.failure;
 
       if (message != null) {
-        showSnackBar(context, message: message);
+        showSnackBar(message);
       }
 
       return null;
@@ -204,7 +204,9 @@ mixin RepositoryActionsMixin on LoggyType {
           databaseId: databaseId, repoLocation: repoLocation);
 
       if (unlockResult == null) return;
-      showSnackBar(context, message: unlockResult.message);
+
+      showSnackBar(unlockResult.message);
+
       return;
     }
 
@@ -219,7 +221,7 @@ mixin RepositoryActionsMixin on LoggyType {
       final message = passwordMode == PasswordMode.none
           ? S.current.messageAutomaticUnlockRepositoryFailed
           : S.current.messageBiometricUnlockRepositoryFailed;
-      showSnackBar(context, message: message);
+      showSnackBar(message);
       return;
     }
 
@@ -231,7 +233,7 @@ mixin RepositoryActionsMixin on LoggyType {
         ? S.current.messageUnlockRepoOk(accessMode.name)
         : S.current.messageUnlockRepoFailed;
 
-    showSnackBar(context, message: message);
+    showSnackBar(message);
   }
 
   /// cubitUnlockRepository => ReposCubit.unlockRepository

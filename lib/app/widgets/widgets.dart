@@ -31,6 +31,7 @@ export 'dialogs/unlock_dialog.dart';
 export 'inputs/password_validation_input.dart';
 
 export 'items/entry_action_item.dart';
+export 'items/entry_info_table.dart';
 export 'items/file_description.dart';
 export 'items/folder_description.dart';
 export 'items/list_item.dart';

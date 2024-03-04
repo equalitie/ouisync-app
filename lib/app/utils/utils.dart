@@ -17,6 +17,7 @@ export 'inline_text_styles.dart';
 export 'log.dart';
 export 'log_reader.dart';
 export 'password_hasher.dart';
+export 'native.dart';
 export 'permissions.dart';
 export 'save_file_to_device.dart';
 export 'settings/settings.dart';

@@ -1,7 +1,8 @@
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 
 import '../../models/models.dart';
+import '../../utils/utils.dart';
 
 class FolderDescription extends StatelessWidget {
   const FolderDescription({
@@ -11,8 +12,8 @@ class FolderDescription extends StatelessWidget {
   final BaseItem folderData;
 
   @override
-  Widget build(BuildContext context) => Fields.autosizeText(folderData.name,
-      minFontSize: context.theme.appTextStyle.bodyMicro.fontSize,
-      maxFontSize: context.theme.appTextStyle.bodyMedium.fontSize,
-      maxLines: 2);
+  Widget build(BuildContext context) => Fields.ellipsedText(
+        folderData.name,
+        ellipsisPosition: TextOverflowPosition.middle,
+      );
 }

@@ -86,8 +86,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                         if (_password!.isEmpty) return;
 
                         await copyStringToClipboard(_password!);
-                        showSnackBar(context,
-                            message: S.current.messagePasswordCopiedClipboard);
+                        showSnackBar(S.current.messagePasswordCopiedClipboard);
                       }),
                   const PopupMenuDivider(),
                   PopupMenuItem<PasswordItem>(

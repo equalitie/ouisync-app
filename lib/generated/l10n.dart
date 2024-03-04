@@ -780,6 +780,16 @@ class S {
     );
   }
 
+  /// `User provided peers`
+  String get titleUserProvidedPeers {
+    return Intl.message(
+      'User provided peers',
+      name: 'titleUserProvidedPeers',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -3820,6 +3830,26 @@ class S {
     );
   }
 
+  /// `Peer added`
+  String get messagePeerAdded {
+    return Intl.message(
+      'Peer added',
+      name: 'messagePeerAdded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Peer removed`
+  String get messagePeerRemoved {
+    return Intl.message(
+      'Peer removed',
+      name: 'messagePeerRemoved',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4645,6 +4675,16 @@ class S {
     return Intl.message(
       'Submit',
       name: 'actionSubmit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Media`
+  String get actionNewMediaFile {
+    return Intl.message(
+      'Media',
+      name: 'actionNewMediaFile',
       desc: '',
       args: [],
     );

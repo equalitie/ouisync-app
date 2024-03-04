@@ -88,7 +88,7 @@ class RenameEntry extends HookWidget with AppLogger {
     if (newName == null) return false;
 
     if (newName == oldName) {
-      showSnackBar(context, message: S.current.messageEnterDifferentName);
+      showSnackBar(S.current.messageEnterDifferentName);
 
       _nameTextFieldFocus.requestFocus();
 

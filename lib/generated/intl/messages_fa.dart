@@ -56,6 +56,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(name) => "خطا در بازکردن فایل ${name}";
 
+  static String m16(path) => "فرآیند پیش‌نمایش فایل ${path} انجام نشد";
+
   static String m17(name) => "ما نتوانستیم مخزن را حذف کنیم \"${name}\"";
 
   static String m18(name) =>
@@ -316,6 +318,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "در صورتی که در مورد خط مشی حفظ حریم خصوصی ما سؤال یا پیشنهادی دارید، حتما با ما تماس بگیرید"),
         "messageCookiesP1": MessageLookupByLibrary.simpleMessage(
             "اپلیکیشن Ouisync از کوکی‌ها استفاده نمی‌کند"),
+        "messageCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
+            "در کلیپ‌بورد(ذخیره موقت) کپی شد."),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "با استفاده از ... یک پوشه جدید ایجاد کنید، یا یک فایل اضافه کنید،"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
@@ -336,6 +340,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "ساده‌ترین راه برای حذف داده‌های خود، حذف فایل‌ها یا مخازن از دستگاه خودتان است. هرگونه حذف فایل به همه همتایان شما اطلاع‌رسانی خواهد شد(منتشر خواهد شد) - به عنوان مثال، اگر به یک مخزن دسترسی نوشتنی دارید، می توانید فایل‌های موجود در آن را حذف کنید و همان فایل‌ها از مخازن همتایان شما و همچنین از همتای همیشه فعال ما Always-On-Peer حذف خواهند شد. \nاگر نیاز دارید که فقط مخازن را از سرور همتای همیشه فعال Always-On-Peer ما حذف کنید (اما همچنان آن‌ها را در مخزن خود در دستگاه خود نگه دارید)، لطفاً با آدرس زیر با ما تماس بگیرید."),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("جداول هش توزیع‌شده"),
+        "messageDownloadFileCanceled":
+            MessageLookupByLibrary.simpleMessage("دانلود فایل لغو شد"),
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder":
@@ -453,6 +459,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "فایل از قبل در حال آپلود است"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("نام فایل"),
+        "messageFilePreviewFailed": MessageLookupByLibrary.simpleMessage(
+            "ما نتوانستیم فرآیند پیش‌نمایش فایل را آغاز کنیم"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "پیش‌نمایش فایل هنوز در دسترس نیست"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("فایل‌ها"),
@@ -552,6 +560,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "رمز عبور جدید در حافظه کوتاه‌مدت کپی شد"),
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("یک نسخه جدید در دسترس است."),
+        "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
+            "هیچ اپلیکیشنی نمی‌تواند این عمل را انجام دهد"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "قبل از اضافه‌کردن فایل ها، باید یک مخزن ایجاد کنید"),
         "messageNoRepoIsSelected":
@@ -585,6 +595,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("تبادل همتا در ویکی‌پدیا"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("این مجوز لازم است"),
+        "messagePreviewingFileFailed": m16,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "این بخش برای اطلاع رسانی به بازدیدکنندگان در مورد سیاست‌های ما در مورد جمع‌آوری، استفاده و افشای اطلاعات شخصی در صورتی که کسی تصمیم به استفاده از سرویس ما داشته باشد، استفاده می شود"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -707,6 +718,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "اپلیکیشن Ouisync مطابق با اصول و ارزش‌های eQuality ساخته شده است. با استفاده از این نرم‌افزار، موافقت می‌کنید که از Ouisync برای انتشار، به‌اشتراک‌گذاری یا ذخیره مطالبی که مغایر با ارزش‌های اساسی یا قوانین ایالت کبک یا کشور کانادا یا اعلامیه جهانی حقوق بشر است، از جمله محتوایی که:"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "توکن مخزن در حافظه موقت کپی شد."),
+        "messageUnknownFileExtension":
+            MessageLookupByLibrary.simpleMessage("فرمت فایل ناشناخته است"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "رمز عبور موردنظر مخزن را باز نکرد"),
         "messageUnlockRepoOk": m22,

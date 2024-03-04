@@ -21,7 +21,6 @@ class RepoState extends Equatable {
   final bool isLoading;
   final Map<String, Job> uploads;
   final Map<String, Job> downloads;
-  final String message;
   final bool isDhtEnabled;
   final bool isPexEnabled;
   final bool requestPassword;
@@ -34,7 +33,6 @@ class RepoState extends Equatable {
     this.isLoading = false,
     this.uploads = const {},
     this.downloads = const {},
-    this.message = "",
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
     this.requestPassword = false,
@@ -61,7 +59,6 @@ class RepoState extends Equatable {
         isLoading: isLoading ?? this.isLoading,
         uploads: uploads ?? this.uploads,
         downloads: downloads ?? this.downloads,
-        message: message ?? this.message,
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
         requestPassword: requestPassword ?? this.requestPassword,
@@ -76,7 +73,6 @@ class RepoState extends Equatable {
         isLoading,
         uploads,
         downloads,
-        message,
         isDhtEnabled,
         isPexEnabled,
         requestPassword,
@@ -284,14 +280,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     oui.File? currentFile,
   }) async {
     if (state.uploads.containsKey(filePath)) {
-      showMessage(S.current.messageFileIsDownloading);
+      showSnackBar(S.current.messageFileIsDownloading);
       return;
     }
 
     final file = currentFile ?? await _createFile(filePath);
 
     if (file == null) {
-      showMessage(S.current.messageNewFileError(filePath));
+      showSnackBar(S.current.messageNewFileError(filePath));
       return;
     }
 
@@ -316,7 +312,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
       loggy.debug('File saved: $filePath (${formatSize(offset)})');
     } catch (e) {
-      showMessage(S.current.messageWritingFileError(filePath));
+      showSnackBar(S.current.messageWritingFileError(filePath));
       return;
     } finally {
       await file.close();
@@ -326,7 +322,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
 
     if (job.state.cancel) {
-      showMessage(S.current.messageWritingFileCanceled(filePath));
+      showSnackBar(S.current.messageWritingFileCanceled(filePath));
     }
   }
 
@@ -345,7 +341,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
 
     if (file == null) {
-      showMessage(S.current.messageOpenFileError(filePath));
+      showSnackBar(S.current.messageOpenFileError(filePath));
       return;
     }
 
@@ -494,10 +490,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<void> downloadFile({
     required String sourcePath,
+    required String parentPath,
     required String destinationPath,
   }) async {
     if (state.downloads.containsKey(sourcePath)) {
-      showMessage(S.current.messageFileIsDownloading);
+      showSnackBar(S.current.messageFileIsDownloading);
       return;
     }
 
@@ -537,11 +534,10 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       }
     } catch (e, st) {
       loggy.app('Download file $sourcePath exception', e, st);
-      showMessage(S.current.messageDownloadingFileError(sourcePath));
+      showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
-      emit(state.copyWith(
-          downloads: state.downloads.withRemoved(sourcePath),
-          message: 'File downloaded to $destinationPath'));
+      showSnackBar('File downloaded to $destinationPath');
+      emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
@@ -597,11 +593,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
         if (!errorShown) {
           errorShown = true;
-          showMessage(S.current.messageErrorCurrentPathMissing(path));
+          showSnackBar(S.current.messageErrorCurrentPathMissing(path));
         }
       }
     } catch (e) {
-      showMessage(e.toString());
+      showSnackBar(e.toString());
     }
 
     emit(state.copyWith(
@@ -612,10 +608,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   StreamSubscription<void> autoRefresh() =>
       _repo.events.listen((_) => refresh());
-
-  void showMessage(String message) {
-    emit(state.copyWith(message: message));
-  }
 
   Future<oui.File?> _createFile(String newFilePath) async {
     oui.File? newFile;

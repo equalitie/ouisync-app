@@ -332,6 +332,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Якщо у вас виникли запитання або пропозиції щодо нашої Політики конфіденційності, будь ласка, зв\'яжіться з нами за адресою"),
         "messageCookiesP1": MessageLookupByLibrary.simpleMessage(
             "Застосунок Ouisync не використовує файли-куки"),
+        "messageCopiedToClipboard":
+            MessageLookupByLibrary.simpleMessage("Скопійовано в буфер обміну."),
         "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
             "Створіть нову <bold>папку</bold>, або додайте <bold>файл</bold>, використовуючи <icon></icon>"),
         "messageCreateNewRepo": MessageLookupByLibrary.simpleMessage(
@@ -496,7 +498,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageInfoLocalDiscovery": MessageLookupByLibrary.simpleMessage(
             "Локальне виявлення однорангових мереж дозволяє вашим програмам Ouisync обмінюватися файлами з одноранговими програмами, не звертаючись до інтернет-провайдерів, якщо доступна локальна мережа Wi-Fi або інша мережа.\n\nДля локального підключення цей параметр має бути увімкнено"),
         "messageInfoNATType": MessageLookupByLibrary.simpleMessage(
-            "Це значення встановлюється вашим інтернет-провайдером.\n\nНайкращий зв\'язок з одноранговими користувачами досягається, коли для цього параметра вибрано значення Несиметричний"),
+            "Це значення залежить від вашого маршрутизатора та/або інтернет-провайдера.\n\nЗв\'язок з одноранговими пристроями найкраще досягається, коли він не залежить від кінцевих точок"),
         "messageInfoPeerExchange": MessageLookupByLibrary.simpleMessage(
             "Інструмент, який використовується для обміну списком однорангових користувачів з одноранговими користувачами, до яких ви підключені"),
         "messageInfoRuntimeID": MessageLookupByLibrary.simpleMessage(

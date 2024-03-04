@@ -131,8 +131,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
         IconButton(
             onPressed: () async {
               await copyStringToClipboard(_password ?? "");
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,
@@ -154,8 +153,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             onPressed: () async {
               await copyStringToClipboard(_retypedPassword ?? "");
 
-              showSnackBar(context,
-                  message: S.current.messagePasswordCopiedClipboard);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
             padding: EdgeInsets.zero,

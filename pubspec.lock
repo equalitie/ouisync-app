@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  build_context_provider:
+    dependency: "direct main"
+    description:
+      name: build_context_provider
+      sha256: f5ea0a893d8a3d2e1d10bf34e4e8020beb3fefaacad0273ca87d7279ed8f6672
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   build_daemon:
     dependency: transitive
     description:
@@ -385,6 +393,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.5"
+  extended_text:
+    dependency: "direct main"
+    description:
+      name: extended_text
+      sha256: "4a7b0338de2a72f690925381ec5f515ca425c011c269971406db1a038fd108fc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.0.1"
+  extended_text_library:
+    dependency: transitive
+    description:
+      name: extended_text_library
+      sha256: "55d09098ec56fab0d9a8a68950ca0bbf2efa1327937f7cec6af6dfa066234829"
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.0.0"
   fake_async:
     dependency: transitive
     description:

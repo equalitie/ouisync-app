@@ -81,21 +81,10 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                     Constants.notAvailableActionMessageDuration),
             const Divider(
                 height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-            Fields.iconLabel(
-                icon: Icons.info_rounded,
-                text: S.current.iconInformation,
-                iconSize: Dimensions.sizeIconBig,
-                textAlign: TextAlign.start,
-                style: context.theme.appTextStyle.titleMedium),
-            Fields.autosizedLabeledText(
-                label: S.current.labelName,
-                text: widget.data.name,
-                textAlign: TextAlign.start,
-                textMaxLines: 2),
-            Fields.labeledText(
-                label: S.current.labelLocation,
-                text: getDirname(widget.data.path),
-                textAlign: TextAlign.start)
+            EntryInfoTable(entryInfo: {
+              S.current.labelName: widget.data.name,
+              S.current.labelLocation: getDirname(widget.data.path),
+            })
           ],
         ),
       );
@@ -128,10 +117,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     if (deleteFolderOk) {
       Navigator.of(context).pop(deleteFolder);
 
-      showSnackBar(
-        context,
-        message: S.current.messageFolderDeleted(widget.data.name),
-      );
+      showSnackBar(S.current.messageFolderDeleted(widget.data.name));
     }
   }
 

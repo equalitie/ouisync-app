@@ -77,7 +77,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     availableAccessMode: widget.availableAccessModes,
                     onChanged: _onChanged,
                     onDisabledMessage: (String message) =>
-                        showSnackBar(context, message: message),
+                        showSnackBar(message),
                   ),
                   Dimensions.spacingVerticalHalf,
                   _buildAccessModeDescription(_accessMode),
@@ -187,17 +187,13 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    showSnackBar(context,
-                        message: S.current.messageShareActionDisabled);
+                    showSnackBar(S.current.messageShareActionDisabled);
 
                     return;
                   }
 
                   await copyStringToClipboard(_shareToken!);
-                  showSnackBar(
-                    context,
-                    message: S.current.messageTokenCopiedToClipboard,
-                  );
+                  showSnackBar(S.current.messageTokenCopiedToClipboard);
                 }),
                 Fields.constrainedText(S.current.labelCopyLink,
                     flex: 0, style: labelStyle),
@@ -212,8 +208,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                   color: _getActionStateColor(_shareToken != null),
                   onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(context,
-                      message: S.current.messageShareActionDisabled);
+                  showSnackBar(S.current.messageShareActionDisabled);
 
                   return;
                 }
@@ -243,8 +238,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    showSnackBar(context,
-                        message: S.current.messageShareActionDisabled);
+                    showSnackBar(S.current.messageShareActionDisabled);
 
                     return;
                   }

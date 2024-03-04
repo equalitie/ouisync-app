@@ -174,15 +174,14 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
         await _repo.repoSettings.setAuthModePasswordProvidedByUser();
       }
     } catch (e) {
-      showSnackBar(context,
-          message: S.current.messageErrorRemovingSecureStorage);
+      showSnackBar(S.current.messageErrorRemovingSecureStorage);
       return;
     }
 
     final changed = await _changeRepositorySecret(newSecret);
 
     if (changed == false) {
-      showSnackBar(context, message: S.current.messageErrorAddingLocalPassword);
+      showSnackBar(S.current.messageErrorAddingLocalPassword);
       return;
     }
 
@@ -199,7 +198,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
 
     final passwordChanged = await _changeRepositorySecret(newSecret);
     if (passwordChanged == false) {
-      showSnackBar(context, message: S.current.messageErrorAddingSecureStorge);
+      showSnackBar(S.current.messageErrorAddingSecureStorge);
       return;
     }
 
@@ -207,7 +206,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
           newSecret.key, _passwordMode == PasswordMode.bio);
     } catch (e) {
-      showSnackBar(context, message: S.current.messageErrorRemovingPassword);
+      showSnackBar(S.current.messageErrorRemovingPassword);
       return;
     }
 
@@ -226,8 +225,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
         return;
       }
     } catch (e) {
-      showSnackBar(context,
-          message: S.current.messageErrorUpdatingSecureStorage);
+      showSnackBar(S.current.messageErrorUpdatingSecureStorage);
       return;
     }
 

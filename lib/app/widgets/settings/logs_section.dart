@@ -48,14 +48,14 @@ class LogsSection extends SettingsSection with AppLogger {
       NavigationTile(
         title: Text(S.current.actionSave, style: bodyStyle),
         leading: Icon(Icons.save),
-        onTap: () => unawaited(_saveLogs(context)),
+        onTap: () => unawaited(_saveLogs(context, natDetection)),
       ),
       // TODO: enable this on desktop as well
       if (PlatformValues.isMobileDevice)
         NavigationTile(
           title: Text(S.current.actionShare, style: bodyStyle),
           leading: Icon(Icons.share),
-          onTap: () => unawaited(_shareLogs(context)),
+          onTap: () => unawaited(_shareLogs(context, natDetection)),
         ),
       NavigationTile(
         title: Text(S.current.messageView, style: bodyStyle),
@@ -114,8 +114,9 @@ class LogsSection extends SettingsSection with AppLogger {
         cubits.mount.state is MountStateError;
   }
 
-  Future<void> _saveLogs(BuildContext context) async {
-    final tempFile = await _dumpInfo(context);
+  Future<void> _saveLogs(
+      BuildContext context, NatDetection natDetection) async {
+    final tempFile = await _dumpInfo(context, natDetection);
 
     loggy.debug('Saving logs');
 
@@ -146,8 +147,9 @@ class LogsSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<void> _shareLogs(BuildContext context) async {
-    final tempFile = await _dumpInfo(context);
+  Future<void> _shareLogs(
+      BuildContext context, NatDetection natDetection) async {
+    final tempFile = await _dumpInfo(context, natDetection);
 
     try {
       await Share.shareXFiles([XFile(tempFile.path, mimeType: 'text/plain')]);
@@ -164,6 +166,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   Future<File> _dumpInfo(
     BuildContext context,
+    NatDetection natDetection,
   ) =>
       dumpAll(
         context,

@@ -29,6 +29,7 @@ dependencies:
   badges: ^3.1.2
   biometric_storage: ^5.0.0+4
   bloc_test: ^9.0.3
+  build_context_provider: ^1.1.0
   collection: ^1.16.0
   connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
@@ -40,6 +41,7 @@ dependencies:
   dns_client: ^0.2.1
   envied: ^0.5.3
   equatable: ^2.0.3
+  extended_text: ^12.0.1
   ffi: ^2.0.1
   file: ^7.0.0
   file_picker: ^6.1.1
@@ -80,7 +82,7 @@ dependencies:
     path: ouisync/bindings/dart
   package_info_plus: ^5.0.1
   path: ^1.8.2
-  path_provider: ^2.1.1
+  path_provider: ^2.1.2
   percent_indicator: ^4.2.2
   permission_handler: ^11.0.1
   qr_flutter: ^4.0.0

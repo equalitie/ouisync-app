@@ -20,28 +20,58 @@ class SaveFileToDevice with AppLogger {
   final FileItem _data;
   final RepoCubit _cubit;
 
-  Future<void> save(BuildContext context, String path) async {
+  Future<void> save(String defaultPath) async {
     await _maybeRequestPermission();
 
-    final destinationFilePath = await _getDestinationFilePath(path, _data.name);
+    String fileName = _data.name;
 
-    if (destinationFilePath == null || destinationFilePath.isEmpty) {
-      final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(context, message: errorMessage);
+    String? parentDir;
+    String? destinationFilePath;
 
-      return;
+    if (PlatformValues.isDesktopDevice) {
+      destinationFilePath = await _desktopPath(defaultPath, fileName);
+
+      if (destinationFilePath == null || destinationFilePath.isEmpty) {
+        final errorMessage = S.current.messageDownloadFileCanceled;
+        showSnackBar(errorMessage);
+
+        return;
+      }
+
+      final dirName = p.dirname(destinationFilePath);
+      parentDir = p.basename(dirName);
+    } else {
+      parentDir = p.basename(defaultPath);
+      if (io.Platform.isAndroid) {
+        parentDir = p.join(parentDir, 'Ouisync');
+        defaultPath = p.join(defaultPath, 'Ouisync');
+      }
+
+      destinationFilePath = p.join(defaultPath, fileName);
+
+      final exist = await io.File(destinationFilePath).exists();
+      if (exist) {
+        destinationFilePath = await _renameFileWithVersion(
+          fileName,
+          defaultPath,
+          destinationFilePath,
+        );
+      }
     }
 
-    final destinationFile = io.File(destinationFilePath);
+    final destinationFile =
+        await io.File(destinationFilePath).create(recursive: true);
+
     await _cubit.downloadFile(
       sourcePath: _data.path,
+      parentPath: parentDir,
       destinationPath: destinationFile.path,
     );
   }
 
   Future<void> _maybeRequestPermission() async {
     if (!io.Platform.isAndroid) return;
-    
+
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
@@ -64,31 +94,6 @@ class SaveFileToDevice with AppLogger {
     }
   }
 
-  Future<String?> _getDestinationFilePath(
-      String parentPath, String fileName) async {
-    final filePath = PlatformValues.isMobileDevice
-        ? await _mobilePath(parentPath, fileName)
-        : await _desktopPath(parentPath, fileName);
-
-    if (filePath == null || filePath.isEmpty) {
-      return null;
-    }
-
-    return filePath;
-  }
-
-  Future<String?> _mobilePath(String parentPath, String fileName) async {
-    final directoryPath = await FilePicker.platform.getDirectoryPath(
-      initialDirectory: parentPath,
-    );
-
-    if (directoryPath == null || directoryPath.isEmpty) {
-      return null;
-    }
-
-    return p.join(directoryPath, fileName);
-  }
-
   Future<String?> _desktopPath(String parentPath, String fileName) async {
     final filePath = await FilePicker.platform.saveFile(
       fileName: fileName,
@@ -96,5 +101,36 @@ class SaveFileToDevice with AppLogger {
     );
 
     return filePath;
+  }
+
+  Future<String> _renameFileWithVersion(
+      String fileName, String defaultPath, String? destinationFilePath) async {
+    loggy.app(
+        'File $fileName already exist on location $defaultPath. Renaming...');
+    fileName = await _renameFile(defaultPath, fileName, 0);
+
+    loggy.app('The new name is $fileName');
+    destinationFilePath = p.join(defaultPath, fileName);
+
+    loggy.app('The new path is $destinationFilePath');
+    return destinationFilePath;
+  }
+
+  Future<String> _renameFile(
+    String destinationPath,
+    String originalFileName,
+    int versions,
+  ) async {
+    final name = p.basenameWithoutExtension(originalFileName);
+    final extension = p.extension(originalFileName);
+
+    final newFileName = '$name (${versions += 1})$extension';
+    final newDestinationPath = p.join(destinationPath, newFileName);
+
+    if (await io.File(newDestinationPath).exists()) {
+      return await _renameFile(destinationPath, originalFileName, versions);
+    }
+
+    return newFileName;
   }
 }

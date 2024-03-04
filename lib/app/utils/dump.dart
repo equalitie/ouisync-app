@@ -8,10 +8,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'log.dart';
 import '../cubits/connectivity_info.dart';
 import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
+import 'log.dart';
 
 Future<File> dumpAll(
   BuildContext context, {

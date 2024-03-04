@@ -27,7 +27,7 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text('User provided peers')),
+        appBar: AppBar(title: Text(S.current.titleUserProvidedPeers)),
         body: BlocBuilder<UserProvidedPeersCubit, List<String>>(
           bloc: _cubit,
           builder: (context, state) => ListView(
@@ -68,15 +68,14 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     await _cubit.addPeer('tcp/$addr');
     await _cubit.addPeer('quic/$addr');
 
-    showSnackBar(context, message: 'Peer added');
+    showSnackBar(S.current.messagePeerAdded);
   }
 
   Future<void> _removePeer(BuildContext context, String addr) async {
     await _cubit.removePeer(addr);
 
     showSnackBar(
-      context,
-      message: 'Peer removed',
+      S.current.messagePeerRemoved,
       action: SnackBarAction(
         label: S.current.actionUndo,
         onPressed: () => _cubit.addPeer(addr),

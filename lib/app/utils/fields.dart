@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart' as b;
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -282,16 +283,42 @@ class Fields {
           double? minFontSize,
           double? maxFontSize,
           int maxLines = 1}) =>
-      AutoSizeText(text,
-          key: key,
-          textAlign: textAlign,
-          softWrap: softWrap,
-          overflow: textOverflow,
-          maxLines: maxLines,
-          style: style,
-          minFontSize: minFontSize ?? 12.0,
-          maxFontSize: maxFontSize ?? double.infinity);
+      AutoSizeText(
+        text,
+        key: key,
+        textAlign: textAlign,
+        softWrap: softWrap,
+        overflow: textOverflow,
+        maxLines: maxLines,
+        style: style,
+        minFontSize: minFontSize ?? 12.0,
+        maxFontSize: maxFontSize ?? double.infinity,
+      );
 
+  static Widget ellipsedText(String text,
+          {Key? key,
+          TextAlign textAlign = TextAlign.start,
+          TextOverflow textOverflow = TextOverflow.ellipsis,
+          TextOverflowPosition ellipsisPosition = TextOverflowPosition.end,
+          bool softWrap = true,
+          TextStyle? style,
+          int maxLines = 1}) =>
+      ExtendedText(
+        text,
+        key: key,
+        textAlign: textAlign,
+        softWrap: softWrap,
+        overflow: textOverflow,
+        maxLines: maxLines,
+        style: style,
+        overflowWidget: TextOverflowWidget(
+          position: TextOverflowPosition.middle,
+          child: Text(
+            '...',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
   static Widget constrainedText(String text,
           {Key? key,
           int flex = 1,
