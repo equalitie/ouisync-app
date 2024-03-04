@@ -929,5 +929,17 @@
   "messageRemoveBiometricsConfirmationMoreInfo": "با این عمل رمز مخزن حذف می‌شود و از اعتبارسنجی بیومتریک برای باز‌کردن قفل استفاده می‌شود",
   "@messageRemoveBiometricsConfirmationMoreInfo": {},
   "messageInfoRuntimeID": "یک شناسه منحصر‌به‌فرد است که هربار هنگام شروع توسط Ouisync تولید می‌شود.\n\nمی‌توانید از آن برای تأیید ارتباط خود با دیگران در بخش مرتبط با همتای (Peer) اپلیکیشن، استفاده کنید",
-  "@messageInfoRuntimeID": {}
+  "@messageInfoRuntimeID": {},
+  "messageDownloadFileCanceled": "دانلود فایل لغو شد",
+  "@messageDownloadFileCanceled": {},
+  "messageNoAppsForThisAction": "هیچ اپلیکیشنی نمی‌تواند این عمل را انجام دهد",
+  "@messageNoAppsForThisAction": {},
+  "messageUnknownFileExtension": "فرمت فایل ناشناخته است",
+  "@messageUnknownFileExtension": {},
+  "messagePreviewingFileFailed": "فرآیند پیش‌نمایش فایل {path} انجام نشد",
+  "@messagePreviewingFileFailed": {},
+  "messageFilePreviewFailed": "ما نتوانستیم فرآیند پیش‌نمایش فایل را آغاز کنیم",
+  "@messageFilePreviewFailed": {},
+  "messageCopiedToClipboard": "در کلیپ‌بورد(ذخیره موقت) کپی شد.",
+  "@messageCopiedToClipboard": {}
 }
