@@ -10,86 +10,85 @@ import 'cubits.dart';
 class CreateRepositoryState extends Equatable {
   final bool isBiometricsAvailable;
   final ShareToken? shareToken;
-  final bool isBlindReplica;
+  final AccessMode accessMode;
   final bool secureWithBiometrics;
   final bool addPassword;
 
-  final AccessMode accessModeGranted;
   final String suggestedName;
 
   final bool obscurePassword;
   final bool obscureRetypePassword;
 
-  final bool showSuggestedName;
   final bool showAccessModeMessage;
   final bool showSavePasswordWarning;
   final bool showRepositoryNameInUseWarning;
 
-  CreateRepositoryState(
-      {required this.isBiometricsAvailable,
-      required this.shareToken,
-      required this.isBlindReplica,
-      required this.secureWithBiometrics,
-      required this.addPassword,
-      required this.accessModeGranted,
-      required this.suggestedName,
-      required this.obscurePassword,
-      required this.obscureRetypePassword,
-      required this.showSuggestedName,
-      required this.showAccessModeMessage,
-      required this.showSavePasswordWarning,
-      required this.showRepositoryNameInUseWarning});
+  final bool useCacheServers;
 
-  CreateRepositoryState copyWith(
-          {bool? isBiometricsAvailable,
-          ShareToken? shareToken,
-          bool? isBlindReplica,
-          bool? secureWithBiometrics,
-          bool? addPassword,
-          AccessMode? accessModeGranted,
-          String? suggestedName,
-          bool? obscurePassword,
-          bool? obscureRetypePassword,
-          bool? showSuggestedName,
-          bool? showAccessModeMessage,
-          bool? showSavePasswordWarning,
-          bool? showRepositoryNameInUseWarning}) =>
+  CreateRepositoryState({
+    required this.isBiometricsAvailable,
+    required this.shareToken,
+    required this.accessMode,
+    required this.secureWithBiometrics,
+    required this.addPassword,
+    required this.suggestedName,
+    required this.obscurePassword,
+    required this.obscureRetypePassword,
+    required this.showAccessModeMessage,
+    required this.showSavePasswordWarning,
+    required this.showRepositoryNameInUseWarning,
+    required this.useCacheServers,
+  });
+
+  CreateRepositoryState copyWith({
+    bool? isBiometricsAvailable,
+    ShareToken? shareToken,
+    AccessMode? accessMode,
+    bool? secureWithBiometrics,
+    bool? addPassword,
+    String? suggestedName,
+    bool? obscurePassword,
+    bool? obscureRetypePassword,
+    bool? showSuggestedName,
+    bool? showAccessModeMessage,
+    bool? showSavePasswordWarning,
+    bool? showRepositoryNameInUseWarning,
+    bool? useCacheServers,
+  }) =>
       CreateRepositoryState(
-          isBiometricsAvailable:
-              isBiometricsAvailable ?? this.isBiometricsAvailable,
-          shareToken: shareToken ?? this.shareToken,
-          isBlindReplica: isBlindReplica ?? this.isBlindReplica,
-          secureWithBiometrics:
-              secureWithBiometrics ?? this.secureWithBiometrics,
-          addPassword: addPassword ?? this.addPassword,
-          accessModeGranted: accessModeGranted ?? this.accessModeGranted,
-          suggestedName: suggestedName ?? this.suggestedName,
-          obscurePassword: obscurePassword ?? this.obscurePassword,
-          obscureRetypePassword:
-              obscureRetypePassword ?? this.obscureRetypePassword,
-          showSuggestedName: showSuggestedName ?? this.showSuggestedName,
-          showAccessModeMessage:
-              showAccessModeMessage ?? this.showAccessModeMessage,
-          showSavePasswordWarning:
-              showSavePasswordWarning ?? this.showSavePasswordWarning,
-          showRepositoryNameInUseWarning: showRepositoryNameInUseWarning ??
-              this.showRepositoryNameInUseWarning);
+        isBiometricsAvailable:
+            isBiometricsAvailable ?? this.isBiometricsAvailable,
+        shareToken: shareToken ?? this.shareToken,
+        accessMode: accessMode ?? this.accessMode,
+        secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
+        addPassword: addPassword ?? this.addPassword,
+        suggestedName: suggestedName ?? this.suggestedName,
+        obscurePassword: obscurePassword ?? this.obscurePassword,
+        obscureRetypePassword:
+            obscureRetypePassword ?? this.obscureRetypePassword,
+        showAccessModeMessage:
+            showAccessModeMessage ?? this.showAccessModeMessage,
+        showSavePasswordWarning:
+            showSavePasswordWarning ?? this.showSavePasswordWarning,
+        showRepositoryNameInUseWarning: showRepositoryNameInUseWarning ??
+            this.showRepositoryNameInUseWarning,
+        useCacheServers: useCacheServers ?? this.useCacheServers,
+      );
 
   @override
   List<Object?> get props => [
         isBiometricsAvailable,
         shareToken,
-        isBlindReplica,
+        accessMode,
         secureWithBiometrics,
         addPassword,
-        accessModeGranted,
         suggestedName,
         obscurePassword,
         obscureRetypePassword,
-        showSuggestedName,
         showAccessModeMessage,
         showSavePasswordWarning,
         showRepositoryNameInUseWarning,
+        useCacheServers,
       ];
 }
 
@@ -102,29 +101,29 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
   Future<io.Directory> get defaultRepoLocation =>
       _reposCubit.settings.defaultRepoLocation();
 
-  static CreateRepositoryCubit create(
-      {required ReposCubit reposCubit,
-      required bool isBiometricsAvailable,
-      required ShareToken? shareToken,
-      required bool isBlindReplica,
-      required String? suggestedName,
-      required AccessMode? accessModeGranted,
-      required bool showSuggestedName,
-      required bool showAccessModeMessage}) {
+  static CreateRepositoryCubit create({
+    required ReposCubit reposCubit,
+    required bool isBiometricsAvailable,
+    required AccessMode accessMode,
+    required bool showSuggestedName,
+    required bool showAccessModeMessage,
+    ShareToken? shareToken,
+    String? suggestedName,
+  }) {
     var initialState = CreateRepositoryState(
-        isBiometricsAvailable: isBiometricsAvailable,
-        shareToken: shareToken,
-        isBlindReplica: isBlindReplica,
-        secureWithBiometrics: false,
-        addPassword: false,
-        accessModeGranted: accessModeGranted ?? AccessMode.blind,
-        suggestedName: suggestedName ?? '',
-        obscurePassword: true,
-        obscureRetypePassword: true,
-        showSuggestedName: showSuggestedName,
-        showAccessModeMessage: showAccessModeMessage,
-        showSavePasswordWarning: false,
-        showRepositoryNameInUseWarning: false);
+      isBiometricsAvailable: isBiometricsAvailable,
+      shareToken: shareToken,
+      accessMode: accessMode,
+      secureWithBiometrics: false,
+      addPassword: false,
+      suggestedName: suggestedName ?? '',
+      obscurePassword: true,
+      obscureRetypePassword: true,
+      showAccessModeMessage: showAccessModeMessage,
+      showSavePasswordWarning: false,
+      showRepositoryNameInUseWarning: false,
+      useCacheServers: false,
+    );
 
     return CreateRepositoryCubit._(reposCubit, initialState);
   }
@@ -148,4 +147,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
 
   void obscureRetypePassword(bool obscure) =>
       emit(state.copyWith(obscureRetypePassword: obscure));
+
+  void useCacheServers(bool enable) =>
+      emit(state.copyWith(useCacheServers: enable));
 }

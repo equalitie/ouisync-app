@@ -151,33 +151,26 @@ class RepositoryCreation extends HookWidget with AppLogger {
   }
 
   Future<CreateRepositoryCubit> initCubit() async {
-    ShareToken? shareToken;
-    if (initialTokenValue != null) {
-      shareToken = await validateToken(initialTokenValue!);
-    }
+    final shareToken = await initialTokenValue?.let(validateToken);
 
-    String suggestedName = '';
-    AccessMode? accessMode;
-
-    if (shareToken != null) {
-      suggestedName = await shareToken.suggestedName;
-      accessMode = await shareToken.mode;
-    }
+    final (accessMode, suggestedName, showAccessModeMessage) =
+        (shareToken != null)
+            ? (await shareToken.mode, await shareToken.suggestedName, true)
+            : (AccessMode.write, '', false);
 
     final showSuggestedName = suggestedName.isNotEmpty;
-    final showAccessModeMessage = accessMode != null;
 
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     final state = CreateRepositoryCubit.create(
-        reposCubit: cubit,
-        isBiometricsAvailable: isBiometricsAvailable,
-        shareToken: shareToken,
-        isBlindReplica: accessMode == AccessMode.blind,
-        accessModeGranted: accessMode,
-        suggestedName: suggestedName,
-        showSuggestedName: showSuggestedName,
-        showAccessModeMessage: showAccessModeMessage);
+      reposCubit: cubit,
+      isBiometricsAvailable: isBiometricsAvailable,
+      shareToken: shareToken,
+      accessMode: accessMode,
+      suggestedName: suggestedName,
+      showSuggestedName: showSuggestedName,
+      showAccessModeMessage: showAccessModeMessage,
+    );
 
     return state;
   }
@@ -227,7 +220,9 @@ class RepositoryCreation extends HookWidget with AppLogger {
   }
 
   Widget newRepositoryWidget(
-          BuildContext context, CreateRepositoryState state) =>
+    BuildContext context,
+    CreateRepositoryState state,
+  ) =>
       Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -236,13 +231,15 @@ class RepositoryCreation extends HookWidget with AppLogger {
             if (initialTokenValue?.isNotEmpty ?? false)
               ...buildTokenLabel(state),
             ...repositoryName(state),
-            if (!state.isBlindReplica) passwordInputs(state),
+            if (state.accessMode == AccessMode.write)
+              useCacheServersSwitch(state),
+            if (state.accessMode != AccessMode.blind) passwordInputs(state),
             if (state.isBiometricsAvailable &&
-                !state.isBlindReplica &&
-                !state.addPassword)
+                !state.addPassword &&
+                state.accessMode != AccessMode.blind)
               useBiometricsSwitch(state),
             Dimensions.spacingVertical,
-            if (!state.isBlindReplica) addLocalPassword(state),
+            if (state.accessMode != AccessMode.blind) addLocalPassword(state),
             manualPasswordWarning(context, state),
             Fields.dialogActions(context, buttons: _actions(context, state))
           ]);
@@ -269,8 +266,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
         Visibility(
             visible: state.showAccessModeMessage,
             child: Fields.constrainedText(
-                S.current
-                    .messageRepositoryAccessMode(state.accessModeGranted.name),
+                S.current.messageRepositoryAccessMode(state.accessMode.name),
                 flex: 0,
                 style: messageSmall))
       ];
@@ -311,7 +307,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
           focusNode: repositoryNameFocus),
       repositoryNameTakenWarning(state),
       Visibility(
-        visible: state.showSuggestedName,
+        visible: state.suggestedName.isNotEmpty,
         child: GestureDetector(
           onTap: () => updateNameController(state.suggestedName),
           child: Row(
@@ -377,6 +373,22 @@ class RepositoryCreation extends HookWidget with AppLogger {
           maxLines: 10,
           softWrap: true,
           textOverflow: TextOverflow.ellipsis));
+
+  Widget useCacheServersSwitch(CreateRepositoryState state) => Container(
+        child: SwitchListTile.adaptive(
+          value: state.useCacheServers,
+          title: Text(
+            S.current.messageUseCacheServers,
+            textAlign: TextAlign.start,
+            style: context.theme.appTextStyle.bodyMedium,
+          ),
+          onChanged: (value) {
+            createRepoCubit.useCacheServers(value);
+          },
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
+      );
 
   Widget passwordInputs(CreateRepositoryState state) => Visibility(
       visible: state.addPassword && !state.secureWithBiometrics,
@@ -573,7 +585,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
               SetLocalSecret secret;
               bool valuesAreOk;
 
-              if (state.isBlindReplica || !state.addPassword) {
+              if (state.accessMode == AccessMode.blind || !state.addPassword) {
                 secret = LocalSecretKeyAndSalt.random();
                 valuesAreOk = await submitNameField(newName);
               } else {
@@ -648,7 +660,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
     /// (authenticationRequired=true).
     ///
     /// Both cases: Autogenerated and saved to secure storage.
-    final savePasswordToSecureStorage = state.isBlindReplica
+    final savePasswordToSecureStorage = state.accessMode == AccessMode.blind
         ? false
         : state.secureWithBiometrics
             ? true
@@ -664,10 +676,14 @@ class RepositoryCreation extends HookWidget with AppLogger {
         : PasswordMode.manual;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: cubit.createRepository(repoLocation, secret,
-            token: state.shareToken,
-            passwordMode: passwordMode,
-            setCurrent: true));
+        f: cubit.createRepository(
+          repoLocation,
+          secret,
+          token: state.shareToken,
+          passwordMode: passwordMode,
+          useCacheServers: state.useCacheServers,
+          setCurrent: true,
+        ));
 
     if (repoEntry is! OpenRepoEntry) {
       var err = "Unknown";

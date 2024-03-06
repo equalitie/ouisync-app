@@ -739,6 +739,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),
+        "messageUseCacheServers":
+            MessageLookupByLibrary.simpleMessage("Use cache servers"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("Validate local password"),

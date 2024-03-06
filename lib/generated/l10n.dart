@@ -3850,6 +3850,16 @@ class S {
     );
   }
 
+  /// `Use cache servers`
+  String get messageUseCacheServers {
+    return Intl.message(
+      'Use cache servers',
+      name: 'messageUseCacheServers',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(

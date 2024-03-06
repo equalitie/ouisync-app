@@ -244,10 +244,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<RepoEntry> createRepository(
-      RepoLocation location, SetLocalSecret secret,
-      {oui.ShareToken? token,
-      required PasswordMode passwordMode,
-      bool setCurrent = false}) async {
+    RepoLocation location,
+    SetLocalSecret secret, {
+    oui.ShareToken? token,
+    required PasswordMode passwordMode,
+    bool useCacheServers = false,
+    bool setCurrent = false,
+  }) async {
     await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
 
     LocalSecretKeyAndSalt localKey;
@@ -261,8 +264,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         localKey = secret;
     }
 
-    final repo = await _create(location, localKey,
-        token: token, passwordMode: passwordMode);
+    final repo = await _create(
+      location,
+      localKey,
+      token: token,
+      passwordMode: passwordMode,
+      useCacheServers: useCacheServers,
+    );
 
     if (repo is! OpenRepoEntry) {
       loggy.app('Failed to create repository ${location.name}');
@@ -451,6 +459,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     LocalSecretKeyAndSalt secret, {
     oui.ShareToken? token,
     required PasswordMode passwordMode,
+    bool useCacheServers = false,
   }) async {
     final store = location.path();
 
@@ -491,13 +500,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         shareToken: token,
       );
 
-      // Enable server storage.
-      // TODO: This should be configurable by the user
-      try {
-        await repo.mirror();
-      } catch (e, st) {
-        loggy.error(
-            'Failed to create server mirror for repository $store:', e, st);
+      // Optionally enable cache server mirror.
+      if (useCacheServers) {
+        try {
+          await repo.createMirror();
+        } catch (e, st) {
+          loggy.error(
+              'Failed to create server mirror for repository $store:', e, st);
+        }
       }
 
       // Enable DHT and PEX by default
