@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/bindings.g.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -35,42 +36,26 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       Fields.bottomSheetHandle(context),
                       Fields.bottomSheetTitle(widget.cubit.name,
                           style: context.theme.appTextStyle.titleMedium),
-                      Row(children: [
-                        Expanded(
-                            child: SwitchListTile.adaptive(
-                          title: Text(S.current.labelBitTorrentDHT,
-                              style: context.theme.appTextStyle.bodyMedium),
-                          secondary: const Icon(
-                            Icons.hub,
-                            size: Dimensions.sizeIconMicro,
-                            color: Colors.black87,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -4.0),
-                          value: state.isDhtEnabled,
+                      _SwitchItem(
+                        title: S.current.labelBitTorrentDHT,
+                        icon: Icons.hub,
+                        value: state.isDhtEnabled,
+                        onChanged: (value) => widget.cubit.setDhtEnabled(value),
+                      ),
+                      _SwitchItem(
+                        title: S.current.messagePeerExchange,
+                        icon: Icons.group_add,
+                        value: state.isPexEnabled,
+                        onChanged: (value) => widget.cubit.setPexEnabled(value),
+                      ),
+                      if (state.accessMode == AccessMode.write)
+                        _SwitchItem(
+                          title: S.current.messageUseCacheServers,
+                          icon: Icons.cloud_outlined,
+                          value: state.isCacheServersEnabled,
                           onChanged: (value) =>
-                              widget.cubit.setDhtEnabled(value),
-                        )),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                            child: SwitchListTile.adaptive(
-                          title: Text(S.current.messagePeerExchange,
-                              style: context.theme.appTextStyle.bodyMedium),
-                          secondary: const Icon(
-                            Icons.group_add,
-                            size: Dimensions.sizeIconMicro,
-                            color: Colors.black87,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -4.0),
-                          value: state.isPexEnabled,
-                          onChanged: (value) =>
-                              widget.cubit.setPexEnabled(value),
-                        ))
-                      ]),
+                              widget.cubit.setCacheServersEnabled(value),
+                        ),
                       EntryActionItem(
                           iconData: Icons.edit,
                           title: S.current.actionRename,
@@ -110,5 +95,34 @@ class _RepositorySettingsState extends State<RepositorySettings>
                               reposCubit: widget.reposCubit,
                               popDialog: () => Navigator.of(context).pop()))
                     ]))),
+      );
+}
+
+class _SwitchItem extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool value;
+  final Function(bool) onChanged;
+
+  _SwitchItem({
+    required this.title,
+    required this.icon,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) => SwitchListTile.adaptive(
+        title: Text(title, style: context.theme.appTextStyle.bodyMedium),
+        secondary: Icon(
+          icon,
+          size: Dimensions.sizeIconMicro,
+          color: Colors.black87,
+        ),
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        visualDensity: VisualDensity(horizontal: -4.0),
+        value: value,
+        onChanged: onChanged,
       );
 }

@@ -23,6 +23,7 @@ class RepoState extends Equatable {
   final Map<String, Job> downloads;
   final bool isDhtEnabled;
   final bool isPexEnabled;
+  final bool isCacheServersEnabled;
   final bool requestPassword;
   final PasswordMode passwordMode;
   final oui.AccessMode accessMode;
@@ -35,6 +36,7 @@ class RepoState extends Equatable {
     this.downloads = const {},
     this.isDhtEnabled = false,
     this.isPexEnabled = false,
+    this.isCacheServersEnabled = false,
     this.requestPassword = false,
     required this.passwordMode,
     this.infoHash = "",
@@ -49,6 +51,7 @@ class RepoState extends Equatable {
     String? message,
     bool? isDhtEnabled,
     bool? isPexEnabled,
+    bool? isCacheServersEnabled,
     bool? requestPassword,
     PasswordMode? passwordMode,
     oui.AccessMode? accessMode,
@@ -61,6 +64,8 @@ class RepoState extends Equatable {
         downloads: downloads ?? this.downloads,
         isDhtEnabled: isDhtEnabled ?? this.isDhtEnabled,
         isPexEnabled: isPexEnabled ?? this.isPexEnabled,
+        isCacheServersEnabled:
+            isCacheServersEnabled ?? this.isCacheServersEnabled,
         requestPassword: requestPassword ?? this.requestPassword,
         passwordMode: passwordMode ?? this.passwordMode,
         accessMode: accessMode ?? this.accessMode,
@@ -75,6 +80,7 @@ class RepoState extends Equatable {
         downloads,
         isDhtEnabled,
         isPexEnabled,
+        isCacheServersEnabled,
         requestPassword,
         passwordMode,
         accessMode,
@@ -87,13 +93,14 @@ class RepoState extends Equatable {
 }
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
-  final Folder _currentFolder = Folder();
+  final _currentFolder = Folder();
   final oui.Session _session;
   final NativeChannels _nativeChannels;
   final oui.Repository _repo;
   final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
   final Cipher _pathCipher;
+  final _setCacheServersEnabledThrottle = Throttle();
 
   RepoCubit._(
     this._session,
@@ -117,10 +124,18 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     var state = RepoState(passwordMode: repoSettings.passwordMode);
 
     state = state.copyWith(
-        infoHash: await repo.infoHash,
-        accessMode: await repo.accessMode,
-        isDhtEnabled: await repo.isDhtEnabled,
-        isPexEnabled: await repo.isPexEnabled);
+      infoHash: await repo.infoHash,
+      accessMode: await repo.accessMode,
+      isDhtEnabled: await repo.isDhtEnabled,
+      isPexEnabled: await repo.isPexEnabled,
+    );
+
+    try {
+      state = state.copyWith(isCacheServersEnabled: await repo.mirrorExists());
+    } catch (e, st) {
+      staticLogger<RepoCubit>()
+          .error('failed to retrieve repo mirror status:', e, st);
+    }
 
     final pathCipher = await Cipher.newWithRandomKey();
 
@@ -170,6 +185,24 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     await _repo.setPexEnabled(value);
 
     emit(state.copyWith(isPexEnabled: value));
+  }
+
+  Future<void> setCacheServersEnabled(bool value) {
+    Future<void> update() async {
+      try {
+        if (value) {
+          await _repo.createMirror();
+        } else {
+          await _repo.deleteMirror();
+        }
+
+        emit(state.copyWith(isCacheServersEnabled: await _repo.mirrorExists()));
+      } catch (e, st) {
+        loggy.error('failed to update repo mirror status:', e, st);
+      }
+    }
+
+    return _setCacheServersEnabledThrottle.invoke(update);
   }
 
   Future<oui.Directory> openDirectory(String path) async {
@@ -637,6 +670,37 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         return await _repo.getReadPasswordSalt();
       case oui.AccessMode.write:
         return await _repo.getWritePasswordSalt();
+    }
+  }
+}
+
+// Ensures an async operation is being executed at most once at a time. If the operation is invoked
+// while already executing, it's delayed until the current execution completes. If it's invoked
+// more than once, only the last invocation is executed.
+//
+// TODO: come up with more accurate name.
+class Throttle {
+  Future<void> Function()? curr;
+  Future<void> Function()? next;
+
+  Future<void> invoke(Future<void> Function() f) async {
+    if (curr != null) {
+      next = f;
+      return;
+    } else {
+      curr = f;
+    }
+
+    while (curr != null) {
+      try {
+        await curr!();
+        curr = next;
+      } catch (e) {
+        curr = null;
+        rethrow;
+      } finally {
+        next = null;
+      }
     }
   }
 }
