@@ -128,14 +128,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       accessMode: await repo.accessMode,
       isDhtEnabled: await repo.isDhtEnabled,
       isPexEnabled: await repo.isPexEnabled,
+      isCacheServersEnabled: await repo.isCacheServersEnabled(),
     );
-
-    try {
-      state = state.copyWith(isCacheServersEnabled: await repo.mirrorExists());
-    } catch (e, st) {
-      staticLogger<RepoCubit>()
-          .error('failed to retrieve repo mirror status:', e, st);
-    }
 
     final pathCipher = await Cipher.newWithRandomKey();
 
@@ -187,22 +181,19 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isPexEnabled: value));
   }
 
-  Future<void> setCacheServersEnabled(bool value) {
-    Future<void> update() async {
-      try {
-        if (value) {
-          await _repo.createMirror();
-        } else {
-          await _repo.deleteMirror();
-        }
+  Future<void> setCacheServersEnabled(bool value) async {
+    // Update the state to the desired value for immediate feedback...
+    emit(state.copyWith(isCacheServersEnabled: value));
 
-        emit(state.copyWith(isCacheServersEnabled: await _repo.mirrorExists()));
-      } catch (e, st) {
-        loggy.error('failed to update repo mirror status:', e, st);
-      }
-    }
+    await _setCacheServersEnabledThrottle.invoke(() async {
+      await _repo.setCacheServersEnabled(value);
 
-    return _setCacheServersEnabledThrottle.invoke(update);
+      // ...then fetch the actual value and update the state again. This is needed because some of
+      // the cache server requests might fail.
+      emit(state.copyWith(
+        isCacheServersEnabled: await _repo.isCacheServersEnabled(),
+      ));
+    });
   }
 
   Future<oui.Directory> openDirectory(String path) async {

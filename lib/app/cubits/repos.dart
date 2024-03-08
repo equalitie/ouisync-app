@@ -500,19 +500,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         shareToken: token,
       );
 
-      // Optionally enable cache server mirror.
-      if (useCacheServers) {
-        try {
-          await repo.createMirror();
-        } catch (e, st) {
-          loggy.error(
-              'Failed to create server mirror for repository $store:', e, st);
-        }
-      }
-
       // Enable DHT and PEX by default
       await repo.setDhtEnabled(true);
       await repo.setPexEnabled(true);
+
+      // Optionally enable cache server mirror.
+      if (useCacheServers) {
+        await repo.setCacheServersEnabled(true);
+      }
 
       RepoSettings? repoSettings;
 

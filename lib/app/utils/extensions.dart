@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
 
@@ -112,5 +114,41 @@ extension TextEditingControllerExtension on TextEditingController {
 
     selection = TextSelection(
         baseOffset: baseOffset, extentOffset: text.length - extentOffset);
+  }
+}
+
+extension RepositoryExtension on Repository {
+  Loggy<LoggyType> get loggy => staticLogger<Repository>();
+
+  /// Check if the repository is mirrored on at least one of the cache servers in
+  /// `Constants.cacheServers`
+  Future<bool> isCacheServersEnabled() async {
+    Future<bool> check(String host) async {
+      try {
+        return await mirrorExists(host);
+      } catch (_) {
+        return false;
+      }
+    }
+
+    return await Future.wait(Constants.cacheServers.map(check))
+        .then((results) => results.contains(true));
+  }
+
+  /// Create/delete repository mirror on all the cache servers in `Constants.cacheServers`.
+  Future<void> setCacheServersEnabled(bool enabled) async {
+    Future<void> update(String host, bool enabled) async {
+      try {
+        if (enabled) {
+          await createMirror(host);
+        } else {
+          await deleteMirror(host);
+        }
+      } catch (_) {}
+    }
+
+    await Future.wait(
+      Constants.cacheServers.map((host) => update(host, enabled)),
+    );
   }
 }

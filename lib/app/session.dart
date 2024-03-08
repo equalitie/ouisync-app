@@ -44,12 +44,10 @@ Future<Session> createSession({
       defaultLocalDiscoveryEnabled: true,
     );
 
+    // Add cache servers as user defined peers so we immediatelly connect to them.
     for (final host in Constants.cacheServers) {
-      try {
-        await session.addCacheServer(host);
-      } catch (e) {
-        logger.error('failed to add cache server $host:', e);
-      }
+      await addCacheServerAsPeer(session, host);
+      logger.debug('cache server added: $host');
     }
   } catch (e) {
     await session.close();
@@ -57,4 +55,25 @@ Future<Session> createSession({
   }
 
   return session;
+}
+
+const _defaultPeerPort = 20209;
+
+Future<void> addCacheServerAsPeer(Session session, String host) async {
+  for (final addr in await InternetAddress.lookup(_stripPort(host))) {
+    for (final proto in ['quic', 'tcp']) {
+      await session
+          .addUserProvidedPeer('$proto/${addr.address}:$_defaultPeerPort');
+    }
+  }
+}
+
+String _stripPort(String addr) {
+  final index = addr.lastIndexOf(':');
+
+  if (index >= 0) {
+    return addr.substring(0, index);
+  } else {
+    return addr;
+  }
 }
