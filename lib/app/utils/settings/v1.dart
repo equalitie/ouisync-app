@@ -407,18 +407,23 @@ class Settings with AppLogger {
           oldPwdStorage = v0.SecureStorage(databaseId: id);
           final password = await oldPwdStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
-          newAuth = _AuthModePasswordStoredOnDevice(password!, true);
+          newAuth = _AuthModePasswordStoredOnDevice(
+              (await masterKey.encrypt(password!)), true);
         case v0.AuthMode.noLocalPassword:
           oldPwdStorage = v0.SecureStorage(databaseId: id);
           final password = await oldPwdStorage.tryGetPassword(
               authMode: v0.AuthMode.noLocalPassword);
-          newAuth = _AuthModePasswordStoredOnDevice(password!, false);
+          newAuth = _AuthModePasswordStoredOnDevice(
+              (await masterKey.encrypt(password!)), false);
       }
       // Remove the password from the old storage.
       if (oldPwdStorage != null) {
         await oldPwdStorage.deletePassword();
       }
-      repos[id] = SettingsRepoEntry(newAuth, repo.info);
+      // The old settings did not include the '.db' extension in RepoLocation.
+      final pathWithoutExt = repo.info.path();
+      final locationWithExt = RepoLocation.fromDbPath("$pathWithoutExt.db");
+      repos[id] = SettingsRepoEntry(newAuth, locationWithExt);
     }
 
     final root = SettingsRoot(
