@@ -657,7 +657,7 @@ class Settings with AppLogger {
     final context = p.Context(style: p.Style.posix);
 
     final nonAndroidAlternativePath =
-        context.join(alternativeDir.path, 'ouisync');
+        context.join(alternativeDir.path, 'Ouisync');
 
     return await Directory(nonAndroidAlternativePath).create();
   }
