@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import 'utils.dart';
@@ -118,22 +117,9 @@ extension TextEditingControllerExtension on TextEditingController {
 }
 
 extension RepositoryExtension on Repository {
-  Loggy<LoggyType> get loggy => staticLogger<Repository>();
-
   /// Check if the repository is mirrored on at least one of the cache servers in
   /// `Constants.cacheServers`
-  Future<bool> isCacheServersEnabled() async {
-    Future<bool> check(String host) async {
-      try {
-        return await mirrorExists(host);
-      } catch (_) {
-        return false;
-      }
-    }
-
-    return await Future.wait(Constants.cacheServers.map(check))
-        .then((results) => results.contains(true));
-  }
+  Future<bool> isCacheServersEnabled() => _isCacheServersEnabled(mirrorExists);
 
   /// Create/delete repository mirror on all the cache servers in `Constants.cacheServers`.
   Future<void> setCacheServersEnabled(bool enabled) async {
@@ -151,4 +137,24 @@ extension RepositoryExtension on Repository {
       Constants.cacheServers.map((host) => update(host, enabled)),
     );
   }
+}
+
+extension ShareTokenExtension on ShareToken {
+  /// Check if the repository of this token is mirrored on at least one of the cache servers in
+  /// `Constants.cacheServers`
+  Future<bool> isCacheServersEnabled() => _isCacheServersEnabled(mirrorExists);
+}
+
+Future<bool> _isCacheServersEnabled(
+    Future<bool> Function(String) mirrorExists) async {
+  Future<bool> check(String host) async {
+    try {
+      return await mirrorExists(host);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  return await Future.wait(Constants.cacheServers.map(check))
+      .then((results) => results.contains(true));
 }

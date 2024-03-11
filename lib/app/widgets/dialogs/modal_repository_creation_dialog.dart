@@ -172,6 +172,11 @@ class RepositoryCreation extends HookWidget with AppLogger {
       showAccessModeMessage: showAccessModeMessage,
     );
 
+    // When importing existing repository check if the cache servers have been already enabled.
+    if (await shareToken?.isCacheServersEnabled() ?? false) {
+      state.useCacheServers(true);
+    }
+
     return state;
   }
 
