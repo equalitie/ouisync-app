@@ -6,11 +6,11 @@ import '../../utils/utils.dart';
 
 class EntryInfoTable extends StatelessWidget {
   const EntryInfoTable({
-    Key? key,
+    super.key,
     this.verticalPadding = 2.0,
     this.spacing = 4.0,
     required this.entryInfo,
-  }) : super(key: key);
+  });
 
   final double verticalPadding;
   final double spacing;
