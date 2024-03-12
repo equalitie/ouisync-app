@@ -69,10 +69,14 @@ class _Reader {
   }
 }
 
+/// Mixin that adds getter that returns logger tagged with the name of the class it's mixed into.
 mixin AppLogger implements LoggyType {
   @override
   Loggy<LoggyType> get loggy => Loggy<AppLogger>(runtimeType.toString());
 }
+
+/// Returns logger tagged with the given class name. Useful for logging from static methods.
+Loggy<LoggyType> staticLogger<T>() => Loggy<AppLogger>((T).toString());
 
 const LogLevel appLevel = LogLevel('Ouisync', 2); // 2 == debug
 

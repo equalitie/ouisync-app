@@ -536,6 +536,7 @@
   "messageCopiedToClipboard":"Copied to the clipboard.",
   "messagePeerAdded":"Peer added",
   "messagePeerRemoved":"Peer removed",
+  "messageUseCacheServers":"Use cache servers",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",

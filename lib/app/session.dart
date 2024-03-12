@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:loggy/loggy.dart';
@@ -44,12 +45,9 @@ Future<Session> createSession({
       defaultLocalDiscoveryEnabled: true,
     );
 
+    // Add cache servers as user defined peers so we immediatelly connect to them.
     for (final host in Constants.cacheServers) {
-      try {
-        await session.addCacheServer(host);
-      } catch (e) {
-        logger.error('failed to add cache server $host:', e);
-      }
+      unawaited(addCacheServerAsPeer(session, host, logger: logger));
     }
   } catch (e) {
     await session.close();
@@ -57,4 +55,35 @@ Future<Session> createSession({
   }
 
   return session;
+}
+
+const _defaultPeerPort = 20209;
+
+Future<void> addCacheServerAsPeer(
+  Session session,
+  String host, {
+  required Loggy logger,
+}) async {
+  try {
+    for (final addr in await InternetAddress.lookup(_stripPort(host))) {
+      for (final proto in ['quic', 'tcp']) {
+        await session
+            .addUserProvidedPeer('$proto/${addr.address}:$_defaultPeerPort');
+      }
+    }
+
+    logger.debug('cache server $host added');
+  } catch (e, st) {
+    logger.error('failed to add cache server $host:', e, st);
+  }
+}
+
+String _stripPort(String addr) {
+  final index = addr.lastIndexOf(':');
+
+  if (index >= 0) {
+    return addr.substring(0, index);
+  } else {
+    return addr;
+  }
 }
