@@ -4260,6 +4260,16 @@ class S {
     );
   }
 
+  /// `Eject`
+  String get actionEject {
+    return Intl.message(
+      'Eject',
+      name: 'actionEject',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Move`
   String get actionMove {
     return Intl.message(

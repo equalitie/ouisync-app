@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDone": MessageLookupByLibrary.simpleMessage("Done"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
+        "actionEject": MessageLookupByLibrary.simpleMessage("Eject"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
         "actionGoToSettings":
             MessageLookupByLibrary.simpleMessage("Go to settings"),

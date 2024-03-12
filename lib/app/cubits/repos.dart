@@ -263,6 +263,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       return;
     }
 
+    // Check for the situation where we alredy have an entry for the repository
+    // but it's location has changed. If so, reuse the existing stored secrets
+    // (if any).
     final repoId = DatabaseId(await repo.hexDatabaseId());
     var repoSettings = _settings.repoSettingsById(repoId);
 
@@ -478,6 +481,22 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await setCurrent(null);
     await _settings.setDefaultRepo(null);
+
+    changed();
+  }
+
+  Future<void> ejectRepository(RepoLocation location) async {
+    final wasCurrent = currentRepoLocation == location;
+    final repoSettings = _settings.repoSettingsByLocation(location)!;
+    final databaseId = repoSettings.databaseId;
+
+    await _forget(location);
+    await _settings.forgetRepository(databaseId);
+
+    if (wasCurrent) {
+      await setCurrent(null);
+      await _settings.setDefaultRepo(null);
+    }
 
     changed();
   }

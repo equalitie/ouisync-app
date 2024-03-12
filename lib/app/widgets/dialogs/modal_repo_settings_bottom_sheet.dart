@@ -85,6 +85,18 @@ class _RepositorySettingsState extends State<RepositorySettings>
                                     widget.reposCubit.passwordHasher,
                                 popDialog: () => Navigator.of(context).pop(),
                               )),
+                      // Only allow forgetting/ejecting a repository if the app
+                      // is not storing the secret for the user.
+                      if (!widget.cubit.repoSettings.hasLocalSecret())
+                        EntryActionItem(
+                            iconData: Icons.eject,
+                            title: S.current.actionEject,
+                            dense: true,
+                            onTap: () async {
+                              await widget.reposCubit
+                                  .ejectRepository(widget.cubit.location);
+                              Navigator.of(context).pop();
+                            }),
                       EntryActionItem(
                           iconData: Icons.delete,
                           title: S.current.actionDelete,

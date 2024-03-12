@@ -606,6 +606,8 @@
   "@actionCancel": {},
   "actionDelete": "Delete",
   "@actionDelete": {},
+  "actionEject": "Eject",
+  "@actionEject": {},
   "actionMove": "Move",
   "@actionMove": {},
   "actionSave": "Save",
