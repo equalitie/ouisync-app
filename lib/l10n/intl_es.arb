@@ -965,5 +965,9 @@
   "messageUseCacheServers": "Usar la caché de los servidores",
   "@messageUseCacheServers": {},
   "actionEject": "Expulsar",
-  "@actionEject": {}
+  "@actionEject": {},
+  "repositoryIsAlreadyImported": "El repositorio ya importado",
+  "@repositoryIsAlreadyImported": {},
+  "buttonLocateRepository": "Localizar",
+  "@buttonLocateRepository": {}
 }
