@@ -308,7 +308,7 @@ class _MainPageState extends State<MainPage>
             },
           );
         }
-      case DokanResult.oldererVersionMayor:
+      case DokanResult.olderVersionMayor:
         {
           final dokanOlderVersionMessage =
               'A previous version of Dokan ${Constants.dokanMinimunVersion}'
