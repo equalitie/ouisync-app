@@ -47,6 +47,10 @@ class DokanCheck with AppLogger {
     return DokanCheckResult(result: dokanResult);
   }
 
+  /// We use a PowerShell script instead of directly executing the msiexec call
+  /// so we can get exit code, sdtour and stderr and log any error better.
+  /// When executing the msiexec directly we only seem to get the exit code.
+  /// TODO: Test and see if just the exit code is enough in this case.
   bool? runDokanMsiInstallation() {
     final scriptFilePath = buildPathToFile('install_dokan.ps1');
     final script = 'powershell.exe -executionpolicy bypass -File '
