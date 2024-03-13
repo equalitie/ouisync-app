@@ -241,9 +241,8 @@ class _MainPageState extends State<MainPage>
         {
           //Install Dokan using the bundled MSI
           final dokanNotFoundMessage =
-              'Ouisync uses Dokan ${Constants.dokanMinimunVersion} for '
-              'mounting unlocked repositories as drives, which later can '
-              'be found in the File Explorer.\n\n'
+              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
+              'which later can be found in the File Explorer.\n\n'
               'We can try to install it for you';
 
           WidgetsBinding.instance.addPostFrameCallback(
@@ -276,19 +275,17 @@ class _MainPageState extends State<MainPage>
       case DokanResult.differentMayor:
         {
           final dokanDifferentMayorMessage =
-              'Ouisync uses Dokan ${Constants.dokanMinimunVersion} for '
-              'mounting unlocked repositories as drives, which later can '
-              'be found in the File Explorer.\n\n'
-              'We found a different mayor version of Dokan thant the version'
-              'required for Ouisync.\n\n'
-              'We can try to install it for you';
+              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
+              'which later can be found in the File Explorer.\n\n'
+              'We found a different mayor version of Dokan thant the version '
+              'required for Ouisync, but we can try to install it for you';
 
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
                 Dialogs.simpleAlertDialog(
                     context: context,
-                    title: 'Dokan ${Constants.dokanMinimunVersion} missing',
+                    title: 'Dokan ${Constants.dokanMayorRequired} missing',
                     message: dokanDifferentMayorMessage,
                     actions: [
                       TextButton(
@@ -313,17 +310,17 @@ class _MainPageState extends State<MainPage>
       case DokanResult.olderVersionMayor:
         {
           final dokanOlderVersionMessage =
-              'A previous version of Dokan ${Constants.dokanMinimunVersion}'
-              ' is already installed.\n\n'
-              'Please uninstall the existing version ${Constants.dokanMayorRequired}'
-              ' of Dokan, reboot the system and run Ouisync again';
+              'A previous version of Dokan is already installed.\n\n'
+              'Please uninstall the existing version '
+              '${Constants.dokanMayorRequired} of Dokan, reboot the system and '
+              'run Ouisync again';
 
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
                 Dialogs.simpleAlertDialog(
                   context: context,
-                  title: 'Dokan ${Constants.dokanMinimunVersion} found',
+                  title: 'Dokan ${Constants.dokanMayorRequired} found',
                   message: dokanOlderVersionMessage,
                 ),
               );
@@ -350,7 +347,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final message = 'Dokan installation failed';
+    final message = 'The Dokan installation failed';
     await Dialogs.simpleAlertDialog(
       context: context,
       title: 'Dokan check',
