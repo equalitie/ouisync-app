@@ -677,7 +677,7 @@
   "actionIDontAgree":"I don't agree",
   "actionRemoveLocalPassword":"Remove local password",
   "actionUpdate":"Update",
-  "actionSubmit":"Submit",
+  "actionResetSecret":"Reset",
   "actionNewMediaFile":"Media",
   "messageFailedToMount": "Failed to mount: {reason}",
   "@messageFailedToMount": {

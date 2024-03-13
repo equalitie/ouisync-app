@@ -117,7 +117,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
                       }
                     }
                   : null,
-              text: S.current.actionSubmit,
+              text: S.current.actionResetSecret,
               size: Dimensions.sizeInPageButtonLong,
               focusNode: _passwordAction)
         ]),
@@ -248,7 +248,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       });
 
   Future<bool> _confirmSaveChanges(BuildContext context) async {
-    final positiveButtonText = S.current.actionSubmit;
+    final positiveButtonText = S.current.actionResetSecret;
     final message = S.current.messageConfirmIrreversibleChange;
 
     final saveChanges = await Dialogs.alertDialogWithActions(
