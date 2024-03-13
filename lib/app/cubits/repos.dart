@@ -251,6 +251,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<void> importRepoFromLocation(RepoLocation location) async {
     if (_repos.containsKey(location)) {
+      showSnackBar(S.current.repositoryIsAlreadyImported);
       return;
     }
 
@@ -277,6 +278,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       if (existingEntry != null) {
         if (existingEntry is! MissingRepoEntry) {
+          showSnackBar(S.current.repositoryIsAlreadyImported);
           loggy.app(
               "Same repository but from different location is already loaded");
           return;

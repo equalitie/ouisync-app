@@ -176,6 +176,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUseCustomLocalPassword":
             MessageLookupByLibrary.simpleMessage("Use custom local password"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
+        "buttonLocateRepository":
+            MessageLookupByLibrary.simpleMessage("Locate"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("Import a repository"),
@@ -769,6 +771,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementNumber": m31,
         "replacementPath": m32,
         "replacementStatus": m33,
+        "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
+            "Repository is already imported"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),

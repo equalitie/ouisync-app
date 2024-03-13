@@ -184,8 +184,13 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           ],
         ),
         Dimensions.spacingVerticalDouble,
-        _buildButton("Locate", () async {
-          final result = await FilePicker.platform.pickFiles();
+        _buildButton(S.current.buttonLocateRepository, () async {
+          final result = await FilePicker.platform.pickFiles(
+              type: FileType.custom,
+              allowedExtensions: [
+                RepoLocation.defaultExtensionWithoutDot,
+                RepoLocation.legacyExtensionWithoutDot
+              ]);
           if (result == null) return;
           for (final path in result.paths) {
             if (path == null) continue;
