@@ -172,6 +172,125 @@ class _MainPageState extends State<MainPage>
         saveMedia(media.path);
       }
     });
+
+    if (io.Platform.isWindows) {
+      final dokanCheck = DokanCheck(
+        requiredMayor: Constants.dokanMayorRequired,
+        requiredMinor: Constants.dokanMinorRequired,
+        requiredPatch: Constants.dokanPatchRequired,
+        minimumRequiredVersion: Constants.dokanMinimunVersion,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final dokanCheckResult = dokanCheck.checkDokanInstallation();
+        final result = dokanCheckResult.result;
+
+        if (result != null) {
+          switch (result) {
+            case DokanResult.sameVersion:
+            case DokanResult.newerVersionMayor:
+              {
+                // No install required
+                loggy.app(
+                  'The Dokan version installed is supported: ${result.name}',
+                );
+              }
+            case DokanResult.notFound:
+              {
+                //Install Dokan using the bundled MSI
+                final dokanNotFoundMessage =
+                    'Ouisync uses Dokan ${Constants.dokanMinimunVersion} for '
+                    'mounting unlocked repositories as drives, which later can '
+                    'be found in the File Explorer.\n\n'
+                    'We can try to install it for you';
+
+                Dialogs.simpleAlertDialog(
+                    context: context,
+                    title: 'Dokan ${Constants.dokanMinimunVersion} missing',
+                    message: dokanNotFoundMessage,
+                    actions: [
+                      TextButton(
+                          child: Text(S.current.actionCancel.toUpperCase()),
+                          onPressed: () => Navigator.of(context).pop(false)),
+                      TextButton(
+                          child: Text(
+                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
+                          onPressed: () => Navigator.of(context).pop(true))
+                    ]).then((installDokan) {
+                  if (installDokan ?? false) {
+                    _installBundledDokan(dokanCheck.runDokanMsiInstallation);
+                  }
+                });
+              }
+            case DokanResult.differentMayor:
+              {
+                final dokanDifferentMayorMessage =
+                    'Ouisync uses Dokan ${Constants.dokanMinimunVersion} for '
+                    'mounting unlocked repositories as drives, which later can '
+                    'be found in the File Explorer.\n\n'
+                    'We can try to install it for you';
+
+                Dialogs.simpleAlertDialog(
+                    context: context,
+                    title: 'Dokan ${Constants.dokanMinimunVersion} missing',
+                    message: dokanDifferentMayorMessage,
+                    actions: [
+                      TextButton(
+                          child: Text(S.current.actionCancel.toUpperCase()),
+                          onPressed: () => Navigator.of(context).pop(false)),
+                      TextButton(
+                          child: Text(
+                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
+                          onPressed: () => Navigator.of(context).pop(true))
+                    ]).then((installDokan) {
+                  if (installDokan ?? false) {
+                    _installBundledDokan(dokanCheck.runDokanMsiInstallation);
+                  }
+                });
+              }
+            case DokanResult.oldererVersionMayor:
+              {
+                final dokanOlderVersionMessage =
+                    'A previous version of Dokan ${Constants.dokanMinimunVersion}'
+                    ' is already installed.\n\n'
+                    'Please uninstall the existing version ${Constants.dokanMayorRequired}'
+                    ' of Dokan, reboot the system and run Ouisync again';
+
+                Dialogs.simpleAlertDialog(
+                  context: context,
+                  title: 'Dokan ${Constants.dokanMinimunVersion} found',
+                  message: dokanOlderVersionMessage,
+                );
+              }
+          }
+        }
+      });
+    }
+  }
+
+  void _installBundledDokan(bool? Function() runDokanMsiInstallation) {
+    final installationResult = runDokanMsiInstallation();
+
+    if (installationResult == null) {
+      return;
+    }
+
+    if (installationResult) {
+      final mountPoint = _cubits.repositories.settings.getMountPoint();
+      if (mountPoint != null) {
+        unawaited(_cubits.mount.mount(mountPoint));
+      }
+    }
+
+    final message = installationResult
+        ? 'Dokan installation successful'
+        : 'Dokan installation failed';
+
+    Dialogs.simpleAlertDialog(
+      context: context,
+      title: 'Dokan check',
+      message: message,
+    );
   }
 
   @override
