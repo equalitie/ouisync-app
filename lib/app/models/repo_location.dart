@@ -5,6 +5,8 @@ import 'dart:io' as io;
 // Information about a repository that we can deduce without opening it.
 class RepoLocation extends Equatable implements Comparable<RepoLocation> {
   static const defaultExtension = ".ouisyncdb";
+  static const defaultExtensionWithoutDot = "ouisyncdb";
+  static const legacyExtensionWithoutDot = "db";
 
   final String _dir;
   final String _name; // Repo name (file name without the extension)

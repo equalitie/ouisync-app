@@ -1160,6 +1160,16 @@ class S {
     );
   }
 
+  /// `Repository is already imported`
+  String get repositoryIsAlreadyImported {
+    return Intl.message(
+      'Repository is already imported',
+      name: 'repositoryIsAlreadyImported',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `No repository is selected`
   String get messageNoRepoIsSelected {
     return Intl.message(
@@ -2175,6 +2185,16 @@ class S {
     return Intl.message(
       'Import a repository using a QR code',
       name: 'messageAddRepoQR',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Locate`
+  String get buttonLocateRepository {
+    return Intl.message(
+      'Locate',
+      name: 'buttonLocateRepository',
       desc: '',
       args: [],
     );
