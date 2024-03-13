@@ -7,10 +7,8 @@ enum DokanResult {
   notFound,
   differentMayor,
   sameVersion,
-  newerMinor,
-  newerPatch,
-  olderMinor,
-  olderPatch
+  oldererVersionMayor,
+  newerVersionMayor
 }
 
 String? dokanResultToString(DokanResult value) {
@@ -18,10 +16,8 @@ String? dokanResultToString(DokanResult value) {
     DokanResult.notFound => 'not_found',
     DokanResult.differentMayor => 'found_different_mayor',
     DokanResult.sameVersion => 'found_same_version',
-    DokanResult.newerMinor => 'found_newer_minor',
-    DokanResult.newerPatch => 'found_newer_patch',
-    DokanResult.olderMinor => 'found_older_minor',
-    DokanResult.olderPatch => 'found_older_patch',
+    DokanResult.oldererVersionMayor => 'found_older_version_mayor',
+    DokanResult.newerVersionMayor => 'found_newer_version_mayor',
   };
 }
 
@@ -30,10 +26,8 @@ DokanResult? dokanResultFromString(String value) {
     'not_found' => DokanResult.notFound,
     'found_different_mayor' => DokanResult.differentMayor,
     'found_same_version' => DokanResult.sameVersion,
-    'found_newer_minor' => DokanResult.newerMinor,
-    'found_newer_patch' => DokanResult.newerPatch,
-    'found_older_minor' => DokanResult.olderMinor,
-    'found_older_patch' => DokanResult.olderPatch,
+    'found_older_version_mayor' => DokanResult.oldererVersionMayor,
+    'found_newer_version_mayor' => DokanResult.newerVersionMayor,
     _ => null,
   };
 }
