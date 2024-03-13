@@ -7,6 +7,7 @@ export 'local_auth.dart';
 export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
+export 'dokan_check.dart';
 export 'dump.dart';
 export 'cipher.dart';
 export 'extensions.dart';

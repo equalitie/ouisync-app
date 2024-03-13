@@ -19,6 +19,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     required ConnectivityInfo connectivityInfo,
     required NatDetection natDetection,
     required PeerSetCubit peerSet,
+    required void Function() checkForDokan,
   }) : sections = [
           NetworkSection(
             session,
@@ -31,6 +32,7 @@ class AppSettingsContainer extends StatefulHookWidget {
             cubits,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
+            checkForDokan: checkForDokan,
           ),
           AboutSection(
             session,

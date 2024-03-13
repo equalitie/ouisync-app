@@ -2,6 +2,36 @@ import 'package:flutter/material.dart';
 
 enum PasswordAction { add, change, remove, biometrics }
 
+// enum DokanResult { ok, mayorOld, mayorMissing, notFound }
+enum DokanResult {
+  notFound,
+  differentMayor,
+  sameVersion,
+  olderVersionMayor,
+  newerVersionMayor
+}
+
+String? dokanResultToString(DokanResult value) {
+  return switch (value) {
+    DokanResult.notFound => 'not_found',
+    DokanResult.differentMayor => 'found_different_mayor',
+    DokanResult.sameVersion => 'found_same_version',
+    DokanResult.olderVersionMayor => 'found_older_version_mayor',
+    DokanResult.newerVersionMayor => 'found_newer_version_mayor',
+  };
+}
+
+DokanResult? dokanResultFromString(String value) {
+  return switch (value) {
+    'not_found' => DokanResult.notFound,
+    'found_different_mayor' => DokanResult.differentMayor,
+    'found_same_version' => DokanResult.sameVersion,
+    'found_older_version_mayor' => DokanResult.olderVersionMayor,
+    'found_newer_version_mayor' => DokanResult.newerVersionMayor,
+    _ => null,
+  };
+}
+
 class Constants {
   Constants._();
 
@@ -109,4 +139,7 @@ class Constants {
   ];
 
   static const int android12SDK = 32;
+
+  static const dokanMayorRequired = '2';
+  static const dokanMinimunVersion = '2.1.0.1000';
 }
