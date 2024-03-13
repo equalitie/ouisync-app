@@ -11,7 +11,7 @@ class MediaReceiverMobile with AppLogger implements MediaReceiver {
   }
 
   @override
-  StreamController controller = StreamController<SharedMediaFile>();
+  StreamController controller = StreamController<List<SharedMediaFile>>();
 
   StreamSubscription? _mediaIntentSubscription;
   StreamSubscription? _textIntentSubscription;

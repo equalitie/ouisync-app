@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../models/models.dart';
 import 'pages.dart';
 
 class AddRepositoryPage extends StatefulWidget {
@@ -28,6 +30,21 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
   Widget build(BuildContext context) {
     final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
 
+    final children = [
+      Fields.placeholderWidget(
+          assetName: Constants.assetPathAddWithQR,
+          assetHeight: noReposImageHeight),
+      _buildScanQrCode(context),
+      _buildOrSeparator(),
+      _buildUseToken(context),
+    ];
+
+    if (PlatformValues.isDesktopDevice) {
+      children
+        ..add(_buildOrSeparator())
+        ..add(_buildImportOuisyncDb(context));
+    }
+
     return Scaffold(
         appBar: AppBar(
             title: Text(S.current.titleAddRepoToken),
@@ -41,14 +58,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
             child: Center(
                 child: SingleChildScrollView(
               padding: Dimensions.paddingAll20,
-              child: Column(children: [
-                Fields.placeholderWidget(
-                    assetName: Constants.assetPathAddWithQR,
-                    assetHeight: noReposImageHeight),
-                _buildScanQrCode(context),
-                _buildOrSeparator(),
-                _buildUseToken(context),
-              ]),
+              child: Column(children: children),
             ))));
   }
 
@@ -158,7 +168,32 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
               hint: S.current.messageRepositoryToken,
               validator: _repositoryTokenValidator),
         ),
-        _builAddRepositoryButton(context),
+        _builAddRepositoryButton(),
+      ],
+    );
+  }
+
+  Widget _buildImportOuisyncDb(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Fields.constrainedText(S.current.messageAddRepoDb,
+                textAlign: TextAlign.center),
+          ],
+        ),
+        Dimensions.spacingVerticalDouble,
+        _buildButton("Locate", () async {
+          final result = await FilePicker.platform.pickFiles();
+          if (result == null) return;
+          for (final path in result.paths) {
+            if (path == null) continue;
+            await widget.reposCubit
+                .importRepoFromLocation(RepoLocation.fromDbPath(path));
+          }
+          Navigator.of(context).pop();
+        }),
       ],
     );
   }
@@ -185,11 +220,14 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
     return null;
   }
 
-  Widget _builAddRepositoryButton(BuildContext context) => Padding(
-      padding: Dimensions.paddingVertical20,
-      child: Fields.inPageButton(
-          onPressed: () => _onAddRepo(_tokenController.text),
-          text: S.current.actionAddRepository.toUpperCase()));
+  Widget _builAddRepositoryButton() => _buildButton(
+      S.current.actionAddRepository.toUpperCase(),
+      () async => _onAddRepo(_tokenController.text));
+
+  Widget _buildButton(String text, Future<void> Function() onPressed) =>
+      Padding(
+          padding: Dimensions.paddingVertical20,
+          child: Fields.inPageButton(onPressed: () => onPressed(), text: text));
 
   void _onAddRepo(String shareLink) async {
     if (!formKey.currentState!.validate()) {

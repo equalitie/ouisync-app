@@ -2200,6 +2200,16 @@ class S {
     );
   }
 
+  /// `Import repository from file system`
+  String get messageAddRepoDb {
+    return Intl.message(
+      'Import repository from file system',
+      name: 'messageAddRepoDb',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This option is not available on read-only repositories`
   String get messageActionNotAvailable {
     return Intl.message(
@@ -4245,6 +4255,16 @@ class S {
     return Intl.message(
       'Delete',
       name: 'actionDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Eject`
+  String get actionEject {
+    return Intl.message(
+      'Eject',
+      name: 'actionEject',
       desc: '',
       args: [],
     );

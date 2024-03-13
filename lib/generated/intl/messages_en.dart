@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDone": MessageLookupByLibrary.simpleMessage("Done"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
+        "actionEject": MessageLookupByLibrary.simpleMessage("Eject"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
         "actionGoToSettings":
             MessageLookupByLibrary.simpleMessage("Go to settings"),
@@ -258,6 +259,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "This option is not available on read-only repositories"),
         "messageAddLocalPassword":
             MessageLookupByLibrary.simpleMessage("Add local password"),
+        "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
+            "Import repository from file system"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Import a repository using a token link"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(

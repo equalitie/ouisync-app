@@ -31,7 +31,7 @@ class MissingRepositoryState extends HookWidget
         Constants.statePlaceholderImageHeightFactor;
 
     final reloadButtonFocus = useFocusNode(debugLabel: 'reload_button_focus');
-    final deleteButtonFOcus = useFocusNode(debugLabel: 'delete_button_focus');
+    final deleteButtonFocus = useFocusNode(debugLabel: 'delete_button_focus');
 
     reloadButtonFocus.requestFocus();
 
@@ -77,7 +77,7 @@ class MissingRepositoryState extends HookWidget
               text: S.current.actionRemoveRepo,
               size: Dimensions.sizeInPageButtonLong,
               alignment: Alignment.center,
-              focusNode: deleteButtonFOcus),
+              focusNode: deleteButtonFocus),
         ],
       ),
     ));

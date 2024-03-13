@@ -226,6 +226,11 @@ class RepoSettings {
     return false;
   }
 
+  Future<void> setLocation(RepoLocation location) async {
+    _entry.location = location;
+    await _settings._storeRoot();
+  }
+
   // Return true if changed.
   Future<bool> setConfirmWithBiometrics(bool value) async {
     final authMode = _entry.authMode;
@@ -665,6 +670,14 @@ class Settings with AppLogger {
   //------------------------------------------------------------------
 
   String? getMountPoint() => _defaultMountPoint();
+
+  void debugPrint() {
+    print("============== Settings ===============");
+    for (final kv in _root.repos.entries) {
+      print("=== ${kv.key}");
+    }
+    print("=======================================");
+  }
 }
 
 String? _defaultMountPoint() {

@@ -12,6 +12,7 @@ import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -157,16 +158,50 @@ class _MainPageState extends State<MainPage>
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
     /// or the MediaReceiverWindows (DropTarget), depending on the platform.
     widget.mediaReceiver.controller.stream.listen((media) {
+      // Media is a String when it is a share token.
       if (media is String) {
         loggy.app('mediaReceiver: String');
         unawaited(addRepoWithTokenDialog(context, initialTokenValue: media));
       }
 
+      // Check if the user tries to import/load a repository to Ouisync.
+      // On desktops this is drag-and-drop into the repository list, on mobile
+      // it's sharing from another application.
+      if (_cubits.repositories.showList || !PlatformValues.isDesktopDevice) {
+        var files = <String>[];
+
+        if (media is io.File) {
+          files.add(media.path);
+        } else if (media is List<SharedMediaFile>) {
+          for (final file in media) {
+            files.add(file.path);
+          }
+        }
+
+        files = files
+            .where((path) => p.extension(path) == RepoLocation.defaultExtension)
+            .toList();
+
+        if (files.isNotEmpty) {
+          unawaited(() async {
+            for (final file in files) {
+              final location = RepoLocation.fromDbPath(file);
+              await _cubits.repositories.importRepoFromLocation(location);
+            }
+          }());
+          return;
+        }
+      }
+
+      // Media is a list of SharedMediaFile when on mobile some application
+      // shares a file with Ouisync.
       if (media is List<SharedMediaFile>) {
         loggy.app('mediaReceiver: List<ShareMediaFile>');
         handleShareIntentPayload(media, _cubits.repositories);
       }
 
+      // Media is io.File when on desktops the user drags and drops a file to
+      // Ouisync.
       if (media is io.File) {
         loggy.app('mediaReceiver: io.File');
         saveMedia(media.path);
