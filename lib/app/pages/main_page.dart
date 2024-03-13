@@ -176,8 +176,6 @@ class _MainPageState extends State<MainPage>
     if (io.Platform.isWindows) {
       final dokanCheck = DokanCheck(
         requiredMayor: Constants.dokanMayorRequired,
-        requiredMinor: Constants.dokanMinorRequired,
-        requiredPatch: Constants.dokanPatchRequired,
         minimumRequiredVersion: Constants.dokanMinimunVersion,
       );
 

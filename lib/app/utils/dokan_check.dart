@@ -8,14 +8,10 @@ import 'log.dart';
 class DokanCheck with AppLogger {
   const DokanCheck({
     required this.requiredMayor,
-    required this.requiredMinor,
-    required this.requiredPatch,
     required this.minimumRequiredVersion,
   });
 
   final String requiredMayor;
-  final String requiredMinor;
-  final String requiredPatch;
   final String minimumRequiredVersion;
 
   String buildPathToFile(String fileName) {
@@ -32,8 +28,6 @@ class DokanCheck with AppLogger {
 
     final args = [
       requiredMayor,
-      requiredMinor,
-      requiredPatch,
       minimumRequiredVersion,
     ];
 
