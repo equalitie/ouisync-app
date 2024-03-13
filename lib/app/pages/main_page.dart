@@ -255,7 +255,7 @@ class _MainPageState extends State<MainPage>
                     message: dokanNotFoundMessage,
                     actions: [
                       TextButton(
-                          child: Text(S.current.actionCancel.toUpperCase()),
+                          child: Text('SKIP INSTALLATION'),
                           onPressed: () => Navigator.of(context).pop(false)),
                       TextButton(
                           child: Text(
@@ -279,6 +279,8 @@ class _MainPageState extends State<MainPage>
               'Ouisync uses Dokan ${Constants.dokanMinimunVersion} for '
               'mounting unlocked repositories as drives, which later can '
               'be found in the File Explorer.\n\n'
+              'We found a different mayor version of Dokan thant the version'
+              'required for Ouisync.\n\n'
               'We can try to install it for you';
 
           WidgetsBinding.instance.addPostFrameCallback(
@@ -290,7 +292,7 @@ class _MainPageState extends State<MainPage>
                     message: dokanDifferentMayorMessage,
                     actions: [
                       TextButton(
-                          child: Text(S.current.actionCancel.toUpperCase()),
+                          child: Text('SKIP INSTALLATION'),
                           onPressed: () => Navigator.of(context).pop(false)),
                       TextButton(
                           child: Text(
