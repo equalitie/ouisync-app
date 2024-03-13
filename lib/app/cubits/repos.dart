@@ -276,7 +276,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final existingEntry = repoById(repoId);
 
       if (existingEntry != null) {
-        if (existingEntry! is MissingRepoEntry) {
+        if (existingEntry is! MissingRepoEntry) {
           loggy.app(
               "Same repository but from different location is already loaded");
           return;

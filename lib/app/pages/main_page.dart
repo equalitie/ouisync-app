@@ -182,7 +182,7 @@ class _MainPageState extends State<MainPage>
             .where((path) => p.extension(path) == RepoLocation.defaultExtension)
             .toList();
 
-        if (!files.isEmpty) {
+        if (files.isNotEmpty) {
           unawaited(() async {
             for (final file in files) {
               final location = RepoLocation.fromDbPath(file);

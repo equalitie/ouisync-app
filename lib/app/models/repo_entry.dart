@@ -26,6 +26,7 @@ abstract class RepoEntry extends Equatable {
 class LoadingRepoEntry extends RepoEntry {
   final RepoLocation _location;
   // Only null when the repo is being created;
+  @override
   final RepoSettings? repoSettings;
 
   LoadingRepoEntry(this._location, this.repoSettings);
@@ -74,6 +75,7 @@ class MissingRepoEntry extends RepoEntry {
   final RepoLocation _location;
   final String _error;
   final String? _errorDescription;
+  @override
   final RepoSettings repoSettings;
 
   MissingRepoEntry(
@@ -98,6 +100,7 @@ class ErrorRepoEntry extends RepoEntry {
   final String _error;
   final String? _errorDescription;
   // Null only if the repo was being created and failed.
+  @override
   final RepoSettings? repoSettings;
 
   ErrorRepoEntry(
