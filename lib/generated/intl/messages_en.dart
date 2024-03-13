@@ -158,6 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionRemoveRepo":
             MessageLookupByLibrary.simpleMessage("Remove repository"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
+        "actionResetSecret": MessageLookupByLibrary.simpleMessage("Reset"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Retry"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
         "actionSaveChanges":
@@ -169,7 +170,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
         "actionStoreSecretOnDevice":
             MessageLookupByLibrary.simpleMessage("Store secret on this device"),
-        "actionSubmit": MessageLookupByLibrary.simpleMessage("Submit"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),

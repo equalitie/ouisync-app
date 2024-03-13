@@ -4720,11 +4720,11 @@ class S {
     );
   }
 
-  /// `Submit`
-  String get actionSubmit {
+  /// `Reset`
+  String get actionResetSecret {
     return Intl.message(
-      'Submit',
-      name: 'actionSubmit',
+      'Reset',
+      name: 'actionResetSecret',
       desc: '',
       args: [],
     );
