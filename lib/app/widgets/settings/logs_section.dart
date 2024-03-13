@@ -25,11 +25,13 @@ class LogsSection extends SettingsSection with AppLogger {
   final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
+  final void Function() checkForDokan;
 
   LogsSection(
     this.cubits, {
     required this.connectivityInfo,
     required this.natDetection,
+    required this.checkForDokan,
   })  : stateMonitor = cubits.repositories.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
@@ -86,7 +88,8 @@ class LogsSection extends SettingsSection with AppLogger {
                   S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
               trailing = Icon(Icons.open_in_browser);
               onTap = () {
-                unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
+                // unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
+                checkForDokan();
               };
             } else {
               reason = error.message;

@@ -1047,7 +1047,12 @@ class _MainPageState extends State<MainPage>
   Future<void> _showAppSettings() => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => SettingsPage(widget.session, _cubits)),
+          builder: (context) => SettingsPage(
+            widget.session,
+            _cubits,
+            checkForDokan,
+          ),
+        ),
       );
 
   Future<void> _showRepoSettings(

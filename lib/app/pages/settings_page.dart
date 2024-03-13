@@ -8,22 +8,34 @@ import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage(this.session, this.cubits);
+  const SettingsPage(
+    this.session,
+    this.cubits,
+    this.checkForDokan,
+  );
 
   final Session session;
   final Cubits cubits;
+  final void Function() checkForDokan;
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState(session);
+  State<SettingsPage> createState() => _SettingsPageState(
+        session,
+        checkForDokan,
+      );
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final void Function() _checkForDokan;
   final ConnectivityInfo _connectivityInfo;
   final PeerSetCubit _peerSet;
   final NatDetection _natDetection;
 
-  _SettingsPageState(Session session)
-      : _connectivityInfo = ConnectivityInfo(session),
+  _SettingsPageState(
+    Session session,
+    void Function() checkForDokan,
+  )   : _checkForDokan = checkForDokan,
+        _connectivityInfo = ConnectivityInfo(session),
         _peerSet = PeerSetCubit(session),
         _natDetection = NatDetection(session);
 
@@ -48,6 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
           connectivityInfo: _connectivityInfo,
           natDetection: _natDetection,
           peerSet: _peerSet,
+          checkForDokan: _checkForDokan,
         ),
       );
 
