@@ -264,6 +264,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       return;
     }
 
+    await repo.setSyncEnabled(true);
+
     // Check for the situation where we alredy have an entry for the repository
     // but it's location has changed. If so, reuse the existing stored secrets
     // (if any).
@@ -518,6 +520,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final repo =
           await oui.Repository.open(_session, store: store, secret: secret);
+      await repo.setSyncEnabled(true);
 
       final cubit = await RepoCubit.create(
         repoSettings: repoSettings,
@@ -584,6 +587,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         writeSecret: writeSecret,
         shareToken: token,
       );
+
+      await repo.setSyncEnabled(true);
 
       // Enable DHT and PEX by default
       await repo.setDhtEnabled(true);
