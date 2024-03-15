@@ -122,7 +122,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
       showAccessModeMessage: showAccessModeMessage,
       showSavePasswordWarning: false,
       showRepositoryNameInUseWarning: false,
-      useCacheServers: false,
+      useCacheServers: true,
     );
 
     return CreateRepositoryCubit._(reposCubit, initialState);
