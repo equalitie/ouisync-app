@@ -49,12 +49,11 @@ Future<List<Repository>> _fetchRepositories(
   Settings settings,
 ) =>
     Future.wait(
-      settings.repos().map((entry) async {
-        final repo =
-            await Repository.open(session, store: entry.location.path());
+      settings.repos.map((entry) async {
+        final repo = await Repository.open(session, store: entry.$2.path);
         await repo.setSyncEnabled(true);
         return repo;
-      }),
+      }).toList(),
     );
 
 Future<void> _waitForAllSynced(List<Repository> repos) async {

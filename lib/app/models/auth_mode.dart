@@ -112,6 +112,15 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
 
   AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
 
+  static Future<AuthModeKeyStoredOnDevice> encrypt(
+    MasterKey masterKey,
+    LocalSecretKey plainKey, {
+    required bool confirmWithBiometrics,
+  }) async {
+    final encryptedKey = await masterKey.encryptBytes(plainKey.bytes);
+    return AuthModeKeyStoredOnDevice(encryptedKey, confirmWithBiometrics);
+  }
+
   AuthModeKeyStoredOnDevice copyWith({
     String? encryptedKey,
     bool? confirmWithBiometrics,

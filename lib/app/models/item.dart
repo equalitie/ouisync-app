@@ -50,7 +50,7 @@ class RepoItem extends BaseItem {
   @override
   String get name => location.name;
   @override
-  String get path => location.path();
+  String get path => location.path;
   @override
   int get size => 0;
 
@@ -67,7 +67,7 @@ class RepoMissingItem extends BaseItem {
   @override
   String get name => location.name;
   @override
-  String get path => location.path();
+  String get path => location.path;
   @override
   int get size => 0;
 

@@ -2,25 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/master_key.dart';
 import '../../utils/utils.dart';
 import '../../models/models.dart';
 import '../../cubits/cubits.dart';
 import '../widgets.dart';
 
 class UnlockRepository extends StatelessWidget with AppLogger {
-  UnlockRepository(
-    this.reposCubit, {
+  UnlockRepository({
     required this.parentContext,
-    required this.databaseId,
-    required this.repoLocation,
+    required this.repoCubit,
+    required this.masterKey,
+    required this.passwordHasher,
     required this.isBiometricsAvailable,
     required this.isPasswordValidation,
   });
 
-  final ReposCubit reposCubit;
   final BuildContext parentContext;
-  final DatabaseId databaseId;
-  final RepoLocation repoLocation;
+  final RepoCubit repoCubit;
+  final MasterKey masterKey;
+  final PasswordHasher passwordHasher;
   final bool isBiometricsAvailable;
   final bool isPasswordValidation;
 
@@ -50,8 +51,11 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.constrainedText('"${repoLocation.name}"',
-              flex: 0, style: bodyStyle),
+          Fields.constrainedText(
+            '"${repoCubit.name}"',
+            flex: 0,
+            style: bodyStyle,
+          ),
           Dimensions.spacingVerticalDouble,
           ValueListenableBuilder(
               valueListenable: _obscurePassword,
@@ -109,29 +113,20 @@ class UnlockRepository extends StatelessWidget with AppLogger {
 
     final password = LocalPassword(passwordStr);
 
-    final repoCubit = await Dialogs.executeFutureWithLoadingDialog(
-        parentContext,
-        f: reposCubit.unlockRepository(repoLocation, password));
-
-    if (repoCubit == null) {
-      final notUnlockedResponse = UnlockRepositoryResult(
-          repoLocation: repoLocation,
-          password: password,
-          accessMode: AccessMode.blind,
-          message: S.current.messageUnlockRepoFailed);
-
-      Navigator.of(parentContext).pop(notUnlockedResponse);
-      return;
-    }
+    await Dialogs.executeFutureWithLoadingDialog(
+      parentContext,
+      f: repoCubit.unlock(password),
+    );
 
     final accessMode = repoCubit.accessMode;
 
     if (accessMode == AccessMode.blind) {
       final notUnlockedResponse = UnlockRepositoryResult(
-          repoLocation: repoLocation,
-          password: password,
-          accessMode: AccessMode.blind,
-          message: S.current.messageUnlockRepoFailed);
+        repoLocation: repoCubit.location,
+        password: password,
+        accessMode: accessMode,
+        message: S.current.messageUnlockRepoFailed,
+      );
 
       Navigator.of(parentContext).pop(notUnlockedResponse);
       return;
@@ -148,18 +143,22 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         f: () async {
           try {
             final salt = (await repoCubit.getCurrentModePasswordSalt())!;
-            final key =
-                await reposCubit.passwordHasher.hashPassword(password, salt);
-            await reposCubit.settings
-                .repoSettingsById(databaseId)!
-                .setAuthModeSecretStoredOnDevice(
-                  key,
-                  _useBiometrics.value,
-                );
+            final key = await passwordHasher.hashPassword(password, salt);
+            final authMode = await AuthModeKeyStoredOnDevice.encrypt(
+              masterKey,
+              key,
+              confirmWithBiometrics: _useBiometrics.value,
+            );
+
+            await repoCubit.setAuthMode(authMode);
             return true;
           } catch (e, st) {
             // TODO: The user should learn about the failure.
-            loggy.error('Failed to store password for repo $databaseId', e, st);
+            loggy.error(
+              'Failed to store password for repo ${repoCubit.name}',
+              e,
+              st,
+            );
             return false;
           }
         }(),
@@ -171,11 +170,11 @@ class UnlockRepository extends StatelessWidget with AppLogger {
     }
 
     final message = _useBiometrics.value
-        ? S.current.messageBiometricValidationAdded(repoLocation.name)
+        ? S.current.messageBiometricValidationAdded(repoCubit.name)
         : S.current.messageUnlockRepoOk(accessMode.name);
 
     final unlockedResponse = UnlockRepositoryResult(
-        repoLocation: repoLocation,
+        repoLocation: repoCubit.location,
         password: password,
         accessMode: accessMode,
         message: message);

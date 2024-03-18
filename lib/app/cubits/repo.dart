@@ -1,19 +1,21 @@
 // ignore_for_file: unnecessary_overrides
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
-import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf/shelf_io.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../utils/master_key.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -25,8 +27,9 @@ class RepoState extends Equatable {
   final bool isPexEnabled;
   final bool isCacheServersEnabled;
   final bool requestPassword;
-  final PasswordMode passwordMode;
-  final oui.AccessMode accessMode;
+  final RepoLocation location;
+  final AuthMode authMode;
+  final AccessMode accessMode;
   final String infoHash;
   final FolderState currentFolder;
 
@@ -38,9 +41,10 @@ class RepoState extends Equatable {
     this.isPexEnabled = false,
     this.isCacheServersEnabled = false,
     this.requestPassword = false,
-    required this.passwordMode,
+    required this.location,
+    required this.authMode,
     this.infoHash = "",
-    this.accessMode = oui.AccessMode.blind,
+    this.accessMode = AccessMode.blind,
     this.currentFolder = const FolderState(),
   });
 
@@ -53,8 +57,9 @@ class RepoState extends Equatable {
     bool? isPexEnabled,
     bool? isCacheServersEnabled,
     bool? requestPassword,
-    PasswordMode? passwordMode,
-    oui.AccessMode? accessMode,
+    RepoLocation? location,
+    AuthMode? authMode,
+    AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
   }) =>
@@ -67,7 +72,8 @@ class RepoState extends Equatable {
         isCacheServersEnabled:
             isCacheServersEnabled ?? this.isCacheServersEnabled,
         requestPassword: requestPassword ?? this.requestPassword,
-        passwordMode: passwordMode ?? this.passwordMode,
+        location: location ?? this.location,
+        authMode: authMode ?? this.authMode,
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
         currentFolder: currentFolder ?? this.currentFolder,
@@ -82,32 +88,33 @@ class RepoState extends Equatable {
         isPexEnabled,
         isCacheServersEnabled,
         requestPassword,
-        passwordMode,
+        location,
+        authMode,
         accessMode,
         infoHash,
         currentFolder,
       ];
 
-  bool get canRead => accessMode != oui.AccessMode.blind;
-  bool get canWrite => accessMode == oui.AccessMode.write;
+  bool get canRead => accessMode != AccessMode.blind;
+  bool get canWrite => accessMode == AccessMode.write;
 }
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final _currentFolder = Folder();
-  final oui.Session _session;
+  final Session _session;
   final NativeChannels _nativeChannels;
-  final oui.Repository _repo;
-  final RepoSettings _repoSettings;
   final NavigationCubit _navigation;
+  final Repository _repo;
+  final DatabaseId _databaseId;
   final Cipher _pathCipher;
   final _setCacheServersEnabledThrottle = Throttle();
 
   RepoCubit._(
     this._session,
     this._nativeChannels,
-    this._repo,
-    this._repoSettings,
     this._navigation,
+    this._repo,
+    this._databaseId,
     this._pathCipher,
     RepoState state,
   ) : super(state) {
@@ -115,19 +122,24 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   static Future<RepoCubit> create({
-    required RepoSettings repoSettings,
-    required oui.Session session,
+    required Session session,
     required NativeChannels nativeChannels,
-    required oui.Repository repo,
+    required Settings settings,
+    required Repository repo,
+    required DatabaseId databaseId,
+    required RepoLocation location,
     required NavigationCubit navigation,
   }) async {
-    var state = RepoState(passwordMode: repoSettings.authMode.passwordMode);
+    final authMode = await _readAuthMode(repo);
+
+    var state = RepoState(
+      location: location,
+      authMode: authMode,
+    );
 
     state = state.copyWith(
       infoHash: await repo.infoHash,
       accessMode: await repo.accessMode,
-      isDhtEnabled: await repo.isDhtEnabled,
-      isPexEnabled: await repo.isPexEnabled,
       isCacheServersEnabled: await repo.isCacheServersEnabled(),
     );
 
@@ -136,21 +148,19 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return RepoCubit._(
       session,
       nativeChannels,
-      repo,
-      repoSettings,
       navigation,
+      repo,
+      databaseId,
       pathCipher,
       state,
     );
   }
 
-  oui.AccessMode get accessMode => state.accessMode;
-  DatabaseId get databaseId => _repoSettings.databaseId;
-  String get name => _repoSettings.name;
+  DatabaseId get databaseId => _databaseId;
+  RepoLocation get location => state.location;
+  String get name => state.location.name;
+  AccessMode get accessMode => state.accessMode;
   String get currentFolder => _currentFolder.state.path;
-  RepoLocation get location => _repoSettings.location;
-  RepoSettings get repoSettings => _repoSettings;
-
   Stream<void> get events => _repo.events;
 
   void setCurrent() {
@@ -159,6 +169,16 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(databaseId, currentFolder, isFolder);
+  }
+
+  Future<void> enableSync() async {
+    await _repo.setSyncEnabled(true);
+
+    // DHT and PEX states can only be queried when sync is enabled, so let's do it here.
+    emit(state.copyWith(
+      isDhtEnabled: await _repo.isDhtEnabled,
+      isPexEnabled: await _repo.isPexEnabled,
+    ));
   }
 
   Future<void> setDhtEnabled(bool value) async {
@@ -196,18 +216,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     });
   }
 
-  Future<oui.Directory> openDirectory(String path) async {
-    return await oui.Directory.open(_repo, path);
-  }
-
-  void emitPasswordMode() {
-    final value = _repoSettings.authMode.passwordMode;
-    if (state.passwordMode == value) {
-      return;
-    }
-
-    emit(state.copyWith(passwordMode: value));
-  }
+  Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
 
   // This operator is required for the DropdownMenuButton to show entries properly.
   @override
@@ -220,14 +229,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
 
-  Future<oui.ShareToken> createShareToken(
-    oui.AccessMode accessMode, {
+  Future<ShareToken> createShareToken(
+    AccessMode accessMode, {
     String? password,
   }) async {
     return await _repo.createShareToken(
       accessMode: accessMode,
       name: name,
-      secret: password != null ? oui.LocalPassword(password) : null,
+      secret: password != null ? LocalPassword(password) : null,
     );
   }
 
@@ -251,9 +260,9 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return await _repo.exists(path);
   }
 
-  Future<oui.EntryType?> type(String path) => _repo.type(path);
+  Future<EntryType?> type(String path) => _repo.type(path);
 
-  Future<oui.Progress> get syncProgress => _repo.syncProgress;
+  Future<Progress> get syncProgress => _repo.syncProgress;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
@@ -272,7 +281,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.create(_repo, folderPath);
+      await Directory.create(_repo, folderPath);
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
@@ -287,7 +296,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.Directory.remove(_repo, path, recursive: recursive);
+      await Directory.remove(_repo, path, recursive: recursive);
       return true;
     } catch (e, st) {
       loggy.app('Directory $path deletion failed', e, st);
@@ -301,7 +310,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required String filePath,
     required int length,
     required Stream<List<int>> fileByteStream,
-    oui.File? currentFile,
+    File? currentFile,
   }) async {
     if (state.uploads.containsKey(filePath)) {
       showSnackBar(S.current.messageFileIsDownloading);
@@ -355,7 +364,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
-    oui.File? file;
+    File? file;
 
     try {
       file = await openFile(filePath);
@@ -385,7 +394,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final content = <BaseItem>[];
 
     // If the directory does not exist, the following command will throw.
-    final directory = await oui.Directory.open(_repo, path);
+    final directory = await Directory.open(_repo, path);
     final iterator = directory.iterator;
 
     try {
@@ -394,12 +403,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         final entryType = iterator.current.entryType;
         final entryPath = buildDestinationPath(path, entryName);
 
-        if (entryType == oui.EntryType.file) {
+        if (entryType == EntryType.file) {
           final size = await _getFileSize(entryPath);
           content.add(FileItem(name: entryName, path: entryPath, size: size));
         }
 
-        if (entryType == oui.EntryType.directory) {
+        if (entryType == EntryType.directory) {
           content.add(FolderItem(name: entryName, path: entryPath));
         }
       }
@@ -427,21 +436,21 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       // the correct write secret we end up in write mode. If it's the correct read secret we
       // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
       // in, we change the corresponding secret to `newSecret`.
-      await _repo.setAccessMode(oui.AccessMode.write, secret: oldSecret);
+      await _repo.setAccessMode(AccessMode.write, secret: oldSecret);
 
       switch (await _repo.accessMode) {
-        case oui.AccessMode.write:
+        case AccessMode.write:
           await _repo.setAccess(
-            read: oui.EnableAccess(newSecret),
-            write: oui.EnableAccess(newSecret),
+            read: EnableAccess(newSecret),
+            write: EnableAccess(newSecret),
           );
           break;
-        case oui.AccessMode.read:
+        case AccessMode.read:
           await _repo.setAccess(
-            read: oui.EnableAccess(newSecret),
+            read: EnableAccess(newSecret),
           );
           break;
-        case oui.AccessMode.blind:
+        case AccessMode.blind:
           loggy.warning('Incorrect local password');
           return false;
       }
@@ -458,20 +467,73 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   /// Returns which access mode does the given password provide.
-  Future<oui.AccessMode> getPasswordAccessMode(String password) async {
+  Future<AccessMode> getPasswordAccessMode(String password) async {
     final credentials = await _repo.credentials;
 
     try {
-      await _repo.setAccessMode(oui.AccessMode.write,
-          secret: oui.LocalPassword(password));
+      await _repo.setAccessMode(
+        AccessMode.write,
+        secret: LocalPassword(password),
+      );
       return await _repo.accessMode;
     } finally {
       await _repo.setCredentials(credentials);
     }
   }
 
+  Future<void> setAuthMode(AuthMode authMode) async {
+    await _writeAuthMode(_repo, authMode);
+    emit(state.copyWith(authMode: authMode));
+  }
+
+  // Return true if changed.
+  Future<bool> setConfirmWithBiometrics(bool value) async {
+    final authMode = state.authMode;
+
+    switch (authMode) {
+      case AuthModeBlindOrManual():
+        return false;
+      case AuthModePasswordStoredOnDevice():
+        if (authMode.confirmWithBiometrics == value) return false;
+        await setAuthMode(authMode.copyWith(confirmWithBiometrics: value));
+
+      case AuthModeKeyStoredOnDevice():
+        if (authMode.confirmWithBiometrics == value) return false;
+        await setAuthMode(authMode.copyWith(confirmWithBiometrics: value));
+    }
+
+    return true;
+  }
+
+  /// May throw if the function failed to decrypt the stored key.
+  /// Returns null if the authMode is AuthModeBlindOrManual.
+  Future<LocalSecret?> getLocalSecret(MasterKey masterKey) async {
+    final authMode = state.authMode;
+
+    switch (authMode) {
+      case AuthModeBlindOrManual():
+        return null;
+      case AuthModePasswordStoredOnDevice(encryptedPassword: final encrypted):
+        final decrypted = await masterKey.decrypt(encrypted);
+        if (decrypted == null) throw AuthModeDecryptFailed();
+        return LocalPassword(decrypted);
+      case AuthModeKeyStoredOnDevice(encryptedKey: final encrypted):
+        final decrypted = await masterKey.decryptBytes(encrypted);
+        if (decrypted == null) throw AuthModeDecryptFailed();
+        return LocalSecretKey(decrypted);
+    }
+  }
+
+  /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
+  /// what access mode the secret unlock (read or write).
+  Future<void> unlock(LocalSecret secret) =>
+      _repo.setAccessMode(AccessMode.write, secret: secret);
+
+  /// Locks the repository (switches it to blind mode)
+  Future<void> lock() => _repo.setAccessMode(AccessMode.blind);
+
   Future<int?> _getFileSize(String path) async {
-    oui.File file;
+    File file;
 
     try {
       file = await openFile(path);
@@ -498,7 +560,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final handler = createStaticFileHandler(
         encryptedHandle, mimeType, openFile, _pathCipher);
 
-    final server = await io.serve(handler, Constants.fileServerAuthority, 0);
+    final server = await serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';
 
     print('Serving file at http://$authority');
@@ -522,7 +584,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return;
     }
 
-    final ouisyncFile = await oui.File.open(_repo, sourcePath);
+    final ouisyncFile = await File.open(_repo, sourcePath);
     final length = await ouisyncFile.length;
 
     final newFile = io.File(destinationPath);
@@ -589,7 +651,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(isLoading: true));
 
     try {
-      await oui.File.remove(_repo, filePath);
+      await File.remove(_repo, filePath);
       return true;
     } catch (e, st) {
       loggy.app('Delete file $filePath failed', e, st);
@@ -633,11 +695,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   StreamSubscription<void> autoRefresh() =>
       _repo.events.listen((_) => refresh());
 
-  Future<oui.File?> _createFile(String newFilePath) async {
-    oui.File? newFile;
+  Future<File?> _createFile(String newFilePath) async {
+    File? newFile;
 
     try {
-      newFile = await oui.File.create(_repo, newFilePath);
+      newFile = await File.create(_repo, newFilePath);
     } catch (e, st) {
       loggy.app('File creation $newFilePath failed', e, st);
     }
@@ -645,7 +707,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return newFile;
   }
 
-  Future<oui.File> openFile(String path) => oui.File.open(_repo, path);
+  Future<File> openFile(String path) => File.open(_repo, path);
 
   @override
   Future<void> close() async {
@@ -655,11 +717,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<PasswordSalt?> getCurrentModePasswordSalt() async {
     switch (accessMode) {
-      case oui.AccessMode.blind:
+      case AccessMode.blind:
         return null;
-      case oui.AccessMode.read:
+      case AccessMode.read:
         return await _repo.getReadPasswordSalt();
-      case oui.AccessMode.write:
+      case AccessMode.write:
         return await _repo.getWritePasswordSalt();
     }
   }
@@ -691,6 +753,36 @@ class Throttle {
         rethrow;
       } finally {
         next = null;
+      }
+    }
+  }
+}
+
+const _authModeKey = 'authMode';
+
+Future<AuthMode> _readAuthMode(Repository repo) =>
+    repo.getMetadata(_authModeKey).then((data) => data != null
+        ? AuthMode.fromJson(json.decode(data))
+        : AuthModeBlindOrManual());
+
+Future<void> _writeAuthMode(Repository repo, AuthMode authMode) async {
+  final newValue = json.encode(authMode.toJson());
+
+  while (true) {
+    // Currently we ignore any concurrent changes and always force the new value.
+    final oldValue = await repo.getMetadata(_authModeKey);
+
+    try {
+      await repo.setMetadata({
+        _authModeKey: (oldValue: oldValue, newValue: newValue),
+      });
+
+      break;
+    } on Error catch (e) {
+      if (e.code == ErrorCode.entryChanged) {
+        continue;
+      } else {
+        rethrow;
       }
     }
   }

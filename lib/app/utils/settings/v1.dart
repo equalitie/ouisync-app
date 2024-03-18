@@ -1,6 +1,5 @@
 import 'dart:io' show Directory, Platform;
 import 'dart:convert';
-import 'dart:collection';
 
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart' as p;
@@ -25,131 +24,6 @@ class DatabaseId extends Equatable {
 
 //--------------------------------------------------------------------
 
-//--------------------------------------------------------------------
-
-class SettingsRepoEntry {
-  AuthMode authMode;
-  RepoLocation location;
-
-  String get name => location.name;
-  Directory get dir => location.dir;
-
-  SettingsRepoEntry(this.authMode, this.location);
-
-  Map toJson() {
-    return {
-      'authMode': authMode.toJson(),
-      'location': location.path(),
-    };
-  }
-
-  // May throw.
-  factory SettingsRepoEntry.fromJson(dynamic data) {
-    final authMode = data['authMode'];
-    final location = data['location'];
-
-    if (authMode == null || location == null) {
-      throw FailedToParseSettingsRepoEntry();
-    }
-    return SettingsRepoEntry(
-      AuthMode.fromJson(authMode),
-      RepoLocation.fromDbPath(location),
-    );
-  }
-}
-
-//--------------------------------------------------------------------
-Future<AuthMode> _secretToAuthModeStoredOnDevice(
-  LocalSecretKey key,
-  MasterKey masterKey,
-  bool requireAuthentication,
-) async {
-  final encryptedKey = await masterKey.encryptBytes(key.bytes);
-  return AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
-}
-//--------------------------------------------------------------------
-
-class RepoSettings {
-  final Settings _settings;
-  final DatabaseId _databaseId;
-  final SettingsRepoEntry _entry;
-
-  RepoSettings(this._settings, this._databaseId, this._entry);
-
-  RepoLocation get location => _entry.location;
-  DatabaseId get databaseId => _databaseId;
-  String get name => _entry.name;
-  Directory get dir => _entry.dir;
-  AuthMode get authMode => _entry.authMode;
-
-  Future<void> setAuthModePasswordProvidedByUser() async {
-    _entry.authMode = AuthModeBlindOrManual();
-    await _settings._storeRoot();
-  }
-
-  Future<void> setAuthModeSecretStoredOnDevice(
-    LocalSecretKey secret,
-    bool requireAuthentication,
-  ) async {
-    _entry.authMode = await _secretToAuthModeStoredOnDevice(
-      secret,
-      _settings._masterKey,
-      requireAuthentication,
-    );
-    await _settings._storeRoot();
-  }
-
-  Future<void> setLocation(RepoLocation location) async {
-    _entry.location = location;
-    await _settings._storeRoot();
-  }
-
-  // Return true if changed.
-  Future<bool> setConfirmWithBiometrics(bool value) async {
-    final authMode = _entry.authMode;
-
-    switch (authMode) {
-      case AuthModeBlindOrManual():
-        return false;
-      case AuthModePasswordStoredOnDevice():
-        if (authMode.confirmWithBiometrics == value) {
-          return false;
-        }
-        _entry.authMode = authMode.copyWith(confirmWithBiometrics: value);
-      case AuthModeKeyStoredOnDevice():
-        if (authMode.confirmWithBiometrics == value) {
-          return false;
-        }
-        _entry.authMode = authMode.copyWith(confirmWithBiometrics: value);
-    }
-
-    await _settings._storeRoot();
-    return true;
-  }
-
-  /// May throw if the function failed to decrypt the stored key.
-  /// Returns null if the authMode is _AuthModeBlindOrManual.
-  Future<LocalSecret?> getLocalSecret() async {
-    final authMode = _entry.authMode;
-    switch (authMode) {
-      case AuthModeBlindOrManual():
-        return null;
-      case AuthModePasswordStoredOnDevice():
-        final pwd =
-            await _settings._masterKey.decrypt(authMode.encryptedPassword);
-        if (pwd == null) throw AuthModeDecryptFailed();
-        return LocalPassword(pwd);
-      case AuthModeKeyStoredOnDevice():
-        final key =
-            await _settings._masterKey.decryptBytes(authMode.encryptedKey);
-        if (key == null) throw AuthModeDecryptFailed();
-        return LocalSecretKey(key);
-    }
-  }
-}
-
-//--------------------------------------------------------------------
-
 class SettingsRoot {
   static const int version = 1;
 
@@ -163,7 +37,7 @@ class SettingsRoot {
   // NOTE: In order to preserve plausible deniability, once the current repo is
   // locked in _AuthModeBlindOrManual, this value must set to `null`.
   DatabaseId? currentRepo;
-  Map<DatabaseId, SettingsRepoEntry> repos = {};
+  Map<DatabaseId, RepoLocation> repos = {};
 
   SettingsRoot._();
 
@@ -186,8 +60,8 @@ class SettingsRoot {
       'enableSyncOnMobileInternet': enableSyncOnMobileInternet,
       'highestSeenProtocolNumber': highestSeenProtocolNumber,
       'currentRepo': currentRepo?.toString(),
-      'repos': <String, dynamic>{
-        for (var kv in repos.entries) kv.key.toString(): kv.value.toJson()
+      'repos': <String, Object?>{
+        for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
     };
     return r;
@@ -206,9 +80,9 @@ class SettingsRoot {
       throw "Invalid settings version ($inputVersion)";
     }
 
-    final repos = <DatabaseId, SettingsRepoEntry>{
+    final repos = {
       for (var kv in data['repos']!.entries)
-        DatabaseId(kv.key): SettingsRepoEntry.fromJson(kv.value)
+        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
     };
 
     String? currentRepo = data['currentRepo'];
@@ -228,20 +102,23 @@ class SettingsRoot {
 class Settings with AppLogger {
   static const String settingsKey = "settings";
 
+  final MasterKey masterKey;
+
   final SettingsRoot _root;
   final SharedPreferences _prefs;
-  final MasterKey _masterKey;
 
   //------------------------------------------------------------------
 
-  Settings._(this._root, this._prefs, this._masterKey);
+  Settings._(this._root, this._prefs, this.masterKey);
 
   Future<void> _storeRoot() async {
     await _prefs.setString(settingsKey, json.encode(_root.toJson()));
   }
 
   static Future<Settings> init(
-      SharedPreferences prefs, MasterKey masterKey) async {
+    SharedPreferences prefs,
+    MasterKey masterKey,
+  ) async {
     final json = prefs.getString(settingsKey);
     final root = SettingsRoot.fromJson(json);
 
@@ -255,7 +132,9 @@ class Settings with AppLogger {
   }
 
   static Future<Settings> initMigrateFromV0(
-      SharedPreferences prefs, MasterKey masterKey) async {
+    SharedPreferences prefs,
+    MasterKey masterKey,
+  ) async {
     final s0 = await v0.Settings.init(prefs);
     final eqValues = s0.getEqualitieValues();
     final showOnboarding = s0.getShowOnboarding();
@@ -264,7 +143,7 @@ class Settings with AppLogger {
     final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
     final currentRepo = s0.getDefaultRepo();
 
-    final Map<DatabaseId, SettingsRepoEntry> repos = HashMap();
+    final Map<DatabaseId, RepoLocation> repos = {};
 
     for (final repo in s0.repos()) {
       final id = DatabaseId(repo.databaseId);
@@ -299,9 +178,8 @@ class Settings with AppLogger {
         await oldPwdStorage.deletePassword();
       }
       // The old settings did not include the '.db' extension in RepoLocation.
-      final pathWithoutExt = repo.info.path();
-      final locationWithExt = RepoLocation.fromDbPath("$pathWithoutExt.db");
-      repos[id] = SettingsRepoEntry(newAuth, locationWithExt);
+      final pathWithoutExt = repo.info.path;
+      repos[id] = RepoLocation.fromDbPath("$pathWithoutExt.db");
     }
 
     final root = SettingsRoot(
@@ -381,35 +259,42 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  Iterable<RepoSettings> repos() =>
-      _root.repos.entries.map((kv) => RepoSettings(this, kv.key, kv.value));
+  Iterable<(DatabaseId id, RepoLocation location)> get repos =>
+      _root.repos.entries.map((entry) => (entry.key, entry.value));
 
   //------------------------------------------------------------------
 
-  RepoSettings? repoSettingsByLocation(RepoLocation location) {
-    for (final kv in _root.repos.entries) {
-      if (kv.value.location == location) {
-        return RepoSettings(this, kv.key, kv.value);
-      }
+  RepoLocation? getRepoLocation(DatabaseId repoId) => _root.repos[repoId];
+
+  Future<void> setRepoLocation(DatabaseId repoId, RepoLocation location) async {
+    _root.repos[repoId] = location;
+    await _storeRoot();
+  }
+
+  DatabaseId? findRepoByLocation(RepoLocation location) => _root.repos.entries
+      .where((entry) => entry.value == location)
+      .map((entry) => entry.key)
+      .firstOrNull;
+
+  Future<void> renameRepo(
+    DatabaseId repoId,
+    RepoLocation newLocation,
+  ) async {
+    if (findRepoByLocation(newLocation) != null) {
+      throw 'Failed to rename repo: "${newLocation.path}" already exists';
     }
 
-    return null;
-  }
-
-  RepoSettings? repoSettingsById(DatabaseId repoId) {
-    final entry = _root.repos[repoId];
-    if (entry == null) return null;
-    return RepoSettings(this, repoId, entry);
+    await setRepoLocation(repoId, newLocation);
   }
 
   //------------------------------------------------------------------
 
-  RepoLocation? getDefaultRepo() {
+  RepoLocation? get defaultRepo {
     final current = _root.currentRepo;
     if (current == null) {
       return null;
     } else {
-      return _root.repos[current]?.location;
+      return _root.repos[current];
     }
   }
 
@@ -420,83 +305,26 @@ class Settings with AppLogger {
       }
       _root.currentRepo = null;
     } else {
-      final rs = repoSettingsByLocation(location);
-      if (rs == null || rs.location == location) {
-        return;
-      }
-      // We must not set repositories for which the user provides the password
-      // as "default" because they must be indistinguishable from blind
-      // repositories.
-      if (rs.authMode.passwordMode == PasswordMode.manual) {
-        return;
-      }
-      _root.currentRepo = rs.databaseId;
+      final id = findRepoByLocation(location);
+      if (id == null) return;
+
+      // TODO: what about this?
+      //// We must not set repositories for which the user provides the password
+      //// as "default" because they must be indistinguishable from blind
+      //// repositories.
+      //if (rs.authMode.passwordMode == PasswordMode.manual) {
+      //  return;
+      //}
+
+      _root.currentRepo = id;
     }
 
-    await _storeRoot();
-  }
-  //------------------------------------------------------------------
-
-  Future<void> renameRepository(
-      RepoSettings repoSettings, RepoLocation newLocation) async {
-    if (repoSettings.location == newLocation) {
-      // TODO: This should just return without throwing, but check where it's used.
-      throw 'Failed to rename repo: "${newLocation.path()}" to same name';
-    }
-
-    if (repoSettingsByLocation(newLocation) != null) {
-      throw 'Failed to rename repo: "${newLocation.path()}" already exists';
-    }
-
-    repoSettings._entry.location = newLocation;
     await _storeRoot();
   }
 
   //------------------------------------------------------------------
 
-  Future<RepoSettings?> addRepoWithSecretStoredOnDevice(
-      RepoLocation location, LocalSecretKey secret, DatabaseId databaseId,
-      {required requireBiometricCheck}) async {
-    final authMode = await _secretToAuthModeStoredOnDevice(
-        secret, _masterKey, requireBiometricCheck);
-    return await _addRepo(location, databaseId: databaseId, authMode: authMode);
-  }
-
-  Future<RepoSettings?> addRepoWithUserProvidedPassword(
-    RepoLocation location,
-    DatabaseId databaseId,
-  ) async {
-    final authMode = AuthModeBlindOrManual();
-    return await _addRepo(location, databaseId: databaseId, authMode: authMode);
-  }
-
-  Future<RepoSettings?> _addRepo(
-    RepoLocation location, {
-    required DatabaseId databaseId,
-    required AuthMode authMode,
-  }) async {
-    if (_root.repos.containsKey(databaseId)) {
-      loggy.debug('Settings already contains a repo with the id "$databaseId"');
-      return null;
-    }
-
-    if (repoSettingsByLocation(location) != null) {
-      loggy.debug(
-          'Settings already contains a repo with the location "${location.path()}"');
-      return null;
-    }
-
-    final entry = SettingsRepoEntry(authMode, location);
-    _root.repos[databaseId] = entry;
-
-    await _storeRoot();
-
-    return RepoSettings(this, databaseId, entry);
-  }
-
-  //------------------------------------------------------------------
-
-  Future<void> forgetRepository(DatabaseId databaseId) async {
+  Future<void> forgetRepo(DatabaseId databaseId) async {
     if (_root.currentRepo == databaseId) {
       _root.currentRepo = null;
     }
@@ -568,7 +396,3 @@ String? _defaultMountPoint() {
     return null;
   }
 }
-
-sealed class SettingsError {}
-
-class FailedToParseSettingsRepoEntry extends SettingsError {}

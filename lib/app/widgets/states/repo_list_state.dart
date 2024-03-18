@@ -34,8 +34,11 @@ class RepoListState extends StatelessWidget
     return _buildRepoList(context, repoList, reposCubit.currentRepoName);
   }
 
-  Widget _buildRepoList(BuildContext parentContext, List<RepoEntry> reposList,
-          String? currentRepoName) =>
+  Widget _buildRepoList(
+    BuildContext parentContext,
+    List<RepoEntry> reposList,
+    String? currentRepoName,
+  ) =>
       ValueListenableBuilder(
           valueListenable: bottomPaddingWithBottomSheet,
           builder: (context, value, child) => ListView.separated(
@@ -45,40 +48,41 @@ class RepoListState extends StatelessWidget
               itemCount: reposList.length,
               itemBuilder: (context, index) {
                 final repoEntry = reposList.elementAt(index);
-                bool isDefault = currentRepoName == repoEntry.name;
+                final isDefault = currentRepoName == repoEntry.name;
+                final repoCubit = repoEntry.cubit;
 
-                if (repoEntry.maybeCubit == null) {
+                if (repoCubit == null) {
                   final repoMissingItem = RepoMissingItem(repoEntry.location,
                       message: S.current.messageRepoMissing);
 
                   return ListItem(
                       reposCubit: null,
-                      repository: null,
+                      repoCubit: null,
                       itemData: repoMissingItem,
                       mainAction: () {},
-                      verticalDotsAction: () async => deleteRepository(context,
-                          repositoryLocation: repoEntry.location,
-                          reposCubit: reposCubit));
+                      verticalDotsAction: () async => deleteRepository(
+                            context,
+                            reposCubit: reposCubit,
+                            repoLocation: repoEntry.location,
+                          ));
                 }
 
-                final repoItem = RepoItem(repoEntry.location,
-                    accessMode: repoEntry.accessMode, isDefault: isDefault);
+                final repoItem = RepoItem(
+                  repoEntry.location,
+                  accessMode: repoEntry.accessMode,
+                  isDefault: isDefault,
+                );
 
                 final listItem = ListItem(
-                    reposCubit: reposCubit,
-                    repository: repoEntry.maybeCubit!,
-                    itemData: repoItem,
-                    mainAction: () async {
-                      await reposCubit.setCurrentByLocation(repoEntry.location);
-                    },
-                    verticalDotsAction: () async {
-                      final cubit = repoEntry.maybeCubit;
-                      if (cubit == null) {
-                        return;
-                      }
-
-                      await onShowRepoSettings(parentContext, repoCubit: cubit);
-                    });
+                  reposCubit: reposCubit,
+                  repoCubit: repoCubit,
+                  itemData: repoItem,
+                  mainAction: () async {
+                    await reposCubit.setCurrentByLocation(repoEntry.location);
+                  },
+                  verticalDotsAction: () =>
+                      onShowRepoSettings(parentContext, repoCubit: repoCubit),
+                );
 
                 return listItem;
               }));

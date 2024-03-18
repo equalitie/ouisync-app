@@ -393,7 +393,7 @@ class _MainPageState extends State<MainPage>
   Widget buildMainWidget() {
     return _cubits.repositories.builder((repos) {
       final currentRepo = repos.currentRepo;
-      final currentRepoCubit = currentRepo?.maybeCubit;
+      final currentRepoCubit = currentRepo?.cubit;
 
       if (currentRepoCubit != null) {
         final isFolder = !repos.showList;
@@ -487,7 +487,7 @@ class _MainPageState extends State<MainPage>
           children: <Widget>[
             Column(children: [Expanded(child: buildMainWidget())]),
             _cubits.repositories.builder(
-              (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit),
+              (repos) => RepositoryProgress(repos.currentRepo?.cubit),
             ),
             const ListenerThatRunsFunctionsWithBuildContext(),
           ],
@@ -553,7 +553,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildRepoSettingsIcon() =>
       Fields.actionIcon(const Icon(Icons.more_vert_rounded),
           onPressed: () async {
-        final cubit = _currentRepo?.maybeCubit;
+        final cubit = _currentRepo?.cubit;
         if (cubit == null) {
           return;
         }
@@ -605,10 +605,12 @@ class _MainPageState extends State<MainPage>
 
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
-        return LockedRepositoryState(context,
-            reposCubit: _cubits.repositories,
-            databaseId: current.databaseId,
-            repoLocation: current.location);
+        return LockedRepositoryState(
+          parentContext: context,
+          repoCubit: current.cubit,
+          masterKey: widget.settings.masterKey,
+          passwordHasher: PasswordHasher(widget.session),
+        );
       }
 
       _appSettingsIconFocus.unfocus();
@@ -764,7 +766,7 @@ class _MainPageState extends State<MainPage>
                 final listItem = ListItem(
                     key: ValueKey(item.name),
                     reposCubit: null,
-                    repository: currentRepo,
+                    repoCubit: currentRepo,
                     itemData: item,
                     mainAction: actionByType,
                     verticalDotsAction: () async {
@@ -1100,7 +1102,8 @@ class _MainPageState extends State<MainPage>
         builder: (context) {
           return RepositorySettings(
             context: context,
-            cubit: repoCubit,
+            settings: widget.settings,
+            repoCubit: repoCubit,
             reposCubit: _cubits.repositories,
           );
         },

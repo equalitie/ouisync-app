@@ -4,7 +4,6 @@ import '../master_key.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef DatabaseId = v1.DatabaseId;
-typedef RepoSettings = v1.RepoSettings;
 typedef Settings = v1.Settings;
 
 Future<Settings> loadAndMigrateSettings() async {

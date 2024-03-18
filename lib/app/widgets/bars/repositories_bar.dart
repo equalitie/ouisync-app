@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
@@ -91,10 +90,7 @@ class RepositoriesBar extends StatelessWidget
                   IconButton(
                     icon: Icon(icon),
                     iconSize: Dimensions.sizeIconSmall,
-                    onPressed: () async {
-                      if (entry == null) return;
-                      await lockRepository(entry, _cubits.repositories);
-                    },
+                    onPressed: () => entry?.cubit?.lock(),
                   ),
                   Fields.constrainedText(_repoName(entry),
                       softWrap: false, textOverflow: TextOverflow.fade)

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -10,14 +9,14 @@ class ListItem extends StatelessWidget with AppLogger {
   const ListItem({
     super.key,
     required this.reposCubit,
-    required this.repository,
+    required this.repoCubit,
     required this.itemData,
     required this.mainAction,
     required this.verticalDotsAction,
   });
 
   final ReposCubit? reposCubit;
-  final RepoCubit? repository;
+  final RepoCubit? repoCubit;
   final BaseItem itemData;
   final Function mainAction;
   final Function verticalDotsAction;
@@ -73,12 +72,8 @@ class ListItem extends StatelessWidget with AppLogger {
                   size: Dimensions.sizeIconAverage),
               color: Constants.folderIconColor,
               padding: EdgeInsets.all(0.0),
-              onPressed: () async {
-                final repos = reposCubit;
-                final entry = repos?.get(repoItem.location);
-                if (entry == null || repos == null) return;
-                await lockRepository(entry, repos);
-              },
+              onPressed: () =>
+                  reposCubit?.get(repoItem.location)?.cubit?.lock(),
             )),
         Expanded(
             flex: 9,
@@ -91,14 +86,14 @@ class ListItem extends StatelessWidget with AppLogger {
   }
 
   Widget _buildFileItem(FileItem fileData) {
-    assert(repository != null, "Repository object for FileItem is null");
+    assert(repoCubit != null, "Repository object for FileItem is null");
 
-    if (repository == null) {
+    if (repoCubit == null) {
       return SizedBox.shrink();
     }
 
-    final uploadJob = repository!.state.uploads[fileData.path];
-    final downloadJob = repository!.state.downloads[fileData.path];
+    final uploadJob = repoCubit!.state.uploads[fileData.path];
+    final downloadJob = repoCubit!.state.downloads[fileData.path];
 
     final isUploading = uploadJob != null;
 
@@ -110,7 +105,7 @@ class ListItem extends StatelessWidget with AppLogger {
             flex: 9,
             child: Padding(
                 padding: Dimensions.paddingItem,
-                child: FileDescription(repository!, fileData, uploadJob))),
+                child: FileDescription(repoCubit!, fileData, uploadJob))),
         _getVerticalMenuAction(isUploading)
       ],
     );

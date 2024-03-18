@@ -23,15 +23,9 @@ class RepoLocation extends Equatable implements Comparable<RepoLocation> {
     return RepoLocation._(dir.path, repoName, defaultExtension);
   }
 
-  String path() {
-    return p.join(_dir, "$_name$_ext");
-  }
-
-  String pathWithoutExt() {
-    return p.join(_dir, _name);
-  }
-
   String get name => _name;
+  String get path => p.join(_dir, "$_name$_ext");
+  String get pathWithoutExtension => p.join(_dir, _name);
 
   io.Directory get dir => io.Directory(_dir);
 
@@ -39,13 +33,24 @@ class RepoLocation extends Equatable implements Comparable<RepoLocation> {
 
   @override
   List<Object> get props => [
-        _dir,
         _name,
+        _dir,
         _ext,
       ];
 
-  // Comparing by name first.
+  /// Comparing by name first.
   @override
-  int compareTo(RepoLocation other) =>
-      "$_name$_ext$_dir".compareTo("${other._name}${other._ext}${other._dir}");
+  int compareTo(RepoLocation other) {
+    final byName = _name.compareTo(other._name);
+    if (byName != 0) {
+      return byName;
+    }
+
+    final byExt = _ext.compareTo(other._ext);
+    if (byExt != 0) {
+      return byExt;
+    }
+
+    return _dir.compareTo(other._dir);
+  }
 }
