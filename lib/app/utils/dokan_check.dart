@@ -5,6 +5,8 @@ import 'package:path/path.dart' as p;
 import 'constants.dart';
 import 'log.dart';
 
+const String msiOuisyncAssetsFolder = 'data\\ouisync_assets';
+
 class DokanCheck with AppLogger {
   const DokanCheck({
     required this.requiredMayor,
@@ -16,9 +18,7 @@ class DokanCheck with AppLogger {
 
   String buildPathToFile(String fileName) {
     final root = p.dirname(io.Platform.resolvedExecutable);
-    final assetsPath = 'data\\flutter_assets\\assets';
-
-    return p.join(root, assetsPath, fileName);
+    return p.join(root, msiOuisyncAssetsFolder, fileName);
   }
 
   DokanCheckResult checkDokanInstallation() {
