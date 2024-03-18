@@ -72,7 +72,7 @@ mixin RepositoryActionsMixin on LoggyType {
     required void Function() popDialog,
   }) async {
     final repoSettings = repository.repoSettings;
-    final passwordMode = repoSettings.passwordMode;
+    final passwordMode = repoSettings.authMode.passwordMode;
 
     LocalSecret secret;
 
@@ -197,7 +197,7 @@ mixin RepositoryActionsMixin on LoggyType {
       {required DatabaseId databaseId,
       required RepoLocation repoLocation}) async {
     final repoSettings = reposCubit.settings.repoSettingsById(databaseId)!;
-    final passwordMode = repoSettings.passwordMode;
+    final passwordMode = repoSettings.authMode.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
       final unlockResult = await unlockRepositoryManually(context, reposCubit,

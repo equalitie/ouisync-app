@@ -25,127 +25,6 @@ class DatabaseId extends Equatable {
 
 //--------------------------------------------------------------------
 
-sealed class AuthMode {
-  Map _toJson();
-
-  // May throw.
-  static AuthMode fromJson(dynamic data) {
-    var decoded = _AuthModeBlindOrManual._fromJson(data);
-    if (decoded != null) return decoded;
-    decoded = _AuthModePasswordStoredOnDevice._fromJson(data);
-    if (decoded != null) return decoded;
-    decoded = _AuthModeKeyStoredOnDevice._fromJson(data);
-    if (decoded == null) throw FailedToParseAuthMode();
-    return decoded;
-  }
-}
-
-class _AuthModeBlindOrManual extends AuthMode {
-  static String _tag() => "password-provided-by-user";
-
-  @override
-  Map _toJson() => {
-        _tag(): null,
-      };
-
-  static AuthMode? _fromJson(dynamic data) {
-    if (data.containsKey(_tag())) {
-      return _AuthModeBlindOrManual();
-    } else {
-      return null;
-    }
-  }
-}
-
-// This is a legacy AuthMode, we used to generate high entropy (24 characters:
-// upper and lower case letters, numbers, special chars) passwords and store
-// those encrypted.  Because those passwords were high entropy, the fact that
-// we did not run them through a password hashing function before encryption
-// perhaps was not such a tragedy. And they still need to go through Argon2
-// when passed to Ouisync library. Still, LocalSecretKey has much higher
-// entropy (256-bits) and so only that is now used.  TODO: Should we force
-// reset existing repos that use this legacy auth mode to use secret keys?
-class _AuthModePasswordStoredOnDevice extends AuthMode {
-  final String encryptedPassword;
-  final bool confirmWithBiometrics;
-
-  _AuthModePasswordStoredOnDevice(
-      this.encryptedPassword, this.confirmWithBiometrics);
-
-  _AuthModePasswordStoredOnDevice copyWith(
-          {String? encryptedPassword, bool? confirmWithBiometrics}) =>
-      _AuthModePasswordStoredOnDevice(
-          encryptedPassword ?? this.encryptedPassword,
-          confirmWithBiometrics ?? this.confirmWithBiometrics);
-
-  // May throw.
-  Future<LocalPassword> getRepositoryPassword(MasterKey masterKey) async {
-    final decrypted = await masterKey.decrypt(encryptedPassword);
-    if (decrypted == null) throw FailedToDecryptError();
-    return LocalPassword(decrypted);
-  }
-
-  static String _tag() => "password-stored-on-device";
-
-  @override
-  Map _toJson() => {
-        _tag(): {
-          "encryptedPassword": encryptedPassword,
-          "confirmWithBiometrics": confirmWithBiometrics,
-        }
-      };
-
-  static AuthMode? _fromJson(dynamic data) {
-    final values = data[_tag()];
-    if (values == null) return null;
-    String? encryptedPassword = values["encryptedPassword"];
-    if (encryptedPassword == null) return null;
-    bool? confirmWithBiometrics = values["confirmWithBiometrics"];
-    if (confirmWithBiometrics == null) return null;
-    return _AuthModePasswordStoredOnDevice(
-        encryptedPassword, confirmWithBiometrics);
-  }
-}
-
-class _AuthModeKeyStoredOnDevice extends AuthMode {
-  final String encryptedKey;
-  final bool confirmWithBiometrics;
-
-  _AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
-
-  _AuthModeKeyStoredOnDevice copyWith(
-          {String? encryptedKey, bool? confirmWithBiometrics}) =>
-      _AuthModeKeyStoredOnDevice(encryptedKey ?? this.encryptedKey,
-          confirmWithBiometrics ?? this.confirmWithBiometrics);
-
-  // May throw.
-  Future<LocalSecretKey> getRepositoryPassword(MasterKey masterKey) async {
-    final decrypted = await masterKey.decryptBytes(encryptedKey);
-    if (decrypted == null) throw FailedToDecryptError();
-    return LocalSecretKey(decrypted);
-  }
-
-  static String _tag() => "key-stored-on-device";
-
-  @override
-  Map _toJson() => {
-        _tag(): {
-          "encryptedKey": encryptedKey,
-          "confirmWithBiometrics": confirmWithBiometrics,
-        }
-      };
-
-  static AuthMode? _fromJson(dynamic data) {
-    final values = data[_tag()];
-    if (values == null) return null;
-    String? encryptedKey = values["encryptedKey"];
-    if (encryptedKey == null) return null;
-    bool? confirmWithBiometrics = values["confirmWithBiometrics"];
-    if (confirmWithBiometrics == null) return null;
-    return _AuthModeKeyStoredOnDevice(encryptedKey, confirmWithBiometrics);
-  }
-}
-
 //--------------------------------------------------------------------
 
 class SettingsRepoEntry {
@@ -159,7 +38,7 @@ class SettingsRepoEntry {
 
   Map toJson() {
     return {
-      'authMode': authMode._toJson(),
+      'authMode': authMode.toJson(),
       'location': location.path(),
     };
   }
@@ -168,6 +47,7 @@ class SettingsRepoEntry {
   factory SettingsRepoEntry.fromJson(dynamic data) {
     final authMode = data['authMode'];
     final location = data['location'];
+
     if (authMode == null || location == null) {
       throw FailedToParseSettingsRepoEntry();
     }
@@ -180,9 +60,12 @@ class SettingsRepoEntry {
 
 //--------------------------------------------------------------------
 Future<AuthMode> _secretToAuthModeStoredOnDevice(
-    LocalSecretKey key, MasterKey masterKey, bool requireAuthentication) async {
+  LocalSecretKey key,
+  MasterKey masterKey,
+  bool requireAuthentication,
+) async {
   final encryptedKey = await masterKey.encryptBytes(key.bytes);
-  return _AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
+  return AuthModeKeyStoredOnDevice(encryptedKey, requireAuthentication);
 }
 //--------------------------------------------------------------------
 
@@ -197,33 +80,23 @@ class RepoSettings {
   DatabaseId get databaseId => _databaseId;
   String get name => _entry.name;
   Directory get dir => _entry.dir;
+  AuthMode get authMode => _entry.authMode;
 
   Future<void> setAuthModePasswordProvidedByUser() async {
-    _entry.authMode = _AuthModeBlindOrManual();
+    _entry.authMode = AuthModeBlindOrManual();
     await _settings._storeRoot();
   }
 
   Future<void> setAuthModeSecretStoredOnDevice(
-      LocalSecretKey secret, bool requireAuthentication) async {
+    LocalSecretKey secret,
+    bool requireAuthentication,
+  ) async {
     _entry.authMode = await _secretToAuthModeStoredOnDevice(
-        secret, _settings._masterKey, requireAuthentication);
+      secret,
+      _settings._masterKey,
+      requireAuthentication,
+    );
     await _settings._storeRoot();
-  }
-
-  bool hasLocalSecret() {
-    return _entry.authMode is _AuthModePasswordStoredOnDevice ||
-        _entry.authMode is _AuthModeKeyStoredOnDevice;
-  }
-
-  bool shouldCheckBiometricsBeforeUnlock() {
-    final authMode = _entry.authMode;
-    if (authMode is _AuthModePasswordStoredOnDevice) {
-      return authMode.confirmWithBiometrics;
-    }
-    if (authMode is _AuthModeKeyStoredOnDevice) {
-      return authMode.confirmWithBiometrics;
-    }
-    return false;
   }
 
   Future<void> setLocation(RepoLocation location) async {
@@ -236,14 +109,14 @@ class RepoSettings {
     final authMode = _entry.authMode;
 
     switch (authMode) {
-      case _AuthModeBlindOrManual():
+      case AuthModeBlindOrManual():
         return false;
-      case _AuthModePasswordStoredOnDevice():
+      case AuthModePasswordStoredOnDevice():
         if (authMode.confirmWithBiometrics == value) {
           return false;
         }
         _entry.authMode = authMode.copyWith(confirmWithBiometrics: value);
-      case _AuthModeKeyStoredOnDevice():
+      case AuthModeKeyStoredOnDevice():
         if (authMode.confirmWithBiometrics == value) {
           return false;
         }
@@ -259,26 +132,20 @@ class RepoSettings {
   Future<LocalSecret?> getLocalSecret() async {
     final authMode = _entry.authMode;
     switch (authMode) {
-      case _AuthModeBlindOrManual():
+      case AuthModeBlindOrManual():
         return null;
-      case _AuthModePasswordStoredOnDevice():
+      case AuthModePasswordStoredOnDevice():
         final pwd =
             await _settings._masterKey.decrypt(authMode.encryptedPassword);
-        if (pwd == null) throw FailedToDecryptError();
+        if (pwd == null) throw AuthModeDecryptFailed();
         return LocalPassword(pwd);
-      case _AuthModeKeyStoredOnDevice():
+      case AuthModeKeyStoredOnDevice():
         final key =
             await _settings._masterKey.decryptBytes(authMode.encryptedKey);
-        if (key == null) throw FailedToDecryptError();
+        if (key == null) throw AuthModeDecryptFailed();
         return LocalSecretKey(key);
     }
   }
-
-  PasswordMode get passwordMode => !hasLocalSecret()
-      ? PasswordMode.manual
-      : shouldCheckBiometricsBeforeUnlock()
-          ? PasswordMode.bio
-          : PasswordMode.none;
 }
 
 //--------------------------------------------------------------------
@@ -406,20 +273,26 @@ class Settings with AppLogger {
       v0.SecureStorage? oldPwdStorage;
       switch (auth) {
         case v0.AuthMode.manual:
-          newAuth = _AuthModeBlindOrManual();
+          newAuth = AuthModeBlindOrManual();
         case v0.AuthMode.version1:
         case v0.AuthMode.version2:
           oldPwdStorage = v0.SecureStorage(databaseId: id);
           final password = await oldPwdStorage.tryGetPassword(
-              authMode: v0.AuthMode.noLocalPassword);
-          newAuth = _AuthModePasswordStoredOnDevice(
-              (await masterKey.encrypt(password!)), true);
+            authMode: v0.AuthMode.noLocalPassword,
+          );
+          newAuth = AuthModePasswordStoredOnDevice(
+            await masterKey.encrypt(password!),
+            true,
+          );
         case v0.AuthMode.noLocalPassword:
           oldPwdStorage = v0.SecureStorage(databaseId: id);
           final password = await oldPwdStorage.tryGetPassword(
-              authMode: v0.AuthMode.noLocalPassword);
-          newAuth = _AuthModePasswordStoredOnDevice(
-              (await masterKey.encrypt(password!)), false);
+            authMode: v0.AuthMode.noLocalPassword,
+          );
+          newAuth = AuthModePasswordStoredOnDevice(
+            await masterKey.encrypt(password!),
+            false,
+          );
       }
       // Remove the password from the old storage.
       if (oldPwdStorage != null) {
@@ -554,7 +427,7 @@ class Settings with AppLogger {
       // We must not set repositories for which the user provides the password
       // as "default" because they must be indistinguishable from blind
       // repositories.
-      if (rs.passwordMode == PasswordMode.manual) {
+      if (rs.authMode.passwordMode == PasswordMode.manual) {
         return;
       }
       _root.currentRepo = rs.databaseId;
@@ -593,7 +466,7 @@ class Settings with AppLogger {
     RepoLocation location,
     DatabaseId databaseId,
   ) async {
-    final authMode = _AuthModeBlindOrManual();
+    final authMode = AuthModeBlindOrManual();
     return await _addRepo(location, databaseId: databaseId, authMode: authMode);
   }
 
@@ -698,10 +571,4 @@ String? _defaultMountPoint() {
 
 sealed class SettingsError {}
 
-class FailedToDecryptError extends SettingsError {}
-
-class FailedToParseAuthMode extends SettingsError {}
-
 class FailedToParseSettingsRepoEntry extends SettingsError {}
-
-class StoringPasswordsIsNoLongerSupported extends SettingsError {}

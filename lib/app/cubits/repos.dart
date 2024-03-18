@@ -225,8 +225,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }) async {
     LocalSecret? secret;
 
-    if (repoSettings.hasLocalSecret() &&
-        !repoSettings.shouldCheckBiometricsBeforeUnlock()) {
+    if (repoSettings.authMode.hasLocalSecret &&
+        !repoSettings.authMode.shouldCheckBiometricsBeforeUnlock) {
       secret = await repoSettings.getLocalSecret();
 
       if (secret == null) {

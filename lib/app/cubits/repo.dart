@@ -121,7 +121,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required oui.Repository repo,
     required NavigationCubit navigation,
   }) async {
-    var state = RepoState(passwordMode: repoSettings.passwordMode);
+    var state = RepoState(passwordMode: repoSettings.authMode.passwordMode);
 
     state = state.copyWith(
       infoHash: await repo.infoHash,
@@ -201,7 +201,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   void emitPasswordMode() {
-    final value = _repoSettings.passwordMode;
+    final value = _repoSettings.authMode.passwordMode;
     if (state.passwordMode == value) {
       return;
     }

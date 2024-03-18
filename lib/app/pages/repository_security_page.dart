@@ -53,7 +53,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
   final RepoCubit _repo;
   LocalSecret _currentSecret;
 
-  PasswordMode get _passwordMode => _repo.repoSettings.passwordMode;
+  PasswordMode get _passwordMode => _repo.repoSettings.authMode.passwordMode;
 
   _RepositorySecurityState(
       this._isBiometricsAvailable, this._repo, this._currentSecret);
