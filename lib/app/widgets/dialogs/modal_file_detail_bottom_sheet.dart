@@ -192,7 +192,7 @@ class _FileDetailState extends State<FileDetail> {
   ) {
     final originPath = getDirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(
-      widget.cubit,
+      repo: widget.cubit,
       navigation: widget.navigation,
       originPath: originPath,
       path: path,

@@ -2,11 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../cubits/cubits.dart';
-import '../utils/utils.dart';
 import '../models/models.dart';
 
 sealed class RepoEntry extends Equatable {
-  DatabaseId? get databaseId;
   RepoLocation get location;
   RepoCubit? get cubit => null;
   PasswordMode? get passwordMode => null;
@@ -22,14 +20,10 @@ sealed class RepoEntry extends Equatable {
 }
 
 class LoadingRepoEntry extends RepoEntry {
-  LoadingRepoEntry(this.databaseId, this.location);
+  LoadingRepoEntry(this.location);
 
   @override
   final RepoLocation location;
-
-  // Only null when the repo is being created;
-  @override
-  final DatabaseId? databaseId;
 
   @override
   Future<void> close() async {}
@@ -40,9 +34,6 @@ class OpenRepoEntry extends RepoEntry {
 
   @override
   final RepoCubit cubit;
-
-  @override
-  DatabaseId get databaseId => cubit.databaseId;
 
   @override
   Future<void> close() async {
@@ -58,14 +49,10 @@ class OpenRepoEntry extends RepoEntry {
 
 class MissingRepoEntry extends RepoEntry {
   MissingRepoEntry(
-    this.databaseId,
     this.location,
     this.error,
     this.errorDescription,
   );
-
-  @override
-  final DatabaseId databaseId;
 
   @override
   final RepoLocation location;
@@ -79,15 +66,10 @@ class MissingRepoEntry extends RepoEntry {
 
 class ErrorRepoEntry extends RepoEntry {
   ErrorRepoEntry(
-    this.databaseId,
     this.location,
     this.error,
     this.errorDescription,
   );
-
-  // Null only if the repo was being created and failed.
-  @override
-  final DatabaseId? databaseId;
 
   @override
   final RepoLocation location;

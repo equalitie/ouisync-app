@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:collection/collection.dart';
 import 'dart:io' as io;
 
 import 'package:ouisync_plugin/native_channels.dart';
@@ -50,14 +49,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     var defaultRepo = _settings.defaultRepo;
 
-    for (final (databaseId, repoLocation) in _settings.repos) {
+    for (final repoLocation in _settings.repos) {
       if (defaultRepo == null) {
         defaultRepo = repoLocation;
         await _settings.setDefaultRepo(repoLocation);
       }
 
       futures.add(_load(
-        databaseId,
         repoLocation,
         setCurrent: repoLocation == defaultRepo,
       ));
@@ -161,7 +159,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<void> _load(
-    DatabaseId databaseId,
     RepoLocation location, {
     bool setCurrent = false,
   }) async {
@@ -169,7 +166,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     // stored secret (if any) and only then enable sync. This is to avoid downloading unwanted
     // blocks.
 
-    final repo = await _open(databaseId, location);
+    final repo = await _open(location);
 
     if (repo is OpenRepoEntry) {
       final authMode = repo.cubit.state.authMode;
@@ -256,10 +253,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  MapEntry<RepoLocation, RepoEntry>? repoById(DatabaseId id) {
-    return _repos.entries.firstWhereOrNull((kv) => kv.value.databaseId == id);
-  }
-
   Future<void> importRepoFromLocation(RepoLocation location) async {
     if (_repos.containsKey(location)) {
       showSnackBar(S.current.repositoryIsAlreadyImported);
@@ -286,7 +279,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     if (oldLocation == null) {
       await _settings.setRepoLocation(databaseId, location);
     } else {
-      final existingEntry = repoById(databaseId);
+      final existingEntry = _repos[oldLocation];
 
       if (existingEntry != null) {
         if (existingEntry is! MissingRepoEntry) {
@@ -297,7 +290,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         }
 
         // It's a MissingRepoEntry, we'll replace it with this new one.
-        _repos.remove(existingEntry.key);
+        _repos.remove(oldLocation);
         await _settings.setRepoLocation(databaseId, location);
       }
     }
@@ -308,7 +301,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       settings: _settings,
       navigation: _navigation,
       repo: repo,
-      databaseId: databaseId,
       location: location,
     );
 
@@ -327,7 +319,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     bool useCacheServers = false,
     bool setCurrent = false,
   }) async {
-    await _put(LoadingRepoEntry(null, location), setCurrent: setCurrent);
+    await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
 
     LocalSecretKeyAndSalt localKey;
 
@@ -376,7 +368,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     final databaseId = _settings.findRepoByLocation(oldLocation)!;
-    final wasCurrent = currentRepo?.databaseId == databaseId;
+    final wasCurrent = currentRepo?.location == oldLocation;
     final credentials = await _repos[oldLocation]?.cubit?.credentials;
 
     await _forget(oldLocation);
@@ -389,7 +381,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     if (!renamed) {
       loggy.app('The repository ${oldLocation.path} renaming failed');
 
-      final repo = await _open(databaseId, oldLocation);
+      final repo = await _open(oldLocation);
       await repo.cubit?.enableSync();
 
       // TODO: restore credentials?
@@ -405,12 +397,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await _settings.renameRepo(databaseId, newLocation);
 
-    await _put(
-      LoadingRepoEntry(databaseId, newLocation),
-      setCurrent: wasCurrent,
-    );
+    await _put(LoadingRepoEntry(newLocation), setCurrent: wasCurrent);
 
-    final repo = await _open(databaseId, newLocation);
+    final repo = await _open(newLocation);
     await repo.cubit?.enableSync();
 
     if (credentials != null) {
@@ -441,7 +430,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       await _put(
         ErrorRepoEntry(
-          databaseId,
           location,
           S.current.messageRepoDeletionFailed,
           S.current.messageRepoDeletionErrorDescription(location.path),
@@ -478,7 +466,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<RepoEntry> _open(
-    DatabaseId databaseId,
     RepoLocation location, [
     LocalSecret? secret,
   ]) async {
@@ -487,7 +474,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     try {
       if (!await io.File(store).exists()) {
         return MissingRepoEntry(
-          databaseId,
           location,
           S.current.messageRepoMissing,
           S.current.messageRepoMissingErrorDescription(store),
@@ -506,7 +492,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         settings: _settings,
         navigation: _navigation,
         repo: repo,
-        databaseId: databaseId,
         location: location,
       );
 
@@ -516,7 +501,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     return ErrorRepoEntry(
-      databaseId,
       location,
       S.current.messageErrorOpeningRepo,
       S.current.messageErrorOpeningRepoDescription(store),
@@ -535,7 +519,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     try {
       if (await io.File(store).exists()) {
         return ErrorRepoEntry(
-          null,
           location,
           S.current.messageErrorRepositoryNameExist,
           null,
@@ -592,7 +575,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         settings: _settings,
         navigation: _navigation,
         repo: repo,
-        databaseId: databaseId,
         location: location,
       );
 
@@ -620,7 +602,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     return ErrorRepoEntry(
-      null,
       location,
       S.current.messageErrorCreatingRepository,
       S.current.messageErrorOpeningRepoDescription(store),

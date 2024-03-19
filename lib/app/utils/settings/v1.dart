@@ -259,8 +259,7 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  Iterable<(DatabaseId id, RepoLocation location)> get repos =>
-      _root.repos.entries.map((entry) => (entry.key, entry.value));
+  Iterable<RepoLocation> get repos => _root.repos.values;
 
   //------------------------------------------------------------------
 

@@ -6,13 +6,14 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../models/repo_location.dart';
 import '../../pages/pages.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class MoveEntryDialog extends StatefulWidget {
-  const MoveEntryDialog(
-    this._repo, {
+  const MoveEntryDialog({
+    required this.repo,
     required this.navigation,
     required this.originPath,
     required this.path,
@@ -21,7 +22,7 @@ class MoveEntryDialog extends StatefulWidget {
     required this.onMoveEntry,
   });
 
-  final RepoCubit _repo;
+  final RepoCubit repo;
   final NavigationCubit navigation;
   final String originPath;
   final String path;
@@ -102,9 +103,9 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
             builder: (context, state) {
               final canMove = state.isFolder
                   ? _canMove(
-                      state.currentRepoId,
-                      state.currentPath,
-                      widget._repo.databaseId,
+                      state.repoLocation,
+                      state.path,
+                      widget.repo.location,
                       widget.originPath,
                     )
                   : false;
@@ -130,17 +131,13 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
       ];
 
   bool _canMove(
-    DatabaseId? originRepoId,
+    RepoLocation? originRepoLocation,
     String originPath,
-    DatabaseId destinationRepoId,
+    RepoLocation destinationRepoLocation,
     String destinationPath,
-  ) {
-    if (originRepoId != destinationRepoId) return false;
-
-    if (originPath == destinationPath) return false;
-
-    return true;
-  }
+  ) =>
+      originRepoLocation == destinationRepoLocation &&
+      originPath != destinationPath;
 
   double _getButtonAspectRatio() {
     if (Platform.isWindows || Platform.isLinux) {

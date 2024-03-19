@@ -105,7 +105,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
   final Repository _repo;
-  final DatabaseId _databaseId;
   final Cipher _pathCipher;
   final _setCacheServersEnabledThrottle = Throttle();
 
@@ -114,7 +113,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     this._nativeChannels,
     this._navigation,
     this._repo,
-    this._databaseId,
     this._pathCipher,
     RepoState state,
   ) : super(state) {
@@ -126,7 +124,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required NativeChannels nativeChannels,
     required Settings settings,
     required Repository repo,
-    required DatabaseId databaseId,
     required RepoLocation location,
     required NavigationCubit navigation,
   }) async {
@@ -150,13 +147,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       nativeChannels,
       navigation,
       repo,
-      databaseId,
       pathCipher,
       state,
     );
   }
 
-  DatabaseId get databaseId => _databaseId;
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
@@ -168,7 +163,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   void updateNavigation({required bool isFolder}) {
-    _navigation.current(databaseId, currentFolder, isFolder);
+    _navigation.current(location, currentFolder, isFolder);
   }
 
   Future<void> enableSync() async {
