@@ -8,7 +8,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>$(TeamIdentifierPrefix)com.example.app-group</string>
+		<string>$(TeamIdentifierPrefix)org.equalitie.ouisync</string>
 	</array>
 </dict>
 </plist>
