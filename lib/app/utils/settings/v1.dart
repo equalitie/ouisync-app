@@ -36,7 +36,7 @@ class SettingsRoot {
   int? highestSeenProtocolNumber;
   // NOTE: In order to preserve plausible deniability, once the current repo is
   // locked in _AuthModeBlindOrManual, this value must set to `null`.
-  DatabaseId? currentRepo;
+  RepoLocation? defaultRepo;
   Map<DatabaseId, RepoLocation> repos = {};
 
   SettingsRoot._();
@@ -47,7 +47,7 @@ class SettingsRoot {
     required this.launchAtStartup,
     required this.enableSyncOnMobileInternet,
     required this.highestSeenProtocolNumber,
-    required this.currentRepo,
+    required this.defaultRepo,
     required this.repos,
   });
 
@@ -59,7 +59,7 @@ class SettingsRoot {
       'launchAtStartup': launchAtStartup,
       'enableSyncOnMobileInternet': enableSyncOnMobileInternet,
       'highestSeenProtocolNumber': highestSeenProtocolNumber,
-      'currentRepo': currentRepo?.toString(),
+      'defaultRepo': defaultRepo?.path,
       'repos': <String, Object?>{
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
@@ -85,7 +85,7 @@ class SettingsRoot {
         DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
     };
 
-    String? currentRepo = data['currentRepo'];
+    String? defaultRepo = data['defaultRepo'];
 
     return SettingsRoot(
       acceptedEqualitieValues: data['acceptedEqualitieValues']!,
@@ -93,7 +93,7 @@ class SettingsRoot {
       launchAtStartup: data['launchAtStartup']!,
       enableSyncOnMobileInternet: data['enableSyncOnMobileInternet']!,
       highestSeenProtocolNumber: data['highestSeenProtocolNumber'],
-      currentRepo: currentRepo != null ? DatabaseId(currentRepo) : null,
+      defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
       repos: repos,
     );
   }
@@ -141,7 +141,7 @@ class Settings with AppLogger {
     final launchAtStartup = s0.getLaunchAtStartup();
     final enableSyncOnMobileInternet = s0.getSyncOnMobileEnabled();
     final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
-    final currentRepo = s0.getDefaultRepo();
+    final defaultRepo = s0.getDefaultRepo();
 
     final Map<DatabaseId, RepoLocation> repos = {};
 
@@ -188,7 +188,7 @@ class Settings with AppLogger {
       launchAtStartup: launchAtStartup,
       enableSyncOnMobileInternet: enableSyncOnMobileInternet,
       highestSeenProtocolNumber: highestSeenProtocolNumber,
-      currentRepo: (currentRepo != null) ? DatabaseId(currentRepo) : null,
+      defaultRepo: defaultRepo?.let((id) => repos[DatabaseId(id)]),
       repos: repos,
     );
 
@@ -288,35 +288,11 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  RepoLocation? get defaultRepo {
-    final current = _root.currentRepo;
-    if (current == null) {
-      return null;
-    } else {
-      return _root.repos[current];
-    }
-  }
+  RepoLocation? get defaultRepo => _root.defaultRepo;
 
   Future<void> setDefaultRepo(RepoLocation? location) async {
-    if (location == null) {
-      if (_root.currentRepo == null) {
-        return;
-      }
-      _root.currentRepo = null;
-    } else {
-      final id = findRepoByLocation(location);
-      if (id == null) return;
-
-      // TODO: what about this?
-      //// We must not set repositories for which the user provides the password
-      //// as "default" because they must be indistinguishable from blind
-      //// repositories.
-      //if (rs.authMode.passwordMode == PasswordMode.manual) {
-      //  return;
-      //}
-
-      _root.currentRepo = id;
-    }
+    if (location == _root.defaultRepo) return;
+    _root.defaultRepo = location;
 
     await _storeRoot();
   }
@@ -324,10 +300,12 @@ class Settings with AppLogger {
   //------------------------------------------------------------------
 
   Future<void> forgetRepo(DatabaseId databaseId) async {
-    if (_root.currentRepo == databaseId) {
-      _root.currentRepo = null;
+    final location = _root.repos.remove(databaseId);
+
+    if (_root.defaultRepo == location) {
+      _root.defaultRepo = null;
     }
-    _root.repos.remove(databaseId);
+
     await _storeRoot();
   }
 

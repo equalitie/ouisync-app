@@ -47,21 +47,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     var futures = <Future>[];
 
-    var defaultRepo = _settings.defaultRepo;
-
     for (final repoLocation in _settings.repos) {
-      if (defaultRepo == null) {
-        defaultRepo = repoLocation;
-        await _settings.setDefaultRepo(repoLocation);
-      }
-
-      futures.add(_load(
-        repoLocation,
-        setCurrent: repoLocation == defaultRepo,
-      ));
+      futures.add(_load(repoLocation));
     }
 
     await Future.wait(futures);
+
+    final defaultRepo =
+        _settings.defaultRepo?.let((location) => _repos[location]);
+
+    await setCurrent(defaultRepo);
 
     _update(() {
       _isLoading = false;
@@ -135,7 +130,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       _subscription = entry.cubit.autoRefresh();
     }
 
-    await _settings.setDefaultRepo(entry?.location);
+    // We must not set repositories for which the user provides the password
+    // as "default" because they must be indistinguishable from blind
+    // repositories.
+    if (entry?.cubit?.state.authMode.passwordMode != PasswordMode.manual) {
+      await _settings.setDefaultRepo(entry?.location);
+    }
 
     _currentRepo = entry;
     changed();
@@ -158,10 +158,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<void> _load(
-    RepoLocation location, {
-    bool setCurrent = false,
-  }) async {
+  Future<void> _load(RepoLocation location) async {
     // First open the repo in blind mode and with sync disabled, then try to unlock it with the
     // stored secret (if any) and only then enable sync. This is to avoid downloading unwanted
     // blocks.
@@ -188,7 +185,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     await repo.cubit?.enableSync();
-    await _put(repo, setCurrent: setCurrent);
+    await _put(repo);
   }
 
   Future<void> _put(RepoEntry newRepo, {bool setCurrent = false}) async {
