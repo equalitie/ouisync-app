@@ -27,7 +27,7 @@ Future<void> syncInBackground() async {
   final start = DateTime.now();
 
   try {
-    final settings = await loadAndMigrateSettings();
+    final settings = await loadAndMigrateSettings(session);
     final repos = await _fetchRepositories(session, settings);
 
     await Future.any([

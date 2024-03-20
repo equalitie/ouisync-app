@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../models/auth_mode.dart';
 import 'utils.dart';
 
 extension AnyExtension<T> on T {
@@ -136,6 +139,36 @@ extension RepositoryExtension on Repository {
     await Future.wait(
       Constants.cacheServers.map((host) => update(host, enabled)),
     );
+  }
+
+  static const _authModeKey = 'authMode';
+
+  Future<AuthMode> getAuthMode() =>
+      getMetadata(_authModeKey).then((data) => data != null
+          ? AuthMode.fromJson(json.decode(data))
+          : AuthModeBlindOrManual());
+
+  Future<void> setAuthMode(AuthMode authMode) async {
+    final newValue = json.encode(authMode.toJson());
+
+    while (true) {
+      // Currently we ignore any concurrent changes and always force the new value.
+      final oldValue = await getMetadata(_authModeKey);
+
+      try {
+        await setMetadata({
+          _authModeKey: (oldValue: oldValue, newValue: newValue),
+        });
+
+        break;
+      } on Error catch (e) {
+        if (e.code == ErrorCode.entryChanged) {
+          continue;
+        } else {
+          rethrow;
+        }
+      }
+    }
   }
 }
 

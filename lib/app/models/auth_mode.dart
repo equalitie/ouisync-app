@@ -1,6 +1,6 @@
-import 'package:ouisync_app/app/models/models.dart';
-
 import '../utils/master_key.dart';
+import 'local_secret.dart';
+import 'password_mode.dart';
 
 const _encryptedPasswordKey = 'encryptedPassword';
 const _encryptedKeyKey = 'encryptedKey';

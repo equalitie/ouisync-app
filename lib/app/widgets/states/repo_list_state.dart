@@ -78,7 +78,7 @@ class RepoListState extends StatelessWidget
                   repoCubit: repoCubit,
                   itemData: repoItem,
                   mainAction: () async {
-                    await reposCubit.setCurrentByLocation(repoEntry.location);
+                    await reposCubit.setCurrent(repoEntry);
                   },
                   verticalDotsAction: () =>
                       onShowRepoSettings(parentContext, repoCubit: repoCubit),

@@ -1,7 +1,8 @@
-import 'dart:io' show Directory, Platform;
+import 'dart:io' as io;
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +27,15 @@ class DatabaseId extends Equatable {
 
 class SettingsRoot {
   static const int version = 1;
+
+  static const _versionKey = 'version';
+  static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
+  static const _showOnboardingKey = 'showOnboarding';
+  static const _launchAtStartupKey = 'launchAtStartup';
+  static const _enableSyncOnMobileInternetKey = 'enableSyncOnMobileInternet';
+  static const _highestSeenProtocolNumberKey = 'highestSeenProtocolNumber';
+  static const _defaultRepoKey = 'defaultRepo';
+  static const _reposKey = 'repos';
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -53,14 +63,14 @@ class SettingsRoot {
 
   Map<String, dynamic> toJson() {
     final r = {
-      'version': version,
-      'acceptedEqualitieValues': acceptedEqualitieValues,
-      'showOnboarding': showOnboarding,
-      'launchAtStartup': launchAtStartup,
-      'enableSyncOnMobileInternet': enableSyncOnMobileInternet,
-      'highestSeenProtocolNumber': highestSeenProtocolNumber,
-      'defaultRepo': defaultRepo?.path,
-      'repos': <String, Object?>{
+      _versionKey: version,
+      _acceptedEqualitieValuesKey: acceptedEqualitieValues,
+      _showOnboardingKey: showOnboarding,
+      _launchAtStartupKey: launchAtStartup,
+      _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
+      _highestSeenProtocolNumberKey: highestSeenProtocolNumber,
+      _defaultRepoKey: defaultRepo?.path,
+      _reposKey: <String, Object?>{
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
     };
@@ -74,25 +84,25 @@ class SettingsRoot {
 
     final data = json.decode(s);
 
-    int inputVersion = data['version'];
+    int inputVersion = data[_versionKey];
 
     if (inputVersion != version) {
       throw "Invalid settings version ($inputVersion)";
     }
 
     final repos = {
-      for (var kv in data['repos']!.entries)
+      for (var kv in data[_reposKey]!.entries)
         DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
     };
 
-    String? defaultRepo = data['defaultRepo'];
+    String? defaultRepo = data[_defaultRepoKey];
 
     return SettingsRoot(
-      acceptedEqualitieValues: data['acceptedEqualitieValues']!,
-      showOnboarding: data['showOnboarding']!,
-      launchAtStartup: data['launchAtStartup']!,
-      enableSyncOnMobileInternet: data['enableSyncOnMobileInternet']!,
-      highestSeenProtocolNumber: data['highestSeenProtocolNumber'],
+      acceptedEqualitieValues: data[_acceptedEqualitieValuesKey]!,
+      showOnboarding: data[_showOnboardingKey]!,
+      launchAtStartup: data[_launchAtStartupKey]!,
+      enableSyncOnMobileInternet: data[_enableSyncOnMobileInternetKey]!,
+      highestSeenProtocolNumber: data[_highestSeenProtocolNumberKey],
       defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
       repos: repos,
     );
@@ -118,97 +128,116 @@ class Settings with AppLogger {
   static Future<Settings> init(
     SharedPreferences prefs,
     MasterKey masterKey,
+    Session session,
   ) async {
     final json = prefs.getString(settingsKey);
     final root = SettingsRoot.fromJson(json);
 
-    if (prefs.getKeys().length > 1) {
-      // The previous migration did not finish correctly, prefs should only
-      // `settingsKey` key after success.
-      await Settings._removeValuesFromV0(prefs);
-    }
+    final settings = Settings._(root, prefs, masterKey);
+    await settings._migrate(session);
 
-    return Settings._(root, prefs, masterKey);
+    return settings;
   }
 
-  static Future<Settings> initMigrateFromV0(
-    SharedPreferences prefs,
-    MasterKey masterKey,
-  ) async {
-    final s0 = await v0.Settings.init(prefs);
-    final eqValues = s0.getEqualitieValues();
-    final showOnboarding = s0.getShowOnboarding();
-    final launchAtStartup = s0.getLaunchAtStartup();
-    final enableSyncOnMobileInternet = s0.getSyncOnMobileEnabled();
-    final highestSeenProtocolNumber = s0.getHighestSeenProtocolNumber();
-    final defaultRepo = s0.getDefaultRepo();
+  Future<void> _migrate(Session session) async {
+    // Check if already fully migrated.
+    if (_prefs.containsKey(settingsKey) && _prefs.getKeys().length == 1) {
+      return;
+    }
 
-    final Map<DatabaseId, RepoLocation> repos = {};
+    final s0 = await v0.Settings.init(_prefs);
+    final r = _root;
+
+    r.acceptedEqualitieValues =
+        s0.getEqualitieValues() ?? r.acceptedEqualitieValues;
+    r.showOnboarding = s0.getShowOnboarding() ?? r.showOnboarding;
+    r.launchAtStartup = s0.getLaunchAtStartup() ?? r.launchAtStartup;
+    r.enableSyncOnMobileInternet =
+        s0.getSyncOnMobileEnabled() ?? r.enableSyncOnMobileInternet;
+    r.highestSeenProtocolNumber =
+        s0.getHighestSeenProtocolNumber() ?? r.highestSeenProtocolNumber;
+    r.defaultRepo = s0.getDefaultRepo()?.let((name) => s0.repoLocation(name)) ??
+        defaultRepo;
+
+    final repos = <DatabaseId, RepoLocation>{};
 
     for (final repo in s0.repos()) {
-      final id = DatabaseId(repo.databaseId);
+      final databaseId = DatabaseId(repo.databaseId);
       final auth = s0.getAuthenticationMode(repo.name);
-      AuthMode? newAuth;
+
+      AuthMode? authMode;
       v0.SecureStorage? oldPwdStorage;
+
       switch (auth) {
         case v0.AuthMode.manual:
-          newAuth = AuthModeBlindOrManual();
+          authMode = AuthModeBlindOrManual();
         case v0.AuthMode.version1:
         case v0.AuthMode.version2:
-          oldPwdStorage = v0.SecureStorage(databaseId: id);
+          oldPwdStorage = v0.SecureStorage(databaseId: databaseId);
           final password = await oldPwdStorage.tryGetPassword(
             authMode: v0.AuthMode.noLocalPassword,
           );
-          newAuth = AuthModePasswordStoredOnDevice(
+          authMode = AuthModePasswordStoredOnDevice(
             await masterKey.encrypt(password!),
             true,
           );
         case v0.AuthMode.noLocalPassword:
-          oldPwdStorage = v0.SecureStorage(databaseId: id);
+          oldPwdStorage = v0.SecureStorage(databaseId: databaseId);
           final password = await oldPwdStorage.tryGetPassword(
             authMode: v0.AuthMode.noLocalPassword,
           );
-          newAuth = AuthModePasswordStoredOnDevice(
+          authMode = AuthModePasswordStoredOnDevice(
             await masterKey.encrypt(password!),
             false,
           );
       }
+
+      // The old settings did not include the '.db' extension in RepoLocation.
+      final pathWithoutExt = repo.info.path;
+      final location = RepoLocation.fromDbPath('$pathWithoutExt.db');
+
+      // Try to write the auth mode to the repo metadata
+      try {
+        final repo = await Repository.open(session, store: location.path);
+        await repo.setAuthMode(authMode);
+        await repo.close();
+      } catch (e, st) {
+        loggy.error(
+            'failed to migrate auth mode for repository ${location.path}:',
+            e,
+            st);
+        continue;
+      }
+
       // Remove the password from the old storage.
       if (oldPwdStorage != null) {
         await oldPwdStorage.deletePassword();
       }
-      // The old settings did not include the '.db' extension in RepoLocation.
-      final pathWithoutExt = repo.info.path;
-      repos[id] = RepoLocation.fromDbPath("$pathWithoutExt.db");
+
+      repos[databaseId] = location;
     }
 
-    final root = SettingsRoot(
-      acceptedEqualitieValues: eqValues,
-      showOnboarding: showOnboarding,
-      launchAtStartup: launchAtStartup,
-      enableSyncOnMobileInternet: enableSyncOnMobileInternet,
-      highestSeenProtocolNumber: highestSeenProtocolNumber,
-      defaultRepo: defaultRepo?.let((id) => repos[DatabaseId(id)]),
-      repos: repos,
-    );
+    await _storeRoot();
 
-    final s1 = Settings._(root, prefs, masterKey);
+    // Remove repos that were successfully migrated
+    for (final location in repos.values) {
+      await s0.forgetRepository(location.name);
+    }
 
-    // The order of these operations is important to avoid data loss.
-    await s1._storeRoot();
-    await Settings._removeValuesFromV0(prefs);
+    // Remove the old repos entry if all repos successfully migrated.
+    if (s0.repos().isEmpty) {
+      await _prefs.remove(v0.Settings.knownRepositoriesKey);
+    }
 
-    return s1;
-  }
-
-  // Remove keys that don't belong to this version of settings.  It's important
-  // to do this **after** we've stored the root and version number of this
-  // settings.
-  static Future<void> _removeValuesFromV0(SharedPreferences prefs) async {
-    for (final key in prefs.getKeys()) {
-      if (key != settingsKey) {
-        await prefs.remove(key);
+    // Remove keys that don't belong to this version of settings.  It's important
+    // to do this **after** we've stored the root and version number of this
+    // settings.
+    for (final key in _prefs.getKeys()) {
+      if (key == settingsKey || key == v0.Settings.knownRepositoriesKey) {
+        continue;
       }
+
+      await _prefs.remove(key);
     }
   }
 
@@ -311,7 +340,7 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  Future<Directory> defaultRepoLocation() async {
+  Future<io.Directory> defaultRepoLocation() async {
     // TODO
     try {
       // Docs says this throws on non Android systems.
@@ -333,7 +362,7 @@ class Settings with AppLogger {
     final alternativeDir =
         await path_provider.getApplicationDocumentsDirectory();
 
-    if (Platform.isAndroid) {
+    if (io.Platform.isAndroid) {
       return alternativeDir;
     }
 
@@ -342,7 +371,7 @@ class Settings with AppLogger {
     final nonAndroidAlternativePath =
         context.join(alternativeDir.path, 'Ouisync');
 
-    return await Directory(nonAndroidAlternativePath).create();
+    return await io.Directory(nonAndroidAlternativePath).create();
   }
 
   //------------------------------------------------------------------
@@ -359,15 +388,15 @@ class Settings with AppLogger {
 }
 
 String? _defaultMountPoint() {
-  if (Platform.isLinux || Platform.isMacOS) {
-    final home = Platform.environment['HOME'];
+  if (io.Platform.isLinux || io.Platform.isMacOS) {
+    final home = io.Platform.environment['HOME'];
 
     if (home == null) {
       return null;
     }
 
     return '$home/Ouisync';
-  } else if (Platform.isWindows) {
+  } else if (io.Platform.isWindows) {
     return 'O:';
   } else {
     return null;

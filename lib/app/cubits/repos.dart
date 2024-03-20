@@ -45,13 +45,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       _isLoading = true;
     });
 
-    var futures = <Future>[];
-
-    for (final repoLocation in _settings.repos) {
-      futures.add(_load(repoLocation));
-    }
-
-    await Future.wait(futures);
+    await Future.wait(
+      _settings.repos.map((location) => _load(location)).toList(),
+    );
 
     final defaultRepo =
         _settings.defaultRepo?.let((location) => _repos[location]);
@@ -139,14 +135,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     _currentRepo = entry;
     changed();
-  }
-
-  Future<void> setCurrentByLocation(RepoLocation? repoLocation) async {
-    if (repoLocation == currentRepo?.location) {
-      return;
-    }
-
-    await setCurrent((repoLocation != null) ? _repos[repoLocation] : null);
   }
 
   RepoEntry? get(RepoLocation location) {

@@ -979,20 +979,20 @@ class _MainPageState extends State<MainPage>
           });
 
   Future<RepoLocation?> _addRepository() async =>
-      _addRepoAndNavigate(createRepoDialog(context));
+      _addRepoAndNavigate(await createRepoDialog(context));
 
   Future<RepoLocation?> _importRepository() async =>
-      _addRepoAndNavigate(addRepoWithTokenDialog(context));
+      _addRepoAndNavigate(await addRepoWithTokenDialog(context));
 
   Future<RepoLocation?> _addRepoAndNavigate(
-      Future<RepoLocation?> repoFunction) async {
-    final newRepoLocation = await repoFunction;
-
+    RepoLocation? newRepoLocation,
+  ) async {
     if (newRepoLocation == null || newRepoLocation.name.isEmpty) {
       return null;
     }
 
-    await _cubits.repositories.setCurrentByLocation(newRepoLocation);
+    final repo = _cubits.repositories.get(newRepoLocation);
+    await _cubits.repositories.setCurrent(repo);
 
     return newRepoLocation;
   }

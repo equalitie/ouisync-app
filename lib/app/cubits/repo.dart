@@ -1,7 +1,6 @@
 // ignore_for_file: unnecessary_overrides
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -127,7 +126,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required RepoLocation location,
     required NavigationCubit navigation,
   }) async {
-    final authMode = await _readAuthMode(repo);
+    final authMode = await repo.getAuthMode();
 
     var state = RepoState(
       location: location,
@@ -477,7 +476,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<void> setAuthMode(AuthMode authMode) async {
-    await _writeAuthMode(_repo, authMode);
+    await _repo.setAuthMode(authMode);
     emit(state.copyWith(authMode: authMode));
   }
 
@@ -748,36 +747,6 @@ class Throttle {
         rethrow;
       } finally {
         next = null;
-      }
-    }
-  }
-}
-
-const _authModeKey = 'authMode';
-
-Future<AuthMode> _readAuthMode(Repository repo) =>
-    repo.getMetadata(_authModeKey).then((data) => data != null
-        ? AuthMode.fromJson(json.decode(data))
-        : AuthModeBlindOrManual());
-
-Future<void> _writeAuthMode(Repository repo, AuthMode authMode) async {
-  final newValue = json.encode(authMode.toJson());
-
-  while (true) {
-    // Currently we ignore any concurrent changes and always force the new value.
-    final oldValue = await repo.getMetadata(_authModeKey);
-
-    try {
-      await repo.setMetadata({
-        _authModeKey: (oldValue: oldValue, newValue: newValue),
-      });
-
-      break;
-    } on Error catch (e) {
-      if (e.code == ErrorCode.entryChanged) {
-        continue;
-      } else {
-        rethrow;
       }
     }
   }
