@@ -15,6 +15,7 @@ import 'package:shelf/shelf_io.dart';
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/master_key.dart';
+import '../utils/path.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -392,7 +393,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     try {
       for (final dirEntry in directory) {
-        final entryPath = pathContext.join(path, dirEntry.name);
+        final entryPath = join(path, dirEntry.name);
 
         final entry = switch (dirEntry.entryType) {
           EntryType.file => FileEntry(

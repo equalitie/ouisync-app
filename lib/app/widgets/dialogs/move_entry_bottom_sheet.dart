@@ -8,6 +8,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_location.dart';
 import '../../pages/pages.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -65,9 +66,9 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         children: [
           Fields.iconLabel(
               icon: Icons.drive_file_move_outlined,
-              text: getBasename(widget.path)),
+              text: basename(widget.path)),
           Fields.constrainedText(
-              S.current.messageMoveEntryOrigin(getDirname(widget.path)),
+              S.current.messageMoveEntryOrigin(dirname(widget.path)),
               style: bodyStyle),
           _selectActions(context)
         ],

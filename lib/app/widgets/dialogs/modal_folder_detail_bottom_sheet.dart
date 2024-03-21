@@ -5,6 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -87,7 +88,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
             EntryInfoTable(entryInfo: {
               S.current.labelName: widget.entry.name,
-              S.current.labelLocation: getDirname(widget.entry.path),
+              S.current.labelLocation: dirname(widget.entry.path),
             })
           ],
         ),
@@ -148,7 +149,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
       BottomSheetCallback bottomSheetControllerCallback) {
     Navigator.of(context).pop();
 
-    final originPath = getDirname(path);
+    final originPath = dirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(
       repo: widget.repo,
       navigation: widget.navigation,
@@ -167,7 +168,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          final oldName = getBasename(entry.path);
+          final oldName = basename(entry.path);
 
           return ActionsDialog(
               title: S.current.messageRenameFolder,
@@ -180,8 +181,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         }).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(entry.path);
-        final newEntryPath = pathContext.join(parent, newName);
+        final parent = dirname(entry.path);
+        final newEntryPath = join(parent, newName);
 
         widget.repo.moveEntry(source: entry.path, destination: newEntryPath);
 

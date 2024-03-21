@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:ouisync_app/app/utils/utils.dart';
-import 'package:path/path.dart' as p;
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
 String formatSize(int bytes, {int decimals = 1}) {
@@ -49,10 +48,6 @@ String _formatSizeUnit(int scale) {
 
   return suffixes[scale];
 }
-
-/// We want to maintain a POSIX style path inside the library, even when
-/// the app is running on Windows.
-final pathContext = p.Context(style: p.Style.posix);
 
 String formatShareLinkForDisplay(String shareLink) {
   final shareTokenUri = Uri.parse(shareLink);

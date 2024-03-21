@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../../cubits/cubits.dart';
 
@@ -29,7 +30,7 @@ class FolderNavigationBar extends StatelessWidget {
 
   Widget _currentLocationBar(
       BuildContext context, String path, BuildContext ctx) {
-    final current = getBasename(path);
+    final current = basename(path);
     String separator = Strings.root;
 
     return Row(children: [
@@ -47,7 +48,7 @@ class FolderNavigationBar extends StatelessWidget {
   }
 
   GestureDetector _navigation(String path, BuildContext ctx) {
-    final target = getDirname(path);
+    final target = dirname(path);
 
     return GestureDetector(
         onTap: () {

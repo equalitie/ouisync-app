@@ -10,6 +10,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../pages/pages.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -157,8 +158,8 @@ class _FileDetailState extends State<FileDetail> {
                   isDanger: true,
                   dense: true,
                   onTap: () async {
-                    final fileName = getBasename(widget.entry.path);
-                    final parent = getDirname(widget.entry.path);
+                    final fileName = basename(widget.entry.path);
+                    final parent = dirname(widget.entry.path);
 
                     final deletedFileName = await Dialogs.deleteFileAlertDialog(
                         widget.repo,
@@ -180,7 +181,7 @@ class _FileDetailState extends State<FileDetail> {
                   height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
               EntryInfoTable(entryInfo: {
                 S.current.labelName: widget.entry.name,
-                S.current.labelLocation: getDirname(widget.entry.path),
+                S.current.labelLocation: dirname(widget.entry.path),
                 S.current.labelSize: formatSize(widget.entry.size ?? 0),
               })
             ],
@@ -194,7 +195,7 @@ class _FileDetailState extends State<FileDetail> {
     MoveEntryCallback moveEntryCallback,
     BottomSheetCallback bottomSheetControllerCallback,
   ) {
-    final originPath = getDirname(path);
+    final originPath = dirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(
       repo: widget.repo,
       navigation: widget.navigation,
@@ -216,8 +217,8 @@ class _FileDetailState extends State<FileDetail> {
         return ScaffoldMessenger(
           child: Builder(
             builder: (context) {
-              final oldName = getBasename(entry.path);
-              final originalExtension = getFileExtension(entry.path);
+              final oldName = basename(entry.path);
+              final originalExtension = extension(entry.path);
 
               return Scaffold(
                 backgroundColor: Colors.transparent,
@@ -239,8 +240,8 @@ class _FileDetailState extends State<FileDetail> {
     ).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(entry.path);
-        final newEntryPath = pathContext.join(parent, newName);
+        final parent = dirname(entry.path);
+        final newEntryPath = join(parent, newName);
 
         widget.repo.moveEntry(source: entry.path, destination: newEntryPath);
 

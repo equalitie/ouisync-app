@@ -12,13 +12,14 @@ import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
+import '../utils/path.dart' as repo_path;
 import '../utils/utils.dart';
 import '../widgets/repository_progress.dart';
 import '../widgets/widgets.dart';
@@ -179,7 +180,8 @@ class _MainPageState extends State<MainPage>
         }
 
         files = files
-            .where((path) => p.extension(path) == RepoLocation.defaultExtension)
+            .where((path) =>
+                system_path.extension(path) == RepoLocation.defaultExtension)
             .toList();
 
         if (files.isNotEmpty) {
@@ -865,8 +867,8 @@ class _MainPageState extends State<MainPage>
     String path,
     EntryType type,
   ) async {
-    final basename = getBasename(path);
-    final destination = pathContext.join(
+    final basename = repo_path.basename(path);
+    final destination = repo_path.join(
       currentRepo.state.currentFolder.path,
       basename,
     );
@@ -941,9 +943,9 @@ class _MainPageState extends State<MainPage>
     String path,
   ) async {
     final file = io.File(path);
-    final fileName = getBasename(path);
+    final fileName = repo_path.basename(path);
     final length = (await file.stat()).size;
-    final filePath = pathContext.join(
+    final filePath = repo_path.join(
       currentRepo.state.currentFolder.path,
       fileName,
     );
