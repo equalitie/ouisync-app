@@ -650,8 +650,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
     final defaultRepoLocation = await createRepoCubit.defaultRepoLocation;
     final repoLocation = RepoLocation.fromDirAndName(defaultRepoLocation, name);
 
-    final exist = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: io.File(repoLocation.path()).exists());
+    final exist = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: io.File(repoLocation.path).exists(),
+    );
     createRepoCubit.showRepositoryNameInUseWarning(exist);
 
     if (exist) return;
@@ -698,9 +700,10 @@ class RepositoryCreation extends HookWidget with AppLogger {
       }
 
       await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.messsageFailedCreateRepository(repoLocation.path()),
-          message: err);
+        context: context,
+        title: S.current.messsageFailedCreateRepository(repoLocation.path),
+        message: err,
+      );
 
       return;
     }

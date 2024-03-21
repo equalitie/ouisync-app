@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/platform/platform.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -98,7 +99,7 @@ class RenameEntry extends HookWidget with AppLogger {
     final validationOk = await _validateNewName(newName);
 
     if (!validationOk) {
-      final newExtension = getFileExtension(newName);
+      final newExtension = extension(newName);
       selectEntryName(newName, newExtension, isFile);
 
       _nameTextFieldFocus.requestFocus();
@@ -126,7 +127,7 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Future<bool> _validateExtension(String name) async {
-    final fileExtension = getFileExtension(name);
+    final fileExtension = extension(name);
 
     /// If there was not extension originally, then no need to have or validate a new one
     if (originalExtension.isEmpty) return true;

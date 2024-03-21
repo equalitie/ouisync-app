@@ -2,10 +2,10 @@ import 'dart:io' as io;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../utils/path.dart' as p;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -114,7 +114,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
       for (final srcFile in result.files) {
         String fileName = srcFile.name;
-        String dstPath = buildDestinationPath(dstDir, fileName);
+        String dstPath = p.join(dstDir, fileName);
 
         if (await repo.exists(dstPath)) {
           final action = await showDialog<FileAction>(
@@ -142,7 +142,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           }
 
           fileName = await _renameFile(dstPath, 0);
-          dstPath = buildDestinationPath(dstDir, fileName);
+          dstPath = p.join(dstDir, fileName);
         }
 
         await repo.saveFile(

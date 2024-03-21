@@ -102,7 +102,7 @@ class Settings with AppLogger {
   static const String _authenticationMode = "AUTH_MODE";
 
   // List of all repositories this app is concerned about
-  static const String _knownRepositoriesKey = "KNOWN_REPOSITORIES";
+  static const String knownRepositoriesKey = "KNOWN_REPOSITORIES";
 
   // In the past we had only a single directory (`_legacyReposDirectory`) where
   // we stored all repositories. To know what repositories we have we would
@@ -130,7 +130,7 @@ class Settings with AppLogger {
 
     final repos = <String, String>{};
 
-    final repoPaths = prefs.getStringList(_knownRepositoriesKey);
+    final repoPaths = prefs.getStringList(knownRepositoriesKey);
 
     if (repoPaths != null) {
       for (var path in repoPaths) {
@@ -166,22 +166,22 @@ class Settings with AppLogger {
 
   static Future<void> _storeRepos(
       SharedPreferences prefs, Map<String, String> repos) async {
-    await prefs.setStringList(_knownRepositoriesKey,
+    await prefs.setStringList(knownRepositoriesKey,
         repos.entries.map((e) => p.join(e.value, e.key)).toList());
   }
 
   // Returns true if the user accepted eQ values.
-  bool getEqualitieValues() => _prefs.getBool(_eqValuesKey) ?? false;
+  bool? getEqualitieValues() => _prefs.getBool(_eqValuesKey);
   Future<void> setEqualitieValues(bool value) async {
     await _prefs.setBool(_eqValuesKey, value);
   }
 
-  bool getShowOnboarding() => _prefs.getBool(_showOnboardingKey) ?? true;
+  bool? getShowOnboarding() => _prefs.getBool(_showOnboardingKey);
   Future<void> setShowOnboarding(bool value) async {
     await _prefs.setBool(_showOnboardingKey, value);
   }
 
-  bool getLaunchAtStartup() => _prefs.getBool(_launchAtStartup) ?? true;
+  bool? getLaunchAtStartup() => _prefs.getBool(_launchAtStartup);
 
   Future<void> setLaunchAtStartup(bool value) async {
     await _prefs.setBool(_launchAtStartup, value);
@@ -221,7 +221,7 @@ class Settings with AppLogger {
   }
 
   List<SettingsRepoEntry> repos() {
-    final paths = _prefs.getStringList(_knownRepositoriesKey);
+    final paths = _prefs.getStringList(knownRepositoriesKey);
 
     if (paths == null) {
       return <SettingsRepoEntry>[];
@@ -324,7 +324,7 @@ class Settings with AppLogger {
   Future<void> _setDatabaseId(String repoName, String? databaseId) =>
       _setRepositoryString(repoName, _databaseId, databaseId);
 
-  bool getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey) ?? true;
+  bool? getSyncOnMobileEnabled() => _prefs.getBool(_syncOnMobileKey);
 
   Future<void> setSyncOnMobileEnabled(bool enable) async {
     await _prefs.setBool(_syncOnMobileKey, enable);

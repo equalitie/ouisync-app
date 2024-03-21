@@ -27,7 +27,7 @@ Future<void> syncInBackground() async {
   final start = DateTime.now();
 
   try {
-    final settings = await loadAndMigrateSettings();
+    final settings = await loadAndMigrateSettings(session);
     final repos = await _fetchRepositories(session, settings);
 
     await Future.any([
@@ -49,12 +49,11 @@ Future<List<Repository>> _fetchRepositories(
   Settings settings,
 ) =>
     Future.wait(
-      settings.repos().map((entry) async {
-        final repo =
-            await Repository.open(session, store: entry.location.path());
+      settings.repos.map((location) async {
+        final repo = await Repository.open(session, store: location.path);
         await repo.setSyncEnabled(true);
         return repo;
-      }),
+      }).toList(),
     );
 
 Future<void> _waitForAllSynced(List<Repository> repos) async {

@@ -9,21 +9,21 @@ import '../../utils/utils.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
   const FileDescription(
-    this.repo,
-    this.fileData,
-    this._uploadJob,
+    this.repoCubit,
+    this.entry,
+    this.uploadJob,
   );
 
-  final RepoCubit repo;
-  final FileItem fileData;
-  final Job? _uploadJob;
+  final RepoCubit repoCubit;
+  final FileEntry entry;
+  final Job? uploadJob;
 
   @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Fields.ellipsedText(
-            fileData.name,
+            entry.name,
             ellipsisPosition: TextOverflowPosition.middle,
           ),
           Dimensions.spacingVerticalHalf,
@@ -32,7 +32,7 @@ class FileDescription extends StatelessWidget with AppLogger {
       );
 
   Widget _buildDetails(BuildContext context) {
-    final uploadJob = _uploadJob;
+    final uploadJob = this.uploadJob;
 
     if (uploadJob != null) {
       return _buildUploadDetails(context, uploadJob);
@@ -42,9 +42,9 @@ class FileDescription extends StatelessWidget with AppLogger {
   }
 
   Widget _buildSyncDetails(BuildContext context) => BlocProvider(
-        create: (context) => FileProgress(repo, fileData.path),
+        create: (context) => FileProgress(repoCubit, entry.path),
         child: BlocBuilder<FileProgress, int?>(builder: (cubit, soFar) {
-          final total = fileData.size;
+          final total = entry.size;
 
           if (total == null) {
             return _buildSizeWidget(context, null, true);

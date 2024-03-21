@@ -3,26 +3,46 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 
 import '../cubits/cubits.dart';
+import '../utils/path.dart';
 import '../utils/utils.dart';
-import 'item.dart';
 
 class FolderState extends Equatable {
   final String path;
-  final List<BaseItem> content;
+  final List<FileSystemEntry> content;
   final SortBy sortBy;
   final SortDirection sortDirection;
 
-  const FolderState(
-      {this.path = Strings.root,
-      this.content = const [],
-      this.sortBy = SortBy.name,
-      this.sortDirection = SortDirection.desc});
+  const FolderState({
+    this.path = Strings.root,
+    this.content = const [],
+    this.sortBy = SortBy.name,
+    this.sortDirection = SortDirection.desc,
+  });
 
   bool get isRoot => path == Strings.root;
-  String get parent => getDirname(path);
+  String get parent => dirname(path);
 
   @override
   List<Object?> get props => [path, content, sortBy, sortDirection];
+}
+
+sealed class FileSystemEntry {
+  FileSystemEntry({required this.path});
+
+  final String path;
+
+  String get name => basename(path);
+}
+
+class FileEntry extends FileSystemEntry {
+  FileEntry({required super.path, required this.size});
+
+  // null means size unknown due to the file not being downloaded yet.
+  final int? size;
+}
+
+class DirectoryEntry extends FileSystemEntry {
+  DirectoryEntry({required super.path});
 }
 
 class Folder {
@@ -71,14 +91,16 @@ class _Refresher {
 
     if (!_running) {
       _running = true;
-      _runner(
-          sortBy: sortBy, sortDirection: sortDirection); // Spawn, don't await
+      unawaited(_runner(
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ));
     }
 
     return future;
   }
 
-  void _runner({SortBy? sortBy, SortDirection? sortDirection}) async {
+  Future<void> _runner({SortBy? sortBy, SortDirection? sortDirection}) async {
     try {
       while (_hasNextJob) {
         _hasNextJob = false;
@@ -132,35 +154,42 @@ class _Refresher {
     }
   }
 
-  int Function(BaseItem, BaseItem)? _sortByName(SortDirection direction) {
+  int Function(FileSystemEntry, FileSystemEntry)? _sortByName(
+    SortDirection direction,
+  ) {
     return direction == SortDirection.asc
         ? (a, b) => _nameComparator(a, b)
         : (b, a) => _nameComparator(a, b);
   }
 
-  int _nameComparator(BaseItem a, BaseItem b) => a.name.compareTo(b.name);
+  int _nameComparator(FileSystemEntry a, FileSystemEntry b) =>
+      a.name.compareTo(b.name);
 
-  int Function(BaseItem, BaseItem)? _sortBySize(SortDirection direction) {
+  int Function(FileSystemEntry, FileSystemEntry)? _sortBySize(
+      SortDirection direction) {
     return direction == SortDirection.asc
         ? (a, b) => _sizeComparator(a, b)
         : (b, a) => _sizeComparator(a, b);
   }
 
-  int _sizeComparator(BaseItem a, BaseItem b) =>
-      (a.size ?? 0).compareTo(b.size ?? 0);
+  int _sizeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
+        (FileEntry(size: final a), FileEntry(size: final b)) =>
+          (a ?? 0).compareTo(b ?? 0),
+        (FileEntry(), DirectoryEntry()) => 1,
+        (DirectoryEntry(), FileEntry()) => -1,
+        (DirectoryEntry(), DirectoryEntry()) => 0,
+      };
 
-  int Function(BaseItem, BaseItem)? _sortByType(SortDirection direction) {
+  int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
+      SortDirection direction) {
     return direction == SortDirection.asc
-        ? (a, b) => _typeComparator(_typeId(a), _typeId(b))
-        : (b, a) => _typeComparator(_typeId(a), _typeId(b));
+        ? (a, b) => _typeComparator(a, b)
+        : (b, a) => _typeComparator(a, b);
   }
 
-  int _typeComparator(int a, int b) => a.compareTo(b);
-
-  int _typeId(BaseItem item) {
-    if (item is FolderItem) return 0;
-    if (item is FileItem) return 1;
-    assert(false);
-    return -1;
-  }
+  int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
+        (FileEntry(), FileEntry()) || (DirectoryEntry(), DirectoryEntry()) => 0,
+        (DirectoryEntry(), FileEntry()) => 1,
+        (FileEntry(), DirectoryEntry()) => -1,
+      };
 }

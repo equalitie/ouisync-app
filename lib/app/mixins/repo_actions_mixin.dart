@@ -7,6 +7,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
+import '../utils/master_key.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -63,40 +64,43 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  /// checkForBiometrics => main_page._checkForBiometricsCallback
-  /// getAuthenticationMode => Settings.getAuthenticationMode
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
-    required RepoCubit repository,
+    required Settings settings,
+    required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
-    final repoSettings = repository.repoSettings;
-    final passwordMode = repoSettings.passwordMode;
+    final passwordMode = repoCubit.state.authMode.passwordMode;
 
     LocalSecret secret;
 
     if (passwordMode == PasswordMode.manual) {
-      final password = await manualUnlock(context, repository);
+      final password = await manualUnlock(context, repoCubit);
       if (password == null || password.isEmpty) return;
       secret = LocalPassword(password);
     } else {
       if (!await LocalAuth.authenticateIfPossible(
-          context, S.current.messageAccessingSecureStorage)) return;
+        context,
+        S.current.messageAccessingSecureStorage,
+      )) return;
 
-      secret = (await repoSettings.getLocalSecret())!;
+      secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
     }
 
     popDialog();
 
     final securityPage = await RepositorySecurityPage.create(
-      repo: repository,
+      settings: settings,
+      repo: repoCubit,
       currentSecret: secret,
       passwordHasher: passwordHasher,
     );
 
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => securityPage));
+      context,
+      MaterialPageRoute(builder: (context) => securityPage),
+    );
   }
 
   Future<String?> manualUnlock(
@@ -145,22 +149,29 @@ mixin RepositoryActionsMixin on LoggyType {
   }
 
   /// delete => ReposCubit.deleteRepository
-  Future<void> deleteRepository(BuildContext context,
-      {required RepoLocation repositoryLocation,
-      required ReposCubit reposCubit,
-      void Function()? popDialog}) async {
+  Future<void> deleteRepository(
+    BuildContext context, {
+    required ReposCubit reposCubit,
+    required RepoLocation repoLocation,
+    void Function()? popDialog,
+  }) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Flex(direction: Axis.horizontal, children: [
-          Fields.constrainedText(S.current.titleDeleteRepository,
-              style: context.theme.appTextStyle.titleMedium, maxLines: 2)
+          Fields.constrainedText(
+            S.current.titleDeleteRepository,
+            style: context.theme.appTextStyle.titleMedium,
+            maxLines: 2,
+          )
         ]),
         content: SingleChildScrollView(
           child: ListBody(
             children: [
-              Text(S.current.messageConfirmRepositoryDeletion,
-                  style: context.theme.appTextStyle.bodyMedium)
+              Text(
+                S.current.messageConfirmRepositoryDeletion,
+                style: context.theme.appTextStyle.bodyMedium,
+              )
             ],
           ),
         ),
@@ -182,8 +193,10 @@ mixin RepositoryActionsMixin on LoggyType {
     );
 
     if (deleteRepo ?? false) {
-      await Dialogs.executeFutureWithLoadingDialog(context,
-          f: reposCubit.deleteRepository(repositoryLocation));
+      await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: reposCubit.deleteRepository(repoLocation),
+      );
 
       if (popDialog != null) {
         popDialog();
@@ -191,18 +204,21 @@ mixin RepositoryActionsMixin on LoggyType {
     }
   }
 
-  /// setAuthenticationMode => Settings.setAuthenticationMode
-  /// cubitUnlockRepository => ReposCubit.unlockRepository
-  Future<void> unlockRepository(BuildContext context, ReposCubit reposCubit,
-      {required DatabaseId databaseId,
-      required RepoLocation repoLocation}) async {
-    final repoSettings = reposCubit.settings.repoSettingsById(databaseId)!;
-    final passwordMode = repoSettings.passwordMode;
+  Future<void> unlockRepository(
+    BuildContext context,
+    RepoCubit repoCubit,
+    MasterKey masterKey,
+    PasswordHasher passwordHasher,
+  ) async {
+    final passwordMode = repoCubit.state.authMode.passwordMode;
 
     if (passwordMode == PasswordMode.manual) {
-      final unlockResult = await unlockRepositoryManually(context, reposCubit,
-          databaseId: databaseId, repoLocation: repoLocation);
-
+      final unlockResult = await unlockRepositoryManually(
+        context,
+        repoCubit,
+        masterKey,
+        passwordHasher,
+      );
       if (unlockResult == null) return;
 
       showSnackBar(unlockResult.message);
@@ -212,10 +228,12 @@ mixin RepositoryActionsMixin on LoggyType {
 
     if (passwordMode == PasswordMode.bio) {
       if (!await LocalAuth.authenticateIfPossible(
-          context, S.current.messageAccessingSecureStorage)) return;
+        context,
+        S.current.messageAccessingSecureStorage,
+      )) return;
     }
 
-    final secret = await repoSettings.getLocalSecret();
+    final secret = await repoCubit.getLocalSecret(masterKey);
 
     if (secret == null) {
       final message = passwordMode == PasswordMode.none
@@ -225,11 +243,10 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    final repoCubit = await reposCubit.unlockRepository(repoLocation, secret);
+    await repoCubit.unlock(secret);
+    final accessMode = repoCubit.accessMode;
 
-    final accessMode = repoCubit?.accessMode;
-
-    final message = (accessMode != null && accessMode != AccessMode.blind)
+    final message = (accessMode != AccessMode.blind)
         ? S.current.messageUnlockRepoOk(accessMode.name)
         : S.current.messageUnlockRepoFailed;
 
@@ -239,9 +256,11 @@ mixin RepositoryActionsMixin on LoggyType {
   /// cubitUnlockRepository => ReposCubit.unlockRepository
   /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(
-      BuildContext context, ReposCubit reposCubit,
-      {required DatabaseId databaseId,
-      required RepoLocation repoLocation}) async {
+    BuildContext context,
+    RepoCubit repoCubit,
+    MasterKey masterKey,
+    PasswordHasher passwordHasher,
+  ) async {
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     return await showDialog<UnlockRepositoryResult?>(
@@ -252,23 +271,16 @@ mixin RepositoryActionsMixin on LoggyType {
                   backgroundColor: Colors.transparent,
                   body: ActionsDialog(
                     title: S.current.messageUnlockRepository,
-                    body: UnlockRepository(reposCubit,
-                        parentContext: context,
-                        databaseId: databaseId,
-                        repoLocation: repoLocation,
-                        isPasswordValidation: false,
-                        isBiometricsAvailable: isBiometricsAvailable),
+                    body: UnlockRepository(
+                      parentContext: context,
+                      repoCubit: repoCubit,
+                      masterKey: masterKey,
+                      passwordHasher: passwordHasher,
+                      isPasswordValidation: false,
+                      isBiometricsAvailable: isBiometricsAvailable,
+                    ),
                   ));
             }))));
-  }
-}
-
-Future<void> lockRepository(
-    RepoEntry repositoryEntry, ReposCubit reposCubit) async {
-  if (repositoryEntry.accessMode == AccessMode.blind) return;
-
-  if (repositoryEntry is OpenRepoEntry) {
-    await reposCubit.lockRepository(repositoryEntry.repoSettings);
   }
 }
 

@@ -1,14 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../models/repo_location.dart';
 import '../utils/utils.dart';
 
 class NavigationState {
-  final DatabaseId? currentRepoId;
-  final String currentPath;
+  final RepoLocation? repoLocation;
+  final String path;
   final bool isFolder;
 
   NavigationState({
-    required this.currentRepoId,
-    required this.currentPath,
+    required this.repoLocation,
+    required this.path,
     required this.isFolder,
   });
 }
@@ -16,15 +17,15 @@ class NavigationState {
 class NavigationCubit extends Cubit<NavigationState> with AppLogger {
   NavigationCubit()
       : super(NavigationState(
-          currentRepoId: null,
-          currentPath: '',
+          repoLocation: null,
+          path: '',
           isFolder: false,
         ));
 
-  void current(DatabaseId databaseId, String path, bool isFolder) =>
+  void current(RepoLocation repoLocation, String path, bool isFolder) =>
       emit(NavigationState(
-        currentRepoId: databaseId,
-        currentPath: path,
+        repoLocation: repoLocation,
+        path: path,
         isFolder: isFolder,
       ));
 }

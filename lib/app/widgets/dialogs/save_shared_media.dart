@@ -3,6 +3,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../generated/l10n.dart';
 import '../../pages/pages.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 import '../../cubits/repos.dart';
@@ -113,7 +114,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
           itemCount: media.length,
           itemBuilder: (context, index) {
             final mediaItem = media[index];
-            final name = getBasename(mediaItem.path);
+            final name = basename(mediaItem.path);
 
             return Container(
                 padding: Dimensions.paddingListItem,

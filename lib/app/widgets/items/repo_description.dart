@@ -1,29 +1,33 @@
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/models.dart';
+import '../../cubits/repo.dart';
 import '../../utils/utils.dart';
 
 class RepoDescription extends StatelessWidget with AppLogger {
-  RepoDescription({required this.repoData});
+  RepoDescription(
+    this.state, {
+    required this.isDefault,
+  });
 
-  final RepoItem repoData;
+  final RepoState state;
+  final bool isDefault;
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(
-        fontWeight: repoData.isDefault ? FontWeight.bold : FontWeight.normal);
+    final textStyle =
+        TextStyle(fontWeight: isDefault ? FontWeight.bold : FontWeight.normal);
 
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Fields.ellipsedText(
-            repoData.name,
+            state.location.name,
             style: textStyle,
             ellipsisPosition: TextOverflowPosition.middle,
           ),
-          Fields.autosizeText(repoData.accessMode.name, style: textStyle)
+          Fields.autosizeText(state.accessMode.name, style: textStyle)
         ],
       ),
     );

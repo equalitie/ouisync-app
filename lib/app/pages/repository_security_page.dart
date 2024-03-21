@@ -10,13 +10,16 @@ import '../models/models.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurityPage extends StatefulWidget {
-  static Future<RepositorySecurityPage> create(
-      {required RepoCubit repo,
-      required LocalSecret currentSecret,
-      required PasswordHasher passwordHasher}) async {
+  static Future<RepositorySecurityPage> create({
+    required Settings settings,
+    required RepoCubit repo,
+    required LocalSecret currentSecret,
+    required PasswordHasher passwordHasher,
+  }) async {
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     return RepositorySecurityPage._(
+      settings: settings,
       repo: repo,
       currentSecret: currentSecret,
       isBiometricsAvailable: isBiometricsAvailable,
@@ -25,12 +28,14 @@ class RepositorySecurityPage extends StatefulWidget {
   }
 
   const RepositorySecurityPage._({
+    required this.settings,
     required this.repo,
     required this.currentSecret,
     required this.isBiometricsAvailable,
     required this.passwordHasher,
   });
 
+  final Settings settings;
   final RepoCubit repo;
   final LocalSecret currentSecret;
   final bool isBiometricsAvailable;
@@ -38,7 +43,7 @@ class RepositorySecurityPage extends StatefulWidget {
 
   @override
   State<RepositorySecurityPage> createState() =>
-      _RepositorySecurityState(isBiometricsAvailable, repo, currentSecret);
+      _RepositorySecurityState(currentSecret);
 }
 
 class _RepositorySecurityState extends State<RepositorySecurityPage>
@@ -49,14 +54,11 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
   String? _validPassword;
   bool _storeUserPasswordAsKey = true;
 
-  final bool _isBiometricsAvailable;
-  final RepoCubit _repo;
   LocalSecret _currentSecret;
 
-  PasswordMode get _passwordMode => _repo.repoSettings.passwordMode;
+  PasswordMode get _passwordMode => widget.repo.state.authMode.passwordMode;
 
-  _RepositorySecurityState(
-      this._isBiometricsAvailable, this._repo, this._currentSecret);
+  _RepositorySecurityState(this._currentSecret);
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +150,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       onChange: (bool value) => setState(() => _useCustomPassword = value));
 
   Widget _biometrics() =>
-      (_isBiometricsAvailable && _passwordMode != PasswordMode.manual)
+      (widget.isBiometricsAvailable && _passwordMode != PasswordMode.manual)
           ? _buildRowWithSwitch(
               value: _passwordMode == PasswordMode.bio,
               icon: Icons.fingerprint_rounded,
@@ -167,11 +169,16 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
 
     try {
       if (store) {
-        bool requireLocalAuth = _passwordMode == PasswordMode.bio;
-        await _repo.repoSettings
-            .setAuthModeSecretStoredOnDevice(key, requireLocalAuth);
+        final authMode = await AuthModeKeyStoredOnDevice.encrypt(
+          widget.settings.masterKey,
+          key,
+          confirmWithBiometrics: _passwordMode == PasswordMode.bio,
+        );
+
+        await widget.repo.setAuthMode(authMode);
       } else {
-        await _repo.repoSettings.setAuthModePasswordProvidedByUser();
+        final authMode = AuthModeBlindOrManual();
+        await widget.repo.setAuthMode(authMode);
       }
     } catch (e) {
       showSnackBar(S.current.messageErrorRemovingSecureStorage);
@@ -180,13 +187,12 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
 
     final changed = await _changeRepositorySecret(newSecret);
 
-    if (changed == false) {
+    if (!changed) {
       showSnackBar(S.current.messageErrorAddingLocalPassword);
       return;
     }
 
     _emitSecret(newSecret.key);
-    _emitPasswordMode();
 
     // TODO
     //_clearPasswordInputs();
@@ -203,15 +209,18 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
     }
 
     try {
-      await _repo.repoSettings.setAuthModeSecretStoredOnDevice(
-          newSecret.key, _passwordMode == PasswordMode.bio);
+      final authMode = await AuthModeKeyStoredOnDevice.encrypt(
+        widget.settings.masterKey,
+        newSecret.key,
+        confirmWithBiometrics: _passwordMode == PasswordMode.bio,
+      );
+      await widget.repo.setAuthMode(authMode);
     } catch (e) {
       showSnackBar(S.current.messageErrorRemovingPassword);
       return;
     }
 
     _emitSecret(newSecret.key);
-    _emitPasswordMode();
   }
 
   // TODO: If any of the async functions here fail, the user may lose their data.
@@ -219,21 +228,14 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
     bool unlockWithBiometrics,
   ) async {
     try {
-      if (!await _repo.repoSettings
-          .setConfirmWithBiometrics(unlockWithBiometrics)) {
-        // Did not change.
-        return;
-      }
+      await widget.repo.setConfirmWithBiometrics(unlockWithBiometrics);
     } catch (e) {
       showSnackBar(S.current.messageErrorUpdatingSecureStorage);
-      return;
     }
-
-    _emitPasswordMode();
   }
 
   Future<bool> _changeRepositorySecret(SetLocalSecret newSecret) async {
-    return _repo.setSecret(
+    return widget.repo.setSecret(
       oldSecret: _currentSecret,
       newSecret: newSecret,
     );
@@ -241,10 +243,6 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
 
   void _emitSecret(LocalSecret newSecret) => setState(() {
         _currentSecret = newSecret;
-      });
-
-  void _emitPasswordMode() => setState(() {
-        _repo.emitPasswordMode();
       });
 
   Future<bool> _confirmSaveChanges(BuildContext context) async {
