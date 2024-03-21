@@ -146,20 +146,18 @@ class Settings with AppLogger {
     }
 
     final s0 = await v0.Settings.init(_prefs);
-    final r = _root;
 
-    r.acceptedEqualitieValues =
-        s0.getEqualitieValues() ?? r.acceptedEqualitieValues;
-    r.showOnboarding = s0.getShowOnboarding() ?? r.showOnboarding;
-    r.launchAtStartup = s0.getLaunchAtStartup() ?? r.launchAtStartup;
-    r.enableSyncOnMobileInternet =
-        s0.getSyncOnMobileEnabled() ?? r.enableSyncOnMobileInternet;
-    r.highestSeenProtocolNumber =
-        s0.getHighestSeenProtocolNumber() ?? r.highestSeenProtocolNumber;
-    r.defaultRepo = s0.getDefaultRepo()?.let((name) => s0.repoLocation(name)) ??
-        defaultRepo;
-
-    final repos = <DatabaseId, RepoLocation>{};
+    _root.acceptedEqualitieValues =
+        s0.getEqualitieValues() ?? _root.acceptedEqualitieValues;
+    _root.showOnboarding = s0.getShowOnboarding() ?? _root.showOnboarding;
+    _root.launchAtStartup = s0.getLaunchAtStartup() ?? _root.launchAtStartup;
+    _root.enableSyncOnMobileInternet =
+        s0.getSyncOnMobileEnabled() ?? _root.enableSyncOnMobileInternet;
+    _root.highestSeenProtocolNumber =
+        s0.getHighestSeenProtocolNumber() ?? _root.highestSeenProtocolNumber;
+    _root.defaultRepo =
+        s0.getDefaultRepo()?.let((name) => s0.repoLocation(name)) ??
+            _root.defaultRepo;
 
     for (final repo in s0.repos()) {
       final databaseId = DatabaseId(repo.databaseId);
@@ -214,13 +212,13 @@ class Settings with AppLogger {
         await oldPwdStorage.deletePassword();
       }
 
-      repos[databaseId] = location;
+      _root.repos[databaseId] = location;
     }
 
     await _storeRoot();
 
     // Remove repos that were successfully migrated
-    for (final location in repos.values) {
+    for (final location in _root.repos.values) {
       await s0.forgetRepository(location.name);
     }
 

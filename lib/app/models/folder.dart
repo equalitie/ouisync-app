@@ -90,14 +90,16 @@ class _Refresher {
 
     if (!_running) {
       _running = true;
-      _runner(
-          sortBy: sortBy, sortDirection: sortDirection); // Spawn, don't await
+      unawaited(_runner(
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ));
     }
 
     return future;
   }
 
-  void _runner({SortBy? sortBy, SortDirection? sortDirection}) async {
+  Future<void> _runner({SortBy? sortBy, SortDirection? sortDirection}) async {
     try {
       while (_hasNextJob) {
         _hasNextJob = false;
