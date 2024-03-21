@@ -43,7 +43,7 @@ class FolderCreation extends HookWidget {
                     final submitted = await submitField(parent, newFolderName);
                     if (submitted && PlatformValues.isDesktopDevice) {
                       final newFolderPath =
-                          buildDestinationPath(parent, newFolderName!);
+                          pathContext.join(parent, newFolderName!);
                       Navigator.of(context).pop(newFolderPath);
                     }
                   },
@@ -92,7 +92,7 @@ class FolderCreation extends HookWidget {
 
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
-    final newFolderPath = buildDestinationPath(parent, newName);
+    final newFolderPath = pathContext.join(parent, newName);
     if (await cubit.exists(newFolderPath)) return false;
 
     formKey.currentState!.save();
@@ -115,7 +115,7 @@ class FolderCreation extends HookWidget {
       BuildContext context, String parent, String newFolderName) async {
     final submitted = await submitField(parent, newFolderName);
     if (submitted) {
-      final newFolderPath = buildDestinationPath(parent, newFolderName);
+      final newFolderPath = pathContext.join(parent, newFolderName);
       Navigator.of(context).pop(newFolderPath);
     }
   }

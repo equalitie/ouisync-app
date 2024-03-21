@@ -9,20 +9,21 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class FolderDetail extends StatefulWidget {
-  const FolderDetail(
-      {required this.context,
-      required this.cubit,
-      required this.navigation,
-      required this.data,
-      required this.onUpdateBottomSheet,
-      required this.onMoveEntry,
-      required this.isActionAvailableValidator});
+  const FolderDetail({
+    required this.context,
+    required this.repo,
+    required this.navigation,
+    required this.entry,
+    required this.onUpdateBottomSheet,
+    required this.onMoveEntry,
+    required this.isActionAvailableValidator,
+  });
 
   final BuildContext context;
-  final RepoCubit cubit;
+  final RepoCubit repo;
 
   final NavigationCubit navigation;
-  final FolderItem data;
+  final DirectoryEntry entry;
   final BottomSheetCallback onUpdateBottomSheet;
   final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
@@ -47,9 +48,9 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 iconData: Icons.edit,
                 title: S.current.iconRename,
                 dense: true,
-                onTap: () async => _showRenameDialog(widget.data),
+                onTap: () async => _showRenameDialog(widget.entry),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.rename),
+                    widget.repo.state.accessMode, EntryAction.rename),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration),
@@ -57,13 +58,14 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 iconData: Icons.drive_file_move_outlined,
                 title: S.current.iconMove,
                 dense: true,
-                onTap: () async => _showMoveEntryBottomSheet(
-                    widget.data.path,
-                    EntryType.directory,
-                    widget.onMoveEntry,
-                    widget.onUpdateBottomSheet),
+                onTap: () => _showMoveEntryBottomSheet(
+                      widget.entry.path,
+                      EntryType.directory,
+                      widget.onMoveEntry,
+                      widget.onUpdateBottomSheet,
+                    ),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.move),
+                    widget.repo.state.accessMode, EntryAction.move),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration),
@@ -72,18 +74,20 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 title: S.current.iconDelete,
                 isDanger: true,
                 dense: true,
-                onTap: () async =>
-                    _deleteFolderWithValidation(widget.cubit, widget.data.path),
+                onTap: () => _deleteFolderWithValidation(
+                      widget.repo,
+                      widget.entry.path,
+                    ),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.delete),
+                    widget.repo.state.accessMode, EntryAction.delete),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration),
             const Divider(
                 height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
             EntryInfoTable(entryInfo: {
-              S.current.labelName: widget.data.name,
-              S.current.labelLocation: getDirname(widget.data.path),
+              S.current.labelName: widget.entry.name,
+              S.current.labelLocation: getDirname(widget.entry.path),
             })
           ],
         ),
@@ -103,8 +107,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
 
     final deleteFolder = await Dialogs.deleteFolderAlertDialog(
       widget.context,
-      widget.cubit,
-      widget.data.path,
+      widget.repo,
+      widget.entry.path,
       validationMessage,
     );
     if (deleteFolder != true) return;
@@ -117,7 +121,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     if (deleteFolderOk) {
       Navigator.of(context).pop(deleteFolder);
 
-      showSnackBar(S.current.messageFolderDeleted(widget.data.name));
+      showSnackBar(S.current.messageFolderDeleted(widget.entry.name));
     }
   }
 
@@ -137,7 +141,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     return true;
   }
 
-  _showMoveEntryBottomSheet(
+  void _showMoveEntryBottomSheet(
       String path,
       EntryType type,
       MoveEntryCallback moveEntryCallback,
@@ -146,7 +150,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
 
     final originPath = getDirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(
-      repo: widget.cubit,
+      repo: widget.repo,
       navigation: widget.navigation,
       originPath: originPath,
       path: path,
@@ -158,12 +162,12 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
   }
 
-  void _showRenameDialog(FolderItem data) async {
+  void _showRenameDialog(DirectoryEntry entry) async {
     await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          final oldName = getBasename(data.path);
+          final oldName = getBasename(entry.path);
 
           return ActionsDialog(
               title: S.current.messageRenameFolder,
@@ -176,10 +180,10 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         }).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(data.path);
-        final newEntryPath = buildDestinationPath(parent, newName);
+        final parent = getDirname(entry.path);
+        final newEntryPath = pathContext.join(parent, newName);
 
-        widget.cubit.moveEntry(source: data.path, destination: newEntryPath);
+        widget.repo.moveEntry(source: entry.path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

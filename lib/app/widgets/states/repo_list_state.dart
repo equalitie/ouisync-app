@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
@@ -40,50 +39,41 @@ class RepoListState extends StatelessWidget
     String? currentRepoName,
   ) =>
       ValueListenableBuilder(
-          valueListenable: bottomPaddingWithBottomSheet,
-          builder: (context, value, child) => ListView.separated(
-              padding: EdgeInsets.only(bottom: value),
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Colors.transparent),
-              itemCount: reposList.length,
-              itemBuilder: (context, index) {
-                final repoEntry = reposList.elementAt(index);
-                final isDefault = currentRepoName == repoEntry.name;
-                final repoCubit = repoEntry.cubit;
+        valueListenable: bottomPaddingWithBottomSheet,
+        builder: (context, value, child) => ListView.separated(
+          padding: EdgeInsets.only(bottom: value),
+          separatorBuilder: (context, index) => const Divider(
+            height: 1,
+            color: Colors.transparent,
+          ),
+          itemCount: reposList.length,
+          itemBuilder: (context, index) {
+            final repoEntry = reposList.elementAt(index);
+            final isDefault = currentRepoName == repoEntry.name;
+            final repoCubit = repoEntry.cubit;
 
-                if (repoCubit == null) {
-                  final repoMissingItem = RepoMissingItem(repoEntry.location,
-                      message: S.current.messageRepoMissing);
-
-                  return ListItem(
-                      reposCubit: null,
-                      repoCubit: null,
-                      itemData: repoMissingItem,
-                      mainAction: () {},
-                      verticalDotsAction: () async => deleteRepository(
-                            context,
-                            reposCubit: reposCubit,
-                            repoLocation: repoEntry.location,
-                          ));
-                }
-
-                final repoItem = RepoItem(
-                  repoEntry.location,
-                  accessMode: repoEntry.accessMode,
-                  isDefault: isDefault,
-                );
-
-                final listItem = ListItem(
+            if (repoCubit == null) {
+              return MissingRepoListItem(
+                location: repoEntry.location,
+                mainAction: () {},
+                verticalDotsAction: () => deleteRepository(
+                  context,
                   reposCubit: reposCubit,
-                  repoCubit: repoCubit,
-                  itemData: repoItem,
-                  mainAction: () async {
-                    await reposCubit.setCurrent(repoEntry);
-                  },
-                  verticalDotsAction: () =>
-                      onShowRepoSettings(parentContext, repoCubit: repoCubit),
-                );
+                  repoLocation: repoEntry.location,
+                ),
+              );
+            }
 
-                return listItem;
-              }));
+            return RepoListItem(
+              repoCubit: repoCubit,
+              isDefault: isDefault,
+              mainAction: () async {
+                await reposCubit.setCurrent(repoEntry);
+              },
+              verticalDotsAction: () =>
+                  onShowRepoSettings(parentContext, repoCubit: repoCubit),
+            );
+          },
+        ),
+      );
 }

@@ -30,7 +30,7 @@ typedef MoveEntryCallback = Future<bool> Function(
     String origin, String path, EntryType type);
 
 typedef PreviewFileCallback = Future<void> Function(
-    RepoCubit repo, FileItem item, bool useDefaultApp);
+    RepoCubit repo, FileEntry entry, bool useDefaultApp);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -657,7 +657,7 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _previewFile(
     RepoCubit repo,
-    FileItem item,
+    FileEntry entry,
     bool useDefaultApp,
   ) async {
     if (io.Platform.isAndroid) {
@@ -665,8 +665,8 @@ class _MainPageState extends State<MainPage>
 
       final previewResult = await widget.nativeChannels.previewOuiSyncFile(
         widget.packageInfo.packageName,
-        item.path,
-        item.size ?? 0,
+        entry.path,
+        entry.size ?? 0,
         useDefaultApp: useDefaultApp,
       );
 
@@ -690,16 +690,16 @@ class _MainPageState extends State<MainPage>
 
       bool previewOk = false;
       try {
-        final url = Uri.parse('file:$mountedDirectory${item.path}');
+        final url = Uri.parse('file:$mountedDirectory${entry.path}');
         previewOk = await launchUrl(url);
       } on PlatformException catch (e, st) {
         loggy.app(
-          'Preview file (desktop): Error previewing file ${item.path}:\n${e.toString()}',
+          'Preview file (desktop): Error previewing file ${entry.path}:',
           e,
           st,
         );
 
-        showSnackBar(S.current.messagePreviewingFileFailed(item.path));
+        showSnackBar(S.current.messagePreviewingFileFailed(entry.path));
         return;
       }
 
@@ -712,13 +712,13 @@ class _MainPageState extends State<MainPage>
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
           context,
-          f: repo.previewFileUrl(item.path),
+          f: repo.previewFileUrl(entry.path),
         );
 
         await launchUrl(url);
       } on PlatformException catch (e, st) {
         loggy.app(
-          '(FileServer) Error previewing file ${item.path}:\n${e.toString()}',
+          '(FileServer) Error previewing file ${entry.path}:',
           e,
           st,
         );
@@ -726,114 +726,116 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepo) => ValueListenableBuilder(
-      valueListenable: _bottomPaddingWithBottomSheet,
-      builder: (context, value, child) => RefreshIndicator(
+  Widget _contentsList(RepoCubit currentRepoCubit) => ValueListenableBuilder(
+        valueListenable: _bottomPaddingWithBottomSheet,
+        builder: (context, value, child) => RefreshIndicator(
           onRefresh: () async => getContent(),
           child: ListView.separated(
-              padding: EdgeInsets.only(bottom: value),
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Colors.transparent),
-              itemCount: currentRepo.state.currentFolder.content.length,
-              itemBuilder: (context, index) {
-                final item = currentRepo.state.currentFolder.content[index];
-                Function actionByType;
+            padding: EdgeInsets.only(bottom: value),
+            separatorBuilder: (context, index) => const Divider(
+              height: 1,
+              color: Colors.transparent,
+            ),
+            itemCount: currentRepoCubit.state.currentFolder.content.length,
+            itemBuilder: (context, index) {
+              final entry = currentRepoCubit.state.currentFolder.content[index];
+              final key = ValueKey(entry.name);
 
-                if (item is FileItem) {
-                  actionByType = () async {
-                    if (_bottomSheet != null) {
-                      await Dialogs.simpleAlertDialog(
-                          context: context,
-                          title: S.current.titleMovingEntry,
-                          message: S.current.messageMovingEntry);
-                      return;
-                    }
-
-                    await _previewFile(currentRepo, item, true);
-                  };
-                } else if (item is FolderItem) {
-                  actionByType = () {
-                    if (_bottomSheet != null && _pathEntryToMove == item.path) {
-                      return;
-                    }
-
-                    currentRepo.navigateTo(item.path);
-                  };
-                } else {
-                  throw UnsupportedError('invalid item type: $item');
-                }
-
-                final listItem = ListItem(
-                    key: ValueKey(item.name),
-                    reposCubit: null,
-                    repoCubit: currentRepo,
-                    itemData: item,
-                    mainAction: actionByType,
-                    verticalDotsAction: () async {
+              return switch (entry) {
+                FileEntry entry => FileListItem(
+                    key: key,
+                    entry: entry,
+                    repoCubit: currentRepoCubit,
+                    mainAction: () async {
                       if (_bottomSheet != null) {
-                        await Dialogs.simpleAlertDialog(
-                            context: context,
-                            title: S.current.titleMovingEntry,
-                            message: S.current.messageMovingEntry);
-
+                        await _showMovingEntryAlertDialog(context);
                         return;
                       }
 
-                      item is FileItem
-                          ? await _showFileDetails(
-                              repoCubit: currentRepo, data: item)
-                          : await _showFolderDetails(
-                              repoCubit: currentRepo, data: item);
-                    });
+                      await _previewFile(currentRepoCubit, entry, true);
+                    },
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await _showMovingEntryAlertDialog(context);
+                        return;
+                      }
 
-                return listItem;
-              })));
+                      await _showFileDetails(currentRepoCubit, entry);
+                    }),
+                DirectoryEntry entry => DirectoryListItem(
+                    key: key,
+                    entry: entry,
+                    mainAction: () {
+                      if (_bottomSheet != null &&
+                          _pathEntryToMove == entry.path) {
+                        return;
+                      }
 
-  Future<dynamic> _showFileDetails({
-    required RepoCubit repoCubit,
-    required BaseItem data,
-  }) {
-    return showModalBottomSheet(
+                      currentRepoCubit.navigateTo(entry.path);
+                    },
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await _showMovingEntryAlertDialog(context);
+                        return;
+                      }
+
+                      await _showFolderDetails(currentRepoCubit, entry);
+                    },
+                  ),
+              };
+            },
+          ),
+        ),
+      );
+
+  Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: S.current.titleMovingEntry,
+        message: S.current.messageMovingEntry,
+      );
+
+  Future<dynamic> _showFileDetails(
+    RepoCubit repoCubit,
+    FileEntry entry,
+  ) =>
+      showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return FileDetail(
-            cubit: repoCubit,
-            navigation: widget.navigation,
-            data: data as FileItem,
-            onUpdateBottomSheet: updateBottomSheet,
-            onPreviewFile: (cubit, data, useDefaultApp) =>
-                _previewFile(cubit, data, useDefaultApp),
-            onMoveEntry: (origin, path, type) =>
-                moveEntry(repoCubit, origin, path, type),
-            isActionAvailableValidator: _isEntryActionAvailable,
-            packageInfo: widget.packageInfo,
-            nativeChannels: widget.nativeChannels,
-          );
-        });
-  }
+        builder: (context) => FileDetail(
+          repo: repoCubit,
+          navigation: widget.navigation,
+          entry: entry,
+          onUpdateBottomSheet: updateBottomSheet,
+          onPreviewFile: (cubit, data, useDefaultApp) =>
+              _previewFile(cubit, data, useDefaultApp),
+          onMoveEntry: (origin, path, type) =>
+              moveEntry(repoCubit, origin, path, type),
+          isActionAvailableValidator: _isEntryActionAvailable,
+          packageInfo: widget.packageInfo,
+          nativeChannels: widget.nativeChannels,
+        ),
+      );
 
-  Future<dynamic> _showFolderDetails({
-    required RepoCubit repoCubit,
-    required BaseItem data,
-  }) =>
+  Future<dynamic> _showFolderDetails(
+    RepoCubit repoCubit,
+    DirectoryEntry entry,
+  ) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return FolderDetail(
-              context: context,
-              cubit: repoCubit,
-              navigation: widget.navigation,
-              data: data as FolderItem,
-              onUpdateBottomSheet: updateBottomSheet,
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
-              isActionAvailableValidator: _isEntryActionAvailable,
-            );
-          });
+          builder: (context) => FolderDetail(
+                context: context,
+                repo: repoCubit,
+                navigation: widget.navigation,
+                entry: entry,
+                onUpdateBottomSheet: updateBottomSheet,
+                onMoveEntry: (origin, path, type) =>
+                    moveEntry(repoCubit, origin, path, type),
+                isActionAvailableValidator: _isEntryActionAvailable,
+              ));
 
   void updateBottomSheet(Widget? widget, String entryPath) {
     _pathEntryToMove = entryPath;
@@ -858,9 +860,13 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool> moveEntry(
-      RepoCubit currentRepo, String origin, String path, EntryType type) async {
+    RepoCubit currentRepo,
+    String origin,
+    String path,
+    EntryType type,
+  ) async {
     final basename = getBasename(path);
-    final destination = buildDestinationPath(
+    final destination = pathContext.join(
       currentRepo.state.currentFolder.path,
       basename,
     );
@@ -937,7 +943,7 @@ class _MainPageState extends State<MainPage>
     final file = io.File(path);
     final fileName = getBasename(path);
     final length = (await file.stat()).size;
-    final filePath = buildDestinationPath(
+    final filePath = pathContext.join(
       currentRepo.state.currentFolder.path,
       fileName,
     );

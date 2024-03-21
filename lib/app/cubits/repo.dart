@@ -382,29 +382,27 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     );
   }
 
-  Future<List<BaseItem>> getFolderContents(String path) async {
+  Future<List<FileSystemEntry>> getFolderContents(String path) async {
     String? error;
 
-    final content = <BaseItem>[];
+    final content = <FileSystemEntry>[];
 
     // If the directory does not exist, the following command will throw.
     final directory = await Directory.open(_repo, path);
-    final iterator = directory.iterator;
 
     try {
-      while (iterator.moveNext()) {
-        final entryName = iterator.current.name;
-        final entryType = iterator.current.entryType;
-        final entryPath = buildDestinationPath(path, entryName);
+      for (final dirEntry in directory) {
+        final entryPath = pathContext.join(path, dirEntry.name);
 
-        if (entryType == EntryType.file) {
-          final size = await _getFileSize(entryPath);
-          content.add(FileItem(name: entryName, path: entryPath, size: size));
-        }
+        final entry = switch (dirEntry.entryType) {
+          EntryType.file => FileEntry(
+              path: entryPath,
+              size: await _getFileSize(entryPath),
+            ),
+          EntryType.directory => DirectoryEntry(path: entryPath),
+        };
 
-        if (entryType == EntryType.directory) {
-          content.add(FolderItem(name: entryName, path: entryPath));
-        }
+        content.add(entry);
       }
     } catch (e, st) {
       loggy.app('Traversing directory $path exception', e, st);
@@ -520,11 +518,16 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
-  Future<void> unlock(LocalSecret secret) =>
-      _repo.setAccessMode(AccessMode.write, secret: secret);
+  Future<void> unlock(LocalSecret secret) async {
+    await _repo.setAccessMode(AccessMode.write, secret: secret);
+    emit(state.copyWith(accessMode: await _repo.accessMode));
+  }
 
   /// Locks the repository (switches it to blind mode)
-  Future<void> lock() => _repo.setAccessMode(AccessMode.blind);
+  Future<void> lock() async {
+    await _repo.setAccessMode(AccessMode.blind);
+    emit(state.copyWith(accessMode: await _repo.accessMode));
+  }
 
   Future<int?> _getFileSize(String path) async {
     File file;

@@ -114,7 +114,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
       for (final srcFile in result.files) {
         String fileName = srcFile.name;
-        String dstPath = buildDestinationPath(dstDir, fileName);
+        String dstPath = pathContext.join(dstDir, fileName);
 
         if (await repo.exists(dstPath)) {
           final action = await showDialog<FileAction>(
@@ -142,7 +142,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           }
 
           fileName = await _renameFile(dstPath, 0);
-          dstPath = buildDestinationPath(dstDir, fileName);
+          dstPath = pathContext.join(dstDir, fileName);
         }
 
         await repo.saveFile(

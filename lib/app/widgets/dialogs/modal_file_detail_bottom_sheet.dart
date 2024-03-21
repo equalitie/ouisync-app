@@ -15,9 +15,9 @@ import '../widgets.dart';
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
-    required this.cubit,
+    required this.repo,
     required this.navigation,
-    required this.data,
+    required this.entry,
     required this.onUpdateBottomSheet,
     required this.onPreviewFile,
     required this.onMoveEntry,
@@ -26,9 +26,9 @@ class FileDetail extends StatefulWidget {
     required this.nativeChannels,
   });
 
-  final RepoCubit cubit;
+  final RepoCubit repo;
   final NavigationCubit navigation;
-  final FileItem data;
+  final FileEntry entry;
   final BottomSheetCallback onUpdateBottomSheet;
   final PreviewFileCallback onPreviewFile;
   final MoveEntryCallback onMoveEntry;
@@ -74,11 +74,13 @@ class _FileDetailState extends State<FileDetail> {
 
                   if (defaultDirectoryPath == null) return;
 
-                  await SaveFileToDevice(data: widget.data, cubit: widget.cubit)
-                      .save(defaultDirectoryPath);
+                  await SaveFileToDevice(
+                    entry: widget.entry,
+                    repoCubit: widget.repo,
+                  ).save(defaultDirectoryPath);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.download),
+                    widget.repo.state.accessMode, EntryAction.download),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -91,10 +93,10 @@ class _FileDetailState extends State<FileDetail> {
                   Navigator.of(context).pop();
 
                   await widget.onPreviewFile
-                      .call(widget.cubit, widget.data, false);
+                      .call(widget.repo, widget.entry, false);
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.preview),
+                    widget.repo.state.accessMode, EntryAction.preview),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -107,11 +109,11 @@ class _FileDetailState extends State<FileDetail> {
                   onTap: () async =>
                       await widget.nativeChannels.shareOuiSyncFile(
                     widget.packageInfo.packageName,
-                    widget.data.path,
-                    widget.data.size ?? 0,
+                    widget.entry.path,
+                    widget.entry.size ?? 0,
                   ),
                   enabledValidation: () => widget.isActionAvailableValidator(
-                      widget.cubit.state.accessMode, EntryAction.share),
+                      widget.repo.state.accessMode, EntryAction.share),
                   disabledMessage: S.current.messageActionNotAvailable,
                   disabledMessageDuration:
                       Constants.notAvailableActionMessageDuration,
@@ -120,9 +122,9 @@ class _FileDetailState extends State<FileDetail> {
                 iconData: Icons.edit,
                 title: S.current.iconRename,
                 dense: true,
-                onTap: () async => _showRenameDialog(widget.data),
+                onTap: () async => _showRenameDialog(widget.entry),
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.rename),
+                    widget.repo.state.accessMode, EntryAction.rename),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -135,14 +137,16 @@ class _FileDetailState extends State<FileDetail> {
                   Navigator.of(context).pop();
 
                   _showMoveEntryBottomSheet(
-                    widget.data.path,
+                    widget.entry.path,
                     EntryType.file,
                     widget.onMoveEntry,
                     widget.onUpdateBottomSheet,
                   );
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.cubit.state.accessMode, EntryAction.move),
+                  widget.repo.state.accessMode,
+                  EntryAction.move,
+                ),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
@@ -153,12 +157,12 @@ class _FileDetailState extends State<FileDetail> {
                   isDanger: true,
                   dense: true,
                   onTap: () async {
-                    final fileName = getBasename(widget.data.path);
-                    final parent = getDirname(widget.data.path);
+                    final fileName = getBasename(widget.entry.path);
+                    final parent = getDirname(widget.entry.path);
 
                     final deletedFileName = await Dialogs.deleteFileAlertDialog(
-                        widget.cubit,
-                        widget.data.path,
+                        widget.repo,
+                        widget.entry.path,
                         context,
                         fileName,
                         parent);
@@ -168,16 +172,16 @@ class _FileDetailState extends State<FileDetail> {
                     }
                   },
                   enabledValidation: () => widget.isActionAvailableValidator(
-                      widget.cubit.state.accessMode, EntryAction.delete),
+                      widget.repo.state.accessMode, EntryAction.delete),
                   disabledMessage: S.current.messageActionNotAvailable,
                   disabledMessageDuration:
                       Constants.notAvailableActionMessageDuration),
               const Divider(
                   height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
               EntryInfoTable(entryInfo: {
-                S.current.labelName: widget.data.name,
-                S.current.labelLocation: getDirname(widget.data.path),
-                S.current.labelSize: formatSize(widget.data.size ?? 0),
+                S.current.labelName: widget.entry.name,
+                S.current.labelLocation: getDirname(widget.entry.path),
+                S.current.labelSize: formatSize(widget.entry.size ?? 0),
               })
             ],
           ),
@@ -192,7 +196,7 @@ class _FileDetailState extends State<FileDetail> {
   ) {
     final originPath = getDirname(path);
     final bottomSheetMoveEntry = MoveEntryDialog(
-      repo: widget.cubit,
+      repo: widget.repo,
       navigation: widget.navigation,
       originPath: originPath,
       path: path,
@@ -204,7 +208,7 @@ class _FileDetailState extends State<FileDetail> {
     widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
   }
 
-  void _showRenameDialog(FileItem data) async {
+  void _showRenameDialog(FileEntry entry) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -212,8 +216,8 @@ class _FileDetailState extends State<FileDetail> {
         return ScaffoldMessenger(
           child: Builder(
             builder: (context) {
-              final oldName = getBasename(data.path);
-              final originalExtension = getFileExtension(data.path);
+              final oldName = getBasename(entry.path);
+              final originalExtension = getFileExtension(entry.path);
 
               return Scaffold(
                 backgroundColor: Colors.transparent,
@@ -235,10 +239,10 @@ class _FileDetailState extends State<FileDetail> {
     ).then((newName) {
       if (newName.isNotEmpty) {
         // The new name provided by the user.
-        final parent = getDirname(data.path);
-        final newEntryPath = buildDestinationPath(parent, newName);
+        final parent = getDirname(entry.path);
+        final newEntryPath = pathContext.join(parent, newName);
 
-        widget.cubit.moveEntry(source: data.path, destination: newEntryPath);
+        widget.repo.moveEntry(source: entry.path, destination: newEntryPath);
 
         Navigator.of(context).pop();
       }

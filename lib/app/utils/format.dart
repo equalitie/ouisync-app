@@ -50,12 +50,9 @@ String _formatSizeUnit(int scale) {
   return suffixes[scale];
 }
 
-String buildDestinationPath(String parentPath, String entryPath) {
-  /// We want to maintain a POSIX style path inside the library, even when
-  /// the app is running on Windows.
-  final context = p.Context(style: p.Style.posix);
-  return context.join(parentPath, entryPath);
-}
+/// We want to maintain a POSIX style path inside the library, even when
+/// the app is running on Windows.
+final pathContext = p.Context(style: p.Style.posix);
 
 String formatShareLinkForDisplay(String shareLink) {
   final shareTokenUri = Uri.parse(shareLink);
