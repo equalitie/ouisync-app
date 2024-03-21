@@ -2,7 +2,7 @@
 //  FileProviderExtension.swift
 //  OuisyncFileProvider
 //
-//  Created by Peter Jankuliak on 15/03/2024.
+//  Created by Peter Jankuliak on 21/03/2024.
 //
 
 import FileProvider
@@ -10,6 +10,18 @@ import FileProvider
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using `NSFileProviderManager.add(_:, completionHandler:)`. The system will then launch the application extension process, call `FileProviderExtension.init(domain:)` to instantiate the extension for that domain, and call methods on the instance.
+        sleep(20)
+        NSLog("EXT -------------------------------------------------- FileProviderExtension.init \(domain)");
+        
+        print("EXT flutter ------------ ext")
+        //logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 🧩 ")
+        Task {
+            while true {
+                print("EXT hello from ext");
+                NSLog("EXT -------------------------------------------------- FileProviderExtension.init \(domain)");
+                try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
+            }
+        }
         super.init()
     }
     
