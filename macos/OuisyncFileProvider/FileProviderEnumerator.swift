@@ -34,7 +34,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
          - inform the observer about the items returned by the server (possibly multiple times)
          - inform the observer that you are finished with this page
          */
-        observer.didEnumerate([FileProviderItem(identifier: NSFileProviderItemIdentifier("a file"))])
+        observer.didEnumerate([FileProviderItem(identifier: NSFileProviderItemIdentifier("ouisyncfile"))])
         observer.finishEnumerating(upTo: nil)
     }
     

@@ -10,6 +10,16 @@ import FileProvider
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using `NSFileProviderManager.add(_:, completionHandler:)`. The system will then launch the application extension process, call `FileProviderExtension.init(domain:)` to instantiate the extension for that domain, and call methods on the instance.
+        NSLog("EXT -------------------------------------------------- FileProviderExtension.init \(domain)");
+        
+        Task {
+            var i = 0;
+            while true {
+                NSLog("EXT --------------------------------- a \(i)");
+                i += 1;
+                try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
+            }
+        }
         super.init()
     }
     
