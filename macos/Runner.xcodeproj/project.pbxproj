@@ -572,7 +572,7 @@
 				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -589,9 +589,13 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"-framework",
+					FlutterMacOS,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -617,7 +621,7 @@
 				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -634,8 +638,12 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"-framework",
+					FlutterMacOS,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -660,7 +668,7 @@
 				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -677,8 +685,12 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"-framework",
+					FlutterMacOS,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
