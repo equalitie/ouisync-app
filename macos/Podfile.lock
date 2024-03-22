@@ -24,7 +24,7 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - ReachabilitySwift (5.0.0)
+  - ReachabilitySwift (5.2.1)
   - screen_retriever (0.0.1):
     - FlutterMacOS
   - Sentry/HybridSDK (8.19.0):
@@ -126,7 +126,7 @@ SPEC CHECKSUMS:
   ouisync_plugin: 42e9b8b756aff3095f91b2207fa19458c2d46048
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   Sentry: 1ebcaef678a27c8ac515f974cb5425dd1bbdec2f
   sentry_flutter: ecdfbedee55337205561cfa782ee02d31ec83e1f
