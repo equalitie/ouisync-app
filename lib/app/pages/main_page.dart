@@ -68,6 +68,7 @@ class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
   final Cubits _cubits;
 
+  bool _isHandleShareIntentPayload = false;
   String _pathEntryToMove = '';
   Widget? _bottomSheet;
 
@@ -197,6 +198,8 @@ class _MainPageState extends State<MainPage>
       // shares a file with Ouisync.
       if (media is List<SharedMediaFile>) {
         loggy.app('mediaReceiver: List<ShareMediaFile>');
+
+        setState(() => _isHandleShareIntentPayload = true);
         handleShareIntentPayload(media, _cubits.repositories);
       }
 
@@ -833,11 +836,16 @@ class _MainPageState extends State<MainPage>
             );
           });
 
-  void updateBottomSheet(Widget? widget, String entryPath) {
+  void updateBottomSheet(Widget? bottomSheetWidget, String entryPath) {
     _pathEntryToMove = entryPath;
     _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
 
-    setState(() => _bottomSheet = widget);
+    setState(() {
+      _bottomSheet = bottomSheetWidget;
+      if (bottomSheetWidget == null && _isHandleShareIntentPayload) {
+        SystemNavigator.pop(animated: true);
+      }
+    });
   }
 
   bool _isEntryActionAvailable(

@@ -44,6 +44,8 @@ class MediaReceiverMobile with AppLogger implements MediaReceiver {
       loggy.app(
           'Media shared: ${(listOfMedia.map((f) => f.path).join(","))} (intent)');
       controller.add(listOfMedia);
+
+      ReceiveSharingIntent.reset();
     });
   }
 
