@@ -366,8 +366,8 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _installBundledDokan(
-      bool? Function() runDokanMsiInstallation) async {
-    final installationResult = runDokanMsiInstallation();
+      Future<bool?> Function() runDokanMsiInstallation) async {
+    final installationResult = await runDokanMsiInstallation();
 
     if (installationResult == null) {
       return;
