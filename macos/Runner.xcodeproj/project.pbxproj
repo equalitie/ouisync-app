@@ -592,10 +592,7 @@
 				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = (
-					"-framework",
-					FlutterMacOS,
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -640,10 +637,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.8.0;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = (
-					"-framework",
-					FlutterMacOS,
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -687,10 +681,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.8.0;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = (
-					"-framework",
-					FlutterMacOS,
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
