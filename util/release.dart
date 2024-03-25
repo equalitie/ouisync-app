@@ -61,8 +61,11 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    final asset =
-        await buildWindowsMSIX(options.identityName!, options.publisher!);
+    final asset = await buildWindowsMSIX(
+      options.identityName!,
+      options.publisher!,
+      options.msixAssets,
+    );
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
@@ -131,6 +134,7 @@ class Options {
   final bool msix;
   final bool deb;
 
+  final bool msixAssets;
   final String? token;
   final RepositorySlug slug;
   final ReleaseAction? action;
@@ -146,6 +150,7 @@ class Options {
     this.exe = false,
     this.msix = false,
     this.deb = false,
+    this.msixAssets = false,
     this.token,
     required this.slug,
     this.action,
@@ -165,6 +170,11 @@ class Options {
         help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
         help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
+    parser.addFlag('msix-assets',
+        abbr: 'ma',
+        negatable: false,
+        help: 'Include additional assets to package with the MSIX',
+        defaultsTo: false);
     parser.addFlag('deb',
         help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
 
@@ -273,6 +283,7 @@ class Options {
       exe: results['exe'],
       msix: results['msix'],
       deb: results['deb'],
+      msixAssets: results['msix-assets'],
       token: token?.trim(),
       slug: slug,
       action: action,
@@ -388,7 +399,8 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 // msix
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsMSIX(String identityName, String publisher) async {
+Future<File> buildWindowsMSIX(
+    String identityName, String publisher, bool hasMsixAssets) async {
   final artifactDir = 'build/windows/x64/runner/Release';
 
   if (await Directory(artifactDir).exists()) {
@@ -399,9 +411,20 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     await Directory(artifactDir).delete(recursive: true);
   }
 
+  String command = 'create';
+  if (hasMsixAssets) {
+    await run('dart', ['run', 'msix:build']);
+    command = 'pack';
+
+    final msixAssetsPath = Directory('util/additional_assets');
+    final dataPath =
+        await Directory('$artifactDir/data/additional_assets').create();
+    await copyDirectory(msixAssetsPath, dataPath);
+  }
+
   await run('dart', [
     'run',
-    'msix:create',
+    'msix:$command',
     '-u',
     'eQualitie Inc',
     '-i',

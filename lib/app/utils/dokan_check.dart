@@ -5,6 +5,8 @@ import 'package:path/path.dart' as p;
 import 'constants.dart';
 import 'log.dart';
 
+const String msiAdditionalAssetsFolder = 'data\\additional_assets';
+
 class DokanCheck with AppLogger {
   const DokanCheck({
     required this.requiredMayor,
@@ -16,9 +18,7 @@ class DokanCheck with AppLogger {
 
   String buildPathToFile(String fileName) {
     final root = p.dirname(io.Platform.resolvedExecutable);
-    final assetsPath = 'data\\flutter_assets\\assets';
-
-    return p.join(root, assetsPath, fileName);
+    return p.join(root, msiAdditionalAssetsFolder, fileName);
   }
 
   DokanCheckResult checkDokanInstallation() {
@@ -47,74 +47,51 @@ class DokanCheck with AppLogger {
     return DokanCheckResult(result: dokanResult);
   }
 
-  /// We use a PowerShell script instead of directly executing the msiexec call
-  /// so we can get exit code, sdtour and stderr and log any error better.
-  /// When executing the msiexec directly we only seem to get the exit code.
-  /// TODO: Test and see if just the exit code is enough in this case.
-  bool? runDokanMsiInstallation() {
-    final scriptFilePath = buildPathToFile('install_dokan.ps1');
-    final script = 'powershell.exe -executionpolicy bypass -File '
-        '"$scriptFilePath"';
+  Future<bool?> runDokanMsiInstallation() async {
+    final args = [
+      '/i',
+      buildPathToFile('Dokan_x64.msi'),
+    ];
 
-    final msiPath = buildPathToFile('Dokan_x64.msi');
-    final args = [msiPath];
-
-    final processResult = io.Process.runSync(script, args);
+    final processResult = io.Process.runSync('msiexec', args);
 
     final exitCode = processResult.exitCode;
     final stdOut = ((processResult.stdout as String?) ?? '').trim();
     final stdError = ((processResult.stderr as String?) ?? '').trim();
 
-    if (exitCode != 0) {
-      loggy.app(
-        'Checking Dokan installation failed.\n'
-        'stderr:\n$stdError\n'
-        'stdout:\n$stdOut\n',
-      );
-
-      return false;
-    }
-
-    if (stdError.isNotEmpty) {
-      loggy.app(
-        'The user say no to run the Dokan installation as admin.\n'
-        'stderr:\n$stdError\n',
-      );
-
-      return null;
-    }
-
-    if (stdOut.isNotEmpty && stdOut != '0') {
-      switch (stdOut) {
-        case '1602':
+    switch (exitCode) {
+      case 0:
+        {
+          loggy.app('Dokan MSI installation successful');
+          return true;
+        }
+      case 1602:
+        {
           loggy.app(
               'The user canceled the Dokan MSI execution before it was done\n'
               'stdout:\n$stdOut\n');
-          break;
-        case '1603':
+          return null;
+        }
+      case 1603:
+        {
           loggy.app(
             'The Dokan MSI installation failed because there is a '
             'Windows reboot still pending after a Dokan driver uninstall, or'
             ' it is already installed\n'
             'stdout:\n$stdOut\n',
           );
-          break;
-        default:
+          return null;
+        }
+      default:
+        {
           loggy.app(
-            'There was an error while trying to install the Dokan MSI.\n'
+            'There was an error trying to install the Dokan MSI.\n'
+            'stderr:\n$stdError\n'
             'stdout:\n$stdOut\n',
           );
-          break;
-      }
-
-      return null;
+          return false;
+        }
     }
-
-    if (stdOut == '0') {
-      loggy.app('Dokan MSI installation successful');
-    }
-
-    return true;
   }
 }
 
