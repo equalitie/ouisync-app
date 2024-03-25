@@ -401,7 +401,7 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(
-    String identityName, String publisher, bool msixAssets) async {
+    String identityName, String publisher, bool hasMsixAssets) async {
   final artifactDir = 'build/windows/x64/runner/Release';
 
   if (await Directory(artifactDir).exists()) {
@@ -413,7 +413,7 @@ Future<File> buildWindowsMSIX(
   }
 
   String command = 'create';
-  if (msixAssets) {
+  if (hasMsixAssets) {
     await run('dart', ['run', 'msix:build']);
     command = 'pack';
 
