@@ -70,3 +70,4 @@ secrets/
 
 .env
 /lib/env/env.g.dart
+util/additional_assets/
