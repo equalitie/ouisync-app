@@ -8,12 +8,11 @@ import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
 import 'package:image/image.dart' as image;
+import 'script_tools.dart';
 import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
-
-import 'script_tools.dart';
 
 const rootWorkDir = 'releases';
 
