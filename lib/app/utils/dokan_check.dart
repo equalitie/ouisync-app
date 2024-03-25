@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'constants.dart';
 import 'log.dart';
 
-const String msiOuisyncAssetsFolder = 'data\\ouisync_assets';
+const String msiAdditionalAssetsFolder = 'data\\additional_assets';
 
 class DokanCheck with AppLogger {
   const DokanCheck({
@@ -18,7 +18,7 @@ class DokanCheck with AppLogger {
 
   String buildPathToFile(String fileName) {
     final root = p.dirname(io.Platform.resolvedExecutable);
-    return p.join(root, msiOuisyncAssetsFolder, fileName);
+    return p.join(root, msiAdditionalAssetsFolder, fileName);
   }
 
   DokanCheckResult checkDokanInstallation() {
