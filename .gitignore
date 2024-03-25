@@ -70,5 +70,4 @@ secrets/
 
 .env
 /lib/env/env.g.dart
-assets/Dokan_x64.msi
-assets/Dokan_x86.msi
+util/additional_assets/
