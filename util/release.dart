@@ -403,6 +403,10 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   /// packaged in the MSIX file
   await run('dart', ['run', 'msix:build']);
 
+  /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
+  /// directory (util/additional_assets)
+  await prepareDokanBundle();
+
   /// Move all additional assets to the data directory (Release/data)
   final msixAssetsPath = Directory('util/additional_assets');
   final dataPath =
@@ -424,6 +428,32 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   ]);
 
   return File('$artifactDir/ouisync_app.msix');
+}
+
+Future<void> prepareDokanBundle() async {
+  final version = "2.1.0.1000";
+  final name = "Dokan_x64.msi";
+  final path = p.join('additional_assets', name);
+
+  final file = File(path);
+
+  // Get Dokan (x64) MSI from repo
+
+  if (!await file.exists()) {
+    print('Downloading Dokan (x64) MSI');
+
+    final url =
+        'https://github.com/dokan-dev/dokany/releases/download/v$version/$name';
+    final client = HttpClient();
+
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
+      await response.pipe(file.openWrite());
+    } finally {
+      client.close();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
