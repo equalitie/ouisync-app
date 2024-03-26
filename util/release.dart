@@ -61,11 +61,8 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    final asset = await buildWindowsMSIX(
-      options.identityName!,
-      options.publisher!,
-      options.msixAssets,
-    );
+    final asset =
+        await buildWindowsMSIX(options.identityName!, options.publisher!);
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
@@ -134,7 +131,6 @@ class Options {
   final bool msix;
   final bool deb;
 
-  final bool msixAssets;
   final String? token;
   final RepositorySlug slug;
   final ReleaseAction? action;
@@ -150,7 +146,6 @@ class Options {
     this.exe = false,
     this.msix = false,
     this.deb = false,
-    this.msixAssets = false,
     this.token,
     required this.slug,
     this.action,
@@ -170,11 +165,6 @@ class Options {
         help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
         help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
-    parser.addFlag('msix-assets',
-        abbr: 'ma',
-        negatable: false,
-        help: 'Include additional assets to package with the MSIX',
-        defaultsTo: false);
     parser.addFlag('deb',
         help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
 
@@ -283,7 +273,6 @@ class Options {
       exe: results['exe'],
       msix: results['msix'],
       deb: results['deb'],
-      msixAssets: results['msix-assets'],
       token: token?.trim(),
       slug: slug,
       action: action,
@@ -399,8 +388,7 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 // msix
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsMSIX(
-    String identityName, String publisher, bool hasMsixAssets) async {
+Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   final artifactDir = 'build/windows/x64/runner/Release';
 
   if (await Directory(artifactDir).exists()) {
@@ -411,20 +399,25 @@ Future<File> buildWindowsMSIX(
     await Directory(artifactDir).delete(recursive: true);
   }
 
-  String command = 'create';
-  if (hasMsixAssets) {
-    await run('dart', ['run', 'msix:build']);
-    command = 'pack';
+  /// We first build the MSIX, before adding the additional assets to be
+  /// packaged in the MSIX file
+  await run('dart', ['run', 'msix:build']);
 
-    final msixAssetsPath = Directory('util/additional_assets');
-    final dataPath =
-        await Directory('$artifactDir/data/additional_assets').create();
-    await copyDirectory(msixAssetsPath, dataPath);
-  }
+  /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
+  /// directory (util/additional_assets)
+  await prepareDokanBundle();
 
+  /// Move all additional assets to the data directory (Release/data)
+  final msixAssetsPath = Directory('util/additional_assets');
+  final dataPath =
+      await Directory('$artifactDir/data/additional_assets').create();
+  await copyDirectory(msixAssetsPath, dataPath);
+
+  /// Package the MSIX, including the Dokan bundled files (script, MSI) inside
+  /// the data directory (Release/data/additional_assets)
   await run('dart', [
     'run',
-    'msix:$command',
+    'msix:pack',
     '-u',
     'eQualitie Inc',
     '-i',
@@ -435,6 +428,32 @@ Future<File> buildWindowsMSIX(
   ]);
 
   return File('$artifactDir/ouisync_app.msix');
+}
+
+Future<void> prepareDokanBundle() async {
+  final version = "2.1.0.1000";
+  final name = "Dokan_x64.msi";
+  final path = p.join('additional_assets', name);
+
+  final file = File(path);
+
+  // Get Dokan (x64) MSI from repo
+
+  if (!await file.exists()) {
+    print('Downloading Dokan (x64) MSI');
+
+    final url =
+        'https://github.com/dokan-dev/dokany/releases/download/v$version/$name';
+    final client = HttpClient();
+
+    try {
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
+      await response.pipe(file.openWrite());
+    } finally {
+      client.close();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
