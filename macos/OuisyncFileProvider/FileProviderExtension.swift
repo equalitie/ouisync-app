@@ -8,6 +8,8 @@
 import FileProvider
 
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
+    //let domain: NSFileProviderDomain
+    
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
         // `NSFileProviderManager.add(_:, completionHandler:)`. The system will
@@ -16,13 +18,14 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         // for that domain, and call methods on the instance.
         
         super.init()
-        //Task {
-        //    var i = 0;
-        //    while true {
-        //        i += 1;
-        //        try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
-        //    }
-        //}
+        Task {
+            var i = 0;
+            while true {
+                i += 1;
+                NSLog("FileProviderExtension :::::::::::::::::::::::::::::::::::: \(i)")
+                try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
+            }
+        }
     }
 
     func invalidate() {
