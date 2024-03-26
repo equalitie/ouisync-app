@@ -44,6 +44,10 @@ Notes:
 
 - Omitting the github token still creates the release packages but doesn't upload them to github.
 
+## MSIX Addtional assets
+
+For bundling additional assets with the Ouisync MSIX, place the required files inside ./additional_assets 
+
 ## Publishing the release
 
 Go to [github releases](https://github.com/equalitie/ouisync-app/releases), edit the draft release,
