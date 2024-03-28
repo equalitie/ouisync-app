@@ -162,7 +162,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
-    final state = CreateRepositoryCubit.create(
+    final state = await CreateRepositoryCubit.create(
       reposCubit: cubit,
       isBiometricsAvailable: isBiometricsAvailable,
       shareToken: shareToken,
@@ -171,11 +171,6 @@ class RepositoryCreation extends HookWidget with AppLogger {
       showSuggestedName: showSuggestedName,
       showAccessModeMessage: showAccessModeMessage,
     );
-
-    // When importing existing repository check if the cache servers have been already enabled.
-    if (await shareToken?.isCacheServersEnabled() ?? false) {
-      state.useCacheServers(true);
-    }
 
     return state;
   }

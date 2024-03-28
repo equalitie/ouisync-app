@@ -101,7 +101,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
   Future<io.Directory> get defaultRepoLocation =>
       _reposCubit.settings.defaultRepoLocation();
 
-  static CreateRepositoryCubit create({
+  static Future<CreateRepositoryCubit> create({
     required ReposCubit reposCubit,
     required bool isBiometricsAvailable,
     required AccessMode accessMode,
@@ -109,7 +109,11 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
     required bool showAccessModeMessage,
     ShareToken? shareToken,
     String? suggestedName,
-  }) {
+  }) async {
+    // When importing existing repository check if the cache servers have been already enabled.
+    final useCacheServers =
+        (shareToken != null) ? await shareToken.isCacheServersEnabled() : true;
+
     var initialState = CreateRepositoryState(
       isBiometricsAvailable: isBiometricsAvailable,
       shareToken: shareToken,
@@ -122,7 +126,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
       showAccessModeMessage: showAccessModeMessage,
       showSavePasswordWarning: false,
       showRepositoryNameInUseWarning: false,
-      useCacheServers: true,
+      useCacheServers: useCacheServers,
     );
 
     return CreateRepositoryCubit._(reposCubit, initialState);

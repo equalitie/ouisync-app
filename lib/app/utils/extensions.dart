@@ -179,7 +179,8 @@ extension ShareTokenExtension on ShareToken {
 }
 
 Future<bool> _isCacheServersEnabled(
-    Future<bool> Function(String) mirrorExists) async {
+  Future<bool> Function(String) mirrorExists,
+) async {
   Future<bool> check(String host) async {
     try {
       return await mirrorExists(host);
