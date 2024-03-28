@@ -140,6 +140,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       isCacheServersEnabled: await repo.isCacheServersEnabled(),
     );
 
+    if (await repo.isSyncEnabled) {
+      state = state.copyWith(
+        isDhtEnabled: await repo.isDhtEnabled,
+        isPexEnabled: await repo.isPexEnabled,
+      );
+    }
+
     final pathCipher = await Cipher.newWithRandomKey();
 
     return RepoCubit._(
