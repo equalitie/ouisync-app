@@ -30,15 +30,20 @@ Future<void> syncInBackground() async {
     final settings = await loadAndMigrateSettings(session);
     final repos = await _fetchRepositories(session, settings);
 
-    await Future.any([
-      _waitForAllSynced(repos),
-      _waitForSyncInactivity(session),
+    final completed = await Future.any([
+      _waitForAllSynced(repos).then((_) => true),
+      _waitForSyncInactivity(session).then((_) => false),
     ]);
 
     final elapsed = DateTime.now().difference(start);
-    logger.info('sync completed in $elapsed');
+
+    if (completed) {
+      logger.info('sync completed in $elapsed');
+    } else {
+      logger.info('sync stopped for inactivity after $elapsed');
+    }
   } catch (e, st) {
-    logger.error('sync failed', e, st);
+    logger.error('sync failed:', e, st);
   } finally {
     await session.close();
   }
@@ -50,9 +55,13 @@ Future<List<Repository>> _fetchRepositories(
 ) =>
     Future.wait(
       settings.repos.map((location) async {
-        final repo = await Repository.open(session, store: location.path);
-        await repo.setSyncEnabled(true);
-        return repo;
+        try {
+          final repo = await Repository.open(session, store: location.path);
+          await repo.setSyncEnabled(true);
+          return repo;
+        } on Error catch (e) {
+          throw _RepositoryError(e, location.name);
+        }
       }).toList(),
     );
 
@@ -90,4 +99,14 @@ Future<void> _waitForSyncInactivity(Session session) async {
       prev = next;
     }
   }
+}
+
+class _RepositoryError implements Exception {
+  _RepositoryError(this.cause, this.name);
+
+  final Error cause;
+  final String name;
+
+  @override
+  String toString() => "error in repository '$name': $cause";
 }
