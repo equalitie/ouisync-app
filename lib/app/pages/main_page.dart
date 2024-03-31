@@ -647,7 +647,7 @@ class _MainPageState extends State<MainPage>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           // TODO: A shadow would be nicer.
-          const Divider(height: 3),
+          const Divider(height: 1),
           if (folder.content.isNotEmpty)
             SortContentsBar(
               sortListCubit: _sortListCubit,
