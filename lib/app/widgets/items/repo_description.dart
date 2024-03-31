@@ -15,8 +15,15 @@ class RepoDescription extends StatelessWidget with AppLogger {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle =
-        TextStyle(fontWeight: isDefault ? FontWeight.bold : FontWeight.normal);
+    final fontWeight = isDefault ? FontWeight.bold : FontWeight.normal;
+    final nameTextStyle = TextStyle(
+      fontSize: Theme.of(context).appTextStyle.bodyLarge.fontSize,
+      fontWeight: fontWeight,
+    );
+    final descriptionTextStyle = TextStyle(
+      fontSize: Theme.of(context).appTextStyle.bodyMicro.fontSize,
+      fontWeight: fontWeight,
+    );
 
     return Container(
       child: Column(
@@ -24,10 +31,13 @@ class RepoDescription extends StatelessWidget with AppLogger {
         children: [
           Fields.ellipsedText(
             state.location.name,
-            style: textStyle,
+            style: nameTextStyle,
             ellipsisPosition: TextOverflowPosition.middle,
           ),
-          Fields.autosizeText(state.accessMode.name, style: textStyle)
+          Fields.autosizeText(
+            state.accessMode.name,
+            style: descriptionTextStyle,
+          ),
         ],
       ),
     );
