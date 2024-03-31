@@ -487,7 +487,11 @@ class _MainPageState extends State<MainPage>
         child: Stack(
           alignment: AlignmentDirectional.bottomEnd,
           children: <Widget>[
-            Column(children: [Expanded(child: buildMainWidget())]),
+            Column(
+              children: [
+                Expanded(child: buildMainWidget()),
+              ],
+            ),
             _cubits.repositories.builder(
               (repos) => RepositoryProgress(repos.currentRepo?.cubit),
             ),
@@ -529,6 +533,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: _cubits.repositories,
         repoPicker: RepositoriesBar(_cubits),
         appSettingsButton: _buildAppSettingsIcon(),
+        searchButton: _buildSearchIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
@@ -562,6 +567,14 @@ class _MainPageState extends State<MainPage>
 
         await _showRepoSettings(context, repoCubit: cubit);
       }, size: Dimensions.sizeIconSmall);
+
+  Widget _buildSearchIcon() => Fields.actionIcon(
+        const Icon(Icons.search_rounded),
+        onPressed: () {
+          /// TODO: Implement searching
+        },
+        size: Dimensions.sizeIconSmall,
+      );
 
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
@@ -624,7 +637,6 @@ class _MainPageState extends State<MainPage>
 
   Widget _contentBrowser(RepoCubit repo) {
     Widget child;
-    Widget navigationBar;
     final folder = repo.state.currentFolder;
 
     if (folder.content.isEmpty) {
@@ -638,22 +650,21 @@ class _MainPageState extends State<MainPage>
       child = _contentsList(repo);
     }
 
-    if (folder.isRoot) {
-      navigationBar = const SizedBox.shrink();
-    } else {
-      navigationBar = FolderNavigationBar(repo);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        navigationBar,
-        // TODO: A shadow would be nicer.
-        const Divider(height: 3),
-        SortContentsBar(
-            sortListCubit: _sortListCubit, reposCubit: _cubits.repositories),
-        Expanded(child: child),
-      ],
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // TODO: A shadow would be nicer.
+          const Divider(height: 1),
+          if (folder.content.isNotEmpty)
+            SortContentsBar(
+              sortListCubit: _sortListCubit,
+              reposCubit: _cubits.repositories,
+            ),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 

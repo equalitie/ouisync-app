@@ -346,7 +346,7 @@ class Fields {
       Icon(icon, size: size, color: color);
 
   static Widget actionIcon(
-    Icon icon, {
+    Widget icon, {
     required void Function()? onPressed,
     double size = Dimensions.sizeIconMicro,
     EdgeInsets padding = Dimensions.paddingIconButton,
