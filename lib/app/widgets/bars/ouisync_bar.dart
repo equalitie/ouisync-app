@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart';
+import '../../utils/constants.dart';
 import 'folder_navigation_bar.dart';
 
 class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
@@ -17,8 +18,17 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget appSettingsButton;
   final Widget repoSettingsButton;
 
+  final ouisyncLogo = const Image(image: AssetImage(Constants.ouisyncLogoFull));
+
   @override
   Widget build(BuildContext context) => reposCubit.builder((state) {
+        final leadingWidget = state.showList
+            ? Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: ouisyncLogo,
+              )
+            : null;
+
         final cubit = state.currentRepo?.cubit;
         Widget titleWidget =
             cubit != null ? getTitleWidget(cubit) : SizedBox.shrink();
@@ -30,6 +40,8 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
         return AppBar(
           automaticallyImplyLeading: true,
+          leading: leadingWidget,
+          leadingWidth: 120.0,
           title: titleWidget,
           // Make the `repoList` have no spacing on the horizontal axis.
           titleSpacing: 0.0,
