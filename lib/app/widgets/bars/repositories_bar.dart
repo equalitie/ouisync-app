@@ -13,23 +13,7 @@ class RepositoriesBar extends StatelessWidget
   final Cubits _cubits;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-        decoration: const BoxDecoration(
-          color: Colors.transparent,
-          border: Border(
-            top: BorderSide(
-                width: 1.0,
-                color: Colors.transparent,
-                style: BorderStyle.solid),
-          ),
-        ),
-        padding: Dimensions.paddingRepositoryBar,
-        child: _buildRepoDescription(context));
-  }
-
-  Widget _buildRepoDescription(BuildContext context) =>
-      _cubits.repositories.builder((state) {
+  Widget build(BuildContext context) => _cubits.repositories.builder((state) {
         if (state.isLoading) {
           return Column(
             children: const [CircularProgressIndicator(color: Colors.white)],
@@ -37,7 +21,7 @@ class RepositoriesBar extends StatelessWidget
         }
 
         if (_cubits.repositories.showList) {
-          return _buildRepoListState(context);
+          return SizedBox.shrink();
         }
 
         final repo = state.currentRepo;
@@ -60,50 +44,43 @@ class RepositoriesBar extends StatelessWidget
     }
   }
 
-  Widget _buildRepoListState(BuildContext context) => Container(
-      padding: Dimensions.paddingRepositoryPicker,
-      child: Padding(
-          padding: EdgeInsets.only(left: 4.0),
-          child: Row(children: [
-            Expanded(child: Text(S.current.titleRepositoriesList)),
-
-            /// TODO: Implement search repos in list
-            // Fields.actionIcon(
-            //   const Icon(Icons.search_rounded),
-            //   onPressed: () {},
-            //   size: Dimensions.sizeIconSmall,
-            //   color: Colors.white,
-            // )
-          ])));
-
   Widget _buildState(
     BuildContext context,
     RepoEntry? entry, {
     required IconData icon,
   }) =>
-      Row(children: [
-        _buildBackButton(),
-        Expanded(
-            child: Container(
-                padding: Dimensions.paddingRepositoryPicker,
-                child: Row(children: [
-                  IconButton(
-                    icon: Icon(icon),
-                    iconSize: Dimensions.sizeIconSmall,
-                    onPressed: () => entry?.cubit?.lock(),
-                  ),
-                  Fields.constrainedText(_repoName(entry),
-                      softWrap: false, textOverflow: TextOverflow.fade)
-                ])))
-      ]);
+      Row(
+        children: [
+          _buildBackButton(),
+          Expanded(
+            child: Row(
+              children: [
+                Fields.constrainedText(
+                  _repoName(entry),
+                  softWrap: false,
+                  textOverflow: TextOverflow.fade,
+                ),
+                IconButton(
+                  icon: Icon(icon),
+                  iconSize: Dimensions.sizeIconSmall,
+                  onPressed: () => entry?.cubit?.lock(),
+                  alignment: Alignment.centerRight,
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
 
   Widget _buildBackButton() {
     return multiBlocBuilder(
         [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
         () {
-      final button = Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
-          onPressed: () => _cubits.repositories.showRepoList(),
-          size: Dimensions.sizeIconSmall);
+      final button = Fields.actionIcon(
+        const Icon(Icons.arrow_back_rounded),
+        onPressed: () => _cubits.repositories.showRepoList(),
+        size: Dimensions.sizeIconSmall,
+      );
 
       Color? color = _cubits.mainNotificationBadgeColor();
 
