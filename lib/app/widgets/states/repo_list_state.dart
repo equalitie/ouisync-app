@@ -30,7 +30,22 @@ class RepoListState extends StatelessWidget
     }
 
     final repoList = reposCubit.repos.toList();
-    return _buildRepoList(context, repoList, reposCubit.currentRepoName);
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Divider(height: 1),
+          Expanded(
+            child: _buildRepoList(
+              context,
+              repoList,
+              reposCubit.currentRepoName,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildRepoList(
@@ -67,11 +82,11 @@ class RepoListState extends StatelessWidget
             return RepoListItem(
               repoCubit: repoCubit,
               isDefault: isDefault,
-              mainAction: () async {
-                await reposCubit.setCurrent(repoEntry);
-              },
-              verticalDotsAction: () =>
-                  onShowRepoSettings(parentContext, repoCubit: repoCubit),
+              mainAction: () async => await reposCubit.setCurrent(repoEntry),
+              verticalDotsAction: () => onShowRepoSettings(
+                parentContext,
+                repoCubit: repoCubit,
+              ),
             );
           },
         ),
