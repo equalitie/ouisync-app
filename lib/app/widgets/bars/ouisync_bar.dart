@@ -10,12 +10,14 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
     required this.reposCubit,
     required this.repoPicker,
     required this.appSettingsButton,
+    required this.searchButton,
     required this.repoSettingsButton,
   });
 
   final ReposCubit reposCubit;
   final PreferredSizeWidget repoPicker;
   final Widget appSettingsButton;
+  final Widget searchButton;
   final Widget repoSettingsButton;
 
   final ouisyncLogo = const Image(image: AssetImage(Constants.ouisyncLogoFull));
@@ -34,6 +36,11 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
             cubit != null ? getTitleWidget(cubit) : SizedBox.shrink();
 
         final actionsList = <Widget>[];
+
+        /// TODO: Implement the search before showing the button in the bar
+        // if (reposCubit.repos.isNotEmpty) {
+        //   actionsList.add(searchButton);
+        // }
 
         actionsList.add(
             state.showList == false ? repoSettingsButton : appSettingsButton);

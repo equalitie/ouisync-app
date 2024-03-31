@@ -533,6 +533,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: _cubits.repositories,
         repoPicker: RepositoriesBar(_cubits),
         appSettingsButton: _buildAppSettingsIcon(),
+        searchButton: _buildSearchIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
@@ -566,6 +567,14 @@ class _MainPageState extends State<MainPage>
 
         await _showRepoSettings(context, repoCubit: cubit);
       }, size: Dimensions.sizeIconSmall);
+
+  Widget _buildSearchIcon() => Fields.actionIcon(
+        const Icon(Icons.search_rounded),
+        onPressed: () {
+          /// TODO: Implement searching
+        },
+        size: Dimensions.sizeIconSmall,
+      );
 
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
