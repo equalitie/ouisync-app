@@ -160,10 +160,13 @@ class MissingRepoListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-                flex: 1,
-                child: Icon(Icons.error_outline_rounded,
-                    size: Dimensions.sizeIconAverage,
-                    color: Constants.folderIconColor)),
+              flex: 1,
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: Dimensions.sizeIconAverage,
+                color: Constants.folderIconColor,
+              ),
+            ),
             Expanded(
               flex: 9,
               child: Padding(
@@ -172,8 +175,11 @@ class MissingRepoListItem extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete,
-                  size: Dimensions.sizeIconMicro, color: Constants.dangerColor),
+              icon: const Icon(
+                Icons.delete,
+                size: Dimensions.sizeIconMicro,
+                color: Constants.dangerColor,
+              ),
               onPressed: () => verticalDotsAction(),
             )
           ],
