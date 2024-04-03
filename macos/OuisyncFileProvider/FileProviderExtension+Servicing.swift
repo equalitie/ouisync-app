@@ -20,16 +20,12 @@ extension FileProviderExtension: NSFileProviderServicing {
     }
 }
 
-public let ouisyncServiceName = NSFileProviderServiceName("org.equalitie.Ouisync")
-
-@objc public protocol OuisyncServiceV1 {
-    func test()
-}
-
 extension FileProviderExtension {
-    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncServiceV1 {
+    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
+        var client: OuisyncFileProviderClientProtocol?
+
         var serviceName: NSFileProviderServiceName {
-            ouisyncServiceName
+            ouisyncFileProviderServiceName
         }
 
         func makeListenerEndpoint() throws -> NSXPCListenerEndpoint {
@@ -43,9 +39,11 @@ extension FileProviderExtension {
         }
 
         func listener(_ listener: NSXPCListener, shouldAcceptNewConnection newConnection: NSXPCConnection) -> Bool {
-            //newConnection.exportedInterface = ouisyncServiceInterface
+            newConnection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
             newConnection.exportedObject = self
-            newConnection.exportedInterface = NSXPCInterface(with: OuisyncServiceV1.self)
+            newConnection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
+
+            client = newConnection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
 
             synchronized(self) {
                 listeners.remove(listener)
@@ -62,7 +60,9 @@ extension FileProviderExtension {
             self.ext = ext
         }
         
-        func test() {
+        var i: Int = 1;
+        
+        func requestForServer(_ request: [UInt8], _ respond: ([UInt8]) -> Void) {
             NSLog("=============================================================================")
             NSLog("=============================================================================")
             NSLog("=============================================================================")
@@ -80,15 +80,11 @@ extension FileProviderExtension {
             NSLog("=============================================================================")
             NSLog("=============================================================================")
             NSLog("=============================================================================")
+            respond(request)
+            i += 1;
         }
     }
 }
-
-//extension DomainService.ConflictVersion {
-//    init(_ data: Data) throws {
-//        self = try JSONDecoder().decode(DomainService.ConflictVersion.self, from: data)
-//    }
-//}
 
 public func synchronized<T>(_ lock: AnyObject, _ closure: () throws -> T) rethrows -> T {
   objc_sync_enter(lock)

@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */; };
+		1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */; };
 		1EBC4D452BB1A2EA0053E2F3 /* FileProviderExtension+Servicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D442BB1A2EA0053E2F3 /* FileProviderExtension+Servicing.swift */; };
 		1EBC4D4A2BB1B5A50053E2F3 /* Error+Presentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D492BB1B5A50053E2F3 /* Error+Presentable.swift */; };
 		1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D532BB1B6840053E2F3 /* Common.docc */; };
@@ -137,6 +139,9 @@
 
 /* Begin PBXFileReference section */
 		1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
+		1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderProxy.swift; sourceTree = "<group>"; };
+		1E6D33D32BBD7AAB00AFB60E /* FileProviderProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileProviderProxy.h; sourceTree = "<group>"; };
+		1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderServiceProtocol.swift; sourceTree = "<group>"; };
 		1EBC4D442BB1A2EA0053E2F3 /* FileProviderExtension+Servicing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileProviderExtension+Servicing.swift"; sourceTree = "<group>"; };
 		1EBC4D472BB1A7940053E2F3 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		1EBC4D492BB1B5A50053E2F3 /* Error+Presentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+Presentable.swift"; sourceTree = "<group>"; };
@@ -230,6 +235,7 @@
 				1EBC4D472BB1A7940053E2F3 /* Errors.swift */,
 				1EBC4D522BB1B6840053E2F3 /* Common.h */,
 				1EBC4D532BB1B6840053E2F3 /* Common.docc */,
+				1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -342,6 +348,8 @@
 			children = (
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
+				1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */,
+				1E6D33D32BBD7AAB00AFB60E /* FileProviderProxy.h */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
@@ -686,6 +694,7 @@
 			files = (
 				1EBC4D702BB1B6B50053E2F3 /* Errors.swift in Sources */,
 				1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */,
+				1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -724,6 +733,7 @@
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+				1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1329,6 +1339,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Profile;
@@ -1460,7 +1472,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -1485,6 +1499,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
