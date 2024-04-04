@@ -12,7 +12,6 @@ import FileProvider
 extension FileProviderExtension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
                                         completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Progress {
-        NSLog("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         completionHandler([OuisyncServiceSource(self)], nil)
         let progress = Progress()
         progress.cancellationHandler = { completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError)) }
@@ -60,9 +59,7 @@ extension FileProviderExtension {
             self.ext = ext
         }
         
-        var i: Int = 1;
-        
-        func requestForServer(_ request: [UInt8], _ respond: ([UInt8]) -> Void) {
+        func messageFromClientToServer(_ message: [UInt8]) {
             NSLog("=============================================================================")
             NSLog("=============================================================================")
             NSLog("=============================================================================")
@@ -80,8 +77,6 @@ extension FileProviderExtension {
             NSLog("=============================================================================")
             NSLog("=============================================================================")
             NSLog("=============================================================================")
-            respond(request)
-            i += 1;
         }
     }
 }
