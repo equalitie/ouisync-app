@@ -433,7 +433,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 Future<void> prepareDokanBundle() async {
   final version = "2.1.0.1000";
   final name = "Dokan_x64.msi";
-  final path = p.join('additional_assets', name);
+  final path = p.join('util/additional_assets', name);
 
   final file = File(path);
 
