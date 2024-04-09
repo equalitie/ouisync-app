@@ -26,80 +26,80 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(name) =>
       "Validación biométrica añadida para el repositorio \"${name}\"";
 
-  static String m2(name) => "${name} - descarga cancelada";
+  static String m3(name) => "${name} - descarga cancelada";
 
-  static String m3(name) => "${name} - fallo durante descarga";
+  static String m4(name) => "${name} - fallo durante descarga";
 
-  static String m4(entry) =>
+  static String m5(entry) =>
       "${entry} con el mismo nombre ya existe en este directorio.";
 
-  static String m5(path) =>
+  static String m6(path) =>
       "Este directorio no existe más, navegando al ancestro: ${path}";
 
-  static String m6(dokanUrl) =>
+  static String m8(dokanUrl) =>
       "Falta la instalación de Dokan. Por favor, instálelo desde ${dokanUrl}";
 
-  static String m7(name) =>
+  static String m9(name) =>
       "La inicialización del repositorio \"${name}\" falló";
 
-  static String m8(path) => "${path} no está vacío";
+  static String m10(path) => "${path} no está vacío";
 
-  static String m9(reason) => "Fallo al montar: ${reason}";
+  static String m11(reason) => "Fallo al montar: ${reason}";
 
-  static String m10(name) =>
+  static String m12(name) =>
       "${name} ya existe en esta ubicación.\n\n¿Qué deseas hacer?";
 
-  static String m11(name) => "Directorio borrado exitosamente: ${name}";
+  static String m13(name) => "Directorio borrado exitosamente: ${name}";
 
-  static String m12(number) =>
+  static String m14(number) =>
       "Desea bloquear todos los repositorios abiertos?\n\n(${number} actualmente)";
 
-  static String m13(path) => "desde ${path}";
+  static String m15(path) => "desde ${path}";
 
-  static String m14(name) => "Error creando archivo ${name}";
+  static String m16(name) => "Error creando archivo ${name}";
 
-  static String m15(name) => "Error al abrir el archivo ${name}";
+  static String m17(name) => "Error al abrir el archivo ${name}";
 
-  static String m16(path) => "Error al previsualizar el archivo ${path}";
+  static String m18(path) => "Error al previsualizar el archivo ${path}";
 
-  static String m17(name) => "No pudimos borrar el repositorio \"${name}\"";
-
-  static String m18(name) =>
-      "No pudimos encontrar el repositorio \"${name}\" en la ubicación habitual";
-
-  static String m19(access) => "Modo de aceso otorgado: ${access}";
+  static String m19(name) => "No pudimos borrar el repositorio \"${name}\"";
 
   static String m20(name) =>
+      "No pudimos encontrar el repositorio \"${name}\" en la ubicación habitual";
+
+  static String m21(access) => "Modo de aceso otorgado: ${access}";
+
+  static String m22(name) =>
       "Este repositorio ya existe en la aplicación con el nombre \"${name}\".";
 
-  static String m21(name) =>
+  static String m23(name) =>
       "Sugerido: ${name}\n(clic aquí para usar este nombre)";
 
-  static String m22(access) => "Abierto en modo ${access}";
+  static String m25(access) => "Abierto en modo ${access}";
 
-  static String m23(name) => "${name} escritura cancelada";
+  static String m26(name) => "${name} escritura cancelada";
 
-  static String m24(name) => "${name} - fallo durante escritura";
+  static String m27(name) => "${name} - fallo durante escritura";
 
-  static String m25(name) => "Error al importar el repositorio ${name}";
+  static String m28(name) => "Error al importar el repositorio ${name}";
 
-  static String m26(name) => "Fallo creando el repositorio ${name}";
+  static String m29(name) => "Fallo creando el repositorio ${name}";
 
-  static String m27(access) => "${access}";
+  static String m30(access) => "${access}";
 
-  static String m28(changes) => "${changes}";
+  static String m31(changes) => "${changes}";
 
-  static String m29(entry) => "${entry}";
+  static String m32(entry) => "${entry}";
 
-  static String m30(name) => "${name}";
+  static String m34(name) => "${name}";
 
-  static String m31(number) => "${number}";
+  static String m35(number) => "${number}";
 
-  static String m32(path) => "${path}";
+  static String m36(path) => "${path}";
 
-  static String m33(status) => "${status}";
+  static String m37(status) => "${status}";
 
-  static String m34(name) => "Compartir repositorio \"${name}\"";
+  static String m38(name) => "Compartir repositorio \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -363,15 +363,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tablas de control distribuidas"),
         "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
             "Descarga de archivos cancelada"),
-        "messageDownloadingFileCanceled": m2,
-        "messageDownloadingFileError": m3,
+        "messageDownloadingFileCanceled": m3,
+        "messageDownloadingFileError": m4,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
             "Este <bold>directorio</bold> está vacío"),
         "messageEmptyRepo": MessageLookupByLibrary.simpleMessage(
             "Este <bold>repositorio</bold> está vacío"),
         "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
             "Por favor, introduzca otro nombre"),
-        "messageEntryAlreadyExist": m4,
+        "messageEntryAlreadyExist": m5,
         "messageEntryTypeDefault":
             MessageLookupByLibrary.simpleMessage("Una entrada"),
         "messageEntryTypeFile":
@@ -428,12 +428,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Error creando el repositorio"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Error creando el token para compartir."),
-        "messageErrorCurrentPathMissing": m5,
+        "messageErrorCurrentPathMissing": m6,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
             "Algo falló. Por favor intente de nuevo."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("Falló."),
-        "messageErrorDokanNotInstalled": m6,
+        "messageErrorDokanNotInstalled": m8,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entrada no encontrada"),
         "messageErrorFormValidatorNameDefault":
@@ -446,8 +446,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "La nueva contraseña es la misma que la vieja"),
         "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
             "Error al abrir el repositorio"),
-        "messageErrorOpeningRepoDescription": m7,
-        "messageErrorPathNotEmpty": m8,
+        "messageErrorOpeningRepoDescription": m9,
+        "messageErrorPathNotEmpty": m10,
         "messageErrorRemovingPassword": MessageLookupByLibrary.simpleMessage(
             "Error al eliminar la contraseña"),
         "messageErrorRemovingSecureStorage":
@@ -475,9 +475,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Presione de nuevo el botón para ir atrás para salir de la aplicación."),
         "messageFAQ":
             MessageLookupByLibrary.simpleMessage("Preguntas frecuentes"),
-        "messageFailedToMount": m9,
+        "messageFailedToMount": m11,
         "messageFile": MessageLookupByLibrary.simpleMessage("archivo"),
-        "messageFileAlreadyExist": m10,
+        "messageFileAlreadyExist": m12,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "El archivo ya se está subiendo"),
         "messageFileName":
@@ -487,7 +487,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "La vista previa de archivo no está disponible todavía"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("archivos"),
-        "messageFolderDeleted": m11,
+        "messageFolderDeleted": m13,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Nombre de directorio"),
         "messageGeneratePassword":
@@ -536,7 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cargando…"),
         "messageLocalDiscovery":
             MessageLookupByLibrary.simpleMessage("Descubrir la zona"),
-        "messageLockOpenRepos": m12,
+        "messageLockOpenRepos": m14,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "Este <bold>repositorio</bold> está cerrado."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
@@ -570,7 +570,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync no tiene permiso para ejecutarse en segundo plano, abrir otra aplicación puede detener la sincronización en curso"),
         "messageMobile": MessageLookupByLibrary.simpleMessage("Móvil"),
-        "messageMoveEntryOrigin": m13,
+        "messageMoveEntryOrigin": m15,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "Esta función no está disponible mientras se está moviendo una entrada."),
         "messageNATOnWikipedia":
@@ -578,7 +578,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNATType": MessageLookupByLibrary.simpleMessage("Tipo de NAT"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Red no disponible"),
-        "messageNewFileError": m14,
+        "messageNewFileError": m16,
         "messageNewPassword":
             MessageLookupByLibrary.simpleMessage("Nueva contraseña"),
         "messageNewPasswordCopiedClipboard":
@@ -604,7 +604,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Los repositorios pueden ser compartidos en modo lectura/escritura, sólo lectura, o \"ciegamente\" (almacenas archivos para otras personas, pero no puedes accederlos)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "Todos los archivos y carpetas agregados a Ouisync son cifrados de manera segura de forma predeterminada, tanto en reposo como en tránsito."),
-        "messageOpenFileError": m15,
+        "messageOpenFileError": m17,
         "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("Ouisync"),
@@ -624,7 +624,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Compañero eliminado"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Este permiso es requerido"),
-        "messagePreviewingFileFailed": m16,
+        "messagePreviewingFileFailed": m18,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "Esta sección se utiliza para informar a los visitantes sobre nuestras políticas con la recopilación, uso y divulgación de Información personal si alguien decide utilizar nuestro servicio"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -660,14 +660,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sustituir el archivo existente"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Fallo en la autentificación del repositorio"),
-        "messageRepoDeletionErrorDescription": m17,
+        "messageRepoDeletionErrorDescription": m19,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "El borrado del repositorio falló"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "El repositorio ya no está allí"),
-        "messageRepoMissingErrorDescription": m18,
-        "messageRepositoryAccessMode": m19,
-        "messageRepositoryAlreadyExist": m20,
+        "messageRepoMissingErrorDescription": m20,
+        "messageRepositoryAccessMode": m21,
+        "messageRepositoryAlreadyExist": m22,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("La contraseña actual"),
         "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(
@@ -682,7 +682,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "El repositorio no se ha montado. "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Contraseña"),
-        "messageRepositorySuggestedName": m21,
+        "messageRepositorySuggestedName": m23,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Pegue el link aquí"),
         "messageRousseau":
@@ -753,7 +753,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Extensión desconocida"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "La contraseña no desbloqueó el repositorio"),
-        "messageUnlockRepoOk": m22,
+        "messageUnlockRepoOk": m25,
         "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
             "Ingrese la clave para abrir el repositorio"),
         "messageUnlockUsingBiometrics":
@@ -775,21 +775,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wifi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Acceso total. Tu par puede leer y modificar"),
-        "messageWritingFileCanceled": m23,
-        "messageWritingFileError": m24,
-        "messsageFailedAddRepository": m25,
-        "messsageFailedCreateRepository": m26,
+        "messageWritingFileCanceled": m26,
+        "messageWritingFileError": m27,
+        "messsageFailedAddRepository": m28,
+        "messsageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Cambiar la contraseña"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("Copiar la contraseña"),
-        "replacementAccess": m27,
-        "replacementChanges": m28,
-        "replacementEntry": m29,
-        "replacementName": m30,
-        "replacementNumber": m31,
-        "replacementPath": m32,
-        "replacementStatus": m33,
+        "replacementAccess": m30,
+        "replacementChanges": m31,
+        "replacementEntry": m32,
+        "replacementName": m34,
+        "replacementNumber": m35,
+        "replacementPath": m36,
+        "replacementStatus": m37,
         "repositoryIsAlreadyImported":
             MessageLookupByLibrary.simpleMessage("El repositorio ya importado"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
@@ -913,7 +913,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Establecer una contraseña para"),
         "titleSettings":
             MessageLookupByLibrary.simpleMessage("Configuraciones"),
-        "titleShareRepository": m34,
+        "titleShareRepository": m38,
         "titleSortBy": MessageLookupByLibrary.simpleMessage("Ordenar por"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("Monitor de Estado"),

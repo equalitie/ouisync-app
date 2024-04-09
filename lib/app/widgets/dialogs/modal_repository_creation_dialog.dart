@@ -92,7 +92,8 @@ class RepositoryCreation extends HookWidget with AppLogger {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Text('Error: ${snapshotCubit.error}'),
+          child: Text(
+              S.current.messageErrorDetail(snapshotCubit.error.toString())),
         )
       ])));
     } else {
@@ -106,7 +107,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
         ),
         Padding(
           padding: EdgeInsets.only(top: 16),
-          child: Text('Awaiting result...'),
+          child: Text(S.current.messageAwaitingResult),
         )
       ])));
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/sort_list.dart';
 
 class SortByButton extends StatelessWidget {
@@ -25,7 +26,7 @@ class SortByButton extends StatelessWidget {
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.all(Radius.circular(6.0)),
             ),
-            child: Text('Sort by ${sortBy.name}'),
+            child: Text(S.current.messageSortBy(sortBy.name)),
           ),
           onTap: () async => sort(),
         ),

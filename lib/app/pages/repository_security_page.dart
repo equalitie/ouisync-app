@@ -68,8 +68,12 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
-              padding: Dimensions.paddingDialog,
-              child: Text("Reset local secret", style: AppTypography.titleBig)),
+            padding: Dimensions.paddingDialog,
+            child: Text(
+              S.current.messageResetLocalSecret,
+              style: AppTypography.titleBig,
+            ),
+          ),
           _buildUseCustomPasswordSwitch(),
           _paswordInput(),
           _submitButton(),
