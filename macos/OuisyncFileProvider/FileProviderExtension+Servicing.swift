@@ -10,6 +10,131 @@ import Foundation
 import FileProvider
 import OuisyncLib
 
+class NotificationStream {
+    typealias Id = UInt64
+    typealias Rx = AsyncStream<OuisyncNotification>
+    typealias RxIter = Rx.AsyncIterator
+    typealias Tx = Rx.Continuation
+
+    class State {
+        var registrations: [Id: Tx] = [:]
+    }
+
+    static var nextId: Id = 0
+    let id: Id
+    let rx: Rx
+    var rx_iter: RxIter
+    var state: State
+
+    init(_ state: State) {
+        id = NotificationStream.nextId;
+        NotificationStream.nextId += 1
+
+        var tx: Tx!
+        rx = Rx { tx = $0 }
+        self.rx_iter = rx.makeAsyncIterator()
+
+        self.state = state
+
+        state.registrations[id] = tx
+    }
+
+    public func next() async -> OuisyncNotification? {
+        return await rx_iter.next()
+    }
+
+    deinit {
+        state.registrations.removeValue(forKey: id)
+    }
+}
+
+class OuisyncConnection {
+    // Used to send and receive messages from the Ouisync library
+    let libraryClient: OuisyncFileProviderClientProtocol
+
+    var nextMessageId: MessageId = 0
+    var pendingResponses: [MessageId: CheckedContinuation<Response, any Error>] = [:]
+    var state: NotificationStream.State = NotificationStream.State()
+
+    init(_ libraryClient: OuisyncFileProviderClientProtocol) {
+        self.libraryClient = libraryClient
+    }
+
+    public func listRepositories() async throws -> Response {
+        return try await sendRequest(MessageRequest.listRepositories(generateMessageId()));
+    }
+
+    public func subscribeToRepositoryListChange() async throws -> NotificationStream {
+        let messageId = generateMessageId()
+        let stream = NotificationStream(state)
+        let _ = try await sendRequest(MessageRequest.subscribeToRepositoryListChange(messageId));
+        return stream
+    }
+
+    func sendRequest(_ request: MessageRequest) async throws -> Response {
+        async let onResponse = withCheckedThrowingContinuation { continuation in
+            pendingResponses[request.messageId] = continuation
+        }
+
+        sendDataToOuisyncLib(request.serialize());
+
+        return try await onResponse
+    }
+
+    func generateMessageId() -> MessageId {
+        let messageId = nextMessageId
+        nextMessageId += 1
+        return messageId
+    }
+
+    func sendDataToOuisyncLib(_ data: [UInt8]) {
+        libraryClient.messageFromServerToClient(data);
+    }
+
+    func onReceiveDataFromOuisyncLib(_ data: [UInt8]) {
+        let maybe_message = IncomingMessage.deserialize(data)
+
+        guard let message = maybe_message else {
+            NSLog(":::: 😡 Failed to parse incoming message from OuisyncLib \(data)")
+            return
+        }
+
+        NSLog(":::: 🙂 Received message from OuisyncLib \(message)")
+
+        switch message.payload {
+        case .response(let response):
+            handleResponse(message.messageId, response)
+        case .notification(let notification):
+            handleNotification(message.messageId, notification)
+        case .error(let error):
+            handleError(message.messageId, error)
+        }
+    }
+
+    func handleResponse(_ messageId: MessageId, _ response: Response) {
+        guard let pendingResponse = pendingResponses.removeValue(forKey: messageId) else {
+            NSLog(":::: 😡 Failed to match response to a request")
+            return
+        }
+        pendingResponse.resume(returning: response)
+    }
+
+    func handleNotification(_ messageId: MessageId, _ response: OuisyncNotification) {
+        for tx in state.registrations.values {
+            tx.yield(response)
+        }
+    }
+
+    func handleError(_ messageId: MessageId, _ response: ErrorResponse) {
+        guard let pendingResponse = pendingResponses.removeValue(forKey: messageId) else {
+            NSLog(":::: 😡 Failed to match response to a request")
+            return
+        }
+        pendingResponse.resume(throwing: response)
+    }
+
+}
+
 extension FileProviderExtension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
                                         completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Progress {
@@ -22,17 +147,11 @@ extension FileProviderExtension: NSFileProviderServicing {
 
 extension FileProviderExtension {
     class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
-        var client: OuisyncFileProviderClientProtocol?
+        var ouisyncConnection: OuisyncConnection?
         var nextMessageId: MessageId = 0
 
         var serviceName: NSFileProviderServiceName {
             ouisyncFileProviderServiceName
-        }
-
-        func generateMessageId() -> MessageId {
-            let messageId = nextMessageId
-            nextMessageId += 1
-            return messageId
         }
 
         func makeListenerEndpoint() throws -> NSXPCListenerEndpoint {
@@ -45,6 +164,7 @@ extension FileProviderExtension {
             return listener.endpoint
         }
 
+        /// https://developer.apple.com/documentation/foundation/nsxpclistenerdelegate/1410381-listener
         func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
             NSLog(":::: START")
 
@@ -60,16 +180,34 @@ extension FileProviderExtension {
                 NSLog("😡 Connection to Ouisync XPC service has been invalidated")
             }
 
-            client = connection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
+            let maybe_client = connection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
 
+            guard let client = maybe_client else {
+                NSLog(":::: 😡 Failed to convert XPC connection to OuisyncConnection")
+                return false
+            }
+
+            // TODO: This was used in an example, but maybe we dont need to do that?
             synchronized(self) {
                 listeners.remove(listener)
             }
 
+            let ouisyncConnection = OuisyncConnection(client)
+            self.ouisyncConnection = ouisyncConnection
+
             connection.resume()
 
-            client!.messageFromServerToClient(listRepositories(generateMessageId()));
-            client!.messageFromServerToClient(subscribeToRepositoryListChange(generateMessageId()));
+            Task {
+                let repoListChanged = try await ouisyncConnection.subscribeToRepositoryListChange()
+                let _ = try await ouisyncConnection.listRepositories()
+                while true {
+                    if await repoListChanged.next() == nil {
+                        break
+                    }
+                    let _ = try await ouisyncConnection.listRepositories()
+                }
+            }
+
             return true
         }
 
@@ -80,25 +218,16 @@ extension FileProviderExtension {
             self.ext = ext
         }
 
-        func messageFromClientToServer(_ message: [UInt8]) {
-            if message.isEmpty {
-                return
-            }
-            guard let client = self.client else {
+        func messageFromClientToServer(_ message_data: [UInt8]) {
+            if message_data.isEmpty {
                 return
             }
 
-            let response = parseResponse(message)
-
-            NSLog(":::: ============ Response from rust")
-            NSLog(":::: ======== \(message)")
-            NSLog(":::: ======== \(response as Response?)")
-
-            if let payload = response?.payload {
-                if case ResponsePayload.notification(_) = payload {
-                    client.messageFromServerToClient(listRepositories(generateMessageId()));
-                }
+            guard let ouisyncConnection = self.ouisyncConnection else {
+                return
             }
+
+            ouisyncConnection.onReceiveDataFromOuisyncLib(message_data)
         }
     }
 }
