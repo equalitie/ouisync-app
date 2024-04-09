@@ -40,7 +40,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       child: TextButton.icon(
           onPressed: () async => await _unlockSecurity(context),
           icon: const Icon(Icons.lock_outline_rounded),
-          label: Text('Authenticate')));
+          label: Text(S.current.messageAuthenticate)));
 
   Widget _passwordLabel(BuildContext context) =>
       Row(mainAxisSize: MainAxisSize.min, children: [

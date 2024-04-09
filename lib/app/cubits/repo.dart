@@ -627,7 +627,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       loggy.app('Download file $sourcePath exception', e, st);
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
-      showSnackBar('File downloaded to $destinationPath');
+      showSnackBar(S.current.messageDownloadFileLocation(destinationPath));
       emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
 
       await Future.wait(

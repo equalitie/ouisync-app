@@ -3850,6 +3850,16 @@ class S {
     );
   }
 
+  /// `File downloaded to {path}`
+  String messageDownloadFileLocation(Object path) {
+    return Intl.message(
+      'File downloaded to $path',
+      name: 'messageDownloadFileLocation',
+      desc: '',
+      args: [path],
+    );
+  }
+
   /// `Copied to the clipboard.`
   String get messageCopiedToClipboard {
     return Intl.message(
@@ -3885,6 +3895,56 @@ class S {
     return Intl.message(
       'Use cache servers',
       name: 'messageUseCacheServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset local secret`
+  String get messageResetLocalSecret {
+    return Intl.message(
+      'Reset local secret',
+      name: 'messageResetLocalSecret',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sort by: {name}`
+  String messageSortBy(Object name) {
+    return Intl.message(
+      'Sort by: $name',
+      name: 'messageSortBy',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error: {error}`
+  String messageErrorDetail(Object error) {
+    return Intl.message(
+      'Error: $error',
+      name: 'messageErrorDetail',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Awaiting result...`
+  String get messageAwaitingResult {
+    return Intl.message(
+      'Awaiting result...',
+      name: 'messageAwaitingResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authenticate`
+  String get messageAuthenticate {
+    return Intl.message(
+      'Authenticate',
+      name: 'messageAuthenticate',
       desc: '',
       args: [],
     );
@@ -4017,6 +4077,16 @@ class S {
       name: 'replacementChanges',
       desc: '',
       args: [changes],
+    );
+  }
+
+  /// `{error}`
+  String replacementError(Object error) {
+    return Intl.message(
+      '$error',
+      name: 'replacementError',
+      desc: '',
+      args: [error],
     );
   }
 
