@@ -78,7 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m33(status) => "";
 
-  static String m34(name) => "";
+  static String m34(name) => "repository \"${name}\" ကို မျှဝေမည်";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -139,30 +139,47 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconRename": MessageLookupByLibrary.simpleMessage(""),
         "iconShare": MessageLookupByLibrary.simpleMessage(""),
         "iconShareTokenWithPeer": MessageLookupByLibrary.simpleMessage(""),
-        "labelAppVersion": MessageLookupByLibrary.simpleMessage(""),
-        "labelBitTorrentDHT": MessageLookupByLibrary.simpleMessage(""),
-        "labelCopyLink": MessageLookupByLibrary.simpleMessage(""),
-        "labelDestination": MessageLookupByLibrary.simpleMessage(""),
-        "labelDownloadedTo": MessageLookupByLibrary.simpleMessage(""),
-        "labelEndpoint": MessageLookupByLibrary.simpleMessage(""),
-        "labelLocation": MessageLookupByLibrary.simpleMessage(""),
-        "labelLockAllRepos": MessageLookupByLibrary.simpleMessage(""),
-        "labelName": MessageLookupByLibrary.simpleMessage(""),
-        "labelNewName": MessageLookupByLibrary.simpleMessage(""),
-        "labelPassword": MessageLookupByLibrary.simpleMessage(""),
-        "labelPeers": MessageLookupByLibrary.simpleMessage(""),
-        "labelQRCode": MessageLookupByLibrary.simpleMessage(""),
-        "labelRenameRepository": MessageLookupByLibrary.simpleMessage(""),
-        "labelRepositoryLink": MessageLookupByLibrary.simpleMessage(""),
-        "labelRetypePassword": MessageLookupByLibrary.simpleMessage(""),
-        "labelSelectRepository": MessageLookupByLibrary.simpleMessage(""),
-        "labelSetPermission": MessageLookupByLibrary.simpleMessage(""),
-        "labelShareLink": MessageLookupByLibrary.simpleMessage(""),
-        "labelSize": MessageLookupByLibrary.simpleMessage(""),
-        "labelSyncStatus": MessageLookupByLibrary.simpleMessage(""),
-        "labelTokenLink": MessageLookupByLibrary.simpleMessage(""),
-        "labelTypePassword": MessageLookupByLibrary.simpleMessage(""),
-        "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(""),
+        "labelAppVersion":
+            MessageLookupByLibrary.simpleMessage("အက်ပ်ဗားရှင်း"),
+        "labelBitTorrentDHT":
+            MessageLookupByLibrary.simpleMessage("BitTorrent DHT"),
+        "labelCopyLink":
+            MessageLookupByLibrary.simpleMessage("လင့်ခ်ကို ကူးယူပါ"),
+        "labelDestination": MessageLookupByLibrary.simpleMessage("ဦးတည်ချက်"),
+        "labelDownloadedTo":
+            MessageLookupByLibrary.simpleMessage("ဒေါင်းလုတ်ဆွဲယူထားသော နေရာ"),
+        "labelEndpoint": MessageLookupByLibrary.simpleMessage("အဆုံးမှတ် "),
+        "labelLocation": MessageLookupByLibrary.simpleMessage("တည်နေရာ "),
+        "labelLockAllRepos":
+            MessageLookupByLibrary.simpleMessage("အားလုံးကို လော့ခ်ချပါ"),
+        "labelName": MessageLookupByLibrary.simpleMessage("အမည် "),
+        "labelNewName": MessageLookupByLibrary.simpleMessage("အမည်အသစ် "),
+        "labelPassword": MessageLookupByLibrary.simpleMessage("စကားဝှက် "),
+        "labelPeers": MessageLookupByLibrary.simpleMessage("အပြန်အလှန်"),
+        "labelQRCode": MessageLookupByLibrary.simpleMessage("ကျူအာကုဒ်"),
+        "labelRenameRepository":
+            MessageLookupByLibrary.simpleMessage("အမည်အသစ်ကို ထည့်ပါ "),
+        "labelRepositoryCurrentPassword": MessageLookupByLibrary.simpleMessage(
+            "လက်ရှိအသုံးပြုနေသော စကားဝှက်"),
+        "labelRepositoryLink":
+            MessageLookupByLibrary.simpleMessage("Repository လင့်ခ် "),
+        "labelRetypePassword":
+            MessageLookupByLibrary.simpleMessage("စကားဝှက်ကို ပြန်ရေးပါ "),
+        "labelSelectRepository":
+            MessageLookupByLibrary.simpleMessage("repository ကို ရွေးချယ်ပါ။ "),
+        "labelSetPermission":
+            MessageLookupByLibrary.simpleMessage("ခွင့်ပြုချက်ကို သတ်မှတ်ပါ"),
+        "labelShareLink":
+            MessageLookupByLibrary.simpleMessage("လင့်ခ်ကို မျှဝေပါ"),
+        "labelSize": MessageLookupByLibrary.simpleMessage("အရွယ်အစား "),
+        "labelSyncStatus":
+            MessageLookupByLibrary.simpleMessage("ချိန်ကိုက်သည့် အခြေအနေ "),
+        "labelTokenLink": MessageLookupByLibrary.simpleMessage(
+            "Repository ကို မျှဝေသော လင့်ခ်"),
+        "labelTypePassword":
+            MessageLookupByLibrary.simpleMessage("စကားဝှက်ကို ရေးပါ "),
+        "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
+            "ပြင်ပသိုလှောင်မှုကို အသုံးပြုပါ"),
         "menuItemAbout": MessageLookupByLibrary.simpleMessage(""),
         "menuItemLogs": MessageLookupByLibrary.simpleMessage(""),
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage(""),
@@ -386,47 +403,141 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m33,
         "statusSync": MessageLookupByLibrary.simpleMessage(""),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage(""),
-        "titleAbout": MessageLookupByLibrary.simpleMessage(""),
-        "titleAddFile": MessageLookupByLibrary.simpleMessage(""),
-        "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(""),
-        "titleAddRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleAppTitle": MessageLookupByLibrary.simpleMessage(""),
+        "titleAbout": MessageLookupByLibrary.simpleMessage("အကြောင်းအရာ"),
+        "titleAddFile": MessageLookupByLibrary.simpleMessage(
+            "Ouisync တွင် ဖိုင်များကို သိမ်းမည်"),
+        "titleAddRepoToken": MessageLookupByLibrary.simpleMessage(
+            "repository တစ်ခုကို တိုကင်အသုံးပြု၍ ထည့်သွင်းပါ"),
+        "titleAddRepository": MessageLookupByLibrary.simpleMessage(
+            "repository တစ်ခုကို ထည့်သွင်းမည်"),
+        "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
         "titleBackgroundAndroidPermissionsTitle":
-            MessageLookupByLibrary.simpleMessage(""),
-        "titleChangePassword": MessageLookupByLibrary.simpleMessage(""),
-        "titleCreateFolder": MessageLookupByLibrary.simpleMessage(""),
-        "titleCreateRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleDeleteFile": MessageLookupByLibrary.simpleMessage(""),
-        "titleDeleteFolder": MessageLookupByLibrary.simpleMessage(""),
-        "titleDeleteNotEmptyFolder": MessageLookupByLibrary.simpleMessage(""),
-        "titleDeleteRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleDownloadLocation": MessageLookupByLibrary.simpleMessage(""),
-        "titleDownloadToDevice": MessageLookupByLibrary.simpleMessage(""),
-        "titleEditRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleFileDetails": MessageLookupByLibrary.simpleMessage(""),
-        "titleFileExtensionChanged": MessageLookupByLibrary.simpleMessage(""),
-        "titleFileExtensionMissing": MessageLookupByLibrary.simpleMessage(""),
-        "titleFolderActions": MessageLookupByLibrary.simpleMessage(""),
-        "titleFolderDetails": MessageLookupByLibrary.simpleMessage(""),
-        "titleLockAllRepos": MessageLookupByLibrary.simpleMessage(""),
-        "titleLogs": MessageLookupByLibrary.simpleMessage(""),
-        "titleMovingEntry": MessageLookupByLibrary.simpleMessage(""),
-        "titleNetwork": MessageLookupByLibrary.simpleMessage(""),
-        "titleRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),
-        "titleRepositoriesList": MessageLookupByLibrary.simpleMessage(""),
-        "titleRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleRepositoryName": MessageLookupByLibrary.simpleMessage(""),
-        "titleRequiredPermission": MessageLookupByLibrary.simpleMessage(""),
-        "titleSaveChanges": MessageLookupByLibrary.simpleMessage(""),
-        "titleScanRepoQR": MessageLookupByLibrary.simpleMessage(""),
-        "titleSecurity": MessageLookupByLibrary.simpleMessage(""),
-        "titleSetPasswordFor": MessageLookupByLibrary.simpleMessage(""),
-        "titleSettings": MessageLookupByLibrary.simpleMessage(""),
+            MessageLookupByLibrary.simpleMessage("ခွင့်ပြုချက်လိုအပ်သည်"),
+        "titleChangePassword":
+            MessageLookupByLibrary.simpleMessage("စကားဝှက် ပြောင်းလဲမည်"),
+        "titleChangesToTerms": MessageLookupByLibrary.simpleMessage(
+            "အဆိုပါအခေါ်အဝေါ်များသို့ ပြောင်းလဲခြင်း"),
+        "titleChildrensPrivacy": MessageLookupByLibrary.simpleMessage(
+            "ကလေးများ၏ ကိုယ်ရေးလုံခြုံမှု"),
+        "titleContactUs":
+            MessageLookupByLibrary.simpleMessage("ကျွန်ုပ်တို့အား ဆက်သွယ်ရန်"),
+        "titleCookies": MessageLookupByLibrary.simpleMessage("ကွတ်ကီးများ"),
+        "titleCreateFolder":
+            MessageLookupByLibrary.simpleMessage("ဖိုဒါဖွင့်မည်"),
+        "titleCreateRepository":
+            MessageLookupByLibrary.simpleMessage("repository အသစ် ပြုလုပ်မည်"),
+        "titleDataCollection":
+            MessageLookupByLibrary.simpleMessage("၃.၁။ အချက်အလက်စုစည်းမှု"),
+        "titleDataSharing":
+            MessageLookupByLibrary.simpleMessage("၃.၂။ အချက်အလက်မျှဝေမှု"),
+        "titleDeleteFile":
+            MessageLookupByLibrary.simpleMessage("ဖိုင်ကို ဖျက်မည်"),
+        "titleDeleteFolder":
+            MessageLookupByLibrary.simpleMessage("ဖိုဒါကို ဖျက်မည်"),
+        "titleDeleteNotEmptyFolder": MessageLookupByLibrary.simpleMessage(
+            "အလွတ်ဖြစ်မနေသော ဖိုဒါကို ဖျက်မည်"),
+        "titleDeleteRepository":
+            MessageLookupByLibrary.simpleMessage("repository ကို ဖျက်မည်"),
+        "titleDeletionDataServer": MessageLookupByLibrary.simpleMessage("၃.၄။"),
+        "titleDigitalSecurity":
+            MessageLookupByLibrary.simpleMessage("ဒစ်ဂျစ်တယ်လုံခြုံရေး"),
+        "titleDownloadLocation": MessageLookupByLibrary.simpleMessage(
+            "တည်နေရာကို ‌ဒေါင်းလုပ်ဒ်လုပ်မည်"),
+        "titleDownloadToDevice":
+            MessageLookupByLibrary.simpleMessage("စက်သို့ ဒေါင်းလုပ်ဒ်လုပ်မည်"),
+        "titleEditRepository":
+            MessageLookupByLibrary.simpleMessage("repository ကို ပြင်မည်"),
+        "titleEqualitiesValues": MessageLookupByLibrary.simpleMessage(
+            "eQualitie ၏ တန်ဖိုးထားမှုများ"),
+        "titleFAQShort":
+            MessageLookupByLibrary.simpleMessage("မေးလေ့ရှိသော မေးခွန်းများ"),
+        "titleFileDetails": MessageLookupByLibrary.simpleMessage(
+            "ဖိုင်၏ အသေးစိတ်အချက်အလက်များ"),
+        "titleFileExtensionChanged": MessageLookupByLibrary.simpleMessage(
+            "ဖိုင်အဆက်ကို ပြောင်းလဲပြီးစီး"),
+        "titleFileExtensionMissing":
+            MessageLookupByLibrary.simpleMessage("ဖိုင်အဆက်ကို ပျောက်ဆုံး"),
+        "titleFolderActions":
+            MessageLookupByLibrary.simpleMessage("ပေါင်းထည့်မည်"),
+        "titleFolderDetails": MessageLookupByLibrary.simpleMessage(
+            "ဖိုဒါ၏ အသေးစိတ်အချက်အလက်များ"),
+        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+            "လွတ်လပ်စွာ ထုတ်ဖော်ပြောဆိုခွင့်နှင့် သတင်းအချက်အလက်ရယူခွင့်"),
+        "titleIssueTracker":
+            MessageLookupByLibrary.simpleMessage("ပြဿနာခြေရာခံသူ"),
+        "titleJustLegalSociety":
+            MessageLookupByLibrary.simpleMessage("တရားမျှတသော လူ့အဖွဲ့အစည်း"),
+        "titleLinksOtherSites": MessageLookupByLibrary.simpleMessage(
+            "အခြားဆိုက်များသို့ လင့်ခ်များ"),
+        "titleLockAllRepos": MessageLookupByLibrary.simpleMessage(
+            "repositories အားလုံးကို လော့ဒ်လုပ်မည်"),
+        "titleLogData":
+            MessageLookupByLibrary.simpleMessage("မှတ်တမ်းအချက်အလက်များ"),
+        "titleLogs": MessageLookupByLibrary.simpleMessage("မှတ်တမ်းများ"),
+        "titleMovingEntry":
+            MessageLookupByLibrary.simpleMessage("စာရင်းကို ရွှေ့ပြောင်းမည်"),
+        "titleNetwork": MessageLookupByLibrary.simpleMessage("ကွန်ရက်"),
+        "titleOnboardingAccess": MessageLookupByLibrary.simpleMessage(
+            "အခြားသော စက်များမှ ဖိုင်များကို သုံးစွဲခွင့်ပြုမည်"),
+        "titleOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
+            "ပူးပေါင်းဆောင်ရွက်ရန်၊ ထုတ်လွှင့်ရန် သို့မဟုတ် ရိုးရှင်းစွာ သိမ်းဆည်းရန် ခွင့်ပြုချက်ပေးမည်"),
+        "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
+            "ဖိုင်များကို လုံခြုံစွာ ရယူပေးပို့မည်"),
+        "titleOpennessTransparency":
+            MessageLookupByLibrary.simpleMessage("ပွင့်လင်းမြင်သာမှု"),
+        "titleOurMission": MessageLookupByLibrary.simpleMessage(
+            "ကျွန်ုပ်တို့၏ မျှော်မှန်းချက်များ"),
+        "titleOurPrinciples":
+            MessageLookupByLibrary.simpleMessage("ကျွန်ုပ်တို့၏ အခြေခံမူများ"),
+        "titleOurValues": MessageLookupByLibrary.simpleMessage(
+            "ကျွန်ုပ်တို့၏ တန်ဖိုးထားမှုများ"),
+        "titleOverview":
+            MessageLookupByLibrary.simpleMessage("၁။ ခြုံငုံသုံးသပ်ချက်"),
+        "titlePIPEDA": MessageLookupByLibrary.simpleMessage(
+            "The Personal Information Protection and Electronic Documents Act (PIPEDA)"),
+        "titlePrivacy":
+            MessageLookupByLibrary.simpleMessage("ကိုယ်ရေးလုံခြုံမှု"),
+        "titlePrivacyNotice": MessageLookupByLibrary.simpleMessage(
+            "၃။ ကိုယ်ရေးလုံခြုံမှု အသိပေးချက်"),
+        "titlePrivacyPolicy":
+            MessageLookupByLibrary.simpleMessage("ကိုယ်ရေးလုံခြုံမှု မူဝါဒ"),
+        "titleRemoveBiometrics": MessageLookupByLibrary.simpleMessage(
+            "ဇီဝအချက်အလက်များကို ဖယ်ရှားမည်"),
+        "titleRepositoriesList":
+            MessageLookupByLibrary.simpleMessage("ကျွန်ုပ်၏ repository များ"),
+        "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
+        "titleRepositoryName":
+            MessageLookupByLibrary.simpleMessage("Repository အမည်"),
+        "titleRequiredPermission":
+            MessageLookupByLibrary.simpleMessage("ခွင့်ပြုချက် လိုအပ်သည်"),
+        "titleSaveChanges": MessageLookupByLibrary.simpleMessage(
+            "ပြောင်းလဲမှုကို သိမ်းဆည်းမည်"),
+        "titleScanRepoQR":
+            MessageLookupByLibrary.simpleMessage("Repository QR ကို စကန်ဖတ်ပါ"),
+        "titleSecurity": MessageLookupByLibrary.simpleMessage("လုံခြုံ‌ရေး"),
+        "titleSecurityPractices": MessageLookupByLibrary.simpleMessage(
+            "၃.၃။ လုံခြုံရေးအလေ့အကျင့်များ"),
+        "titleSendFeedback":
+            MessageLookupByLibrary.simpleMessage("အကြံပြုစာ ပေးပို့မည်"),
+        "titleSetPasswordFor":
+            MessageLookupByLibrary.simpleMessage("စကားဝှက်ကို သတ်မှတ်မည်"),
+        "titleSettings": MessageLookupByLibrary.simpleMessage("ဆက်တင်များ"),
         "titleShareRepository": m34,
+        "titleSortBy": MessageLookupByLibrary.simpleMessage("အစီအစဥ်"),
         "titleStateMonitor": MessageLookupByLibrary.simpleMessage(""),
-        "titleUnlockRepository": MessageLookupByLibrary.simpleMessage(""),
-        "titleUnsavedChanges": MessageLookupByLibrary.simpleMessage(""),
-        "typeFile": MessageLookupByLibrary.simpleMessage(""),
-        "typeFolder": MessageLookupByLibrary.simpleMessage("")
+        "titleTermsOfUse":
+            MessageLookupByLibrary.simpleMessage("၂။ အခေါ်အဝေါ်များ"),
+        "titleTermsPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Ouisync ၏ အခေါ်အဝေါ်များနှင့် ကိုယ်ရေးလုံခြုံမှု အသိပေးချက်"),
+        "titleUnlockRepository":
+            MessageLookupByLibrary.simpleMessage("repository ကို လော့ခ်ဖြေမည်"),
+        "titleUnsavedChanges": MessageLookupByLibrary.simpleMessage(
+            "အပြောင်းအလဲများကို မသိမ်းဆည်းပါ"),
+        "titleUserProvidedPeers": MessageLookupByLibrary.simpleMessage(
+            "အပြန်အလှန်အထောက်အပံ့ပြုနေသော အသုံးပြုသူ"),
+        "titleWeAreEq": MessageLookupByLibrary.simpleMessage(
+            "ကျွန်ုပ်တို့သည် eQualit.ie ဖြစ်သည်"),
+        "typeFile": MessageLookupByLibrary.simpleMessage("ဖိုင်"),
+        "typeFolder": MessageLookupByLibrary.simpleMessage("ဖိုဒါ")
       };
 }
