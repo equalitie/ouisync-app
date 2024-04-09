@@ -18,14 +18,14 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         // for that domain, and call methods on the instance.
         
         super.init()
-        Task {
-            var i = 0;
-            while true {
-                i += 1;
-                NSLog("FileProviderExtension :::::::::::::::::::::::::::::::::::: \(i)")
-                try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
-            }
-        }
+//        Task {
+//            var i = 0;
+//            while true {
+//                i += 1;
+//                NSLog("FileProviderExtension :::::::::::::::::::::::::::::::::::: \(i)")
+//                try await Task.sleep(nanoseconds: 1 * 1_000_000_000)
+//            }
+//        }
     }
 
     func invalidate() {
