@@ -64,7 +64,6 @@ class FileProviderProxy {
             @Sendable
             func fromRustToServer() async {
                 for await message in fromRustRx {
-                    NSLog("::::: from rust to server \(message)")
                     server.messageFromClientToServer(message)
                 }
             }
@@ -77,7 +76,6 @@ class FileProviderProxy {
                     self.session = session
                 }
                 func messageFromServerToClient(_ message: [UInt8]) {
-                    NSLog("::::: from server to client \(message)")
                     ffi.channelSend(session, message)
                 }
             }
@@ -87,20 +85,10 @@ class FileProviderProxy {
 
             connection.resume();
 
-            @Sendable
-            func debug() async {
-                while true {
-                    NSLog("::::::::: sending to extension")
-                    server.messageFromClientToServer([])
-                    try? await Task.sleep(nanoseconds: 1_000_000_000)
-                }
-            }
+            // For some reason the communication wont start unless we send this first message
+            server.messageFromClientToServer([])
 
-            //await fromRustToServer();
-            async let r1: () = fromRustToServer();
-            async let r2: () = debug()
-
-            let _ = await (r1, r2)
+            await fromRustToServer();
 
             ffi.releaseSession(session)
         }
@@ -108,10 +96,6 @@ class FileProviderProxy {
 
     func getDomain() -> NSFileProviderDomain {
         return NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier(rawValue: "mydomain"), displayName: "mydisplayname")
-    }
-
-    func requestForClient(_ request: [UInt8], _ respond: ([UInt8]) -> Void) {
-        //ffi.channelSend()
     }
 }
 
