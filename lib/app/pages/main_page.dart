@@ -545,6 +545,7 @@ class _MainPageState extends State<MainPage>
       _cubits.upgradeExists,
       _cubits.powerControl,
       _cubits.panicCounter,
+      _cubits.mount,
     ], () {
       Color? color = _cubits.mainNotificationBadgeColor();
 
