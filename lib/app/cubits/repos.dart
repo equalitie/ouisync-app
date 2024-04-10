@@ -129,7 +129,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     // We must not set repositories for which the user provides the password
     // as "default" because they must be indistinguishable from blind
     // repositories.
-    if (entry?.cubit?.state.authMode.passwordMode != PasswordMode.manual) {
+    final setDefault = switch (entry?.cubit?.state.authMode) {
+      AuthModeKeyStoredOnDevice() || AuthModePasswordStoredOnDevice() => true,
+      AuthModeBlindOrManual() || null => false,
+    };
+
+    if (setDefault) {
       await _settings.setDefaultRepo(entry?.location);
     }
 
@@ -156,8 +161,17 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     if (repo is OpenRepoEntry) {
       final authMode = repo.cubit.state.authMode;
 
-      if (authMode.hasLocalSecret &&
-          !authMode.shouldCheckBiometricsBeforeUnlock) {
+      final unlock = switch (authMode) {
+        AuthModeKeyStoredOnDevice(confirmWithBiometrics: false) ||
+        AuthModePasswordStoredOnDevice(confirmWithBiometrics: false) =>
+          true,
+        AuthModeKeyStoredOnDevice() ||
+        AuthModePasswordStoredOnDevice() ||
+        AuthModeBlindOrManual() =>
+          false,
+      };
+
+      if (unlock) {
         final secret = await repo.cubit.getLocalSecret(_settings.masterKey);
 
         if (secret != null) {
@@ -568,11 +582,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         PasswordMode.bio => await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
             secret.key,
+            keyProvenance: SecretKeyProvenance.random,
             confirmWithBiometrics: true,
           ),
         PasswordMode.none => await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
             secret.key,
+            keyProvenance: SecretKeyProvenance.random,
             confirmWithBiometrics: false,
           ),
       };

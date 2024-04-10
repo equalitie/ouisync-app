@@ -7,7 +7,6 @@ import '../models/models.dart';
 sealed class RepoEntry extends Equatable {
   RepoLocation get location;
   RepoCubit? get cubit => null;
-  PasswordMode? get passwordMode => null;
 
   String get name => location.name;
   String? get infoHash => cubit?.state.infoHash;
@@ -42,9 +41,6 @@ class OpenRepoEntry extends RepoEntry {
 
   @override
   RepoLocation get location => cubit.location;
-
-  @override
-  PasswordMode get passwordMode => cubit.state.authMode.passwordMode;
 }
 
 class MissingRepoEntry extends RepoEntry {

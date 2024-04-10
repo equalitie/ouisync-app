@@ -1,9 +1,9 @@
 import '../utils/master_key.dart';
 import 'local_secret.dart';
-import 'password_mode.dart';
 
 const _encryptedPasswordKey = 'encryptedPassword';
 const _encryptedKeyKey = 'encryptedKey';
+const _keyProvenanceKey = 'keyProvenance';
 const _confirmWithBiometricsKey = 'confirmWithBiometrics';
 
 sealed class AuthMode {
@@ -15,30 +15,6 @@ sealed class AuthMode {
       AuthModePasswordStoredOnDevice.fromJson(data) ??
       AuthModeKeyStoredOnDevice.fromJson(data) ??
       (throw AuthModeParseFailed);
-
-  bool get hasLocalSecret => switch (this) {
-        AuthModePasswordStoredOnDevice() || AuthModeKeyStoredOnDevice() => true,
-        AuthModeBlindOrManual() => false,
-      };
-
-  bool get shouldCheckBiometricsBeforeUnlock => switch (this) {
-        AuthModePasswordStoredOnDevice(confirmWithBiometrics: final check) ||
-        AuthModeKeyStoredOnDevice(confirmWithBiometrics: final check) =>
-          check,
-        AuthModeBlindOrManual() => false,
-      };
-
-  PasswordMode get passwordMode {
-    if (hasLocalSecret) {
-      if (shouldCheckBiometricsBeforeUnlock) {
-        return PasswordMode.bio;
-      } else {
-        return PasswordMode.none;
-      }
-    } else {
-      return PasswordMode.manual;
-    }
-  }
 }
 
 class AuthModeBlindOrManual extends AuthMode {
@@ -109,29 +85,43 @@ class AuthModePasswordStoredOnDevice extends AuthMode {
 class AuthModeKeyStoredOnDevice extends AuthMode {
   final String encryptedKey;
   final bool confirmWithBiometrics;
+  final SecretKeyProvenance keyProvenance;
 
-  AuthModeKeyStoredOnDevice(this.encryptedKey, this.confirmWithBiometrics);
+  AuthModeKeyStoredOnDevice({
+    required this.encryptedKey,
+    required this.keyProvenance,
+    required this.confirmWithBiometrics,
+  });
 
   static Future<AuthModeKeyStoredOnDevice> encrypt(
     MasterKey masterKey,
     LocalSecretKey plainKey, {
+    required SecretKeyProvenance keyProvenance,
     required bool confirmWithBiometrics,
   }) async {
     final encryptedKey = await masterKey.encryptBytes(plainKey.bytes);
-    return AuthModeKeyStoredOnDevice(encryptedKey, confirmWithBiometrics);
+
+    return AuthModeKeyStoredOnDevice(
+      encryptedKey: encryptedKey,
+      keyProvenance: keyProvenance,
+      confirmWithBiometrics: confirmWithBiometrics,
+    );
   }
 
   AuthModeKeyStoredOnDevice copyWith({
     String? encryptedKey,
+    SecretKeyProvenance? keyProvenance,
     bool? confirmWithBiometrics,
   }) =>
       AuthModeKeyStoredOnDevice(
-        encryptedKey ?? this.encryptedKey,
-        confirmWithBiometrics ?? this.confirmWithBiometrics,
+        encryptedKey: encryptedKey ?? this.encryptedKey,
+        keyProvenance: keyProvenance ?? this.keyProvenance,
+        confirmWithBiometrics:
+            confirmWithBiometrics ?? this.confirmWithBiometrics,
       );
 
   // May throw.
-  Future<LocalSecretKey> getRepositoryPassword(MasterKey masterKey) async {
+  Future<LocalSecretKey> decryptKey(MasterKey masterKey) async {
     final decrypted = await masterKey.decryptBytes(encryptedKey);
     if (decrypted == null) throw AuthModeDecryptFailed();
     return LocalSecretKey(decrypted);
@@ -140,6 +130,7 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
   @override
   Object? toJson() => {
         _encryptedKeyKey: encryptedKey,
+        _keyProvenanceKey: keyProvenance.toJson(),
         _confirmWithBiometricsKey: confirmWithBiometrics,
       };
 
@@ -151,11 +142,32 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
     final encryptedKey = data[_encryptedKeyKey];
     if (encryptedKey == null) return null;
 
+    final keyProvenance = data[_keyProvenanceKey];
+    if (keyProvenance == null) return null;
+
     final confirmWithBiometrics = data[_confirmWithBiometricsKey];
     if (confirmWithBiometrics == null) return null;
 
-    return AuthModeKeyStoredOnDevice(encryptedKey, confirmWithBiometrics);
+    return AuthModeKeyStoredOnDevice(
+      encryptedKey: encryptedKey,
+      keyProvenance: keyProvenance,
+      confirmWithBiometrics: confirmWithBiometrics,
+    );
   }
+}
+
+enum SecretKeyProvenance {
+  manual,
+  random,
+  ;
+
+  Object toJson() => name;
+
+  static SecretKeyProvenance? fromJson(Object? data) => switch (data) {
+        "manual" => manual,
+        "random" => random,
+        _ => null,
+      };
 }
 
 sealed class AuthModeException implements Exception {}

@@ -71,35 +71,37 @@ mixin RepositoryActionsMixin on LoggyType {
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
-    final passwordMode = repoCubit.state.authMode.passwordMode;
-
     LocalSecret secret;
 
-    if (passwordMode == PasswordMode.manual) {
-      final password = await manualUnlock(context, repoCubit);
-      if (password == null || password.isEmpty) return;
-      secret = LocalPassword(password);
-    } else {
-      if (!await LocalAuth.authenticateIfPossible(
-        context,
-        S.current.messageAccessingSecureStorage,
-      )) return;
+    switch (repoCubit.state.authMode) {
+      case (AuthModeBlindOrManual()):
+        final password = await manualUnlock(context, repoCubit);
+        if (password == null || password.isEmpty) return;
+        secret = LocalPassword(password);
+        break;
+      case (AuthModeKeyStoredOnDevice()):
+      case (AuthModePasswordStoredOnDevice()):
+        if (!await LocalAuth.authenticateIfPossible(
+          context,
+          S.current.messageAccessingSecureStorage,
+        )) return;
 
-      secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
+        secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
+        break;
     }
 
     popDialog();
 
-    final securityPage = await RepositorySecurityPage.create(
-      settings: settings,
-      repo: repoCubit,
-      currentSecret: secret,
-      passwordHasher: passwordHasher,
-    );
-
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => securityPage),
+      MaterialPageRoute(
+        builder: (context) => RepositorySecurityPage(
+          settings: settings,
+          repo: repoCubit,
+          currentSecret: secret,
+          passwordHasher: passwordHasher,
+        ),
+      ),
     );
   }
 
@@ -210,36 +212,39 @@ mixin RepositoryActionsMixin on LoggyType {
     MasterKey masterKey,
     PasswordHasher passwordHasher,
   ) async {
-    final passwordMode = repoCubit.state.authMode.passwordMode;
+    final authMode = repoCubit.state.authMode;
+    String? errorMessage;
 
-    if (passwordMode == PasswordMode.manual) {
-      final unlockResult = await unlockRepositoryManually(
-        context,
-        repoCubit,
-        masterKey,
-        passwordHasher,
-      );
-      if (unlockResult == null) return;
+    switch (authMode) {
+      case (AuthModeBlindOrManual()):
+        final unlockResult = await unlockRepositoryManually(
+          context,
+          repoCubit,
+          masterKey,
+          passwordHasher,
+        );
+        if (unlockResult == null) return;
 
-      showSnackBar(unlockResult.message);
+        showSnackBar(unlockResult.message);
 
-      return;
-    }
+        return;
+      case AuthModeKeyStoredOnDevice(confirmWithBiometrics: true):
+      case AuthModePasswordStoredOnDevice(confirmWithBiometrics: true):
+        if (!await LocalAuth.authenticateIfPossible(
+          context,
+          S.current.messageAccessingSecureStorage,
+        )) return;
 
-    if (passwordMode == PasswordMode.bio) {
-      if (!await LocalAuth.authenticateIfPossible(
-        context,
-        S.current.messageAccessingSecureStorage,
-      )) return;
+        errorMessage = S.current.messageBiometricUnlockRepositoryFailed;
+      case AuthModeKeyStoredOnDevice():
+      case AuthModePasswordStoredOnDevice():
+        errorMessage = S.current.messageAutomaticUnlockRepositoryFailed;
     }
 
     final secret = await repoCubit.getLocalSecret(masterKey);
 
     if (secret == null) {
-      final message = passwordMode == PasswordMode.none
-          ? S.current.messageAutomaticUnlockRepositoryFailed
-          : S.current.messageBiometricUnlockRepositoryFailed;
-      showSnackBar(message);
+      showSnackBar(errorMessage);
       return;
     }
 
