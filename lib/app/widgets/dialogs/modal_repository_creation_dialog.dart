@@ -236,7 +236,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
               useCacheServersSwitch(state),
             if (state.accessMode != AccessMode.blind) passwordInputs(state),
             if (state.isBiometricsAvailable &&
-                !state.addPassword &&
+                state.localSecretMode.origin == SecretKeyOrigin.random &&
                 state.accessMode != AccessMode.blind)
               useBiometricsSwitch(state),
             Dimensions.spacingVertical,
@@ -279,12 +279,11 @@ class RepositoryCreation extends HookWidget with AppLogger {
           key: _repositoryNameInputKey,
           context: context,
           textEditingController: nameController,
-          textInputAction:
-              state.addPassword ? TextInputAction.done : TextInputAction.done,
+          textInputAction: TextInputAction.done,
           label: S.current.labelName,
           hint: S.current.messageRepositoryName,
           onFieldSubmitted: (newName) async {
-            if (state.addPassword) {
+            if (state.localSecretMode.origin == SecretKeyOrigin.manual) {
               newName?.isEmpty ?? true
                   ? repositoryNameFocus.requestFocus()
                   : passwordFocus.requestFocus();
@@ -392,7 +391,13 @@ class RepositoryCreation extends HookWidget with AppLogger {
       );
 
   Widget passwordInputs(CreateRepositoryState state) => Visibility(
-      visible: state.addPassword && !state.secureWithBiometrics,
+      visible: switch (state.localSecretMode) {
+        LocalSecretMode.manual || LocalSecretMode.manualStored => true,
+        LocalSecretMode.manualSecuredWithBiometrics ||
+        LocalSecretMode.randomStored ||
+        LocalSecretMode.randomSecuredWithBiometrics =>
+          false,
+      },
       child: Container(
           child: Column(children: [
         Row(children: [
@@ -532,18 +537,18 @@ class RepositoryCreation extends HookWidget with AppLogger {
   }
 
   Widget addLocalPassword(CreateRepositoryState state) => Visibility(
-      visible: !state.addPassword,
+      visible: state.localSecretMode.origin == SecretKeyOrigin.random,
       child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
         TextButton(
-            onPressed: state.secureWithBiometrics
+            onPressed: state.localSecretMode.isSecuredWithBiometrics
                 ? null
-                : () => updatePasswordSection(true),
+                : () => updatePasswordSection(LocalSecretMode.manual),
             child: Text(S.current.messageAddLocalPassword))
       ]));
 
   Widget useBiometricsSwitch(CreateRepositoryState state) => Container(
       child: SwitchListTile.adaptive(
-          value: state.secureWithBiometrics,
+          value: state.localSecretMode.isSecuredWithBiometrics,
           title: Text(S.current.messageSecureUsingBiometrics,
               textAlign: TextAlign.start,
               style: context.theme.appTextStyle.bodyMedium),
@@ -557,58 +562,68 @@ class RepositoryCreation extends HookWidget with AppLogger {
           visualDensity: VisualDensity.compact));
 
   Widget manualPasswordWarning(
-          BuildContext context, CreateRepositoryState state) =>
+    BuildContext context,
+    CreateRepositoryState state,
+  ) =>
       Visibility(
-          visible: state.showSavePasswordWarning && state.addPassword,
-          child: Fields.autosizeText(S.current.messageRememberSavePasswordAlert,
-              style: context.theme.appTextStyle.bodyMedium
-                  .copyWith(color: Colors.red),
-              maxLines: 10,
-              softWrap: true,
-              textOverflow: TextOverflow.ellipsis));
+        visible: state.showSavePasswordWarning &&
+            state.localSecretMode.origin == SecretKeyOrigin.manual,
+        child: Fields.autosizeText(
+          S.current.messageRememberSavePasswordAlert,
+          style:
+              context.theme.appTextStyle.bodyMedium.copyWith(color: Colors.red),
+          maxLines: 10,
+          softWrap: true,
+          textOverflow: TextOverflow.ellipsis,
+        ),
+      );
 
   List<Widget> _actions(BuildContext context, CreateRepositoryState state) => [
         NegativeButton(
-            text: state.addPassword
-                ? S.current.actionBack
-                : S.current.actionCancel,
-            onPressed: () => state.addPassword
-                ? updatePasswordSection(false)
-                : Navigator.of(context).pop(null),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+          text: state.localSecretMode.origin == SecretKeyOrigin.manual
+              ? S.current.actionBack
+              : S.current.actionCancel,
+          onPressed: () =>
+              state.localSecretMode.origin == SecretKeyOrigin.manual
+                  ? updatePasswordSection(LocalSecretMode.randomStored)
+                  : Navigator.of(context).pop(null),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        ),
         PositiveButton(
-            text: state.shareToken == null
-                ? S.current.actionCreate
-                : S.current.actionImport,
-            onPressed: () async {
-              final newName = nameController.text;
+          text: state.shareToken == null
+              ? S.current.actionCreate
+              : S.current.actionImport,
+          onPressed: () async {
+            final newName = nameController.text;
 
-              SetLocalSecret secret;
-              bool valuesAreOk;
+            SetLocalSecret secret;
+            bool valuesAreOk;
 
-              if (state.accessMode == AccessMode.blind || !state.addPassword) {
-                secret = LocalSecretKeyAndSalt.random();
-                valuesAreOk = await submitNameField(newName);
-              } else {
-                final password = passwordController.text;
-                secret = LocalPassword(passwordController.text);
-                valuesAreOk = await submitRetypedPasswordField(password);
-              }
+            if (state.accessMode == AccessMode.blind ||
+                state.localSecretMode.origin == SecretKeyOrigin.random) {
+              secret = LocalSecretKeyAndSalt.random();
+              valuesAreOk = await submitNameField(newName);
+            } else {
+              final password = passwordController.text;
+              secret = LocalPassword(passwordController.text);
+              valuesAreOk = await submitRetypedPasswordField(password);
+            }
 
-              if (valuesAreOk) {
-                _onSaved(newName, secret, state);
-              }
-            },
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            focusNode: positiveButtonFocus)
+            if (valuesAreOk) {
+              _onSaved(newName, secret, state);
+            }
+          },
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+          focusNode: positiveButtonFocus,
+        ),
       ];
 
-  void updatePasswordSection(bool addPassword) {
-    createRepoCubit.addPassword(addPassword);
+  void updatePasswordSection(LocalSecretMode localSecretMode) {
+    createRepoCubit.setLocalSecretMode(localSecretMode);
 
-    // Biometrics used to be the default; now we let the user enable it.
-    createRepoCubit.secureWithBiometrics(false);
-    createRepoCubit.showSavePasswordWarning(addPassword);
+    createRepoCubit.showSavePasswordWarning(
+      localSecretMode.origin == SecretKeyOrigin.manual,
+    );
 
     populatePasswordControllers();
   }
@@ -636,7 +651,7 @@ class RepositoryCreation extends HookWidget with AppLogger {
     if (!isRepoNameOk) return;
     _repositoryNameInputKey.currentState!.save();
 
-    if (state.addPassword) {
+    if (state.localSecretMode.origin == SecretKeyOrigin.manual) {
       if (!(isPasswordOk && isRetypePasswordOk)) return;
 
       _passwordInputKey.currentState!.save();
@@ -654,36 +669,16 @@ class RepositoryCreation extends HookWidget with AppLogger {
 
     if (exist) return;
 
-    /// We savePasswordToSecureStorage when: is not a blind replica AND there is
-    /// not local secret (authenticationRequired=false) OR using biometric
-    /// validation (authenticationRequired=true).
-    ///
-    /// We authenticationRequired when: there is local secret
-    /// (authenticationRequired=false) AND using biometric validation
-    /// (authenticationRequired=true).
-    ///
-    /// Both cases: Autogenerated and saved to secure storage.
-    final savePasswordToSecureStorage = state.accessMode == AccessMode.blind
-        ? false
-        : state.secureWithBiometrics
-            ? true
-            : !state.addPassword;
-
-    final authenticationRequired =
-        state.secureWithBiometrics ? true : state.addPassword;
-
-    final passwordMode = savePasswordToSecureStorage
-        ? authenticationRequired
-            ? PasswordMode.bio
-            : PasswordMode.none
-        : PasswordMode.manual;
+    final localSecretMode = state.accessMode == AccessMode.blind
+        ? LocalSecretMode.manual
+        : state.localSecretMode;
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
         f: cubit.createRepository(
           repoLocation,
           secret,
           token: state.shareToken,
-          passwordMode: passwordMode,
+          localSecretMode: localSecretMode,
           useCacheServers: state.useCacheServers,
           setCurrent: true,
         ));

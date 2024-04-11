@@ -228,8 +228,8 @@ mixin RepositoryActionsMixin on LoggyType {
         showSnackBar(unlockResult.message);
 
         return;
-      case AuthModeKeyStoredOnDevice(confirmWithBiometrics: true):
-      case AuthModePasswordStoredOnDevice(confirmWithBiometrics: true):
+      case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
+      case AuthModePasswordStoredOnDevice(secureWithBiometrics: true):
         if (!await LocalAuth.authenticateIfPossible(
           context,
           S.current.messageAccessingSecureStorage,

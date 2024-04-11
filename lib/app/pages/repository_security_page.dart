@@ -152,8 +152,8 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       onChange: (bool value) => setState(() => useCustomPassword = value));
 
   Widget _biometrics() => switch (authMode) {
-        AuthModeKeyStoredOnDevice(confirmWithBiometrics: final value) ||
-        AuthModePasswordStoredOnDevice(confirmWithBiometrics: final value)
+        AuthModeKeyStoredOnDevice(secureWithBiometrics: final value) ||
+        AuthModePasswordStoredOnDevice(secureWithBiometrics: final value)
             when isBiometricsAvailable =>
           _buildRowWithSwitch(
               value: value,
@@ -180,10 +180,10 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
         final newAuthMode = await AuthModeKeyStoredOnDevice.encrypt(
           widget.settings.masterKey,
           key,
-          keyProvenance: SecretKeyProvenance.manual,
-          confirmWithBiometrics: switch (authMode) {
-            AuthModeKeyStoredOnDevice(confirmWithBiometrics: true) ||
-            AuthModePasswordStoredOnDevice(confirmWithBiometrics: true) =>
+          keyOrigin: SecretKeyOrigin.manual,
+          secureWithBiometrics: switch (authMode) {
+            AuthModeKeyStoredOnDevice(secureWithBiometrics: true) ||
+            AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
               true,
             AuthModeKeyStoredOnDevice() ||
             AuthModePasswordStoredOnDevice() ||
@@ -229,10 +229,10 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       final newAuthMode = await AuthModeKeyStoredOnDevice.encrypt(
         widget.settings.masterKey,
         newSecret.key,
-        keyProvenance: SecretKeyProvenance.random,
-        confirmWithBiometrics: switch (authMode) {
-          AuthModeKeyStoredOnDevice(confirmWithBiometrics: true) ||
-          AuthModePasswordStoredOnDevice(confirmWithBiometrics: true) =>
+        keyOrigin: SecretKeyOrigin.random,
+        secureWithBiometrics: switch (authMode) {
+          AuthModeKeyStoredOnDevice(secureWithBiometrics: true) ||
+          AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
             true,
           AuthModeKeyStoredOnDevice() ||
           AuthModePasswordStoredOnDevice() ||

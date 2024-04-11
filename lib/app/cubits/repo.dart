@@ -494,12 +494,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       case AuthModeBlindOrManual():
         return false;
       case AuthModePasswordStoredOnDevice():
-        if (authMode.confirmWithBiometrics == value) return false;
-        await setAuthMode(authMode.copyWith(confirmWithBiometrics: value));
+        if (authMode.secureWithBiometrics == value) return false;
+        await setAuthMode(authMode.copyWith(secureWithBiometrics: value));
 
       case AuthModeKeyStoredOnDevice():
-        if (authMode.confirmWithBiometrics == value) return false;
-        await setAuthMode(authMode.copyWith(confirmWithBiometrics: value));
+        if (authMode.secureWithBiometrics == value) return false;
+        await setAuthMode(authMode.copyWith(secureWithBiometrics: value));
     }
 
     return true;

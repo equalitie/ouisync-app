@@ -453,9 +453,10 @@ class _MainPageState extends State<MainPage>
         // This is a general purpose error state.
         // errorDescription is required, but nullable.
         return ErrorState(
-            errorMessage: currentRepo.error,
-            errorDescription: currentRepo.errorDescription,
-            onReload: null);
+          errorMessage: currentRepo.error,
+          errorDescription: currentRepo.errorDescription,
+          onReload: () => repos.setCurrent(null),
+        );
       }
 
       if (currentRepo == null) {

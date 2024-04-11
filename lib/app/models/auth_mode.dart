@@ -1,10 +1,12 @@
 import '../utils/master_key.dart';
 import 'local_secret.dart';
 
-const _encryptedPasswordKey = 'encryptedPassword';
-const _encryptedKeyKey = 'encryptedKey';
-const _keyProvenanceKey = 'keyProvenance';
-const _confirmWithBiometricsKey = 'confirmWithBiometrics';
+const _keys = (
+  encryptedPassword: 'encryptedPassword',
+  encryptedKey: 'encryptedKey',
+  keyOrigin: 'keyOrigin',
+  secureWithBiometrics: 'secureWithBiometrics',
+);
 
 sealed class AuthMode {
   Object? toJson();
@@ -35,20 +37,20 @@ class AuthModeBlindOrManual extends AuthMode {
 // reset existing repos that use this legacy auth mode to use secret keys?
 class AuthModePasswordStoredOnDevice extends AuthMode {
   final String encryptedPassword;
-  final bool confirmWithBiometrics;
+  final bool secureWithBiometrics;
 
   AuthModePasswordStoredOnDevice(
     this.encryptedPassword,
-    this.confirmWithBiometrics,
+    this.secureWithBiometrics,
   );
 
   AuthModePasswordStoredOnDevice copyWith({
     String? encryptedPassword,
-    bool? confirmWithBiometrics,
+    bool? secureWithBiometrics,
   }) =>
       AuthModePasswordStoredOnDevice(
         encryptedPassword ?? this.encryptedPassword,
-        confirmWithBiometrics ?? this.confirmWithBiometrics,
+        secureWithBiometrics ?? this.secureWithBiometrics,
       );
 
   // May throw.
@@ -60,8 +62,8 @@ class AuthModePasswordStoredOnDevice extends AuthMode {
 
   @override
   Object? toJson() => {
-        _encryptedPasswordKey: encryptedPassword,
-        _confirmWithBiometricsKey: confirmWithBiometrics,
+        _keys.encryptedPassword: encryptedPassword,
+        _keys.secureWithBiometrics: secureWithBiometrics,
       };
 
   static AuthMode? fromJson(Object? data) {
@@ -69,55 +71,54 @@ class AuthModePasswordStoredOnDevice extends AuthMode {
       return null;
     }
 
-    final encryptedPassword = data[_encryptedPasswordKey];
+    final encryptedPassword = data[_keys.encryptedPassword];
     if (encryptedPassword == null) return null;
 
-    final confirmWithBiometrics = data[_confirmWithBiometricsKey];
-    if (confirmWithBiometrics == null) return null;
+    final secureWithBiometrics = data[_keys.secureWithBiometrics];
+    if (secureWithBiometrics == null) return null;
 
     return AuthModePasswordStoredOnDevice(
       encryptedPassword,
-      confirmWithBiometrics,
+      secureWithBiometrics,
     );
   }
 }
 
 class AuthModeKeyStoredOnDevice extends AuthMode {
   final String encryptedKey;
-  final bool confirmWithBiometrics;
-  final SecretKeyProvenance keyProvenance;
+  final bool secureWithBiometrics;
+  final SecretKeyOrigin keyOrigin;
 
   AuthModeKeyStoredOnDevice({
     required this.encryptedKey,
-    required this.keyProvenance,
-    required this.confirmWithBiometrics,
+    required this.keyOrigin,
+    required this.secureWithBiometrics,
   });
 
   static Future<AuthModeKeyStoredOnDevice> encrypt(
     MasterKey masterKey,
     LocalSecretKey plainKey, {
-    required SecretKeyProvenance keyProvenance,
-    required bool confirmWithBiometrics,
+    required SecretKeyOrigin keyOrigin,
+    required bool secureWithBiometrics,
   }) async {
     final encryptedKey = await masterKey.encryptBytes(plainKey.bytes);
 
     return AuthModeKeyStoredOnDevice(
       encryptedKey: encryptedKey,
-      keyProvenance: keyProvenance,
-      confirmWithBiometrics: confirmWithBiometrics,
+      keyOrigin: keyOrigin,
+      secureWithBiometrics: secureWithBiometrics,
     );
   }
 
   AuthModeKeyStoredOnDevice copyWith({
     String? encryptedKey,
-    SecretKeyProvenance? keyProvenance,
-    bool? confirmWithBiometrics,
+    SecretKeyOrigin? keyOrigin,
+    bool? secureWithBiometrics,
   }) =>
       AuthModeKeyStoredOnDevice(
         encryptedKey: encryptedKey ?? this.encryptedKey,
-        keyProvenance: keyProvenance ?? this.keyProvenance,
-        confirmWithBiometrics:
-            confirmWithBiometrics ?? this.confirmWithBiometrics,
+        keyOrigin: keyOrigin ?? this.keyOrigin,
+        secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
       );
 
   // May throw.
@@ -129,9 +130,9 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
 
   @override
   Object? toJson() => {
-        _encryptedKeyKey: encryptedKey,
-        _keyProvenanceKey: keyProvenance.toJson(),
-        _confirmWithBiometricsKey: confirmWithBiometrics,
+        _keys.encryptedKey: encryptedKey,
+        _keys.keyOrigin: keyOrigin.toJson(),
+        _keys.secureWithBiometrics: secureWithBiometrics,
       };
 
   static AuthMode? fromJson(Object? data) {
@@ -139,34 +140,77 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
       return null;
     }
 
-    final encryptedKey = data[_encryptedKeyKey];
+    final encryptedKey = data[_keys.encryptedKey];
     if (encryptedKey == null) return null;
 
-    final keyProvenance = data[_keyProvenanceKey];
-    if (keyProvenance == null) return null;
+    final keyOrigin = data[_keys.keyOrigin];
+    if (keyOrigin == null) return null;
 
-    final confirmWithBiometrics = data[_confirmWithBiometricsKey];
-    if (confirmWithBiometrics == null) return null;
+    final secureWithBiometrics = data[_keys.secureWithBiometrics];
+    if (secureWithBiometrics == null) return null;
 
     return AuthModeKeyStoredOnDevice(
       encryptedKey: encryptedKey,
-      keyProvenance: keyProvenance,
-      confirmWithBiometrics: confirmWithBiometrics,
+      keyOrigin: keyOrigin,
+      secureWithBiometrics: secureWithBiometrics,
     );
   }
 }
 
-enum SecretKeyProvenance {
+/// How is the local secret key obtained
+enum SecretKeyOrigin {
+  /// The key is derived from a password provided by the user.
   manual,
+
+  /// The key is randomly generated.
   random,
   ;
 
   Object toJson() => name;
 
-  static SecretKeyProvenance? fromJson(Object? data) => switch (data) {
-        "manual" => manual,
-        "random" => random,
-        _ => null,
+  static SecretKeyOrigin? fromJson(Object? data) {
+    if (data == manual.name) {
+      return manual;
+    }
+
+    if (data == random.name) {
+      return random;
+    }
+
+    return null;
+  }
+}
+
+/// How is the local secret key obtained and stored
+enum LocalSecretMode {
+  /// Derived from a user provided password, not stored in the secure storage
+  manual,
+
+  /// Derived from a user provided password, stored in the secure storage
+  manualStored,
+
+  /// Derived from a user provided password, stored in the secure storage and requires biometric
+  /// check to retrieve
+  manualSecuredWithBiometrics,
+
+  /// Randomly generated, stored in the secure storage
+  randomStored,
+
+  /// Randomly generated, stored in the secure storage and requires biometric check to retrieve
+  randomSecuredWithBiometrics,
+  ;
+
+  SecretKeyOrigin get origin => switch (this) {
+        manual ||
+        manualStored ||
+        manualSecuredWithBiometrics =>
+          SecretKeyOrigin.manual,
+        randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
+      };
+
+  bool get isSecuredWithBiometrics => switch (this) {
+        manualSecuredWithBiometrics || randomSecuredWithBiometrics => true,
+        manual || manualStored || randomStored => false,
       };
 }
 

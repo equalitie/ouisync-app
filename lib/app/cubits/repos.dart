@@ -162,8 +162,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final authMode = repo.cubit.state.authMode;
 
       final unlock = switch (authMode) {
-        AuthModeKeyStoredOnDevice(confirmWithBiometrics: false) ||
-        AuthModePasswordStoredOnDevice(confirmWithBiometrics: false) =>
+        AuthModeKeyStoredOnDevice(secureWithBiometrics: false) ||
+        AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
           true,
         AuthModeKeyStoredOnDevice() ||
         AuthModePasswordStoredOnDevice() ||
@@ -314,7 +314,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoLocation location,
     SetLocalSecret secret, {
     oui.ShareToken? token,
-    required PasswordMode passwordMode,
+    required LocalSecretMode localSecretMode,
     bool useCacheServers = false,
     bool setCurrent = false,
   }) async {
@@ -335,7 +335,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       location,
       localKey,
       token: token,
-      passwordMode: passwordMode,
+      localSecretMode: localSecretMode,
       useCacheServers: useCacheServers,
     );
 
@@ -510,7 +510,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoLocation location,
     LocalSecretKeyAndSalt secret, {
     oui.ShareToken? token,
-    required PasswordMode passwordMode,
+    required LocalSecretMode localSecretMode,
     bool useCacheServers = false,
   }) async {
     final store = location.path;
@@ -577,19 +577,33 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         location: location,
       );
 
-      final authMode = switch (passwordMode) {
-        PasswordMode.manual => AuthModeBlindOrManual(),
-        PasswordMode.bio => await AuthModeKeyStoredOnDevice.encrypt(
+      final authMode = switch (localSecretMode) {
+        LocalSecretMode.manual => AuthModeBlindOrManual(),
+        LocalSecretMode.manualStored => await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
             secret.key,
-            keyProvenance: SecretKeyProvenance.random,
-            confirmWithBiometrics: true,
+            keyOrigin: SecretKeyOrigin.manual,
+            secureWithBiometrics: false,
           ),
-        PasswordMode.none => await AuthModeKeyStoredOnDevice.encrypt(
+        LocalSecretMode.manualSecuredWithBiometrics =>
+          await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
             secret.key,
-            keyProvenance: SecretKeyProvenance.random,
-            confirmWithBiometrics: false,
+            keyOrigin: SecretKeyOrigin.manual,
+            secureWithBiometrics: true,
+          ),
+        LocalSecretMode.randomStored => await AuthModeKeyStoredOnDevice.encrypt(
+            _settings.masterKey,
+            secret.key,
+            keyOrigin: SecretKeyOrigin.random,
+            secureWithBiometrics: false,
+          ),
+        LocalSecretMode.randomSecuredWithBiometrics =>
+          await AuthModeKeyStoredOnDevice.encrypt(
+            _settings.masterKey,
+            secret.key,
+            keyOrigin: SecretKeyOrigin.random,
+            secureWithBiometrics: true,
           ),
       };
 

@@ -147,8 +147,8 @@ class UnlockRepository extends StatelessWidget with AppLogger {
             final authMode = await AuthModeKeyStoredOnDevice.encrypt(
               masterKey,
               key,
-              keyProvenance: SecretKeyProvenance.manual,
-              confirmWithBiometrics: _useBiometrics.value,
+              keyOrigin: SecretKeyOrigin.manual,
+              secureWithBiometrics: _useBiometrics.value,
             );
 
             await repoCubit.setAuthMode(authMode);

@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../utils/utils.dart';
@@ -11,8 +12,7 @@ class CreateRepositoryState extends Equatable {
   final bool isBiometricsAvailable;
   final ShareToken? shareToken;
   final AccessMode accessMode;
-  final bool secureWithBiometrics;
-  final bool addPassword;
+  final LocalSecretMode localSecretMode;
 
   final String suggestedName;
 
@@ -29,8 +29,7 @@ class CreateRepositoryState extends Equatable {
     required this.isBiometricsAvailable,
     required this.shareToken,
     required this.accessMode,
-    required this.secureWithBiometrics,
-    required this.addPassword,
+    required this.localSecretMode,
     required this.suggestedName,
     required this.obscurePassword,
     required this.obscureRetypePassword,
@@ -44,8 +43,8 @@ class CreateRepositoryState extends Equatable {
     bool? isBiometricsAvailable,
     ShareToken? shareToken,
     AccessMode? accessMode,
+    LocalSecretMode? localSecretMode,
     bool? secureWithBiometrics,
-    bool? addPassword,
     String? suggestedName,
     bool? obscurePassword,
     bool? obscureRetypePassword,
@@ -60,8 +59,7 @@ class CreateRepositoryState extends Equatable {
             isBiometricsAvailable ?? this.isBiometricsAvailable,
         shareToken: shareToken ?? this.shareToken,
         accessMode: accessMode ?? this.accessMode,
-        secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
-        addPassword: addPassword ?? this.addPassword,
+        localSecretMode: localSecretMode ?? this.localSecretMode,
         suggestedName: suggestedName ?? this.suggestedName,
         obscurePassword: obscurePassword ?? this.obscurePassword,
         obscureRetypePassword:
@@ -80,8 +78,7 @@ class CreateRepositoryState extends Equatable {
         isBiometricsAvailable,
         shareToken,
         accessMode,
-        secureWithBiometrics,
-        addPassword,
+        localSecretMode,
         suggestedName,
         obscurePassword,
         obscureRetypePassword,
@@ -118,8 +115,7 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
       isBiometricsAvailable: isBiometricsAvailable,
       shareToken: shareToken,
       accessMode: accessMode,
-      secureWithBiometrics: false,
-      addPassword: false,
+      localSecretMode: LocalSecretMode.randomStored,
       suggestedName: suggestedName ?? '',
       obscurePassword: true,
       obscureRetypePassword: true,
@@ -132,7 +128,8 @@ class CreateRepositoryCubit extends Cubit<CreateRepositoryState>
     return CreateRepositoryCubit._(reposCubit, initialState);
   }
 
-  void addPassword(bool add) => emit(state.copyWith(addPassword: add));
+  void setLocalSecretMode(LocalSecretMode value) =>
+      emit(state.copyWith(localSecretMode: value));
 
   void secureWithBiometrics(bool useBiometrics) =>
       emit(state.copyWith(secureWithBiometrics: useBiometrics));
