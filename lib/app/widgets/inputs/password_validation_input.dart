@@ -15,9 +15,6 @@ class PasswordValidation extends StatefulWidget {
 
 class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
     with AppLogger {
-  final _passwordFocus = FocusNode();
-  final _retypePasswordFocus = FocusNode();
-
   bool _obscurePassword = true;
   bool _obscureRetypePassword = true;
 
@@ -30,57 +27,76 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Column(children: [
-      Row(children: [
-        Expanded(
-            child: Fields.formTextField(
-                context: context,
-                obscureText: _obscurePassword,
-                label: S.current.labelPassword,
-                suffixIcon: _passwordActions(),
-                hint: S.current.messageRepositoryPassword,
-                onSaved: (_) {},
-                onChanged: (value) => _passwordChanged(value, _retypedPassword),
-                validator: validateNoEmptyMaybeRegExpr(
-                    emptyError:
-                        S.current.messageErrorRepositoryPasswordValidation),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                focusNode: _passwordFocus))
-      ]),
-      Dimensions.spacingVertical,
-      Row(children: [
-        Expanded(
-            child: Fields.formTextField(
-                context: context,
-                obscureText: _obscureRetypePassword,
-                label: S.current.labelRetypePassword,
-                suffixIcon: _retypePasswordActions(),
-                hint: S.current.messageRepositoryPassword,
-                onSaved: (_) {},
-                onChanged: (value) => _passwordChanged(_password, value),
-                validator: (retypedPassword) => retypedPasswordValidator(
-                      _password,
-                      retypedPassword,
-                    ),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                focusNode: _retypePasswordFocus))
-      ]),
-      Dimensions.spacingVertical,
-      Row(children: [
-        Text('${S.current.messagePasswordStrength}:',
-            style: context.theme.appTextStyle.bodySmall
-                .copyWith(color: Colors.black54)),
-        Dimensions.spacingHorizontalHalf,
-        Text(_passwordStrength ?? '',
-            style: context.theme.appTextStyle.bodySmall
-                .copyWith(color: _passwordStrengthColorValue))
-      ]),
-      Dimensions.spacingVertical,
-      FlutterPasswordStrength(
-          password: _password,
-          strengthCallback: _updatePasswordStrengthMessage),
-      Dimensions.spacingVerticalDouble,
-    ]));
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Fields.formTextField(
+                  context: context,
+                  obscureText: _obscurePassword,
+                  labelText: S.current.labelPassword,
+                  hintText: S.current.messageRepositoryPassword,
+                  suffixIcon: _passwordActions(),
+                  onSaved: (_) {},
+                  onChanged: (value) =>
+                      _passwordChanged(value, _retypedPassword),
+                  validator: validateNoEmptyMaybeRegExpr(
+                      emptyError:
+                          S.current.messageErrorRepositoryPasswordValidation),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  textInputAction: TextInputAction.next,
+                ),
+              )
+            ],
+          ),
+          Dimensions.spacingVertical,
+          Row(
+            children: [
+              Expanded(
+                child: Fields.formTextField(
+                  context: context,
+                  obscureText: _obscureRetypePassword,
+                  labelText: S.current.labelRetypePassword,
+                  hintText: S.current.messageRepositoryPassword,
+                  suffixIcon: _retypePasswordActions(),
+                  onSaved: (_) {},
+                  onChanged: (value) => _passwordChanged(_password, value),
+                  validator: (retypedPassword) => retypedPasswordValidator(
+                    _password,
+                    retypedPassword,
+                  ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  textInputAction: TextInputAction.next,
+                ),
+              ),
+            ],
+          ),
+          Dimensions.spacingVertical,
+          Row(
+            children: [
+              Text(
+                '${S.current.messagePasswordStrength}:',
+                style: context.theme.appTextStyle.bodySmall
+                    .copyWith(color: Colors.black54),
+              ),
+              Dimensions.spacingHorizontalHalf,
+              Text(
+                _passwordStrength ?? '',
+                style: context.theme.appTextStyle.bodySmall
+                    .copyWith(color: _passwordStrengthColorValue),
+              )
+            ],
+          ),
+          Dimensions.spacingVertical,
+          FlutterPasswordStrength(
+            password: _password,
+            strengthCallback: _updatePasswordStrengthMessage,
+          ),
+          Dimensions.spacingVerticalDouble,
+        ],
+      ),
+    );
   }
 
   void _updatePasswordStrengthMessage(double strength) {
@@ -162,9 +178,9 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
       ]);
 
   String? retypedPasswordValidator(String? password, String? retypedPassword) {
-    if (password == null ||
-        retypedPassword == null ||
-        password != retypedPassword) {
+    // We don't want this validation to trigger when both fields are null/empty.
+
+    if ((password ?? '') != (retypedPassword ?? '')) {
       return S.current.messageErrorRetypePassword;
     }
 
@@ -182,13 +198,5 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
       _password = password;
       _retypedPassword = retypedPassword;
     });
-  }
-
-  @override
-  void dispose() {
-    _passwordFocus.dispose();
-    _retypePasswordFocus.dispose();
-
-    super.dispose();
   }
 }

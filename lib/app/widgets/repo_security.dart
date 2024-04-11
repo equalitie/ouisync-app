@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
+import '../models/local_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/fields.dart';
 import '../utils/log.dart';
@@ -22,10 +23,11 @@ class RepoSecurity extends StatefulWidget {
   /// Function called when the local secret mode and/or the password change.
   /// With manual origin password is null means the password is invalid. With random origin
   /// password is always null and should be ignored.
-  final void Function(LocalSecretMode localSecretMode, String? password)
+  final void Function(LocalSecretMode localSecretMode, LocalPassword? password)
       onChanged;
 
   final String passwordLabel;
+
   final bool isBiometricsAvailable;
 
   @override
@@ -36,7 +38,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
   SecretKeyOrigin origin = SecretKeyOrigin.random;
   bool store = false;
   bool secureWithBiometrics = false;
-  String? password;
+  LocalPassword? password;
 
   @override
   void initState() {
@@ -152,7 +154,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
 
   void _onPasswordChanged(String? value) {
     setState(() {
-      password = value;
+      password = value != null ? LocalPassword(value) : null;
     });
 
     _emitOnChanged();

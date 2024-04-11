@@ -1030,8 +1030,7 @@ class _MainPageState extends State<MainPage>
                 body: ActionsDialog(
                   title: S.current.titleCreateRepository,
                   body: RepositoryCreation(
-                    context: context,
-                    cubit: _cubits.repositories,
+                    reposCubit: _cubits.repositories,
                   ),
                 ),
               );
@@ -1087,8 +1086,7 @@ class _MainPageState extends State<MainPage>
               body: ActionsDialog(
                 title: S.current.titleAddRepository,
                 body: RepositoryCreation(
-                  context: context,
-                  cubit: _cubits.repositories,
+                  reposCubit: _cubits.repositories,
                   initialTokenValue: initialTokenValue,
                 ),
               ),

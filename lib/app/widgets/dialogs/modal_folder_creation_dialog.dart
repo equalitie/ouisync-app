@@ -36,10 +36,10 @@ class FolderCreation extends HookWidget {
               Dimensions.spacingVerticalDouble,
               Fields.formTextField(
                   context: context,
-                  textEditingController: nameController,
+                  controller: nameController,
                   textInputAction: TextInputAction.done,
-                  label: S.current.labelName,
-                  hint: S.current.messageFolderName,
+                  labelText: S.current.labelName,
+                  hintText: S.current.messageFolderName,
                   onFieldSubmitted: (newFolderName) async {
                     final submitted = await submitField(parent, newFolderName);
                     if (submitted && PlatformValues.isDesktopDevice) {

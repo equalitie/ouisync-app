@@ -143,7 +143,7 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
     final encryptedKey = data[_keys.encryptedKey];
     if (encryptedKey == null) return null;
 
-    final keyOrigin = data[_keys.keyOrigin];
+    final keyOrigin = SecretKeyOrigin.fromJson(data[_keys.keyOrigin]);
     if (keyOrigin == null) return null;
 
     final secureWithBiometrics = data[_keys.secureWithBiometrics];
