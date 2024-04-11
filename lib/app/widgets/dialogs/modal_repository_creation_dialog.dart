@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:ouisync_app/app/widgets/repo_security.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
@@ -234,14 +235,26 @@ class RepositoryCreation extends HookWidget with AppLogger {
             ...repositoryName(state),
             if (state.accessMode == AccessMode.write)
               useCacheServersSwitch(state),
-            if (state.accessMode != AccessMode.blind) passwordInputs(state),
-            if (state.isBiometricsAvailable &&
-                state.localSecretMode.origin == SecretKeyOrigin.random &&
-                state.accessMode != AccessMode.blind)
-              useBiometricsSwitch(state),
-            Dimensions.spacingVertical,
-            if (state.accessMode != AccessMode.blind) addLocalPassword(state),
-            manualPasswordWarning(context, state),
+
+            RepoSecurity(
+              isBiometricsAvailable: state.isBiometricsAvailable,
+              passwordLabel: S.current.messageAddLocalPassword,
+              localSecretMode: state.localSecretMode,
+              onChanged: (newLocalSecretMode, newPassword) {
+                // TODO
+                loggy.debug(
+                    'newLocalSecretMode: $newLocalSecretMode, newPassword: $newPassword');
+              },
+            ),
+
+            //if (state.accessMode != AccessMode.blind) passwordInputs(state),
+            //if (state.isBiometricsAvailable &&
+            //    state.localSecretMode.origin == SecretKeyOrigin.random &&
+            //    state.accessMode != AccessMode.blind)
+            //  useBiometricsSwitch(state),
+            //Dimensions.spacingVertical,
+            //if (state.accessMode != AccessMode.blind) addLocalPassword(state),
+            //manualPasswordWarning(context, state),
             Fields.dialogActions(context, buttons: _actions(context, state))
           ]);
 

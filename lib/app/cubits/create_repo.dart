@@ -2,9 +2,9 @@ import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../models/auth_mode.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 

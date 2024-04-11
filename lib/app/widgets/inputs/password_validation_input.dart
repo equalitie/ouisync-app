@@ -44,7 +44,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                 validator: validateNoEmptyMaybeRegExpr(
                     emptyError:
                         S.current.messageErrorRepositoryPasswordValidation),
-                autovalidateMode: AutovalidateMode.disabled,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 focusNode: _passwordFocus))
       ]),
       Dimensions.spacingVertical,
@@ -62,7 +62,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                       _password,
                       retypedPassword,
                     ),
-                autovalidateMode: AutovalidateMode.disabled,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 focusNode: _retypePasswordFocus))
       ]),
       Dimensions.spacingVertical,
