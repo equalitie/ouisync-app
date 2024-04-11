@@ -60,8 +60,9 @@ class OuisyncConnection {
         self.libraryClient = libraryClient
     }
 
-    public func listRepositories() async throws -> Response {
-        return try await sendRequest(MessageRequest.listRepositories(generateMessageId()));
+    public func listRepositories() async throws -> [UInt64] {
+        let response = try await sendRequest(MessageRequest.listRepositories(generateMessageId()));
+        return response.value.arrayValue!.map({n in n.uint64Value! })
     }
 
     public func subscribeToRepositoryListChange() async throws -> NotificationStream {
@@ -147,7 +148,6 @@ extension FileProviderExtension: NSFileProviderServicing {
 
 extension FileProviderExtension {
     class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
-        var ouisyncConnection: OuisyncConnection?
         var nextMessageId: MessageId = 0
 
         var serviceName: NSFileProviderServiceName {
@@ -193,7 +193,10 @@ extension FileProviderExtension {
             }
 
             let ouisyncConnection = OuisyncConnection(client)
-            self.ouisyncConnection = ouisyncConnection
+
+            if let ext = self.ext {
+                ext.ouisyncConnection = ouisyncConnection
+            }
 
             connection.resume()
 
@@ -223,7 +226,11 @@ extension FileProviderExtension {
                 return
             }
 
-            guard let ouisyncConnection = self.ouisyncConnection else {
+            guard let ext = self.ext else {
+                return
+            }
+
+            guard let ouisyncConnection = ext.ouisyncConnection else {
                 return
             }
 
