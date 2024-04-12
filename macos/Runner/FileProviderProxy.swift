@@ -94,9 +94,7 @@ class FileProviderProxy {
         }
     }
 
-    func getDomain() -> NSFileProviderDomain {
-        return NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier(rawValue: "mydomain"), displayName: "mydisplayname")
-    }
+
 }
 
 // ---------------------------------------------------------------------------------------

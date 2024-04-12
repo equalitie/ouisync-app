@@ -7,8 +7,13 @@
 
 import FileProvider
 
+class State {
+    var items = Set<UInt64>()
+}
+
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     var ouisyncConnection: OuisyncConnection?
+    let state = State()
 
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
@@ -29,7 +34,7 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         
         // TODO: implement the actual lookup
 
-        completionHandler(FileProviderItem(identifier: identifier), nil)
+        completionHandler(FileProviderItem(Entry(identifier)!), nil)
         return Progress()
     }
     
@@ -62,6 +67,12 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
-        return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncConnection)
+        Self.log("enumerator(for: \(containerItemIdentifier), request: \(request)")
+        return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncConnection, self.state)
+    }
+
+    static func log(_ str: String) {
+        NSLog(">>>> FileProviderExtension: \(str)")
     }
 }
+

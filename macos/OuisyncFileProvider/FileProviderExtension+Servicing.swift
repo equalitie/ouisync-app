@@ -208,6 +208,8 @@ extension FileProviderExtension {
                         break
                     }
                     let _ = try await ouisyncConnection.listRepositories()
+
+                    await refreshFileProvider()
                 }
             }
 
@@ -235,6 +237,20 @@ extension FileProviderExtension {
             }
 
             ouisyncConnection.onReceiveDataFromOuisyncLib(message_data)
+        }
+    }
+
+    // This signals to the file provider to refresh
+    static func refreshFileProvider() async {
+        let managerDomain = getDomain()
+        guard let manager = NSFileProviderManager(for: managerDomain) else {
+            NSLog("❌ failed to create NSFileProviderManager for \(managerDomain)")
+            return
+        }
+        do {
+            try await manager.signalEnumerator(for: .workingSet)
+        } catch let error as NSError {
+            NSLog("❌ failed to signal working set for \(managerDomain): \(error)")
         }
     }
 }
