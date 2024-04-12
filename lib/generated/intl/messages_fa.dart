@@ -253,8 +253,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "زمانی استفاده خواهد شد که مشکلی بروز کند. سورپرایز شدن یا واکنش منفی به چیزی که طبق انتظار عمل نمی‌کند.\nدر گفتگوی مرتبط با خطاها استفاده می‌شود."),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "این گزینه در مخازنی که فقط قابل هستند، موجود نیست"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("اضافه‌کردن رمز عبور محلی"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "یک مخزن را با استفاده از پیوند (لینک) توکن وارد کنید"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -296,8 +294,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("قانون حفظ حریم خصوصی کانادا"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "تغییر پسوند یک فایل می تواند آن‌را غیرقابل استفاده کند"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("تغییر رمز عبور محلی"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "ممکن است شرایط استفاده (خدمات) خود را هر از چندگاهی به‌روز کنیم. بنابراین، به شما توصیه می‌شود برای اطلاع از هر‌گونه تغییر، این صفحه را به صورت دوره‌ای مرور کنید"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -387,16 +383,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "مطابق با اصول ما ساخته شده است.\n\nبا استفاده از آن، موافقت می‌کنید که از این اصول پیروی کنید و شرایط استفاده و سند حریم خصوصی ما را بپذیرید."),
         "messageError": MessageLookupByLibrary.simpleMessage("خطا!"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "اضافه‌کردن یک رمز عبور محلی ناموفق بود"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "اضافه‌کردن یک رمز عبور محلی ناموفق بود"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "خطایی در احراز‌هویت با استفاده از روش‌های بیومتریک وجود داشت. لطفا دوباره تلاش کنید"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "تغییر رمز عبور محلی ناموفق بود"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "در تغییر رمز عبور مشکلی وجود داشت. لطفا دوباره تلاش کنید"),
         "messageErrorCharactersNotAllowed":
@@ -426,11 +415,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("خطا در باز کردن مخزن"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword":
-            MessageLookupByLibrary.simpleMessage("حذف رمز عبور ناموفق بود"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "حذف رمز عبور از حافظه امن ناموفق بود"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "یک مخزن با این نام وجود دارد"),
         "messageErrorRepositoryPasswordValidation":
@@ -445,9 +429,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "لطفاً یک توکن معتبر وارد کنید."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("خطا: حالت کنترل‌نشده"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "به‌روزرسانی رمز عبور در حافظه امن ناموفق بود"),
         "messageEthernet":
             MessageLookupByLibrary.simpleMessage("شبکه محلی کابلی"),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
@@ -553,8 +534,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("شبکه در دسترس نیست"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("رمز عبور جدید"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "رمز عبور جدید در حافظه کوتاه‌مدت کپی شد"),
@@ -606,8 +585,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "امکان تغییر وجود ندارد، فقط دسترسی به محتوا مجاز است"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "به‌یاد داشته باشید که رمز عبور را به‌طور ایمن ذخیره کنید. اگر آن را فراموش کردید، راهی برای بازیابی آن وجود ندارد."),
-        "messageRemovaLocalPassword":
-            MessageLookupByLibrary.simpleMessage("حذف رمز عبور محلی"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("حذف اعتبارسنجی بیومتریکی"),
         "messageRemoveBiometrics":

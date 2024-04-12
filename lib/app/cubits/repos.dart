@@ -129,7 +129,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     // We must not set repositories for which the user provides the password
     // as "default" because they must be indistinguishable from blind
     // repositories.
-    if (entry?.cubit?.state.authMode.passwordMode != PasswordMode.manual) {
+    final setDefault = switch (entry?.cubit?.state.authMode) {
+      AuthModeKeyStoredOnDevice() || AuthModePasswordStoredOnDevice() => true,
+      AuthModeBlindOrManual() || null => false,
+    };
+
+    if (setDefault) {
       await _settings.setDefaultRepo(entry?.location);
     }
 
@@ -156,8 +161,17 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     if (repo is OpenRepoEntry) {
       final authMode = repo.cubit.state.authMode;
 
-      if (authMode.hasLocalSecret &&
-          !authMode.shouldCheckBiometricsBeforeUnlock) {
+      final unlock = switch (authMode) {
+        AuthModeKeyStoredOnDevice(secureWithBiometrics: false) ||
+        AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
+          true,
+        AuthModeKeyStoredOnDevice() ||
+        AuthModePasswordStoredOnDevice() ||
+        AuthModeBlindOrManual() =>
+          false,
+      };
+
+      if (unlock) {
         final secret = await repo.cubit.getLocalSecret(_settings.masterKey);
 
         if (secret != null) {
@@ -296,32 +310,26 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  Future<RepoEntry> createRepository(
-    RepoLocation location,
-    SetLocalSecret secret, {
+  Future<RepoEntry> createRepository({
+    required RepoLocation location,
+    required SetLocalSecret setLocalSecret,
+    required LocalSecretMode localSecretMode,
     oui.ShareToken? token,
-    required PasswordMode passwordMode,
     bool useCacheServers = false,
     bool setCurrent = false,
   }) async {
     await _put(LoadingRepoEntry(location), setCurrent: setCurrent);
 
-    LocalSecretKeyAndSalt localKey;
-
-    switch (secret) {
-      case LocalPassword():
-        final salt = PasswordSalt.random();
-        final key = await passwordHasher.hashPassword(secret, salt);
-        localKey = LocalSecretKeyAndSalt(key, salt);
-      case LocalSecretKeyAndSalt():
-        localKey = secret;
-    }
+    final localSecret = switch (setLocalSecret) {
+      LocalSecretKeyAndSalt() => setLocalSecret,
+      LocalPassword() => await passwordHasher.hashPassword(setLocalSecret),
+    };
 
     final repo = await _create(
-      location,
-      localKey,
+      location: location,
+      localSecret: localSecret,
+      localSecretMode: localSecretMode,
       token: token,
-      passwordMode: passwordMode,
       useCacheServers: useCacheServers,
     );
 
@@ -492,11 +500,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     );
   }
 
-  Future<RepoEntry> _create(
-    RepoLocation location,
-    LocalSecretKeyAndSalt secret, {
+  Future<RepoEntry> _create({
+    required RepoLocation location,
+    required LocalSecretKeyAndSalt localSecret,
+    required LocalSecretMode localSecretMode,
     oui.ShareToken? token,
-    required PasswordMode passwordMode,
     bool useCacheServers = false,
   }) async {
     final store = location.path;
@@ -510,8 +518,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         );
       }
 
-      LocalSecretKeyAndSalt readSecret;
-      LocalSecretKeyAndSalt writeSecret;
+      SetLocalSecret readSecret;
+      SetLocalSecret writeSecret;
 
       if (token != null) {
         switch (await token.mode) {
@@ -519,15 +527,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
             readSecret = LocalSecretKeyAndSalt.random();
             writeSecret = LocalSecretKeyAndSalt.random();
           case oui.AccessMode.read:
-            readSecret = secret;
+            readSecret = localSecret;
             writeSecret = LocalSecretKeyAndSalt.random();
           case oui.AccessMode.write:
             readSecret = LocalSecretKeyAndSalt.random();
-            writeSecret = secret;
+            writeSecret = localSecret;
         }
       } else {
         readSecret = LocalSecretKeyAndSalt.random();
-        writeSecret = secret;
+        writeSecret = localSecret;
       }
 
       // TODO: readSecret and writeSecret may be different, they can also
@@ -563,17 +571,33 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         location: location,
       );
 
-      final authMode = switch (passwordMode) {
-        PasswordMode.manual => AuthModeBlindOrManual(),
-        PasswordMode.bio => await AuthModeKeyStoredOnDevice.encrypt(
+      final authMode = switch (localSecretMode) {
+        LocalSecretMode.manual => AuthModeBlindOrManual(),
+        LocalSecretMode.manualStored => await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
-            secret.key,
-            confirmWithBiometrics: true,
+            localSecret.key,
+            keyOrigin: SecretKeyOrigin.manual,
+            secureWithBiometrics: false,
           ),
-        PasswordMode.none => await AuthModeKeyStoredOnDevice.encrypt(
+        LocalSecretMode.manualSecuredWithBiometrics =>
+          await AuthModeKeyStoredOnDevice.encrypt(
             _settings.masterKey,
-            secret.key,
-            confirmWithBiometrics: false,
+            localSecret.key,
+            keyOrigin: SecretKeyOrigin.manual,
+            secureWithBiometrics: true,
+          ),
+        LocalSecretMode.randomStored => await AuthModeKeyStoredOnDevice.encrypt(
+            _settings.masterKey,
+            localSecret.key,
+            keyOrigin: SecretKeyOrigin.random,
+            secureWithBiometrics: false,
+          ),
+        LocalSecretMode.randomSecuredWithBiometrics =>
+          await AuthModeKeyStoredOnDevice.encrypt(
+            _settings.masterKey,
+            localSecret.key,
+            keyOrigin: SecretKeyOrigin.random,
+            secureWithBiometrics: true,
           ),
       };
 

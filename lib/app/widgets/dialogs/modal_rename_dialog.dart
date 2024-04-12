@@ -66,10 +66,10 @@ class RenameEntry extends HookWidget with AppLogger {
             Dimensions.spacingVerticalDouble,
             Fields.formTextField(
                 context: context,
-                textEditingController: _newNameController,
+                controller: _newNameController,
                 textInputAction: TextInputAction.done,
-                label: S.current.labelName,
-                hint: hint,
+                labelText: S.current.labelName,
+                hintText: hint,
                 onFieldSubmitted: (newName) async {
                   final submitted = await _submitField(context, newName);
                   if (submitted && PlatformValues.isDesktopDevice) {

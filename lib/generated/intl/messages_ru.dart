@@ -264,8 +264,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Ой!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Эта опция недоступна в хранилищах только для чтения"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Добавить локальный пароль"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Импортировать хранилище используя ссылку-токен"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -308,8 +306,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Закон Канады о конфиденциальности"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Изменение расширения файла может помешать его дальнейшему использованию"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Изменить локальный пароль"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "Мы можем время от времени обновлять наши Условия. Таким образом, Вам рекомендуется периодически просматривать эту страницу на предмет любых изменений"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -398,16 +394,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "Это приложение разработано в соответствии с нашими ценностями.\n\nИспользуя Ouisync, вы соглашаетесь с этими приницами, и принимаете Условия Использования и Политику Конфиденциальности."),
         "messageError": MessageLookupByLibrary.simpleMessage("Ошибка !"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Ошибка добавления локального пароля"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "Ошибка добавления локального пароля"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "Произошла ошибка при авторизации по биометрии. Пожалуйста, попробуйте снова"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "Ошибка изменения локального пароля"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "Произошла ошибка при изменении пароля. Пожалуйста, попробуйте снова"),
         "messageErrorCharactersNotAllowed":
@@ -436,11 +425,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ошибка при открытии хранилища"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword":
-            MessageLookupByLibrary.simpleMessage("Ошибка удаления пароля"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Ошибка удаления пароля безопасного хранилища"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Хранилище с таким именем уже существует"),
         "messageErrorRepositoryPasswordValidation":
@@ -455,9 +439,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Введите верный токен."),
         "messageErrorUnhandledState": MessageLookupByLibrary.simpleMessage(
             "Ошибка: состояние не поддерживается"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Ошибка обновления пароля в безопасном хранилище"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Нажмите снова чтобы выйти."),
@@ -564,8 +545,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Сеть недоступна"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("Новый пароль"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "Новый пароль сохранен в буфер обмена"),
@@ -616,8 +595,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Изменения невозможны, только доступ к контенту"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Не забудьте надежно сохранить ваш пароль; если вы его забудете, восстановить его не удастся."),
-        "messageRemovaLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Удалить локальный пароль"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Удалить вход по биометрии"),
         "messageRemoveBiometrics":

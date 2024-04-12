@@ -266,8 +266,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Ак!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Не доступно для сховищ в режимі читання"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Додати локальний пароль"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Імпортувати репозиторій за допомогою токен-посилання"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -310,8 +308,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Закон Канади про конфіденційність"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Зміна розширення файлу може зробити його непридатним для використання"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Змінити локальний пароль"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "Ми можемо час від часу оновлювати наші Умови. Тому радимо вам періодично переглядати цю сторінку на предмет будь-яких змін"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -400,16 +396,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "створений відповідно до наших цінностей.\n\nВикористовуючи його, ви погоджуєтеся дотримуватися цих принципів і приймаєте наші Умови використання та Політику конфіденційності."),
         "messageError": MessageLookupByLibrary.simpleMessage("Помилка!"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Не вдалося додати локальний пароль"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "Не вдалося додати локальний пароль"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "Виникла помилка автентифікації за допомогою біометричних даних. Будь ласка, спробуйте ще раз"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "Не вдалося змінити локальний пароль"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "Виникла проблема зі зміною пароля. Будь ласка, спробуйте ще раз"),
         "messageErrorCharactersNotAllowed":
@@ -439,11 +428,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Помилка при відкритті сховища"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword":
-            MessageLookupByLibrary.simpleMessage("Не вдалося видалити пароль"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Не вдалося видалити пароль із захищеного сховища"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Репозиторій з такою назвою вже існує"),
         "messageErrorRepositoryPasswordValidation":
@@ -458,9 +442,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Будь ласка, введіть дійсний токен."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("Помилка: необроблений стан"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Не вдалося оновити пароль у захищеному сховищі"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Натисніть ще раз, щоб вийти."),
@@ -570,8 +551,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Мережа недоступна"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("Новий пароль"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "Новий пароль скопійовано до буфера обміну"),
@@ -623,8 +602,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не можна змінювати, тільки доступ до вмісту"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Не забувайте надійно зберігати пароль, адже якщо ви його забудете, відновити його буде неможливо."),
-        "messageRemovaLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Видалити локальний пароль"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(
                 "Прибрати біометричну перевірку"),

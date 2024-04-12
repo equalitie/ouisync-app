@@ -38,10 +38,10 @@ class RenameRepository extends HookWidget {
                     .copyWith(fontWeight: FontWeight.w400)),
             Fields.formTextField(
                 context: context,
-                textEditingController: newNameController,
+                controller: newNameController,
                 textInputAction: TextInputAction.done,
-                label: S.current.labelRenameRepository,
-                hint: S.current.messageRepositoryNewName,
+                labelText: S.current.labelRenameRepository,
+                hintText: S.current.messageRepositoryNewName,
                 onFieldSubmitted: (newName) {
                   final submitted = submitField(newName);
                   if (submitted && PlatformValues.isDesktopDevice) {

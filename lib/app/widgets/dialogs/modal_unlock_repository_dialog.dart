@@ -65,9 +65,10 @@ class UnlockRepository extends StatelessWidget with AppLogger {
                   Expanded(
                       child: Fields.formTextField(
                           context: context,
-                          textEditingController: _passwordController,
+                          controller: _passwordController,
                           obscureText: obscure,
-                          label: S.current.labelTypePassword,
+                          labelText: S.current.labelTypePassword,
+                          hintText: S.current.messageRepositoryPassword,
                           suffixIcon: Fields.actionIcon(
                               Icon(
                                   obscure
@@ -77,7 +78,6 @@ class UnlockRepository extends StatelessWidget with AppLogger {
                               color: Colors.black, onPressed: () {
                             _obscurePassword.value = !_obscurePassword.value;
                           }),
-                          hint: S.current.messageRepositoryPassword,
                           onSaved: (String? password) async {
                             await _unlockRepository(password);
                           },
@@ -143,11 +143,15 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         f: () async {
           try {
             final salt = (await repoCubit.getCurrentModePasswordSalt())!;
-            final key = await passwordHasher.hashPassword(password, salt);
+            final keyAndSalt = await passwordHasher.hashPassword(
+              password,
+              salt,
+            );
             final authMode = await AuthModeKeyStoredOnDevice.encrypt(
               masterKey,
-              key,
-              confirmWithBiometrics: _useBiometrics.value,
+              keyAndSalt.key,
+              keyOrigin: SecretKeyOrigin.manual,
+              secureWithBiometrics: _useBiometrics.value,
             );
 
             await repoCubit.setAuthMode(authMode);

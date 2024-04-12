@@ -453,9 +453,10 @@ class _MainPageState extends State<MainPage>
         // This is a general purpose error state.
         // errorDescription is required, but nullable.
         return ErrorState(
-            errorMessage: currentRepo.error,
-            errorDescription: currentRepo.errorDescription,
-            onReload: null);
+          errorMessage: currentRepo.error,
+          errorDescription: currentRepo.errorDescription,
+          onReload: () => repos.setCurrent(null),
+        );
       }
 
       if (currentRepo == null) {
@@ -1029,8 +1030,7 @@ class _MainPageState extends State<MainPage>
                 body: ActionsDialog(
                   title: S.current.titleCreateRepository,
                   body: RepositoryCreation(
-                    context: context,
-                    cubit: _cubits.repositories,
+                    reposCubit: _cubits.repositories,
                   ),
                 ),
               );
@@ -1086,8 +1086,7 @@ class _MainPageState extends State<MainPage>
               body: ActionsDialog(
                 title: S.current.titleAddRepository,
                 body: RepositoryCreation(
-                  context: context,
-                  cubit: _cubits.repositories,
+                  reposCubit: _cubits.repositories,
                   initialTokenValue: initialTokenValue,
                 ),
               ),

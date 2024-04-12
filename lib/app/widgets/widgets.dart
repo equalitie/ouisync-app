@@ -55,3 +55,4 @@ export 'settings/platform/platform_pex_switch.dart';
 export 'eq_terms_privacy.dart';
 export 'eq_values.dart';
 export 'log_view.dart';
+export 'repo_security.dart';
