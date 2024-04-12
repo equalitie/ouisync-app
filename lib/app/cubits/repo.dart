@@ -424,7 +424,27 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     return content;
   }
 
-  Future<bool> setSecret({
+  /// Returns which access mode does the given password provide.
+  Future<AccessMode> getPasswordAccessMode(String password) async {
+    final credentials = await _repo.credentials;
+
+    try {
+      await _repo.setAccessMode(
+        AccessMode.write,
+        secret: LocalPassword(password),
+      );
+      return await _repo.accessMode;
+    } finally {
+      await _repo.setCredentials(credentials);
+    }
+  }
+
+  Future<void> setAuthMode(AuthMode authMode) async {
+    await _repo.setAuthMode(authMode);
+    emit(state.copyWith(authMode: authMode));
+  }
+
+  Future<bool> setLocalSecret({
     required LocalSecret oldSecret,
     required SetLocalSecret newSecret,
   }) async {
@@ -451,7 +471,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
           );
           break;
         case AccessMode.blind:
-          loggy.warning('Incorrect local password');
+          loggy.warning('Incorrect local secret');
           return false;
       }
 
@@ -459,50 +479,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return true;
     } catch (e, st) {
       loggy.error(
-          'Password change for repository ${location.name} failed', e, st);
+          'Setting local secret for repository ${location.name} failed', e, st);
       return false;
     } finally {
       await _repo.setCredentials(credentials);
     }
-  }
-
-  /// Returns which access mode does the given password provide.
-  Future<AccessMode> getPasswordAccessMode(String password) async {
-    final credentials = await _repo.credentials;
-
-    try {
-      await _repo.setAccessMode(
-        AccessMode.write,
-        secret: LocalPassword(password),
-      );
-      return await _repo.accessMode;
-    } finally {
-      await _repo.setCredentials(credentials);
-    }
-  }
-
-  Future<void> setAuthMode(AuthMode authMode) async {
-    await _repo.setAuthMode(authMode);
-    emit(state.copyWith(authMode: authMode));
-  }
-
-  // Return true if changed.
-  Future<bool> setConfirmWithBiometrics(bool value) async {
-    final authMode = state.authMode;
-
-    switch (authMode) {
-      case AuthModeBlindOrManual():
-        return false;
-      case AuthModePasswordStoredOnDevice():
-        if (authMode.secureWithBiometrics == value) return false;
-        await setAuthMode(authMode.copyWith(secureWithBiometrics: value));
-
-      case AuthModeKeyStoredOnDevice():
-        if (authMode.secureWithBiometrics == value) return false;
-        await setAuthMode(authMode.copyWith(secureWithBiometrics: value));
-    }
-
-    return true;
   }
 
   /// May throw if the function failed to decrypt the stored key.

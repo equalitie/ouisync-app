@@ -7,8 +7,13 @@ class PasswordHasher {
 
   PasswordHasher(this._ouisyncSession);
 
-  Future<LocalSecretKey> hashPassword(
-      LocalPassword password, PasswordSalt salt) async {
-    return _ouisyncSession.deriveLocalSecretKey(password, salt);
+  Future<LocalSecretKeyAndSalt> hashPassword(
+    LocalPassword password, [
+    PasswordSalt? salt,
+  ]) async {
+    salt = salt ?? PasswordSalt.random();
+    final key = await _ouisyncSession.deriveLocalSecretKey(password, salt);
+
+    return LocalSecretKeyAndSalt(key, salt);
   }
 }

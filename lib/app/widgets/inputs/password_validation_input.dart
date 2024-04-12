@@ -5,9 +5,13 @@ import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class PasswordValidation extends StatefulWidget {
-  PasswordValidation({required this.onPasswordChange});
+  PasswordValidation({
+    required this.onChanged,
+    this.required = true,
+  });
 
-  final void Function(String?) onPasswordChange;
+  final void Function(String?) onChanged;
+  final bool required;
 
   @override
   State<PasswordValidation> createState() => _PasswordValidationState();
@@ -41,9 +45,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   onSaved: (_) {},
                   onChanged: (value) =>
                       _passwordChanged(value, _retypedPassword),
-                  validator: validateNoEmptyMaybeRegExpr(
-                      emptyError:
-                          S.current.messageErrorRepositoryPasswordValidation),
+                  validator: (password) => passwordValidator(password),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   textInputAction: TextInputAction.next,
                 ),
@@ -106,8 +108,6 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
       _passwordStrengthColorValue =
           strength > 0.0 ? _passwordStrengthColor(strength) : null;
     });
-
-    loggy.app('Strength: $_passwordStrength ($strength)');
   }
 
   String _passwordStrengthString(double strength) {
@@ -177,6 +177,14 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             color: Colors.black)
       ]);
 
+  String? passwordValidator(String? password) {
+    if (widget.required && (password == null || password.isEmpty)) {
+      return S.current.messageErrorRepositoryPasswordValidation;
+    }
+
+    return null;
+  }
+
   String? retypedPasswordValidator(String? password, String? retypedPassword) {
     // We don't want this validation to trigger when both fields are null/empty.
 
@@ -188,10 +196,11 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   }
 
   void _passwordChanged(String? password, String? retypedPassword) {
-    if (retypedPasswordValidator(password, retypedPassword) == null) {
-      widget.onPasswordChange(password);
+    if (passwordValidator(password) == null &&
+        retypedPasswordValidator(password, retypedPassword) == null) {
+      widget.onChanged(password);
     } else {
-      widget.onPasswordChange(null);
+      widget.onChanged(null);
     }
 
     setState(() {

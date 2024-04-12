@@ -1160,6 +1160,16 @@ class S {
     );
   }
 
+  /// `Remember password`
+  String get labelRememberPassword {
+    return Intl.message(
+      'Remember password',
+      name: 'labelRememberPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Repository is already imported`
   String get repositoryIsAlreadyImported {
     return Intl.message(
@@ -2750,101 +2760,31 @@ class S {
     );
   }
 
-  /// `Adding a local password failed`
-  String get messageErrorAddingSecureStorge {
+  /// `Updating security properties of the repository failed.`
+  String get messageUpdateLocalSecretFailed {
     return Intl.message(
-      'Adding a local password failed',
-      name: 'messageErrorAddingSecureStorge',
+      'Updating security properties of the repository failed.',
+      name: 'messageUpdateLocalSecretFailed',
       desc: '',
       args: [],
     );
   }
 
-  /// `Updating the password in the secure storage failed`
-  String get messageErrorUpdatingSecureStorage {
+  /// `Security properties of the repository have been updated.`
+  String get messageUpdateLocalSecretOk {
     return Intl.message(
-      'Updating the password in the secure storage failed',
-      name: 'messageErrorUpdatingSecureStorage',
+      'Security properties of the repository have been updated.',
+      name: 'messageUpdateLocalSecretOk',
       desc: '',
       args: [],
     );
   }
 
-  /// `Removing the password from the secure storage failed`
-  String get messageErrorRemovingSecureStorage {
+  /// `Use local password`
+  String get messageUseLocalPassword {
     return Intl.message(
-      'Removing the password from the secure storage failed',
-      name: 'messageErrorRemovingSecureStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Adding a local password failed`
-  String get messageErrorAddingLocalPassword {
-    return Intl.message(
-      'Adding a local password failed',
-      name: 'messageErrorAddingLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Changing local password failed`
-  String get messageErrorChangingLocalPassword {
-    return Intl.message(
-      'Changing local password failed',
-      name: 'messageErrorChangingLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Removing the password failed`
-  String get messageErrorRemovingPassword {
-    return Intl.message(
-      'Removing the password failed',
-      name: 'messageErrorRemovingPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New password`
-  String get messageNewPassword {
-    return Intl.message(
-      'New password',
-      name: 'messageNewPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add local password`
-  String get messageAddLocalPassword {
-    return Intl.message(
-      'Add local password',
-      name: 'messageAddLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Change local password`
-  String get messageChangeLocalPassword {
-    return Intl.message(
-      'Change local password',
-      name: 'messageChangeLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove local password`
-  String get messageRemovaLocalPassword {
-    return Intl.message(
-      'Remove local password',
-      name: 'messageRemovaLocalPassword',
+      'Use local password',
+      name: 'messageUseLocalPassword',
       desc: '',
       args: [],
     );
@@ -4540,26 +4480,6 @@ class S {
     );
   }
 
-  /// `Store secret on this device`
-  String get actionStoreSecretOnDevice {
-    return Intl.message(
-      'Store secret on this device',
-      name: 'actionStoreSecretOnDevice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use custom local password`
-  String get actionUseCustomLocalPassword {
-    return Intl.message(
-      'Use custom local password',
-      name: 'actionUseCustomLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `ACCEPT`
   String get actionAcceptCapital {
     return Intl.message(
@@ -4785,16 +4705,6 @@ class S {
     return Intl.message(
       'Update',
       name: 'actionUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reset`
-  String get actionResetSecret {
-    return Intl.message(
-      'Reset',
-      name: 'actionResetSecret',
       desc: '',
       args: [],
     );

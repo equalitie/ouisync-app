@@ -17,6 +17,34 @@ sealed class AuthMode {
       AuthModePasswordStoredOnDevice.fromJson(data) ??
       AuthModeKeyStoredOnDevice.fromJson(data) ??
       (throw AuthModeParseFailed);
+
+  LocalSecretMode get localSecretMode => switch (this) {
+        AuthModeBlindOrManual() => LocalSecretMode.manual,
+        AuthModeKeyStoredOnDevice(
+          keyOrigin: SecretKeyOrigin.random,
+          secureWithBiometrics: false
+        ) =>
+          LocalSecretMode.randomStored,
+        AuthModeKeyStoredOnDevice(
+          keyOrigin: SecretKeyOrigin.random,
+          secureWithBiometrics: true
+        ) =>
+          LocalSecretMode.randomSecuredWithBiometrics,
+        AuthModeKeyStoredOnDevice(
+          keyOrigin: SecretKeyOrigin.manual,
+          secureWithBiometrics: false
+        ) =>
+          LocalSecretMode.manualStored,
+        AuthModeKeyStoredOnDevice(
+          keyOrigin: SecretKeyOrigin.manual,
+          secureWithBiometrics: true
+        ) =>
+          LocalSecretMode.manualSecuredWithBiometrics,
+        AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
+          LocalSecretMode.manualStored,
+        AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
+          LocalSecretMode.manualSecuredWithBiometrics,
+      };
 }
 
 class AuthModeBlindOrManual extends AuthMode {
@@ -155,6 +183,10 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
       secureWithBiometrics: secureWithBiometrics,
     );
   }
+
+  @override
+  String toString() =>
+      '$runtimeType(keyOrigin: $keyOrigin, secureWithBiometrics: $secureWithBiometrics)';
 }
 
 /// How is the local secret key obtained
@@ -206,6 +238,15 @@ enum LocalSecretMode {
         manualSecuredWithBiometrics =>
           SecretKeyOrigin.manual,
         randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
+      };
+
+  bool get isStored => switch (this) {
+        manual => false,
+        manualStored ||
+        manualSecuredWithBiometrics ||
+        randomStored ||
+        randomSecuredWithBiometrics =>
+          true,
       };
 
   bool get isSecuredWithBiometrics => switch (this) {

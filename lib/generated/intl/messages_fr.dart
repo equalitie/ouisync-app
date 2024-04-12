@@ -227,8 +227,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Oups !"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Cette option n\'est pas disponible sur le dépôts en lecture seule"),
-        "messageAddLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Ajouter un mot de passe local"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Importer un dépôt en utilisant un lien de jeton"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -260,8 +258,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nous avons besoin de cette permission pour utiliser l\'appareil photo et lire le code QR"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Modifier l\'extension d\'un fichier peut le rendre inutilisable"),
-        "messageChangeLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Modifier le mot de passe local"),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
             "Voulez-vous vraiment supprimer ce fichier ?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
@@ -292,16 +288,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFolder":
             MessageLookupByLibrary.simpleMessage("Un dossier"),
         "messageError": MessageLookupByLibrary.simpleMessage("Erreur !"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "L\'ajout d\'un mot de passe local a échoué"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "L\'ajout d\'un mot de passe local a échoué"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "Une erreur s\'est produite lors de l\'authentification biométrique. Veuillez réessayer"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "La modification du mot de passe local a échoué"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "Une erreur s\'est produite lors de la modification du mot de passe. Veuillez réessayer"),
         "messageErrorCharactersNotAllowed":
@@ -330,11 +319,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Erreur lors de l\'ouverture du dépôt"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword": MessageLookupByLibrary.simpleMessage(
-            "La suppression du mot de passe a échoué"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "La suppression du mot de passe du stockage sécurisé a échoué"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Il y a déjà un dépôt avec ce nom"),
         "messageErrorRepositoryPasswordValidation":
@@ -350,8 +334,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Veuillez entrer un jeton valide."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("Erreur : État non géré"),
-        "messageErrorUpdatingSecureStorage": MessageLookupByLibrary.simpleMessage(
-            "La mise à jour du mot de passe dans le stockage local a échoué"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Appuyez à nouveau sur retour pour quitter."),
@@ -412,8 +394,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Réseau indisponible"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("Nouveau mot de passe"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "Nouveau mot de passe copié dans le presse-papiers"),
@@ -445,8 +425,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ne peut être modifié, il suffit d\'accéder au contenu"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "N\'oubliez pas de sauvegarder le mot de passe en toute sécurité ; si vous l\'oubliez, il n\'y a aucun moyen de le retrouver."),
-        "messageRemovaLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Supprimer le mot de passe local"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(
                 "Validation par biométrie supprimée"),

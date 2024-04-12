@@ -143,10 +143,13 @@ class UnlockRepository extends StatelessWidget with AppLogger {
         f: () async {
           try {
             final salt = (await repoCubit.getCurrentModePasswordSalt())!;
-            final key = await passwordHasher.hashPassword(password, salt);
+            final keyAndSalt = await passwordHasher.hashPassword(
+              password,
+              salt,
+            );
             final authMode = await AuthModeKeyStoredOnDevice.encrypt(
               masterKey,
-              key,
+              keyAndSalt.key,
               keyOrigin: SecretKeyOrigin.manual,
               secureWithBiometrics: _useBiometrics.value,
             );

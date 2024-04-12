@@ -137,7 +137,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             RepoSecurity(
               localSecretMode: localSecretMode,
               isBiometricsAvailable: isBiometricsAvailable,
-              passwordLabel: S.current.messageAddLocalPassword,
               onChanged: _onLocalSecretChanged,
             ),
             Fields.dialogActions(
@@ -221,11 +220,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   Widget _buildUseCacheServersSwitch(BuildContext context) =>
       SwitchListTile.adaptive(
         value: useCacheServers,
-        title: Text(
-          S.current.messageUseCacheServers,
-          textAlign: TextAlign.start,
-          style: context.theme.appTextStyle.bodyMedium,
-        ),
+        title: Text(S.current.messageUseCacheServers),
         onChanged: (value) => setState(() {
           useCacheServers = value;
         }),
@@ -249,12 +244,12 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       ];
 
   void _onLocalSecretChanged(
-    LocalSecretMode localSecretMode,
-    LocalPassword? localPassword,
+    LocalSecretMode newLocalSecretMode,
+    LocalPassword? newLocalPassword,
   ) {
     setState(() {
-      this.localSecretMode = localSecretMode;
-      this.localPassword = localPassword;
+      localSecretMode = newLocalSecretMode;
+      localPassword = newLocalPassword;
     });
   }
 
@@ -285,19 +280,19 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       return;
     }
 
-    final localSecret = (accessMode == AccessMode.blind ||
+    final setLocalSecret = (accessMode == AccessMode.blind ||
             localSecretMode.origin == SecretKeyOrigin.random)
         ? LocalSecretKeyAndSalt.random()
         : localPassword;
 
-    if (localSecret == null) {
+    if (setLocalSecret == null) {
       return;
     }
 
     final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
         f: widget.reposCubit.createRepository(
-          location,
-          localSecret,
+          location: location,
+          setLocalSecret: setLocalSecret,
           token: shareToken,
           localSecretMode: localSecretMode,
           useCacheServers: useCacheServers,

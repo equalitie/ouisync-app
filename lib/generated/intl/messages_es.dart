@@ -179,8 +179,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUndo": MessageLookupByLibrary.simpleMessage("Deshacer"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Abrir"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Actualizar"),
-        "actionUseCustomLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Utilizar contraseña local personalizada"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Sí"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Localizar"),
@@ -269,8 +267,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("¡Ay!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Esta opción no está disponible en repositorios de solo lectura"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Añadir una contraseña local"),
         "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
             "Importar repositorio desde sistema de archivos"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
@@ -315,8 +311,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ley de Protección de Datos de Canadá"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Cambiar la extensión del archivo puede hacerlo inutilizable"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Cambiar la contraseña local"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "Es posible que actualicemos nuestras Condiciones de vez en cuando. Por lo tanto, le recomendamos que revise periódicamente esta página para comprobar si se han producido cambios"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -409,16 +403,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "está construido en línea con nuestros valores.\n\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Error al añadir una contraseña local"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "Error al añadir una contraseña local"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "Se ha producido un error al autenticarse mediante datos biométricos. Por favor, inténtelo de nuevo"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "Error al cambiar la contraseña local"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "Ha habido un problema al cambiar la contraseña. Por favor, inténtelo de nuevo"),
         "messageErrorCharactersNotAllowed":
@@ -448,11 +435,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Error al abrir el repositorio"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword": MessageLookupByLibrary.simpleMessage(
-            "Error al eliminar la contraseña"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Error al eliminar la contraseña del almacenamiento seguro"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Ya existe un repositorio con este nombre"),
         "messageErrorRepositoryPasswordValidation":
@@ -467,9 +449,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Por favor ingrese un token válido."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("Error: estado no manejado"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Error al actualizar la contraseña en el almacenamiento seguro"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "Presione de nuevo el botón para ir atrás para salir de la aplicación."),
@@ -579,8 +558,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Red no disponible"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("Nueva contraseña"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "La nueva contraseña fue copiada en el portapapeles"),
@@ -635,8 +612,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "No puede ser modificado, sólo acceder sus contenidos"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Recuerda guardar la contraseña de forma segura; si la olvidas, no hay forma de recuperarla."),
-        "messageRemovaLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Eliminar la contraseña local"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(
                 "Remover validación biométrica"),

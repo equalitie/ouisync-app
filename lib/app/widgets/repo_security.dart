@@ -13,7 +13,6 @@ class RepoSecurity extends StatefulWidget {
     super.key,
     required this.localSecretMode,
     required this.onChanged,
-    this.passwordLabel = 'Use password',
     this.isBiometricsAvailable = false,
   });
 
@@ -25,8 +24,6 @@ class RepoSecurity extends StatefulWidget {
   /// password is always null and should be ignored.
   final void Function(LocalSecretMode localSecretMode, LocalPassword? password)
       onChanged;
-
-  final String passwordLabel;
 
   final bool isBiometricsAvailable;
 
@@ -63,6 +60,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
 
   @override
   Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildOriginSwitch(context),
           ..._buildPasswordFields(context),
@@ -74,22 +72,37 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
   Widget _buildOriginSwitch(BuildContext context) => _buildSwitch(
         context,
         value: origin == SecretKeyOrigin.manual,
-        title: widget.passwordLabel,
+        title: S.current.messageUseLocalPassword,
         onChanged: _onOriginChanged,
       );
 
   List<Widget> _buildPasswordFields(BuildContext context) => switch (origin) {
         SecretKeyOrigin.manual => [
-            PasswordValidation(onPasswordChange: _onPasswordChanged),
+            PasswordValidation(
+              onChanged: _onPasswordChanged,
+              required: _isPasswordRequired,
+            ),
             _buildStoreSwitch(context),
           ],
         SecretKeyOrigin.random => [],
       };
 
+  // If the secret is already stored and is not random then we can keep using it and only change
+  // the other properties. So in those cases putting in a new password is not required.
+  bool get _isPasswordRequired => switch (widget.localSecretMode) {
+        LocalSecretMode.manual ||
+        LocalSecretMode.randomStored ||
+        LocalSecretMode.randomSecuredWithBiometrics =>
+          true,
+        LocalSecretMode.manualStored ||
+        LocalSecretMode.manualSecuredWithBiometrics =>
+          false,
+      };
+
   Widget _buildStoreSwitch(BuildContext context) => _buildSwitch(
         context,
         value: store,
-        title: 'Remember password',
+        title: S.current.labelRememberPassword,
         onChanged: _onStoreChanged,
       );
 
@@ -122,11 +135,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
   }) =>
       SwitchListTile.adaptive(
         value: value,
-        title: Text(
-          title,
-          textAlign: TextAlign.start,
-          style: context.theme.appTextStyle.bodyMedium,
-        ),
+        title: Text(title),
         onChanged: onChanged,
         contentPadding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,

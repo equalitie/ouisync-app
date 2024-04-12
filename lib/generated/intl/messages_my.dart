@@ -190,7 +190,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(""),
         "messageAck": MessageLookupByLibrary.simpleMessage(""),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(""),
-        "messageAddLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(""),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(""),
         "messageAddingFileToLockedRepository":
@@ -213,7 +212,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageCamera": MessageLookupByLibrary.simpleMessage(""),
         "messageCameraPermission": MessageLookupByLibrary.simpleMessage(""),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(""),
-        "messageChangeLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(""),
         "messageConfirmFolderDeletion":
             MessageLookupByLibrary.simpleMessage(""),
@@ -233,13 +231,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage(""),
         "messageEntryTypeFolder": MessageLookupByLibrary.simpleMessage(""),
         "messageError": MessageLookupByLibrary.simpleMessage(""),
-        "messageErrorAddingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(""),
-        "messageErrorAddingSecureStorge":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageErrorAuthenticatingBiometrics":
-            MessageLookupByLibrary.simpleMessage(""),
-        "messageErrorChangingLocalPassword":
             MessageLookupByLibrary.simpleMessage(""),
         "messageErrorChangingPassword":
             MessageLookupByLibrary.simpleMessage(""),
@@ -260,10 +252,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(""),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword":
-            MessageLookupByLibrary.simpleMessage(""),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageErrorRepositoryNameExist":
             MessageLookupByLibrary.simpleMessage(""),
         "messageErrorRepositoryPasswordValidation":
@@ -273,8 +261,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorTokenInvalid": MessageLookupByLibrary.simpleMessage(""),
         "messageErrorTokenValidator": MessageLookupByLibrary.simpleMessage(""),
         "messageErrorUnhandledState": MessageLookupByLibrary.simpleMessage(""),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(""),
         "messageEthernet": MessageLookupByLibrary.simpleMessage(""),
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(""),
         "messageFile": MessageLookupByLibrary.simpleMessage(""),
@@ -314,7 +300,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNATType": MessageLookupByLibrary.simpleMessage(""),
         "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(""),
         "messageNewFileError": m16,
-        "messageNewPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(""),
         "messageNewVersionIsAvailable":
@@ -336,7 +321,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(""),
         "messageRememberSavePasswordAlert":
             MessageLookupByLibrary.simpleMessage(""),
-        "messageRemovaLocalPassword": MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(""),
         "messageRemoveBiometrics": MessageLookupByLibrary.simpleMessage(""),

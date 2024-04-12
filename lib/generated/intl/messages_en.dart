@@ -166,7 +166,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionRemoveRepo":
             MessageLookupByLibrary.simpleMessage("Remove repository"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
-        "actionResetSecret": MessageLookupByLibrary.simpleMessage("Reset"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Retry"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
         "actionSaveChanges":
@@ -176,13 +175,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
-        "actionStoreSecretOnDevice":
-            MessageLookupByLibrary.simpleMessage("Store secret on this device"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
-        "actionUseCustomLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Use custom local password"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Locate"),
@@ -228,6 +223,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6":
             MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("Remember password"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
         "labelRepositoryCurrentPassword":
@@ -267,8 +264,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "This option is not available on read-only repositories"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Add local password"),
         "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
             "Import repository from file system"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
@@ -316,8 +311,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Canada’s Privacy Act"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Changing the extension of a file can make it unusable"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Change local password"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "We may update our Terms from time to time. Thus, you are advised to review this page periodically for any changes"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -411,16 +404,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "is built in line with our values.\n\nBy using it you agree to abide by these principles, and accept our Terms of Use and Privacy Notice."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Adding a local password failed"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "Adding a local password failed"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "There was an error authenticathing using biometrics. Please try again"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "Changing local password failed"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "There was a problem changing the password. Please try again"),
         "messageErrorCharactersNotAllowed":
@@ -450,11 +436,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Error opening the repository"),
         "messageErrorOpeningRepoDescription": m9,
         "messageErrorPathNotEmpty": m10,
-        "messageErrorRemovingPassword": MessageLookupByLibrary.simpleMessage(
-            "Removing the password failed"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Removing the password from the secure storage failed"),
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "There is already a repository with this name"),
         "messageErrorRepositoryPasswordValidation":
@@ -469,9 +450,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a valid token."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("Error: unhandled state"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Updating the password in the secure storage failed"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
@@ -577,8 +555,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Network is unavailable"),
         "messageNewFileError": m16,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("New password"),
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "New password copied to the clipboard"),
@@ -632,8 +608,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cannot be modified, just access the contents"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Remember to securely save the password; if you forget it, there is no way to retrieve it."),
-        "messageRemovaLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Remove local password"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":
@@ -761,8 +735,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),
+        "messageUpdateLocalSecretFailed": MessageLookupByLibrary.simpleMessage(
+            "Updating security properties of the repository failed."),
+        "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
+            "Security properties of the repository have been updated."),
         "messageUseCacheServers":
             MessageLookupByLibrary.simpleMessage("Use cache servers"),
+        "messageUseLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Use local password"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("Validate local password"),
