@@ -62,7 +62,13 @@ class OuisyncConnection {
 
     public func listRepositories() async throws -> [UInt64] {
         let response = try await sendRequest(MessageRequest.listRepositories(generateMessageId()));
-        return response.value.arrayValue!.map({n in n.uint64Value! })
+        return response.toUInt64Array()!
+    }
+
+    public func getRepositoryName(_ handle: RepositoryHandle) async throws -> String {
+        let response = try await sendRequest(MessageRequest.getRepositoryName(generateMessageId(), handle));
+        let data = response.toData()!
+        return String(decoding: data, as: UTF8.self)
     }
 
     public func subscribeToRepositoryListChange() async throws -> NotificationStream {
@@ -207,7 +213,7 @@ extension FileProviderExtension {
                     if await repoListChanged.next() == nil {
                         break
                     }
-                    let _ = try await ouisyncConnection.listRepositories()
+                    let repos = try await ouisyncConnection.listRepositories()
 
                     await refreshFileProvider()
                 }
