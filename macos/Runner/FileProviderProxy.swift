@@ -32,12 +32,12 @@ class FileProviderProxy {
             let wrapFromRustTx = Wrap(fromRustTx)
 
             let callback: FFICallback = { context, dataPointer, size in
-                let fromRustTx: Wrap<Tx> = fromPointer(context!)
+                let fromRustTx: Wrap<Tx> = FFI.fromUnretainedPtr(ptr: context!)
                 let data = Array(UnsafeBufferPointer(start: dataPointer, count: Int(exactly: size)!))
                 fromRustTx.inner.yield(data)
             }
 
-            let session = try await ffi.waitForSession(toPointer(wrapFromRustTx), callback)
+            let session = try await ffi.waitForSession(FFI.toUnretainedPtr(obj: wrapFromRustTx), callback)
 
             let manager = NSFileProviderManager(for: domain)!
             let service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
@@ -90,7 +90,7 @@ class FileProviderProxy {
 
             await fromRustToServer();
 
-            ffi.releaseSession(session)
+            await ffi.closeSession(session)
         }
     }
 
@@ -115,40 +115,30 @@ class Channel {
 }
 
 func makeStream() -> (Rx, Tx) {
-    var continuation: AsyncStream<[UInt8]>.Continuation!
-    let stream = AsyncStream<[UInt8]>() { continuation = $0 }
+    var continuation: Rx.Continuation!
+    let stream = Rx() { continuation = $0 }
     return (stream, continuation!)
 }
 
 // ---------------------------------------------------------------------------------------
-// https://stackoverflow.com/questions/68972755/how-to-cast-back-correctly-a-pointer-swift-native
 
-func toPointer<T : AnyObject>(_ obj : T) -> UnsafeRawPointer {
-    return UnsafeRawPointer(Unmanaged.passUnretained(obj).toOpaque())
-}
-
-func fromPointer<T : AnyObject>(_ ptr : UnsafeRawPointer) -> T {
-    return unsafeBitCast(ptr, to: T.self)
-}
-
-// ---------------------------------------------------------------------------------------
-
-typealias FFICallback = @convention(c) (UnsafeRawPointer?, UnsafePointer<UInt8>, CUnsignedLongLong) -> Void;
+typealias FFIContext = UnsafeRawPointer
+typealias FFICallback = @convention(c) (FFIContext?, UnsafePointer<UInt8>, CUnsignedLongLong) -> Void;
 typealias FFISessionGrab = @convention(c) (UnsafeRawPointer?, FFICallback) -> SessionCreateResult;
-typealias FFISessionRelease = @convention(c) (SessionHandle) -> Void;
+typealias FFISessionClose = @convention(c) (SessionHandle, FFIContext?, FFICallback) -> Void;
 typealias FFISessionChannelSend = @convention(c) (SessionHandle, UnsafeRawPointer, UInt64) -> Void;
 
 class FFI {
     let handle: UnsafeMutableRawPointer
     let ffiSessionGrab: FFISessionGrab
     let ffiSessionChannelSend: FFISessionChannelSend
-    let ffiSessionRelease: FFISessionRelease
+    let ffiSessionClose: FFISessionClose
 
     init() {
         handle = dlopen("libouisync_ffi.dylib", RTLD_NOW)!
         ffiSessionGrab = unsafeBitCast(dlsym(handle, "session_grab"), to: FFISessionGrab.self)
         ffiSessionChannelSend = unsafeBitCast(dlsym(handle, "session_channel_send"), to: FFISessionChannelSend.self)
-        ffiSessionRelease = unsafeBitCast(dlsym(handle, "session_release"), to: FFISessionRelease.self)
+        ffiSessionClose = unsafeBitCast(dlsym(handle, "session_close"), to: FFISessionClose.self)
     }
 
     // Blocks until Dart creates a session, then returns it.
@@ -186,7 +176,43 @@ class FFI {
         })
     }
 
-    func releaseSession(_ session: SessionHandle) {
-        ffiSessionRelease(session)
+    func closeSession(_ session: SessionHandle) async {
+        typealias C = CheckedContinuation<Void, Never>
+
+        class Context {
+            let session: SessionHandle
+            let continuation: C
+            init(_ session: SessionHandle, _ continuation: C) {
+                self.session = session
+                self.continuation = continuation
+            }
+        }
+
+        await withCheckedContinuation(function: "FFI.closeSession", { continuation in
+            let context = Self.toRetainedPtr(obj: Context(session, continuation))
+            let callback: FFICallback = { context, dataPointer, size in
+                let context: Context = FFI.fromRetainedPtr(ptr: context!)
+                context.continuation.resume()
+            }
+            ffiSessionClose(session, context, callback)
+        })
+    }
+
+    // Retained pointers have their reference counter incremented by 1.
+    // https://stackoverflow.com/a/33310021/273348
+    static func toUnretainedPtr<T : AnyObject>(obj : T) -> UnsafeRawPointer {
+        return UnsafeRawPointer(Unmanaged.passUnretained(obj).toOpaque())
+    }
+
+    static func fromUnretainedPtr<T : AnyObject>(ptr : UnsafeRawPointer) -> T {
+        return Unmanaged<T>.fromOpaque(ptr).takeUnretainedValue()
+    }
+
+    static func toRetainedPtr<T : AnyObject>(obj : T) -> UnsafeRawPointer {
+        return UnsafeRawPointer(Unmanaged.passRetained(obj).toOpaque())
+    }
+
+    static func fromRetainedPtr<T : AnyObject>(ptr : UnsafeRawPointer) -> T {
+        return Unmanaged<T>.fromOpaque(ptr).takeRetainedValue()
     }
 }
