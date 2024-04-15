@@ -1580,13 +1580,13 @@ class S {
     );
   }
 
-  /// `Enter password to unlock`
-  String get messageUnlockRepository {
+  /// `Enter password to unlock "{name}"`
+  String messageUnlockRepository(Object name) {
     return Intl.message(
-      'Enter password to unlock',
+      'Enter password to unlock "$name"',
       name: 'messageUnlockRepository',
       desc: '',
-      args: [],
+      args: [name],
     );
   }
 
@@ -2565,26 +2565,6 @@ class S {
     return Intl.message(
       'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
       name: 'messageRememberSavePasswordAlert',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Biometric validation added for repository "{name}"`
-  String messageBiometricValidationAdded(Object name) {
-    return Intl.message(
-      'Biometric validation added for repository "$name"',
-      name: 'messageBiometricValidationAdded',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Biometric validation removed`
-  String get messageBiometricValidationRemoved {
-    return Intl.message(
-      'Biometric validation removed',
-      name: 'messageBiometricValidationRemoved',
       desc: '',
       args: [],
     );

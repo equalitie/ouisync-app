@@ -64,7 +64,7 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RepoSecurity(
-                    localSecretMode: oldLocalSecretMode,
+                    initialLocalSecretMode: oldLocalSecretMode,
                     isBiometricsAvailable: isBiometricsAvailable,
                     onChanged: _onLocalSecretChanged,
                   ),
