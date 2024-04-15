@@ -43,11 +43,10 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
          */
         if let connection = self.connection {
             Task {
-                let repos = try await connection.listRepositories();
-                self.state.items = Set(repos)
-                for repo in repos {
-                    observer.didEnumerate([FileProviderItem(Entry(repo))])
-                }
+                let repos = Set(try await connection.listRepositories());
+                self.state.items = repos
+                let items = await reposToItems(repos)
+                observer.didEnumerate(Array(items))
                 observer.finishEnumerating(upTo: nil)
             }
         } else {
@@ -81,20 +80,35 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             NSLog("********************** new \(new_repos)")
             NSLog("********************** deleted \(deleted)")
             if !deleted.isEmpty {
-                observer.didDeleteItems(withIdentifiers: deleted.map({FileProviderItem(Entry($0)).itemIdentifier}))
+                let deletedIdentifiers = reposToItemIdentifiers(deleted)
+                observer.didDeleteItems(withIdentifiers: Array(deletedIdentifiers))
             }
 
-            //let kept = new_repos.subtracting(deleted)
-
-            observer.didUpdate(new_repos.map {
-                FileProviderItem(Entry($0))
-            })
+            observer.didUpdate(Array(await reposToItems(new_repos)))
 
             self.state.items = new_repos
             NSLog("********************** new' \(new_repos)")
 
             observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
         }
+    }
+
+    func reposToItems(_ repos: Set<OuisyncRepository>) async -> Set<FileProviderItem> {
+        var items = Set<FileProviderItem>()
+        for repo in repos {
+            let item = (try? await FileProviderItem.fromOuisyncRepository(repo))!
+            items.insert(item)
+        }
+        return items
+    }
+
+    func reposToItemIdentifiers(_ repos: Set<OuisyncRepository>) -> Set<NSFileProviderItemIdentifier> {
+        var items = Set<NSFileProviderItemIdentifier>()
+        for repo in repos {
+            let id = ItemEnum.handle(repo.handle).identifier()
+            items.insert(id)
+        }
+        return items
     }
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {

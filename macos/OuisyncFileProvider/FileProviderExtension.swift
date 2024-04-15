@@ -9,7 +9,7 @@ import FileProvider
 import OuisyncLib
 
 class State {
-    var items = Set<UInt64>()
+    var items = Set<OuisyncRepository>()
 }
 
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
@@ -35,7 +35,10 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         
         // TODO: implement the actual lookup
 
-        completionHandler(FileProviderItem(identifier)!, nil)
+        Task {
+            let item = try await FileProviderItem.fromIdentifier(identifier, ouisyncSession)
+            completionHandler(item, nil)
+        }
         return Progress()
     }
     

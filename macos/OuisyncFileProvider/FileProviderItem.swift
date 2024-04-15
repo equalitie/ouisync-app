@@ -8,49 +8,20 @@
 import FileProvider
 import UniformTypeIdentifiers
 import MessagePack
-
-class Entry: Equatable {
-    let handle: UInt64
-
-    init(_ handle: UInt64) {
-        self.handle = handle
-    }
-
-    func encode() -> String {
-        return pack(MessagePackValue.uint(handle)).base64EncodedString()
-    }
-
-    static func decode(_ encoded: String) -> Entry? {
-        guard let data = Data(base64Encoded: encoded) else {
-            return nil
-        }
-        guard let (unpacked, _) = try? unpack(data) else {
-            return nil
-        }
-        guard let(handle) = unpacked.uint64Value else {
-            return nil
-        }
-        return Entry(handle)
-    }
-
-    static func == (lhs: Entry, rhs: Entry) -> Bool {
-        return
-            lhs.handle == rhs.handle
-    }
-}
+import OuisyncLib
 
 enum ItemEnum: Equatable {
     case root
     case trash
     case workingSet
-    case entry(Entry)
+    case handle(RepositoryHandle)
 
     func identifier() -> NSFileProviderItemIdentifier {
         switch self {
         case .root: return .rootContainer
         case .trash: return .trashContainer
         case .workingSet: return .workingSet
-        case .entry(let entry): return NSFileProviderItemIdentifier(entry.encode())
+        case .handle(let handle): return NSFileProviderItemIdentifier(String(handle))
         }
     }
 
@@ -59,38 +30,37 @@ enum ItemEnum: Equatable {
         case .root: return ".rootContainer"
         case .trash: return ".trashContainer"
         case .workingSet: return ".workingSet"
-        case .entry(let entry): return "entry-\(entry.handle)"
+        case .handle(let handle): return "handle-\(handle)"
         }
     }
 }
 
 class FileProviderItem: NSObject, NSFileProviderItem {
-
-    // TODO: implement an initializer to create an item from your extension's backing model
-    // TODO: implement the accessors to return the values from your extension's backing model
-    
     let item: ItemEnum
+    let name: String
 
-    init(_ entry: Entry) {
-        self.item = .entry(entry)
+    init(_ item: ItemEnum, _ name: String) {
+        self.item = item
+        self.name = name
     }
 
-    init?(_ identifier: NSFileProviderItemIdentifier) {
+    public static func fromOuisyncRepository(_ repo: OuisyncRepository) async throws -> FileProviderItem {
+        let name = try await repo.getName()
+        return FileProviderItem(.handle(repo.handle), name)
+    }
+
+    public static func fromIdentifier(_ identifier: NSFileProviderItemIdentifier, _ session: OuisyncSession?) async throws -> FileProviderItem {
         if identifier == .rootContainer {
-            item = .root
-            return
+            return FileProviderItem(.root, ".root")
         } else if identifier == .trashContainer {
-            item = .trash
-            return
+            return FileProviderItem(.trash, ".trash")
         } else if identifier == .workingSet {
-            item = .workingSet
-            return
+            return FileProviderItem(.workingSet, ".workingSet")
         } else {
-            guard let entry = Entry.decode(identifier.rawValue) else {
-                return nil
-            }
-            item = .entry(entry)
-            return
+            let handle = RepositoryHandle(identifier.rawValue)!
+            let repo = OuisyncRepository(handle, session!)
+            let name = try await repo.getName()
+            return FileProviderItem(.handle(handle), name)
         }
     }
 
@@ -111,15 +81,10 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
     
     var filename: String {
-        return item.toString()
+        return name
     }
     
     var contentType: UTType {
         return item == .root ? .folder : .plainText
-    }
-
-    // Temporary until naming is sorted
-    public static func handleToName(_ handle: UInt64) -> String {
-        return "ouisyncfile-\(handle)"
     }
 }
