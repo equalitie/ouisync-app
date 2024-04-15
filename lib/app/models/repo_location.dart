@@ -31,6 +31,9 @@ class RepoLocation extends Equatable implements Comparable<RepoLocation> {
 
   RepoLocation rename(String newName) => RepoLocation._(_dir, newName, _ext);
 
+  RepoLocation move(io.Directory newDir) =>
+      RepoLocation._(newDir.path, _name, _ext);
+
   @override
   List<Object> get props => [
         _name,

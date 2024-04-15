@@ -2,9 +2,10 @@ import 'dart:io' as io;
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:ouisync_app/app/utils/files.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
@@ -36,6 +37,8 @@ class SettingsRoot {
   static const _highestSeenProtocolNumberKey = 'highestSeenProtocolNumber';
   static const _defaultRepoKey = 'defaultRepo';
   static const _reposKey = 'repos';
+  static const _defaultRepositoriesDirVersionKey =
+      'defaultRepositoriesDirVersion';
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -49,6 +52,9 @@ class SettingsRoot {
   RepoLocation? defaultRepo;
   Map<DatabaseId, RepoLocation> repos = {};
 
+  // Whenever we change the default repos path, increment this value and implement a migration.
+  int defaultRepositoriesDirVersion = 0;
+
   SettingsRoot._();
 
   SettingsRoot({
@@ -59,6 +65,7 @@ class SettingsRoot {
     required this.highestSeenProtocolNumber,
     required this.defaultRepo,
     required this.repos,
+    required this.defaultRepositoriesDirVersion,
   });
 
   Map<String, dynamic> toJson() {
@@ -73,6 +80,7 @@ class SettingsRoot {
       _reposKey: <String, Object?>{
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
+      _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
     };
     return r;
   }
@@ -105,6 +113,8 @@ class SettingsRoot {
       highestSeenProtocolNumber: data[_highestSeenProtocolNumberKey],
       defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
       repos: repos,
+      defaultRepositoriesDirVersion:
+          data[_defaultRepositoriesDirVersionKey] ?? 0,
     );
   }
 }
@@ -134,12 +144,13 @@ class Settings with AppLogger {
     final root = SettingsRoot.fromJson(json);
 
     final settings = Settings._(root, prefs, masterKey);
-    await settings._migrate(session);
+    await settings._migrateValues(session);
+    await settings._migrateRepositoryPaths();
 
     return settings;
   }
 
-  Future<void> _migrate(Session session) async {
+  Future<void> _migrateValues(Session session) async {
     // Check if already fully migrated.
     if (_prefs.containsKey(settingsKey) && _prefs.getKeys().length == 1) {
       return;
@@ -236,6 +247,46 @@ class Settings with AppLogger {
       }
 
       await _prefs.remove(key);
+    }
+  }
+
+  Future<void> _migrateRepositoryPaths() async {
+    switch (_root.defaultRepositoriesDirVersion) {
+      case 0:
+        final oldDirs = [
+          if (io.Platform.isAndroid) await getExternalStorageDirectory(),
+          if (io.Platform.isAndroid) await getApplicationDocumentsDirectory(),
+          io.Directory(
+              join((await getApplicationDocumentsDirectory()).path, 'ouisync')),
+          io.Directory(
+              join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
+        ];
+
+        final newDir = await getDefaultRepositoriesDir();
+
+        for (final oldDir in oldDirs) {
+          // Move files
+          if (oldDir != null && await oldDir.exists()) {
+            await migrateFiles(oldDir, newDir);
+          }
+
+          // Update locations
+          _root.repos.updateAll(
+            (databaseId, location) => (location.dir.path == oldDir?.path)
+                ? location.move(newDir)
+                : location,
+          );
+        }
+
+        _root.defaultRepositoriesDirVersion = 1;
+
+        await _storeRoot();
+      case 1:
+        return;
+      default:
+        loggy.error(
+            'invalid defaultRepositoriesDirVersion: expected 0 or 1, was ${_root.defaultRepositoriesDirVersion}');
+        return;
     }
   }
 
@@ -337,40 +388,10 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-
-  Future<io.Directory> defaultRepoLocation() async {
-    // TODO
-    try {
-      // Docs says this throws on non Android systems.
-      // https://pub.dev/documentation/path_provider/latest/path_provider/getExternalStorageDirectory.html
-      //
-      // On Android this function will most likely return the user accessible
-      // directory on phone's internal memory (i.e. not the SDCard). The user
-      // will see it as "<DEVICE>/Phone/Android/data/org.equalitie.ouisync/files"
-      //
-      // Everything in this folder is deleted when the app is un/re-installed.
-      final dir = await path_provider.getExternalStorageDirectory();
-      if (dir != null) {
-        return dir;
-      }
-    } catch (_) {}
-
-    // This path is not accessible by the user using a file explorer and it
-    // also gets deleted when the app is un/re-installed.
-    final alternativeDir =
-        await path_provider.getApplicationDocumentsDirectory();
-
-    if (io.Platform.isAndroid) {
-      return alternativeDir;
-    }
-
-    final context = p.Context(style: p.Style.posix);
-
-    final nonAndroidAlternativePath =
-        context.join(alternativeDir.path, 'Ouisync');
-
-    return await io.Directory(nonAndroidAlternativePath).create();
-  }
+  Future<io.Directory> getDefaultRepositoriesDir() =>
+      getApplicationSupportDirectory().then(
+        (dir) => io.Directory(join(dir.path, Constants.folderRepositoriesName)),
+      );
 
   //------------------------------------------------------------------
 
