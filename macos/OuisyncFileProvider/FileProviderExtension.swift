@@ -6,13 +6,14 @@
 //
 
 import FileProvider
+import OuisyncLib
 
 class State {
     var items = Set<UInt64>()
 }
 
 class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
-    var ouisyncConnection: OuisyncConnection?
+    var ouisyncSession: OuisyncSession?
     let state = State()
 
     required init(domain: NSFileProviderDomain) {
@@ -68,7 +69,7 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     
     func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         Self.log("enumerator(for: \(containerItemIdentifier), request: \(request)")
-        return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncConnection, self.state)
+        return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncSession, self.state)
     }
 
     static func log(_ str: String) {

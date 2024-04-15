@@ -6,14 +6,15 @@
 //
 
 import FileProvider
+import OuisyncLib
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
-    private let connection: OuisyncConnection?
+    private let connection: OuisyncSession?
     private let enumeratedItemIdentifier: NSFileProviderItemIdentifier
     private let anchor = NSFileProviderSyncAnchor("an anchor".data(using: .utf8)!)
     private let state: State
 
-    init(enumeratedItemIdentifier: NSFileProviderItemIdentifier, _ connection: OuisyncConnection?, _ state: State) {
+    init(enumeratedItemIdentifier: NSFileProviderItemIdentifier, _ connection: OuisyncSession?, _ state: State) {
         Self.log("init")
         self.enumeratedItemIdentifier = enumeratedItemIdentifier
         self.connection = connection
