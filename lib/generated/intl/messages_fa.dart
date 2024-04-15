@@ -23,55 +23,55 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد: ${access}";
 
-  static String m1(name) => "احرازهویت بیومتریکی برای مخزن اضافه شد";
+  static String m2(name) => "${name} - دانلود لغو شد";
 
-  static String m3(name) => "${name} - دانلود لغو شد";
+  static String m3(name) => "${name} - ناموفق در دانلود";
 
-  static String m4(name) => "${name} - ناموفق در دانلود";
+  static String m4(entry) => "${entry} در حال حاضر موجود است.";
 
-  static String m5(entry) => "${entry} در حال حاضر موجود است.";
+  static String m5(path) => "پوشه فعلی موجود نیست، به بخش اصلی بروید: ${path}";
 
-  static String m6(path) => "پوشه فعلی موجود نیست، به بخش اصلی بروید: ${path}";
-
-  static String m8(dokanUrl) =>
+  static String m7(dokanUrl) =>
       "نصب دوکان (Dokan) پیدا نشد . لطفا آن را از این لینک نصب کنید. ${dokanUrl}";
 
-  static String m9(name) => "آماده‌سازی اولیه مخزن ${name} ناموفق بود";
+  static String m8(name) => "آماده‌سازی اولیه مخزن ${name} ناموفق بود";
 
-  static String m10(path) => "${path} خالی نیست";
+  static String m9(path) => "${path} خالی نیست";
 
-  static String m11(reason) => "نصب نشد: ${reason}";
+  static String m10(reason) => "نصب نشد: ${reason}";
 
-  static String m12(name) =>
+  static String m11(name) =>
       "${name} از قبل در این‌جا وجود دارد.\n\nچه‌کاری قصد دارید انجام دهید؟";
 
-  static String m13(name) => "پوشه با موفقیت حذف شد: ${name}";
+  static String m12(name) => "پوشه با موفقیت حذف شد: ${name}";
 
-  static String m14(number) =>
+  static String m13(number) =>
       "آیا می‌خواهید تمام مخازنی که باز هستند را قفل کنید؟\n\n(${number} باز)";
 
-  static String m15(path) => "از ${path}";
+  static String m14(path) => "از ${path}";
 
-  static String m16(name) => "خطا در ایجاد فایل ${name}";
+  static String m15(name) => "خطا در ایجاد فایل ${name}";
 
-  static String m17(name) => "خطا در بازکردن فایل ${name}";
+  static String m16(name) => "خطا در بازکردن فایل ${name}";
 
-  static String m18(path) => "فرآیند پیش‌نمایش فایل ${path} انجام نشد";
+  static String m17(path) => "فرآیند پیش‌نمایش فایل ${path} انجام نشد";
 
-  static String m19(name) => "ما نتوانستیم مخزن را حذف کنیم \"${name}\"";
+  static String m18(name) => "ما نتوانستیم مخزن را حذف کنیم \"${name}\"";
 
-  static String m20(name) =>
+  static String m19(name) =>
       "ما نتوانستیم مخزن را در مکانی که معمولا هست، پیدا کنیم \"${name}\"";
 
-  static String m21(access) => "اجازه «دسترسی» داده شد: ${access}";
+  static String m20(access) => "اجازه «دسترسی» داده شد: ${access}";
 
-  static String m22(name) =>
+  static String m21(name) =>
       "این مخزن از قبل در برنامه با این نام وجود دارد \"${name}\".";
 
-  static String m23(name) =>
+  static String m22(name) =>
       "پیشنهاد: ${name}\n(برای استفاده از این نام این‌جا ضربه بزنید)";
 
-  static String m25(access) => "به‌عنوان کپی ${access} باز شد";
+  static String m24(access) => "به‌عنوان کپی ${access} باز شد";
+
+  static String m25(name) => "رمز عبور را برای باز کردن قفل وارد کنید";
 
   static String m26(name) => "${name} نوشتن لغو شد";
 
@@ -276,9 +276,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageBiometricUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
                 "بازکردن قفل بیومتریک ناموفق بود"),
-        "messageBiometricValidationAdded": m1,
-        "messageBiometricValidationRemoved":
-            MessageLookupByLibrary.simpleMessage("اعتبارسنجی بیومتریکی حذف شد"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "همتای شما نمی‌تواند محتواها را بنویسد و بخواند"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
@@ -338,15 +335,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("جداول هش توزیع‌شده"),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("دانلود فایل لغو شد"),
-        "messageDownloadingFileCanceled": m3,
-        "messageDownloadingFileError": m4,
+        "messageDownloadingFileCanceled": m2,
+        "messageDownloadingFileError": m3,
         "messageEmptyFolder":
             MessageLookupByLibrary.simpleMessage("این پوشه خالی است"),
         "messageEmptyRepo":
             MessageLookupByLibrary.simpleMessage("این مخزن خالی است"),
         "messageEnterDifferentName":
             MessageLookupByLibrary.simpleMessage("لطفا نام دیگری وارد کنید"),
-        "messageEntryAlreadyExist": m5,
+        "messageEntryAlreadyExist": m4,
         "messageEntryTypeDefault":
             MessageLookupByLibrary.simpleMessage("یک ورودی"),
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("یک فایل"),
@@ -395,12 +392,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("خطا در ایجاد مخزن"),
         "messageErrorCreatingToken":
             MessageLookupByLibrary.simpleMessage("خطا در ایجاد توکن اشتراکی."),
-        "messageErrorCurrentPathMissing": m6,
+        "messageErrorCurrentPathMissing": m5,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
             "اشکالی پیش آمد. لطفا دوباره تلاش کنید."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("ناموفق."),
-        "messageErrorDokanNotInstalled": m8,
+        "messageErrorDokanNotInstalled": m7,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("ورودی یافت نشد"),
         "messageErrorFormValidatorNameDefault":
@@ -413,8 +410,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "رمز عبور جدید همان رمز عبور قدیمی است"),
         "messageErrorOpeningRepo":
             MessageLookupByLibrary.simpleMessage("خطا در باز کردن مخزن"),
-        "messageErrorOpeningRepoDescription": m9,
-        "messageErrorPathNotEmpty": m10,
+        "messageErrorOpeningRepoDescription": m8,
+        "messageErrorPathNotEmpty": m9,
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "یک مخزن با این نام وجود دارد"),
         "messageErrorRepositoryPasswordValidation":
@@ -434,9 +431,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageExitOuiSync": MessageLookupByLibrary.simpleMessage(
             "برای خروج، دوباره دکمه بازگشت را فشار دهید."),
         "messageFAQ": MessageLookupByLibrary.simpleMessage("پرسش‌های متداول"),
-        "messageFailedToMount": m11,
+        "messageFailedToMount": m10,
         "messageFile": MessageLookupByLibrary.simpleMessage("فایل"),
-        "messageFileAlreadyExist": m12,
+        "messageFileAlreadyExist": m11,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "فایل از قبل در حال آپلود است"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("نام فایل"),
@@ -445,7 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "پیش‌نمایش فایل هنوز در دسترس نیست"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("فایل‌ها"),
-        "messageFolderDeleted": m13,
+        "messageFolderDeleted": m12,
         "messageFolderName": MessageLookupByLibrary.simpleMessage("نام پوشه"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("ایجاد رمز عبور"),
@@ -492,7 +489,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("در حال بارگذاری…"),
         "messageLocalDiscovery":
             MessageLookupByLibrary.simpleMessage("کشف محلی"),
-        "messageLockOpenRepos": m14,
+        "messageLockOpenRepos": m13,
         "messageLockedRepository":
             MessageLookupByLibrary.simpleMessage("این مخزن قفل شده است."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
@@ -525,7 +522,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "اپلیکیشن Ouisync مجوز اجراشدن در پس‌زمینه را ندارد، باز کردن یک اپلیکیشن دیگر ممکن است، روند همگام‌سازی را متوقف کند"),
         "messageMobile": MessageLookupByLibrary.simpleMessage("موبایل"),
-        "messageMoveEntryOrigin": m15,
+        "messageMoveEntryOrigin": m14,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "این ویژگی هنگام جابجایی «ورودی» در دسترس نیست."),
         "messageNATOnWikipedia": MessageLookupByLibrary.simpleMessage(
@@ -533,7 +530,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNATType": MessageLookupByLibrary.simpleMessage("نوع NAT"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("شبکه در دسترس نیست"),
-        "messageNewFileError": m16,
+        "messageNewFileError": m15,
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "رمز عبور جدید در حافظه کوتاه‌مدت کپی شد"),
@@ -557,7 +554,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "مخازن را می‌توان به صورت خواندنی-نوشتنی، فقط خواندنی یا «کور» (شما فایل‌ها را برای دیگران ذخیره می‌کنید، اما نمی‌توانید به آن‌ها دسترسی داشته باشید) به اشتراک گذاشت"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "همه فایل‌ها و پوشه‌های اضافه‌شده به Ouisync به‌طور پیش‌فرض هم در حالت انتقال و هم در حالت استراحت، به‌صورت امن رمزنگاری شده‌اند."),
-        "messageOpenFileError": m17,
+        "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("یا"),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("Ouisync"),
@@ -574,7 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("تبادل همتا در ویکی‌پدیا"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("این مجوز لازم است"),
-        "messagePreviewingFileFailed": m18,
+        "messagePreviewingFileFailed": m17,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "این بخش برای اطلاع رسانی به بازدیدکنندگان در مورد سیاست‌های ما در مورد جمع‌آوری، استفاده و افشای اطلاعات شخصی در صورتی که کسی تصمیم به استفاده از سرویس ما داشته باشد، استفاده می شود"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -607,14 +604,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("فایل موجود را جایگزین کنید"),
         "messageRepoAuthFailed":
             MessageLookupByLibrary.simpleMessage("خطا در احراز هویت مخزن"),
-        "messageRepoDeletionErrorDescription": m19,
+        "messageRepoDeletionErrorDescription": m18,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "(درخواست) حذف مخزن ناموفق بود"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "مخزن موردنظر دیگر آن‌جا نیست"),
-        "messageRepoMissingErrorDescription": m20,
-        "messageRepositoryAccessMode": m21,
-        "messageRepositoryAlreadyExist": m22,
+        "messageRepoMissingErrorDescription": m19,
+        "messageRepositoryAccessMode": m20,
+        "messageRepositoryAlreadyExist": m21,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور کنونی"),
         "messageRepositoryIsNotOpen":
@@ -629,7 +626,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مخرن موردنظر نصب نشده است "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("رمز عبور"),
-        "messageRepositorySuggestedName": m23,
+        "messageRepositorySuggestedName": m22,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("لینک را این‌جا قرار دهید"),
         "messageRousseau": MessageLookupByLibrary.simpleMessage("ژان ژاک روسو"),
@@ -699,9 +696,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("فرمت فایل ناشناخته است"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "رمز عبور موردنظر مخزن را باز نکرد"),
-        "messageUnlockRepoOk": m25,
-        "messageUnlockRepository": MessageLookupByLibrary.simpleMessage(
-            "رمز عبور را برای باز کردن قفل وارد کنید"),
+        "messageUnlockRepoOk": m24,
+        "messageUnlockRepository": m25,
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
             "با استفاده از بیومتریک قفل را باز کنید"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(

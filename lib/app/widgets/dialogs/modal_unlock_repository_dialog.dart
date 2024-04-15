@@ -8,200 +8,181 @@ import '../../models/models.dart';
 import '../../cubits/cubits.dart';
 import '../widgets.dart';
 
-class UnlockRepository extends StatelessWidget with AppLogger {
+class UnlockRepository extends StatefulWidget {
   UnlockRepository({
-    required this.parentContext,
     required this.repoCubit,
     required this.masterKey,
     required this.passwordHasher,
     required this.isBiometricsAvailable,
-    required this.isPasswordValidation,
   });
 
-  final BuildContext parentContext;
   final RepoCubit repoCubit;
   final MasterKey masterKey;
   final PasswordHasher passwordHasher;
   final bool isBiometricsAvailable;
-  final bool isPasswordValidation;
 
+  @override
+  State<UnlockRepository> createState() => _UnlockRepositoryState();
+}
+
+class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController passwordController = TextEditingController();
 
-  final TextEditingController _passwordController =
-      TextEditingController(text: null);
-
-  final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
-  final ValueNotifier<bool> _useBiometrics = ValueNotifier<bool>(false);
+  bool obscurePassword = true;
+  bool store = false;
+  bool secureWithBiometrics = false;
+  bool passwordInvalid = false;
 
   @override
   Widget build(BuildContext context) => Form(
         key: formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: _buildUnlockRepositoryWidget(parentContext),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            buildPasswordField(context),
+            buildStoreSwitch(),
+            buildBiometricsSwitch(),
+            Fields.dialogActions(context, buttons: buildActions(context)),
+          ],
+        ),
       );
 
-  Widget _buildUnlockRepositoryWidget(BuildContext context) {
-    final bodyStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(fontWeight: FontWeight.w400);
-
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.constrainedText(
-            '"${repoCubit.name}"',
-            flex: 0,
-            style: bodyStyle,
+  Widget buildPasswordField(BuildContext context) => Fields.formTextField(
+        context: context,
+        controller: passwordController,
+        obscureText: obscurePassword,
+        labelText: S.current.labelTypePassword,
+        hintText: S.current.messageRepositoryPassword,
+        errorText: passwordInvalid ? S.current.messageUnlockRepoFailed : null,
+        suffixIcon: Fields.actionIcon(
+          Icon(
+            obscurePassword
+                ? Constants.iconVisibilityOn
+                : Constants.iconVisibilityOff,
+            size: Dimensions.sizeIconSmall,
           ),
-          Dimensions.spacingVerticalDouble,
-          ValueListenableBuilder(
-              valueListenable: _obscurePassword,
-              builder: (context, value, child) {
-                final obscure = value;
-                return Row(children: [
-                  Expanded(
-                      child: Fields.formTextField(
-                          context: context,
-                          controller: _passwordController,
-                          obscureText: obscure,
-                          labelText: S.current.labelTypePassword,
-                          hintText: S.current.messageRepositoryPassword,
-                          suffixIcon: Fields.actionIcon(
-                            Icon(
-                                obscure
-                                    ? Constants.iconVisibilityOn
-                                    : Constants.iconVisibilityOff,
-                                size: Dimensions.sizeIconSmall),
-                            color: Colors.black,
-                            onPressed: () {
-                              _obscurePassword.value = !_obscurePassword.value;
-                            },
-                          ),
-                          onSaved: (String? password) async {
-                            await _unlockRepository(password);
-                          },
-                          validator: validateNoEmptyMaybeRegExpr(
-                              emptyError: S.current
-                                  .messageErrorRepositoryPasswordValidation),
-                          autofocus: true))
-                ]);
-              }),
-          if (!isPasswordValidation) _useBiometricsCheckbox(),
-          Fields.dialogActions(context, buttons: _actions(context)),
-        ]);
-  }
-
-  Widget _useBiometricsCheckbox() => ValueListenableBuilder(
-      valueListenable: _useBiometrics,
-      builder: (context, useBiometrics, child) {
-        return Visibility(
-            visible: isBiometricsAvailable,
-            child: SwitchListTile.adaptive(
-                value: useBiometrics,
-                title: Text(S.current.messageSecureUsingBiometrics),
-                onChanged: (enableBiometrics) {
-                  _useBiometrics.value = enableBiometrics;
-                },
-                contentPadding: EdgeInsets.zero));
-      });
-
-  Future<void> _unlockRepository(String? passwordStr) async {
-    if (passwordStr == null || passwordStr.isEmpty) {
-      return;
-    }
-
-    final password = LocalPassword(passwordStr);
-
-    await Dialogs.executeFutureWithLoadingDialog(
-      parentContext,
-      f: repoCubit.unlock(password),
-    );
-
-    final accessMode = repoCubit.accessMode;
-
-    if (accessMode == AccessMode.blind) {
-      final notUnlockedResponse = UnlockRepositoryResult(
-        repoLocation: repoCubit.location,
-        password: password,
-        accessMode: accessMode,
-        message: S.current.messageUnlockRepoFailed,
+          color: Colors.black,
+          onPressed: () => setState(() {
+            obscurePassword = !obscurePassword;
+          }),
+        ),
+        validator: validateNoEmptyMaybeRegExpr(
+          emptyError: S.current.messageErrorRepositoryPasswordValidation,
+        ),
+        autofocus: true,
       );
 
-      Navigator.of(parentContext).pop(notUnlockedResponse);
-      return;
-    }
-
-    // Only if the password successfuly unlocked the repo, then we add it
-    // to the secure storage -if the user selected the option.
-    // TODO: Why are we storing the password from inside this UnlockRepository
-    // dialog? And why are we doing it only when `_useBiometrics.value` is
-    // true?
-    if (_useBiometrics.value) {
-      final success = await Dialogs.executeFutureWithLoadingDialog<bool>(
-        parentContext,
-        f: () async {
-          try {
-            final salt = (await repoCubit.getCurrentModePasswordSalt())!;
-            final keyAndSalt = await passwordHasher.hashPassword(
-              password,
-              salt,
-            );
-            final authMode = await AuthModeKeyStoredOnDevice.encrypt(
-              masterKey,
-              keyAndSalt.key,
-              keyOrigin: SecretKeyOrigin.manual,
-              secureWithBiometrics: _useBiometrics.value,
-            );
-
-            await repoCubit.setAuthMode(authMode);
-            return true;
-          } catch (e, st) {
-            // TODO: The user should learn about the failure.
-            loggy.error(
-              'Failed to store password for repo ${repoCubit.name}',
-              e,
-              st,
-            );
-            return false;
-          }
-        }(),
+  Widget buildStoreSwitch() => SwitchListTile.adaptive(
+        value: store,
+        title: Text(S.current.labelRememberPassword),
+        onChanged: (value) => setState(() {
+          store = value;
+        }),
+        contentPadding: EdgeInsets.zero,
       );
 
-      if (!success) {
-        return;
-      }
-    }
+  Widget buildBiometricsSwitch() => Visibility(
+        visible: widget.isBiometricsAvailable,
+        child: SwitchListTile.adaptive(
+          value: secureWithBiometrics,
+          title: Text(S.current.messageSecureUsingBiometrics),
+          onChanged: store
+              ? (value) => setState(() {
+                    secureWithBiometrics = value;
+                  })
+              : null,
+          contentPadding: EdgeInsets.zero,
+        ),
+      );
 
-    final message = _useBiometrics.value
-        ? S.current.messageBiometricValidationAdded(repoCubit.name)
-        : S.current.messageUnlockRepoOk(accessMode.name);
-
-    final unlockedResponse = UnlockRepositoryResult(
-        repoLocation: repoCubit.location,
-        password: password,
-        accessMode: accessMode,
-        message: message);
-
-    Navigator.of(parentContext).pop(unlockedResponse);
-  }
-
-  List<Widget> _actions(context) => [
+  List<Widget> buildActions(context) => [
         NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(null),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+          text: S.current.actionCancel,
+          onPressed: () => Navigator.of(context).pop(null),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        ),
         PositiveButton(
-            text: S.current.actionUnlock,
-            onPressed: _validatePassword,
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+          text: S.current.actionUnlock,
+          onPressed: () => onSubmit(context),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        )
       ];
 
-  void _validatePassword() {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+  Future<void> onSubmit(BuildContext context) async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (passwordController.text.isEmpty) {
+      return;
+    }
+
+    final password = LocalPassword(passwordController.text);
+
+    await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      f: widget.repoCubit.unlock(password),
+    );
+
+    final accessMode = widget.repoCubit.accessMode;
+
+    if (accessMode == AccessMode.blind) {
+      setState(() {
+        passwordInvalid = true;
+      });
+      return;
+    } else {
+      setState(() {
+        passwordInvalid = false;
+      });
+    }
+
+    if (store) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        f: updateLocalSecretStore(password),
+      );
+    }
+
+    Navigator.of(context).pop(UnlockRepositoryResult(
+      repoLocation: widget.repoCubit.location,
+      password: password,
+      accessMode: accessMode,
+      message: S.current.messageUnlockRepoOk(accessMode.name),
+    ));
+  }
+
+  Future<void> updateLocalSecretStore(LocalPassword password) async {
+    try {
+      // NOTE: Using `!` is ok here because this only returns null when the repo is currently in
+      // blind mode but we already covered that case earlier.
+      final salt = (await widget.repoCubit.getCurrentModePasswordSalt())!;
+
+      final keyAndSalt = await widget.passwordHasher.hashPassword(
+        password,
+        salt,
+      );
+
+      final authMode = await AuthModeKeyStoredOnDevice.encrypt(
+        widget.masterKey,
+        keyAndSalt.key,
+        keyOrigin: SecretKeyOrigin.manual,
+        secureWithBiometrics: secureWithBiometrics,
+      );
+
+      await widget.repoCubit.setAuthMode(authMode);
+    } catch (e, st) {
+      // TODO: Should we show this error to the user?
+
+      loggy.error(
+        'Failed to store local secret for repo ${widget.repoCubit.name}',
+        e,
+        st,
+      );
     }
   }
 }

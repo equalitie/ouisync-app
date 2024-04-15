@@ -267,23 +267,22 @@ mixin RepositoryActionsMixin on LoggyType {
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     return await showDialog<UnlockRepositoryResult?>(
-        context: context,
-        builder: (BuildContext context) =>
-            ScaffoldMessenger(child: Builder(builder: ((context) {
-              return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                    title: S.current.messageUnlockRepository,
-                    body: UnlockRepository(
-                      parentContext: context,
-                      repoCubit: repoCubit,
-                      masterKey: masterKey,
-                      passwordHasher: passwordHasher,
-                      isPasswordValidation: false,
-                      isBiometricsAvailable: isBiometricsAvailable,
-                    ),
-                  ));
-            }))));
+      context: context,
+      builder: (BuildContext context) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ActionsDialog(
+            title: S.current.messageUnlockRepository(repoCubit.name),
+            body: UnlockRepository(
+              repoCubit: repoCubit,
+              masterKey: masterKey,
+              passwordHasher: passwordHasher,
+              isBiometricsAvailable: isBiometricsAvailable,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
