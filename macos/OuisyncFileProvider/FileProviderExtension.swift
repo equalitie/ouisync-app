@@ -71,7 +71,7 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
-        Self.log("enumerator(for: \(containerItemIdentifier), request: \(request)")
+        Self.log("enumerator(for: \(ItemEnum(containerItemIdentifier)), request: \(request)")
         return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncSession, self.state)
     }
 

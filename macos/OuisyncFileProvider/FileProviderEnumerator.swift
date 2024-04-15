@@ -10,13 +10,13 @@ import OuisyncLib
 
 class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     private let connection: OuisyncSession?
-    private let enumeratedItemIdentifier: NSFileProviderItemIdentifier
+    private let item: ItemEnum
     private let anchor = NSFileProviderSyncAnchor("an anchor".data(using: .utf8)!)
     private let state: State
 
     init(enumeratedItemIdentifier: NSFileProviderItemIdentifier, _ connection: OuisyncSession?, _ state: State) {
         Self.log("init")
-        self.enumeratedItemIdentifier = enumeratedItemIdentifier
+        self.item = ItemEnum(enumeratedItemIdentifier)
         self.connection = connection
         self.state = state
         super.init()
@@ -71,24 +71,44 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             return
         }
 
-        Task {
-            let new_repos = Set(try await connection.listRepositories())
-            let old_repos = self.state.items
-            NSLog("********************** old \(old_repos)")
-            let deleted = old_repos.subtracting(new_repos)
+        switch item {
+        case .root:
+            Task {
+                let new_repos = Set(try await connection.listRepositories())
+                let old_repos = self.state.items
+                let deleted = old_repos.subtracting(new_repos)
 
-            NSLog("********************** new \(new_repos)")
-            NSLog("********************** deleted \(deleted)")
-            if !deleted.isEmpty {
-                let deletedIdentifiers = reposToItemIdentifiers(deleted)
-                observer.didDeleteItems(withIdentifiers: Array(deletedIdentifiers))
+                if !deleted.isEmpty {
+                    let deletedIdentifiers = reposToItemIdentifiers(deleted)
+                    observer.didDeleteItems(withIdentifiers: Array(deletedIdentifiers))
+                }
+
+                observer.didUpdate(Array(await reposToItems(new_repos)))
+
+                self.state.items = new_repos
+
+                observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
             }
+        case .handle(let item):
+            Task {
+                let new_repos = Set(try await connection.listRepositories())
+                let old_repos = self.state.items
+                let deleted = old_repos.subtracting(new_repos)
 
-            observer.didUpdate(Array(await reposToItems(new_repos)))
+                if !deleted.isEmpty {
+                    let deletedIdentifiers = reposToItemIdentifiers(deleted)
+                    observer.didDeleteItems(withIdentifiers: Array(deletedIdentifiers))
+                }
 
-            self.state.items = new_repos
-            NSLog("********************** new' \(new_repos)")
+                observer.didUpdate(Array(await reposToItems(new_repos)))
 
+                self.state.items = new_repos
+
+                observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
+            }
+        case .trash:
+            observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
+        case .workingSet:
             observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
         }
     }
@@ -105,7 +125,7 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
     func reposToItemIdentifiers(_ repos: Set<OuisyncRepository>) -> Set<NSFileProviderItemIdentifier> {
         var items = Set<NSFileProviderItemIdentifier>()
         for repo in repos {
-            let id = ItemEnum.handle(repo.handle).identifier()
+            let id = ItemEnum.handle(.repo(repo.handle)).identifier()
             items.insert(id)
         }
         return items
