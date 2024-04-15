@@ -70,14 +70,16 @@ class UnlockRepository extends StatelessWidget with AppLogger {
                           labelText: S.current.labelTypePassword,
                           hintText: S.current.messageRepositoryPassword,
                           suffixIcon: Fields.actionIcon(
-                              Icon(
-                                  obscure
-                                      ? Constants.iconVisibilityOn
-                                      : Constants.iconVisibilityOff,
-                                  size: Dimensions.sizeIconSmall),
-                              color: Colors.black, onPressed: () {
-                            _obscurePassword.value = !_obscurePassword.value;
-                          }),
+                            Icon(
+                                obscure
+                                    ? Constants.iconVisibilityOn
+                                    : Constants.iconVisibilityOff,
+                                size: Dimensions.sizeIconSmall),
+                            color: Colors.black,
+                            onPressed: () {
+                              _obscurePassword.value = !_obscurePassword.value;
+                            },
+                          ),
                           onSaved: (String? password) async {
                             await _unlockRepository(password);
                           },

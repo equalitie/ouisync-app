@@ -11,13 +11,13 @@ import 'widgets.dart';
 class RepoSecurity extends StatefulWidget {
   const RepoSecurity({
     super.key,
-    required this.localSecretMode,
+    required this.initialLocalSecretMode,
     required this.onChanged,
     this.isBiometricsAvailable = false,
   });
 
   /// Initial value of the local secret mode
-  final LocalSecretMode localSecretMode;
+  final LocalSecretMode initialLocalSecretMode;
 
   /// Function called when the local secret mode and/or the password change.
   /// With manual origin password is null means the password is invalid. With random origin
@@ -41,11 +41,11 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
   void initState() {
     super.initState();
 
-    origin = widget.localSecretMode.origin;
+    origin = widget.initialLocalSecretMode.origin;
 
     // We want store to be explicitly opt-in so the switch must be initially off even if the
     // initial origin is random which is implicitly stored.
-    store = switch (widget.localSecretMode) {
+    store = switch (widget.initialLocalSecretMode) {
       LocalSecretMode.manualStored ||
       LocalSecretMode.manualSecuredWithBiometrics =>
         true,
@@ -55,7 +55,8 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
         false
     };
 
-    secureWithBiometrics = widget.localSecretMode.isSecuredWithBiometrics;
+    secureWithBiometrics =
+        widget.initialLocalSecretMode.isSecuredWithBiometrics;
   }
 
   @override
@@ -89,7 +90,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
 
   // If the secret is already stored and is not random then we can keep using it and only change
   // the other properties. So in those cases putting in a new password is not required.
-  bool get _isPasswordRequired => switch (widget.localSecretMode) {
+  bool get _isPasswordRequired => switch (widget.initialLocalSecretMode) {
         LocalSecretMode.manual ||
         LocalSecretMode.randomStored ||
         LocalSecretMode.randomSecuredWithBiometrics =>

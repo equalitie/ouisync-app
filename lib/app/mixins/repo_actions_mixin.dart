@@ -258,8 +258,6 @@ mixin RepositoryActionsMixin on LoggyType {
     showSnackBar(message);
   }
 
-  /// cubitUnlockRepository => ReposCubit.unlockRepository
-  /// setAuthenticationMode => Settings.setAuthenticationMode
   Future<UnlockRepositoryResult?> unlockRepositoryManually(
     BuildContext context,
     RepoCubit repoCubit,

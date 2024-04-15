@@ -18,6 +18,7 @@ class RepositoryCreation extends StatefulWidget {
 
   final ReposCubit reposCubit;
   final String? initialTokenValue;
+  final LocalSecretMode initialLocalSecretMode = LocalSecretMode.randomStored;
 
   @override
   State<RepositoryCreation> createState() => _RepositoryCreationState();
@@ -30,7 +31,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   var isBiometricsAvailable = false;
   ShareToken? shareToken;
   var accessMode = AccessMode.blind;
-  var localSecretMode = LocalSecretMode.randomStored;
+  late var localSecretMode = widget.initialLocalSecretMode;
   LocalPassword? localPassword;
   final nameController = TextEditingController();
   var nameSuggestion = '';
@@ -135,7 +136,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
             if (accessMode == AccessMode.write)
               _buildUseCacheServersSwitch(context),
             RepoSecurity(
-              localSecretMode: localSecretMode,
+              initialLocalSecretMode: widget.initialLocalSecretMode,
               isBiometricsAvailable: isBiometricsAvailable,
               onChanged: _onLocalSecretChanged,
             ),
