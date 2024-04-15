@@ -34,7 +34,7 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         
         // TODO: implement the actual lookup
 
-        completionHandler(FileProviderItem(Entry(identifier)!), nil)
+        completionHandler(FileProviderItem(identifier)!, nil)
         return Progress()
     }
     

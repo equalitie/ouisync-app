@@ -7,50 +7,51 @@
 
 import FileProvider
 import UniformTypeIdentifiers
+import MessagePack
 
-enum Entry: Equatable {
+class Entry: Equatable {
+    let handle: UInt64
+
+    init(_ handle: UInt64) {
+        self.handle = handle
+    }
+
+    func encode() -> String {
+        return pack(MessagePackValue.uint(handle)).base64EncodedString()
+    }
+
+    static func decode(_ encoded: String) -> Entry? {
+        guard let data = Data(base64Encoded: encoded) else {
+            return nil
+        }
+        guard let (unpacked, _) = try? unpack(data) else {
+            return nil
+        }
+        guard let(handle) = unpacked.uint64Value else {
+            return nil
+        }
+        return Entry(handle)
+    }
+
+    static func == (lhs: Entry, rhs: Entry) -> Bool {
+        return
+            lhs.handle == rhs.handle
+    }
+}
+
+enum ItemEnum: Equatable {
     case root
     case trash
     case workingSet
-    case handle(UInt64)
-
-    init(_ handle: UInt64) {
-        self = .handle(handle)
-    }
-
-    init?(_ identifier: NSFileProviderItemIdentifier) {
-        if identifier == .rootContainer {
-            self = .root
-            return
-        } else if identifier == .trashContainer {
-            self = .trash
-            return
-        } else if identifier == .workingSet {
-            self = .workingSet
-            return
-        } else {
-            guard let handle = UInt64(identifier.rawValue) else {
-                return nil
-            }
-            self = .handle(handle)
-        }
-        return nil
-    }
+    case entry(Entry)
 
     func identifier() -> NSFileProviderItemIdentifier {
         switch self {
         case .root: return .rootContainer
         case .trash: return .trashContainer
         case .workingSet: return .workingSet
-        case .handle(let handle): return NSFileProviderItemIdentifier(String(handle))
+        case .entry(let entry): return NSFileProviderItemIdentifier(entry.encode())
         }
-    }
-
-    func asHandle() -> UInt64? {
-        if case .handle(let handle) = self {
-            return handle
-        }
-        return nil
     }
 
     func toString() -> String {
@@ -58,7 +59,7 @@ enum Entry: Equatable {
         case .root: return ".rootContainer"
         case .trash: return ".trashContainer"
         case .workingSet: return ".workingSet"
-        case .handle(let handle): return "file-\(handle)"
+        case .entry(let entry): return "entry-\(entry.handle)"
         }
     }
 }
@@ -68,14 +69,33 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     // TODO: implement an initializer to create an item from your extension's backing model
     // TODO: implement the accessors to return the values from your extension's backing model
     
-    let entry: Entry
+    let item: ItemEnum
 
     init(_ entry: Entry) {
-        self.entry = entry
+        self.item = .entry(entry)
+    }
+
+    init?(_ identifier: NSFileProviderItemIdentifier) {
+        if identifier == .rootContainer {
+            item = .root
+            return
+        } else if identifier == .trashContainer {
+            item = .trash
+            return
+        } else if identifier == .workingSet {
+            item = .workingSet
+            return
+        } else {
+            guard let entry = Entry.decode(identifier.rawValue) else {
+                return nil
+            }
+            item = .entry(entry)
+            return
+        }
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        return entry.identifier()
+        return item.identifier()
     }
     
     var parentItemIdentifier: NSFileProviderItemIdentifier {
@@ -91,11 +111,11 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
     
     var filename: String {
-        return entry.toString()
+        return item.toString()
     }
     
     var contentType: UTType {
-        return entry == Entry.root ? .folder : .plainText
+        return item == .root ? .folder : .plainText
     }
 
     // Temporary until naming is sorted
