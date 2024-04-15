@@ -588,8 +588,10 @@ class Fields {
       return;
     }
 
-    final content = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: webView.loadUrl(context, url));
+    final content = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      webView.loadUrl(context, url),
+    );
 
     await Navigator.push(
         context,

@@ -125,7 +125,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
 
     await Dialogs.executeFutureWithLoadingDialog(
       context,
-      f: widget.repoCubit.unlock(password),
+      widget.repoCubit.unlock(password),
     );
 
     final accessMode = widget.repoCubit.accessMode;
@@ -144,7 +144,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
     if (store) {
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: updateLocalSecretStore(password),
+        updateLocalSecretStore(password),
       );
     }
 

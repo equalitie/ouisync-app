@@ -149,8 +149,10 @@ class AboutSection extends SettingsSection with AppLogger {
 
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
-      final content = await Dialogs.executeFutureWithLoadingDialog(context,
-          f: webView.loadUrl(context, url));
+      final content = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        webView.loadUrl(context, url),
+      );
 
       await Navigator.push(
           context,
@@ -175,7 +177,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (attachments.logs) {
       final logs = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: dumpAll(
+        dumpAll(
           context,
           rootMonitor: cubits.repositories.rootStateMonitor,
           powerControl: cubits.powerControl,

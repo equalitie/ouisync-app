@@ -117,7 +117,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     final recursive = !isEmpty;
     final deleteFolderOk = await Dialogs.executeFutureWithLoadingDialog(
       context,
-      f: repo.deleteFolder(path, recursive),
+      repo.deleteFolder(path, recursive),
     );
     if (deleteFolderOk) {
       Navigator.of(context).pop(deleteFolder);

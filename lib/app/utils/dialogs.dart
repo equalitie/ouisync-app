@@ -7,62 +7,25 @@ import 'utils.dart';
 
 abstract class Dialogs {
   static Future<T> executeFutureWithLoadingDialog<T>(
-    BuildContext context, {
-    required Future<T> f,
-    String? text,
-    Widget? widget,
-  }) async {
-    showLoadingDialog(context, text: text, widget: widget);
-
-    var result = await f;
+    BuildContext context,
+    Future<T> future,
+  ) async {
+    _showLoadingDialog(context);
+    var result = await future;
     _hideLoadingDialog(context);
 
     return result;
   }
 
-  static void executeFunctionWithLoadingDialog(
-      BuildContext context, Function f) {
-    showLoadingDialog(context);
-
-    f.call();
-    _hideLoadingDialog(context);
-  }
-
-  static showLoadingDialog(
-    BuildContext context, {
-    String? text,
-    Widget? widget,
-  }) {
-    final defaultIndicator = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const CircularProgressIndicator.adaptive(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
-        if (text?.isNotEmpty ?? false) Dimensions.spacingVertical,
-        if (text?.isNotEmpty ?? false)
-          Text(
-            text!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white),
-          ),
-      ],
-    );
-
+  static _showLoadingDialog(BuildContext context) {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: widget != null
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    widget,
-                  ],
-                )
-              : defaultIndicator,
-        );
-      },
+      builder: (BuildContext context) => Center(
+        child: const CircularProgressIndicator.adaptive(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      ),
     );
   }
 

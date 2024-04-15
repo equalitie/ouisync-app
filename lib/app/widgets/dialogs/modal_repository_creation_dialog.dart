@@ -270,7 +270,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     final exists = await Dialogs.executeFutureWithLoadingDialog(
       context,
-      f: io.File(location.path).exists(),
+      io.File(location.path).exists(),
     );
 
     setState(() {
@@ -290,15 +290,17 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       return;
     }
 
-    final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: widget.reposCubit.createRepository(
-          location: location,
-          setLocalSecret: setLocalSecret,
-          token: shareToken,
-          localSecretMode: localSecretMode,
-          useCacheServers: useCacheServers,
-          setCurrent: true,
-        ));
+    final repoEntry = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      widget.reposCubit.createRepository(
+        location: location,
+        setLocalSecret: setLocalSecret,
+        token: shareToken,
+        localSecretMode: localSecretMode,
+        useCacheServers: useCacheServers,
+        setCurrent: true,
+      ),
+    );
 
     switch (repoEntry) {
       case OpenRepoEntry():

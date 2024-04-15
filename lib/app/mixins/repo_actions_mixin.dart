@@ -30,8 +30,10 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await Dialogs.executeFutureWithLoadingDialog(context,
-        f: reposCubit.renameRepository(repository.location, newName));
+    await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      reposCubit.renameRepository(repository.location, newName),
+    );
 
     if (popDialog != null) {
       popDialog();
@@ -197,7 +199,7 @@ mixin RepositoryActionsMixin on LoggyType {
     if (deleteRepo ?? false) {
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: reposCubit.deleteRepository(repoLocation),
+        reposCubit.deleteRepository(repoLocation),
       );
 
       if (popDialog != null) {
