@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart'
     show Repository, Session, SessionKind;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -16,6 +17,17 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  late Directory tempDir;
+
+  setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp();
+    PathProviderPlatform.instance = FakePathProviderPlatform(tempDir);
+  });
+
+  tearDown(() async {
+    await tempDir.delete(recursive: true);
+  });
+
   test('settings migration', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
@@ -23,7 +35,6 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getKeys().isEmpty, true);
 
-    final tempDir = await Directory.systemTemp.createTemp();
     final fooPath = join(tempDir.path, 'foo.db');
     final barPath = join(tempDir.path, 'bar.db');
 
@@ -120,4 +131,18 @@ void main() {
 
     expect(await key.decrypt(encrypted), teststring);
   });
+}
+
+class FakePathProviderPlatform extends PathProviderPlatform {
+  final Directory root;
+
+  FakePathProviderPlatform(this.root);
+
+  @override
+  Future<String?> getApplicationSupportPath() async =>
+      join(root.path, 'application-support');
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async =>
+      join(root.path, 'application-documents');
 }

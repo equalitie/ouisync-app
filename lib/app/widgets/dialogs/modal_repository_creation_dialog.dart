@@ -103,6 +103,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     }
 
     this.shareToken = shareToken;
+    nameController.text = nameSuggestion;
 
     isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
