@@ -581,24 +581,27 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
 
-    if (_cubits.repositories.showList &&
-        _cubits.repositories.repos.isNotEmpty) {
-      return FloatingActionButton(
-        focusNode: _fabFocus,
-        heroTag: Constants.heroTagRepoListActions,
-        child: icon,
-        onPressed: () => _showRepoListActions(context),
-      );
-    }
-
-    if (current is OpenRepoEntry &&
-        current.cubit.state.canWrite &&
-        !_cubits.repositories.showList) {
-      return FloatingActionButton(
-        focusNode: _fabFocus,
-        heroTag: Constants.heroTagMainPageActions,
-        child: icon,
-        onPressed: () => _showDirectoryActions(context, current),
+    if (_cubits.repositories.showList) {
+      if (_cubits.repositories.repos.isNotEmpty) {
+        return FloatingActionButton(
+          focusNode: _fabFocus,
+          heroTag: Constants.heroTagRepoListActions,
+          child: icon,
+          onPressed: () => _showRepoListActions(context),
+        );
+      }
+    } else if (current is OpenRepoEntry) {
+      return BlocBuilder<RepoCubit, RepoState>(
+        bloc: current.cubit,
+        builder: (context, state) => Visibility(
+          visible: state.canWrite,
+          child: FloatingActionButton(
+            focusNode: _fabFocus,
+            heroTag: Constants.heroTagMainPageActions,
+            child: icon,
+            onPressed: () => _showDirectoryActions(context, current),
+          ),
+        ),
       );
     }
 
