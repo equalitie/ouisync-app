@@ -1,3 +1,5 @@
+import 'package:ouisync_app/app/utils/log.dart';
+
 import '../utils/master_key.dart';
 import 'local_secret.dart';
 
@@ -16,7 +18,7 @@ sealed class AuthMode {
       AuthModeBlindOrManual.fromJson(data) ??
       AuthModePasswordStoredOnDevice.fromJson(data) ??
       AuthModeKeyStoredOnDevice.fromJson(data) ??
-      (throw AuthModeParseFailed);
+      _decodeError(data);
 
   LocalSecretMode get localSecretMode => switch (this) {
         AuthModeBlindOrManual() => LocalSecretMode.manual,
@@ -265,4 +267,9 @@ class AuthModeParseFailed extends AuthModeException {
 class AuthModeDecryptFailed extends AuthModeException {
   @override
   String toString() => 'failed to decrypt local secret';
+}
+
+AuthMode _decodeError(Object? data) {
+  staticLogger<AuthMode>().error('invalid auth mode data: `$data`');
+  throw AuthModeParseFailed();
 }

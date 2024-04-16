@@ -250,12 +250,16 @@ class Settings with AppLogger {
     }
   }
 
+  // Move all repos from the legacy location to the new location.
   Future<void> _migrateRepositoryPaths() async {
     switch (_root.defaultRepositoriesDirVersion) {
       case 0:
+        // NOTE: We purposefully skip the android directories. This is because on android those
+        // directories contain other stuff besides repositories so it's a bit more complicated to
+        // migrate them correctly. More importantly, on android these directories are not visible
+        // outside of this app and so it doesn't really matter where they are.
+        // New repos are created in the new directory even on android though.
         final oldDirs = [
-          if (io.Platform.isAndroid) await getExternalStorageDirectory(),
-          if (io.Platform.isAndroid) await getApplicationDocumentsDirectory(),
           io.Directory(
               join((await getApplicationDocumentsDirectory()).path, 'ouisync')),
           io.Directory(
@@ -265,10 +269,6 @@ class Settings with AppLogger {
         final newDir = await getDefaultRepositoriesDir();
 
         for (final oldDir in oldDirs) {
-          if (oldDir == null) {
-            continue;
-          }
-
           if (!(await oldDir.exists())) {
             continue;
           }

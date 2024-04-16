@@ -641,7 +641,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     final newLocation = oldLocation.rename(newName);
 
     // Check the destination files don't exist
-    for (final suffix in _dbFileSuffixes) {
+    for (final suffix in repoDbFileSuffixes) {
       final path = "${newLocation.path}$suffix";
 
       if (await io.File(path).exists()) {
@@ -650,7 +650,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       }
     }
 
-    for (final suffix in _dbFileSuffixes) {
+    for (final suffix in repoDbFileSuffixes) {
       final srcPath = "${oldLocation.path}$suffix";
       final srcFile = io.File(srcPath);
 
@@ -680,7 +680,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     var success = true;
 
-    for (final suffix in _dbFileSuffixes) {
+    for (final suffix in repoDbFileSuffixes) {
       final file = io.File('$primaryPath$suffix');
 
       if (!await file.exists()) {
@@ -699,4 +699,4 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 }
 
-const _dbFileSuffixes = ['', '-wal', '-shm'];
+const repoDbFileSuffixes = ['', '-wal', '-shm'];
