@@ -264,13 +264,14 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     // we did it in the validator there would be no way to pass that object to here and we would
     // have to construct it again which would be sad.
 
-    final defaultLocation =
-        await widget.reposCubit.settings.defaultRepoLocation();
-    final location = RepoLocation.fromDirAndName(defaultLocation, name);
+    final location = RepoLocation.fromDirAndName(
+      await widget.reposCubit.settings.getDefaultRepositoriesDir(),
+      name,
+    );
 
     final exists = await Dialogs.executeFutureWithLoadingDialog(
       context,
-      f: io.File(location.path).exists(),
+      io.File(location.path).exists(),
     );
 
     setState(() {
@@ -290,15 +291,17 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       return;
     }
 
-    final repoEntry = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: widget.reposCubit.createRepository(
-          location: location,
-          setLocalSecret: setLocalSecret,
-          token: shareToken,
-          localSecretMode: localSecretMode,
-          useCacheServers: useCacheServers,
-          setCurrent: true,
-        ));
+    final repoEntry = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      widget.reposCubit.createRepository(
+        location: location,
+        setLocalSecret: setLocalSecret,
+        token: shareToken,
+        localSecretMode: localSecretMode,
+        useCacheServers: useCacheServers,
+        setCurrent: true,
+      ),
+    );
 
     switch (repoEntry) {
       case OpenRepoEntry():

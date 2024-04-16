@@ -5,7 +5,7 @@
 #define MyAppVersion "<APP_VERSION>"
 #define MyAppPublisher "eQualitie Inc"
 #define MyAppURL "https://ouisync.net"
-#define MyAppExeName "ouisync_app.exe"
+#define MyAppExeName "ouisync-gui.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.

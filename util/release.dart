@@ -427,7 +427,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     '--store'
   ]);
 
-  return File('$artifactDir/ouisync_app.msix');
+  return File('$artifactDir/ouisync.msix');
 }
 
 Future<void> prepareDokanBundle() async {

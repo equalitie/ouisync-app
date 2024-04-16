@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/utils/extensions.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 
 import '../cubits/cubits.dart';
+import '../utils/extensions.dart';
 
 class RepositoryProgress extends StatelessWidget {
   final StateMonitorCubit? _monitor;

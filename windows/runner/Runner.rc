@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "org.equalitie" "\0"
-            VALUE "FileDescription", "ouisync_app" "\0"
+            VALUE "FileDescription", "Ouisync main executable" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ouisync_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 org.equalitie. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ouisync_app.exe" "\0"
-            VALUE "ProductName", "ouisync_app" "\0"
+            VALUE "InternalName", "ouisync-gui" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 eQualitie Inc. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ouisync-gui.exe" "\0"
+            VALUE "ProductName", "ouisync" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

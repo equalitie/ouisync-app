@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/cubits/user_provided_peers.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
+import '../cubits/user_provided_peers.dart';
 import '../utils/actions.dart';
 import '../utils/dimensions.dart';
 import '../widgets/dialogs/add_peer_dialog.dart';

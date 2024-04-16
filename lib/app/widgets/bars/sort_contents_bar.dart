@@ -58,7 +58,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
     if (widget.reposCubit.currentRepo is OpenRepoEntry) {
       Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: (widget.reposCubit.currentRepo as OpenRepoEntry).cubit.refresh(
+        (widget.reposCubit.currentRepo as OpenRepoEntry).cubit.refresh(
               sortBy: sortBy,
               sortDirection: newDirection,
             ),
@@ -162,7 +162,7 @@ class _SortByList extends StatelessWidget with AppLogger {
                     if (_reposCubit.currentRepo is OpenRepoEntry) {
                       Dialogs.executeFutureWithLoadingDialog(
                         context,
-                        f: (_reposCubit.currentRepo as OpenRepoEntry)
+                        (_reposCubit.currentRepo as OpenRepoEntry)
                             .cubit
                             .refresh(
                               sortBy: sortByItem,

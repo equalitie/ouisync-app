@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:ouisync_app/app/utils/utils.dart';
+import 'constants.dart';
 
 // source: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
 String formatSize(int bytes, {int decimals = 1}) {

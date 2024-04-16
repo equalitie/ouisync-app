@@ -118,9 +118,13 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
                       ? () async {
                           final moved =
                               await Dialogs.executeFutureWithLoadingDialog(
-                                  context,
-                                  f: widget.onMoveEntry.call(widget.originPath,
-                                      widget.path, widget.type));
+                            context,
+                            widget.onMoveEntry.call(
+                              widget.originPath,
+                              widget.path,
+                              widget.type,
+                            ),
+                          );
 
                           if (moved) widget.onBottomSheetOpen.call(null, '');
                         }

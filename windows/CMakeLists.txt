@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(ouisync_app LANGUAGES CXX)
 
-set(BINARY_NAME "ouisync_app")
+set(BINARY_NAME "ouisync-gui")
 
 cmake_policy(SET CMP0063 NEW)
 

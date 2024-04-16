@@ -727,7 +727,7 @@ class _MainPageState extends State<MainPage>
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
           context,
-          f: repo.previewFileUrl(entry.path),
+          repo.previewFileUrl(entry.path),
         );
 
         await launchUrl(url);
