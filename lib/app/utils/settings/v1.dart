@@ -265,17 +265,40 @@ class Settings with AppLogger {
         final newDir = await getDefaultRepositoriesDir();
 
         for (final oldDir in oldDirs) {
-          // Move files
-          if (oldDir != null && await oldDir.exists()) {
-            await migrateFiles(oldDir, newDir);
+          if (oldDir == null) {
+            continue;
           }
+
+          if (!(await oldDir.exists())) {
+            continue;
+          }
+
+          // Move files
+          final statuses = await migrateFiles(oldDir, newDir);
+
+          for (final status in statuses) {
+            if (status.exception == null) {
+              loggy.info(
+                'moved repository ${status.oldPath} -> ${status.newPath}',
+              );
+            } else {
+              loggy.error(
+                'failed to move repository ${status.oldPath} -> ${status.newPath}:',
+                status.exception,
+              );
+            }
+          }
+
+          final replacements = Map.fromEntries(statuses
+              .where((status) => status.exception == null)
+              .map((status) => MapEntry(
+                    RepoLocation.fromDbPath(status.oldPath),
+                    RepoLocation.fromDbPath(status.newPath),
+                  )));
 
           // Update locations
           _root.repos.updateAll(
-            (databaseId, location) => (location.dir.path == oldDir?.path)
-                ? location.move(newDir)
-                : location,
-          );
+              (databaseId, location) => replacements[location] ?? location);
         }
 
         _root.defaultRepositoriesDirVersion = 1;

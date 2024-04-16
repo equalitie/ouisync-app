@@ -29,11 +29,28 @@ Future<void> _migratePaths() async {
       .map((component) => (component == 'ouisync') ? 'ouisync_app' : component)
       .join(separator));
 
-  if (newDir.path != oldDir.path && await oldDir.exists()) {
-    staticLogger<Settings>().info(
-      'migrating app support directory ${oldDir.path} -> ${newDir.path}',
-    );
+  if (newDir.path == oldDir.path) {
+    return;
+  }
 
-    await migrateFiles(oldDir, newDir);
+  if (!(await oldDir.exists())) {
+    return;
+  }
+
+  final logger = staticLogger<Settings>();
+
+  logger.info(
+    'migrating app support directory ${oldDir.path} -> ${newDir.path}',
+  );
+
+  final statuses = await migrateFiles(oldDir, newDir);
+
+  for (final status in statuses) {
+    if (status.exception != null) {
+      logger.error(
+        'failed to move ${status.oldPath} -> ${status.newPath}:',
+        status.exception,
+      );
+    }
   }
 }
