@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
   companion object {
-    private val CHANNEL = "org.equalitie.ouisync_app/native"
+    private val CHANNEL = "org.equalitie.ouisync/native"
   }
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
