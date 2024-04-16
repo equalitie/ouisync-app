@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -14,62 +16,51 @@ class RepositoriesBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) => _cubits.repositories.builder((state) {
-        if (state.isLoading) {
-          return Column(
-            children: const [CircularProgressIndicator(color: Colors.white)],
-          );
-        }
+        final reposCubit = _cubits.repositories;
 
-        if (_cubits.repositories.showList) {
+        if (reposCubit.isLoading || reposCubit.showList) {
           return SizedBox.shrink();
         }
 
-        final repo = state.currentRepo;
-        IconData icon;
-
-        if (repo == null) {
-          icon = Fields.accessModeIcon(null);
-        } else {
-          icon = Fields.accessModeIcon(repo.accessMode);
-        }
-
-        return _buildState(context, repo, icon: icon);
+        return Row(
+          children: [
+            _buildBackButton(),
+            Expanded(
+              child: Row(
+                children: [
+                  _buildName(reposCubit.currentRepo),
+                  _buildLockButton(reposCubit.currentRepo),
+                ],
+              ),
+            ),
+          ],
+        );
       });
 
-  String _repoName(RepoEntry? repo) {
-    if (repo != null) {
-      return repo.name;
+  Widget _buildName(RepoEntry? repo) => Fields.constrainedText(
+        repo?.name ?? S.current.messageNoRepos,
+        softWrap: false,
+        textOverflow: TextOverflow.fade,
+      );
+
+  Widget _buildLockButton(RepoEntry? repo) {
+    final repoCubit = repo?.cubit;
+
+    if (repoCubit != null) {
+      return BlocBuilder<RepoCubit, RepoState>(
+          bloc: repoCubit,
+          builder: (context, state) => _buildLockButtonContent(repoCubit));
     } else {
-      return S.current.messageNoRepos;
+      return _buildLockButtonContent(null);
     }
   }
 
-  Widget _buildState(
-    BuildContext context,
-    RepoEntry? entry, {
-    required IconData icon,
-  }) =>
-      Row(
-        children: [
-          _buildBackButton(),
-          Expanded(
-            child: Row(
-              children: [
-                Fields.constrainedText(
-                  _repoName(entry),
-                  softWrap: false,
-                  textOverflow: TextOverflow.fade,
-                ),
-                IconButton(
-                  icon: Icon(icon),
-                  iconSize: Dimensions.sizeIconSmall,
-                  onPressed: () => entry?.cubit?.lock(),
-                  alignment: Alignment.centerRight,
-                ),
-              ],
-            ),
-          ),
-        ],
+  Widget _buildLockButtonContent(RepoCubit? repoCubit) => IconButton(
+        icon: Icon(
+            Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
+        iconSize: Dimensions.sizeIconSmall,
+        onPressed: () => repoCubit?.lock(),
+        alignment: Alignment.centerRight,
       );
 
   Widget _buildBackButton() {
