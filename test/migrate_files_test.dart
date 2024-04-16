@@ -35,7 +35,7 @@ void main() {
         equals([
           ('a.txt', null),
           ('dir', null),
-          ('dir/b.txt', null),
+          (join('dir', 'b.txt'), null),
           ('empty', null),
           ('inside-abs', join(dst.path, 'a.txt')),
           ('inside-rel', 'a.txt'),
