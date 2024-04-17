@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/bindings.g.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 import '../widgets.dart';
 
 class RepositorySettings extends StatefulWidget {
@@ -39,8 +40,16 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle(widget.repoCubit.name,
-                          style: context.theme.appTextStyle.titleMedium),
+                      Row(
+                        children: [
+                          Fields.bottomSheetTitle(
+                            widget.repoCubit.name,
+                            style: context.theme.appTextStyle.titleMedium,
+                          ),
+                          Spacer(),
+                          _Progress(widget.repoCubit),
+                        ],
+                      ),
                       _SwitchItem(
                         title: S.current.labelBitTorrentDHT,
                         icon: Icons.hub,
@@ -149,4 +158,24 @@ class _SwitchItem extends StatelessWidget {
         value: value,
         onChanged: onChanged,
       );
+}
+
+class _Progress extends StatelessWidget {
+  _Progress(this.repoCubit);
+
+  final RepoCubit repoCubit;
+
+  @override
+  Widget build(BuildContext context) => RepoProgressBuilder(
+        repoCubit: repoCubit,
+        builder: (context, progress) => Fields.bottomSheetTitle(
+          'Synced: ${_formatProgress(progress)}',
+        ),
+      );
+}
+
+String _formatProgress(Progress progress) {
+  final value =
+      (progress.fraction * 100.0).truncateToDouble().toStringAsFixed(0);
+  return '$value%';
 }
