@@ -36,14 +36,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m6(error) => "Error: ${error}";
 
-  static String m7(dokanUrl) =>
-      "Dokan is missing.\nPlease install it from ${dokanUrl}";
+  static String m7(dokanUrl) => "Dokan is missing.${dokanUrl}";
 
   static String m8(name) => "Initialization of the repository ${name} failed";
 
   static String m9(path) => "${path} is not empty";
 
-  static String m10(reason) => "Can\'t open repositories: ${reason}";
+  static String m10(reason) =>
+      "Accessing repositories via File Explorer is not available: ${reason}";
 
   static String m11(name) =>
       "${name} already exist in this location.\n\nWhat do you want to do?";
@@ -356,11 +356,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
         "messageDokanDifferentMayor": MessageLookupByLibrary.simpleMessage(
-            "Seems your Dokan is out of date. Please update it to the latest version."),
+            "Installed Dokan is out of date. Please update it to the latest version."),
         "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
             "The Dokan installation failed."),
         "messageDokanOlderVersion": MessageLookupByLibrary.simpleMessage(
-            "A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
+            "Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("File download canceled"),
         "messageDownloadFileLocation": m1,

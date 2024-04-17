@@ -3910,20 +3910,20 @@ class S {
     );
   }
 
-  /// `Seems your Dokan is out of date. Please update it to the latest version.`
+  /// `Installed Dokan is out of date. Please update it to the latest version.`
   String get messageDokanDifferentMayor {
     return Intl.message(
-      'Seems your Dokan is out of date. Please update it to the latest version.',
+      'Installed Dokan is out of date. Please update it to the latest version.',
       name: 'messageDokanDifferentMayor',
       desc: '',
       args: [],
     );
   }
 
-  /// `A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
+  /// `Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
   String get messageDokanOlderVersion {
     return Intl.message(
-      'A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
+      'Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
       name: 'messageDokanOlderVersion',
       desc: '',
       args: [],
@@ -4790,20 +4790,20 @@ class S {
     );
   }
 
-  /// `Can't open repositories: {reason}`
+  /// `Accessing repositories via File Explorer is not available: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(
-      'Can\'t open repositories: $reason',
+      'Accessing repositories via File Explorer is not available: $reason',
       name: 'messageFailedToMount',
       desc: '',
       args: [reason],
     );
   }
 
-  /// `Dokan is missing.\nPlease install it from {dokanUrl}`
+  /// `Dokan is missing.{dokanUrl}`
   String messageErrorDokanNotInstalled(Object dokanUrl) {
     return Intl.message(
-      'Dokan is missing.\nPlease install it from $dokanUrl',
+      'Dokan is missing.$dokanUrl',
       name: 'messageErrorDokanNotInstalled',
       desc: '',
       args: [dokanUrl],

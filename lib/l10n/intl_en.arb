@@ -542,8 +542,8 @@
   "messageAwaitingResult":"Awaiting result...",
   "messageAuthenticate":"Authenticate",
   "messageInstallDokanForOuisync":"Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.",
-  "messageDokanDifferentMayor":"Seems your Dokan is out of date. Please update it to the latest version.", 
-  "messageDokanOlderVersion":"A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.",
+  "messageDokanDifferentMayor":"Installed Dokan is out of date. Please update it to the latest version.", 
+  "messageDokanOlderVersion":"Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.",
   "messageDokanInstallationFailed":"The Dokan installation failed.",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
@@ -684,13 +684,13 @@
   "actionNewMediaFile":"Media",
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
-  "messageFailedToMount": "Can't open repositories: {reason}",
+  "messageFailedToMount": "Accessing repositories via File Explorer is not available: {reason}",
   "@messageFailedToMount": {
     "placeholders": {
         "reason": {}
     }
   },
-  "messageErrorDokanNotInstalled": "Dokan is missing.\nPlease install it from {dokanUrl}",
+  "messageErrorDokanNotInstalled": "Dokan is missing.{dokanUrl}",
   "@messageErrorDokanNotInstalled": {
     "placeholders": {
         "dokanUrl": {}
