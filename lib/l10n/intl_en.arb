@@ -107,6 +107,9 @@
   "titleUPnP":"Universal Plug and Play (UPnP)",
   "titleSortBy":"Sort by",
   "titleUserProvidedPeers":"User provided peers",
+  "titleDokanInstallation":"Dokan installation",
+  "titleDokanMissing":"Dokan is missing",
+  "titleDokanInstallationFound":"Dokan installation found",
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -538,6 +541,10 @@
   "messageErrorDetail":"Error: {error}",
   "messageAwaitingResult":"Awaiting result...",
   "messageAuthenticate":"Authenticate",
+  "messageInstallDokanForOuisync":"To access repositories via the File Explorer, Ouisync uses Dokan.\nPlease install Dokan to enhance your Ouisync experience",
+  "messageDokanDifferentMayor":"Seems your Dokan is out of date. Please update it to the latest version", 
+  "messageDokanOlderVersion":"A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again",
+  "messageDokanInstallationFailed":"The Dokan installation failed",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "menuItemRepository":"Repository",
@@ -675,13 +682,16 @@
   "actionRemoveLocalPassword":"Remove local password",
   "actionUpdate":"Update",
   "actionNewMediaFile":"Media",
-  "messageFailedToMount": "Failed to mount: {reason}",
+  "actionSkipInstallation":"Skip installation",
+  "actionInstallDokan":"Install Dokan",
+  "actionUpdateDokan":"Update Dokan",
+  "messageFailedToMount": "Can't open repositories: {reason}",
   "@messageFailedToMount": {
     "placeholders": {
         "reason": {}
     }
   },
-  "messageErrorDokanNotInstalled": "Missing Dokan installation. Please install it from {dokanUrl}",
+  "messageErrorDokanNotInstalled": "Dokan is missing.\nPlease install it from {dokanUrl}",
   "@messageErrorDokanNotInstalled": {
     "placeholders": {
         "dokanUrl": {}

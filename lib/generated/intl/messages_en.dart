@@ -37,13 +37,13 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m6(error) => "Error: ${error}";
 
   static String m7(dokanUrl) =>
-      "Missing Dokan installation. Please install it from ${dokanUrl}";
+      "Dokan is missing.\nPlease install it from ${dokanUrl}";
 
   static String m8(name) => "Initialization of the repository ${name} failed";
 
   static String m9(path) => "${path} is not empty";
 
-  static String m10(reason) => "Failed to mount: ${reason}";
+  static String m10(reason) => "Can\'t open repositories: ${reason}";
 
   static String m11(name) =>
       "${name} already exist in this location.\n\nWhat do you want to do?";
@@ -144,6 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
+        "actionInstallDokan":
+            MessageLookupByLibrary.simpleMessage("Install Dokan"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),
@@ -174,9 +176,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
+        "actionSkipInstallation":
+            MessageLookupByLibrary.simpleMessage("Skip installation"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
+        "actionUpdateDokan":
+            MessageLookupByLibrary.simpleMessage("Update Dokan"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Locate"),
@@ -351,6 +357,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
+        "messageDokanDifferentMayor": MessageLookupByLibrary.simpleMessage(
+            "Seems your Dokan is out of date. Please update it to the latest version"),
+        "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
+            "The Dokan installation failed"),
+        "messageDokanOlderVersion": MessageLookupByLibrary.simpleMessage(
+            "A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again"),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("File download canceled"),
         "messageDownloadFileLocation": m1,
@@ -494,6 +506,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
+        "messageInstallDokanForOuisync": MessageLookupByLibrary.simpleMessage(
+            "To access repositories via the File Explorer, Ouisync uses Dokan.\nPlease install Dokan to enhance your Ouisync experience"),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage(
                 "International Bill of Human Rights"),
@@ -805,6 +819,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "3.4 Deletion of your data from our Always-On-Peer server"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("Digital Security"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("Dokan installation"),
+        "titleDokanInstallationFound":
+            MessageLookupByLibrary.simpleMessage("Dokan installation found"),
+        "titleDokanMissing":
+            MessageLookupByLibrary.simpleMessage("Dokan is missing"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Download location"),
         "titleDownloadToDevice":

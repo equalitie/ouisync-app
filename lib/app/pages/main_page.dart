@@ -270,31 +270,26 @@ class _MainPageState extends State<MainPage>
       case DokanResult.newerVersionMayor:
         {
           // No install required
-          loggy.app(
-            'The Dokan version installed is supported: ${result.name}',
-          );
+          loggy.app('The Dokan version installed is supported: ${result.name}');
         }
       case DokanResult.notFound:
         {
           //Install Dokan using the bundled MSI
-          final dokanNotFoundMessage =
-              'To access repositories via the File Explorer, Ouisync uses '
-              'Dokan.\n'
-              'Please install Dokan to enhance your Ouisync experience';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
                 Dialogs.simpleAlertDialog(
                     context: context,
-                    title: 'Dokan is missing',
-                    message: dokanNotFoundMessage,
+                    title: S.current.titleDokanMissing,
+                    message: S.current.messageInstallDokanForOuisync,
                     actions: [
                       TextButton(
-                          child: Text('Skip installation'.toUpperCase()),
+                          child: Text(
+                              S.current.actionSkipInstallation.toUpperCase()),
                           onPressed: () => Navigator.of(context).pop(false)),
                       TextButton(
-                          child: Text('Install Dokan'.toUpperCase()),
+                          child:
+                              Text(S.current.actionInstallDokan.toUpperCase()),
                           onPressed: () => Navigator.of(context).pop(true))
                     ]).then(
                   (installDokan) async {
@@ -310,23 +305,20 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.differentMayor:
         {
-          final dokanDifferentMayorMessage =
-              'Seems your Dokan is out of date. Please update it to the latest '
-              'version';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
                 Dialogs.simpleAlertDialog(
                     context: context,
-                    title: 'Dokan out of date',
-                    message: dokanDifferentMayorMessage,
+                    title: S.current.titleDokanInstallationFound,
+                    message: S.current.messageDokanDifferentMayor,
                     actions: [
                       TextButton(
-                          child: Text('Skip'.toUpperCase()),
+                          child: Text(S.current.actionSkip.toUpperCase()),
                           onPressed: () => Navigator.of(context).pop(false)),
                       TextButton(
-                          child: Text('Update Dokan'.toUpperCase()),
+                          child:
+                              Text(S.current.actionUpdateDokan.toUpperCase()),
                           onPressed: () => Navigator.of(context).pop(true))
                     ]).then(
                   (installDokan) async {
@@ -342,21 +334,14 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.olderVersionMayor:
         {
-          final dokanOlderVersionMessage =
-              'A previous version of Dokan is already installed.\n\n'
-              'Please uninstall the existing version of Dokan, reboot the system'
-              ' and run Ouisync again';
-
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                Dialogs.simpleAlertDialog(
-                  context: context,
-                  title: 'Dokan installation found',
-                  message: dokanOlderVersionMessage,
-                ),
-              );
-            },
+            (_) => unawaited(
+              Dialogs.simpleAlertDialog(
+                context: context,
+                title: S.current.titleDokanInstallationFound,
+                message: S.current.messageDokanOlderVersion,
+              ),
+            ),
           );
         }
     }
@@ -381,8 +366,8 @@ class _MainPageState extends State<MainPage>
 
     await Dialogs.simpleAlertDialog(
       context: context,
-      title: 'Dokan installation',
-      message: 'The Dokan installation failed',
+      title: S.current.titleDokanInstallation,
+      message: S.current.messageDokanInstallationFailed,
     );
   }
 
