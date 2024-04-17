@@ -96,7 +96,7 @@ extension FileProviderExtension {
                     let repos = try await ouisyncSession.listRepositories()
 
                     for repo in repos {
-                        let entries = try await repo.listEntries("/")
+                        let entries = try await repo.getRootDirectory().listEntries()
                         NSLog(">>>> \(entries)")
                     }
                     await refreshFileProvider()

@@ -11,85 +11,65 @@ import MessagePack
 import OuisyncLib
 import System
 
-enum OuisyncItem: Equatable {
-    case repo(RepositoryHandle)
-    case entry(OuisyncEntry)
-
-    init(_ identifier: NSFileProviderItemIdentifier) {
-        let arr = identifier.rawValue.components(separatedBy: "-")
-        if arr[0] == "repo" {
-            self = .repo(RepositoryHandle(arr[1])!)
-        } else if arr[0] == "entry" {
-            var type: OuisyncEntry.EntryType
-
-            switch arr[1] {
-            case "file": type = .file
-            case "directory": type = .directory
-            default:
-                fatalError("Invalid OuisyncEntry.EntryType")
-            }
-
-            self = .entry(OuisyncEntry(FilePath(arr[2]), type))
-        }
-        fatalError("Failed to parse NSFileProviderItemIdentifier into OuisyncItem")
-    }
-
-    func identifier() -> NSFileProviderItemIdentifier {
-        switch self {
-        case .repo(let handle): return NSFileProviderItemIdentifier("repo-\(handle)")
-        case .entry(let entry):
-            let typeStr: String?
-
-            switch entry.type {
-            case .file: typeStr = "file"
-            case .directory: typeStr = "directory"
-            }
-
-            return NSFileProviderItemIdentifier("entry-\(typeStr!)-\(entry.path)")
-        }
-    }
-}
-enum ItemEnum: Equatable {
-    case root
+enum ItemEnum: CustomDebugStringConvertible {
+    case repositoryList
     case trash
     case workingSet
-    case handle(OuisyncItem)
+    case entry(Entry)
 
+    init(_ entry: Entry) {
+        self = .entry(entry)
+    }
+
+    init(_ entry: FileEntry) {
+        self = .entry(.file(entry))
+    }
+
+    init(_ entry: DirectoryEntry) {
+        self = .entry(.directory(entry))
+    }
+    
     init(_ identifier: NSFileProviderItemIdentifier) {
         switch identifier {
         case .rootContainer:
-            self = .root
+            self = .repositoryList
         case .trashContainer:
             self = .trash
         case .workingSet:
             self = .workingSet
         default:
-            self = .handle(OuisyncItem(identifier))
+            self = .entry(Entry.deserialize(identifier.rawValue)!)
         }
     }
 
     func identifier() -> NSFileProviderItemIdentifier {
         switch self {
-        case .root: return .rootContainer
+        case .repositoryList: return .rootContainer
         case .trash: return .trashContainer
         case .workingSet: return .workingSet
-        case .handle(let handle): return handle.identifier()
+        case .entry(let entry): return NSFileProviderItemIdentifier(entry.serialize())
         }
     }
 
-    func toString() -> String {
+    func hasChildren() -> Bool {
         switch self {
-        case .root: return ".rootContainer"
-        case .trash: return ".trashContainer"
-        case .workingSet: return ".workingSet"
-        case .handle(let handle): return "handle-\(handle)"
-        }
-    }
-
-    func isHandle() -> Bool {
-        switch self {
-        case .handle: return true
+        case .repositoryList: return true
+        case .entry(let entry):
+            return entry.hasChildren()
         default: return false
+        }
+    }
+
+    var debugDescription: String {
+        switch self {
+        case .repositoryList:
+            return "ItemEnum(.repositoryList)"
+        case .trash:
+            return "ItemEnum(.trash)"
+        case .workingSet:
+            return "ItemEnum(.workingSet)"
+        case .entry(let entry):
+            return "ItemEnum(.entry(\(entry.serialize())))"
         }
     }
 }
@@ -103,25 +83,28 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.name = name
     }
 
+    init(_ entry: OuisyncEntry) {
+        self.item = .entry(Entry(entry))
+        self.name = entry.name()
+    }
+
     public static func fromOuisyncRepository(_ repo: OuisyncRepository) async throws -> FileProviderItem {
         let name = try await repo.getName()
-        return FileProviderItem(.handle(.repo(repo.handle)), name)
+        return FileProviderItem(.entry(Entry(DirectoryEntry.root(repo.handle))), name)
     }
 
     public static func fromIdentifier(_ identifier: NSFileProviderItemIdentifier, _ session: OuisyncSession?) async throws -> FileProviderItem {
         let item = ItemEnum(identifier)
         
         switch item {
-        case .root: return FileProviderItem(item, ".root")
+        case .repositoryList: return FileProviderItem(item, ".repositoryList")
         case .trash: return FileProviderItem(item, ".trash")
         case .workingSet: return FileProviderItem(item, ".workingSet")
-        case .handle(let ouisyncItem):
-            switch ouisyncItem {
-            case .repo(let handle):
-                let repo = OuisyncRepository(handle, session!)
-                let name = try await repo.getName()
-                return FileProviderItem(item, name)
-            case .entry(let entry):
+        case .entry(let entry):
+            switch entry {
+            case .directory(let entry):
+                return FileProviderItem(item, entry.name())
+            case .file(let entry):
                 return FileProviderItem(item, entry.name())
             }
         }
@@ -132,7 +115,22 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
     
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        return .rootContainer
+        switch item {
+        case .repositoryList: return .rootContainer
+        case .trash: return .trashContainer
+        case .workingSet: return .workingSet
+        case .entry(let entry):
+            switch entry {
+            case .file(let file):
+                return ItemEnum(FileEntry(OuisyncFile.parent(file.path), file.repositoryHandle)).identifier()
+            case .directory(let dir):
+                guard let parentPath = OuisyncDirectory.parent(dir.path) else {
+                    // It's the root of a repository so the .rootContainer
+                    return .rootContainer
+                }
+                return ItemEnum(DirectoryEntry(parentPath, dir.repositoryHandle)).identifier()
+            }
+        }
     }
     
     var capabilities: NSFileProviderItemCapabilities {
@@ -148,7 +146,6 @@ class FileProviderItem: NSObject, NSFileProviderItem {
     }
     
     var contentType: UTType {
-        return item == .root || item.isHandle() ? .folder : .plainText
-        //return item == .root ? .folder : .plainText
+        return item.hasChildren() ? .folder : .plainText
     }
 }
