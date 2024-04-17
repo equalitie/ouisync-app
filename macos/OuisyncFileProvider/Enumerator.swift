@@ -8,7 +8,7 @@
 import FileProvider
 import OuisyncLib
 
-class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
+class Enumerator: NSObject, NSFileProviderEnumerator {
     private let connection: OuisyncSession?
     private let item: ItemEnum
     private let anchor = NSFileProviderSyncAnchor("an anchor".data(using: .utf8)!)
@@ -62,10 +62,10 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
             Task {
                 let entries = try await dir.listEntries()
                 for entry in entries {
-                    let item = FileProviderItem(entry)
+                    let item = Item(entry)
                     NSLog("entry: \(entry) \(item.itemIdentifier.rawValue) \(item.parentItemIdentifier.rawValue)")
                 }
-                observer.didEnumerate(entries.map(FileProviderItem.init))
+                observer.didEnumerate(entries.map(Item.init))
                 observer.finishEnumerating(upTo: nil)
             }
         case .trash:
@@ -121,10 +121,10 @@ class FileProviderEnumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    func reposToItems(_ repos: Set<OuisyncRepository>) async -> Set<FileProviderItem> {
-        var items = Set<FileProviderItem>()
+    func reposToItems(_ repos: Set<OuisyncRepository>) async -> Set<Item> {
+        var items = Set<Item>()
         for repo in repos {
-            let item = (try? await FileProviderItem.fromOuisyncRepository(repo))!
+            let item = (try? await Item.fromOuisyncRepository(repo))!
             items.insert(item)
         }
         return items

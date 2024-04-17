@@ -74,7 +74,7 @@ enum ItemEnum: CustomDebugStringConvertible {
     }
 }
 
-class FileProviderItem: NSObject, NSFileProviderItem {
+class Item: NSObject, NSFileProviderItem {
     let item: ItemEnum
     let name: String
 
@@ -88,24 +88,24 @@ class FileProviderItem: NSObject, NSFileProviderItem {
         self.name = entry.name()
     }
 
-    public static func fromOuisyncRepository(_ repo: OuisyncRepository) async throws -> FileProviderItem {
+    public static func fromOuisyncRepository(_ repo: OuisyncRepository) async throws -> Item {
         let name = try await repo.getName()
-        return FileProviderItem(.entry(Entry(DirectoryEntry.root(repo.handle))), name)
+        return Item(.entry(Entry(DirectoryEntry.root(repo.handle))), name)
     }
 
-    public static func fromIdentifier(_ identifier: NSFileProviderItemIdentifier, _ session: OuisyncSession?) async throws -> FileProviderItem {
+    public static func fromIdentifier(_ identifier: NSFileProviderItemIdentifier, _ session: OuisyncSession?) async throws -> Item {
         let item = ItemEnum(identifier)
         
         switch item {
-        case .repositoryList: return FileProviderItem(item, ".repositoryList")
-        case .trash: return FileProviderItem(item, ".trash")
-        case .workingSet: return FileProviderItem(item, ".workingSet")
+        case .repositoryList: return Item(item, ".repositoryList")
+        case .trash: return Item(item, ".trash")
+        case .workingSet: return Item(item, ".workingSet")
         case .entry(let entry):
             switch entry {
             case .directory(let entry):
-                return FileProviderItem(item, entry.name())
+                return Item(item, entry.name())
             case .file(let entry):
-                return FileProviderItem(item, entry.name())
+                return Item(item, entry.name())
             }
         }
     }

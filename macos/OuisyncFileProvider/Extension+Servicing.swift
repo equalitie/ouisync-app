@@ -22,7 +22,7 @@ class OuisyncLibrarySender: OuisyncLibrarySenderProtocol {
     }
 }
 
-extension FileProviderExtension: NSFileProviderServicing {
+extension Extension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
                                         completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Progress {
         completionHandler([OuisyncServiceSource(self)], nil)
@@ -32,7 +32,7 @@ extension FileProviderExtension: NSFileProviderServicing {
     }
 }
 
-extension FileProviderExtension {
+extension Extension {
     class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
         var nextMessageId: MessageId = 0
 
@@ -106,10 +106,10 @@ extension FileProviderExtension {
             return true
         }
 
-        weak var ext: FileProviderExtension?
+        weak var ext: Extension?
         let listeners = NSHashTable<NSXPCListener>()
 
-        init(_ ext: FileProviderExtension) {
+        init(_ ext: Extension) {
             self.ext = ext
         }
 

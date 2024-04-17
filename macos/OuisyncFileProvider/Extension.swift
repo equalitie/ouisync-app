@@ -12,7 +12,7 @@ class State {
     var items = Set<OuisyncRepository>()
 }
 
-class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
+class Extension: NSObject, NSFileProviderReplicatedExtension {
     var ouisyncSession: OuisyncSession?
     let state = State()
 
@@ -36,7 +36,7 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
         // TODO: implement the actual lookup
 
         Task {
-            let item = try await FileProviderItem.fromIdentifier(identifier, ouisyncSession)
+            let item = try await Item.fromIdentifier(identifier, ouisyncSession)
             completionHandler(item, nil)
         }
         return Progress()
@@ -71,8 +71,14 @@ class FileProviderExtension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
-        Self.log("enumerator(for: \(ItemEnum(containerItemIdentifier)), request: \(request)")
-        return FileProviderEnumerator(enumeratedItemIdentifier: containerItemIdentifier, self.ouisyncSession, self.state)
+        var identifier = containerItemIdentifier
+
+        if identifier == .workingSet {
+            identifier = .rootContainer
+        }
+
+        Self.log("enumerator(for: \(ItemEnum(identifier)), request: \(request)")
+        return Enumerator(enumeratedItemIdentifier: identifier, self.ouisyncSession, self.state)
     }
 
     static func log(_ str: String) {
