@@ -284,8 +284,7 @@ class _MainPageState extends State<MainPage>
                     message: S.current.messageInstallDokanForOuisync,
                     actions: [
                       TextButton(
-                          child: Text(
-                              S.current.actionSkipInstallation.toUpperCase()),
+                          child: Text(S.current.actionSkip.toUpperCase()),
                           onPressed: () => Navigator.of(context).pop(false)),
                       TextButton(
                           child:

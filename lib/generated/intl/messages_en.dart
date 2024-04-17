@@ -176,8 +176,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
-        "actionSkipInstallation":
-            MessageLookupByLibrary.simpleMessage("Skip installation"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
@@ -358,11 +356,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
         "messageDokanDifferentMayor": MessageLookupByLibrary.simpleMessage(
-            "Seems your Dokan is out of date. Please update it to the latest version"),
+            "Seems your Dokan is out of date. Please update it to the latest version."),
         "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
-            "The Dokan installation failed"),
+            "The Dokan installation failed."),
         "messageDokanOlderVersion": MessageLookupByLibrary.simpleMessage(
-            "A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again"),
+            "A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("File download canceled"),
         "messageDownloadFileLocation": m1,
@@ -507,7 +505,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
         "messageInstallDokanForOuisync": MessageLookupByLibrary.simpleMessage(
-            "To access repositories via the File Explorer, Ouisync uses Dokan.\nPlease install Dokan to enhance your Ouisync experience"),
+            "Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience."),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage(
                 "International Bill of Human Rights"),

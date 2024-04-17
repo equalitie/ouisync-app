@@ -3900,40 +3900,40 @@ class S {
     );
   }
 
-  /// `To access repositories via the File Explorer, Ouisync uses Dokan.\nPlease install Dokan to enhance your Ouisync experience`
+  /// `Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.`
   String get messageInstallDokanForOuisync {
     return Intl.message(
-      'To access repositories via the File Explorer, Ouisync uses Dokan.\nPlease install Dokan to enhance your Ouisync experience',
+      'Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.',
       name: 'messageInstallDokanForOuisync',
       desc: '',
       args: [],
     );
   }
 
-  /// `Seems your Dokan is out of date. Please update it to the latest version`
+  /// `Seems your Dokan is out of date. Please update it to the latest version.`
   String get messageDokanDifferentMayor {
     return Intl.message(
-      'Seems your Dokan is out of date. Please update it to the latest version',
+      'Seems your Dokan is out of date. Please update it to the latest version.',
       name: 'messageDokanDifferentMayor',
       desc: '',
       args: [],
     );
   }
 
-  /// `A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again`
+  /// `A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
   String get messageDokanOlderVersion {
     return Intl.message(
-      'A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again',
+      'A previous version of Dokan is already installed.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
       name: 'messageDokanOlderVersion',
       desc: '',
       args: [],
     );
   }
 
-  /// `The Dokan installation failed`
+  /// `The Dokan installation failed.`
   String get messageDokanInstallationFailed {
     return Intl.message(
-      'The Dokan installation failed',
+      'The Dokan installation failed.',
       name: 'messageDokanInstallationFailed',
       desc: '',
       args: [],
@@ -4765,16 +4765,6 @@ class S {
     return Intl.message(
       'Media',
       name: 'actionNewMediaFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skip installation`
-  String get actionSkipInstallation {
-    return Intl.message(
-      'Skip installation',
-      name: 'actionSkipInstallation',
       desc: '',
       args: [],
     );
