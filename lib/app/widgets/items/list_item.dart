@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 import '../widgets.dart';
 
 class FileListItem extends StatelessWidget {
@@ -33,14 +34,12 @@ class FileListItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Expanded(flex: 1, child: FileIconAnimated(downloadJob)),
-          Expanded(
-            flex: 9,
-            child: Padding(
-              padding: Dimensions.paddingItem,
-              child: FileDescription(repoCubit, entry, uploadJob),
-            ),
+          FileIconAnimated(downloadJob),
+          Padding(
+            padding: Dimensions.paddingItem,
+            child: FileDescription(repoCubit, entry, uploadJob),
           ),
+          Spacer(),
           _VerticalDotsButton(uploadJob == null ? verticalDotsAction : null),
         ],
       ),
@@ -66,24 +65,19 @@ class DirectoryListItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Expanded(
-              flex: 1,
-              child: Icon(
-                Icons.folder_rounded,
-                size: Dimensions.sizeIconAverage,
-                color: Constants.folderIconColor,
+            Icon(
+              Icons.folder_rounded,
+              size: Dimensions.sizeIconAverage,
+              color: Constants.folderIconColor,
+            ),
+            Padding(
+              padding: Dimensions.paddingItem,
+              child: Fields.ellipsedText(
+                entry.name,
+                ellipsisPosition: TextOverflowPosition.middle,
               ),
             ),
-            Expanded(
-              flex: 9,
-              child: Padding(
-                padding: Dimensions.paddingItem,
-                child: Fields.ellipsedText(
-                  entry.name,
-                  ellipsisPosition: TextOverflowPosition.middle,
-                ),
-              ),
-            ),
+            Spacer(),
             _VerticalDotsButton(verticalDotsAction),
           ],
         ),
@@ -112,28 +106,24 @@ class RepoListItem extends StatelessWidget {
           builder: (context, state) => Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: IconButton(
-                  icon: Icon(
-                    Fields.accessModeIcon(state.accessMode),
-                    size: Dimensions.sizeIconAverage,
-                  ),
-                  color: Constants.folderIconColor,
-                  padding: EdgeInsets.all(0.0),
-                  onPressed: () => repoCubit.lock(),
+              IconButton(
+                icon: Icon(
+                  Fields.accessModeIcon(state.accessMode),
+                  size: Dimensions.sizeIconAverage,
+                ),
+                color: Constants.folderIconColor,
+                padding: EdgeInsets.all(0.0),
+                onPressed: () => repoCubit.lock(),
+              ),
+              Padding(
+                padding: Dimensions.paddingItem,
+                child: RepoDescription(
+                  state,
+                  isDefault: isDefault,
                 ),
               ),
-              Expanded(
-                flex: 9,
-                child: Padding(
-                  padding: Dimensions.paddingItem,
-                  child: RepoDescription(
-                    state,
-                    isDefault: isDefault,
-                  ),
-                ),
-              ),
+              Spacer(),
+              RepoStatus(repoCubit),
               _VerticalDotsButton(verticalDotsAction),
             ],
           ),

@@ -6,6 +6,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 
 class RepositoriesBar extends StatelessWidget
     with AppLogger
@@ -25,14 +26,10 @@ class RepositoriesBar extends StatelessWidget
         return Row(
           children: [
             _buildBackButton(),
-            Expanded(
-              child: Row(
-                children: [
-                  _buildName(reposCubit.currentRepo),
-                  _buildLockButton(reposCubit.currentRepo),
-                ],
-              ),
-            ),
+            _buildName(reposCubit.currentRepo),
+            Spacer(),
+            _buildStatus(reposCubit.currentRepo),
+            _buildLockButton(reposCubit.currentRepo),
           ],
         );
       });
@@ -42,6 +39,13 @@ class RepositoriesBar extends StatelessWidget
         softWrap: false,
         textOverflow: TextOverflow.fade,
       );
+
+  Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
+      ? Padding(
+          padding: EdgeInsets.only(right: 10.0),
+          child: RepoStatus(repo.cubit),
+        )
+      : SizedBox.shrink();
 
   Widget _buildLockButton(RepoEntry? repo) {
     final repoCubit = repo?.cubit;

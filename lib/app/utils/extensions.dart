@@ -192,3 +192,9 @@ Future<bool> _isCacheServersEnabled(
   return await Future.wait(Constants.cacheServers.map(check))
       .then((results) => results.contains(true));
 }
+
+extension ProgressExtension on Progress {
+  double get fraction => total > 0 ? value.toDouble() / total.toDouble() : 1.0;
+
+  bool get isComplete => value == total;
+}

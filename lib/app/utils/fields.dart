@@ -121,21 +121,24 @@ class Fields {
         ),
       );
 
-  static Widget bottomSheetTitle(String title,
-          {EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
-          TextAlign textAlign = TextAlign.start,
-          TextOverflow textOverflow = TextOverflow.ellipsis,
-          bool softWrap = true,
-          TextStyle? style}) =>
+  static Widget bottomSheetTitle(
+    String title, {
+    EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.ellipsis,
+    bool softWrap = true,
+    TextStyle? style,
+  }) =>
       Padding(
-          padding: padding,
-          child: Row(children: [
-            Text(title,
-                textAlign: textAlign,
-                softWrap: softWrap,
-                overflow: textOverflow,
-                style: style)
-          ]));
+        padding: padding,
+        child: Text(
+          title,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          style: style,
+        ),
+      );
 
   static Widget idLabel(String text,
           {TextAlign textAlign = TextAlign.center,

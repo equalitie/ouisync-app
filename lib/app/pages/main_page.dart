@@ -21,7 +21,6 @@ import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
 import '../utils/path.dart' as repo_path;
 import '../utils/utils.dart';
-import '../widgets/repository_progress.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -598,9 +597,6 @@ class _MainPageState extends State<MainPage>
               children: [
                 Expanded(child: buildMainWidget()),
               ],
-            ),
-            _cubits.repositories.builder(
-              (repos) => RepositoryProgress(repos.currentRepo?.cubit),
             ),
             const ListenerThatRunsFunctionsWithBuildContext(),
           ],
