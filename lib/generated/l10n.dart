@@ -790,6 +790,36 @@ class S {
     );
   }
 
+  /// `Dokan installation`
+  String get titleDokanInstallation {
+    return Intl.message(
+      'Dokan installation',
+      name: 'titleDokanInstallation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dokan is missing`
+  String get titleDokanMissing {
+    return Intl.message(
+      'Dokan is missing',
+      name: 'titleDokanMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dokan installation found`
+  String get titleDokanInstallationFound {
+    return Intl.message(
+      'Dokan installation found',
+      name: 'titleDokanInstallationFound',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -3870,6 +3900,76 @@ class S {
     );
   }
 
+  /// `Dokan`
+  String get messageDokan {
+    return Intl.message(
+      'Dokan',
+      name: 'messageDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ouisync uses`
+  String get messageInstallDokanForOuisyncP1 {
+    return Intl.message(
+      'Ouisync uses',
+      name: 'messageInstallDokanForOuisyncP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.`
+  String get messageInstallDokanForOuisyncP2 {
+    return Intl.message(
+      'to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.',
+      name: 'messageInstallDokanForOuisyncP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installed`
+  String get messageDokanDifferentMayorP1 {
+    return Intl.message(
+      'The installed',
+      name: 'messageDokanDifferentMayorP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date. Please update it to the latest version.`
+  String get messageDokanDifferentMayorP2 {
+    return Intl.message(
+      'is out of date. Please update it to the latest version.',
+      name: 'messageDokanDifferentMayorP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
+  String get messageDokanOlderVersionP2 {
+    return Intl.message(
+      'is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
+      name: 'messageDokanOlderVersionP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Dokan installation failed.`
+  String get messageDokanInstallationFailed {
+    return Intl.message(
+      'The Dokan installation failed.',
+      name: 'messageDokanInstallationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4700,20 +4800,40 @@ class S {
     );
   }
 
-  /// `Failed to mount: {reason}`
+  /// `Install Dokan`
+  String get actionInstallDokan {
+    return Intl.message(
+      'Install Dokan',
+      name: 'actionInstallDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Dokan`
+  String get actionUpdateDokan {
+    return Intl.message(
+      'Update Dokan',
+      name: 'actionUpdateDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accessing repositories via File Explorer is not available: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(
-      'Failed to mount: $reason',
+      'Accessing repositories via File Explorer is not available: $reason',
       name: 'messageFailedToMount',
       desc: '',
       args: [reason],
     );
   }
 
-  /// `Missing Dokan installation. Please install it from {dokanUrl}`
+  /// `Dokan is missing.{dokanUrl}`
   String messageErrorDokanNotInstalled(Object dokanUrl) {
     return Intl.message(
-      'Missing Dokan installation. Please install it from $dokanUrl',
+      'Dokan is missing.$dokanUrl',
       name: 'messageErrorDokanNotInstalled',
       desc: '',
       args: [dokanUrl],

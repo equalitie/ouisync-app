@@ -270,34 +270,64 @@ class _MainPageState extends State<MainPage>
       case DokanResult.newerVersionMayor:
         {
           // No install required
-          loggy.app(
-            'The Dokan version installed is supported: ${result.name}',
-          );
+          loggy.app('The Dokan version installed is supported: ${result.name}');
         }
       case DokanResult.notFound:
         {
           //Install Dokan using the bundled MSI
-          final dokanNotFoundMessage =
-              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
-              'which later can be found in the File Explorer.\n\n'
-              'We can try to install it for you';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: 'Dokan ${Constants.dokanMinimunVersion} missing',
-                    message: dokanNotFoundMessage,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanMissing,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageInstallDokanForOuisyncP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageInstallDokanForOuisyncP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text('SKIP INSTALLATION'),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child: Text(
-                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -311,28 +341,59 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.differentMayor:
         {
-          final dokanDifferentMayorMessage =
-              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
-              'which later can be found in the File Explorer.\n\n'
-              'We found a different mayor version of Dokan thant the version '
-              'required for Ouisync, but we can try to install it for you';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: 'Dokan ${Constants.dokanMayorRequired} missing',
-                    message: dokanDifferentMayorMessage,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanInstallationFound,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageDokanDifferentMayorP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageDokanDifferentMayorP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text('SKIP INSTALLATION'),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child: Text(
-                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -346,25 +407,71 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.olderVersionMayor:
         {
-          final dokanOlderVersionMessage =
-              'A previous version of Dokan is already installed.\n\n'
-              'Please uninstall the existing version '
-              '${Constants.dokanMayorRequired} of Dokan, reboot the system and '
-              'run Ouisync again';
-
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                Dialogs.simpleAlertDialog(
-                  context: context,
-                  title: 'Dokan ${Constants.dokanMayorRequired} found',
-                  message: dokanOlderVersionMessage,
+            (_) => unawaited(
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      Fields.constrainedText(
+                        S.current.titleDokanInstallationFound,
+                        style: context.theme.appTextStyle.titleMedium,
+                        maxLines: 2,
+                      )
+                    ],
+                  ),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: context.theme.appTextStyle.bodyMedium,
+                            children: [
+                              TextSpan(
+                                  text:
+                                      '${S.current.messageDokanDifferentMayorP1} '),
+                              Fields.linkTextSpan(
+                                context,
+                                S.current.messageDokan,
+                                _launchDokanGitHub,
+                              ),
+                              TextSpan(
+                                  text:
+                                      ' ${S.current.messageDokanOlderVersionP2}')
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text(S.current.actionCloseCapital),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(false),
+                    )
+                  ],
                 ),
-              );
-            },
+              ).then(
+                (installDokan) async {
+                  if (installDokan ?? false) {
+                    unawaited(_installBundledDokan(
+                        dokanCheck.runDokanMsiInstallation));
+                  }
+                },
+              ),
+            ),
           );
         }
     }
+  }
+
+  void _launchDokanGitHub(BuildContext context) async {
+    final title = Text('Dokan');
+    await Fields.openUrl(context, title, Constants.dokanUrl);
   }
 
   Future<void> _installBundledDokan(
@@ -384,11 +491,10 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final message = 'The Dokan installation failed';
     await Dialogs.simpleAlertDialog(
       context: context,
-      title: 'Dokan check',
-      message: message,
+      title: S.current.titleDokanInstallation,
+      message: S.current.messageDokanInstallationFailed,
     );
   }
 
