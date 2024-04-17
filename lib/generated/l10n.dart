@@ -3910,20 +3910,20 @@ class S {
     );
   }
 
-  /// `Installed Dokan is out of date. Please update it to the latest version.`
+  /// `The installed Dokan is out of date. Please update it to the latest version.`
   String get messageDokanDifferentMayor {
     return Intl.message(
-      'Installed Dokan is out of date. Please update it to the latest version.',
+      'The installed Dokan is out of date. Please update it to the latest version.',
       name: 'messageDokanDifferentMayor',
       desc: '',
       args: [],
     );
   }
 
-  /// `Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
+  /// `The installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
   String get messageDokanOlderVersion {
     return Intl.message(
-      'Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
+      'The installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
       name: 'messageDokanOlderVersion',
       desc: '',
       args: [],

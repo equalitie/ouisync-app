@@ -356,11 +356,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
         "messageDokanDifferentMayor": MessageLookupByLibrary.simpleMessage(
-            "Installed Dokan is out of date. Please update it to the latest version."),
+            "The installed Dokan is out of date. Please update it to the latest version."),
         "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
             "The Dokan installation failed."),
         "messageDokanOlderVersion": MessageLookupByLibrary.simpleMessage(
-            "Installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
+            "The installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("File download canceled"),
         "messageDownloadFileLocation": m1,
