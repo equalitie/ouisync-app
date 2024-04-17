@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:git/git.dart';
 import 'package:args/args.dart';
 import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
 import 'package:date_format/date_format.dart';
 import 'package:github/github.dart';
+import 'package:hex/hex.dart';
 import 'package:image/image.dart' as image;
 import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
@@ -83,6 +85,8 @@ Future<void> main(List<String> args) async {
     }
     print('');
   }
+
+  await computeChecksums(assets);
 
   final auth = options.token != null
       ? Authentication.withToken(options.token)
@@ -740,6 +744,9 @@ Future<void> uploadAssets(
   for (final asset in assets) {
     final name = p.basename(asset.path);
     final content = await asset.readAsBytes();
+    final contentType = p.extension(name) == checksumExtension
+        ? 'text/plain'
+        : 'application/octet-stream';
 
     print('Uploading $name ...');
 
@@ -748,7 +755,7 @@ Future<void> uploadAssets(
       [
         CreateReleaseAsset(
           name: name,
-          contentType: 'application/octet-stream',
+          contentType: contentType,
           assetData: content,
         )
       ],
@@ -768,6 +775,29 @@ Future<File> collateAsset(
   final ext = p.extension(inputFile.path);
   return await inputFile
       .copy(p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
+}
+
+const checksumExtension = '.sha256';
+
+Future<void> computeChecksums(List<File> assets) async {
+  assets.addAll(await Future.wait(assets.map(computeChecksum)));
+}
+
+Future<File> computeChecksum(File input) async {
+  final algo = Sha256();
+  final sink = algo.newHashSink();
+
+  await input.openRead().forEach((chunk) => sink.add(chunk));
+
+  sink.close();
+
+  final hash = HEX.encode((await sink.hash()).bytes);
+  final name = p.basename(input.path);
+
+  final output = File('${input.path}$checksumExtension');
+  await output.writeAsString('$hash  $name\n');
+
+  return output;
 }
 
 Future<String> buildReleaseNotes(

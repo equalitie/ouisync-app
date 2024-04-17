@@ -680,7 +680,7 @@ packages:
     source: hosted
     version: "2.3.1"
   hex:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: hex
       sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
