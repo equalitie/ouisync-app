@@ -3900,31 +3900,61 @@ class S {
     );
   }
 
-  /// `Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.`
-  String get messageInstallDokanForOuisync {
+  /// `Dokan`
+  String get messageDokan {
     return Intl.message(
-      'Ouisync uses Dokan to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.',
-      name: 'messageInstallDokanForOuisync',
+      'Dokan',
+      name: 'messageDokan',
       desc: '',
       args: [],
     );
   }
 
-  /// `The installed Dokan is out of date. Please update it to the latest version.`
-  String get messageDokanDifferentMayor {
+  /// `Ouisync uses`
+  String get messageInstallDokanForOuisyncP1 {
     return Intl.message(
-      'The installed Dokan is out of date. Please update it to the latest version.',
-      name: 'messageDokanDifferentMayor',
+      'Ouisync uses',
+      name: 'messageInstallDokanForOuisyncP1',
       desc: '',
       args: [],
     );
   }
 
-  /// `The installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
-  String get messageDokanOlderVersion {
+  /// `to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.`
+  String get messageInstallDokanForOuisyncP2 {
     return Intl.message(
-      'The installed Dokan is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
-      name: 'messageDokanOlderVersion',
+      'to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.',
+      name: 'messageInstallDokanForOuisyncP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installed`
+  String get messageDokanDifferentMayorP1 {
+    return Intl.message(
+      'The installed',
+      name: 'messageDokanDifferentMayorP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date. Please update it to the latest version.`
+  String get messageDokanDifferentMayorP2 {
+    return Intl.message(
+      'is out of date. Please update it to the latest version.',
+      name: 'messageDokanDifferentMayorP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
+  String get messageDokanOlderVersionP2 {
+    return Intl.message(
+      'is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
+      name: 'messageDokanOlderVersionP2',
       desc: '',
       args: [],
     );

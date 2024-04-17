@@ -278,19 +278,56 @@ class _MainPageState extends State<MainPage>
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: S.current.titleDokanMissing,
-                    message: S.current.messageInstallDokanForOuisync,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanMissing,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageInstallDokanForOuisyncP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageInstallDokanForOuisyncP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text(S.current.actionSkip.toUpperCase()),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child:
-                              Text(S.current.actionInstallDokan.toUpperCase()),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -307,19 +344,56 @@ class _MainPageState extends State<MainPage>
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: S.current.titleDokanInstallationFound,
-                    message: S.current.messageDokanDifferentMayor,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanInstallationFound,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageDokanDifferentMayorP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageDokanDifferentMayorP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text(S.current.actionSkip.toUpperCase()),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child:
-                              Text(S.current.actionUpdateDokan.toUpperCase()),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -335,15 +409,69 @@ class _MainPageState extends State<MainPage>
         {
           WidgetsBinding.instance.addPostFrameCallback(
             (_) => unawaited(
-              Dialogs.simpleAlertDialog(
+              showDialog(
                 context: context,
-                title: S.current.titleDokanInstallationFound,
-                message: S.current.messageDokanOlderVersion,
+                barrierDismissible: false,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      Fields.constrainedText(
+                        S.current.titleDokanInstallationFound,
+                        style: context.theme.appTextStyle.titleMedium,
+                        maxLines: 2,
+                      )
+                    ],
+                  ),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: context.theme.appTextStyle.bodyMedium,
+                            children: [
+                              TextSpan(
+                                  text:
+                                      '${S.current.messageDokanDifferentMayorP1} '),
+                              Fields.linkTextSpan(
+                                context,
+                                S.current.messageDokan,
+                                _launchDokanGitHub,
+                              ),
+                              TextSpan(
+                                  text:
+                                      ' ${S.current.messageDokanOlderVersionP2}')
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text(S.current.actionCloseCapital),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(false),
+                    )
+                  ],
+                ),
+              ).then(
+                (installDokan) async {
+                  if (installDokan ?? false) {
+                    unawaited(_installBundledDokan(
+                        dokanCheck.runDokanMsiInstallation));
+                  }
+                },
               ),
             ),
           );
         }
     }
+  }
+
+  void _launchDokanGitHub(BuildContext context) async {
+    final title = Text('Dokan');
+    await Fields.openUrl(context, title, Constants.dokanUrl);
   }
 
   Future<void> _installBundledDokan(
