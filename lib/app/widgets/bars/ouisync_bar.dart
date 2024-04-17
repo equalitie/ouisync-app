@@ -5,6 +5,8 @@ import '../../cubits/cubits.dart';
 import '../../utils/constants.dart';
 import 'folder_navigation_bar.dart';
 
+enum AppBarWidgetType { title, action }
+
 class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   OuiSyncBar({
     required this.reposCubit,
@@ -32,8 +34,22 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
             : null;
 
         final cubit = state.currentRepo?.cubit;
-        Widget titleWidget =
-            cubit != null ? getTitleWidget(cubit) : SizedBox.shrink();
+
+        final titleWidget = cubit != null
+            ? getTitleWidget(
+                cubit,
+                repoPicker,
+                FolderNavigationBar(cubit),
+              )
+            : const SizedBox.shrink();
+
+        final settingsButton = cubit != null
+            ? getSettingsAction(
+                cubit,
+                appSettingsButton,
+                repoSettingsButton,
+              )
+            : appSettingsButton;
 
         final actionsList = <Widget>[];
 
@@ -42,8 +58,7 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
         //   actionsList.add(searchButton);
         // }
 
-        actionsList.add(
-            state.showList == false ? repoSettingsButton : appSettingsButton);
+        actionsList.add(settingsButton);
 
         return AppBar(
           automaticallyImplyLeading: true,
@@ -56,16 +71,49 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
         );
       });
 
-  Widget getTitleWidget(RepoCubit? cubit) => BlocBuilder<RepoCubit, RepoState>(
-      bloc: cubit,
-      builder: (context, state) {
-        if (state.currentFolder.isRoot) {
-          return repoPicker;
-        }
+  Widget getTitleWidget(
+    RepoCubit cubit,
+    PreferredSizeWidget repoPicker,
+    FolderNavigationBar folderNavigationBar,
+  ) =>
+      BlocBuilder<RepoCubit, RepoState>(
+        bloc: cubit,
+        builder: (_, state) => _selectWidget(
+          AppBarWidgetType.title,
+          state.currentFolder.isRoot,
+          repoPicker,
+          folderNavigationBar,
+        ),
+      );
 
-        final cubit = reposCubit.currentRepo?.cubit;
-        return cubit != null ? FolderNavigationBar(cubit) : SizedBox.shrink();
-      });
+  Widget getSettingsAction(
+    RepoCubit cubit,
+    Widget appSettingsButton,
+    Widget repoSettingsButton,
+  ) =>
+      BlocBuilder<RepoCubit, RepoState>(
+        bloc: cubit,
+        builder: (_, state) => _selectWidget(
+          AppBarWidgetType.action,
+          state.currentFolder.isRoot,
+          repoSettingsButton,
+          appSettingsButton,
+        ),
+      );
+
+  Widget _selectWidget(
+    AppBarWidgetType type,
+    bool isFolderRoot,
+    Widget repoListWidget,
+    Widget folderContentWidget,
+  ) {
+    if (isFolderRoot) return repoListWidget;
+
+    return switch (type) {
+      AppBarWidgetType.title => folderContentWidget,
+      AppBarWidgetType.action => const SizedBox.shrink(),
+    };
+  }
 
   @override
   Size get preferredSize => Size(
