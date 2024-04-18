@@ -73,13 +73,16 @@ class _RepositorySettingsState extends State<RepositorySettings>
                               widget.repoCubit.setCacheServersEnabled(value),
                         ),
                       EntryActionItem(
-                          iconData: Icons.edit,
-                          title: S.current.actionRename,
-                          dense: true,
-                          onTap: () async => await renameRepository(context,
-                              repository: widget.repoCubit,
-                              reposCubit: widget.reposCubit,
-                              popDialog: () => Navigator.of(context).pop())),
+                        iconData: Icons.edit,
+                        title: S.current.actionRename,
+                        dense: true,
+                        onTap: () async => await renameRepository(
+                          context,
+                          repoCubit: widget.repoCubit,
+                          reposCubit: widget.reposCubit,
+                          popDialog: () => Navigator.of(context).pop(),
+                        ),
+                      ),
                       EntryActionItem(
                           iconData: Icons.share,
                           title: S.current.actionShare,

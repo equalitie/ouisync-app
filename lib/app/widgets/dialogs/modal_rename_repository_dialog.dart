@@ -1,118 +1,113 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/platform/platform.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class RenameRepository extends HookWidget {
-  RenameRepository({required this.parentContext, required this.oldName});
+class RenameRepository extends StatefulWidget {
+  RenameRepository(this.repoCubit, {super.key});
 
-  final BuildContext parentContext;
-  final String oldName;
-
-  final formKey = GlobalKey<FormState>();
-
-  late final TextEditingController newNameController;
-
-  late final FocusNode newNameTextFieldFocus;
-  late final FocusNode positiveButtonFocus;
+  final RepoCubit repoCubit;
 
   @override
-  Widget build(BuildContext context) {
-    initHooks();
-    selectNewName(oldName);
+  State<RenameRepository> createState() => _RenameRepository();
+}
 
-    return Form(
-      key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Column(
+class _RenameRepository extends State<RenameRepository> {
+  final formKey = GlobalKey<FormState>();
+  final newNameController = TextEditingController();
+  final newNameFocus = FocusNode();
+
+  var nameTaken = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    newNameController.text = widget.repoCubit.name;
+    newNameController.selectAll();
+  }
+
+  @override
+  Widget build(BuildContext context) => Form(
+        key: formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Fields.constrainedText('"$oldName"',
-                flex: 0,
-                style: context.theme.appTextStyle.bodyMedium
-                    .copyWith(fontWeight: FontWeight.w400)),
+            Fields.constrainedText(
+              '"$widget.oldName"',
+              flex: 0,
+              style: context.theme.appTextStyle.bodyMedium
+                  .copyWith(fontWeight: FontWeight.w400),
+            ),
             Fields.formTextField(
-                context: context,
-                controller: newNameController,
-                textInputAction: TextInputAction.done,
-                labelText: S.current.labelRenameRepository,
-                hintText: S.current.messageRepositoryNewName,
-                onFieldSubmitted: (newName) {
-                  final submitted = submitField(newName);
-                  if (submitted && PlatformValues.isDesktopDevice) {
-                    Navigator.of(context).pop(newName);
-                  }
-                },
-                validator: validateNoEmptyMaybeRegExpr(
-                    emptyError: S.current.messageErrorFormValidatorNameDefault,
-                    regExp: Strings.entityNameRegExp,
-                    regExpError: S.current.messageErrorCharactersNotAllowed),
-                focusNode: newNameTextFieldFocus,
-                autofocus: true),
-            Fields.dialogActions(context, buttons: _actions(context)),
-          ]),
-    );
+              context: context,
+              controller: newNameController,
+              textInputAction: TextInputAction.done,
+              labelText: S.current.labelRenameRepository,
+              hintText: S.current.messageRepositoryNewName,
+              errorText:
+                  nameTaken ? S.current.messageErrorRepositoryNameExist : null,
+              validator: validateNoEmptyMaybeRegExpr(
+                emptyError: S.current.messageErrorFormValidatorNameDefault,
+                regExp: Strings.entityNameRegExp,
+                regExpError: S.current.messageErrorCharactersNotAllowed,
+              ),
+              focusNode: newNameFocus,
+              autofocus: true,
+            ),
+            Fields.dialogActions(context, buttons: buildActions(context)),
+          ],
+        ),
+      );
+
+  List<Widget> buildActions(BuildContext context) => [
+        NegativeButton(
+          text: S.current.actionCancel,
+          onPressed: () => Navigator.of(context).pop(null),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        ),
+        PositiveButton(
+          text: S.current.actionRename,
+          onPressed: () => onSubmit(context),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        )
+      ];
+
+  Future<void> onSubmit(BuildContext context) async {
+    if (!(await validate(context))) {
+      newNameController.selectAll();
+      newNameFocus.requestFocus();
+
+      return;
+    }
+
+    Navigator.of(context).pop(newNameController.text);
   }
 
-  void initHooks() {
-    newNameController =
-        useTextEditingController.fromValue(TextEditingValue.empty);
-
-    newNameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
-    positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
-  }
-
-  void selectNewName(String value) {
-    newNameController.text = value;
-    newNameController.selectAll();
-  }
-
-  bool submitField(String? newName) {
-    final validationOk = _validateNewName(newName ?? '');
-    if (!validationOk) {
-      selectNewName(newName ?? '');
-      newNameTextFieldFocus.requestFocus();
-
+  Future<bool> validate(BuildContext context) async {
+    if (!formKey.currentState!.validate()) {
       return false;
     }
 
-    if (PlatformValues.isMobileDevice) {
-      positiveButtonFocus.requestFocus();
-    }
+    // Check if name is already taken
+    final newLocation =
+        widget.repoCubit.location.rename(newNameController.text);
+    final exists = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      File(newLocation.path).exists(),
+    );
 
-    return true;
-  }
+    setState(() {
+      nameTaken = exists;
+    });
 
-  bool _validateNewName(String newName) {
-    if (newName.isEmpty || newName == oldName) return false;
-
-    if (!(formKey.currentState?.validate() ?? false)) return false;
-
-    formKey.currentState!.save();
-    return true;
-  }
-
-  List<Widget> _actions(BuildContext context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
-        PositiveButton(
-            text: S.current.actionRename,
-            onPressed: () => onSaved(context, newNameController.text),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            focusNode: positiveButtonFocus)
-      ];
-
-  void onSaved(BuildContext context, String? newName) {
-    final submitted = submitField(newName);
-    if (submitted) {
-      Navigator.of(context).pop(newName);
-    }
+    return !exists;
   }
 }
