@@ -10,17 +10,18 @@ import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/platform/platform.dart';
 import '../utils/path.dart' as repo_path;
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import '../widgets/dialogs/alert/alert.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -490,10 +491,10 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    await Dialogs.simpleAlertDialog(
+    await Dialogs.showSimpleAlertDialog(
       context: context,
-      title: S.current.titleDokanInstallation,
-      message: S.current.messageDokanInstallationFailed,
+      title: CustomAlertTitle(S.current.titleDokanInstallation),
+      message: Text(S.current.messageDokanInstallationFailed),
     );
   }
 
@@ -909,10 +910,10 @@ class _MainPageState extends State<MainPage>
       );
 
   Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
-      Dialogs.simpleAlertDialog(
+      Dialogs.showSimpleAlertDialog(
         context: context,
-        title: S.current.titleMovingEntry,
-        message: S.current.messageMovingEntry,
+        title: CustomAlertTitle(S.current.titleMovingEntry),
+        message: Text(S.current.messageMovingEntry),
       );
 
   Future<dynamic> _showFileDetails(
@@ -1013,10 +1014,11 @@ class _MainPageState extends State<MainPage>
   Future<bool> canSaveMedia() async {
     final currentRepo = _currentRepo;
     if (currentRepo is! OpenRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
+      await Dialogs.showSimpleAlertDialog(
+        context: context,
+        title: CustomAlertTitle(S.current.titleAddFile),
+        message: Text(S.current.messageNoRepo),
+      );
 
       return false;
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../widgets/dialogs/alert/alert.dart';
 import '../widgets/widgets.dart';
 import 'utils.dart';
 
@@ -45,37 +46,32 @@ abstract class Dialogs {
             return _alertDialog(context, title, body, actions);
           });
 
-  static Future<bool?> simpleAlertDialog(
-      {required BuildContext context,
-      required String title,
-      required String message,
-      List<Widget>? actions}) {
+  static Future<bool?> showSimpleAlertDialog({
+    required BuildContext context,
+    required Widget title,
+    required Widget message,
+    List<Widget>? actions,
+  }) {
     actions ??= [
-      TextButton(
-        child: Text(S.current.actionCloseCapital),
-        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
+      CustomAlertAction(
+        parentContext: context,
+        text: S.current.actionCloseCapital,
       )
     ];
 
     return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return _alertDialog(context, title, [Text(message)], actions!);
-        });
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return CustomAlertDialog(
+          parentContext: context,
+          title: title,
+          body: [message],
+          actions: actions,
+        );
+      },
+    );
   }
-
-  static actionDialog(
-          BuildContext context, String dialogTitle, Widget? actionBody) =>
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return ActionsDialog(
-              title: dialogTitle,
-              body: actionBody,
-            );
-          });
 
   static AlertDialog _alertDialog(BuildContext context, String title,
           List<Widget> body, List<Widget> actions) =>

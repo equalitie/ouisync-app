@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart';
 import '../../utils/constants.dart';
+import '../../utils/dialogs.dart';
+import '../dialogs/alert/alert.dart';
 import 'folder_navigation_bar.dart';
 
 enum AppBarWidgetType { title, action }
@@ -57,6 +59,20 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
         // if (reposCubit.repos.isNotEmpty) {
         //   actionsList.add(searchButton);
         // }
+
+        actionsList.add(TextButton.icon(
+          onPressed: () async {
+            final result = await Dialogs.showSimpleAlertDialog(
+              context: context,
+              title: CustomAlertTitle('Title test'),
+              message: Text('Message test'),
+            );
+
+            print(result);
+          },
+          icon: const Icon(Icons.power),
+          label: Text('test'),
+        ));
 
         actionsList.add(settingsButton);
 

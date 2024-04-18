@@ -9,6 +9,7 @@ import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
+import 'alert/alert.dart';
 
 class RepositoryCreation extends StatefulWidget {
   RepositoryCreation({
@@ -308,10 +309,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       case OpenRepoEntry():
         Navigator.of(context).pop(location);
       case ErrorRepoEntry():
-        await Dialogs.simpleAlertDialog(
+        await Dialogs.showSimpleAlertDialog(
           context: context,
-          title: S.current.messsageFailedCreateRepository(location.path),
-          message: repoEntry.error,
+          title: CustomAlertTitle(
+              S.current.messsageFailedCreateRepository(location.path)),
+          message: Text(repoEntry.error),
         );
 
         return;
