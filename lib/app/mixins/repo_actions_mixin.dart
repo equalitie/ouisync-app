@@ -15,16 +15,17 @@ mixin RepositoryActionsMixin on LoggyType {
   /// rename => ReposCubit.renameRepository
   Future<void> renameRepository(
     BuildContext context, {
-    required RepoCubit repository,
+    required RepoCubit repoCubit,
     required ReposCubit reposCubit,
     void Function()? popDialog,
   }) async {
     final newName = await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageRenameRepository,
-            body: RenameRepository(
-                parentContext: context, oldName: repository.name)));
+      context: context,
+      builder: (BuildContext context) => ActionsDialog(
+        title: S.current.messageRenameRepository,
+        body: RenameRepository(repoCubit),
+      ),
+    );
 
     if (newName == null || newName.isEmpty) {
       return;
@@ -32,7 +33,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     await Dialogs.executeFutureWithLoadingDialog(
       context,
-      reposCubit.renameRepository(repository.location, newName),
+      reposCubit.renameRepository(repoCubit.location, newName),
     );
 
     if (popDialog != null) {
