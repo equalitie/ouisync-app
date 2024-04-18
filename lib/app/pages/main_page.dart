@@ -931,15 +931,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> handleReceivedMedia(Object object) async {
-    final List<SharedMediaFile> media = switch (object) {
-      io.File() => [
-          SharedMediaFile(path: object.path, type: SharedMediaType.file)
-        ],
-      List<SharedMediaFile>() => object,
-      _ => [],
-    };
-
+  Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
     List<String> repos = [];
     List<String> files = [];
     List<String> tokens = [];
