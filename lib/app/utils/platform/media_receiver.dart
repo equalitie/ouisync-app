@@ -20,7 +20,7 @@ abstract class MediaReceiver {
     return MediaReceiverMobile();
   }
 
-  StreamController<dynamic> controller = StreamController<dynamic>();
+  final controller = StreamController<Object>();
 
   void dispose() {
     controller.close();

@@ -6,7 +6,7 @@ import 'platform.dart';
 
 class MediaReceiverMacOS with AppLogger implements MediaReceiver {
   @override
-  StreamController controller = StreamController<io.File>();
+  final controller = StreamController<io.File>();
 
   @override
   void dispose() {
