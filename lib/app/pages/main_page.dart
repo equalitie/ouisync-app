@@ -157,57 +157,7 @@ class _MainPageState extends State<MainPage>
 
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
     /// or the MediaReceiverWindows (DropTarget), depending on the platform.
-    widget.mediaReceiver.controller.stream.listen((media) {
-      // Media is a String when it is a share token.
-      if (media is String) {
-        loggy.app('mediaReceiver: String');
-        unawaited(addRepoWithTokenDialog(context, initialTokenValue: media));
-      }
-
-      // Check if the user tries to import/load a repository to Ouisync.
-      // On desktops this is drag-and-drop into the repository list, on mobile
-      // it's sharing from another application.
-      if (_cubits.repositories.showList || !PlatformValues.isDesktopDevice) {
-        var files = <String>[];
-
-        if (media is io.File) {
-          files.add(media.path);
-        } else if (media is List<SharedMediaFile>) {
-          for (final file in media) {
-            files.add(file.path);
-          }
-        }
-
-        files = files
-            .where((path) =>
-                system_path.extension(path) == RepoLocation.defaultExtension)
-            .toList();
-
-        if (files.isNotEmpty) {
-          unawaited(() async {
-            for (final file in files) {
-              final location = RepoLocation.fromDbPath(file);
-              await _cubits.repositories.importRepoFromLocation(location);
-            }
-          }());
-          return;
-        }
-      }
-
-      // Media is a list of SharedMediaFile when on mobile some application
-      // shares a file with Ouisync.
-      if (media is List<SharedMediaFile>) {
-        loggy.app('mediaReceiver: List<ShareMediaFile>');
-        handleShareIntentPayload(media, _cubits.repositories);
-      }
-
-      // Media is io.File when on desktops the user drags and drops a file to
-      // Ouisync.
-      if (media is io.File) {
-        loggy.app('mediaReceiver: io.File');
-        saveMedia(media.path);
-      }
-    });
+    widget.mediaReceiver.controller.stream.listen(handleReceivedMedia);
 
     if (io.Platform.isWindows) {
       checkForDokan();
@@ -226,24 +176,6 @@ class _MainPageState extends State<MainPage>
 
   void initMainPage() async {
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-  }
-
-  void handleShareIntentPayload(
-      List<SharedMediaFile> payload, ReposCubit repos) {
-    if (payload.isEmpty) {
-      return;
-    }
-
-    _bottomPaddingWithBottomSheet.value =
-        defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
-
-    final bottomSheetSaveMedia = SaveSharedMedia(repos,
-        sharedMedia: payload,
-        onUpdateBottomSheet: updateBottomSheet,
-        onSaveFile: saveMedia,
-        validationFunction: canSaveMedia);
-
-    setState(() => _bottomSheet = bottomSheetSaveMedia);
   }
 
   getContent() {
@@ -999,18 +931,64 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia(String sourceFilePath) async {
-    final currentRepo = _currentRepo;
+  Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
+    List<String> repos = [];
+    List<String> files = [];
+    List<String> tokens = [];
 
-    if (currentRepo is! OpenRepoEntry) {
+    for (final medium in media) {
+      switch (medium.type) {
+        case SharedMediaType.file
+            when (_cubits.repositories.showList ||
+                    !PlatformValues.isDesktopDevice) &&
+                system_path.extension(medium.path) ==
+                    RepoLocation.defaultExtension:
+          repos.add(medium.path);
+        case SharedMediaType.file:
+        case SharedMediaType.image:
+        case SharedMediaType.video:
+          files.add(medium.path);
+        case SharedMediaType.url:
+        case SharedMediaType.text:
+          tokens.add(medium.path);
+      }
+    }
+
+    // Handle imported repos
+    for (final path in repos) {
+      final location = RepoLocation.fromDbPath(path);
+      await _cubits.repositories.importRepoFromLocation(location);
+    }
+
+    // Handle share tokens
+    for (final token in tokens) {
+      await addRepoWithTokenDialog(context, initialTokenValue: token);
+    }
+
+    // Handle received files
+    handleReceivedFiles(files);
+  }
+
+  void handleReceivedFiles(List<String> paths) {
+    if (paths.isEmpty) {
       return;
     }
 
-    loggy.app('Media path: $sourceFilePath');
-    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
+    _bottomPaddingWithBottomSheet.value =
+        defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
+
+    final bottomSheetSaveMedia = SaveSharedMedia(
+      _cubits.repositories,
+      sharedMediaPaths: paths,
+      onUpdateBottomSheet: updateBottomSheet,
+      onSaveFile: trySaveFile,
+      validationFunction: canSaveFiles,
+    );
+
+    setState(() => _bottomSheet = bottomSheetSaveMedia);
   }
 
-  Future<bool> canSaveMedia() async {
+  Future<bool> canSaveFiles() async {
     final currentRepo = _currentRepo;
     if (currentRepo is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
@@ -1056,7 +1034,17 @@ class _MainPageState extends State<MainPage>
     return true;
   }
 
-  Future<void> saveFileToOuiSync(
+  Future<void> trySaveFile(String path) async {
+    final currentRepo = _currentRepo;
+
+    if (currentRepo is! OpenRepoEntry) {
+      return;
+    }
+
+    await saveFile(currentRepo.cubit, path);
+  }
+
+  Future<void> saveFile(
     RepoCubit currentRepo,
     String path,
   ) async {

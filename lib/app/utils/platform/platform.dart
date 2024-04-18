@@ -1,8 +1,5 @@
 export 'media_receiver.dart';
 export 'media_receiver_mobile.dart';
-export 'media_receiver_linux.dart';
-export 'media_receiver_windows.dart';
-export 'media_receiver_macos.dart';
 
 export 'platform_values.dart';
 export 'platform_widget.dart';
