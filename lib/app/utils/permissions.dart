@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
+import '../widgets/dialogs/alert/alert.dart';
 import 'utils.dart';
 
 class Permissions {
@@ -40,18 +41,20 @@ class Permissions {
     if (status != PermissionStatus.granted) {
       final actions = status == PermissionStatus.permanentlyDenied
           ? <Widget>[
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: true).pop(false),
+              CustomAlertAction(
+                parentContext: context,
+                text: S.current.actionCloseCapital,
+                action: () => false,
               ),
-              TextButton(
-                  child: Text(S.current.actionGoToSettings.toUpperCase()),
-                  onPressed: () {
-                    openAppSettings();
+              CustomAlertAction(
+                parentContext: context,
+                text: S.current.actionGoToSettings,
+                action: () {
+                  openAppSettings();
 
-                    Navigator.of(context, rootNavigator: true).pop(true);
-                  })
+                  return true;
+                },
+              ),
             ]
           : <Widget>[
               TextButton(
@@ -63,9 +66,9 @@ class Permissions {
 
       final name = (_labels[permission]?.name)!;
 
-      await Dialogs.alertDialogWithActions(
+      await Dialogs.showAlertDialog(
         context: context,
-        title: S.current.titleRequiredPermission,
+        title: CustomAlertTitle(S.current.titleRequiredPermission),
         body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
         actions: actions,
       );

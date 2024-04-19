@@ -33,20 +33,7 @@ abstract class Dialogs {
   static _hideLoadingDialog(context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
-  static Future<bool?> alertDialogWithActions({
-    required BuildContext context,
-    required String title,
-    required List<Widget> body,
-    required List<Widget> actions,
-  }) =>
-      showDialog<bool?>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return _alertDialog(context, title, body, actions);
-          });
-
-  static Future<bool?> showSimpleAlertDialog({
+  static Future<T?> showSimpleAlertDialog<T>({
     required BuildContext context,
     required Widget title,
     required Widget message,
@@ -56,22 +43,36 @@ abstract class Dialogs {
       CustomAlertAction(
         parentContext: context,
         text: S.current.actionCloseCapital,
+        action: () => false,
       )
     ];
 
-    return showDialog(
+    return showAlertDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomAlertDialog(
-          parentContext: context,
-          title: title,
-          body: [message],
-          actions: actions,
-        );
-      },
+      title: title,
+      body: [message],
+      actions: actions,
     );
   }
+
+  static Future<T?> showAlertDialog<T>({
+    required BuildContext context,
+    required Widget title,
+    required List<Widget> body,
+    required List<Widget>? actions,
+  }) =>
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return CustomAlertDialog(
+            parentContext: context,
+            title: title,
+            body: body,
+            actions: actions,
+          );
+        },
+      );
 
   static AlertDialog _alertDialog(BuildContext context, String title,
           List<Widget> body, List<Widget> actions) =>

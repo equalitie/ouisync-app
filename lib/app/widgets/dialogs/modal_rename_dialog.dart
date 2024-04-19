@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/platform/platform.dart';
 import '../../utils/path.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
+import 'alert/alert.dart';
 
 class RenameEntry extends HookWidget with AppLogger {
   RenameEntry(
@@ -145,21 +146,23 @@ class RenameEntry extends HookWidget with AppLogger {
 
     if (title.isEmpty) return true;
 
-    final continueAnyway = await Dialogs.alertDialogWithActions(
+    final continueAnyway = await Dialogs.showAlertDialog<bool?>(
         context: parentContext,
-        title: title,
+        title: CustomAlertTitle(title),
         body: [
           Text(message)
         ],
         actions: [
-          TextButton(
-            child: Text(S.current.actionRename.toUpperCase()),
-            onPressed: () => Navigator.of(parentContext).pop(true),
+          CustomAlertAction(
+            parentContext: parentContext,
+            text: S.current.actionRename,
+            action: () => true,
           ),
-          TextButton(
-            child: Text(S.current.actionCancelCapital),
-            onPressed: () => Navigator.of(parentContext).pop(false),
-          )
+          CustomAlertAction(
+            parentContext: parentContext,
+            text: S.current.actionCancel,
+            action: () => false,
+          ),
         ]);
 
     return continueAnyway ?? false;

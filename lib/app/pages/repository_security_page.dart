@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../mixins/repo_actions_mixin.dart';
-import '../utils/utils.dart';
 import '../models/models.dart';
+import '../utils/utils.dart';
+import '../widgets/dialogs/alert/alert.dart';
 import '../widgets/widgets.dart';
 
 class RepositorySecurityPage extends StatefulWidget {
@@ -111,17 +112,21 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
       return;
     }
 
-    Dialogs.alertDialogWithActions(
+    Dialogs.showAlertDialog(
       context: context,
-      title: S.current.titleUnsavedChanges,
+      title: CustomAlertTitle(S.current.titleUnsavedChanges),
       body: [Text(S.current.messageUnsavedChanges)],
       actions: [
-        TextButton(
-            child: Text(S.current.actionCancel),
-            onPressed: () => Navigator.of(context).pop(false)),
-        TextButton(
-            child: Text(S.current.actionAccept),
-            onPressed: () => Navigator.of(context).pop(true))
+        CustomAlertAction(
+          parentContext: context,
+          text: S.current.actionCancel,
+          action: () => false,
+        ),
+        CustomAlertAction(
+          parentContext: context,
+          text: S.current.actionAccept,
+          action: () => true,
+        ),
       ],
     ).then((pop) {
       if (pop ?? false) {
@@ -209,17 +214,21 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
   Future<bool> _confirmSaveChanges(BuildContext context) async {
     final message = S.current.messageConfirmIrreversibleChange;
 
-    final saveChanges = await Dialogs.alertDialogWithActions(
+    final saveChanges = await Dialogs.showAlertDialog(
       context: context,
-      title: S.current.titleSaveChanges,
+      title: CustomAlertTitle(S.current.titleSaveChanges),
       body: [Text(message, style: context.theme.appTextStyle.bodyMedium)],
       actions: [
-        TextButton(
-            child: Text(S.current.actionCancel),
-            onPressed: () => Navigator.of(context).pop(false)),
-        TextButton(
-            child: Text(S.current.actionAccept),
-            onPressed: () => Navigator.of(context).pop(true))
+        CustomAlertAction(
+          parentContext: context,
+          text: S.current.actionCancel,
+          action: () => false,
+        ),
+        CustomAlertAction(
+          parentContext: context,
+          text: S.current.actionAccept,
+          action: () => true,
+        ),
       ],
     );
 
