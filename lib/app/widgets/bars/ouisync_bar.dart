@@ -60,20 +60,6 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
         //   actionsList.add(searchButton);
         // }
 
-        actionsList.add(TextButton.icon(
-          onPressed: () async {
-            final result = await Dialogs.showSimpleAlertDialog(
-              context: context,
-              title: CustomAlertTitle('Title test'),
-              message: Text('Message test'),
-            );
-
-            print(result);
-          },
-          icon: const Icon(Icons.power),
-          label: Text('test'),
-        ));
-
         actionsList.add(settingsButton);
 
         return AppBar(
