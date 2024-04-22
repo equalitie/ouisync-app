@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_overrides
+g// ignore_for_file: unnecessary_overrides
 
 import 'dart:async';
 import 'dart:io' as io;
@@ -510,6 +510,10 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<void> unlock(LocalSecret secret) async {
     await _repo.setAccessMode(AccessMode.write, secret: secret);
     emit(state.copyWith(accessMode: await _repo.accessMode));
+
+    if (state.accessMode != AccessMode.blind) {
+        await refresh();
+    }
   }
 
   /// Locks the repository (switches it to blind mode)
