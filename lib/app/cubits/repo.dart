@@ -1,4 +1,4 @@
-g// ignore_for_file: unnecessary_overrides
+// ignore_for_file: unnecessary_overrides
 
 import 'dart:async';
 import 'dart:io' as io;
@@ -512,7 +512,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(accessMode: await _repo.accessMode));
 
     if (state.accessMode != AccessMode.blind) {
-        await refresh();
+      await refresh();
     }
   }
 
