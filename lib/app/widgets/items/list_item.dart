@@ -34,9 +34,9 @@ class FileListItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          FileIconAnimated(downloadJob),
-          Padding(
-            padding: Dimensions.paddingItem,
+          Expanded(flex: 1, child: FileIconAnimated(downloadJob)),
+          Expanded(
+            flex: 9,
             child: FileDescription(repoCubit, entry, uploadJob),
           ),
           Spacer(),
