@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:result_type/result_type.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -110,48 +109,15 @@ mixin RepositoryActionsMixin on LoggyType {
 
   Future<String?> manualUnlock(
     BuildContext context,
-    RepoCubit repository,
-  ) async {
-    final result = await manualUnlockDialog(context, repository: repository);
-
-    if (result.isFailure) {
-      final message = result.failure;
-
-      if (message != null) {
-        showSnackBar(message);
-      }
-
-      return null;
-    }
-
-    return result.success;
-  }
-
-  Future<Result<String, String?>> manualUnlockDialog(
-    BuildContext context, {
-    required RepoCubit repository,
-  }) async {
-    final password = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.messageValidateLocalPassword,
-        body: UnlockDialog<String>(
-          context: context,
-          repository: repository,
+    RepoCubit repoCubit,
+  ) =>
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => ActionsDialog(
+          title: S.current.messageValidateLocalPassword,
+          body: UnlockDialog(repoCubit),
         ),
-      ),
-    );
-
-    if (password == null) {
-      // User cancelled
-      return Failure(null);
-    }
-
-    return switch (await repository.getPasswordAccessMode(password)) {
-      AccessMode.write || AccessMode.read => Success(password),
-      AccessMode.blind => Failure(S.current.messageUnlockRepoFailed),
-    };
-  }
+      );
 
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(

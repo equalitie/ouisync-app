@@ -1,100 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class UnlockDialog<T> extends StatelessWidget with AppLogger {
-  UnlockDialog({super.key, required this.context, required this.repository});
+class UnlockDialog extends StatefulWidget {
+  UnlockDialog(this.repoCubit, {super.key});
 
-  final BuildContext context;
-  final RepoCubit repository;
+  final RepoCubit repoCubit;
 
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  @override
+  State<UnlockDialog> createState() => _UnlockDialogState();
+}
 
-  final TextEditingController _passwordController =
-      TextEditingController(text: null);
-
-  final ValueNotifier<bool> _obscurePassword = ValueNotifier<bool>(true);
+class _UnlockDialogState extends State<UnlockDialog> with AppLogger {
+  final formKey = GlobalKey<FormState>();
+  final passwordController = TextEditingController();
+  bool obscurePassword = true;
+  bool passwordInvalid = false;
 
   @override
   Widget build(BuildContext context) => Form(
         key: formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: _buildUnlockRepositoryWidget(this.context),
+        child: buildContent(context),
       );
 
-  Widget _buildUnlockRepositoryWidget(BuildContext context) {
-    final bodyStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(fontWeight: FontWeight.w400);
-
-    return Column(
+  Widget buildContent(BuildContext context) => Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.constrainedText('"${repository.name}"',
-              flex: 0, style: bodyStyle),
+          Fields.constrainedText(
+            '"${widget.repoCubit.name}"',
+            flex: 0,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w400),
+          ),
           Dimensions.spacingVerticalDouble,
-          ValueListenableBuilder(
-              valueListenable: _obscurePassword,
-              builder: (context, value, child) {
-                final obscure = value;
-                return Row(children: [
-                  Expanded(
-                      child: Fields.formTextField(
-                          context: context,
-                          controller: _passwordController,
-                          obscureText: obscure,
-                          labelText: S.current.labelTypePassword,
-                          hintText: S.current.messageRepositoryPassword,
-                          suffixIcon: Fields.actionIcon(
-                              Icon(
-                                obscure
-                                    ? Constants.iconVisibilityOn
-                                    : Constants.iconVisibilityOff,
-                                size: Dimensions.sizeIconSmall,
-                              ),
-                              color: Colors.black, onPressed: () {
-                            _obscurePassword.value = !_obscurePassword.value;
-                          }),
-                          onSaved: (String? password) async =>
-                              await _validatePasswordAndReturn(password),
-                          validator: validateNoEmptyMaybeRegExpr(
-                              emptyError: S.current
-                                  .messageErrorRepositoryPasswordValidation),
-                          autofocus: true))
-                ]);
+          Fields.formTextField(
+            context: context,
+            controller: passwordController,
+            obscureText: obscurePassword,
+            labelText: S.current.labelTypePassword,
+            hintText: S.current.messageRepositoryPassword,
+            errorText:
+                passwordInvalid ? S.current.messageUnlockRepoFailed : null,
+            suffixIcon: Fields.actionIcon(
+              Icon(
+                obscurePassword
+                    ? Constants.iconVisibilityOn
+                    : Constants.iconVisibilityOff,
+                size: Dimensions.sizeIconSmall,
+              ),
+              color: Colors.black,
+              onPressed: () => setState(() {
+                obscurePassword = !obscurePassword;
               }),
-          Fields.dialogActions(context, buttons: _actions(context)),
-        ]);
-  }
+            ),
+            validator: validateNoEmptyMaybeRegExpr(
+              emptyError: S.current.messageErrorRepositoryPasswordValidation,
+            ),
+            autofocus: true,
+          ),
+          Fields.dialogActions(
+            context,
+            buttons: buildActions(context),
+          ),
+        ],
+      );
 
-  Future<void> _validatePasswordAndReturn(String? password) async {
-    if (password == null || password.isEmpty) {
+  List<Widget> buildActions(BuildContext context) => [
+        NegativeButton(
+          text: S.current.actionCancel,
+          onPressed: () => Navigator.of(context).pop(null),
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        ),
+        PositiveButton(
+          text: S.current.actionUnlock,
+          onPressed: onSubmit,
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+        ),
+      ];
+
+  Future<void> onSubmit() async {
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
-    Navigator.of(context).pop(password);
-  }
+    final password = passwordController.text;
+    final accessMode = await widget.repoCubit.getPasswordAccessMode(password);
 
-  List<Widget> _actions(context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(null),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
-        PositiveButton(
-            text: S.current.actionUnlock,
-            onPressed: _validatePasswordForm,
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
-      ];
-
-  void _validatePasswordForm() {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+    if (accessMode == AccessMode.blind) {
+      setState(() {
+        passwordInvalid = true;
+      });
+      return;
+    } else {
+      setState(() {
+        passwordInvalid = false;
+      });
     }
+
+    Navigator.of(context).pop(password);
   }
 }

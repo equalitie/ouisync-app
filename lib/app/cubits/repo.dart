@@ -429,6 +429,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final credentials = await _repo.credentials;
 
     try {
+      await _repo.setAccessMode(AccessMode.blind);
       await _repo.setAccessMode(
         AccessMode.write,
         secret: LocalPassword(password),
