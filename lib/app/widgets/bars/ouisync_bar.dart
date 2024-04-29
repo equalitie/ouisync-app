@@ -39,7 +39,6 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
             ? getTitleWidget(
                 cubit,
                 repoPicker,
-                FolderNavigationBar(cubit),
               )
             : const SizedBox.shrink();
 
@@ -74,7 +73,6 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   Widget getTitleWidget(
     RepoCubit cubit,
     PreferredSizeWidget repoPicker,
-    FolderNavigationBar folderNavigationBar,
   ) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: cubit,
@@ -82,7 +80,7 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
           AppBarWidgetType.title,
           state.currentFolder.isRoot,
           repoPicker,
-          folderNavigationBar,
+          FolderNavigationBar(cubit),
         ),
       );
 

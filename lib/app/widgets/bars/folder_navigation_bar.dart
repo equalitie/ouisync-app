@@ -12,7 +12,6 @@ class FolderNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = _repo.state.currentFolder.path;
-    final route = _currentLocationBar(context, path, context);
 
     return Container(
       padding: const EdgeInsets.only(left: 12.0),
@@ -23,7 +22,7 @@ class FolderNavigationBar extends StatelessWidget {
             flex: 1,
             child: Row(
               children: [
-                Expanded(child: route),
+                Expanded(child: _currentLocationBar(path)),
               ],
             ),
           ),
@@ -32,17 +31,13 @@ class FolderNavigationBar extends StatelessWidget {
     );
   }
 
-  Widget _currentLocationBar(
-    BuildContext context,
-    String path,
-    BuildContext ctx,
-  ) {
+  Widget _currentLocationBar(String path) {
     final current = basename(path);
     String separator = Strings.root;
 
     return Row(
       children: [
-        _navigation(path, ctx),
+        _navigation(path),
         SizedBox(width: path == separator ? 5.0 : 0.0),
         Expanded(
           flex: 1,
@@ -59,7 +54,7 @@ class FolderNavigationBar extends StatelessWidget {
     );
   }
 
-  GestureDetector _navigation(String path, BuildContext ctx) {
+  GestureDetector _navigation(String path) {
     final target = dirname(path);
 
     return GestureDetector(
