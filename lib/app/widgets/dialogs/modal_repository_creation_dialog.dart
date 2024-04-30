@@ -265,9 +265,9 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     // we did it in the validator there would be no way to pass that object to here and we would
     // have to construct it again which would be sad.
 
-    final location = RepoLocation.fromDirAndName(
-      await widget.reposCubit.settings.getDefaultRepositoriesDir(),
-      name,
+    final location = RepoLocation.fromParts(
+      dir: await widget.reposCubit.settings.getDefaultRepositoriesDir(),
+      name: name,
     );
 
     final exists = await Dialogs.executeFutureWithLoadingDialog(

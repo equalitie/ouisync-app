@@ -299,6 +299,9 @@ class Settings with AppLogger {
           // Update locations
           _root.repos.updateAll(
               (databaseId, location) => replacements[location] ?? location);
+
+          _root.defaultRepo = _root.defaultRepo
+              ?.let((location) => replacements[location] ?? location);
         }
 
         _root.defaultRepositoriesDirVersion = 1;

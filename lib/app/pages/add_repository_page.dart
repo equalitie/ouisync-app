@@ -188,8 +188,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           final result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
               allowedExtensions: [
-                RepoLocation.defaultExtensionWithoutDot,
-                RepoLocation.legacyExtensionWithoutDot
+                RepoLocation.defaultExtension,
+                RepoLocation.legacyExtension
               ]);
           if (result == null) return;
           for (final path in result.paths) {
