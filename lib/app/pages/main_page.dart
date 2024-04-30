@@ -12,6 +12,7 @@ import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
@@ -742,8 +743,18 @@ class _MainPageState extends State<MainPage>
 
       bool previewOk = false;
       try {
-        final url = Uri.parse('file:$mountedDirectory${entry.path}');
-        previewOk = await launchUrl(url);
+        if (!io.Platform.isWindows) {
+          final url = Uri.parse('file:$mountedDirectory${entry.path}');
+          previewOk = await launchUrl(url);
+        } else {
+          // Special non ASCII characters are encoded using Escape Encoding
+          // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
+          // which are not decoded back by the url_launcher plugin on Windows
+          // before passing to the system for execution. Thus on Windows
+          // we use the `launchUrlString` function instead of `launchUrl`.
+          final path = '$mountedDirectory${entry.path}';
+          previewOk = await launchUrlString(path);
+        }
       } on PlatformException catch (e, st) {
         loggy.app(
           'Preview file (desktop): Error previewing file ${entry.path}:',
