@@ -102,7 +102,7 @@ dependencies:
   webview_flutter: ^4.2.2
   webview_flutter_android: ^3.8.0
   webview_flutter_wkwebview: ^3.5.0
-  win32: ^5.0.7
+  win32: ^5.5.0
   window_manager: ^0.3.6
   windows_single_instance: ^1.0.1
 
