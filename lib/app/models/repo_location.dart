@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io' as io;
 
 // Information about a repository that we can deduce without opening it.
-class RepoLocation extends Equatable implements Comparable<RepoLocation> {
+class RepoLocation implements Comparable<RepoLocation> {
   static const defaultExtension = ".ouisyncdb";
   static const defaultExtensionWithoutDot = "ouisyncdb";
   static const legacyExtensionWithoutDot = "db";
@@ -35,11 +34,11 @@ class RepoLocation extends Equatable implements Comparable<RepoLocation> {
       RepoLocation._(newDir.path, _name, _ext);
 
   @override
-  List<Object> get props => [
-        _name,
-        _dir,
-        _ext,
-      ];
+  bool operator ==(Object other) =>
+      other is RepoLocation && p.equals(path, other.path);
+
+  @override
+  int get hashCode => p.hash(path);
 
   /// Comparing by name first.
   @override
