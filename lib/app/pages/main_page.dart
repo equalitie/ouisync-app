@@ -10,16 +10,16 @@ import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/platform/platform.dart';
 import '../utils/path.dart' as repo_path;
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -740,13 +740,39 @@ class _MainPageState extends State<MainPage>
         return;
       }
 
+      String filePath = '$mountedDirectory${entry.path}';
       bool previewOk = false;
       try {
-        final url = Uri.parse('file:$mountedDirectory${entry.path}');
-        previewOk = await launchUrl(url);
+        if (io.Platform.isWindows) {
+          final args = ['/c', 'start', '', filePath];
+
+          final processResult = await io.Process.run('cmd', args);
+
+          final exitCode = processResult.exitCode;
+          final stdOut = ((processResult.stdout as String?) ?? '').trim();
+          final stdError = ((processResult.stderr as String?) ?? '').trim();
+
+          switch (exitCode) {
+            case 0:
+              {
+                loggy.app('(Windows) File $filePath preview successful');
+              }
+            default:
+              {
+                loggy.app(
+                  'There was an error trying to preview the file $filePath.\n'
+                  'stderr:\n$stdError\n'
+                  'stdout:\n$stdOut\n',
+                );
+              }
+          }
+        } else {
+          final url = Uri.parse('file:$filePath');
+          previewOk = await launchUrl(url);
+        }
       } on PlatformException catch (e, st) {
         loggy.app(
-          'Preview file (desktop): Error previewing file ${entry.path}:',
+          'Preview file (Platform: ${io.Platform.operatingSystem}): Error previewing file ${entry.path}:',
           e,
           st,
         );
