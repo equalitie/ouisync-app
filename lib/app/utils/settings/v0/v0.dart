@@ -244,7 +244,11 @@ class Settings with AppLogger {
   RepoLocation? repoLocation(String repoName) {
     final dir = _repos[repoName];
     if (dir == null) return null;
-    return RepoLocation.fromDirAndName(Directory(dir), repoName);
+    return RepoLocation.fromParts(
+      dir: Directory(dir),
+      name: repoName,
+      extension: RepoLocation.legacyExtension,
+    );
   }
 
   Future<void> setDefaultRepo(String? name) async {
@@ -253,36 +257,6 @@ class Settings with AppLogger {
 
   String? getDefaultRepo() {
     return _defaultRepo.get();
-  }
-
-  Future<SettingsRepoEntry?> renameRepository(
-      String oldName, String newName) async {
-    if (oldName == newName) {
-      return null;
-    }
-
-    if (_repos.containsKey(newName)) {
-      loggy.debug('Failed to rename repo: "$newName" already exists');
-      return null;
-    }
-
-    if (_defaultRepo.get() == oldName) {
-      await _defaultRepo.set(newName);
-    }
-
-    final path = _repos[oldName]!;
-    _repos[newName] = path;
-
-    final databaseId = getDatabaseId(oldName);
-    await _setDatabaseId(newName, databaseId);
-    await setAuthenticationMode(newName, getAuthenticationMode(oldName));
-
-    await forgetRepository(oldName);
-
-    return SettingsRepoEntry(
-      databaseId,
-      RepoLocation.fromDirAndName(Directory(path), newName),
-    );
   }
 
   Future<SettingsRepoEntry?> addRepo(

@@ -3,9 +3,8 @@ import 'dart:io' as io;
 
 // Information about a repository that we can deduce without opening it.
 class RepoLocation implements Comparable<RepoLocation> {
-  static const defaultExtension = ".ouisyncdb";
-  static const defaultExtensionWithoutDot = "ouisyncdb";
-  static const legacyExtensionWithoutDot = "db";
+  static const defaultExtension = "ouisyncdb";
+  static const legacyExtension = "db";
 
   final String _dir;
   final String _name; // Repo name (file name without the extension)
@@ -14,17 +13,22 @@ class RepoLocation implements Comparable<RepoLocation> {
   RepoLocation._(this._dir, this._name, this._ext);
 
   static RepoLocation fromDbPath(String pathToDbFile) {
-    return RepoLocation._(p.dirname(pathToDbFile),
-        p.basenameWithoutExtension(pathToDbFile), p.extension(pathToDbFile));
+    return RepoLocation._(
+      p.dirname(pathToDbFile),
+      p.basenameWithoutExtension(pathToDbFile),
+      _trimLeadingDot(p.extension(pathToDbFile)),
+    );
   }
 
-  static RepoLocation fromDirAndName(io.Directory dir, String repoName) {
-    return RepoLocation._(dir.path, repoName, defaultExtension);
-  }
+  static RepoLocation fromParts({
+    required io.Directory dir,
+    required String name,
+    String? extension,
+  }) =>
+      RepoLocation._(dir.path, name, extension ?? defaultExtension);
 
   String get name => _name;
-  String get path => p.join(_dir, "$_name$_ext");
-  String get pathWithoutExtension => p.join(_dir, _name);
+  String get path => _addExtension(p.join(_dir, _name), _ext);
 
   io.Directory get dir => io.Directory(_dir);
 
@@ -56,3 +60,8 @@ class RepoLocation implements Comparable<RepoLocation> {
     return _dir.compareTo(other._dir);
   }
 }
+
+String _trimLeadingDot(String s) => s.startsWith('.') ? s.substring(1) : s;
+
+String _addExtension(String path, String ext) =>
+    ext.isNotEmpty ? '$path.$ext' : path;
