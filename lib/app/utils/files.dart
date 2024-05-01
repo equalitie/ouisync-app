@@ -70,8 +70,16 @@ String _convertPath(String path, Directory oldDir, Directory newDir) =>
     join(newDir.path, relative(path, from: oldDir.path));
 
 // Move file to dst. Unlike `File.rename` this also works across filesystems (by first making a
-// copy and then deleting the original).
+// copy and then deleting the original). Does not move if the destination already exists.
 Future<void> _moveFile(File file, String dst) async {
+  if (await File(dst).exists()) {
+    // Don't overwrite files. This is important for example when a migration has already happened, but
+    // the user for some reason again started some previous version of Ouisync app which created new
+    // SharedPreferences. Then running the newer version of Ouisync app would perform the migration
+    // again replacing the already migrated SharedPreferences with the newly created one.
+    return;
+  }
+
   try {
     await file.rename(dst);
   } on FileSystemException catch (_) {
