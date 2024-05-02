@@ -17,7 +17,7 @@ Future<List<MigrationStatus>> migrateFiles(
 
       switch (e) {
         case File():
-          await _moveFile(e, newPath);
+          await _migrateFile(e, newPath);
         case Directory():
           if (await e.list().isEmpty) {
             await e.rename(newPath);
@@ -71,7 +71,16 @@ String _convertPath(String path, Directory oldDir, Directory newDir) =>
 
 // Move file to dst. Unlike `File.rename` this also works across filesystems (by first making a
 // copy and then deleting the original). Does not move if the destination already exists.
-Future<void> _moveFile(File file, String dst) async {
+Future<void> _migrateFile(File file, String dst) async {
+  if (extension(file.path) == ".log") {
+    // Log files might already be in the new migration destination so the next
+    // code would prevent the file move. And if there are residual files in the
+    // old directory, that directory won't be deleted. We also don't really want
+    // log files from the old directory in the new one.
+    file.delete();
+    return;
+  }
+
   if (await File(dst).exists()) {
     // Don't overwrite files. This is important for example when a migration has already happened, but
     // the user for some reason again started some previous version of Ouisync app which created new
