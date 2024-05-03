@@ -1,5 +1,6 @@
-import 'package:path/path.dart' as p;
 import 'dart:io' as io;
+
+import 'package:path/path.dart' as p;
 
 // Information about a repository that we can deduce without opening it.
 class RepoLocation implements Comparable<RepoLocation> {

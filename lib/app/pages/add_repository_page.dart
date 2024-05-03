@@ -1,13 +1,13 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:file_picker/file_picker.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../models/models.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import '../models/models.dart';
 import 'pages.dart';
 
 class AddRepositoryPage extends StatefulWidget {
