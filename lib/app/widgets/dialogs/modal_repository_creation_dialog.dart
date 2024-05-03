@@ -3,10 +3,12 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -270,9 +272,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       name: name,
     );
 
+    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
+    final repoPath = join(iosSandboxDir.path, location.path);
     final exists = await Dialogs.executeFutureWithLoadingDialog(
       context,
-      io.File(location.path).exists(),
+      io.File(repoPath).exists(),
     );
 
     setState(() {

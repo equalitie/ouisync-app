@@ -5,9 +5,11 @@ import 'dart:io' as io;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../utils/path.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -259,9 +261,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     oui.Repository repo;
+    io.Directory iosSanboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
 
     try {
-      repo = await oui.Repository.open(_session, store: location.path);
+      repo = await oui.Repository.open(_session, store: join(iosSanboxDir.path, location.path));
     } catch (e) {
       loggy.app("Failed to open repository ${location.path}: $e");
       return;
@@ -462,7 +465,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoLocation location, [
     LocalSecret? secret,
   ]) async {
-    final store = location.path;
+    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
+    final repoPath = join(iosSandboxDir.path, location.path);
+
+    final store = repoPath;
 
     try {
       if (!await io.File(store).exists()) {
@@ -507,7 +513,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     oui.ShareToken? token,
     bool useCacheServers = false,
   }) async {
-    final store = location.path;
+    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
+    final repoPath = join(iosSandboxDir.path, location.path);
+
+    final store = repoPath;
 
     try {
       if (await io.File(store).exists()) {
@@ -630,9 +639,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     if (oldName == newName) return true;
 
+    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
+    final repoOldPath = join(iosSandboxDir.path, oldLocation.path);
+
     // Check the source db exists
     {
-      if (!await io.File(oldLocation.path).exists()) {
+      if (!await io.File(repoOldPath).exists()) {
         loggy.app("Source database does not exist \"${oldLocation.path}\".");
         return false;
       }
@@ -642,7 +654,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     // Check the destination files don't exist
     for (final suffix in repoDbFileSuffixes) {
-      final path = "${newLocation.path}$suffix";
+      final path = join(iosSandboxDir.path, "${newLocation.path}$suffix");
 
       if (await io.File(path).exists()) {
         loggy.app("Destination file \"$path already exists\".");
@@ -651,14 +663,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     for (final suffix in repoDbFileSuffixes) {
-      final srcPath = "${oldLocation.path}$suffix";
+      final srcPath = join(iosSandboxDir.path, "${oldLocation.path}$suffix");
       final srcFile = io.File(srcPath);
 
       if (!await srcFile.exists()) {
         continue;
       }
 
-      final dstPath = "${newLocation.path}$suffix";
+      final dstPath = join(iosSandboxDir.path, "${newLocation.path}$suffix");
 
       try {
         await srcFile.rename(dstPath);
@@ -672,11 +684,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<bool> _deleteRepositoryFiles(RepoLocation repoLocation) async {
-    if (!await repoLocation.dir.exists()) {
+    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
+    final repoDir = io.Directory(join(iosSandboxDir.path, repoLocation.dir.path));
+
+    if (!await repoDir.exists()) {
       return false;
     }
 
-    final primaryPath = repoLocation.path;
+    final primaryPath = join(iosSandboxDir.path,repoLocation.path);
 
     var success = true;
 
