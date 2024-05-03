@@ -28,6 +28,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final Settings _settings;
   final NavigationCubit _navigation;
   final PasswordHasher passwordHasher;
+  String _iosSandboxBasePath = '';
 
   ReposCubit({
     required session,
@@ -46,6 +47,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     _update(() {
       _isLoading = true;
     });
+
+    if (io.Platform.isIOS) {
+      final baseDir = await getApplicationSupportDirectory();
+      _iosSandboxBasePath = baseDir.path; 
+    }
 
     await Future.wait(
       _settings.repos.map((location) => _load(location)).toList(),
@@ -261,10 +267,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     oui.Repository repo;
-    io.Directory iosSanboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
 
     try {
-      repo = await oui.Repository.open(_session, store: join(iosSanboxDir.path, location.path));
+      repo = await oui.Repository.open(_session, store: _osPath(location.path));
     } catch (e) {
       loggy.app("Failed to open repository ${location.path}: $e");
       return;
@@ -465,10 +470,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     RepoLocation location, [
     LocalSecret? secret,
   ]) async {
-    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
-    final repoPath = join(iosSandboxDir.path, location.path);
-
-    final store = repoPath;
+    final store =  _osPath(location.path);
 
     try {
       if (!await io.File(store).exists()) {
@@ -513,10 +515,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     oui.ShareToken? token,
     bool useCacheServers = false,
   }) async {
-    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
-    final repoPath = join(iosSandboxDir.path, location.path);
-
-    final store = repoPath;
+    final store = _osPath(location.path);
 
     try {
       if (await io.File(store).exists()) {
@@ -639,12 +638,9 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     if (oldName == newName) return true;
 
-    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
-    final repoOldPath = join(iosSandboxDir.path, oldLocation.path);
-
     // Check the source db exists
     {
-      if (!await io.File(repoOldPath).exists()) {
+      if (!await io.File(_osPath(oldLocation.path)).exists()) {
         loggy.app("Source database does not exist \"${oldLocation.path}\".");
         return false;
       }
@@ -654,7 +650,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     // Check the destination files don't exist
     for (final suffix in repoDbFileSuffixes) {
-      final path = join(iosSandboxDir.path, "${newLocation.path}$suffix");
+      final path = _osPath("${newLocation.path}$suffix");
 
       if (await io.File(path).exists()) {
         loggy.app("Destination file \"$path already exists\".");
@@ -663,14 +659,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     for (final suffix in repoDbFileSuffixes) {
-      final srcPath = join(iosSandboxDir.path, "${oldLocation.path}$suffix");
+      final srcPath = _osPath("${oldLocation.path}$suffix");
       final srcFile = io.File(srcPath);
 
       if (!await srcFile.exists()) {
         continue;
       }
 
-      final dstPath = join(iosSandboxDir.path, "${newLocation.path}$suffix");
+      final dstPath = _osPath("${newLocation.path}$suffix");
 
       try {
         await srcFile.rename(dstPath);
@@ -684,14 +680,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<bool> _deleteRepositoryFiles(RepoLocation repoLocation) async {
-    io.Directory iosSandboxDir = io.Platform.isIOS ? await getApplicationSupportDirectory() : io.Directory('');
-    final repoDir = io.Directory(join(iosSandboxDir.path, repoLocation.dir.path));
+    final repoDir = io.Directory(_osPath(repoLocation.dir.path));
 
     if (!await repoDir.exists()) {
       return false;
     }
 
-    final primaryPath = join(iosSandboxDir.path,repoLocation.path);
+    final primaryPath = _osPath(repoLocation.path);
 
     var success = true;
 
@@ -711,6 +706,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     return success;
+  }
+
+  String _osPath(String path) {
+    if (io.Platform.isIOS) {
+      return join(_iosSandboxBasePath, path);
+    }
+
+    return path;
   }
 }
 
