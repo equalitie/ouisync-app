@@ -36,8 +36,6 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // and let whoever needs seetings to await for it.
   final settings = await loadAndMigrateSettings(session);
 
-  var launchAtStartup = settings.getLaunchAtStartup();
-  await windowManager.launchAtStartup(launchAtStartup);
   var showOnboarding = settings.getShowOnboarding();
   var eqValuesAccepted = settings.getEqualitieValues();
 

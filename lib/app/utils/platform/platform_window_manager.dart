@@ -16,8 +16,6 @@ abstract class PlatformWindowManager {
   /// Sets the function to be called when the app is about to be closed.
   void onClose(CloseHandler handler);
 
-  Future<bool> launchAtStartup(bool enable);
-
   /// Sets the window title. Can be called only after localization has been initialized.
   Future<void> setTitle(String title);
 
