@@ -10,12 +10,6 @@ class PlatformWindowManagerMobile
   void onClose(CloseHandler handler) {}
 
   @override
-  Future<bool> launchAtStartup(bool enable) async {
-    loggy.app('This function is not avaliable on mobile');
-    return false;
-  }
-
-  @override
   Future<void> setTitle(String title) async {}
 
   @override

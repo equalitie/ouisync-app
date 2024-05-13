@@ -32,7 +32,6 @@ class SettingsRoot {
   static const _versionKey = 'version';
   static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
   static const _showOnboardingKey = 'showOnboarding';
-  static const _launchAtStartupKey = 'launchAtStartup';
   static const _enableSyncOnMobileInternetKey = 'enableSyncOnMobileInternet';
   static const _highestSeenProtocolNumberKey = 'highestSeenProtocolNumber';
   static const _defaultRepoKey = 'defaultRepo';
@@ -44,7 +43,6 @@ class SettingsRoot {
   bool acceptedEqualitieValues = false;
   // Show onboarding (will flip to false once shown).
   bool showOnboarding = true;
-  bool launchAtStartup = true;
   bool enableSyncOnMobileInternet = true;
   int? highestSeenProtocolNumber;
   // NOTE: In order to preserve plausible deniability, once the current repo is
@@ -60,7 +58,6 @@ class SettingsRoot {
   SettingsRoot({
     required this.acceptedEqualitieValues,
     required this.showOnboarding,
-    required this.launchAtStartup,
     required this.enableSyncOnMobileInternet,
     required this.highestSeenProtocolNumber,
     required this.defaultRepo,
@@ -73,7 +70,6 @@ class SettingsRoot {
       _versionKey: version,
       _acceptedEqualitieValuesKey: acceptedEqualitieValues,
       _showOnboardingKey: showOnboarding,
-      _launchAtStartupKey: launchAtStartup,
       _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
       _highestSeenProtocolNumberKey: highestSeenProtocolNumber,
       _defaultRepoKey: defaultRepo?.path,
@@ -108,7 +104,6 @@ class SettingsRoot {
     return SettingsRoot(
       acceptedEqualitieValues: data[_acceptedEqualitieValuesKey]!,
       showOnboarding: data[_showOnboardingKey]!,
-      launchAtStartup: data[_launchAtStartupKey]!,
       enableSyncOnMobileInternet: data[_enableSyncOnMobileInternetKey]!,
       highestSeenProtocolNumber: data[_highestSeenProtocolNumberKey],
       defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
@@ -161,7 +156,6 @@ class Settings with AppLogger {
     _root.acceptedEqualitieValues =
         s0.getEqualitieValues() ?? _root.acceptedEqualitieValues;
     _root.showOnboarding = s0.getShowOnboarding() ?? _root.showOnboarding;
-    _root.launchAtStartup = s0.getLaunchAtStartup() ?? _root.launchAtStartup;
     _root.enableSyncOnMobileInternet =
         s0.getSyncOnMobileEnabled() ?? _root.enableSyncOnMobileInternet;
     _root.highestSeenProtocolNumber =
@@ -331,15 +325,6 @@ class Settings with AppLogger {
 
   Future<void> setShowOnboarding(bool value) async {
     _root.showOnboarding = value;
-    await _storeRoot();
-  }
-
-  //------------------------------------------------------------------
-
-  bool getLaunchAtStartup() => _root.launchAtStartup;
-
-  Future<void> setLaunchAtStartup(bool value) async {
-    _root.launchAtStartup = value;
     await _storeRoot();
   }
 
