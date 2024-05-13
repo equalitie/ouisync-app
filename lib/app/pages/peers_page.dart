@@ -85,7 +85,7 @@ class PeersPage extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              flex: 1,
+              flex: 0,
               child: Text('#$index',
                   style: context.theme.appTextStyle.titleMedium),
             ),
