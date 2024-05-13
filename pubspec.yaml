@@ -77,7 +77,7 @@ dependencies:
   mobile_scanner: ^4.0.0
   move_to_background: ^1.0.2
   mutex: ^3.1.0
-  network_info_plus: ^4.0.2
+  network_info_plus: ^5.0.3
   ouisync_plugin:
     path: ouisync/bindings/dart
   package_info_plus: ^5.0.1
