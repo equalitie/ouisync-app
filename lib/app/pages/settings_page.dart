@@ -5,6 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../cubits/launch_at_startup.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -19,32 +20,20 @@ class SettingsPage extends StatefulWidget {
   final void Function() checkForDokan;
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState(
-        session,
-        checkForDokan,
-      );
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final void Function() _checkForDokan;
-  final ConnectivityInfo _connectivityInfo;
-  final PeerSetCubit _peerSet;
-  final NatDetection _natDetection;
+  late final connectivityInfo = ConnectivityInfo(widget.session);
+  late final PeerSetCubit peerSet = PeerSetCubit(widget.session);
+  late final NatDetection natDetection = NatDetection(widget.session);
+  final launchAtStartup = LaunchAtStartupCubit();
 
-  _SettingsPageState(
-    Session session,
-    void Function() checkForDokan,
-  )   : _checkForDokan = checkForDokan,
-        _connectivityInfo = ConnectivityInfo(session),
-        _peerSet = PeerSetCubit(session),
-        _natDetection = NatDetection(session);
-
-  @override
   @override
   void initState() {
     super.initState();
 
-    _peerSet.init();
+    peerSet.init();
     unawaited(_updateConnectivityInfo());
   }
 
@@ -57,18 +46,19 @@ class _SettingsPageState extends State<SettingsPage> {
         body: AppSettingsContainer(
           widget.session,
           widget.cubits,
-          connectivityInfo: _connectivityInfo,
-          natDetection: _natDetection,
-          peerSet: _peerSet,
-          checkForDokan: _checkForDokan,
+          connectivityInfo: connectivityInfo,
+          natDetection: natDetection,
+          peerSet: peerSet,
+          checkForDokan: widget.checkForDokan,
+          launchAtStartup: launchAtStartup,
         ),
       );
 
   Future<void> _updateConnectivityInfo() async {
-    await _connectivityInfo.update();
+    await connectivityInfo.update();
 
     await for (final _ in widget.cubits.powerControl.stream) {
-      await _connectivityInfo.update();
+      await connectivityInfo.update();
     }
   }
 }

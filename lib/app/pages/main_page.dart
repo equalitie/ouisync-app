@@ -1201,8 +1201,6 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void reloadRepository() => _cubits.repositories.init();
-
   Future<void> _showAppSettings() => Navigator.push(
         context,
         MaterialPageRoute(

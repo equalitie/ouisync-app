@@ -77,7 +77,7 @@ Future<void> _migrateFile(File file, String dst) async {
     // code would prevent the file move. And if there are residual files in the
     // old directory, that directory won't be deleted. We also don't really want
     // log files from the old directory in the new one.
-    file.delete();
+    await file.delete();
     return;
   }
 

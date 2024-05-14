@@ -5,6 +5,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
+import '../../cubits/launch_at_startup.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'about_section.dart';
@@ -20,6 +21,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     required NatDetection natDetection,
     required PeerSetCubit peerSet,
     required void Function() checkForDokan,
+    required LaunchAtStartupCubit launchAtStartup,
   }) : sections = [
           NetworkSection(
             session,
@@ -40,6 +42,7 @@ class AppSettingsContainer extends StatefulHookWidget {
             connectivityInfo: connectivityInfo,
             peerSet: peerSet,
             natDetection: natDetection,
+            launchAtStartup: launchAtStartup,
           ),
         ];
 
