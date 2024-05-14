@@ -146,12 +146,12 @@ class PlatformWindowManagerDesktop
         size: initialSize,
         minimumSize: minSize);
 
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      if (_showWindow) {
-        await windowManager.show();
-        await windowManager.focus();
-      }
-    });
+    await windowManager.waitUntilReadyToShow(windowOptions);
+
+    if (_showWindow) {
+      await windowManager.show();
+      await windowManager.focus();
+    }
   }
 
   @override
