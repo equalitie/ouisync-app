@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_overrides
-
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -137,7 +135,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     state = state.copyWith(
       infoHash: await repo.infoHash,
       accessMode: await repo.accessMode,
-      isCacheServersEnabled: await repo.isCacheServersEnabled(),
     );
 
     if (await repo.isSyncEnabled) {
@@ -149,7 +146,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     final pathCipher = await Cipher.newWithRandomKey();
 
-    return RepoCubit._(
+    final cubit = RepoCubit._(
       session,
       nativeChannels,
       navigation,
@@ -157,6 +154,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       pathCipher,
       state,
     );
+
+    // Fetching the cache server state involves network request which might take a long time. Using
+    // `unawaited` to avoid blocking this function on it.
+    unawaited(cubit._updateCacheServersState());
+
+    return cubit;
   }
 
   RepoLocation get location => state.location;
@@ -212,10 +215,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
       // ...then fetch the actual value and update the state again. This is needed because some of
       // the cache server requests might fail.
-      emit(state.copyWith(
-        isCacheServersEnabled: await _repo.isCacheServersEnabled(),
-      ));
+      await _updateCacheServersState();
     });
+  }
+
+  Future<void> _updateCacheServersState() async {
+    final value = await _repo.isCacheServersEnabled();
+
+    emit(state.copyWith(isCacheServersEnabled: value));
   }
 
   Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
@@ -228,8 +235,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
+  int get hashCode => state.infoHash.hashCode;
 
   Future<ShareToken> createShareToken(
     AccessMode accessMode, {
