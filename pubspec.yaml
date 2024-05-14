@@ -19,10 +19,11 @@ version: 0.8.0+63
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
-  flutter: ^3.3.2
+  # FIXME: Pinning 3.19 because 3.22 is broken on linux.
+  flutter: 3.19.6
 
 dependencies:
-  android_alarm_manager_plus: ^3.0.4
+  android_alarm_manager_plus: ^4.0.3
   archive: ^3.3.7
   async: ^2.11.0
   auto_size_text: ^3.0.0
