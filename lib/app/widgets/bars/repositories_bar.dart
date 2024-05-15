@@ -26,18 +26,18 @@ class RepositoriesBar extends StatelessWidget
         return Row(
           children: [
             _buildBackButton(),
-            _buildName(reposCubit.currentRepo),
-            Spacer(),
+            Expanded(flex: 2, child: _buildName(reposCubit.currentRepo)),
             _buildStatus(reposCubit.currentRepo),
             _buildLockButton(reposCubit.currentRepo),
           ],
         );
       });
 
-  Widget _buildName(RepoEntry? repo) => Fields.constrainedText(
+  Widget _buildName(RepoEntry? repo) => Text(
         repo?.name ?? S.current.messageNoRepos,
-        softWrap: false,
-        textOverflow: TextOverflow.fade,
+        softWrap: true,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
