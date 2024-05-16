@@ -42,11 +42,12 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       Fields.bottomSheetHandle(context),
                       Row(
                         children: [
-                          Fields.bottomSheetTitle(
-                            widget.repoCubit.name,
-                            style: context.theme.appTextStyle.titleMedium,
+                          Expanded(
+                            child: Fields.bottomSheetTitle(
+                              widget.repoCubit.name,
+                              style: context.theme.appTextStyle.titleMedium,
+                            ),
                           ),
-                          Spacer(),
                           _Progress(widget.repoCubit),
                         ],
                       ),
