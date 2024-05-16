@@ -6,6 +6,7 @@ import '../models/local_secret.dart';
 import '../utils/extensions.dart';
 import '../utils/fields.dart';
 import '../utils/log.dart';
+import '../utils/platform/platform_values.dart';
 import 'widgets.dart';
 
 class RepoSecurity extends StatefulWidget {
@@ -107,14 +108,17 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
         onChanged: _onStoreChanged,
       );
 
-  Widget _buildSecureWithBiometricsSwitch(BuildContext context) => _buildSwitch(
-        context,
-        value: secureWithBiometrics,
-        title: S.current.messageSecureUsingBiometrics,
-        onChanged: _isSecureWithBiometricsSwitchEnabled
-            ? _onSecureWithBiometricsChanged
-            : null,
-      );
+  Widget _buildSecureWithBiometricsSwitch(BuildContext context) =>
+      PlatformValues.isMobileDevice
+          ? _buildSwitch(
+              context,
+              value: secureWithBiometrics,
+              title: S.current.messageSecureUsingBiometrics,
+              onChanged: _isSecureWithBiometricsSwitchEnabled
+                  ? _onSecureWithBiometricsChanged
+                  : null,
+            )
+          : SizedBox.shrink();
 
   Widget _buildManualPasswordWarning(BuildContext context) => Visibility(
         visible: origin == SecretKeyOrigin.manual,
