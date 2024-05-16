@@ -16,6 +16,8 @@ class LaunchAtStartupCubit extends Cubit<bool> {
 
   /// Enable/disable launch at startup.
   Future<void> setEnabled(bool value) async {
+    if (!_isSupported) return;
+
     if (value) {
       await LaunchAtStartup.instance.enable();
     } else {
@@ -26,6 +28,8 @@ class LaunchAtStartupCubit extends Cubit<bool> {
   }
 
   Future<void> _init() async {
+    if (!_isSupported) return;
+
     final packageInfo = await PackageInfo.fromPlatform();
 
     LaunchAtStartup.instance.setup(
@@ -41,3 +45,6 @@ class LaunchAtStartupCubit extends Cubit<bool> {
     emit(await LaunchAtStartup.instance.isEnabled());
   }
 }
+
+bool get _isSupported =>
+    Platform.isLinux || Platform.isMacOS || Platform.isWindows;
