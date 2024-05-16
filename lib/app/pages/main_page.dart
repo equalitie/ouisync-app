@@ -953,7 +953,7 @@ class _MainPageState extends State<MainPage>
             when (_cubits.repositories.showList ||
                     !PlatformValues.isDesktopDevice) &&
                 system_path.extension(medium.path) ==
-                    RepoLocation.defaultExtension:
+                    ".${RepoLocation.defaultExtension}":
           repos.add(medium.path);
         case SharedMediaType.file:
         case SharedMediaType.image:
