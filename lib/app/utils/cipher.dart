@@ -45,14 +45,22 @@ class Cipher {
   Future<String?> decrypt(String encryptedData) async {
     final secretBox = _boxFromString(encryptedData);
 
-    return await _algorithm.decryptString(secretBox, secretKey: secretKey);
+    try {
+      return await _algorithm.decryptString(secretBox, secretKey: secretKey);
+    } on SecretBoxAuthenticationError catch (e) {
+      return null;
+    }
   }
 
   Future<Uint8List?> decryptBytes(String encryptedData) async {
     final secretBox = _boxFromString(encryptedData);
 
-    return Uint8List.fromList(
-        await _algorithm.decrypt(secretBox, secretKey: secretKey));
+    try {
+      return Uint8List.fromList(
+          await _algorithm.decrypt(secretBox, secretKey: secretKey));
+    } on SecretBoxAuthenticationError catch (e) {
+      return null;
+    }
   }
 
   SecretBox _boxFromString(String box) {

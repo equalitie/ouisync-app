@@ -493,22 +493,28 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     }
   }
 
-  /// May throw if the function failed to decrypt the stored key.
-  /// Returns null if the authMode is AuthModeBlindOrManual.
+  /// Returns null if the authMode is AuthModeBlindOrManual or if decrytion fails.
+  /// TODO: If decryption fails, we should throw and catch that above to inform
+  /// the user about the fact.
   Future<LocalSecret?> getLocalSecret(MasterKey masterKey) async {
     final authMode = state.authMode;
 
-    switch (authMode) {
-      case AuthModeBlindOrManual():
-        return null;
-      case AuthModePasswordStoredOnDevice(encryptedPassword: final encrypted):
-        final decrypted = await masterKey.decrypt(encrypted);
-        if (decrypted == null) throw AuthModeDecryptFailed();
-        return LocalPassword(decrypted);
-      case AuthModeKeyStoredOnDevice(encryptedKey: final encrypted):
-        final decrypted = await masterKey.decryptBytes(encrypted);
-        if (decrypted == null) throw AuthModeDecryptFailed();
-        return LocalSecretKey(decrypted);
+    try {
+      switch (authMode) {
+        case AuthModeBlindOrManual():
+          return null;
+        case AuthModePasswordStoredOnDevice(encryptedPassword: final encrypted):
+          final decrypted = await masterKey.decrypt(encrypted);
+          if (decrypted == null) throw AuthModeDecryptFailed();
+          return LocalPassword(decrypted);
+        case AuthModeKeyStoredOnDevice(encryptedKey: final encrypted):
+          final decrypted = await masterKey.decryptBytes(encrypted);
+          if (decrypted == null) throw AuthModeDecryptFailed();
+          return LocalSecretKey(decrypted);
+      }
+    } catch (e) {
+      loggy.error("Failed to decrypt local secret: $e");
+      return null;
     }
   }
 
