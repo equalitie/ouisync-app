@@ -42,11 +42,12 @@ class FolderNavigationBar extends StatelessWidget {
         Expanded(
           flex: 1,
           child: Padding(
-            padding: EdgeInsets.only(left: 12.0),
+            padding: EdgeInsets.only(left: 12.0, right: 12.0),
             child: Text(
               current,
               softWrap: false,
-              overflow: TextOverflow.fade,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ),
