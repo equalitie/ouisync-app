@@ -108,6 +108,11 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
         onChanged: _onStoreChanged,
       );
 
+  // On desktops the keyring is accessible to any application once the user is
+  // logged in into their account and thus giving the user the option to protect
+  // their repository with system authentication might give them a false sense
+  // of security. Therefore unlocking repositories with system authentication is
+  // not supported on these systems.
   Widget _buildSecureWithBiometricsSwitch(BuildContext context) =>
       PlatformValues.isMobileDevice
           ? _buildSwitch(
