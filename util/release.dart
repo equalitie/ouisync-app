@@ -17,6 +17,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 const rootWorkDir = 'releases';
+const String windowsArtifactDir = 'build/windows/x64/runner/Release';
 
 Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
@@ -375,6 +376,10 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
     buildName,
   ]);
 
+  /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
+  /// directory (releases/bundled-assets-windows)
+  await prepareDokanBundle();
+
   final innoScript =
       await File("windows/inno-setup.iss.template").readAsString();
   await File("build/inno-setup.iss").writeAsString(
@@ -393,14 +398,12 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(String identityName, String publisher) async {
-  final artifactDir = 'build/windows/x64/runner/Release';
-
-  if (await Directory(artifactDir).exists()) {
+  if (await Directory(windowsArtifactDir).exists()) {
     // We had a problem when creating the msix when there was an executable from
     // previous non-msix builds, the executable was not regenerated and the
     // package was unusable.
     print("Removing artifacts from previous builds");
-    await Directory(artifactDir).delete(recursive: true);
+    //await Directory(windowsArtifactDir).delete(recursive: true);
   }
 
   /// We first build the MSIX, before adding the additional assets to be
@@ -410,16 +413,6 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
   await prepareDokanBundle();
-
-  /// Move all additional assets to the data directory (Release/data)
-  final dataPath =
-      await Directory('$artifactDir/data/bundled-assets-windows').create();
-
-  final msixAssetsPath = Directory('releases/bundled-assets-windows');
-  await copyDirectory(msixAssetsPath, dataPath);
-
-  final scriptsPath = Directory('windows/util/scripts');
-  await copyDirectory(scriptsPath, dataPath);
 
   /// Package the MSIX, including the Dokan bundled files (script, MSI) inside
   /// the data directory (Release/data/bundled-assets-windows)
@@ -435,13 +428,14 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     '--store'
   ]);
 
-  return File('$artifactDir/ouisync_app.msix');
+  return File('$windowsArtifactDir/ouisync_app.msix');
 }
 
 Future<void> prepareDokanBundle() async {
   final version = "2.1.0.1000";
+  final assetPath = 'releases/bundled-assets-windows';
   final name = "Dokan_x64.msi";
-  final path = p.join('releases/bundled-assets-windows', name);
+  final path = p.join(assetPath, name);
 
   final file = File(path);
 
@@ -449,6 +443,12 @@ Future<void> prepareDokanBundle() async {
 
   if (!await file.exists()) {
     print('Downloading Dokan (x64) MSI');
+
+    final assetDir = Directory(assetPath);
+
+    if (!await assetDir.exists()) {
+      await assetDir.create(recursive: true);
+    }
 
     final url =
         'https://github.com/dokan-dev/dokany/releases/download/v$version/$name';
@@ -462,6 +462,16 @@ Future<void> prepareDokanBundle() async {
       client.close();
     }
   }
+
+  /// Move all additional assets to the data directory (Release/data)
+  final dataPath =
+      await Directory('$windowsArtifactDir/data/bundled-assets').create();
+
+  final msixAssetsPath = Directory('releases/bundled-assets-windows');
+  await copyDirectory(msixAssetsPath, dataPath);
+
+  final scriptsPath = Directory('windows/util/scripts');
+  await copyDirectory(scriptsPath, dataPath);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
