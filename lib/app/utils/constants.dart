@@ -37,8 +37,6 @@ class Constants {
 
   static const String launchAtStartupArg = 'auto';
 
-  static const Color devColor = Colors.grey;
-
   static const Color errorColor = Colors.red;
   static const Color warningColor = Colors.orange;
   static const Color dangerColor = Colors.red;
