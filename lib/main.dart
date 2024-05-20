@@ -29,8 +29,10 @@ Future<void> main(List<String> args) async {
     );
   }
 
-  final dsn = Env.ouisyncDSN;
-  if (dsn == '""') {
+  const dsn = bool.hasEnvironment('SENTRY_DSN')
+      ? String.fromEnvironment('SENTRY_DSN')
+      : null;
+  if (dsn == null) {
     runApp(await initOuiSyncApp(args));
   } else {
     await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
