@@ -408,17 +408,21 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
   await run('dart', ['run', 'msix:build']);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
-  /// directory (util/additional_assets)
+  /// directory (releases/bundled-assets-windows)
   await prepareDokanBundle();
 
   /// Move all additional assets to the data directory (Release/data)
-  final msixAssetsPath = Directory('util/additional_assets');
   final dataPath =
-      await Directory('$artifactDir/data/additional_assets').create();
+      await Directory('$artifactDir/data/bundled-assets-windows').create();
+
+  final msixAssetsPath = Directory('releases/bundled-assets-windows');
   await copyDirectory(msixAssetsPath, dataPath);
 
+  final scriptsPath = Directory('windows/util/scripts');
+  await copyDirectory(scriptsPath, dataPath);
+
   /// Package the MSIX, including the Dokan bundled files (script, MSI) inside
-  /// the data directory (Release/data/additional_assets)
+  /// the data directory (Release/data/bundled-assets-windows)
   await run('dart', [
     'run',
     'msix:pack',
@@ -437,7 +441,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 Future<void> prepareDokanBundle() async {
   final version = "2.1.0.1000";
   final name = "Dokan_x64.msi";
-  final path = p.join('util/additional_assets', name);
+  final path = p.join('releases/bundled-assets-windows', name);
 
   final file = File(path);
 

@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'constants.dart';
 import 'log.dart';
 
-const String msiAdditionalAssetsFolder = 'data\\additional_assets';
+const String msiAdditionalAssetsFolder = 'data\\bundled-assets-windows';
 
 class DokanCheck with AppLogger {
   const DokanCheck({
