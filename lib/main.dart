@@ -6,7 +6,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
 import 'app/background.dart';
-import 'env/env.dart';
 
 /// How often the background syncing runs
 // TODO: using short period of 5 minutes for now to simplify debugging but once things stabilize
