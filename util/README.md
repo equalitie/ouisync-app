@@ -44,9 +44,9 @@ Notes:
 
 - Omitting the github token still creates the release packages but doesn't upload them to github.
 
-## MSIX Addtional assets
+## Windows Additional assets
 
-For bundling additional assets with the Ouisync MSIX, place the required files inside ./additional_assets 
+For bundling additional assets with the Ouisync MSIX, or EXE, place the required files inside `./releases/bundled-assets-windows` 
 
 ## Publishing the release
 
