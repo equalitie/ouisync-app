@@ -17,6 +17,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 const rootWorkDir = 'releases';
+const sentryDSNFilePath = 'secrets/sentry/sentry-dsn.txt';
 
 Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
@@ -29,6 +30,10 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  if (!await checkSentryDSNFileIsAvailable()) {
+    return;
+  }
+
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
   final version = pubspec.version!;
@@ -37,7 +42,7 @@ Future<void> main(List<String> args) async {
   final buildDesc = BuildDesc(version, commit);
   final outputDir = await createOutputDir(buildDesc);
 
-  final sentryDSN = options.sentryDSN;
+  final sentryDSN = await File(sentryDSNFilePath).readAsString();
 
   List<File> assets = [];
 
@@ -148,7 +153,6 @@ class Options {
   final bool detailedLog;
   final String? identityName;
   final String? publisher;
-  final String sentryDSN;
   final bool awaitUpload;
 
   Options._({
@@ -164,7 +168,6 @@ class Options {
     this.detailedLog = true,
     this.identityName,
     this.publisher,
-    required this.sentryDSN,
     this.awaitUpload = false,
   });
 
@@ -239,12 +242,6 @@ class Options {
           'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
       defaultsTo: 'CN=E3D17812-E9F1-46C8-B650-4D39786777D9',
     );
-    parser.addOption(
-      'sentry-dsn-file',
-      abbr: 'd',
-      help: 'Path to a file containing the Sentry DSN',
-      mandatory: true,
-    );
     parser.addFlag(
       'help',
       abbr: 'h',
@@ -285,9 +282,6 @@ class Options {
       }
     }
 
-    final sentryDSNPath = results['sentry-dsn-file'];
-    final sentryDSN = await File(sentryDSNPath).readAsString();
-
     return Options._(
       apk: results['apk'],
       aab: results['aab'],
@@ -301,7 +295,6 @@ class Options {
       detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
       publisher: results['publisher'],
-      sentryDSN: sentryDSN.trim(),
       awaitUpload: results['await-upload'],
     );
   }
@@ -1039,6 +1032,15 @@ Future<bool> checkWorkingTreeIsClean(GitDir git) async {
       }
     }
   }
+  return true;
+}
+
+Future<bool> checkSentryDSNFileIsAvailable() async {
+  if (!await File(sentryDSNFilePath).exists()) {
+    print('The file containing the Sentry DSN is missing: $sentryDSNFilePath');
+    return false;
+  }
+
   return true;
 }
 
