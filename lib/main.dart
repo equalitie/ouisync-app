@@ -11,6 +11,11 @@ import 'app/background.dart';
 // TODO: using short period of 5 minutes for now to simplify debugging but once things stabilize
 // a bit we should increase it (say to 15 minutes) to reduce battery drain.
 const _syncInBackgroundPeriod = Duration(minutes: 5);
+
+/// In order to setup Sentry correctly when compiling, the DSN needs to be
+/// provided via environmental variable, like this:
+///
+/// flutter run --dart-define=SENTRY_DSN=<dsn>
 const _sentryDSN = bool.hasEnvironment('SENTRY_DSN')
     ? String.fromEnvironment('SENTRY_DSN')
     : '';
