@@ -37,10 +37,12 @@ Future<void> main(List<String> args) async {
   final buildDesc = BuildDesc(version, commit);
   final outputDir = await createOutputDir(buildDesc);
 
+  final sentryDSN = options.sentryDSN;
+
   List<File> assets = [];
 
   if (options.apk || options.aab) {
-    final aab = await buildAab(buildDesc);
+    final aab = await buildAab(buildDesc, sentryDSN);
 
     if (options.aab) {
       assets.add(await collateAsset(outputDir, name, buildDesc, aab));
@@ -53,7 +55,7 @@ Future<void> main(List<String> args) async {
   }
 
   if (options.exe) {
-    final asset = await buildWindowsInstaller(buildDesc);
+    final asset = await buildWindowsInstaller(buildDesc, sentryDSN);
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
@@ -63,8 +65,11 @@ Future<void> main(List<String> args) async {
     ///
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
-    final asset =
-        await buildWindowsMSIX(options.identityName!, options.publisher!);
+    final asset = await buildWindowsMSIX(
+      options.identityName!,
+      options.publisher!,
+      sentryDSN,
+    );
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
@@ -74,6 +79,7 @@ Future<void> main(List<String> args) async {
       outputDir: outputDir,
       buildDesc: buildDesc,
       description: pubspec.description ?? '',
+      sentryDSN: sentryDSN,
     );
     assets.add(asset);
   }
@@ -142,6 +148,7 @@ class Options {
   final bool detailedLog;
   final String? identityName;
   final String? publisher;
+  final String sentryDSN;
   final bool awaitUpload;
 
   Options._({
@@ -157,6 +164,7 @@ class Options {
     this.detailedLog = true,
     this.identityName,
     this.publisher,
+    required this.sentryDSN,
     this.awaitUpload = false,
   });
 
@@ -231,6 +239,12 @@ class Options {
           'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
       defaultsTo: 'CN=E3D17812-E9F1-46C8-B650-4D39786777D9',
     );
+    parser.addOption(
+      'sentry-dsn-file',
+      abbr: 'd',
+      help: 'Path to a file containing the Sentry DSN',
+      mandatory: true,
+    );
     parser.addFlag(
       'help',
       abbr: 'h',
@@ -271,6 +285,9 @@ class Options {
       }
     }
 
+    final sentryDSNPath = results['sentry-dsn-file'];
+    final sentryDSN = await File(sentryDSNPath).readAsString();
+
     return Options._(
       apk: results['apk'],
       aab: results['aab'],
@@ -284,6 +301,7 @@ class Options {
       detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
       publisher: results['publisher'],
+      sentryDSN: sentryDSN.trim(),
       awaitUpload: results['await-upload'],
     );
   }
@@ -363,7 +381,10 @@ class BuildDesc {
 // exe
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
+Future<File> buildWindowsInstaller(
+  BuildDesc buildDesc,
+  String sentryDSN,
+) async {
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -373,6 +394,8 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
     '--release',
     '--build-name',
     buildName,
+    '--dart-define',
+    'SENTRY_DSN=$sentryDSN',
   ]);
 
   final innoScript =
@@ -392,7 +415,11 @@ Future<File> buildWindowsInstaller(BuildDesc buildDesc) async {
 // msix
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsMSIX(String identityName, String publisher) async {
+Future<File> buildWindowsMSIX(
+  String identityName,
+  String publisher,
+  String sentryDSN,
+) async {
   final artifactDir = 'build/windows/x64/runner/Release';
 
   if (await Directory(artifactDir).exists()) {
@@ -405,7 +432,12 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 
   /// We first build the MSIX, before adding the additional assets to be
   /// packaged in the MSIX file
-  await run('dart', ['run', 'msix:build']);
+  await run('dart', [
+    'run',
+    'msix:build',
+    '--windows-build-args',
+    '--dart-define=SENTRY_DSN=$sentryDSN',
+  ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
@@ -474,6 +506,7 @@ Future<File> buildDeb({
   required Directory outputDir,
   required BuildDesc buildDesc,
   String description = '',
+  required String sentryDSN,
 }) async {
   // At some point we'll want to include the command line `ouisync`
   // executable as well, so we rename this flutter app so as to not clash
@@ -491,6 +524,8 @@ Future<File> buildDeb({
     'linux',
     '--build-name',
     buildName,
+    '--dart-define',
+    'SENTRY_DSN=$sentryDSN',
   ]);
 
   final arch = 'amd64';
@@ -580,7 +615,7 @@ Future<File> buildDeb({
 // aab
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildAab(BuildDesc buildDesc) async {
+Future<File> buildAab(BuildDesc buildDesc, String sentryDSN) async {
   final inputPath = 'build/app/outputs/bundle/release/app-release.aab';
 
   print('Creating Android App Bundle ...');
@@ -593,6 +628,8 @@ Future<File> buildAab(BuildDesc buildDesc) async {
     buildDesc.version.build[0].toString(),
     '--build-name',
     buildDesc.toString(),
+    '--dart-define',
+    'SENTRY_DSN=$sentryDSN',
   ]);
 
   return File(inputPath);
