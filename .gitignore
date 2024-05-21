@@ -70,5 +70,3 @@ secrets/
 
 .env
 /lib/env/env.g.dart
-util/additional_assets/*
-!util/additional_assets/check_dokan_installation.ps1

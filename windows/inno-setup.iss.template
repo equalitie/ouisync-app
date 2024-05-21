@@ -27,6 +27,7 @@ PrivilegesRequiredOverridesAllowed=commandline
 OutputBaseFilename=ouisync-installer
 OutputDir={#SourcePath}..\build\windows\x64\runner\Release
 SetupIconFile={#SourcePath}..\assets\favicon.ico
+UninstallDisplayIcon={#SourcePath}..\assets\favicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
