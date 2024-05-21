@@ -11,6 +11,9 @@ import 'app/background.dart';
 // TODO: using short period of 5 minutes for now to simplify debugging but once things stabilize
 // a bit we should increase it (say to 15 minutes) to reduce battery drain.
 const _syncInBackgroundPeriod = Duration(minutes: 5);
+const _sentryDSN = bool.hasEnvironment('SENTRY_DSN')
+    ? String.fromEnvironment('SENTRY_DSN')
+    : '';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,13 +31,13 @@ Future<void> main(List<String> args) async {
     );
   }
 
-  const dsn = bool.hasEnvironment('SENTRY_DSN')
-      ? String.fromEnvironment('SENTRY_DSN')
-      : null;
-  if (dsn == null) {
+  if (_sentryDSN.isEmpty) {
     runApp(await initOuiSyncApp(args));
   } else {
-    await setupSentry(() async => runApp(await initOuiSyncApp(args)), dsn);
+    await setupSentry(
+      () async => runApp(await initOuiSyncApp(args)),
+      _sentryDSN,
+    );
   }
 }
 
