@@ -69,9 +69,11 @@ dart run intl_utils:generate
 
 Ouisync integrates Sentry, via the `sentry_flutter` plugin.
 
-For initialization, you need to get a client key, called _DSN_, from a Sentry instance, making it available via an `.env` file, or as a environment variable using `export`, and then using [envied](https://github.com/petercinibulk/envied)
+For initialization, you need to get a client key, called _DSN_, from a Sentry instance, making it available via a Dart environment variable:
 
-Please follow the instructions in the package repository for [envied in GitHub](https://github.com/petercinibulk/envied#table-of-contents) to add a key called `DSN`, that contains the client key.
+```bash
+flutter run --dart-define=SENTRY_DSN=<DSN>
+```
 
 ## App suffix
 
