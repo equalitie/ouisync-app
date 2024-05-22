@@ -22,10 +22,11 @@
 
 /* Begin PBXBuildFile section */
 		1E11B5D92BC00EFA007248F2 /* OuisyncLib in Frameworks */ = {isa = PBXBuildFile; productRef = 1E11B5D82BC00EFA007248F2 /* OuisyncLib */; };
-		1E60DA162BCEBC5A001422A4 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E60DA152BCEBC5A001422A4 /* Entry.swift */; };
 		1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E60DA172BD0218C001422A4 /* Extension+Servicing.swift */; };
+		1E60DA1C2BD0FBEE001422A4 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E60DA1B2BD0FBEE001422A4 /* Path.swift */; };
 		1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */; };
 		1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */; };
+		1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */; };
 		1EBC4D4A2BB1B5A50053E2F3 /* Error+Presentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D492BB1B5A50053E2F3 /* Error+Presentable.swift */; };
 		1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D532BB1B6840053E2F3 /* Common.docc */; };
 		1EBC4D5A2BB1B6850053E2F3 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
@@ -140,12 +141,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1E60DA152BCEBC5A001422A4 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		1E60DA172BD0218C001422A4 /* Extension+Servicing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+Servicing.swift"; sourceTree = "<group>"; };
+		1E60DA1B2BD0FBEE001422A4 /* Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
 		1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderProxy.swift; sourceTree = "<group>"; };
 		1E6D33D32BBD7AAB00AFB60E /* FileProviderProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileProviderProxy.h; sourceTree = "<group>"; };
 		1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderServiceProtocol.swift; sourceTree = "<group>"; };
+		1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemIdentifier.swift; sourceTree = "<group>"; };
 		1EBC4D472BB1A7940053E2F3 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		1EBC4D492BB1B5A50053E2F3 /* Error+Presentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+Presentable.swift"; sourceTree = "<group>"; };
 		1EBC4D502BB1B6840053E2F3 /* Common.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -262,7 +264,8 @@
 				1EC102C62BAC66050026BD42 /* Info.plist */,
 				1EC102C72BAC66050026BD42 /* OuisyncFileProvider.entitlements */,
 				1EBC4D492BB1B5A50053E2F3 /* Error+Presentable.swift */,
-				1E60DA152BCEBC5A001422A4 /* Entry.swift */,
+				1E60DA1B2BD0FBEE001422A4 /* Path.swift */,
+				1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */,
 			);
 			path = OuisyncFileProvider;
 			sourceTree = "<group>";
@@ -721,12 +724,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E60DA162BCEBC5A001422A4 /* Entry.swift in Sources */,
+				1E60DA1C2BD0FBEE001422A4 /* Path.swift in Sources */,
 				1EC102C12BAC66050026BD42 /* Extension.swift in Sources */,
 				1EC102C32BAC66050026BD42 /* Item.swift in Sources */,
 				1EBC4D4A2BB1B5A50053E2F3 /* Error+Presentable.swift in Sources */,
 				1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */,
 				1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */,
+				1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

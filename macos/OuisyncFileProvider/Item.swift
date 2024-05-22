@@ -11,141 +11,218 @@ import MessagePack
 import OuisyncLib
 import System
 
-enum ItemEnum: CustomDebugStringConvertible {
-    case repositoryList
-    case trash
-    case workingSet
-    case entry(Entry)
+class FileItem: NSObject, NSFileProviderItem {
+    let repoName: String
+    let file: OuisyncFile
 
-    init(_ entry: Entry) {
-        self = .entry(entry)
-    }
-
-    init(_ entry: FileEntry) {
-        self = .entry(.file(entry))
-    }
-
-    init(_ entry: DirectoryEntry) {
-        self = .entry(.directory(entry))
-    }
-    
-    init(_ identifier: NSFileProviderItemIdentifier) {
-        switch identifier {
-        case .rootContainer:
-            self = .repositoryList
-        case .trashContainer:
-            self = .trash
-        case .workingSet:
-            self = .workingSet
-        default:
-            self = .entry(Entry.deserialize(identifier.rawValue)!)
-        }
-    }
-
-    func identifier() -> NSFileProviderItemIdentifier {
-        switch self {
-        case .repositoryList: return .rootContainer
-        case .trash: return .trashContainer
-        case .workingSet: return .workingSet
-        case .entry(let entry): return NSFileProviderItemIdentifier(entry.serialize())
-        }
-    }
-
-    func hasChildren() -> Bool {
-        switch self {
-        case .repositoryList: return true
-        case .entry(let entry):
-            return entry.hasChildren()
-        default: return false
-        }
-    }
-
-    var debugDescription: String {
-        switch self {
-        case .repositoryList:
-            return "ItemEnum(.repositoryList)"
-        case .trash:
-            return "ItemEnum(.trash)"
-        case .workingSet:
-            return "ItemEnum(.workingSet)"
-        case .entry(let entry):
-            return "ItemEnum(.entry(\(entry.serialize())))"
-        }
-    }
-}
-
-class Item: NSObject, NSFileProviderItem {
-    let item: ItemEnum
-    let name: String
-
-    init(_ item: ItemEnum, _ name: String) {
-        self.item = item
-        self.name = name
-    }
-
-    init(_ entry: OuisyncEntry) {
-        self.item = .entry(Entry(entry))
-        self.name = entry.name()
-    }
-
-    public static func fromOuisyncRepository(_ repo: OuisyncRepository) async throws -> Item {
-        let name = try await repo.getName()
-        return Item(.entry(Entry(DirectoryEntry.root(repo.handle))), name)
-    }
-
-    public static func fromIdentifier(_ identifier: NSFileProviderItemIdentifier, _ session: OuisyncSession?) async throws -> Item {
-        let item = ItemEnum(identifier)
-        
-        switch item {
-        case .repositoryList: return Item(item, ".repositoryList")
-        case .trash: return Item(item, ".trash")
-        case .workingSet: return Item(item, ".workingSet")
-        case .entry(let entry):
-            switch entry {
-            case .directory(let entry):
-                return Item(item, entry.name())
-            case .file(let entry):
-                return Item(item, entry.name())
-            }
-        }
+    init(_ file: OuisyncFile, _ repoName: String) {
+        self.repoName = repoName
+        self.file = file
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        return item.identifier()
+        ItemIdentifier.file(repoName, file.path).serialize()
     }
-    
+
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        switch item {
-        case .repositoryList: return .rootContainer
-        case .trash: return .trashContainer
-        case .workingSet: return .workingSet
-        case .entry(let entry):
-            switch entry {
-            case .file(let file):
-                return ItemEnum(FileEntry(OuisyncFile.parent(file.path), file.repositoryHandle)).identifier()
-            case .directory(let dir):
-                guard let parentPath = OuisyncDirectory.parent(dir.path) else {
-                    // It's the root of a repository so the .rootContainer
-                    return .rootContainer
-                }
-                return ItemEnum(DirectoryEntry(parentPath, dir.repositoryHandle)).identifier()
-            }
-        }
+        return ItemIdentifier.directory(repoName, file.parent().path).serialize()
     }
-    
+
     var capabilities: NSFileProviderItemCapabilities {
         return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
     }
-    
+
     var itemVersion: NSFileProviderItemVersion {
         NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
     }
-    
+
     var filename: String {
-        return name
+        return file.name()
     }
-    
+
     var contentType: UTType {
-        return item.hasChildren() ? .folder : .plainText
+        return .plainText
     }
+
+    public override var debugDescription: String {
+        return "FileItem(\(repoName), \(file.path))"
+    }
+}
+
+class DirectoryItem: NSObject, NSFileProviderItem {
+    let repoName: String
+    let directory: OuisyncDirectory
+
+    init(_ directory: OuisyncDirectory, _ repoName: String) {
+        self.repoName = repoName
+        self.directory = directory
+    }
+
+    var itemIdentifier: NSFileProviderItemIdentifier {
+        ItemIdentifier.directory(repoName, directory.path).serialize()
+    }
+
+    var parentItemIdentifier: NSFileProviderItemIdentifier {
+        if let parent = directory.parent() {
+            return ItemIdentifier.directory(repoName, parent.path).serialize()
+        } else {
+            return .rootContainer
+        }
+    }
+
+    var capabilities: NSFileProviderItemCapabilities {
+        return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+    }
+
+    var itemVersion: NSFileProviderItemVersion {
+        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+    }
+
+    var filename: String {
+        NSLog("::::::::::::: \(repoName) \(directory.path) \(FilePath.mergeRepoNameAndPath(repoName, directory.path)) \(OuisyncDirectory.name(FilePath.mergeRepoNameAndPath(repoName, directory.path)))")
+        return OuisyncDirectory.name(FilePath.mergeRepoNameAndPath(repoName, directory.path))
+    }
+
+    var contentType: UTType {
+        return .folder
+    }
+
+    public override var debugDescription: String {
+        return "DirectoryItem(\(repoName), \(directory.path))"
+    }
+}
+
+class RootContainerItem: NSObject, NSFileProviderItem {
+    override init() { }
+
+    var itemIdentifier: NSFileProviderItemIdentifier {
+        return .rootContainer
+    }
+
+    var parentItemIdentifier: NSFileProviderItemIdentifier {
+        return .rootContainer
+    }
+
+    var capabilities: NSFileProviderItemCapabilities {
+        return [.allowsReading]
+    }
+
+    var itemVersion: NSFileProviderItemVersion {
+        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+    }
+
+    var filename: String {
+        return ".rootContainer"
+    }
+
+    var contentType: UTType {
+        return .folder
+    }
+
+    public override var debugDescription: String {
+        return "RootContainerItem()"
+    }
+}
+
+class WorkingSetItem: NSObject, NSFileProviderItem {
+    override init() { }
+
+    var itemIdentifier: NSFileProviderItemIdentifier {
+        return .workingSet
+    }
+
+    var parentItemIdentifier: NSFileProviderItemIdentifier {
+        return .workingSet
+    }
+
+    var capabilities: NSFileProviderItemCapabilities {
+        return [.allowsReading]
+    }
+
+    var itemVersion: NSFileProviderItemVersion {
+        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+    }
+
+    var filename: String {
+        return ".workingSet"
+    }
+
+    var contentType: UTType {
+        return .folder
+    }
+
+    public override var debugDescription: String {
+        return "WorkingSetItem()"
+    }
+}
+
+class TrashContainerItem: NSObject, NSFileProviderItem {
+    override init() {}
+
+    var itemIdentifier: NSFileProviderItemIdentifier {
+        return .trashContainer
+    }
+
+    var parentItemIdentifier: NSFileProviderItemIdentifier {
+        return .trashContainer
+    }
+
+    var capabilities: NSFileProviderItemCapabilities {
+        return [.allowsReading]
+    }
+
+    var itemVersion: NSFileProviderItemVersion {
+        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+    }
+
+    var filename: String {
+        return ".trashContainer"
+    }
+
+    var contentType: UTType {
+        return .folder
+    }
+
+    public override var debugDescription: String {
+        return "TrashContainerItem()"
+    }
+}
+
+func itemFromIdentifier(
+        _ identifier: NSFileProviderItemIdentifier,
+        _ session: OuisyncSession,
+        _ state: State) throws -> NSFileProviderItem {
+    return try itemFromIdentifier(ItemIdentifier(identifier), session, state)
+}
+
+func itemFromIdentifier(
+        _ identifier: ItemIdentifier,
+        _ session: OuisyncSession,
+        _ state: State) throws -> NSFileProviderItem {
+    switch identifier {
+    case .rootContainer: return RootContainerItem()
+    case .trashContainer: return TrashContainerItem()
+    case .workingSet: return WorkingSetItem()
+    case .directory(let repoName, let path):
+        guard let repo = state.reposByName[repoName] else {
+            throw ExtError.noSuchRepository
+        }
+        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
+    case .file(let repoName, let path):
+        guard let repo = state.reposByName[repoName] else {
+            throw ExtError.noSuchRepository
+        }
+        return FileItem(OuisyncFile(path, repo), repoName)
+    }
+}
+
+func itemFromEntry(_ entry: OuisyncEntry, _ repoName: RepoName) -> NSFileProviderItem {
+    switch entry {
+    case .directory(let dir): return DirectoryItem(dir, repoName)
+    case .file(let file): return FileItem(file, repoName)
+    }
+}
+
+func itemFromRepo(_ repo: OuisyncRepository, _ repoName: RepoName) -> NSFileProviderItem {
+    return DirectoryItem(OuisyncDirectory(FilePath("/"), repo), repoName)
 }

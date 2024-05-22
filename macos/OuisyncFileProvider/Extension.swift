@@ -9,7 +9,11 @@ import FileProvider
 import OuisyncLib
 
 class State {
-    var items = Set<OuisyncRepository>()
+    var reposByName = Dictionary<RepoName, OuisyncRepository>()
+
+    func repos() -> Set<OuisyncRepository> {
+        return Set(reposByName.values)
+    }
 }
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
@@ -36,7 +40,17 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // TODO: implement the actual lookup
 
         Task {
-            let item = try await Item.fromIdentifier(identifier, ouisyncSession)
+            guard let session = ouisyncSession else {
+                let id = ItemIdentifier(identifier)
+                switch id {
+                case .rootContainer: return completionHandler(RootContainerItem(), nil);
+                case .trashContainer: return completionHandler(TrashContainerItem(), nil);
+                case .workingSet: return completionHandler(WorkingSetItem(), nil);
+                default:
+                    fatalError("TODO")
+                }
+            }
+            let item = try itemFromIdentifier(identifier, session, state)
             completionHandler(item, nil)
         }
         return Progress()
@@ -77,8 +91,14 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             identifier = .rootContainer
         }
 
-        Self.log("enumerator(for: \(ItemEnum(identifier)), request: \(request)")
-        return Enumerator(enumeratedItemIdentifier: identifier, self.ouisyncSession, self.state)
+        guard let session = self.ouisyncSession else {
+            return NoConnectionEnumerator()
+        }
+
+        let itemIdentifier = ItemIdentifier(identifier)
+        Self.log("enumerator(for: \(identifier), request: \(request)")
+
+        return try Enumerator(itemIdentifier, session, self.state)
     }
 
     static func log(_ str: String) {

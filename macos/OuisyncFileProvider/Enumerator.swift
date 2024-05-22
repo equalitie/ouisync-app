@@ -9,26 +9,26 @@ import FileProvider
 import OuisyncLib
 
 class Enumerator: NSObject, NSFileProviderEnumerator {
-    private let connection: OuisyncSession?
-    private let item: ItemEnum
+    private let session: OuisyncSession
+    private let item: NSFileProviderItem
     private let anchor = NSFileProviderSyncAnchor("an anchor".data(using: .utf8)!)
     private let state: State
 
-    init(enumeratedItemIdentifier: NSFileProviderItemIdentifier, _ connection: OuisyncSession?, _ state: State) {
-        self.item = ItemEnum(enumeratedItemIdentifier)
-        self.connection = connection
+    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ state: State) throws {
+        Self.log("init(\(itemIdentifier), ...)")
+        self.item = try itemFromIdentifier(itemIdentifier, session, state)
+        self.session = session
         self.state = state
-        Self.log("init \(item)")
         super.init()
     }
 
     func invalidate() {
-        Self.log("invalidate \(item)")
+        Self.log("invalidate(\(item),...)")
         // TODO: perform invalidation of server connection if necessary
     }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        Self.log("enumerateItems(\(item)")
+        Self.log("enumerateItems(\(item))")
         /* TODO:
          - inspect the page to determine whether this is an initial or a follow-up request
          
@@ -41,37 +41,25 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          - inform the observer about the items returned by the server (possibly multiple times)
          - inform the observer that you are finished with this page
          */
-        guard let connection = self.connection else {
-            observer.finishEnumerating(upTo: nil)
-            return
-        }
-
         switch item {
-        case .repositoryList:
+        case is RootContainerItem:
             Task {
-                let repos = Set(try await connection.listRepositories());
-                self.state.items = repos
-                let items = await reposToItems(repos)
-                observer.didEnumerate(Array(items))
+                let reposByName = try await listRepositories()
+                self.state.reposByName = reposByName
+                observer.didEnumerate(reposToItems(reposByName))
                 observer.finishEnumerating(upTo: nil)
             }
-        case .entry(let entry):
-            let repo = OuisyncRepository(entry.repositoryHandle(), connection)
-            let dir = OuisyncDirectory(entry.path(), repo)
-
+        case let dir as DirectoryItem:
             Task {
-                let entries = try await dir.listEntries()
-                for entry in entries {
-                    let item = Item(entry)
-                    NSLog("entry: \(entry) \(item.itemIdentifier.rawValue) \(item.parentItemIdentifier.rawValue)")
-                }
-                observer.didEnumerate(entries.map(Item.init))
+                let entries = try await dir.directory.listEntries()
+                observer.didEnumerate(entries.map({ e in itemFromEntry(e, dir.repoName) }))
                 observer.finishEnumerating(upTo: nil)
             }
-        case .trash:
+        case is TrashContainerItem:
             observer.finishEnumerating(upTo: nil)
-        case .workingSet:
+        case is WorkingSetItem:
             observer.finishEnumerating(upTo: nil)
+        default: fatalError("Invalid item in `enumerateItems`: \(item)")
         }
     }
     
@@ -86,54 +74,45 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          - inform the observer about item deletions and updates (modifications + insertions)
          - inform the observer when you have finished enumerating up to a subsequent sync anchor
          */
-        guard let connection = self.connection else {
-            let error = NSError(domain: NSFileProviderErrorDomain, code: NSFileProviderError.serverUnreachable.rawValue, userInfo: nil)
-            observer.finishEnumeratingWithError(error)
-            return
-        }
-
         switch item {
-        case .repositoryList:
+        case is RootContainerItem:
             Task {
-                let new_repos = Set(try await connection.listRepositories())
-                let old_repos = self.state.items
-                let deleted = old_repos.subtracting(new_repos)
+                let new_repos = try await listRepositories()
+                var deleted: [NSFileProviderItemIdentifier] = [];
 
-                if !deleted.isEmpty {
-                    let deletedIdentifiers = reposToItemIdentifiers(deleted)
-                    observer.didDeleteItems(withIdentifiers: Array(deletedIdentifiers))
+                for (repoName, repo) in self.state.reposByName {
+                    if new_repos[repoName] == nil {
+                        deleted.append(itemFromRepo(repo, repoName).itemIdentifier)
+                    }
                 }
 
-                observer.didUpdate(Array(await reposToItems(new_repos)))
+                if !deleted.isEmpty {
+                    observer.didDeleteItems(withIdentifiers: deleted)
+                }
 
-                self.state.items = new_repos
+                observer.didUpdate(reposToItems(new_repos))
+
+                self.state.reposByName = new_repos
 
                 observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
             }
-        case .entry(let entry):
+        case is DirectoryItem:
             Task {
                 observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
             }
-        case .trash:
+        case is TrashContainerItem:
             observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
-        case .workingSet:
+        case is WorkingSetItem:
             observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
+        default:
+            fatalError("Invalid item in `enumerateChanges`")
         }
     }
 
-    func reposToItems(_ repos: Set<OuisyncRepository>) async -> Set<Item> {
-        var items = Set<Item>()
-        for repo in repos {
-            let item = (try? await Item.fromOuisyncRepository(repo))!
-            items.insert(item)
-        }
-        return items
-    }
-
-    func reposToItemIdentifiers(_ repos: Set<OuisyncRepository>) -> Set<NSFileProviderItemIdentifier> {
-        var items = Set<NSFileProviderItemIdentifier>()
-        for repo in repos {
-            items.insert(ItemEnum(Entry(repo)).identifier())
+    func reposToItems(_ repos: Dictionary<RepoName, OuisyncRepository>)  -> [NSFileProviderItem] {
+        var items: [NSFileProviderItem] = []
+        for (repoName, repo) in repos {
+            items.append(itemFromRepo(repo, repoName))
         }
         return items
     }
@@ -145,5 +124,34 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 
     static func log(_ str: String) {
         NSLog(">>>> FileProviderEnumerator: \(str)")
+    }
+
+    func listRepositories() async throws -> Dictionary<RepoName, OuisyncRepository> {
+        var repos: Dictionary<RepoName, OuisyncRepository> = [:]
+        for repo in try await session.listRepositories() {
+            let name = try await repo.getName()
+            repos[name] = repo
+        }
+        return repos
+    }
+}
+
+class NoConnectionEnumerator: NSObject, NSFileProviderEnumerator {
+    func invalidate() { }
+
+    func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
+        NSLog("NoConnectionEnumerator.enumerateItems(...)")
+        observer.finishEnumerating(upTo: nil)
+    }
+
+    func enumerateChanges(for observer: NSFileProviderChangeObserver, from anchor: NSFileProviderSyncAnchor) {
+        NSLog("NoConnectionEnumerator.enumerateChanges(...))")
+        observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
+    }
+
+    func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
+        NSLog("NoConnectionEnumerator.currentSyncAnchor(...)")
+        let anchor = NSFileProviderSyncAnchor("an anchor".data(using: .utf8)!)
+        completionHandler(anchor)
     }
 }

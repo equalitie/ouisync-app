@@ -8,6 +8,11 @@
 import Common
 import FileProvider
 
+enum ExtError : Error {
+    //case ouisyncIsNotConnected
+    case noSuchRepository
+}
+
 extension Error {
     func toPresentableError() -> NSError {
         guard let commonError = self as? CommonError else {
