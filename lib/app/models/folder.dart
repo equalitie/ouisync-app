@@ -119,16 +119,16 @@ class _Refresher {
 
           switch (sortBy) {
             case SortBy.name:
-              content.sort(_sortByName(sortDirection ?? SortDirection.asc));
+              content.sort(_sortByName(sortDirection ?? SortDirection.desc));
               break;
             case SortBy.size:
-              content.sort(_sortBySize(sortDirection ?? SortDirection.asc));
+              content.sort(_sortBySize(sortDirection ?? SortDirection.desc));
               break;
             case SortBy.type:
-              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
+              content.sort(_sortByType(sortDirection ?? SortDirection.desc));
               break;
             default:
-              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
+              content.sort(_sortByType(sortDirection ?? SortDirection.desc));
           }
 
           if (path == folder.state.path) {

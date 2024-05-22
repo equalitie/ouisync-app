@@ -666,7 +666,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<void> refresh({
     SortBy? sortBy = SortBy.type,
-    SortDirection? sortDirection = SortDirection.asc,
+    SortDirection? sortDirection = SortDirection.desc,
   }) async {
     final path = state.currentFolder.path;
     bool errorShown = false;

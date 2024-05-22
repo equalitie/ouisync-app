@@ -131,8 +131,8 @@ class _MainPageState extends State<MainPage>
   @override
   void initState() {
     _sortListCubit = SortListCubit.create(
-        sortBy: SortBy.name,
-        direction: SortDirection.asc,
+        sortBy: SortBy.type,
+        direction: SortDirection.desc,
         listType: ListType.repos);
 
     super.initState();
