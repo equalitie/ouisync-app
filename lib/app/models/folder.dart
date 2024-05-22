@@ -162,8 +162,13 @@ class _Refresher {
         : (b, a) => _nameComparator(a, b);
   }
 
-  int _nameComparator(FileSystemEntry a, FileSystemEntry b) =>
-      a.name.compareTo(b.name);
+  int _nameComparator(FileSystemEntry a, FileSystemEntry b) {
+    final nameResult = a.name.compareTo(b.name);
+    if (nameResult != 0) return nameResult;
+
+    final typeResult = _typeComparator(a, b);
+    return typeResult == 0 ? _sizeComparator(a, b) : typeResult;
+  }
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortBySize(
       SortDirection direction) {
@@ -172,13 +177,17 @@ class _Refresher {
         : (b, a) => _sizeComparator(a, b);
   }
 
-  int _sizeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
-        (FileEntry(size: final a), FileEntry(size: final b)) =>
-          (a ?? 0).compareTo(b ?? 0),
-        (FileEntry(), DirectoryEntry()) => 1,
-        (DirectoryEntry(), FileEntry()) => -1,
-        (DirectoryEntry(), DirectoryEntry()) => 0,
-      };
+  int _sizeComparator(FileSystemEntry a, FileSystemEntry b) {
+    if (a is FileEntry && b is DirectoryEntry) return 1;
+    if (a is DirectoryEntry && b is FileEntry) return -1;
+
+    if (a is DirectoryEntry && b is DirectoryEntry) {
+      return _nameComparator(a, b);
+    }
+
+    return ((a as FileEntry).size ?? 0.0)
+        .compareTo((b as FileEntry).size ?? 0.0);
+  }
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
       SortDirection direction) {
@@ -187,9 +196,11 @@ class _Refresher {
         : (b, a) => _typeComparator(a, b);
   }
 
-  int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
-        (FileEntry(), FileEntry()) || (DirectoryEntry(), DirectoryEntry()) => 0,
-        (DirectoryEntry(), FileEntry()) => 1,
-        (FileEntry(), DirectoryEntry()) => -1,
-      };
+  int _typeComparator(FileSystemEntry a, FileSystemEntry b) {
+    if (a is DirectoryEntry && b is FileEntry) return 1;
+    if (a is FileEntry && b is DirectoryEntry) return -1;
+
+    final nameOrder = _nameComparator(a, b);
+    return nameOrder == 0 ? _sizeComparator(a, b) : nameOrder;
+  }
 }
