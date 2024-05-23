@@ -16,7 +16,7 @@ class FolderState extends Equatable {
     this.path = Strings.root,
     this.content = const [],
     this.sortBy = SortBy.name,
-    this.sortDirection = SortDirection.desc,
+    this.sortDirection = SortDirection.asc,
   });
 
   bool get isRoot => path == Strings.root;
@@ -119,16 +119,16 @@ class _Refresher {
 
           switch (sortBy) {
             case SortBy.name:
-              content.sort(_sortByName(sortDirection ?? SortDirection.desc));
+              content.sort(_sortByName(sortDirection ?? SortDirection.asc));
               break;
             case SortBy.size:
-              content.sort(_sortBySize(sortDirection ?? SortDirection.desc));
+              content.sort(_sortBySize(sortDirection ?? SortDirection.asc));
               break;
             case SortBy.type:
-              content.sort(_sortByType(sortDirection ?? SortDirection.desc));
+              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
               break;
             default:
-              content.sort(_sortByType(sortDirection ?? SortDirection.desc));
+              content.sort(_sortByName(sortDirection ?? SortDirection.asc));
           }
 
           if (path == folder.state.path) {

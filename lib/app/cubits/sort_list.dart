@@ -9,8 +9,8 @@ class SortListState extends Equatable {
   final ListType listType;
 
   SortListState(
-      {this.sortBy = SortBy.type,
-      this.direction = SortDirection.desc,
+      {this.sortBy = SortBy.name,
+      this.direction = SortDirection.asc,
       this.listType = ListType.repos});
 
   SortListState copyWith(
