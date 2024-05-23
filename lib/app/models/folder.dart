@@ -164,10 +164,12 @@ class _Refresher {
 
   int _nameComparator(FileSystemEntry a, FileSystemEntry b) {
     final nameResult = a.name.compareTo(b.name);
-    if (nameResult != 0) return nameResult;
+    if (nameResult != 0) {
+      if (a is FileEntry && b is DirectoryEntry) return 1;
+      if (a is DirectoryEntry && b is FileEntry) return -1;
+    }
 
-    final typeResult = _typeComparator(a, b);
-    return typeResult == 0 ? _sizeComparator(a, b) : typeResult;
+    return nameResult;
   }
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortBySize(
@@ -177,17 +179,17 @@ class _Refresher {
         : (b, a) => _sizeComparator(a, b);
   }
 
-  int _sizeComparator(FileSystemEntry a, FileSystemEntry b) {
-    if (a is FileEntry && b is DirectoryEntry) return 1;
-    if (a is DirectoryEntry && b is FileEntry) return -1;
+  int _sizeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
+        (FileEntry(size: final sa), FileEntry(size: final sb)) =>
+          _sizeNameComparator((sa ?? 0).compareTo(sb ?? 0), a, b),
+        (FileEntry(), DirectoryEntry()) => 1,
+        (DirectoryEntry(), FileEntry()) => -1,
+        (DirectoryEntry(), DirectoryEntry()) => a.name.compareTo(b.name),
+      };
 
-    if (a is DirectoryEntry && b is DirectoryEntry) {
-      return _nameComparator(a, b);
-    }
-
-    return ((a as FileEntry).size ?? 0.0)
-        .compareTo((b as FileEntry).size ?? 0.0);
-  }
+  int _sizeNameComparator(
+          int sizeResult, FileSystemEntry a, FileSystemEntry b) =>
+      sizeResult == 0 ? a.name.compareTo(b.name) : sizeResult;
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
       SortDirection direction) {
@@ -196,11 +198,11 @@ class _Refresher {
         : (b, a) => _typeComparator(a, b);
   }
 
-  int _typeComparator(FileSystemEntry a, FileSystemEntry b) {
-    if (a is DirectoryEntry && b is FileEntry) return 1;
-    if (a is FileEntry && b is DirectoryEntry) return -1;
-
-    final nameOrder = _nameComparator(a, b);
-    return nameOrder == 0 ? _sizeComparator(a, b) : nameOrder;
-  }
+  int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
+        (FileEntry(), FileEntry()) ||
+        (DirectoryEntry(), DirectoryEntry()) =>
+          a.name.compareTo(b.name),
+        (DirectoryEntry(), FileEntry()) => -1,
+        (FileEntry(), DirectoryEntry()) => 1,
+      };
 }
