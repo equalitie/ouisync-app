@@ -52,44 +52,45 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-      future: init,
-      builder: (context, snapshot) =>
-          // NOTE: Can't use `hasData` because the future returns void.
-          (snapshot.connectionState == ConnectionState.done)
-              ? Form(
-                  key: formKey,
-                  child: PopScope(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SingleChildScrollView(
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+            title: Text(S.current.titleCreateRepository), elevation: 0.0),
+        body: Padding(
+          padding: EdgeInsets.zero, //Dimensions.paddingInPageMain,
+          child: FutureBuilder(
+            future: init,
+            builder: (context, snapshot) =>
+                // NOTE: Can't use `hasData` because the future returns void.
+                (snapshot.connectionState == ConnectionState.done)
+                    ? Form(
+                        key: formKey,
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24.0, vertical: 12.0),
                           reverse: true,
                           child: _buildContent(context),
                         ),
-                      ],
-                    ),
-                  ),
-                )
-              : Container(
-                  child: Center(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CircularProgressIndicator(),
+                      )
+                    : Container(
+                        child: Center(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: CircularProgressIndicator(),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 16),
+                                child: Text(S.current.messageAwaitingResult),
+                              )
+                            ],
+                          ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: Text(S.current.messageAwaitingResult),
-                        )
-                      ],
-                    ),
-                  ),
-                ));
+                      ),
+          ),
+        ),
+      );
 
   Future<void> _init() async {
     final shareToken = await widget.initialTokenValue?.let(_validateToken);
@@ -126,26 +127,24 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     }
   }
 
-  Widget _buildContent(BuildContext context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (widget.initialTokenValue?.isNotEmpty ?? false)
-              ..._buildTokenLabel(context),
-            ..._buildNameField(context),
-            if (accessMode == AccessMode.write)
-              _buildUseCacheServersSwitch(context),
-            RepoSecurity(
-              initialLocalSecretMode: widget.initialLocalSecretMode,
-              isBiometricsAvailable: isBiometricsAvailable,
-              onChanged: _onLocalSecretChanged,
-            ),
-            Fields.dialogActions(
-              context,
-              buttons: _buildActions(context),
-            )
-          ]);
+  Widget _buildContent(BuildContext context) =>
+      Column(mainAxisSize: MainAxisSize.min, children: [
+        if (widget.initialTokenValue?.isNotEmpty ?? false)
+          ..._buildTokenLabel(context),
+        ..._buildNameField(context),
+        if (accessMode == AccessMode.write)
+          _buildUseCacheServersSwitch(context),
+        RepoSecurity(
+          initialLocalSecretMode: widget.initialLocalSecretMode,
+          isBiometricsAvailable: isBiometricsAvailable,
+          onChanged: _onLocalSecretChanged,
+        ),
+        Fields.dialogActions(
+          context,
+          mainAxisAlignment: MainAxisAlignment.end,
+          buttons: _buildActions(context),
+        )
+      ]);
 
   List<Widget> _buildTokenLabel(BuildContext context) => [
         Padding(
@@ -158,7 +157,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
               color: Constants.inputBackgroundColor,
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Fields.constrainedText(
@@ -168,19 +167,32 @@ class _RepositoryCreationState extends State<RepositoryCreation>
                       .copyWith(color: Constants.inputLabelForeColor),
                 ),
                 Dimensions.spacingVerticalHalf,
-                Text(
-                  formatShareLinkForDisplay(widget.initialTokenValue ?? ''),
-                  style: context.theme.appTextStyle.bodySmall
-                      .copyWith(fontWeight: FontWeight.w500),
-                )
+                Row(
+                  children: [
+                    Text(
+                      formatShareLinkForDisplay(widget.initialTokenValue ?? ''),
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: context.theme.appTextStyle.bodySmall
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
-        Fields.constrainedText(
-          S.current.messageRepositoryAccessMode(accessMode.name),
-          flex: 0,
-          style: smallMessageStyle(context),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 6.0),
+          child: Row(
+            children: [
+              Fields.constrainedText(
+                S.current.messageRepositoryAccessMode(accessMode.name),
+                style: smallMessageStyle(context),
+              ),
+            ],
+          ),
         ),
       ];
 
@@ -220,28 +232,24 @@ class _RepositoryCreationState extends State<RepositoryCreation>
       ];
 
   Widget _buildUseCacheServersSwitch(BuildContext context) =>
-      SwitchListTile.adaptive(
+      CustomAdaptiveSwitch(
         value: useCacheServers,
-        title: Text(S.current.messageUseCacheServers),
-        onChanged: (value) => setState(() {
-          useCacheServers = value;
-        }),
+        title: S.current.messageUseCacheServers,
         contentPadding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
+        onChanged: (value) => setState(() => useCacheServers = value),
       );
 
   List<Widget> _buildActions(BuildContext context) => [
-        NegativeButton(
-          text: S.current.actionBack,
+        Fields.inPageButton(
+          text: S.current.actionCancel,
           onPressed: () => Navigator.of(context).pop(null),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
-        PositiveButton(
+        SizedBox(width: 24.0),
+        Fields.inPageButton(
           text: shareToken == null
               ? S.current.actionCreate
               : S.current.actionImport,
           onPressed: () => _onSubmit(context),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
       ];
 
