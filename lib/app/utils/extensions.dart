@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
+import '../models/auth_mode.dart';
 import 'utils.dart';
 
 extension AnyExtension<T> on T {
@@ -137,6 +140,36 @@ extension RepositoryExtension on Repository {
       Constants.cacheServers.map((host) => update(host, enabled)),
     );
   }
+
+  static const _authModeKey = 'authMode';
+
+  Future<AuthMode> getAuthMode() =>
+      getMetadata(_authModeKey).then((data) => data != null
+          ? AuthMode.fromJson(json.decode(data))
+          : AuthModeBlindOrManual());
+
+  Future<void> setAuthMode(AuthMode authMode) async {
+    final newValue = json.encode(authMode.toJson());
+
+    while (true) {
+      // Currently we ignore any concurrent changes and always force the new value.
+      final oldValue = await getMetadata(_authModeKey);
+
+      try {
+        await setMetadata({
+          _authModeKey: (oldValue: oldValue, newValue: newValue),
+        });
+
+        break;
+      } on Error catch (e) {
+        if (e.code == ErrorCode.entryChanged) {
+          continue;
+        } else {
+          rethrow;
+        }
+      }
+    }
+  }
 }
 
 extension ShareTokenExtension on ShareToken {
@@ -146,7 +179,8 @@ extension ShareTokenExtension on ShareToken {
 }
 
 Future<bool> _isCacheServersEnabled(
-    Future<bool> Function(String) mirrorExists) async {
+  Future<bool> Function(String) mirrorExists,
+) async {
   Future<bool> check(String host) async {
     try {
       return await mirrorExists(host);
@@ -157,4 +191,10 @@ Future<bool> _isCacheServersEnabled(
 
   return await Future.wait(Constants.cacheServers.map(check))
       .then((results) => results.contains(true));
+}
+
+extension ProgressExtension on Progress {
+  double get fraction => total > 0 ? value.toDouble() / total.toDouble() : 1.0;
+
+  bool get isComplete => value == total;
 }

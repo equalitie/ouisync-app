@@ -4,21 +4,22 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
+import '../../utils/master_key.dart';
 import '../../utils/utils.dart';
-import '../../models/models.dart';
 
 class LockedRepositoryState extends HookWidget
     with AppLogger, RepositoryActionsMixin {
-  const LockedRepositoryState(this.parentContext,
-      {required this.databaseId,
-      required this.repoLocation,
-      required this.reposCubit});
+  const LockedRepositoryState({
+    required this.parentContext,
+    required this.repoCubit,
+    required this.masterKey,
+    required this.passwordHasher,
+  });
 
   final BuildContext parentContext;
-
-  final ReposCubit reposCubit;
-  final DatabaseId databaseId;
-  final RepoLocation repoLocation;
+  final RepoCubit repoCubit;
+  final MasterKey masterKey;
+  final PasswordHasher passwordHasher;
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +65,12 @@ class LockedRepositoryState extends HookWidget
         Dimensions.spacingVerticalDouble,
         Fields.inPageButton(
             onPressed: () async {
-              await unlockRepository(parentContext, reposCubit,
-                  databaseId: databaseId, repoLocation: repoLocation);
+              await unlockRepository(
+                parentContext,
+                repoCubit,
+                masterKey,
+                passwordHasher,
+              );
             },
             leadingIcon: const Icon(Icons.lock_open_rounded),
             text: S.current.actionUnlock,

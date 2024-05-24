@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 
 class RepositoriesBar extends StatelessWidget
     with AppLogger
@@ -14,100 +16,66 @@ class RepositoriesBar extends StatelessWidget
   final Cubits _cubits;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-        decoration: const BoxDecoration(
-          color: Colors.transparent,
-          border: Border(
-            top: BorderSide(
-                width: 1.0,
-                color: Colors.transparent,
-                style: BorderStyle.solid),
-          ),
-        ),
-        padding: Dimensions.paddingRepositoryBar,
-        child: _buildRepoDescription(context));
-  }
+  Widget build(BuildContext context) => _cubits.repositories.builder((state) {
+        final reposCubit = _cubits.repositories;
 
-  Widget _buildRepoDescription(BuildContext context) =>
-      _cubits.repositories.builder((state) {
-        if (state.isLoading) {
-          return Column(
-            children: const [CircularProgressIndicator(color: Colors.white)],
-          );
+        if (reposCubit.isLoading || reposCubit.showList) {
+          return SizedBox.shrink();
         }
 
-        if (_cubits.repositories.showList) {
-          return _buildRepoListState(context);
-        }
-
-        final repo = state.currentRepo;
-        IconData icon;
-
-        if (repo == null) {
-          icon = Fields.accessModeIcon(null);
-        } else {
-          icon = Fields.accessModeIcon(repo.accessMode);
-        }
-
-        return _buildState(context, repo, icon: icon);
+        return Row(
+          children: [
+            _buildBackButton(),
+            Expanded(flex: 2, child: _buildName(reposCubit.currentRepo)),
+            _buildStatus(reposCubit.currentRepo),
+            _buildLockButton(reposCubit.currentRepo),
+          ],
+        );
       });
 
-  String _repoName(RepoEntry? repo) {
-    if (repo != null) {
-      return repo.name;
+  Widget _buildName(RepoEntry? repo) => Text(
+        repo?.name ?? S.current.messageNoRepos,
+        softWrap: true,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      );
+
+  Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
+      ? Padding(
+          padding: EdgeInsets.only(right: 10.0),
+          child: RepoStatus(repo.cubit),
+        )
+      : SizedBox.shrink();
+
+  Widget _buildLockButton(RepoEntry? repo) {
+    final repoCubit = repo?.cubit;
+
+    if (repoCubit != null) {
+      return BlocBuilder<RepoCubit, RepoState>(
+          bloc: repoCubit,
+          builder: (context, state) => _buildLockButtonContent(repoCubit));
     } else {
-      return S.current.messageNoRepos;
+      return _buildLockButtonContent(null);
     }
   }
 
-  Widget _buildRepoListState(BuildContext context) => Container(
-      padding: Dimensions.paddingRepositoryPicker,
-      child: Padding(
-          padding: EdgeInsets.only(left: 4.0),
-          child: Row(children: [
-            Expanded(child: Text(S.current.titleRepositoriesList)),
-
-            /// TODO: Implement search repos in list
-            // Fields.actionIcon(
-            //   const Icon(Icons.search_rounded),
-            //   onPressed: () {},
-            //   size: Dimensions.sizeIconSmall,
-            //   color: Colors.white,
-            // )
-          ])));
-
-  Widget _buildState(
-    BuildContext context,
-    RepoEntry? entry, {
-    required IconData icon,
-  }) =>
-      Row(children: [
-        _buildBackButton(),
-        Expanded(
-            child: Container(
-                padding: Dimensions.paddingRepositoryPicker,
-                child: Row(children: [
-                  IconButton(
-                    icon: Icon(icon),
-                    iconSize: Dimensions.sizeIconSmall,
-                    onPressed: () async {
-                      if (entry == null) return;
-                      await lockRepository(entry, _cubits.repositories);
-                    },
-                  ),
-                  Fields.constrainedText(_repoName(entry),
-                      softWrap: false, textOverflow: TextOverflow.fade)
-                ])))
-      ]);
+  Widget _buildLockButtonContent(RepoCubit? repoCubit) => IconButton(
+        icon: Icon(
+            Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
+        iconSize: Dimensions.sizeIconSmall,
+        onPressed: () => repoCubit?.lock(),
+        alignment: Alignment.centerRight,
+      );
 
   Widget _buildBackButton() {
     return multiBlocBuilder(
         [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
         () {
-      final button = Fields.actionIcon(const Icon(Icons.arrow_back_rounded),
-          onPressed: () => _cubits.repositories.showRepoList(),
-          size: Dimensions.sizeIconSmall);
+      final button = Fields.actionIcon(
+        const Icon(Icons.arrow_back_rounded),
+        onPressed: () => _cubits.repositories.showRepoList(),
+        size: Dimensions.sizeIconSmall,
+      );
 
       Color? color = _cubits.mainNotificationBadgeColor();
 

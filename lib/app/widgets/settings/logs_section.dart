@@ -83,8 +83,7 @@ class LogsSection extends SettingsSection with AppLogger {
             void Function()? onTap;
 
             if (error.code == oui.ErrorCode.vfsDriverInstall) {
-              reason =
-                  S.current.messageErrorDokanNotInstalled(Constants.dokanUrl);
+              reason = S.current.messageErrorDokanNotInstalled('');
               trailing = Icon(Icons.open_in_browser);
               onTap = () {
                 // unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));

@@ -1,8 +1,15 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart'
+    show Repository, Session, SessionKind;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -10,13 +17,32 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('Settings migration', () async {
+  late Directory tempDir;
+
+  setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp();
+    PathProviderPlatform.instance = FakePathProviderPlatform(tempDir);
+  });
+
+  tearDown(() async {
+    try {
+      await tempDir.delete(recursive: true);
+    } on PathAccessException catch (_) {
+      // This sometimes happen on the CI on windows. It seems to be caused by another process
+      // accessing the temp directory for some reason. It probably doesn't indicate a problem in
+      // the code under test so it should be safe to ignore it.
+    }
+  });
+
+  test('settings migration', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
 
     final prefs = await SharedPreferences.getInstance();
-
     expect(prefs.getKeys().isEmpty, true);
+
+    final fooPath = join(tempDir.path, 'foo.db');
+    final barPath = join(tempDir.path, 'bar.db');
 
     final s0 = await v0.Settings.init(prefs);
 
@@ -25,23 +51,49 @@ void main() {
     await s0.setLaunchAtStartup(true);
     await s0.setSyncOnMobileEnabled(true);
     await s0.setHighestSeenProtocolNumber(1);
-    await s0.addRepo(RepoLocation.fromDbPath("/foo/bar.db"),
-        databaseId: "123", authenticationMode: v0.AuthMode.manual);
-    await s0.setDefaultRepo("bar");
+    await s0.addRepo(
+      RepoLocation.fromDbPath(fooPath),
+      databaseId: '123',
+      authenticationMode: v0.AuthMode.manual,
+    );
+    await s0.setDefaultRepo('foo');
 
-    final s1 = await loadAndMigrateSettings();
+    final session = Session.create(
+      configPath: join(tempDir.path, 'config'),
+      kind: SessionKind.unique,
+    );
+
+    await Repository.create(
+      session,
+      store: fooPath,
+      readSecret: null,
+      writeSecret: null,
+    );
+
+    final s1 = await loadAndMigrateSettings(session);
 
     await prefs.reload();
 
-    // In version 1 we only expect the `SETTINGS_KEY` value to be present.
+    // In version 1 we only expect the "settings" value to be present.
     expect(prefs.getKeys().length, 1);
+    expect(s1.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
-    expect(s1.repos().length, 1);
+    // The auth mode should have been transfered to the repo metadata
+    final repo = await Repository.open(session, store: fooPath);
+    expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
-    await s1.addRepoWithUserProvidedPassword(
-        RepoLocation.fromDbPath("/foo/baz.db"), DatabaseId("234"));
+    await s1.setRepoLocation(
+      DatabaseId("234"),
+      RepoLocation.fromDbPath(barPath),
+    );
 
-    expect(s1.repos().length, 2);
+    expect(
+      s1.repos,
+      unorderedEquals([
+        RepoLocation.fromDbPath(fooPath),
+        RepoLocation.fromDbPath(barPath),
+      ]),
+    );
   });
 
   test('master key', () async {
@@ -85,4 +137,18 @@ void main() {
 
     expect(await key.decrypt(encrypted), teststring);
   });
+}
+
+class FakePathProviderPlatform extends PathProviderPlatform {
+  final Directory root;
+
+  FakePathProviderPlatform(this.root);
+
+  @override
+  Future<String?> getApplicationSupportPath() async =>
+      join(root.path, 'application-support');
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async =>
+      join(root.path, 'application-documents');
 }

@@ -1,5 +1,5 @@
 $bundle_dokan_mayor = $args[0] #"2"
-$bundle_dokan_version = $args[3] #"2.1.0.1000"
+$bundle_dokan_version = $args[1] #"2.1.0.1000"
 
 ######################
 # FUNCTIONS          #

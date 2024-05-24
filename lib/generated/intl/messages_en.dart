@@ -23,8 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "The permission cannot be higher than the repository current access mode: ${access}";
 
-  static String m1(name) =>
-      "Biometric validation added for repository \"${name}\"";
+  static String m1(path) => "File downloaded to ${path}";
 
   static String m2(name) => "${name} - downloading canceled";
 
@@ -35,68 +34,76 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m5(path) =>
       "The current folder is missing, navigating to its parent: ${path}";
 
-  static String m6(dokanUrl) =>
-      "Missing Dokan installation. Please install it from ${dokanUrl}";
+  static String m6(error) => "Error: ${error}";
 
-  static String m7(name) => "Initialization of the repository ${name} failed";
+  static String m7(dokanUrl) => "Dokan is missing.${dokanUrl}";
 
-  static String m8(path) => "${path} is not empty";
+  static String m8(name) => "Initialization of the repository ${name} failed";
 
-  static String m9(reason) => "Failed to mount: ${reason}";
+  static String m9(path) => "${path} is not empty";
 
-  static String m10(name) =>
+  static String m10(reason) =>
+      "Accessing repositories via File Explorer is not available: ${reason}";
+
+  static String m11(name) =>
       "${name} already exist in this location.\n\nWhat do you want to do?";
 
-  static String m11(name) => "Folder deleted successfully: ${name}";
+  static String m12(name) => "Folder deleted successfully: ${name}";
 
-  static String m12(number) =>
+  static String m13(number) =>
       "Do you want to lock all open repositories?\n\n(${number} open)";
 
-  static String m13(path) => "from ${path}";
+  static String m14(path) => "from ${path}";
 
-  static String m14(name) => "Error creating file ${name}";
+  static String m15(name) => "Error creating file ${name}";
 
-  static String m15(name) => "Error opening file ${name}";
+  static String m16(name) => "Error opening file ${name}";
 
-  static String m16(path) => "Previewing file ${path} failed";
+  static String m17(path) => "Previewing file ${path} failed";
 
-  static String m17(name) => "We could not delete the repository \"${name}\"";
+  static String m18(name) => "We could not delete the repository \"${name}\"";
 
-  static String m18(name) =>
+  static String m19(name) =>
       "We could not find the repository \"${name}\" at the usual location";
 
-  static String m19(access) => "Access mode granted: ${access}";
+  static String m20(access) => "Access mode granted: ${access}";
 
-  static String m20(name) =>
+  static String m21(name) =>
       "This repository already exists in the app under the name \"${name}\".";
 
-  static String m21(name) => "Suggested: ${name}\n(tap here to use this name)";
+  static String m22(name) => "Suggested: ${name}\n(tap here to use this name)";
 
-  static String m22(access) => "Unlocked as a ${access} replica";
+  static String m23(name) => "Sort by: ${name}";
 
-  static String m23(name) => "${name} writing canceled";
+  static String m24(access) => "Unlocked as a ${access} replica";
 
-  static String m24(name) => "${name} - writing failed";
+  static String m25(name) => "Enter password to unlock \"${name}\"";
 
-  static String m25(name) => "Failed to import repository ${name}";
+  static String m26(name) => "${name} writing canceled";
 
-  static String m26(name) => "Failed to create repository ${name}";
+  static String m27(name) => "${name} - writing failed";
 
-  static String m27(access) => "${access}";
+  static String m28(name) => "Failed to import repository ${name}";
 
-  static String m28(changes) => "${changes}";
+  static String m29(name) => "Failed to create repository ${name}";
 
-  static String m29(entry) => "${entry}";
+  static String m30(access) => "${access}";
 
-  static String m30(name) => "${name}";
+  static String m31(changes) => "${changes}";
 
-  static String m31(number) => "${number}";
+  static String m32(entry) => "${entry}";
 
-  static String m32(path) => "${path}";
+  static String m33(error) => "${error}";
 
-  static String m33(status) => "${status}";
+  static String m34(name) => "${name}";
 
-  static String m34(name) => "Share repository \"${name}\"";
+  static String m35(number) => "${number}";
+
+  static String m36(path) => "${path}";
+
+  static String m37(status) => "${status}";
+
+  static String m38(name) => "Share repository \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -137,6 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
+        "actionInstallDokan":
+            MessageLookupByLibrary.simpleMessage("Install Dokan"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),
@@ -158,7 +167,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionRemoveRepo":
             MessageLookupByLibrary.simpleMessage("Remove repository"),
         "actionRename": MessageLookupByLibrary.simpleMessage("Rename"),
-        "actionResetSecret": MessageLookupByLibrary.simpleMessage("Reset"),
         "actionRetry": MessageLookupByLibrary.simpleMessage("Retry"),
         "actionSave": MessageLookupByLibrary.simpleMessage("Save"),
         "actionSaveChanges":
@@ -168,13 +176,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
         "actionSkip": MessageLookupByLibrary.simpleMessage("Skip"),
-        "actionStoreSecretOnDevice":
-            MessageLookupByLibrary.simpleMessage("Store secret on this device"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Update"),
-        "actionUseCustomLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Use custom local password"),
+        "actionUpdateDokan":
+            MessageLookupByLibrary.simpleMessage("Update Dokan"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Locate"),
@@ -220,6 +226,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6":
             MessageLookupByLibrary.simpleMessage("Listening on QUIC/UDP IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("Remember password"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Enter the new name: "),
         "labelRepositoryCurrentPassword":
@@ -259,8 +267,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Ack!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "This option is not available on read-only repositories"),
-        "messageAddLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Add local password"),
         "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
             "Import repository from file system"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
@@ -272,11 +278,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "This repository is a read-only replica."),
+        "messageAuthenticate":
+            MessageLookupByLibrary.simpleMessage("Authenticate"),
         "messageAutomaticUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
                 "We couldn\'t unlock the repository"),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("Available on mobile"),
+        "messageAwaitingResult":
+            MessageLookupByLibrary.simpleMessage("Awaiting result..."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground"),
         "messageBackgroundNotificationAndroid":
@@ -285,10 +295,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Biometric authentication failed"),
         "messageBiometricUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage("Biometric unlocking failed"),
-        "messageBiometricValidationAdded": m1,
-        "messageBiometricValidationRemoved":
-            MessageLookupByLibrary.simpleMessage(
-                "Biometric validation removed"),
         "messageBlindReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Your peer cannot write nor read the contents"),
         "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
@@ -304,8 +310,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Canada’s Privacy Act"),
         "messageChangeExtensionAlert": MessageLookupByLibrary.simpleMessage(
             "Changing the extension of a file can make it unusable"),
-        "messageChangeLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Change local password"),
         "messageChangesToTermsP1": MessageLookupByLibrary.simpleMessage(
             "We may update our Terms from time to time. Thus, you are advised to review this page periodically for any changes"),
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
@@ -351,8 +355,18 @@ class MessageLookup extends MessageLookupByLibrary {
             "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
+        "messageDokan": MessageLookupByLibrary.simpleMessage("Dokan"),
+        "messageDokanDifferentMayorP1":
+            MessageLookupByLibrary.simpleMessage("The installed"),
+        "messageDokanDifferentMayorP2": MessageLookupByLibrary.simpleMessage(
+            "is out of date. Please update it to the latest version."),
+        "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
+            "The Dokan installation failed."),
+        "messageDokanOlderVersionP2": MessageLookupByLibrary.simpleMessage(
+            "is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again."),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("File download canceled"),
+        "messageDownloadFileLocation": m1,
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -398,16 +412,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageEqualitieValues": MessageLookupByLibrary.simpleMessage(
             "is built in line with our values.\n\nBy using it you agree to abide by these principles, and accept our Terms of Use and Privacy Notice."),
         "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
-        "messageErrorAddingLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "Adding a local password failed"),
-        "messageErrorAddingSecureStorge": MessageLookupByLibrary.simpleMessage(
-            "Adding a local password failed"),
         "messageErrorAuthenticatingBiometrics":
             MessageLookupByLibrary.simpleMessage(
                 "There was an error authenticathing using biometrics. Please try again"),
-        "messageErrorChangingLocalPassword":
-            MessageLookupByLibrary.simpleMessage(
-                "Changing local password failed"),
         "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
             "There was a problem changing the password. Please try again"),
         "messageErrorCharactersNotAllowed":
@@ -422,7 +429,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Something went wrong. Please try again."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("Failed."),
-        "messageErrorDokanNotInstalled": m6,
+        "messageErrorDetail": m6,
+        "messageErrorDokanNotInstalled": m7,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entry not found"),
         "messageErrorFormValidatorNameDefault":
@@ -434,13 +442,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "The new password is the same as the old password"),
         "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
             "Error opening the repository"),
-        "messageErrorOpeningRepoDescription": m7,
-        "messageErrorPathNotEmpty": m8,
-        "messageErrorRemovingPassword": MessageLookupByLibrary.simpleMessage(
-            "Removing the password failed"),
-        "messageErrorRemovingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Removing the password from the secure storage failed"),
+        "messageErrorOpeningRepoDescription": m8,
+        "messageErrorPathNotEmpty": m9,
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "There is already a repository with this name"),
         "messageErrorRepositoryPasswordValidation":
@@ -455,17 +458,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a valid token."),
         "messageErrorUnhandledState":
             MessageLookupByLibrary.simpleMessage("Error: unhandled state"),
-        "messageErrorUpdatingSecureStorage":
-            MessageLookupByLibrary.simpleMessage(
-                "Updating the password in the secure storage failed"),
         "messageEthernet": MessageLookupByLibrary.simpleMessage("Ethernet"),
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Press back again to exit."),
         "messageFAQ":
             MessageLookupByLibrary.simpleMessage("Frequently Asked Questions"),
-        "messageFailedToMount": m9,
+        "messageFailedToMount": m10,
         "messageFile": MessageLookupByLibrary.simpleMessage("file"),
-        "messageFileAlreadyExist": m10,
+        "messageFileAlreadyExist": m11,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "File is already being uploaded"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
@@ -474,7 +474,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "File preview is not yet available"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("files"),
-        "messageFolderDeleted": m11,
+        "messageFolderDeleted": m12,
         "messageFolderName":
             MessageLookupByLibrary.simpleMessage("Folder name"),
         "messageGeneratePassword":
@@ -507,6 +507,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Initializing…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Tap on the <bold>Unlock</bold> button and input the password to access content in this repository."),
+        "messageInstallDokanForOuisyncP1":
+            MessageLookupByLibrary.simpleMessage("Ouisync uses"),
+        "messageInstallDokanForOuisyncP2": MessageLookupByLibrary.simpleMessage(
+            "to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience."),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage(
                 "International Bill of Human Rights"),
@@ -522,7 +526,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLocalDiscovery":
             MessageLookupByLibrary.simpleMessage("Local Discovery"),
-        "messageLockOpenRepos": m12,
+        "messageLockOpenRepos": m13,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is locked."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
@@ -554,7 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization"),
         "messageMobile": MessageLookupByLibrary.simpleMessage("Mobile"),
-        "messageMoveEntryOrigin": m13,
+        "messageMoveEntryOrigin": m14,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "This function is not available when moving an entry."),
         "messageNATOnWikipedia":
@@ -562,9 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNATType": MessageLookupByLibrary.simpleMessage("NAT type"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Network is unavailable"),
-        "messageNewFileError": m14,
-        "messageNewPassword":
-            MessageLookupByLibrary.simpleMessage("New password"),
+        "messageNewFileError": m15,
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "New password copied to the clipboard"),
@@ -588,7 +590,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest."),
-        "messageOpenFileError": m15,
+        "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("Ouisync"),
@@ -607,7 +609,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Peer removed"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
-        "messagePreviewingFileFailed": m16,
+        "messagePreviewingFileFailed": m17,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -618,8 +620,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cannot be modified, just access the contents"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
             "Remember to securely save the password; if you forget it, there is no way to retrieve it."),
-        "messageRemovaLocalPassword":
-            MessageLookupByLibrary.simpleMessage("Remove local password"),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":
@@ -642,14 +642,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Replace existing file"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Repository authentication failed"),
-        "messageRepoDeletionErrorDescription": m17,
+        "messageRepoDeletionErrorDescription": m18,
         "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
             "The repository deletion failed"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "The repository is not there anymore"),
-        "messageRepoMissingErrorDescription": m18,
-        "messageRepositoryAccessMode": m19,
-        "messageRepositoryAlreadyExist": m20,
+        "messageRepoMissingErrorDescription": m19,
+        "messageRepositoryAccessMode": m20,
+        "messageRepositoryAlreadyExist": m21,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("The current password"),
         "messageRepositoryIsNotOpen":
@@ -664,9 +664,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "The repository is not mounted "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Password"),
-        "messageRepositorySuggestedName": m21,
+        "messageRepositorySuggestedName": m22,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Paste the link here"),
+        "messageResetLocalSecret":
+            MessageLookupByLibrary.simpleMessage("Reset local secret"),
         "messageRousseau":
             MessageLookupByLibrary.simpleMessage("Jean-Jacques Rousseau"),
         "messageSaveLogFile":
@@ -697,6 +699,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "You need to select one permission to create a repository link first"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("Share with QR Code"),
+        "messageSortBy": m23,
         "messageStorage": MessageLookupByLibrary.simpleMessage("Storage"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
             "Needed for getting access to the files"),
@@ -734,9 +737,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unknown file extension"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "The password did not unlock the repository"),
-        "messageUnlockRepoOk": m22,
-        "messageUnlockRepository":
-            MessageLookupByLibrary.simpleMessage("Enter password to unlock"),
+        "messageUnlockRepoOk": m24,
+        "messageUnlockRepository": m25,
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Unlock using biometrics"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
@@ -744,8 +746,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),
+        "messageUpdateLocalSecretFailed": MessageLookupByLibrary.simpleMessage(
+            "Updating security properties of the repository failed."),
+        "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
+            "Security properties of the repository have been updated."),
         "messageUseCacheServers":
             MessageLookupByLibrary.simpleMessage("Use cache servers"),
+        "messageUseLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Use local password"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("Validate local password"),
@@ -756,21 +764,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Full access. Your peer can read and write"),
-        "messageWritingFileCanceled": m23,
-        "messageWritingFileError": m24,
-        "messsageFailedAddRepository": m25,
-        "messsageFailedCreateRepository": m26,
+        "messageWritingFileCanceled": m26,
+        "messageWritingFileError": m27,
+        "messsageFailedAddRepository": m28,
+        "messsageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("Copy password"),
-        "replacementAccess": m27,
-        "replacementChanges": m28,
-        "replacementEntry": m29,
-        "replacementName": m30,
-        "replacementNumber": m31,
-        "replacementPath": m32,
-        "replacementStatus": m33,
+        "replacementAccess": m30,
+        "replacementChanges": m31,
+        "replacementEntry": m32,
+        "replacementError": m33,
+        "replacementName": m34,
+        "replacementNumber": m35,
+        "replacementPath": m36,
+        "replacementStatus": m37,
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "Repository is already imported"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
@@ -813,6 +822,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "3.4 Deletion of your data from our Always-On-Peer server"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("Digital Security"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("Dokan installation"),
+        "titleDokanInstallationFound":
+            MessageLookupByLibrary.simpleMessage("Dokan installation found"),
+        "titleDokanMissing":
+            MessageLookupByLibrary.simpleMessage("Dokan is missing"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Download location"),
         "titleDownloadToDevice":
@@ -887,7 +902,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("Set password for"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "titleShareRepository": m34,
+        "titleShareRepository": m38,
         "titleSortBy": MessageLookupByLibrary.simpleMessage("Sort by"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("State Monitor"),

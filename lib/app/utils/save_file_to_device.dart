@@ -12,17 +12,15 @@ import 'platform/platform.dart';
 import 'utils.dart';
 
 class SaveFileToDevice with AppLogger {
-  const SaveFileToDevice({required FileItem data, required RepoCubit cubit})
-      : _data = data,
-        _cubit = cubit;
+  const SaveFileToDevice({required this.entry, required this.repoCubit});
 
-  final FileItem _data;
-  final RepoCubit _cubit;
+  final FileEntry entry;
+  final RepoCubit repoCubit;
 
   Future<void> save(String defaultPath) async {
     await _maybeRequestPermission();
 
-    String fileName = _data.name;
+    String fileName = entry.name;
 
     String? parentDir;
     String? destinationFilePath;
@@ -61,8 +59,8 @@ class SaveFileToDevice with AppLogger {
     final destinationFile =
         await io.File(destinationFilePath).create(recursive: true);
 
-    await _cubit.downloadFile(
-      sourcePath: _data.path,
+    await repoCubit.downloadFile(
+      sourcePath: entry.path,
       parentPath: parentDir,
       destinationPath: destinationFile.path,
     );

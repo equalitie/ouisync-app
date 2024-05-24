@@ -121,21 +121,24 @@ class Fields {
         ),
       );
 
-  static Widget bottomSheetTitle(String title,
-          {EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
-          TextAlign textAlign = TextAlign.start,
-          TextOverflow textOverflow = TextOverflow.ellipsis,
-          bool softWrap = true,
-          TextStyle? style}) =>
+  static Widget bottomSheetTitle(
+    String title, {
+    EdgeInsets padding = Dimensions.paddingBottomSheetTitle,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow textOverflow = TextOverflow.ellipsis,
+    bool softWrap = true,
+    TextStyle? style,
+  }) =>
       Padding(
-          padding: padding,
-          child: Row(children: [
-            Text(title,
-                textAlign: textAlign,
-                softWrap: softWrap,
-                overflow: textOverflow,
-                style: style)
-          ]));
+        padding: padding,
+        child: Text(
+          title,
+          textAlign: textAlign,
+          softWrap: softWrap,
+          overflow: textOverflow,
+          style: style,
+        ),
+      );
 
   static Widget idLabel(String text,
           {TextAlign textAlign = TextAlign.center,
@@ -346,7 +349,7 @@ class Fields {
       Icon(icon, size: size, color: color);
 
   static Widget actionIcon(
-    Icon icon, {
+    Widget icon, {
     required void Function()? onPressed,
     double size = Dimensions.sizeIconMicro,
     EdgeInsets padding = Dimensions.paddingIconButton,
@@ -402,26 +405,28 @@ class Fields {
             subtitle: subtitle != null ? Text(subtitle) : null,
           ));
 
-  static Widget _textFormFieldBase(
-      {Key? key,
-      required BuildContext context,
-      TextEditingController? textEditingController,
-      TextStyle? style,
-      bool? enabled = true,
-      Icon? icon,
-      Widget? prefixIcon,
-      Widget? suffixIcon,
-      String? label,
-      required String hint,
-      Function(String?)? onSaved,
-      Function(String)? onChanged,
-      Function(String)? onFieldSubmitted,
-      FutureOr<String?> Function(String?)? validator,
-      AutovalidateMode? autovalidateMode,
-      bool autofocus = false,
-      FocusNode? focusNode,
-      bool obscureText = false,
-      TextInputAction? textInputAction}) {
+  static Widget formTextField({
+    Key? key,
+    required BuildContext context,
+    TextEditingController? controller,
+    TextStyle? style,
+    bool? enabled = true,
+    Icon? icon,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? labelText,
+    String? hintText,
+    String? errorText,
+    Function(String?)? onSaved,
+    Function(String)? onChanged,
+    Function(String?)? onFieldSubmitted,
+    FutureOr<String?> Function(String? value)? validator,
+    AutovalidateMode? autovalidateMode,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    bool obscureText = false,
+    TextInputAction? textInputAction,
+  }) {
     final inputBorder = UnderlineInputBorder(
       borderSide: BorderSide(
         color: Theme.of(context).primaryColor,
@@ -436,98 +441,58 @@ class Fields {
       icon: icon,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
-      hintText: hint,
-      labelText: label,
+      labelText: labelText,
+      hintText: hintText,
+      errorText: errorText,
       labelStyle: TextStyle(color: Constants.inputLabelForeColor),
       errorMaxLines: 2,
     );
 
-    if (validator is Future<String?> Function(String?)) {
-      return AsyncTextFormField(
-          key: key,
-          controller: textEditingController,
-          enabled: enabled,
-          autovalidateMode: autovalidateMode,
-          autofocus: autofocus,
-          focusNode: focusNode,
-          obscureText: obscureText,
-          textInputAction: textInputAction,
-          keyboardType: TextInputType.text,
-          decoration: decoration,
-          style: style,
-          validator: validator,
-          onSaved: onSaved,
-          onChanged: onChanged,
-          onFieldSubmitted: onFieldSubmitted);
-    } else {
-      return TextFormField(
-          key: key,
-          controller: textEditingController,
-          enabled: enabled,
-          autovalidateMode: autovalidateMode,
-          autofocus: autofocus,
-          focusNode: focusNode,
-          obscureText: obscureText,
-          textInputAction: textInputAction,
-          keyboardType: TextInputType.text,
-          decoration: decoration,
-          style: style,
-          validator: validator as String? Function(String?)?,
-          onSaved: onSaved,
-          onChanged: onChanged,
-          onFieldSubmitted: onFieldSubmitted);
-    }
-  }
+    final widget = (validator is Future<String?> Function(String?))
+        ? AsyncTextFormField(
+            key: key,
+            controller: controller,
+            enabled: enabled,
+            autovalidateMode: autovalidateMode,
+            autofocus: autofocus,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            keyboardType: TextInputType.text,
+            decoration: decoration,
+            style: style,
+            validator: validator,
+            onSaved: onSaved,
+            onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+          )
+        : TextFormField(
+            key: key,
+            controller: controller,
+            enabled: enabled,
+            autovalidateMode: autovalidateMode,
+            autofocus: autofocus,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            keyboardType: TextInputType.text,
+            decoration: decoration,
+            style: style,
+            validator: validator as String? Function(String?)?,
+            onSaved: onSaved,
+            onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+          );
 
-  static Widget formTextField(
-          {Key? key,
-          required BuildContext context,
-          TextEditingController? textEditingController,
-          TextStyle? style,
-          bool? enabled = true,
-          Icon? icon,
-          Widget? prefixIcon,
-          Widget? suffixIcon,
-          String? label,
-          required String hint,
-          Function(String?)? onSaved,
-          Function(String)? onChanged,
-          Function(String?)? onFieldSubmitted,
-          FutureOr<String?> Function(String? value)? validator,
-          AutovalidateMode? autovalidateMode,
-          bool autofocus = false,
-          FocusNode? focusNode,
-          bool obscureText = false,
-          TextInputAction? textInputAction}) =>
-      Padding(
-          padding: Dimensions.paddingFormTextField,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              _textFormFieldBase(
-                  key: key,
-                  context: context,
-                  textEditingController: textEditingController,
-                  style: style,
-                  enabled: enabled,
-                  icon: icon,
-                  prefixIcon: prefixIcon,
-                  suffixIcon: suffixIcon,
-                  label: label,
-                  hint: hint,
-                  onSaved: onSaved,
-                  onChanged: onChanged,
-                  onFieldSubmitted: onFieldSubmitted,
-                  validator: validator,
-                  autovalidateMode: autovalidateMode,
-                  autofocus: autofocus,
-                  focusNode: focusNode,
-                  obscureText: obscureText,
-                  textInputAction: textInputAction)
-            ],
-          ));
+    return Padding(
+        padding: Dimensions.paddingFormTextField,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [widget],
+        ));
+  }
 
   static Widget dialogActions(BuildContext context,
           {required List<Widget> buttons,
@@ -626,8 +591,10 @@ class Fields {
       return;
     }
 
-    final content = await Dialogs.executeFutureWithLoadingDialog(context,
-        f: webView.loadUrl(context, url));
+    final content = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      webView.loadUrl(context, url),
+    );
 
     await Navigator.push(
         context,

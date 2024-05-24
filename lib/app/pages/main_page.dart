@@ -12,15 +12,16 @@ import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
+import '../utils/path.dart' as repo_path;
 import '../utils/utils.dart';
-import '../widgets/repository_progress.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -30,7 +31,7 @@ typedef MoveEntryCallback = Future<bool> Function(
     String origin, String path, EntryType type);
 
 typedef PreviewFileCallback = Future<void> Function(
-    RepoCubit repo, FileItem item, bool useDefaultApp);
+    RepoCubit repo, FileEntry entry, bool useDefaultApp);
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -157,56 +158,7 @@ class _MainPageState extends State<MainPage>
 
     /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription, _textIntentSubscription),
     /// or the MediaReceiverWindows (DropTarget), depending on the platform.
-    widget.mediaReceiver.controller.stream.listen((media) {
-      // Media is a String when it is a share token.
-      if (media is String) {
-        loggy.app('mediaReceiver: String');
-        unawaited(addRepoWithTokenDialog(context, initialTokenValue: media));
-      }
-
-      // Check if the user tries to import/load a repository to Ouisync.
-      // On desktops this is drag-and-drop into the repository list, on mobile
-      // it's sharing from another application.
-      if (_cubits.repositories.showList || !PlatformValues.isDesktopDevice) {
-        var files = <String>[];
-
-        if (media is io.File) {
-          files.add(media.path);
-        } else if (media is List<SharedMediaFile>) {
-          for (final file in media) {
-            files.add(file.path);
-          }
-        }
-
-        files = files
-            .where((path) => p.extension(path) == RepoLocation.defaultExtension)
-            .toList();
-
-        if (files.isNotEmpty) {
-          unawaited(() async {
-            for (final file in files) {
-              final location = RepoLocation.fromDbPath(file);
-              await _cubits.repositories.importRepoFromLocation(location);
-            }
-          }());
-          return;
-        }
-      }
-
-      // Media is a list of SharedMediaFile when on mobile some application
-      // shares a file with Ouisync.
-      if (media is List<SharedMediaFile>) {
-        loggy.app('mediaReceiver: List<ShareMediaFile>');
-        handleShareIntentPayload(media, _cubits.repositories);
-      }
-
-      // Media is io.File when on desktops the user drags and drops a file to
-      // Ouisync.
-      if (media is io.File) {
-        loggy.app('mediaReceiver: io.File');
-        saveMedia(media.path);
-      }
-    });
+    widget.mediaReceiver.controller.stream.listen(handleReceivedMedia);
 
     if (io.Platform.isWindows) {
       checkForDokan();
@@ -225,24 +177,6 @@ class _MainPageState extends State<MainPage>
 
   void initMainPage() async {
     _bottomPaddingWithBottomSheet = ValueNotifier<double>(defaultBottomPadding);
-  }
-
-  void handleShareIntentPayload(
-      List<SharedMediaFile> payload, ReposCubit repos) {
-    if (payload.isEmpty) {
-      return;
-    }
-
-    _bottomPaddingWithBottomSheet.value =
-        defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
-
-    final bottomSheetSaveMedia = SaveSharedMedia(repos,
-        sharedMedia: payload,
-        onUpdateBottomSheet: updateBottomSheet,
-        onSaveFile: saveMedia,
-        validationFunction: canSaveMedia);
-
-    setState(() => _bottomSheet = bottomSheetSaveMedia);
   }
 
   getContent() {
@@ -268,34 +202,64 @@ class _MainPageState extends State<MainPage>
       case DokanResult.newerVersionMayor:
         {
           // No install required
-          loggy.app(
-            'The Dokan version installed is supported: ${result.name}',
-          );
+          loggy.app('The Dokan version installed is supported: ${result.name}');
         }
       case DokanResult.notFound:
         {
           //Install Dokan using the bundled MSI
-          final dokanNotFoundMessage =
-              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
-              'which later can be found in the File Explorer.\n\n'
-              'We can try to install it for you';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: 'Dokan ${Constants.dokanMinimunVersion} missing',
-                    message: dokanNotFoundMessage,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanMissing,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageInstallDokanForOuisyncP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageInstallDokanForOuisyncP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text('SKIP INSTALLATION'),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child: Text(
-                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -309,28 +273,59 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.differentMayor:
         {
-          final dokanDifferentMayorMessage =
-              'Ouisync uses Dokan for mounting unlocked repositories as drives, '
-              'which later can be found in the File Explorer.\n\n'
-              'We found a different mayor version of Dokan thant the version '
-              'required for Ouisync, but we can try to install it for you';
-
           WidgetsBinding.instance.addPostFrameCallback(
             (_) {
               unawaited(
-                Dialogs.simpleAlertDialog(
-                    context: context,
-                    title: 'Dokan ${Constants.dokanMayorRequired} missing',
-                    message: dokanDifferentMayorMessage,
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Flex(
+                      direction: Axis.horizontal,
+                      children: [
+                        Fields.constrainedText(
+                          S.current.titleDokanInstallationFound,
+                          style: context.theme.appTextStyle.titleMedium,
+                          maxLines: 2,
+                        )
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: context.theme.appTextStyle.bodyMedium,
+                              children: [
+                                TextSpan(
+                                    text:
+                                        '${S.current.messageDokanDifferentMayorP1} '),
+                                Fields.linkTextSpan(
+                                  context,
+                                  S.current.messageDokan,
+                                  _launchDokanGitHub,
+                                ),
+                                TextSpan(
+                                    text:
+                                        ' ${S.current.messageDokanDifferentMayorP2}')
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       TextButton(
-                          child: Text('SKIP INSTALLATION'),
-                          onPressed: () => Navigator.of(context).pop(false)),
+                        child: Text(S.current.actionSkip.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
                       TextButton(
-                          child: Text(
-                              'INSTALL DOKAN ${Constants.dokanMinimunVersion}'),
-                          onPressed: () => Navigator.of(context).pop(true))
-                    ]).then(
+                        child: Text(S.current.actionInstallDokan.toUpperCase()),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      )
+                    ],
+                  ),
+                ).then(
                   (installDokan) async {
                     if (installDokan ?? false) {
                       unawaited(_installBundledDokan(
@@ -344,30 +339,76 @@ class _MainPageState extends State<MainPage>
         }
       case DokanResult.olderVersionMayor:
         {
-          final dokanOlderVersionMessage =
-              'A previous version of Dokan is already installed.\n\n'
-              'Please uninstall the existing version '
-              '${Constants.dokanMayorRequired} of Dokan, reboot the system and '
-              'run Ouisync again';
-
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                Dialogs.simpleAlertDialog(
-                  context: context,
-                  title: 'Dokan ${Constants.dokanMayorRequired} found',
-                  message: dokanOlderVersionMessage,
+            (_) => unawaited(
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      Fields.constrainedText(
+                        S.current.titleDokanInstallationFound,
+                        style: context.theme.appTextStyle.titleMedium,
+                        maxLines: 2,
+                      )
+                    ],
+                  ),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: context.theme.appTextStyle.bodyMedium,
+                            children: [
+                              TextSpan(
+                                  text:
+                                      '${S.current.messageDokanDifferentMayorP1} '),
+                              Fields.linkTextSpan(
+                                context,
+                                S.current.messageDokan,
+                                _launchDokanGitHub,
+                              ),
+                              TextSpan(
+                                  text:
+                                      ' ${S.current.messageDokanOlderVersionP2}')
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text(S.current.actionCloseCapital),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(false),
+                    )
+                  ],
                 ),
-              );
-            },
+              ).then(
+                (installDokan) async {
+                  if (installDokan ?? false) {
+                    unawaited(_installBundledDokan(
+                        dokanCheck.runDokanMsiInstallation));
+                  }
+                },
+              ),
+            ),
           );
         }
     }
   }
 
+  void _launchDokanGitHub(BuildContext context) async {
+    final title = Text('Dokan');
+    await Fields.openUrl(context, title, Constants.dokanUrl);
+  }
+
   Future<void> _installBundledDokan(
-      bool? Function() runDokanMsiInstallation) async {
-    final installationResult = runDokanMsiInstallation();
+      Future<bool?> Function() runDokanMsiInstallation) async {
+    final installationResult = await runDokanMsiInstallation();
 
     if (installationResult == null) {
       return;
@@ -382,18 +423,17 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final message = 'The Dokan installation failed';
     await Dialogs.simpleAlertDialog(
       context: context,
-      title: 'Dokan check',
-      message: message,
+      title: S.current.titleDokanInstallation,
+      message: S.current.messageDokanInstallationFailed,
     );
   }
 
   Widget buildMainWidget() {
     return _cubits.repositories.builder((repos) {
       final currentRepo = repos.currentRepo;
-      final currentRepoCubit = currentRepo?.maybeCubit;
+      final currentRepoCubit = currentRepo?.cubit;
 
       if (currentRepoCubit != null) {
         final isFolder = !repos.showList;
@@ -451,9 +491,10 @@ class _MainPageState extends State<MainPage>
         // This is a general purpose error state.
         // errorDescription is required, but nullable.
         return ErrorState(
-            errorMessage: currentRepo.error,
-            errorDescription: currentRepo.errorDescription,
-            onReload: null);
+          errorMessage: currentRepo.error,
+          errorDescription: currentRepo.errorDescription,
+          onReload: () => repos.setCurrent(null),
+        );
       }
 
       if (currentRepo == null) {
@@ -485,9 +526,10 @@ class _MainPageState extends State<MainPage>
         child: Stack(
           alignment: AlignmentDirectional.bottomEnd,
           children: <Widget>[
-            Column(children: [Expanded(child: buildMainWidget())]),
-            _cubits.repositories.builder(
-              (repos) => RepositoryProgress(repos.currentRepo?.maybeCubit),
+            Column(
+              children: [
+                Expanded(child: buildMainWidget()),
+              ],
             ),
             const ListenerThatRunsFunctionsWithBuildContext(),
           ],
@@ -527,6 +569,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: _cubits.repositories,
         repoPicker: RepositoriesBar(_cubits),
         appSettingsButton: _buildAppSettingsIcon(),
+        searchButton: _buildSearchIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
@@ -538,6 +581,7 @@ class _MainPageState extends State<MainPage>
       _cubits.upgradeExists,
       _cubits.powerControl,
       _cubits.panicCounter,
+      _cubits.mount,
     ], () {
       Color? color = _cubits.mainNotificationBadgeColor();
 
@@ -553,7 +597,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildRepoSettingsIcon() =>
       Fields.actionIcon(const Icon(Icons.more_vert_rounded),
           onPressed: () async {
-        final cubit = _currentRepo?.maybeCubit;
+        final cubit = _currentRepo?.cubit;
         if (cubit == null) {
           return;
         }
@@ -561,27 +605,38 @@ class _MainPageState extends State<MainPage>
         await _showRepoSettings(context, repoCubit: cubit);
       }, size: Dimensions.sizeIconSmall);
 
+  Widget _buildSearchIcon() => Fields.actionIcon(
+        const Icon(Icons.search_rounded),
+        onPressed: () {
+          /// TODO: Implement searching
+        },
+        size: Dimensions.sizeIconSmall,
+      );
+
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
 
-    if (_cubits.repositories.showList &&
-        _cubits.repositories.repos.isNotEmpty) {
-      return FloatingActionButton(
-        focusNode: _fabFocus,
-        heroTag: Constants.heroTagRepoListActions,
-        child: icon,
-        onPressed: () => _showRepoListActions(context),
-      );
-    }
-
-    if (current is OpenRepoEntry &&
-        current.cubit.state.canWrite &&
-        !_cubits.repositories.showList) {
-      return FloatingActionButton(
-        focusNode: _fabFocus,
-        heroTag: Constants.heroTagMainPageActions,
-        child: icon,
-        onPressed: () => _showDirectoryActions(context, current),
+    if (_cubits.repositories.showList) {
+      if (_cubits.repositories.repos.isNotEmpty) {
+        return FloatingActionButton(
+          focusNode: _fabFocus,
+          heroTag: Constants.heroTagRepoListActions,
+          child: icon,
+          onPressed: () => _showRepoListActions(context),
+        );
+      }
+    } else if (current is OpenRepoEntry) {
+      return BlocBuilder<RepoCubit, RepoState>(
+        bloc: current.cubit,
+        builder: (context, state) => Visibility(
+          visible: state.canWrite,
+          child: FloatingActionButton(
+            focusNode: _fabFocus,
+            heroTag: Constants.heroTagMainPageActions,
+            child: icon,
+            onPressed: () => _showDirectoryActions(context, current),
+          ),
+        ),
       );
     }
 
@@ -605,10 +660,12 @@ class _MainPageState extends State<MainPage>
 
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
-        return LockedRepositoryState(context,
-            reposCubit: _cubits.repositories,
-            databaseId: current.databaseId,
-            repoLocation: current.location);
+        return LockedRepositoryState(
+          parentContext: context,
+          repoCubit: current.cubit,
+          masterKey: widget.settings.masterKey,
+          passwordHasher: PasswordHasher(widget.session),
+        );
       }
 
       _appSettingsIconFocus.unfocus();
@@ -620,7 +677,6 @@ class _MainPageState extends State<MainPage>
 
   Widget _contentBrowser(RepoCubit repo) {
     Widget child;
-    Widget navigationBar;
     final folder = repo.state.currentFolder;
 
     if (folder.content.isEmpty) {
@@ -634,28 +690,27 @@ class _MainPageState extends State<MainPage>
       child = _contentsList(repo);
     }
 
-    if (folder.isRoot) {
-      navigationBar = const SizedBox.shrink();
-    } else {
-      navigationBar = FolderNavigationBar(repo);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        navigationBar,
-        // TODO: A shadow would be nicer.
-        const Divider(height: 3),
-        SortContentsBar(
-            sortListCubit: _sortListCubit, reposCubit: _cubits.repositories),
-        Expanded(child: child),
-      ],
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // TODO: A shadow would be nicer.
+          const Divider(height: 1),
+          if (folder.content.isNotEmpty)
+            SortContentsBar(
+              sortListCubit: _sortListCubit,
+              reposCubit: _cubits.repositories,
+            ),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 
   Future<void> _previewFile(
     RepoCubit repo,
-    FileItem item,
+    FileEntry entry,
     bool useDefaultApp,
   ) async {
     if (io.Platform.isAndroid) {
@@ -663,8 +718,8 @@ class _MainPageState extends State<MainPage>
 
       final previewResult = await widget.nativeChannels.previewOuiSyncFile(
         widget.packageInfo.packageName,
-        item.path,
-        item.size ?? 0,
+        entry.path,
+        entry.size ?? 0,
         useDefaultApp: useDefaultApp,
       );
 
@@ -688,16 +743,26 @@ class _MainPageState extends State<MainPage>
 
       bool previewOk = false;
       try {
-        final url = Uri.parse('file:$mountedDirectory${item.path}');
-        previewOk = await launchUrl(url);
+        if (!io.Platform.isWindows) {
+          final url = Uri.parse('file:$mountedDirectory${entry.path}');
+          previewOk = await launchUrl(url);
+        } else {
+          // Special non ASCII characters are encoded using Escape Encoding
+          // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
+          // which are not decoded back by the url_launcher plugin on Windows
+          // before passing to the system for execution. Thus on Windows
+          // we use the `launchUrlString` function instead of `launchUrl`.
+          final path = '$mountedDirectory${entry.path}';
+          previewOk = await launchUrlString(path);
+        }
       } on PlatformException catch (e, st) {
         loggy.app(
-          'Preview file (desktop): Error previewing file ${item.path}:\n${e.toString()}',
+          'Preview file (desktop): Error previewing file ${entry.path}:',
           e,
           st,
         );
 
-        showSnackBar(S.current.messagePreviewingFileFailed(item.path));
+        showSnackBar(S.current.messagePreviewingFileFailed(entry.path));
         return;
       }
 
@@ -710,13 +775,13 @@ class _MainPageState extends State<MainPage>
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
           context,
-          f: repo.previewFileUrl(item.path),
+          repo.previewFileUrl(entry.path),
         );
 
         await launchUrl(url);
       } on PlatformException catch (e, st) {
         loggy.app(
-          '(FileServer) Error previewing file ${item.path}:\n${e.toString()}',
+          '(FileServer) Error previewing file ${entry.path}:',
           e,
           st,
         );
@@ -724,114 +789,116 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepo) => ValueListenableBuilder(
-      valueListenable: _bottomPaddingWithBottomSheet,
-      builder: (context, value, child) => RefreshIndicator(
+  Widget _contentsList(RepoCubit currentRepoCubit) => ValueListenableBuilder(
+        valueListenable: _bottomPaddingWithBottomSheet,
+        builder: (context, value, child) => RefreshIndicator(
           onRefresh: () async => getContent(),
           child: ListView.separated(
-              padding: EdgeInsets.only(bottom: value),
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Colors.transparent),
-              itemCount: currentRepo.state.currentFolder.content.length,
-              itemBuilder: (context, index) {
-                final item = currentRepo.state.currentFolder.content[index];
-                Function actionByType;
+            padding: EdgeInsets.only(bottom: value),
+            separatorBuilder: (context, index) => const Divider(
+              height: 1,
+              color: Colors.transparent,
+            ),
+            itemCount: currentRepoCubit.state.currentFolder.content.length,
+            itemBuilder: (context, index) {
+              final entry = currentRepoCubit.state.currentFolder.content[index];
+              final key = ValueKey(entry.name);
 
-                if (item is FileItem) {
-                  actionByType = () async {
-                    if (_bottomSheet != null) {
-                      await Dialogs.simpleAlertDialog(
-                          context: context,
-                          title: S.current.titleMovingEntry,
-                          message: S.current.messageMovingEntry);
-                      return;
-                    }
-
-                    await _previewFile(currentRepo, item, true);
-                  };
-                } else if (item is FolderItem) {
-                  actionByType = () {
-                    if (_bottomSheet != null && _pathEntryToMove == item.path) {
-                      return;
-                    }
-
-                    currentRepo.navigateTo(item.path);
-                  };
-                } else {
-                  throw UnsupportedError('invalid item type: $item');
-                }
-
-                final listItem = ListItem(
-                    key: ValueKey(item.name),
-                    reposCubit: null,
-                    repository: currentRepo,
-                    itemData: item,
-                    mainAction: actionByType,
-                    verticalDotsAction: () async {
+              return switch (entry) {
+                FileEntry entry => FileListItem(
+                    key: key,
+                    entry: entry,
+                    repoCubit: currentRepoCubit,
+                    mainAction: () async {
                       if (_bottomSheet != null) {
-                        await Dialogs.simpleAlertDialog(
-                            context: context,
-                            title: S.current.titleMovingEntry,
-                            message: S.current.messageMovingEntry);
-
+                        await _showMovingEntryAlertDialog(context);
                         return;
                       }
 
-                      item is FileItem
-                          ? await _showFileDetails(
-                              repoCubit: currentRepo, data: item)
-                          : await _showFolderDetails(
-                              repoCubit: currentRepo, data: item);
-                    });
+                      await _previewFile(currentRepoCubit, entry, true);
+                    },
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await _showMovingEntryAlertDialog(context);
+                        return;
+                      }
 
-                return listItem;
-              })));
+                      await _showFileDetails(currentRepoCubit, entry);
+                    }),
+                DirectoryEntry entry => DirectoryListItem(
+                    key: key,
+                    entry: entry,
+                    mainAction: () {
+                      if (_bottomSheet != null &&
+                          _pathEntryToMove == entry.path) {
+                        return;
+                      }
 
-  Future<dynamic> _showFileDetails({
-    required RepoCubit repoCubit,
-    required BaseItem data,
-  }) {
-    return showModalBottomSheet(
+                      currentRepoCubit.navigateTo(entry.path);
+                    },
+                    verticalDotsAction: () async {
+                      if (_bottomSheet != null) {
+                        await _showMovingEntryAlertDialog(context);
+                        return;
+                      }
+
+                      await _showFolderDetails(currentRepoCubit, entry);
+                    },
+                  ),
+              };
+            },
+          ),
+        ),
+      );
+
+  Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: S.current.titleMovingEntry,
+        message: S.current.messageMovingEntry,
+      );
+
+  Future<dynamic> _showFileDetails(
+    RepoCubit repoCubit,
+    FileEntry entry,
+  ) =>
+      showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return FileDetail(
-            cubit: repoCubit,
-            navigation: widget.navigation,
-            data: data as FileItem,
-            onUpdateBottomSheet: updateBottomSheet,
-            onPreviewFile: (cubit, data, useDefaultApp) =>
-                _previewFile(cubit, data, useDefaultApp),
-            onMoveEntry: (origin, path, type) =>
-                moveEntry(repoCubit, origin, path, type),
-            isActionAvailableValidator: _isEntryActionAvailable,
-            packageInfo: widget.packageInfo,
-            nativeChannels: widget.nativeChannels,
-          );
-        });
-  }
+        builder: (context) => FileDetail(
+          repo: repoCubit,
+          navigation: widget.navigation,
+          entry: entry,
+          onUpdateBottomSheet: updateBottomSheet,
+          onPreviewFile: (cubit, data, useDefaultApp) =>
+              _previewFile(cubit, data, useDefaultApp),
+          onMoveEntry: (origin, path, type) =>
+              moveEntry(repoCubit, origin, path, type),
+          isActionAvailableValidator: _isEntryActionAvailable,
+          packageInfo: widget.packageInfo,
+          nativeChannels: widget.nativeChannels,
+        ),
+      );
 
-  Future<dynamic> _showFolderDetails({
-    required RepoCubit repoCubit,
-    required BaseItem data,
-  }) =>
+  Future<dynamic> _showFolderDetails(
+    RepoCubit repoCubit,
+    DirectoryEntry entry,
+  ) =>
       showModalBottomSheet(
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
-          builder: (context) {
-            return FolderDetail(
-              context: context,
-              cubit: repoCubit,
-              navigation: widget.navigation,
-              data: data as FolderItem,
-              onUpdateBottomSheet: updateBottomSheet,
-              onMoveEntry: (origin, path, type) =>
-                  moveEntry(repoCubit, origin, path, type),
-              isActionAvailableValidator: _isEntryActionAvailable,
-            );
-          });
+          builder: (context) => FolderDetail(
+                context: context,
+                repo: repoCubit,
+                navigation: widget.navigation,
+                entry: entry,
+                onUpdateBottomSheet: updateBottomSheet,
+                onMoveEntry: (origin, path, type) =>
+                    moveEntry(repoCubit, origin, path, type),
+                isActionAvailableValidator: _isEntryActionAvailable,
+              ));
 
   void updateBottomSheet(Widget? widget, String entryPath) {
     _pathEntryToMove = entryPath;
@@ -856,9 +923,13 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool> moveEntry(
-      RepoCubit currentRepo, String origin, String path, EntryType type) async {
-    final basename = getBasename(path);
-    final destination = buildDestinationPath(
+    RepoCubit currentRepo,
+    String origin,
+    String path,
+    EntryType type,
+  ) async {
+    final basename = repo_path.basename(path);
+    final destination = repo_path.join(
       currentRepo.state.currentFolder.path,
       basename,
     );
@@ -871,18 +942,64 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> saveMedia(String sourceFilePath) async {
-    final currentRepo = _currentRepo;
+  Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
+    List<String> repos = [];
+    List<String> files = [];
+    List<String> tokens = [];
 
-    if (currentRepo is! OpenRepoEntry) {
+    for (final medium in media) {
+      switch (medium.type) {
+        case SharedMediaType.file
+            when (_cubits.repositories.showList ||
+                    !PlatformValues.isDesktopDevice) &&
+                system_path.extension(medium.path) ==
+                    ".${RepoLocation.defaultExtension}":
+          repos.add(medium.path);
+        case SharedMediaType.file:
+        case SharedMediaType.image:
+        case SharedMediaType.video:
+          files.add(medium.path);
+        case SharedMediaType.url:
+        case SharedMediaType.text:
+          tokens.add(medium.path);
+      }
+    }
+
+    // Handle imported repos
+    for (final path in repos) {
+      final location = RepoLocation.fromDbPath(path);
+      await _cubits.repositories.importRepoFromLocation(location);
+    }
+
+    // Handle share tokens
+    for (final token in tokens) {
+      await addRepoWithTokenDialog(context, initialTokenValue: token);
+    }
+
+    // Handle received files
+    handleReceivedFiles(files);
+  }
+
+  void handleReceivedFiles(List<String> paths) {
+    if (paths.isEmpty) {
       return;
     }
 
-    loggy.app('Media path: $sourceFilePath');
-    await saveFileToOuiSync(currentRepo.cubit, sourceFilePath);
+    _bottomPaddingWithBottomSheet.value =
+        defaultBottomPadding + Dimensions.paddingBottomWithBottomSheetExtra;
+
+    final bottomSheetSaveMedia = SaveSharedMedia(
+      _cubits.repositories,
+      sharedMediaPaths: paths,
+      onUpdateBottomSheet: updateBottomSheet,
+      onSaveFile: trySaveFile,
+      validationFunction: canSaveFiles,
+    );
+
+    setState(() => _bottomSheet = bottomSheetSaveMedia);
   }
 
-  Future<bool> canSaveMedia() async {
+  Future<bool> canSaveFiles() async {
     final currentRepo = _currentRepo;
     if (currentRepo is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
@@ -928,14 +1045,24 @@ class _MainPageState extends State<MainPage>
     return true;
   }
 
-  Future<void> saveFileToOuiSync(
+  Future<void> trySaveFile(String path) async {
+    final currentRepo = _currentRepo;
+
+    if (currentRepo is! OpenRepoEntry) {
+      return;
+    }
+
+    await saveFile(currentRepo.cubit, path);
+  }
+
+  Future<void> saveFile(
     RepoCubit currentRepo,
     String path,
   ) async {
     final file = io.File(path);
-    final fileName = getBasename(path);
+    final fileName = repo_path.basename(path);
     final length = (await file.stat()).size;
-    final filePath = buildDestinationPath(
+    final filePath = repo_path.join(
       currentRepo.state.currentFolder.path,
       fileName,
     );
@@ -977,20 +1104,20 @@ class _MainPageState extends State<MainPage>
           });
 
   Future<RepoLocation?> _addRepository() async =>
-      _addRepoAndNavigate(createRepoDialog(context));
+      _addRepoAndNavigate(await createRepoDialog(context));
 
   Future<RepoLocation?> _importRepository() async =>
-      _addRepoAndNavigate(addRepoWithTokenDialog(context));
+      _addRepoAndNavigate(await addRepoWithTokenDialog(context));
 
   Future<RepoLocation?> _addRepoAndNavigate(
-      Future<RepoLocation?> repoFunction) async {
-    final newRepoLocation = await repoFunction;
-
+    RepoLocation? newRepoLocation,
+  ) async {
     if (newRepoLocation == null || newRepoLocation.name.isEmpty) {
       return null;
     }
 
-    await _cubits.repositories.setCurrentByLocation(newRepoLocation);
+    final repo = _cubits.repositories.get(newRepoLocation);
+    await _cubits.repositories.setCurrent(repo);
 
     return newRepoLocation;
   }
@@ -1007,8 +1134,7 @@ class _MainPageState extends State<MainPage>
                 body: ActionsDialog(
                   title: S.current.titleCreateRepository,
                   body: RepositoryCreation(
-                    context: context,
-                    cubit: _cubits.repositories,
+                    reposCubit: _cubits.repositories,
                   ),
                 ),
               );
@@ -1064,8 +1190,7 @@ class _MainPageState extends State<MainPage>
               body: ActionsDialog(
                 title: S.current.titleAddRepository,
                 body: RepositoryCreation(
-                  context: context,
-                  cubit: _cubits.repositories,
+                  reposCubit: _cubits.repositories,
                   initialTokenValue: initialTokenValue,
                 ),
               ),
@@ -1075,8 +1200,6 @@ class _MainPageState extends State<MainPage>
       ),
     );
   }
-
-  void reloadRepository() => _cubits.repositories.init();
 
   Future<void> _showAppSettings() => Navigator.push(
         context,
@@ -1100,7 +1223,8 @@ class _MainPageState extends State<MainPage>
         builder: (context) {
           return RepositorySettings(
             context: context,
-            cubit: repoCubit,
+            settings: widget.settings,
+            repoCubit: repoCubit,
             reposCubit: _cubits.repositories,
           );
         },

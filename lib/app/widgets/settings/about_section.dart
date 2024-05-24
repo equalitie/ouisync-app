@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
+import '../../cubits/launch_at_startup.dart';
 import '../../pages/pages.dart';
 import '../../pages/peers_page.dart';
 import '../../utils/platform/platform.dart';
@@ -26,21 +27,18 @@ class AboutSection extends SettingsSection with AppLogger {
     required this.connectivityInfo,
     required this.peerSet,
     required this.natDetection,
+    required this.launchAtStartup,
   }) : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
           title: S.current.titleAbout,
-        ) {
-    _launchAtStartup = ValueNotifier<bool>(
-      cubits.repositories.settings.getLaunchAtStartup(),
-    );
-  }
+        );
 
   final Session session;
   final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
   final PeerSetCubit peerSet;
   final NatDetection natDetection;
-  late final ValueNotifier<bool> _launchAtStartup;
+  final LaunchAtStartupCubit launchAtStartup;
 
   TextStyle? bodyStyle;
 
@@ -50,13 +48,18 @@ class AboutSection extends SettingsSection with AppLogger {
 
     return [
       if (PlatformValues.isDesktopDevice)
-        ValueListenableBuilder(
-            valueListenable: _launchAtStartup,
-            builder: (context, value, child) => SwitchSettingsTile(
-                value: value,
-                onChanged: (value) => unawaited(_updateLaunchAtStartup(value)),
-                title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
-                leading: Icon(Icons.rocket_launch_sharp))),
+        BlocBuilder<LaunchAtStartupCubit, bool>(
+          bloc: launchAtStartup,
+          builder: (context, state) => SwitchSettingsTile(
+            value: state,
+            onChanged: (value) => unawaited(launchAtStartup.setEnabled(value)),
+            title: Text(
+              S.current.messageLaunchAtStartup,
+              style: bodyStyle,
+            ),
+            leading: Icon(Icons.rocket_launch_sharp),
+          ),
+        ),
       NavigationTile(
           title: Text(S.current.titleFAQShort, style: bodyStyle),
           leading: Icon(Icons.question_answer_rounded),
@@ -137,20 +140,15 @@ class AboutSection extends SettingsSection with AppLogger {
     return cubits.upgradeExists.state;
   }
 
-  Future<void> _updateLaunchAtStartup(bool value) async {
-    await cubits.windowManager.launchAtStartup(value);
-    await cubits.repositories.settings.setLaunchAtStartup(value);
-
-    _launchAtStartup.value = value;
-  }
-
   Future<void> _openUrl(BuildContext context, String title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
-      final content = await Dialogs.executeFutureWithLoadingDialog(context,
-          f: webView.loadUrl(context, url));
+      final content = await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        webView.loadUrl(context, url),
+      );
 
       await Navigator.push(
           context,
@@ -175,7 +173,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (attachments.logs) {
       final logs = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        f: dumpAll(
+        dumpAll(
           context,
           rootMonitor: cubits.repositories.rootStateMonitor,
           powerControl: cubits.powerControl,

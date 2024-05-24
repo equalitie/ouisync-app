@@ -71,13 +71,16 @@ class MissingRepositoryState extends HookWidget
                 autofocus: true),
           if (onReloadRepository != null) Dimensions.spacingVertical,
           Fields.inPageButton(
-              onPressed: () => deleteRepository(context,
-                  repositoryLocation: repositoryLocation,
-                  reposCubit: reposCubit),
-              text: S.current.actionRemoveRepo,
-              size: Dimensions.sizeInPageButtonLong,
-              alignment: Alignment.center,
-              focusNode: deleteButtonFocus),
+            onPressed: () => deleteRepository(
+              context,
+              reposCubit: reposCubit,
+              repoLocation: repositoryLocation,
+            ),
+            text: S.current.actionRemoveRepo,
+            size: Dimensions.sizeInPageButtonLong,
+            alignment: Alignment.center,
+            focusNode: deleteButtonFocus,
+          ),
         ],
       ),
     ));

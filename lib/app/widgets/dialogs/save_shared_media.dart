@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../generated/l10n.dart';
 import '../../pages/pages.dart';
+import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 import '../../cubits/repos.dart';
@@ -10,14 +10,16 @@ import '../../cubits/repos.dart';
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class SaveSharedMedia extends StatefulWidget {
-  const SaveSharedMedia(this._repos,
-      {required this.sharedMedia,
-      required this.onUpdateBottomSheet,
-      required this.onSaveFile,
-      required this.validationFunction});
+  const SaveSharedMedia(
+    this._repos, {
+    required this.sharedMediaPaths,
+    required this.onUpdateBottomSheet,
+    required this.onSaveFile,
+    required this.validationFunction,
+  });
 
   final ReposCubit _repos;
-  final List<SharedMediaFile> sharedMedia;
+  final List<String> sharedMediaPaths;
   final BottomSheetCallback onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
   final Future<bool> Function() validationFunction;
@@ -69,15 +71,17 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                 ],
               ),
               Fields.autosizeText(
-                  '(${widget.sharedMedia.length} ${widget.sharedMedia.length == 1 ? S.current.messageFile : S.current.messageFiles})',
-                  textAlign: TextAlign.center),
+                '(${widget.sharedMediaPaths.length} ${widget.sharedMediaPaths.length == 1 ? S.current.messageFile : S.current.messageFiles})',
+                textAlign: TextAlign.center,
+              ),
               Dimensions.spacingVertical,
               Visibility(
                   visible: !_minimize,
                   child: ConstrainedBox(
                       constraints: BoxConstraints.loose(
                           Size.fromHeight(mediaListMaxHeight)),
-                      child: _buildMediaList(context, widget.sharedMedia))),
+                      child:
+                          _buildMediaList(context, widget.sharedMediaPaths))),
               Visibility(
                   visible: !_minimize,
                   child: Fields.dialogActions(context,
@@ -105,15 +109,15 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
     });
   }
 
-  Widget _buildMediaList(BuildContext context, List<SharedMediaFile> media) =>
+  Widget _buildMediaList(BuildContext context, List<String> mediaPaths) =>
       ListView.separated(
           shrinkWrap: true,
           separatorBuilder: (context, index) =>
               const Divider(height: 1, color: Colors.black12),
-          itemCount: media.length,
+          itemCount: mediaPaths.length,
           itemBuilder: (context, index) {
-            final mediaItem = media[index];
-            final name = getBasename(mediaItem.path);
+            final mediaPath = mediaPaths[index];
+            final name = basename(mediaPath);
 
             return Container(
                 padding: Dimensions.paddingListItem,
@@ -130,7 +134,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                         Expanded(flex: 9, child: Fields.autosizeText(name))
                       ],
                     ),
-                    Fields.autosizeText(mediaItem.path)
+                    Fields.autosizeText(mediaPath)
                   ],
                 ));
           });
@@ -150,8 +154,8 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                       return;
                     }
 
-                    for (final media in widget.sharedMedia) {
-                      await widget.onSaveFile(media.path);
+                    for (final path in widget.sharedMediaPaths) {
+                      await widget.onSaveFile(path);
                     }
 
                     widget.onUpdateBottomSheet.call(null, '');

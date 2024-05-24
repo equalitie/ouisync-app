@@ -50,16 +50,15 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "ouisync_app");
+    gtk_header_bar_set_title(header_bar, "Ouisync");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "ouisync_app");
+    gtk_window_set_title(window, "Ouisync");
   }
 
-  gtk_window_set_default_size(window, 320, 200);//1280, 720);
-  // gtk_widget_show(GTK_WIDGET(window));
-  gtk_widget_realize(GTK_WIDGET(window));
+  gtk_window_set_default_size(window, 320, 200);
+  gtk_window_set_position(window, GTK_WIN_POS_CENTER);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
@@ -68,7 +67,14 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
+  // HACK: We want to control the window showing from inside the flutter code, but for some reason
+  // if the window is not shown, the plugin registration fails. As a workaround we show the window
+  // only briefly to register the plugins, the hide it again.
+  gtk_widget_show(GTK_WIDGET(window));
+
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+
+  gtk_widget_hide(GTK_WIDGET(window));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

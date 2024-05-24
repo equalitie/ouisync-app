@@ -1,170 +1,219 @@
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 import '../widgets.dart';
 
-class ListItem extends StatelessWidget with AppLogger {
-  const ListItem({
+class FileListItem extends StatelessWidget {
+  FileListItem({
     super.key,
-    required this.reposCubit,
-    required this.repository,
-    required this.itemData,
+    required this.entry,
+    required this.repoCubit,
     required this.mainAction,
     required this.verticalDotsAction,
   });
 
-  final ReposCubit? reposCubit;
-  final RepoCubit? repository;
-  final BaseItem itemData;
-  final Function mainAction;
-  final Function verticalDotsAction;
+  final FileEntry entry;
+  final RepoCubit repoCubit;
+  final void Function() mainAction;
+  final void Function() verticalDotsAction;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: InkWell(
-          onTap: () => mainAction.call(),
-          splashColor: Colors.blue,
-          child: Container(
-            padding: Dimensions.paddingListItem,
-            child: _buildItem(),
-          )),
-      color: Colors.white,
+    // TODO: should this be inside of a BlockBuilder of fileItem.repoCubit?
+
+    final uploadJob = repoCubit.state.uploads[entry.path];
+    final downloadJob = repoCubit.state.downloads[entry.path];
+
+    return _ListItemContainer(
+      mainAction: mainAction,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          FileIconAnimated(downloadJob),
+          Expanded(
+            child: Container(
+              padding: Dimensions.paddingItem,
+              child: FileDescription(repoCubit, entry, uploadJob),
+            ),
+          ),
+          _VerticalDotsButton(uploadJob == null ? verticalDotsAction : null),
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildItem() {
-    final data = itemData;
+class DirectoryListItem extends StatelessWidget {
+  DirectoryListItem({
+    super.key,
+    required this.entry,
+    required this.mainAction,
+    required this.verticalDotsAction,
+  });
 
-    if (data is RepoItem) {
-      return _buildRepoItem(data);
-    }
+  final DirectoryEntry entry;
+  final void Function() mainAction;
+  final void Function() verticalDotsAction;
 
-    if (data is FileItem) {
-      return _buildFileItem(data);
-    }
-
-    if (data is FolderItem) {
-      return _buildFolderItem(data);
-    }
-
-    if (data is RepoMissingItem) {
-      return _buildRepoMissingItem(data);
-    }
-
-    assert(false,
-        "Item must be either RepoItem, FileItem, FolderItem, or RepoMissingItem");
-    return SizedBox.shrink();
-  }
-
-  Widget _buildRepoItem(RepoItem repoItem) {
-    assert(reposCubit != null, "Repository cubit object for RepoItem is null");
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-            flex: 1,
-            child: IconButton(
-              icon: Icon(Fields.accessModeIcon(repoItem.accessMode),
-                  size: Dimensions.sizeIconAverage),
+  @override
+  Widget build(BuildContext context) => _ListItemContainer(
+        mainAction: mainAction,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.folder_rounded,
+              size: Dimensions.sizeIconAverage,
               color: Constants.folderIconColor,
-              padding: EdgeInsets.all(0.0),
-              onPressed: () async {
-                final repos = reposCubit;
-                final entry = repos?.get(repoItem.location);
-                if (entry == null || repos == null) return;
-                await lockRepository(entry, repos);
-              },
+            ),
+            Expanded(
+              child: Container(
+                padding: Dimensions.paddingItem,
+                child: Fields.ellipsedText(
+                  entry.name,
+                  ellipsisPosition: TextOverflowPosition.middle,
+                ),
+              ),
+            ),
+            _VerticalDotsButton(verticalDotsAction),
+          ],
+        ),
+      );
+}
+
+class RepoListItem extends StatelessWidget {
+  RepoListItem({
+    super.key,
+    required this.repoCubit,
+    required this.isDefault,
+    required this.mainAction,
+    required this.verticalDotsAction,
+  });
+
+  final RepoCubit repoCubit;
+  final bool isDefault;
+  final void Function() mainAction;
+  final void Function() verticalDotsAction;
+
+  @override
+  Widget build(BuildContext context) => _ListItemContainer(
+        mainAction: mainAction,
+        child: BlocBuilder<RepoCubit, RepoState>(
+          bloc: repoCubit,
+          builder: (context, state) => Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Fields.accessModeIcon(state.accessMode),
+                  size: Dimensions.sizeIconAverage,
+                ),
+                color: Constants.folderIconColor,
+                padding: EdgeInsets.all(0.0),
+                onPressed: () => repoCubit.lock(),
+              ),
+              Expanded(
+                child: Container(
+                  padding: Dimensions.paddingItem,
+                  child: RepoDescription(
+                    state,
+                    isDefault: isDefault,
+                  ),
+                ),
+              ),
+              RepoStatus(repoCubit),
+              _VerticalDotsButton(verticalDotsAction),
+            ],
+          ),
+        ),
+      );
+}
+
+class MissingRepoListItem extends StatelessWidget {
+  MissingRepoListItem({
+    super.key,
+    required this.location,
+    required this.mainAction,
+    required this.verticalDotsAction,
+  });
+
+  final RepoLocation location;
+  final void Function() mainAction;
+  final void Function() verticalDotsAction;
+
+  @override
+  Widget build(BuildContext context) => _ListItemContainer(
+        mainAction: mainAction,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: Dimensions.sizeIconAverage,
+                color: Constants.folderIconColor,
+              ),
+            ),
+            Expanded(
+              flex: 9,
+              child: Padding(
+                padding: Dimensions.paddingItem,
+                child: MissingRepoDescription(location.name),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.delete,
+                size: Dimensions.sizeIconMicro,
+                color: Constants.dangerColor,
+              ),
+              onPressed: () => verticalDotsAction(),
+            )
+          ],
+        ),
+      );
+}
+
+class _ListItemContainer extends StatelessWidget {
+  _ListItemContainer({
+    required this.child,
+    required this.mainAction,
+  });
+
+  final Widget child;
+  final Function mainAction;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        child: InkWell(
+            onTap: () => mainAction.call(),
+            splashColor: Colors.blue,
+            child: Container(
+              padding: Dimensions.paddingListItem,
+              child: child,
             )),
-        Expanded(
-            flex: 9,
-            child: Padding(
-                padding: Dimensions.paddingItem,
-                child: RepoDescription(repoData: repoItem))),
-        _getVerticalMenuAction(false)
-      ],
-    );
-  }
+        color: Colors.white,
+      );
+}
 
-  Widget _buildFileItem(FileItem fileData) {
-    assert(repository != null, "Repository object for FileItem is null");
+class _VerticalDotsButton extends StatelessWidget {
+  _VerticalDotsButton(this.action);
 
-    if (repository == null) {
-      return SizedBox.shrink();
-    }
+  final void Function()? action;
 
-    final uploadJob = repository!.state.uploads[fileData.path];
-    final downloadJob = repository!.state.downloads[fileData.path];
-
-    final isUploading = uploadJob != null;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(flex: 1, child: FileIconAnimated(downloadJob)),
-        Expanded(
-            flex: 9,
-            child: Padding(
-                padding: Dimensions.paddingItem,
-                child: FileDescription(repository!, fileData, uploadJob))),
-        _getVerticalMenuAction(isUploading)
-      ],
-    );
-  }
-
-  Widget _buildFolderItem(FolderItem folderItem) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        const Expanded(
-            flex: 1,
-            child: Icon(Icons.folder_rounded,
-                size: Dimensions.sizeIconAverage,
-                color: Constants.folderIconColor)),
-        Expanded(
-            flex: 9,
-            child: Padding(
-                padding: Dimensions.paddingItem,
-                child: FolderDescription(folderData: itemData))),
-        _getVerticalMenuAction(false)
-      ],
-    );
-  }
-
-  Widget _buildRepoMissingItem(RepoMissingItem repoMissingItem) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-            flex: 1,
-            child: Icon(Icons.error_outline_rounded,
-                size: Dimensions.sizeIconAverage,
-                color: Constants.folderIconColor)),
-        Expanded(
-            flex: 9,
-            child: Padding(
-                padding: Dimensions.paddingItem,
-                child: RepoMissing(repoData: repoMissingItem))),
-        _getDeleteMissingRepoAction()
-      ],
-    );
-  }
-
-  Widget _getVerticalMenuAction(bool isUploading) {
-    return IconButton(
-        icon:
-            const Icon(Icons.more_vert_rounded, size: Dimensions.sizeIconSmall),
-        onPressed: isUploading ? null : () async => await verticalDotsAction());
-  }
-
-  Widget _getDeleteMissingRepoAction() {
-    return IconButton(
-        icon: const Icon(Icons.delete,
-            size: Dimensions.sizeIconMicro, color: Constants.dangerColor),
-        onPressed: () async => await verticalDotsAction());
-  }
+  @override
+  Widget build(BuildContext context) => IconButton(
+        icon: const Icon(
+          Icons.more_vert_rounded,
+          size: Dimensions.sizeIconSmall,
+        ),
+        onPressed: action,
+      );
 }

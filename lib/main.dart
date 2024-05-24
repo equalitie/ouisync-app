@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/background.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
+import 'app/background.dart';
 import 'env/env.dart';
 
 /// How often the background syncing runs

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/utils.dart';
 import '../../cubits/cubits.dart';
+import '../../utils/path.dart';
+import '../../utils/strings.dart';
 
 class FolderNavigationBar extends StatelessWidget {
   final RepoCubit _repo;
@@ -11,43 +12,51 @@ class FolderNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = _repo.state.currentFolder.path;
-    final route = _currentLocationBar(context, path, context);
 
     return Container(
-        padding: const EdgeInsets.all(10.0),
-        decoration: const BoxDecoration(
-            border: Border(
-                bottom: BorderSide(
-                    width: 0.0,
-                    color: Colors.transparent,
-                    style: BorderStyle.solid)),
-            color: Colors.white),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Expanded(flex: 1, child: Row(children: [Expanded(child: route)]))
-        ]));
+      padding: const EdgeInsets.only(left: 12.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: [
+                Expanded(child: _currentLocationBar(path)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _currentLocationBar(
-      BuildContext context, String path, BuildContext ctx) {
-    final current = getBasename(path);
+  Widget _currentLocationBar(String path) {
+    final current = basename(path);
     String separator = Strings.root;
 
-    return Row(children: [
-      _navigation(path, ctx),
-      SizedBox(width: path == separator ? 5.0 : 0.0),
-      Expanded(
+    return Row(
+      children: [
+        _navigation(path),
+        SizedBox(width: path == separator ? 5.0 : 0.0),
+        Expanded(
           flex: 1,
           child: Padding(
-              padding: Dimensions.paddingActionBox,
-              child: Text(current,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.theme.appTextStyle.titleMedium)))
-    ]);
+            padding: EdgeInsets.only(left: 12.0, right: 12.0),
+            child: Text(
+              current,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
-  GestureDetector _navigation(String path, BuildContext ctx) {
-    final target = getDirname(path);
+  GestureDetector _navigation(String path) {
+    final target = dirname(path);
 
     return GestureDetector(
         onTap: () {
@@ -57,7 +66,7 @@ class FolderNavigationBar extends StatelessWidget {
           }
         },
         child: path == Strings.root
-            ? const Icon(Icons.lock_rounded, size: Dimensions.sizeIconAverage)
-            : const Icon(Icons.arrow_back, size: Dimensions.sizeIconAverage));
+            ? const Icon(Icons.lock_rounded)
+            : const Icon(Icons.arrow_back));
   }
 }

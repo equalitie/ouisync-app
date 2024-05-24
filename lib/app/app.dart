@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,6 +8,7 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
@@ -35,10 +34,8 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   // TODO: Maybe we don't need to await for this, instead just get the future
   // and let whoever needs seetings to await for it.
-  final settings = await loadAndMigrateSettings();
+  final settings = await loadAndMigrateSettings(session);
 
-  var launchAtStartup = settings.getLaunchAtStartup();
-  await windowManager.launchAtStartup(launchAtStartup);
   var showOnboarding = settings.getShowOnboarding();
   var eqValuesAccepted = settings.getEqualitieValues();
 
@@ -121,19 +118,22 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     return Scaffold(
       body: DropTarget(
         onDragDone: (detail) {
-          loggy.app('Drop done: ${detail.files.first.path}');
+          loggy.debug(
+              'Drop done: ${detail.files.map((file) => file.path).join(', ')}');
 
-          final xFile = detail.files.firstOrNull;
-          if (xFile != null) {
-            final file = File(xFile.path);
-            _mediaReceiver.controller.add(file);
-          }
+          final media = detail.files
+              .map((file) => SharedMediaFile(
+                  path: file.path,
+                  type: SharedMediaType.file,
+                  mimeType: file.mimeType))
+              .toList();
+          _mediaReceiver.controller.add(media);
         },
         onDragEntered: (detail) {
-          loggy.app('Drop entered: ${detail.localPosition}');
+          loggy.debug('Drop entered: ${detail.localPosition}');
         },
         onDragExited: (detail) {
-          loggy.app('Drop exited: ${detail.localPosition}');
+          loggy.debug('Drop exited: ${detail.localPosition}');
         },
         child: MainPage(
           mediaReceiver: _mediaReceiver,

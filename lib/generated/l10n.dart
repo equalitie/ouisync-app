@@ -790,6 +790,36 @@ class S {
     );
   }
 
+  /// `Dokan installation`
+  String get titleDokanInstallation {
+    return Intl.message(
+      'Dokan installation',
+      name: 'titleDokanInstallation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dokan is missing`
+  String get titleDokanMissing {
+    return Intl.message(
+      'Dokan is missing',
+      name: 'titleDokanMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dokan installation found`
+  String get titleDokanInstallationFound {
+    return Intl.message(
+      'Dokan installation found',
+      name: 'titleDokanInstallationFound',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -1155,6 +1185,16 @@ class S {
     return Intl.message(
       'Local IPv6',
       name: 'labelLocalIPv6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remember password`
+  String get labelRememberPassword {
+    return Intl.message(
+      'Remember password',
+      name: 'labelRememberPassword',
       desc: '',
       args: [],
     );
@@ -1570,13 +1610,13 @@ class S {
     );
   }
 
-  /// `Enter password to unlock`
-  String get messageUnlockRepository {
+  /// `Enter password to unlock "{name}"`
+  String messageUnlockRepository(Object name) {
     return Intl.message(
-      'Enter password to unlock',
+      'Enter password to unlock "$name"',
       name: 'messageUnlockRepository',
       desc: '',
-      args: [],
+      args: [name],
     );
   }
 
@@ -2560,26 +2600,6 @@ class S {
     );
   }
 
-  /// `Biometric validation added for repository "{name}"`
-  String messageBiometricValidationAdded(Object name) {
-    return Intl.message(
-      'Biometric validation added for repository "$name"',
-      name: 'messageBiometricValidationAdded',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Biometric validation removed`
-  String get messageBiometricValidationRemoved {
-    return Intl.message(
-      'Biometric validation removed',
-      name: 'messageBiometricValidationRemoved',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `There was an error authenticathing using biometrics. Please try again`
   String get messageErrorAuthenticatingBiometrics {
     return Intl.message(
@@ -2750,101 +2770,31 @@ class S {
     );
   }
 
-  /// `Adding a local password failed`
-  String get messageErrorAddingSecureStorge {
+  /// `Updating security properties of the repository failed.`
+  String get messageUpdateLocalSecretFailed {
     return Intl.message(
-      'Adding a local password failed',
-      name: 'messageErrorAddingSecureStorge',
+      'Updating security properties of the repository failed.',
+      name: 'messageUpdateLocalSecretFailed',
       desc: '',
       args: [],
     );
   }
 
-  /// `Updating the password in the secure storage failed`
-  String get messageErrorUpdatingSecureStorage {
+  /// `Security properties of the repository have been updated.`
+  String get messageUpdateLocalSecretOk {
     return Intl.message(
-      'Updating the password in the secure storage failed',
-      name: 'messageErrorUpdatingSecureStorage',
+      'Security properties of the repository have been updated.',
+      name: 'messageUpdateLocalSecretOk',
       desc: '',
       args: [],
     );
   }
 
-  /// `Removing the password from the secure storage failed`
-  String get messageErrorRemovingSecureStorage {
+  /// `Use local password`
+  String get messageUseLocalPassword {
     return Intl.message(
-      'Removing the password from the secure storage failed',
-      name: 'messageErrorRemovingSecureStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Adding a local password failed`
-  String get messageErrorAddingLocalPassword {
-    return Intl.message(
-      'Adding a local password failed',
-      name: 'messageErrorAddingLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Changing local password failed`
-  String get messageErrorChangingLocalPassword {
-    return Intl.message(
-      'Changing local password failed',
-      name: 'messageErrorChangingLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Removing the password failed`
-  String get messageErrorRemovingPassword {
-    return Intl.message(
-      'Removing the password failed',
-      name: 'messageErrorRemovingPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New password`
-  String get messageNewPassword {
-    return Intl.message(
-      'New password',
-      name: 'messageNewPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add local password`
-  String get messageAddLocalPassword {
-    return Intl.message(
-      'Add local password',
-      name: 'messageAddLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Change local password`
-  String get messageChangeLocalPassword {
-    return Intl.message(
-      'Change local password',
-      name: 'messageChangeLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove local password`
-  String get messageRemovaLocalPassword {
-    return Intl.message(
-      'Remove local password',
-      name: 'messageRemovaLocalPassword',
+      'Use local password',
+      name: 'messageUseLocalPassword',
       desc: '',
       args: [],
     );
@@ -3850,6 +3800,16 @@ class S {
     );
   }
 
+  /// `File downloaded to {path}`
+  String messageDownloadFileLocation(Object path) {
+    return Intl.message(
+      'File downloaded to $path',
+      name: 'messageDownloadFileLocation',
+      desc: '',
+      args: [path],
+    );
+  }
+
   /// `Copied to the clipboard.`
   String get messageCopiedToClipboard {
     return Intl.message(
@@ -3885,6 +3845,126 @@ class S {
     return Intl.message(
       'Use cache servers',
       name: 'messageUseCacheServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset local secret`
+  String get messageResetLocalSecret {
+    return Intl.message(
+      'Reset local secret',
+      name: 'messageResetLocalSecret',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sort by: {name}`
+  String messageSortBy(Object name) {
+    return Intl.message(
+      'Sort by: $name',
+      name: 'messageSortBy',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error: {error}`
+  String messageErrorDetail(Object error) {
+    return Intl.message(
+      'Error: $error',
+      name: 'messageErrorDetail',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Awaiting result...`
+  String get messageAwaitingResult {
+    return Intl.message(
+      'Awaiting result...',
+      name: 'messageAwaitingResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authenticate`
+  String get messageAuthenticate {
+    return Intl.message(
+      'Authenticate',
+      name: 'messageAuthenticate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dokan`
+  String get messageDokan {
+    return Intl.message(
+      'Dokan',
+      name: 'messageDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ouisync uses`
+  String get messageInstallDokanForOuisyncP1 {
+    return Intl.message(
+      'Ouisync uses',
+      name: 'messageInstallDokanForOuisyncP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.`
+  String get messageInstallDokanForOuisyncP2 {
+    return Intl.message(
+      'to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.',
+      name: 'messageInstallDokanForOuisyncP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installed`
+  String get messageDokanDifferentMayorP1 {
+    return Intl.message(
+      'The installed',
+      name: 'messageDokanDifferentMayorP1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date. Please update it to the latest version.`
+  String get messageDokanDifferentMayorP2 {
+    return Intl.message(
+      'is out of date. Please update it to the latest version.',
+      name: 'messageDokanDifferentMayorP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.`
+  String get messageDokanOlderVersionP2 {
+    return Intl.message(
+      'is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.',
+      name: 'messageDokanOlderVersionP2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Dokan installation failed.`
+  String get messageDokanInstallationFailed {
+    return Intl.message(
+      'The Dokan installation failed.',
+      name: 'messageDokanInstallationFailed',
       desc: '',
       args: [],
     );
@@ -4017,6 +4097,16 @@ class S {
       name: 'replacementChanges',
       desc: '',
       args: [changes],
+    );
+  }
+
+  /// `{error}`
+  String replacementError(Object error) {
+    return Intl.message(
+      '$error',
+      name: 'replacementError',
+      desc: '',
+      args: [error],
     );
   }
 
@@ -4470,26 +4560,6 @@ class S {
     );
   }
 
-  /// `Store secret on this device`
-  String get actionStoreSecretOnDevice {
-    return Intl.message(
-      'Store secret on this device',
-      name: 'actionStoreSecretOnDevice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use custom local password`
-  String get actionUseCustomLocalPassword {
-    return Intl.message(
-      'Use custom local password',
-      name: 'actionUseCustomLocalPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `ACCEPT`
   String get actionAcceptCapital {
     return Intl.message(
@@ -4720,16 +4790,6 @@ class S {
     );
   }
 
-  /// `Reset`
-  String get actionResetSecret {
-    return Intl.message(
-      'Reset',
-      name: 'actionResetSecret',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Media`
   String get actionNewMediaFile {
     return Intl.message(
@@ -4740,20 +4800,40 @@ class S {
     );
   }
 
-  /// `Failed to mount: {reason}`
+  /// `Install Dokan`
+  String get actionInstallDokan {
+    return Intl.message(
+      'Install Dokan',
+      name: 'actionInstallDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Dokan`
+  String get actionUpdateDokan {
+    return Intl.message(
+      'Update Dokan',
+      name: 'actionUpdateDokan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accessing repositories via File Explorer is not available: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(
-      'Failed to mount: $reason',
+      'Accessing repositories via File Explorer is not available: $reason',
       name: 'messageFailedToMount',
       desc: '',
       args: [reason],
     );
   }
 
-  /// `Missing Dokan installation. Please install it from {dokanUrl}`
+  /// `Dokan is missing.{dokanUrl}`
   String messageErrorDokanNotInstalled(Object dokanUrl) {
     return Intl.message(
-      'Missing Dokan installation. Please install it from $dokanUrl',
+      'Dokan is missing.$dokanUrl',
       name: 'messageErrorDokanNotInstalled',
       desc: '',
       args: [dokanUrl],

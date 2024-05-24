@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/bindings.g.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../utils/utils.dart';
+import '../repo_status.dart';
 import '../widgets.dart';
 
 class RepositorySettings extends StatefulWidget {
-  const RepositorySettings(
-      {required this.context, required this.cubit, required this.reposCubit});
+  const RepositorySettings({
+    required this.context,
+    required this.settings,
+    required this.repoCubit,
+    required this.reposCubit,
+  });
 
   final BuildContext context;
-  final RepoCubit cubit;
+  final Settings settings;
+  final RepoCubit repoCubit;
   final ReposCubit reposCubit;
 
   @override
@@ -24,7 +30,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
     with AppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-        bloc: widget.cubit,
+        bloc: widget.repoCubit,
         builder: (context, state) => SingleChildScrollView(
             child: Container(
                 padding: Dimensions.paddingBottomSheet,
@@ -34,19 +40,30 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Fields.bottomSheetHandle(context),
-                      Fields.bottomSheetTitle(widget.cubit.name,
-                          style: context.theme.appTextStyle.titleMedium),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Fields.bottomSheetTitle(
+                              widget.repoCubit.name,
+                              style: context.theme.appTextStyle.titleMedium,
+                            ),
+                          ),
+                          _Progress(widget.repoCubit),
+                        ],
+                      ),
                       _SwitchItem(
                         title: S.current.labelBitTorrentDHT,
                         icon: Icons.hub,
                         value: state.isDhtEnabled,
-                        onChanged: (value) => widget.cubit.setDhtEnabled(value),
+                        onChanged: (value) =>
+                            widget.repoCubit.setDhtEnabled(value),
                       ),
                       _SwitchItem(
                         title: S.current.messagePeerExchange,
                         icon: Icons.group_add,
                         value: state.isPexEnabled,
-                        onChanged: (value) => widget.cubit.setPexEnabled(value),
+                        onChanged: (value) =>
+                            widget.repoCubit.setPexEnabled(value),
                       ),
                       if (state.accessMode == AccessMode.write)
                         _SwitchItem(
@@ -54,17 +71,19 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           icon: Icons.cloud_outlined,
                           value: state.isCacheServersEnabled,
                           onChanged: (value) =>
-                              widget.cubit.setCacheServersEnabled(value),
+                              widget.repoCubit.setCacheServersEnabled(value),
                         ),
                       EntryActionItem(
-                          iconData: Icons.edit,
-                          title: S.current.actionRename,
-                          dense: true,
-                          onTap: () async => await renameRepository(
-                              widget.context,
-                              repository: widget.cubit,
-                              reposCubit: widget.reposCubit,
-                              popDialog: () => Navigator.of(context).pop())),
+                        iconData: Icons.edit,
+                        title: S.current.actionRename,
+                        dense: true,
+                        onTap: () async => await renameRepository(
+                          context,
+                          repoCubit: widget.repoCubit,
+                          reposCubit: widget.reposCubit,
+                          popDialog: () => Navigator.of(context).pop(),
+                        ),
+                      ),
                       EntryActionItem(
                           iconData: Icons.share,
                           title: S.current.actionShare,
@@ -72,7 +91,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async {
                             Navigator.of(context).pop();
                             await shareRepository(context,
-                                repository: widget.cubit);
+                                repository: widget.repoCubit);
                           }),
                       EntryActionItem(
                           iconData: Icons.password,
@@ -80,7 +99,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           dense: true,
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
-                                repository: widget.cubit,
+                                settings: widget.settings,
+                                repoCubit: widget.repoCubit,
                                 passwordHasher:
                                     widget.reposCubit.passwordHasher,
                                 popDialog: () => Navigator.of(context).pop(),
@@ -108,7 +128,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           dense: true,
                           isDanger: true,
                           onTap: () async => await deleteRepository(context,
-                              repositoryLocation: widget.cubit.location,
+                              repoLocation: widget.repoCubit.location,
                               reposCubit: widget.reposCubit,
                               popDialog: () => Navigator.of(context).pop()))
                     ]))),
@@ -142,4 +162,24 @@ class _SwitchItem extends StatelessWidget {
         value: value,
         onChanged: onChanged,
       );
+}
+
+class _Progress extends StatelessWidget {
+  _Progress(this.repoCubit);
+
+  final RepoCubit repoCubit;
+
+  @override
+  Widget build(BuildContext context) => RepoProgressBuilder(
+        repoCubit: repoCubit,
+        builder: (context, progress) => Fields.bottomSheetTitle(
+          'Synced: ${_formatProgress(progress)}',
+        ),
+      );
+}
+
+String _formatProgress(Progress progress) {
+  final value =
+      (progress.fraction * 100.0).truncateToDouble().toStringAsFixed(0);
+  return '$value%';
 }

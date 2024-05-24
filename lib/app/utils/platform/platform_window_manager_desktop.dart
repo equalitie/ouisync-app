@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
@@ -23,7 +22,9 @@ class PlatformWindowManagerDesktop
   PlatformWindowManagerDesktop._(this._appName);
 
   static Future<PlatformWindowManagerDesktop> create(
-      List<String> args, String appName) async {
+    List<String> args,
+    String appName,
+  ) async {
     final manager = PlatformWindowManagerDesktop._(appName);
     await manager._init(args);
     return manager;
@@ -32,18 +33,6 @@ class PlatformWindowManagerDesktop
   @override
   void onClose(CloseHandler handler) {
     _onClose = handler;
-  }
-
-  @override
-  Future<bool> launchAtStartup(bool enable) async {
-    LaunchAtStartup.instance.setup(
-        appName: _appName,
-        appPath: Platform.resolvedExecutable,
-        args: [Constants.launchAtStartupArg]);
-
-    return enable
-        ? await LaunchAtStartup.instance.enable()
-        : await LaunchAtStartup.instance.disable();
   }
 
   @override
@@ -157,12 +146,12 @@ class PlatformWindowManagerDesktop
         size: initialSize,
         minimumSize: minSize);
 
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      if (_showWindow) {
-        await windowManager.show();
-        await windowManager.focus();
-      }
-    });
+    await windowManager.waitUntilReadyToShow(windowOptions);
+
+    if (_showWindow) {
+      await windowManager.show();
+      await windowManager.focus();
+    }
   }
 
   @override

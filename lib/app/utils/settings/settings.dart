@@ -1,21 +1,56 @@
-import 'v1.dart' as v1;
-import '../master_key.dart';
+import 'dart:io' as io;
 
+import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'v1.dart' as v1;
+import '../files.dart';
+import '../log.dart';
+import '../master_key.dart';
+
 typedef DatabaseId = v1.DatabaseId;
-typedef RepoSettings = v1.RepoSettings;
 typedef Settings = v1.Settings;
 
-Future<Settings> loadAndMigrateSettings() async {
-  final prefs = await SharedPreferences.getInstance();
-  var isVersionZero = !prefs.containsKey(v1.Settings.settingsKey);
+Future<Settings> loadAndMigrateSettings(Session session) async {
+  await _migratePaths();
 
+  final prefs = await SharedPreferences.getInstance();
   final masterKey = await MasterKey.init();
 
-  if (isVersionZero) {
-    return await v1.Settings.initMigrateFromV0(prefs, masterKey);
-  } else {
-    return await v1.Settings.init(prefs, masterKey);
+  return await v1.Settings.init(prefs, masterKey, session);
+}
+
+Future<void> _migratePaths() async {
+  final newDir = await getApplicationSupportDirectory();
+  final oldDir = io.Directory(newDir.path
+      .split(separator)
+      .map((component) => (component == 'ouisync') ? 'ouisync_app' : component)
+      .join(separator));
+
+  if (newDir.path == oldDir.path) {
+    return;
+  }
+
+  if (!(await oldDir.exists())) {
+    return;
+  }
+
+  final logger = staticLogger<Settings>();
+
+  logger.info(
+    'migrating app support directory ${oldDir.path} -> ${newDir.path}',
+  );
+
+  final statuses = await migrateFiles(oldDir, newDir);
+
+  for (final status in statuses) {
+    if (status.exception != null) {
+      logger.error(
+        'failed to move ${status.oldPath} -> ${status.newPath}:',
+        status.exception,
+      );
+    }
   }
 }

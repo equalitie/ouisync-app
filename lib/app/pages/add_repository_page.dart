@@ -162,10 +162,10 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           ),
           child: Fields.formTextField(
               context: context,
-              textEditingController: _tokenController,
-              label: S.current.labelRepositoryLink,
+              controller: _tokenController,
+              labelText: S.current.labelRepositoryLink,
+              hintText: S.current.messageRepositoryToken,
               suffixIcon: const Icon(Icons.key_rounded),
-              hint: S.current.messageRepositoryToken,
               validator: _repositoryTokenValidator),
         ),
         _builAddRepositoryButton(),
@@ -188,8 +188,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           final result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
               allowedExtensions: [
-                RepoLocation.defaultExtensionWithoutDot,
-                RepoLocation.legacyExtensionWithoutDot
+                RepoLocation.defaultExtension,
+                RepoLocation.legacyExtension
               ]);
           if (result == null) return;
           for (final path in result.paths) {

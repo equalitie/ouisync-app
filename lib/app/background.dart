@@ -1,8 +1,8 @@
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_app/app/session.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show Repository, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'session.dart';
 import 'utils/log.dart';
 import 'utils/settings/settings.dart';
 
@@ -27,18 +27,23 @@ Future<void> syncInBackground() async {
   final start = DateTime.now();
 
   try {
-    final settings = await loadAndMigrateSettings();
+    final settings = await loadAndMigrateSettings(session);
     final repos = await _fetchRepositories(session, settings);
 
-    await Future.any([
-      _waitForAllSynced(repos),
-      _waitForSyncInactivity(session),
+    final completed = await Future.any([
+      _waitForAllSynced(repos).then((_) => true),
+      _waitForSyncInactivity(session).then((_) => false),
     ]);
 
     final elapsed = DateTime.now().difference(start);
-    logger.info('sync completed in $elapsed');
+
+    if (completed) {
+      logger.info('sync completed in $elapsed');
+    } else {
+      logger.info('sync stopped for inactivity after $elapsed');
+    }
   } catch (e, st) {
-    logger.error('sync failed', e, st);
+    logger.error('sync failed:', e, st);
   } finally {
     await session.close();
   }
@@ -48,9 +53,17 @@ Future<List<Repository>> _fetchRepositories(
   Session session,
   Settings settings,
 ) =>
-    Future.wait(settings.repos().map(
-          (entry) => Repository.open(session, store: entry.location.path()),
-        ));
+    Future.wait(
+      settings.repos.map((location) async {
+        try {
+          final repo = await Repository.open(session, store: location.path);
+          await repo.setSyncEnabled(true);
+          return repo;
+        } on Error catch (e) {
+          throw _RepositoryError(e, location.name);
+        }
+      }).toList(),
+    );
 
 Future<void> _waitForAllSynced(List<Repository> repos) async {
   await Future.wait(repos.map((repo) => _waitForSynced(repo)));
@@ -86,4 +99,14 @@ Future<void> _waitForSyncInactivity(Session session) async {
       prev = next;
     }
   }
+}
+
+class _RepositoryError implements Exception {
+  _RepositoryError(this.cause, this.name);
+
+  final Error cause;
+  final String name;
+
+  @override
+  String toString() => "error in repository '$name': $cause";
 }

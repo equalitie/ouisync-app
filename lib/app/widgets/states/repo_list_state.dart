@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
@@ -31,55 +30,65 @@ class RepoListState extends StatelessWidget
     }
 
     final repoList = reposCubit.repos.toList();
-    return _buildRepoList(context, repoList, reposCubit.currentRepoName);
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Divider(height: 1),
+          Expanded(
+            child: _buildRepoList(
+              context,
+              repoList,
+              reposCubit.currentRepoName,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildRepoList(BuildContext parentContext, List<RepoEntry> reposList,
-          String? currentRepoName) =>
+  Widget _buildRepoList(
+    BuildContext parentContext,
+    List<RepoEntry> reposList,
+    String? currentRepoName,
+  ) =>
       ValueListenableBuilder(
-          valueListenable: bottomPaddingWithBottomSheet,
-          builder: (context, value, child) => ListView.separated(
-              padding: EdgeInsets.only(bottom: value),
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Colors.transparent),
-              itemCount: reposList.length,
-              itemBuilder: (context, index) {
-                final repoEntry = reposList.elementAt(index);
-                bool isDefault = currentRepoName == repoEntry.name;
+        valueListenable: bottomPaddingWithBottomSheet,
+        builder: (context, value, child) => ListView.separated(
+          padding: EdgeInsets.only(bottom: value),
+          separatorBuilder: (context, index) => const Divider(
+            height: 1,
+            color: Colors.transparent,
+          ),
+          itemCount: reposList.length,
+          itemBuilder: (context, index) {
+            final repoEntry = reposList.elementAt(index);
+            final isDefault = currentRepoName == repoEntry.name;
+            final repoCubit = repoEntry.cubit;
 
-                if (repoEntry.maybeCubit == null) {
-                  final repoMissingItem = RepoMissingItem(repoEntry.location,
-                      message: S.current.messageRepoMissing);
+            if (repoCubit == null) {
+              return MissingRepoListItem(
+                location: repoEntry.location,
+                mainAction: () {},
+                verticalDotsAction: () => deleteRepository(
+                  context,
+                  reposCubit: reposCubit,
+                  repoLocation: repoEntry.location,
+                ),
+              );
+            }
 
-                  return ListItem(
-                      reposCubit: null,
-                      repository: null,
-                      itemData: repoMissingItem,
-                      mainAction: () {},
-                      verticalDotsAction: () async => deleteRepository(context,
-                          repositoryLocation: repoEntry.location,
-                          reposCubit: reposCubit));
-                }
-
-                final repoItem = RepoItem(repoEntry.location,
-                    accessMode: repoEntry.accessMode, isDefault: isDefault);
-
-                final listItem = ListItem(
-                    reposCubit: reposCubit,
-                    repository: repoEntry.maybeCubit!,
-                    itemData: repoItem,
-                    mainAction: () async {
-                      await reposCubit.setCurrentByLocation(repoEntry.location);
-                    },
-                    verticalDotsAction: () async {
-                      final cubit = repoEntry.maybeCubit;
-                      if (cubit == null) {
-                        return;
-                      }
-
-                      await onShowRepoSettings(parentContext, repoCubit: cubit);
-                    });
-
-                return listItem;
-              }));
+            return RepoListItem(
+              repoCubit: repoCubit,
+              isDefault: isDefault,
+              mainAction: () async => await reposCubit.setCurrent(repoEntry),
+              verticalDotsAction: () => onShowRepoSettings(
+                parentContext,
+                repoCubit: repoCubit,
+              ),
+            );
+          },
+        ),
+      );
 }
