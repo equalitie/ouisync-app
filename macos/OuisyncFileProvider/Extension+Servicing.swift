@@ -131,6 +131,7 @@ extension Extension {
     }
 
     // This signals to the file provider to refresh
+    // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
     static func refreshFileProvider() async {
         let managerDomain = getDomain()
         guard let manager = NSFileProviderManager(for: managerDomain) else {
