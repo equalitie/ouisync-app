@@ -406,9 +406,19 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
     //await Directory(windowsArtifactDir).delete(recursive: true);
   }
 
+  final args = [
+    '--publisher-display-name',
+    'eQualitie Inc',
+    '--identity-name',
+    identityName,
+    '--publisher',
+    publisher,
+    '--store'
+  ];
+
   /// We first build the MSIX, before adding the additional assets to be
   /// packaged in the MSIX file
-  await run('dart', ['run', 'msix:build']);
+  await run('dart', ['run', 'msix:build', ...args]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
@@ -416,17 +426,7 @@ Future<File> buildWindowsMSIX(String identityName, String publisher) async {
 
   /// Package the MSIX, including the Dokan bundled files (script, MSI) inside
   /// the data directory (Release/data/bundled-assets-windows)
-  await run('dart', [
-    'run',
-    'msix:pack',
-    '-u',
-    'eQualitie Inc',
-    '-i',
-    identityName,
-    '-b',
-    publisher,
-    '--store'
-  ]);
+  await run('dart', ['run', 'msix:pack', ...args]);
 
   return File('$windowsArtifactDir/ouisync_app.msix');
 }
