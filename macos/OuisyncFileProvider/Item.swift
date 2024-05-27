@@ -58,6 +58,19 @@ class DirectoryItem: NSObject, NSFileProviderItem {
         self.directory = directory
     }
 
+    // For when this directory represents a repository
+    init(_ repo: OuisyncRepository, _ repoName: String) {
+        self.repoName = repoName
+        self.directory = OuisyncDirectory(FilePath("/"), repo)
+    }
+    
+    static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> DirectoryItem {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchRepository
+        }
+        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
+    }
+
     var itemIdentifier: NSFileProviderItemIdentifier {
         ItemIdentifier.directory(repoName, directory.path).serialize()
     }
@@ -79,7 +92,6 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        NSLog("::::::::::::: \(repoName) \(directory.path) \(FilePath.mergeRepoNameAndPath(repoName, directory.path)) \(OuisyncDirectory.name(FilePath.mergeRepoNameAndPath(repoName, directory.path)))")
         return OuisyncDirectory.name(FilePath.mergeRepoNameAndPath(repoName, directory.path))
     }
 
@@ -88,7 +100,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "DirectoryItem(\(repoName), \(directory.path))"
+        return "DirectoryItem(\(repoName), \(directory.path), parent:\(parentItemIdentifier))"
     }
 }
 
@@ -190,30 +202,44 @@ class TrashContainerItem: NSObject, NSFileProviderItem {
 
 func itemFromIdentifier(
         _ identifier: NSFileProviderItemIdentifier,
-        _ session: OuisyncSession,
-        _ state: State) throws -> NSFileProviderItem {
-    return try itemFromIdentifier(ItemIdentifier(identifier), session, state)
+        _ session: OuisyncSession) async throws -> NSFileProviderItem {
+    return try await itemFromIdentifier(ItemIdentifier(identifier), session)
 }
 
 func itemFromIdentifier(
         _ identifier: ItemIdentifier,
-        _ session: OuisyncSession,
-        _ state: State) throws -> NSFileProviderItem {
+        _ session: OuisyncSession) async throws -> NSFileProviderItem {
     switch identifier {
     case .rootContainer: return RootContainerItem()
     case .trashContainer: return TrashContainerItem()
     case .workingSet: return WorkingSetItem()
     case .directory(let repoName, let path):
-        guard let repo = state.reposByName[repoName] else {
-            throw ExtError.noSuchRepository
-        }
-        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
+        return try await DirectoryItem.fromIdentifier(path, repoName, session)
+//        guard let repo = await getRepoByName(session, repoName) else {
+//            throw ExtError.noSuchRepository
+//        }
+//        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
     case .file(let repoName, let path):
-        guard let repo = state.reposByName[repoName] else {
+        guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchRepository
         }
         return FileItem(OuisyncFile(path, repo), repoName)
     }
+}
+
+func getRepoByName(_ session: OuisyncSession, _ repoName: String) async -> OuisyncRepository? {
+    // TODO: the unwraps
+
+    let repos = (try? await session.listRepositories())!
+
+    for repo in repos {
+        let name = (try? await repo.getName())!
+        if name == repoName {
+            return repo
+        }
+    }
+
+    return nil
 }
 
 func itemFromEntry(_ entry: OuisyncEntry, _ repoName: RepoName) -> NSFileProviderItem {
@@ -224,5 +250,5 @@ func itemFromEntry(_ entry: OuisyncEntry, _ repoName: RepoName) -> NSFileProvide
 }
 
 func itemFromRepo(_ repo: OuisyncRepository, _ repoName: RepoName) -> NSFileProviderItem {
-    return DirectoryItem(OuisyncDirectory(FilePath("/"), repo), repoName)
+    return DirectoryItem(repo, repoName)
 }

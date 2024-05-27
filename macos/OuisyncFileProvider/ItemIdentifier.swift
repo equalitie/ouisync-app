@@ -80,3 +80,9 @@ extension FilePath {
         return (repoName, FilePath(root: nil, path.components.dropFirst()))
     }
 }
+
+extension NSFileProviderItemIdentifier: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        return ItemIdentifier(self).debugDescription
+    }
+}

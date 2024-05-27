@@ -52,7 +52,7 @@ extension Extension {
 
         /// https://developer.apple.com/documentation/foundation/nsxpclistenerdelegate/1410381-listener
         func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
-            NSLog(":::: START")
+            NSLog(":::: Servicing START ::::")
 
             connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
             connection.exportedObject = self
@@ -69,14 +69,14 @@ extension Extension {
             let maybe_client = connection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
 
             guard let client = maybe_client else {
-                NSLog(":::: 😡 Failed to convert XPC connection to OuisyncConnection")
+                NSLog("😡 Failed to convert XPC connection to OuisyncConnection")
                 return false
             }
 
             // TODO: This was used in an example, but maybe we dont need to do that?
-            synchronized(self) {
-                listeners.remove(listener)
-            }
+//            synchronized(self) {
+//                listeners.remove(listener)
+//            }
 
             let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
 
@@ -88,20 +88,31 @@ extension Extension {
 
             Task {
                 let repoListChanged = try await ouisyncSession.subscribeToRepositoryListChange()
-                let _ = try await ouisyncSession.listRepositories()
+
                 while true {
                     if await repoListChanged.next() == nil {
                         break
                     }
-                    let repos = try await ouisyncSession.listRepositories()
 
-                    for repo in repos {
-                        let entries = try await repo.getRootDirectory().listEntries()
-                        NSLog(">>>> \(entries)")
+                    if let ext {
+                        let old = ext.currentAnchor
+                        ext.currentAnchor = UInt64.random(in: UInt64.min ... UInt64.max)
+                        NSLog("❗Refreshing FileProvider and updating anchor \(old) -> \(ext.currentAnchor)")
+                    } else {
+                        NSLog("❗Refreshing FileProvider")
                     }
+                    
                     await refreshFileProvider()
                 }
             }
+
+//            Task {
+//                while true {
+//                    NSLog("::::::::::::::: REFRESH :::::::::::::::::")
+//                    await refreshFileProvider()
+//                    try await Task.sleep(nanoseconds: 5 * 1_000_000_000)
+//                }
+//            }
 
             return true
         }
@@ -133,15 +144,15 @@ extension Extension {
     // This signals to the file provider to refresh
     // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
     static func refreshFileProvider() async {
-        let managerDomain = getDomain()
-        guard let manager = NSFileProviderManager(for: managerDomain) else {
-            NSLog("❌ failed to create NSFileProviderManager for \(managerDomain)")
+        let domain = ouisyncFileProviderDomain
+        guard let manager = NSFileProviderManager(for: domain) else {
+            NSLog("❌ failed to create NSFileProviderManager for \(domain)")
             return
         }
         do {
             try await manager.signalEnumerator(for: .workingSet)
         } catch let error as NSError {
-            NSLog("❌ failed to signal working set for \(managerDomain): \(error)")
+            NSLog("❌ failed to signal working set for \(domain): \(error)")
         }
     }
 }

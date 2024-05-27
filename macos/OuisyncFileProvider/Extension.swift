@@ -8,17 +8,10 @@
 import FileProvider
 import OuisyncLib
 
-class State {
-    var reposByName = Dictionary<RepoName, OuisyncRepository>()
-
-    func repos() -> Set<OuisyncRepository> {
-        return Set(reposByName.values)
-    }
-}
-
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     var ouisyncSession: OuisyncSession?
-    let state = State()
+    var currentAnchor: UInt64 = UInt64.random(in: UInt64.min ... UInt64.max)
+    let domain: NSFileProviderDomain
 
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
@@ -27,6 +20,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // `FileProviderExtension.init(domain:)` to instantiate the extension
         // for that domain, and call methods on the instance.
         
+        self.domain = domain
         super.init()
     }
 
@@ -35,24 +29,27 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
+        Self.log("item(\(identifier))")
         // resolve the given identifier to a record in the model
         
         // TODO: implement the actual lookup
 
-        Task {
-            guard let session = ouisyncSession else {
-                let id = ItemIdentifier(identifier)
-                switch id {
-                case .rootContainer: return completionHandler(RootContainerItem(), nil);
-                case .trashContainer: return completionHandler(TrashContainerItem(), nil);
-                case .workingSet: return completionHandler(WorkingSetItem(), nil);
-                default:
-                    fatalError("TODO")
-                }
-            }
-            let item = try itemFromIdentifier(identifier, session, state)
-            completionHandler(item, nil)
+        guard let session = ouisyncSession else {
+            completionHandler(nil, NSError(domain: NSFileProviderErrorDomain, code: NSFileProviderError.serverUnreachable.rawValue, userInfo: nil))
+            return Progress()
         }
+
+        Task {
+            do {
+                let item = try await itemFromIdentifier(identifier, session)
+                completionHandler(item, nil)
+            } catch ExtError.noSuchRepository {
+                completionHandler(nil, NSError(domain: NSFileProviderErrorDomain, code: NSFileProviderError.noSuchItem.rawValue, userInfo: nil))
+            } catch {
+                fatalError("Unrecognized exception \(error)")
+            }
+        }
+
         return Progress()
     }
     
@@ -85,20 +82,26 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
-        var identifier = containerItemIdentifier
+        Self.log("enumerator(\(containerItemIdentifier))")
+        let identifier = containerItemIdentifier
 
-        if identifier == .workingSet {
-            identifier = .rootContainer
-        }
+//        if identifier == .workingSet {
+//            identifier = .rootContainer
+//            //currentAnchor += 1
+//        }
+
+//        if identifier == .trashContainer {
+//            // Trashing is not yet supported
+//            throw NSFileProviderError(.noSuchItem)
+//        }
 
         guard let session = self.ouisyncSession else {
-            return NoConnectionEnumerator()
+            return NoConnectionEnumerator(currentAnchor)
         }
 
         let itemIdentifier = ItemIdentifier(identifier)
-        Self.log("enumerator(for: \(identifier), request: \(request)")
 
-        return try Enumerator(itemIdentifier, session, self.state)
+        return try Enumerator(itemIdentifier, session, currentAnchor)
     }
 
     static func log(_ str: String) {

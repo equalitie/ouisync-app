@@ -12,14 +12,16 @@ import Common
 
 // Facilitate communication between the file provider extension and the rust code.
 class FileProviderProxy {
+    static private let printLogs = false
+
     init() {
-        let domain = getDomain()
+        let domain = ouisyncFileProviderDomain
 
         NSFileProviderManager.add(domain, completionHandler: {error in
             if let error = error {
-                NSLog("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
+                Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
             } else {
-                NSLog("😀 NSFileProviderManager added domain successfully");
+                Self.log("😀 NSFileProviderManager added domain successfully");
             }
         })
 
@@ -43,6 +45,7 @@ class FileProviderProxy {
             let service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
 
             guard let service = service else {
+                Self.log("😡 Failed to acquire service from NSFileProviderManager")
                 return;
             }
 
@@ -50,12 +53,12 @@ class FileProviderProxy {
             connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
 
             connection.interruptionHandler = {
-                NSLog("😡 Connection to File Provider XPC service has been interrupted")
+                Self.log("😡 Connection to File Provider XPC service has been interrupted")
                 fromRustTx.finish();
             }
 
             connection.invalidationHandler = {
-                NSLog("😡 Connection to File Provider XPC service has been invalidated")
+                Self.log("😡 Connection to File Provider XPC service has been invalidated")
                 fromRustTx.finish();
             }
 
@@ -94,7 +97,11 @@ class FileProviderProxy {
         }
     }
 
-
+    static func log(_ message: String) {
+        if printLogs {
+            NSLog(message)
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------------------

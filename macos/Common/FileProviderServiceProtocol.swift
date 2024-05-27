@@ -9,6 +9,9 @@ import Foundation
 import FileProvider
 
 public let ouisyncFileProviderServiceName = NSFileProviderServiceName("org.equalitie.Ouisync")
+// We use only one domain
+public let ouisyncFileProviderDomainId = NSFileProviderDomainIdentifier(rawValue: "ouisyncCommonDomain")
+public let ouisyncFileProviderDomain = NSFileProviderDomain(identifier: ouisyncFileProviderDomainId, displayName: "Ouisync")
 
 @objc public protocol OuisyncFileProviderClientProtocol {
     func messageFromServerToClient(_ message: [UInt8])
@@ -16,8 +19,4 @@ public let ouisyncFileProviderServiceName = NSFileProviderServiceName("org.equal
 
 @objc public protocol OuisyncFileProviderServerProtocol {
     func messageFromClientToServer(_ message: [UInt8])
-}
-
-public func getDomain() -> NSFileProviderDomain {
-    return NSFileProviderDomain(identifier: NSFileProviderDomainIdentifier(rawValue: "mydomain"), displayName: "mydisplayname")
 }
