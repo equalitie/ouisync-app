@@ -141,7 +141,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         ),
         Fields.dialogActions(
           context,
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           buttons: _buildActions(context),
         )
       ]);
