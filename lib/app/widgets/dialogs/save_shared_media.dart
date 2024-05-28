@@ -33,9 +33,15 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
   final Icon _collapsableIconDown =
       const Icon(Icons.keyboard_arrow_down_rounded);
 
-  Icon _collapsableIcon = const Icon(Icons.keyboard_arrow_down_rounded);
-
+  late Icon _collapsableIcon;
   bool _minimize = false;
+
+  @override
+  void initState() {
+    _collapsableIcon = _collapsableIconDown;
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
