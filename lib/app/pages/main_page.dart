@@ -690,20 +690,24 @@ class _MainPageState extends State<MainPage>
       child = _contentsList(repo);
     }
 
-    return Container(
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // TODO: A shadow would be nicer.
-          const Divider(height: 1),
-          if (folder.content.isNotEmpty)
-            SortContentsBar(
-              sortListCubit: _sortListCubit,
-              reposCubit: _cubits.repositories,
-            ),
-          Expanded(child: child),
-        ],
+    return ValueListenableBuilder(
+      valueListenable: _bottomPaddingWithBottomSheet,
+      builder: (context, value, _) => Container(
+        padding: EdgeInsets.only(bottom: value),
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // TODO: A shadow would be nicer.
+            const Divider(height: 1),
+            if (folder.content.isNotEmpty)
+              SortContentsBar(
+                sortListCubit: _sortListCubit,
+                reposCubit: _cubits.repositories,
+              ),
+            Expanded(child: child),
+          ],
+        ),
       ),
     );
   }
@@ -789,65 +793,61 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepoCubit) => ValueListenableBuilder(
-        valueListenable: _bottomPaddingWithBottomSheet,
-        builder: (context, value, child) => RefreshIndicator(
-          onRefresh: () async => getContent(),
-          child: ListView.separated(
-            padding: EdgeInsets.only(bottom: value),
-            separatorBuilder: (context, index) => const Divider(
-              height: 1,
-              color: Colors.transparent,
-            ),
-            itemCount: currentRepoCubit.state.currentFolder.content.length,
-            itemBuilder: (context, index) {
-              final entry = currentRepoCubit.state.currentFolder.content[index];
-              final key = ValueKey(entry.name);
-
-              return switch (entry) {
-                FileEntry entry => FileListItem(
-                    key: key,
-                    entry: entry,
-                    repoCubit: currentRepoCubit,
-                    mainAction: () async {
-                      if (_bottomSheet != null) {
-                        await _showMovingEntryAlertDialog(context);
-                        return;
-                      }
-
-                      await _previewFile(currentRepoCubit, entry, true);
-                    },
-                    verticalDotsAction: () async {
-                      if (_bottomSheet != null) {
-                        await _showMovingEntryAlertDialog(context);
-                        return;
-                      }
-
-                      await _showFileDetails(currentRepoCubit, entry);
-                    }),
-                DirectoryEntry entry => DirectoryListItem(
-                    key: key,
-                    entry: entry,
-                    mainAction: () {
-                      if (_bottomSheet != null &&
-                          _pathEntryToMove == entry.path) {
-                        return;
-                      }
-
-                      currentRepoCubit.navigateTo(entry.path);
-                    },
-                    verticalDotsAction: () async {
-                      if (_bottomSheet != null) {
-                        await _showMovingEntryAlertDialog(context);
-                        return;
-                      }
-
-                      await _showFolderDetails(currentRepoCubit, entry);
-                    },
-                  ),
-              };
-            },
+  Widget _contentsList(RepoCubit currentRepoCubit) => RefreshIndicator(
+        onRefresh: () async => getContent(),
+        child: ListView.separated(
+          separatorBuilder: (context, index) => const Divider(
+            height: 1,
+            color: Colors.transparent,
           ),
+          itemCount: currentRepoCubit.state.currentFolder.content.length,
+          itemBuilder: (context, index) {
+            final entry = currentRepoCubit.state.currentFolder.content[index];
+            final key = ValueKey(entry.name);
+
+            return switch (entry) {
+              FileEntry entry => FileListItem(
+                  key: key,
+                  entry: entry,
+                  repoCubit: currentRepoCubit,
+                  mainAction: () async {
+                    if (_bottomSheet != null) {
+                      await _showMovingEntryAlertDialog(context);
+                      return;
+                    }
+
+                    await _previewFile(currentRepoCubit, entry, true);
+                  },
+                  verticalDotsAction: () async {
+                    if (_bottomSheet != null) {
+                      await _showMovingEntryAlertDialog(context);
+                      return;
+                    }
+
+                    await _showFileDetails(currentRepoCubit, entry);
+                  }),
+              DirectoryEntry entry => DirectoryListItem(
+                  key: key,
+                  entry: entry,
+                  mainAction: () {
+                    if (_bottomSheet != null &&
+                        _pathEntryToMove == entry.path) {
+                      return;
+                    }
+
+                    currentRepoCubit.navigateTo(entry.path);
+                  },
+                  verticalDotsAction: () async {
+                    if (_bottomSheet != null) {
+                      await _showMovingEntryAlertDialog(context);
+                      return;
+                    }
+
+                    await _showFolderDetails(currentRepoCubit, entry);
+                  },
+                ),
+            };
+          },
         ),
       );
 
@@ -901,8 +901,13 @@ class _MainPageState extends State<MainPage>
               ));
 
   void updateBottomSheet(Widget? widget, String entryPath) {
+    // The size for the bottom sheet when moving a entry is set to 160.0,
+    // then we add some extra so it looks a bit better.
+    // TODO: Find a way to determine the size of the bototm sheet dinamically.
+    final modalSize = widget == null ? defaultBottomPadding : 168.0;
+
     _pathEntryToMove = entryPath;
-    _bottomPaddingWithBottomSheet.value = defaultBottomPadding;
+    _bottomPaddingWithBottomSheet.value = modalSize;
 
     setState(() => _bottomSheet = widget);
   }
@@ -996,7 +1001,7 @@ class _MainPageState extends State<MainPage>
       validationFunction: canSaveFiles,
     );
 
-    setState(() => _bottomSheet = bottomSheetSaveMedia);
+    updateBottomSheet(bottomSheetSaveMedia, '');
   }
 
   Future<bool> canSaveFiles() async {
