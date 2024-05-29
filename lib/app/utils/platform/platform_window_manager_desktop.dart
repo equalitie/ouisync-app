@@ -113,13 +113,6 @@ class PlatformWindowManagerDesktop
       _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
     }
 
-    /// Neither these suations seems to be true any more [Tested on Ubuntu 22.04.3 LTS - 2023-09-22]
-    /// TODO: Remove this comment after more testing
-    /// If the user is using Wayland instead of X Windows on Linux, the app crashes with the error:
-    /// (ouisync_app:8441): Gdk-CRITICAL **: 01:05:51.655: gdk_monitor_get_geometry: assertion 'GDK_IS_MONITOR (monitor)' failed
-    /// A "fix" is to switch to X Windows (https://stackoverflow.com/questions/62809877/gdk-critical-exceptions-on-a-flutter-desktop-app-linux)
-    /// Since we still don't know the real reason nor a real fix, we are skipping this configuration on Linux for now.
-    /// *****************
     /// For some reason, if we use a constant value for the title in the
     /// WindowsOptions, the app hangs. This is true for the localized strings,
     /// or a regular constant value in Constants.
