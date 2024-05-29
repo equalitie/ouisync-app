@@ -95,10 +95,15 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
   List<Widget> _actions(BuildContext context, double aspectRatio) => [
         NegativeButton(
-            buttonsAspectRatio: aspectRatio,
-            buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-            text: S.current.actionCancel,
-            onPressed: () => widget.onBottomSheetOpen.call(null, '')),
+          buttonsAspectRatio: aspectRatio,
+          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+          text: S.current.actionCancel,
+          onPressed: () => widget.onBottomSheetOpen.call(
+            null,
+            0.0,
+            '',
+          ),
+        ),
         BlocBuilder<NavigationCubit, NavigationState>(
             bloc: widget.navigation,
             builder: (context, state) {
@@ -126,7 +131,9 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
                             ),
                           );
 
-                          if (moved) widget.onBottomSheetOpen.call(null, '');
+                          if (moved) {
+                            widget.onBottomSheetOpen.call(null, 0.0, '');
+                          }
                         }
                       : null);
             }),
