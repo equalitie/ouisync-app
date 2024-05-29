@@ -71,6 +71,10 @@ class DirectoryItem: NSObject, NSFileProviderItem {
         return DirectoryItem(OuisyncDirectory(path, repo), repoName)
     }
 
+    func exists() async throws -> Bool {
+        return try await directory.exists()
+    }
+
     var itemIdentifier: NSFileProviderItemIdentifier {
         ItemIdentifier.directory(repoName, directory.path).serialize()
     }
@@ -214,11 +218,11 @@ func itemFromIdentifier(
     case .trashContainer: return TrashContainerItem()
     case .workingSet: return WorkingSetItem()
     case .directory(let repoName, let path):
-        return try await DirectoryItem.fromIdentifier(path, repoName, session)
-//        guard let repo = await getRepoByName(session, repoName) else {
-//            throw ExtError.noSuchRepository
-//        }
-//        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
+        let dir = try await DirectoryItem.fromIdentifier(path, repoName, session)
+        if try await dir.exists() == false {
+            throw ExtError.noSuchRepository
+        }
+        return dir
     case .file(let repoName, let path):
         guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchRepository

@@ -34,8 +34,6 @@ extension Extension: NSFileProviderServicing {
 
 extension Extension {
     class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
-        var nextMessageId: MessageId = 0
-
         var serviceName: NSFileProviderServiceName {
             ouisyncFileProviderServiceName
         }
@@ -80,48 +78,71 @@ extension Extension {
 
             let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
 
-            if let ext = self.ext {
+            let weakExt = self.weakExt
+
+            if let ext = weakExt {
                 ext.ouisyncSession = ouisyncSession
             }
 
             connection.resume()
 
             Task {
+                // Everytime a repository is added or removed, and everytime a repository in the backend
+                // changes we ask the file provider to refresh it's content.
+
                 let repoListChanged = try await ouisyncSession.subscribeToRepositoryListChange()
+
+                var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
 
                 while true {
                     if await repoListChanged.next() == nil {
                         break
                     }
 
-                    if let ext {
-                        let old = ext.currentAnchor
-                        ext.currentAnchor = UInt64.random(in: UInt64.min ... UInt64.max)
-                        NSLog("❗Refreshing FileProvider and updating anchor \(old) -> \(ext.currentAnchor)")
-                    } else {
-                        NSLog("❗Refreshing FileProvider")
+                    guard let ext = weakExt else {
+                        NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
+                        return
                     }
-                    
-                    await refreshFileProvider()
+
+                    let watchedRepoHandles = Set(repoWatchingTasks.keys)
+                    let currentRepoHandles = Set((try? await ouisyncSession.listRepositories())!.map({ $0.handle }))
+
+                    let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
+                    let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
+
+                    for repo in reposToAdd {
+                        guard let stream = try? await ouisyncSession.subscribeToRepositoryChange(repo) else {
+                            continue
+                        }
+                        repoWatchingTasks[repo] = Task {
+                            while true {
+                                if await stream.next() == nil {
+                                    return
+                                }
+                                guard let ext = weakExt else {
+                                    return
+                                }
+                                await refreshFileProvider(ext)
+                            }
+                        }
+                    }
+
+                    for repo in reposToRemove {
+                        repoWatchingTasks.removeValue(forKey: repo)
+                    }
+
+                    await refreshFileProvider(ext)
                 }
             }
-
-//            Task {
-//                while true {
-//                    NSLog("::::::::::::::: REFRESH :::::::::::::::::")
-//                    await refreshFileProvider()
-//                    try await Task.sleep(nanoseconds: 5 * 1_000_000_000)
-//                }
-//            }
 
             return true
         }
 
-        weak var ext: Extension?
+        weak var weakExt: Extension?
         let listeners = NSHashTable<NSXPCListener>()
 
         init(_ ext: Extension) {
-            self.ext = ext
+            self.weakExt = ext
         }
 
         func messageFromClientToServer(_ message_data: [UInt8]) {
@@ -129,7 +150,7 @@ extension Extension {
                 return
             }
 
-            guard let ext = self.ext else {
+            guard let ext = self.weakExt else {
                 return
             }
 
@@ -143,8 +164,13 @@ extension Extension {
 
     // This signals to the file provider to refresh
     // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
-    static func refreshFileProvider() async {
+    static func refreshFileProvider(_ ext: Extension) async {
+        let oldAnchor = ext.currentAnchor
+        ext.currentAnchor = UInt64.random(in: UInt64.min ... UInt64.max)
+        NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(ext.currentAnchor)")
+
         let domain = ouisyncFileProviderDomain
+
         guard let manager = NSFileProviderManager(for: domain) else {
             NSLog("❌ failed to create NSFileProviderManager for \(domain)")
             return
