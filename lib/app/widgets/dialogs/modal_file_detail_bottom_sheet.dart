@@ -206,7 +206,7 @@ class _FileDetailState extends State<FileDetail> {
       onMoveEntry: moveEntryCallback,
     );
 
-    widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
+    widget.onUpdateBottomSheet(bottomSheetMoveEntry, 160.0, path);
   }
 
   void _showRenameDialog(FileEntry entry) async {
