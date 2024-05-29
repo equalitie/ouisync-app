@@ -160,7 +160,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
       onMoveEntry: moveEntryCallback,
     );
 
-    widget.onUpdateBottomSheet(bottomSheetMoveEntry, path);
+    widget.onUpdateBottomSheet(bottomSheetMoveEntry, 160.0, path);
   }
 
   void _showRenameDialog(DirectoryEntry entry) async {

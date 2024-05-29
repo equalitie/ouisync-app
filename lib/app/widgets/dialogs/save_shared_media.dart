@@ -148,7 +148,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => widget.onUpdateBottomSheet.call(null, ''),
+            onPressed: () => widget.onUpdateBottomSheet.call(null, 0.0, ''),
             buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton),
         PositiveButton(
             text: S.current.actionSave,
@@ -164,7 +164,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                       await widget.onSaveFile(path);
                     }
 
-                    widget.onUpdateBottomSheet.call(null, '');
+                    widget.onUpdateBottomSheet.call(null, 0.0, '');
                   },
             buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton)
       ];
