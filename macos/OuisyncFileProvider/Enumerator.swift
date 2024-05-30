@@ -84,11 +84,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
             // We don't know what has changed because we don't track the current state and neither does
             // the Ouisync backend. So we return `synchAnchorExpired` error which will force the system
             // to re-enumerate the items (by calling the `enumerateItems` function.
-            observer.finishEnumeratingWithError(NSError(
-                domain: NSFileProviderErrorDomain,
-                code: NSFileProviderError.syncAnchorExpired.rawValue,
-                userInfo: nil
-            ))
+            observer.finishEnumeratingWithError(ExtError.syncAnchorExpired.toNSError())
         }
     }
 

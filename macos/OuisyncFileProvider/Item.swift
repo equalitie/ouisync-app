@@ -66,7 +66,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     
     static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> DirectoryItem {
         guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchRepository
+            throw ExtError.noSuchItem
         }
         return DirectoryItem(OuisyncDirectory(path, repo), repoName)
     }
@@ -104,7 +104,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "DirectoryItem(\(repoName), \(directory.path), parent:\(parentItemIdentifier))"
+        return "DirectoryItem(\(repoName), \(directory.path))"
     }
 }
 
@@ -220,12 +220,12 @@ func itemFromIdentifier(
     case .directory(let repoName, let path):
         let dir = try await DirectoryItem.fromIdentifier(path, repoName, session)
         if try await dir.exists() == false {
-            throw ExtError.noSuchRepository
+            throw ExtError.noSuchItem
         }
         return dir
     case .file(let repoName, let path):
         guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchRepository
+            throw ExtError.noSuchItem
         }
         return FileItem(OuisyncFile(path, repo), repoName)
     }

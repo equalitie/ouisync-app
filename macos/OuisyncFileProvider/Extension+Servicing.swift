@@ -34,6 +34,13 @@ extension Extension: NSFileProviderServicing {
 
 extension Extension {
     class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
+        weak var weakExt: Extension?
+        let listeners = NSHashTable<NSXPCListener>()
+
+        init(_ ext: Extension) {
+            self.weakExt = ext
+        }
+
         var serviceName: NSFileProviderServiceName {
             ouisyncFileProviderServiceName
         }
@@ -68,83 +75,37 @@ extension Extension {
 
             guard let client = maybe_client else {
                 NSLog("😡 Failed to convert XPC connection to OuisyncConnection")
+                return true
+            }
+
+            guard let ext = weakExt else {
+                NSLog("😡 The File Provider extension has received a connection from the app but the extension was already destroyed")
                 return false
             }
 
-            // TODO: This was used in an example, but maybe we dont need to do that?
-//            synchronized(self) {
-//                listeners.remove(listener)
-//            }
+            if ext.ouisyncSession != nil {
+                // TODO: What shoudld we do if there is another app trying to connect? Right now Ouisync
+                // runs inside the app, so that would mean we have two or more Ouisyncs running at the
+                // same time. The app is set up in Flutter to only allow one instance, but whether that
+                // actually works remains to be tested. If it happens that there are acually more than
+                // one Ouisync instance, we might need to move the backend to the extension, but that
+                // would require a lot of boilerplate to make it accessible from Dart.
+                fatalError("😡 Session already exists")
+            }
 
             let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
+            ext.ouisyncSession = ouisyncSession
 
-            let weakExt = self.weakExt
-
-            if let ext = weakExt {
-                ext.ouisyncSession = ouisyncSession
-            }
+            startListeningToRepoChanges()
 
             connection.resume()
 
-            Task {
-                // Everytime a repository is added or removed, and everytime a repository in the backend
-                // changes we ask the file provider to refresh it's content.
-
-                let repoListChanged = try await ouisyncSession.subscribeToRepositoryListChange()
-
-                var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
-
-                while true {
-                    if await repoListChanged.next() == nil {
-                        break
-                    }
-
-                    guard let ext = weakExt else {
-                        NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
-                        return
-                    }
-
-                    let watchedRepoHandles = Set(repoWatchingTasks.keys)
-                    let currentRepoHandles = Set((try? await ouisyncSession.listRepositories())!.map({ $0.handle }))
-
-                    let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
-                    let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
-
-                    for repo in reposToAdd {
-                        guard let stream = try? await ouisyncSession.subscribeToRepositoryChange(repo) else {
-                            continue
-                        }
-                        repoWatchingTasks[repo] = Task {
-                            while true {
-                                if await stream.next() == nil {
-                                    return
-                                }
-                                guard let ext = weakExt else {
-                                    return
-                                }
-                                await refreshFileProvider(ext)
-                            }
-                        }
-                    }
-
-                    for repo in reposToRemove {
-                        repoWatchingTasks.removeValue(forKey: repo)
-                    }
-
-                    await refreshFileProvider(ext)
-                }
-            }
 
             return true
         }
 
-        weak var weakExt: Extension?
-        let listeners = NSHashTable<NSXPCListener>()
-
-        init(_ ext: Extension) {
-            self.weakExt = ext
-        }
-
+        // Ouisync backend is running inside the app (not in this extension), so when we send a request to it
+        // here is where we receive responses and pass it to `ouisyncSession`.
         func messageFromClientToServer(_ message_data: [UInt8]) {
             if message_data.isEmpty {
                 return
@@ -160,7 +121,83 @@ extension Extension {
 
             ouisyncSession.onReceiveDataFromOuisyncLib(message_data)
         }
+
+        // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
+        // everytime a repository changes we ask the file provider to refresh it's content.
+        func startListeningToRepoChanges() {
+            let weakExt = self.weakExt
+
+            Task {
+                let repoListChanged: NotificationStream
+
+                if let session = weakExt?.ouisyncSession {
+                    repoListChanged = try await session.subscribeToRepositoryListChange()
+                } else {
+                    return
+                }
+
+                var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
+
+                while true {
+                    if let ext = weakExt {
+                        let currentRepos: [OuisyncRepository]
+
+                        do {
+                            currentRepos = try await ext.ouisyncSession!.listRepositories()
+                        } catch let error as OuisyncError {
+                            switch error.code {
+                            case .ConnectionLost: return
+                            default: fatalError("😡 Unexpected Ouisync exception: \(error)")
+                            }
+                        } catch {
+                            fatalError("😡 Unexpected exception: \(error)")
+                        }
+
+                        let watchedRepoHandles = Set(repoWatchingTasks.keys)
+                        let currentRepoHandles = Set(currentRepos.map({ $0.handle }))
+
+                        let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
+                        let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
+
+                        for repo in reposToAdd {
+                            guard let ext = weakExt else {
+                                return
+                            }
+                            guard let stream = try? await ext.ouisyncSession!.subscribeToRepositoryChange(repo) else {
+                                continue
+                            }
+                            repoWatchingTasks[repo] = Task {
+                                while true {
+                                    if await stream.next() == nil {
+                                        return
+                                    }
+                                    guard let ext = weakExt else {
+                                        return
+                                    }
+                                    await refreshFileProvider(ext)
+                                }
+                            }
+                        }
+
+                        for repo in reposToRemove {
+                            repoWatchingTasks.removeValue(forKey: repo)
+                        }
+
+                        await refreshFileProvider(ext)
+
+                    } else {
+                        NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
+                        return
+                    }
+
+                    if await repoListChanged.next() == nil {
+                        break
+                    }
+                }
+            }
+        }
     }
+
 
     // This signals to the file provider to refresh
     // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755

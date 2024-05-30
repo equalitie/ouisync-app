@@ -32,10 +32,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         Self.log("item(\(identifier))")
         // resolve the given identifier to a record in the model
         
-        // TODO: implement the actual lookup
-
         guard let session = ouisyncSession else {
-            completionHandler(nil, NSError(domain: NSFileProviderErrorDomain, code: NSFileProviderError.serverUnreachable.rawValue, userInfo: nil))
+            completionHandler(nil, ExtError.backendIsUnreachable.toNSError())
             return Progress()
         }
 
@@ -43,8 +41,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             do {
                 let item = try await itemFromIdentifier(identifier, session)
                 completionHandler(item, nil)
-            } catch ExtError.noSuchRepository {
-                completionHandler(nil, NSError(domain: NSFileProviderErrorDomain, code: NSFileProviderError.noSuchItem.rawValue, userInfo: nil))
+            } catch ExtError.noSuchItem {
+                completionHandler(nil, ExtError.noSuchItem.toNSError())
             } catch {
                 fatalError("Unrecognized exception \(error)")
             }
@@ -81,27 +79,16 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return Progress()
     }
     
-    func enumerator(for containerItemIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
-        Self.log("enumerator(\(containerItemIdentifier))")
-        let identifier = containerItemIdentifier
+    func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
+        let identifier = ItemIdentifier(rawIdentifier)
 
-//        if identifier == .workingSet {
-//            identifier = .rootContainer
-//            //currentAnchor += 1
-//        }
-
-//        if identifier == .trashContainer {
-//            // Trashing is not yet supported
-//            throw NSFileProviderError(.noSuchItem)
-//        }
+        Self.log("enumerator(\(identifier))")
 
         guard let session = self.ouisyncSession else {
-            return NoConnectionEnumerator(currentAnchor)
+            throw ExtError.syncAnchorExpired.toNSError()
         }
 
-        let itemIdentifier = ItemIdentifier(identifier)
-
-        return try Enumerator(itemIdentifier, session, currentAnchor)
+        return try Enumerator(identifier, session, currentAnchor)
     }
 
     static func log(_ str: String) {
