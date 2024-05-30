@@ -13,11 +13,22 @@ import System
 
 class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
-    let file: OuisyncFile
+    let file: OuisyncFileEntry
 
-    init(_ file: OuisyncFile, _ repoName: String) {
+    init(_ file: OuisyncFileEntry, _ repoName: String) {
         self.repoName = repoName
         self.file = file
+    }
+
+    static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> FileItem {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+        return FileItem(OuisyncFileEntry(path, repo), repoName)
+    }
+
+    func exists() async throws -> Bool {
+        return try await file.exists()
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
@@ -51,9 +62,9 @@ class FileItem: NSObject, NSFileProviderItem {
 
 class DirectoryItem: NSObject, NSFileProviderItem {
     let repoName: String
-    let directory: OuisyncDirectory
+    let directory: OuisyncDirectoryEntry
 
-    init(_ directory: OuisyncDirectory, _ repoName: String) {
+    init(_ directory: OuisyncDirectoryEntry, _ repoName: String) {
         self.repoName = repoName
         self.directory = directory
     }
@@ -61,14 +72,14 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     // For when this directory represents a repository
     init(_ repo: OuisyncRepository, _ repoName: String) {
         self.repoName = repoName
-        self.directory = OuisyncDirectory(FilePath("/"), repo)
+        self.directory = OuisyncDirectoryEntry(FilePath("/"), repo)
     }
     
     static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> DirectoryItem {
         guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchItem
         }
-        return DirectoryItem(OuisyncDirectory(path, repo), repoName)
+        return DirectoryItem(OuisyncDirectoryEntry(path, repo), repoName)
     }
 
     func exists() async throws -> Bool {
@@ -96,7 +107,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        return OuisyncDirectory.name(FilePath.mergeRepoNameAndPath(repoName, directory.path))
+        return OuisyncDirectoryEntry.name(FilePath.mergeRepoNameAndPath(repoName, directory.path))
     }
 
     var contentType: UTType {
@@ -224,10 +235,11 @@ func itemFromIdentifier(
         }
         return dir
     case .file(let repoName, let path):
-        guard let repo = await getRepoByName(session, repoName) else {
+        let file = try await FileItem.fromIdentifier(path, repoName, session)
+        if try await file.exists() == false {
             throw ExtError.noSuchItem
         }
-        return FileItem(OuisyncFile(path, repo), repoName)
+        return file
     }
 }
 

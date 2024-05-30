@@ -13,6 +13,7 @@ enum ExtError : Error {
     case noSuchItem
     case backendIsUnreachable
     case syncAnchorExpired
+    case featureNotSupported
 }
 
 extension ExtError {
@@ -35,6 +36,12 @@ extension ExtError {
                 domain: NSFileProviderErrorDomain,
                 code: NSFileProviderError.syncAnchorExpired.rawValue,
                 userInfo: nil
+            )
+        case .featureNotSupported:
+            return NSError(
+                domain: NSCocoaErrorDomain,
+                code: NSFeatureUnsupportedError,
+                userInfo:[:]
             )
         }
     }

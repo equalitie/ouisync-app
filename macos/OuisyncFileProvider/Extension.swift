@@ -12,6 +12,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     var ouisyncSession: OuisyncSession?
     var currentAnchor: UInt64 = UInt64.random(in: UInt64.min ... UInt64.max)
     let domain: NSFileProviderDomain
+    let temporaryDirectoryURL: URL
 
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
@@ -20,6 +21,14 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // `FileProviderExtension.init(domain:)` to instantiate the extension
         // for that domain, and call methods on the instance.
         
+        let manager = NSFileProviderManager(for: domain)!
+
+        do {
+            temporaryDirectoryURL = try manager.temporaryDirectoryURL()
+        } catch {
+            fatalError("Failed to get temporary directory: \(error)")
+        }
+
         self.domain = domain
         super.init()
     }
@@ -54,7 +63,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
-        completionHandler(nil, nil, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
+        completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
         return Progress()
     }
     
@@ -93,6 +102,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
     static func log(_ str: String) {
         NSLog(">>>> FileProviderExtension: \(str)")
+    }
+
+    // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location
+    // and write the content there. Then pass that URL to a completion handler.
+    func makeTemporaryURL(_ purpose: String) -> URL {
+        return temporaryDirectoryURL.appendingPathComponent("\(purpose)-\(UUID().uuidString)")
     }
 }
 
