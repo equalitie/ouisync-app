@@ -55,9 +55,17 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
             Task {
                 let dir = try await identifier.loadItem(session)
                 let entries = try await dir.directory.listEntries()
-                let items = entries.map({ e in itemFromEntry(e, dir.repoName) })
+                var items: [NSFileProviderItem] = []
+                for entry in entries {
+                    switch entry {
+                    case .directory(let dirEntry): items.append(DirectoryItem(dirEntry, dir.repoName))
+                    case .file(let fileEntry):
+                        let identifier = FileIdentifier(fileEntry.path, dir.repoName)
+                        items.append(try await identifier.loadItem(session))
+                    }
+                }
                 log("enumerateItems \(itemId) -> \(items)")
-                observer.didEnumerate(entries.map({ e in itemFromEntry(e, dir.repoName) }))
+                observer.didEnumerate(items)
                 observer.finishEnumerating(upTo: nil)
             }
         case .trashContainer:

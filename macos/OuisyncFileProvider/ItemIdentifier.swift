@@ -42,6 +42,13 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         }
     }
 
+    init(_ ouisyncEntry: OuisyncEntry, _ repoName: RepoName) {
+        switch ouisyncEntry {
+        case .directory(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
+        case .file(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
+        }
+    }
+
     public func serialize() -> NSFileProviderItemIdentifier {
         switch self {
         case .rootContainer: return .rootContainer
@@ -92,11 +99,22 @@ class FileIdentifier {
 
         let entry = OuisyncFileEntry(path, repo)
 
-        if try await entry.exists() == false {
-            throw ExtError.noSuchItem
+        let size: UInt64
+
+        do {
+            let file = try await entry.open()
+            size = try await file.size()
+        } catch let error as OuisyncError {
+            if error.code == .EntryNotFound {
+                throw ExtError.noSuchItem
+            } else {
+                fatalError("Unhandled Ouisync error:\(error), repo:\(repoName), path:\(path)")
+            }
+        } catch {
+            fatalError("Unhandled exception error:\(error), repo:\(repoName), path:\(path)")
         }
 
-        return FileItem(OuisyncFileEntry(path, repo), repoName)
+        return FileItem(OuisyncFileEntry(path, repo), repoName, size: size)
     }
 
     func serialize() -> NSFileProviderItemIdentifier {

@@ -14,10 +14,12 @@ import System
 class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
     let file: OuisyncFileEntry
+    var size: UInt64
 
-    init(_ file: OuisyncFileEntry, _ repoName: String) {
+    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64) {
         self.repoName = repoName
         self.file = file
+        self.size = size
     }
 
     func exists() async throws -> Bool {
@@ -33,7 +35,8 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+        //return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+        return [.allowsReading]
     }
 
     var itemVersion: NSFileProviderItemVersion {
@@ -45,11 +48,15 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var contentType: UTType {
-        return .plainText
+        return .item
     }
 
     public override var debugDescription: String {
         return "FileItem(\(repoName), \(file.path))"
+    }
+
+    var documentSize: NSNumber? {
+        return size as NSNumber
     }
 }
 
@@ -214,13 +221,6 @@ func getRepoByName(_ session: OuisyncSession, _ repoName: String) async -> Ouisy
     }
 
     return nil
-}
-
-func itemFromEntry(_ entry: OuisyncEntry, _ repoName: RepoName) -> NSFileProviderItem {
-    switch entry {
-    case .directory(let dir): return DirectoryItem(dir, repoName)
-    case .file(let file): return FileItem(file, repoName)
-    }
 }
 
 func itemFromRepo(_ repo: OuisyncRepository, _ repoName: RepoName) -> NSFileProviderItem {

@@ -64,7 +64,59 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         Self.log("fetchContents(\(itemIdentifier))")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
-        completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
+        guard let session = ouisyncSession else {
+            completionHandler(nil, nil, ExtError.backendIsUnreachable.toNSError())
+            return Progress()
+        }
+
+        Task {
+            do {
+                let fileItem: FileItem
+                let identifier = ItemIdentifier(itemIdentifier)
+
+                switch identifier {
+                case .file(let identifier):
+                    fileItem = try await identifier.loadItem(session)
+                default:
+                    completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
+                    return
+                }
+
+                let file = try await fileItem.file.open()
+                let url = makeTemporaryURL("fetchContents")
+
+                var offset: UInt64 = 0
+                var size: UInt64 = 0
+                let chunkSize: UInt64 = 32768 // TODO: Decide on optimal value
+
+                let outFile = FileOnDisk(url)
+
+                while true {
+                    let data = try await file.read(offset, chunkSize)
+
+                    let dataSize = UInt64(exactly: data.count)!
+                    size += dataSize
+
+                    if data.isEmpty {
+                        break
+                    }
+
+                    if offset == 0 {
+                        try outFile.write(data)
+                    } else {
+                        try outFile.append(data)
+                    }
+
+                    offset += UInt64(exactly: data.count)!
+                }
+
+                fileItem.size = offset
+
+                completionHandler(url, fileItem, nil)
+            } catch {
+                fatalError("Uncaught exception: \(error)")
+            }
+        }
         return Progress()
     }
     
@@ -112,5 +164,38 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     // and write the content there. Then pass that URL to a completion handler.
     func makeTemporaryURL(_ purpose: String) -> URL {
         return temporaryDirectoryURL.appendingPathComponent("\(purpose)-\(UUID().uuidString)")
+    }
+}
+ 
+// TODO: I just couldn't find a sane way to write and append to a file in Swift
+class FileOnDisk {
+    let url: URL
+    var handle: Foundation.FileHandle?
+
+    init(_ url: URL) {
+        self.url = url
+    }
+
+    func write(_ data: Data) throws {
+        try data.write(to: url)
+    }
+
+    func append(_ data: Data) throws {
+        if let h = getFileHandle() {
+            h.seekToEndOfFile()
+            h.write(data)
+        }
+        else {
+            try data.write(to: url, options: .atomic)
+        }
+    }
+
+    private func getFileHandle() -> Foundation.FileHandle? {
+        if let h = handle {
+            return h
+        } else {
+            handle = FileHandle(forWritingAtPath: url.path)
+            return handle
+        }
     }
 }
