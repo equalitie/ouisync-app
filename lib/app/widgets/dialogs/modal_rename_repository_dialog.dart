@@ -41,7 +41,7 @@ class _RenameRepository extends State<RenameRepository> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Fields.constrainedText(
-              '"$widget.oldName"',
+              '"${widget.repoCubit.name}"',
               flex: 0,
               style: context.theme.appTextStyle.bodyMedium
                   .copyWith(fontWeight: FontWeight.w400),
