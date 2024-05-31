@@ -20,12 +20,12 @@ class ContentWithStickyFooterState extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
+                    padding: EdgeInsets.symmetric(horizontal: 18.0),
                     alignment: Alignment.topCenter,
                     child: content,
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    padding: EdgeInsets.symmetric(vertical: 18.0),
                     child: footer,
                   ),
                 ],
