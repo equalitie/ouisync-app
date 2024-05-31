@@ -53,34 +53,32 @@ class _RepositorySecurityState extends State<RepositorySecurityPage>
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: Dimensions.paddingInPageMain,
-            child: Form(
-              key: formKey,
-              canPop: false,
-              onPopInvoked: (didPop) => _onPopInvoked(context, didPop),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RepoSecurity(
-                    initialLocalSecretMode: oldLocalSecretMode,
-                    isBiometricsAvailable: isBiometricsAvailable,
-                    onChanged: _onLocalSecretChanged,
-                  ),
-                  Dimensions.spacingVertical,
-                  Center(
-                    child: Fields.inPageButton(
-                      text: S.current.actionUpdate,
-                      onPressed:
-                          _isSubmitEnabled ? () => _onSubmit(context) : null,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        body: _buildContent(context),
+      );
+
+  ContentWithStickyFooterState _buildContent(BuildContext context) =>
+      ContentWithStickyFooterState(
+        content: Form(
+          key: formKey,
+          canPop: false,
+          onPopInvoked: (didPop) => _onPopInvoked(context, didPop),
+          child: _buildForm(),
         ),
+        footer: Fields.inPageButton(
+          text: S.current.actionUpdate,
+          onPressed: _isSubmitEnabled ? () => _onSubmit(context) : null,
+        ),
+      );
+
+  Column _buildForm() => Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          RepoSecurity(
+            initialLocalSecretMode: oldLocalSecretMode,
+            isBiometricsAvailable: isBiometricsAvailable,
+            onChanged: _onLocalSecretChanged,
+          ),
+        ],
       );
 
   void _onLocalSecretChanged(
