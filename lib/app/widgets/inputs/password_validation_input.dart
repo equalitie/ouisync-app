@@ -31,6 +31,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.only(top: 24.0),
       child: Column(
         children: [
           Row(

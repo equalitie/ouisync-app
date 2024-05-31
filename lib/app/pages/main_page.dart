@@ -10,17 +10,17 @@ import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:path/path.dart' as system_path;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/platform/platform.dart';
 import '../utils/path.dart' as repo_path;
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
@@ -1138,22 +1138,11 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
-      showDialog<RepoLocation>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => ScaffoldMessenger(
-          child: Builder(
-            builder: ((context) {
-              return Scaffold(
-                backgroundColor: Colors.transparent,
-                body: ActionsDialog(
-                  title: S.current.titleCreateRepository,
-                  body: RepositoryCreation(
-                    reposCubit: _cubits.repositories,
-                  ),
-                ),
-              );
-            }),
+      Navigator.push<RepoLocation?>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepositoryCreation(
+            reposCubit: _cubits.repositories,
           ),
         ),
       );
@@ -1194,23 +1183,12 @@ class _MainPageState extends State<MainPage>
       return null;
     }
 
-    return showDialog<RepoLocation>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Builder(
-          builder: ((context) {
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: ActionsDialog(
-                title: S.current.titleAddRepository,
-                body: RepositoryCreation(
-                  reposCubit: _cubits.repositories,
-                  initialTokenValue: initialTokenValue,
-                ),
-              ),
-            );
-          }),
+    return Navigator.push<RepoLocation?>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RepositoryCreation(
+          reposCubit: _cubits.repositories,
+          initialTokenValue: initialTokenValue,
         ),
       ),
     );
