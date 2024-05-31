@@ -21,7 +21,6 @@ export 'dialogs/modal_rename_repository_dialog.dart';
 export 'dialogs/modal_replace_file_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repo_settings_bottom_sheet.dart';
-export 'dialogs/modal_repository_creation_dialog.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
 export 'dialogs/modal_unlock_repository_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
@@ -39,6 +38,7 @@ export 'items/missing_repo_description.dart';
 
 export 'selectors/access_mode_selector.dart';
 
+export 'states/content_with_sticky_footer_state.dart';
 export 'states/error_state.dart';
 export 'states/locked_repository_state.dart';
 export 'states/missing_repo_state.dart';
@@ -51,6 +51,8 @@ export 'settings/app_settings_container.dart';
 
 export 'settings/platform/platform_dht_switch.dart';
 export 'settings/platform/platform_pex_switch.dart';
+
+export 'switches/custom_adaptive_switch.dart';
 
 export 'eq_terms_privacy.dart';
 export 'eq_values.dart';

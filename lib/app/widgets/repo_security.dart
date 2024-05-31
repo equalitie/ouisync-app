@@ -60,35 +60,6 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
         widget.initialLocalSecretMode.isSecuredWithBiometrics;
   }
 
-  @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildOriginSwitch(context),
-          ..._buildPasswordFields(context),
-          _buildSecureWithBiometricsSwitch(context),
-          _buildManualPasswordWarning(context),
-        ],
-      );
-
-  Widget _buildOriginSwitch(BuildContext context) => _buildSwitch(
-        context,
-        value: origin == SecretKeyOrigin.manual,
-        title: S.current.messageUseLocalPassword,
-        onChanged: _onOriginChanged,
-      );
-
-  List<Widget> _buildPasswordFields(BuildContext context) => switch (origin) {
-        SecretKeyOrigin.manual => [
-            PasswordValidation(
-              onChanged: _onPasswordChanged,
-              required: _isPasswordRequired,
-            ),
-            _buildStoreSwitch(context),
-          ],
-        SecretKeyOrigin.random => [],
-      };
-
   // If the secret is already stored and is not random then we can keep using it and only change
   // the other properties. So in those cases putting in a new password is not required.
   bool get _isPasswordRequired => switch (widget.initialLocalSecretMode) {
@@ -101,54 +72,81 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
           false,
       };
 
-  Widget _buildStoreSwitch(BuildContext context) => _buildSwitch(
-        context,
-        value: store,
-        title: S.current.labelRememberPassword,
-        onChanged: _onStoreChanged,
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPasswordFields(),
+          _buildOriginSwitch(),
+          _buildStoreSwitch(),
+          _buildSecureWithBiometricsSwitch(),
+          _buildManualPasswordWarning(),
+        ],
       );
+
+  Widget _buildPasswordFields() => switch (origin) {
+        SecretKeyOrigin.manual => PasswordValidation(
+            onChanged: _onPasswordChanged,
+            required: _isPasswordRequired,
+          ),
+        SecretKeyOrigin.random => SizedBox.shrink(),
+      };
+
+  Widget _buildOriginSwitch() => _buildSwitch(
+        value: origin == SecretKeyOrigin.manual,
+        title: S.current.messageUseLocalPassword,
+        onChanged: _onOriginChanged,
+      );
+
+  Widget _buildStoreSwitch() => switch (origin) {
+        SecretKeyOrigin.manual => _buildSwitch(
+            value: store,
+            title: S.current.labelRememberPassword,
+            onChanged: _onStoreChanged,
+          ),
+        SecretKeyOrigin.random => SizedBox.shrink(),
+      };
 
   // On desktops the keyring is accessible to any application once the user is
   // logged in into their account and thus giving the user the option to protect
   // their repository with system authentication might give them a false sense
   // of security. Therefore unlocking repositories with system authentication is
   // not supported on these systems.
-  Widget _buildSecureWithBiometricsSwitch(BuildContext context) =>
-      PlatformValues.isMobileDevice
-          ? _buildSwitch(
-              context,
-              value: secureWithBiometrics,
-              title: S.current.messageSecureUsingBiometrics,
-              onChanged: _isSecureWithBiometricsSwitchEnabled
-                  ? _onSecureWithBiometricsChanged
-                  : null,
-            )
-          : SizedBox.shrink();
+  Widget _buildSecureWithBiometricsSwitch() => PlatformValues.isMobileDevice
+      ? _buildSwitch(
+          value: secureWithBiometrics,
+          title: S.current.messageSecureUsingBiometrics,
+          onChanged: _isSecureWithBiometricsSwitchEnabled
+              ? _onSecureWithBiometricsChanged
+              : null,
+        )
+      : SizedBox.shrink();
 
-  Widget _buildManualPasswordWarning(BuildContext context) => Visibility(
+  Widget _buildManualPasswordWarning() => Visibility(
         visible: origin == SecretKeyOrigin.manual,
-        child: Fields.autosizeText(
-          S.current.messageRememberSavePasswordAlert,
-          style:
-              context.theme.appTextStyle.bodyMedium.copyWith(color: Colors.red),
-          maxLines: 10,
-          softWrap: true,
-          textOverflow: TextOverflow.ellipsis,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24.0),
+          child: Fields.autosizeText(
+            S.current.messageRememberSavePasswordAlert,
+            style: context.theme.appTextStyle.bodyMedium
+                .copyWith(color: Colors.red),
+            maxLines: 10,
+            softWrap: true,
+            textOverflow: TextOverflow.ellipsis,
+          ),
         ),
       );
 
-  Widget _buildSwitch(
-    BuildContext context, {
+  Widget _buildSwitch({
     required bool value,
     required String title,
     required void Function(bool)? onChanged,
   }) =>
-      SwitchListTile.adaptive(
+      CustomAdaptiveSwitch(
         value: value,
-        title: Text(title),
-        onChanged: onChanged,
+        title: title,
         contentPadding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
+        onChanged: onChanged,
       );
 
   bool get _isSecureWithBiometricsSwitchEnabled {
