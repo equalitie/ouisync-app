@@ -54,41 +54,16 @@ class _RepositoryCreationState extends State<RepositoryCreation>
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-            title: Text(S.current.titleCreateRepository), elevation: 0.0),
-        body: Padding(
-          padding: EdgeInsets.zero, //Dimensions.paddingInPageMain,
-          child: FutureBuilder(
-            future: init,
-            builder: (context, snapshot) =>
-                // NOTE: Can't use `hasData` because the future returns void.
-                (snapshot.connectionState == ConnectionState.done)
-                    ? Form(
-                        key: formKey,
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 24.0, vertical: 12.0),
-                          reverse: true,
-                          child: _buildContent(context),
-                        ),
-                      )
-                    : Container(
-                        child: Center(
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: CircularProgressIndicator(),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 16),
-                                child: Text(S.current.messageAwaitingResult),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-          ),
+          title: Text(S.current.titleCreateRepository),
+          elevation: 0.0,
+        ),
+        body: FutureBuilder(
+          future: init,
+          builder: (context, snapshot) =>
+              // NOTE: Can't use `hasData` because the future returns void.
+              (snapshot.connectionState == ConnectionState.done)
+                  ? _buildContent()
+                  : _buildLoadingIndicator(),
         ),
       );
 
@@ -127,24 +102,68 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     }
   }
 
-  Widget _buildContent(BuildContext context) =>
-      Column(mainAxisSize: MainAxisSize.min, children: [
-        if (widget.initialTokenValue?.isNotEmpty ?? false)
-          ..._buildTokenLabel(context),
-        ..._buildNameField(context),
-        if (accessMode == AccessMode.write)
-          _buildUseCacheServersSwitch(context),
-        RepoSecurity(
-          initialLocalSecretMode: widget.initialLocalSecretMode,
-          isBiometricsAvailable: isBiometricsAvailable,
-          onChanged: _onLocalSecretChanged,
+  SizedBox _buildLoadingIndicator() => SizedBox.expand(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(S.current.messageLoadingDefault),
+              )
+            ],
+          ),
         ),
-        Fields.dialogActions(
-          context,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          buttons: _buildActions(context),
-        )
-      ]);
+      );
+
+  LayoutBuilder _buildContent() => LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0),
+                    alignment: Alignment.topCenter,
+                    child: Form(
+                      key: formKey,
+                      child: _buildFormContent(context),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: Fields.dialogActions(
+                      context,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      buttons: _buildActions(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+  Widget _buildFormContent(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          if (widget.initialTokenValue?.isNotEmpty ?? false)
+            ..._buildTokenLabel(context),
+          ..._buildNameField(context),
+          if (accessMode == AccessMode.write)
+            _buildUseCacheServersSwitch(context),
+          RepoSecurity(
+            initialLocalSecretMode: widget.initialLocalSecretMode,
+            isBiometricsAvailable: isBiometricsAvailable,
+            onChanged: _onLocalSecretChanged,
+          ),
+        ],
+      );
 
   List<Widget> _buildTokenLabel(BuildContext context) => [
         Padding(
@@ -244,7 +263,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           text: S.current.actionCancel,
           onPressed: () => Navigator.of(context).pop(null),
         ),
-        SizedBox(width: 24.0),
         Fields.inPageButton(
           text: shareToken == null
               ? S.current.actionCreate
