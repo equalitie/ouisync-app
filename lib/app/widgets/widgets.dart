@@ -38,6 +38,7 @@ export 'items/missing_repo_description.dart';
 
 export 'selectors/access_mode_selector.dart';
 
+export 'states/content_with_sticky_footer_state.dart';
 export 'states/error_state.dart';
 export 'states/locked_repository_state.dart';
 export 'states/missing_repo_state.dart';
