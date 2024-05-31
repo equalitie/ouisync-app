@@ -30,8 +30,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
           content: _buildContent(context),
           footer: Fields.dialogActions(
             context,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            buttons: _actions(),
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            buttons: _buildActions(),
           ),
         ),
       );
@@ -47,12 +47,12 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         const SizedBox(height: 20.0),
         EqValues(),
         EqTermsAndPrivacy(),
-        const SizedBox(height: 20.0),
       ],
     );
   }
 
   Widget _headerImages() => Column(children: [
+        const SizedBox(height: 18.0),
         Image.asset(Constants.ouisyncLogoFull,
             width: MediaQuery.of(context).size.width * 0.6),
         Padding(
@@ -71,7 +71,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         TextSpan(text: ' ${S.current.messageEqualitieValues}')
       ]));
 
-  List<Widget> _actions() => [
+  List<Widget> _buildActions() => [
         OutlinedButton(
             onPressed: () => exit(0),
             child: Text(S.current.actionIDontAgree.toUpperCase())),
