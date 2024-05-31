@@ -117,39 +117,19 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         ),
       );
 
-  LayoutBuilder _buildContent() => LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    alignment: Alignment.topCenter,
-                    child: Form(
-                      key: formKey,
-                      child: _buildFormContent(context),
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
-                    child: Fields.dialogActions(
-                      context,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      buttons: _buildActions(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+  Widget _buildContent() => ContentWithStickyFooterState(
+        content: Form(
+          key: formKey,
+          child: _buildForm(context),
+        ),
+        footer: Fields.dialogActions(
+          context,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          buttons: _buildActions(context),
+        ),
       );
 
-  Widget _buildFormContent(BuildContext context) => Column(
+  Widget _buildForm(BuildContext context) => Column(
         mainAxisSize: MainAxisSize.max,
         children: [
           if (widget.initialTokenValue?.isNotEmpty ?? false)
