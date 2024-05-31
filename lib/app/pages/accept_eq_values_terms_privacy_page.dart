@@ -23,28 +23,34 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: PlatformValues.isMobileDevice
-          ? AppBar(title: Text(S.current.titleAppTitle))
-          : null,
-      body: SingleChildScrollView(
-          child: Center(
-              child: Container(
-                  padding: EdgeInsets.all(24.0),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _headerImages(),
-                        const SizedBox(height: 60.0),
-                        _introTextSpan(),
-                        const SizedBox(height: 20.0),
-                        EqValues(),
-                        EqTermsAndPrivacy(),
-                        const SizedBox(height: 20.0),
-                        Fields.dialogActions(context,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            buttons: _actions())
-                      ])))));
+        appBar: PlatformValues.isMobileDevice
+            ? AppBar(title: Text(S.current.titleAppTitle))
+            : null,
+        body: ContentWithStickyFooterState(
+          content: _buildContent(context),
+          footer: Fields.dialogActions(
+            context,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            buttons: _actions(),
+          ),
+        ),
+      );
+
+  Column _buildContent(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _headerImages(),
+        const SizedBox(height: 60.0),
+        _introTextSpan(),
+        const SizedBox(height: 20.0),
+        EqValues(),
+        EqTermsAndPrivacy(),
+        const SizedBox(height: 20.0),
+      ],
+    );
+  }
 
   Widget _headerImages() => Column(children: [
         Image.asset(Constants.ouisyncLogoFull,
