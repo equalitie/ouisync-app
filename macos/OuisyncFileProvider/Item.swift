@@ -20,23 +20,16 @@ class FileItem: NSObject, NSFileProviderItem {
         self.file = file
     }
 
-    static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> FileItem {
-        guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchItem
-        }
-        return FileItem(OuisyncFileEntry(path, repo), repoName)
-    }
-
     func exists() async throws -> Bool {
         return try await file.exists()
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        ItemIdentifier.file(repoName, file.path).serialize()
+        FileIdentifier(file.path, repoName).serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        return ItemIdentifier.directory(repoName, file.parent().path).serialize()
+        return DirectoryIdentifier(file.parent().path, repoName).serialize()
     }
 
     var capabilities: NSFileProviderItemCapabilities {
@@ -75,24 +68,17 @@ class DirectoryItem: NSObject, NSFileProviderItem {
         self.directory = OuisyncDirectoryEntry(FilePath("/"), repo)
     }
     
-    static func fromIdentifier(_ path: FilePath, _ repoName: String, _ session: OuisyncSession) async throws -> DirectoryItem {
-        guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchItem
-        }
-        return DirectoryItem(OuisyncDirectoryEntry(path, repo), repoName)
-    }
-
     func exists() async throws -> Bool {
-        return try await directory.exists()
+        try await directory.exists()
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        ItemIdentifier.directory(repoName, directory.path).serialize()
+        DirectoryIdentifier(directory.path, repoName).serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
         if let parent = directory.parent() {
-            return ItemIdentifier.directory(repoName, parent.path).serialize()
+            return DirectoryIdentifier(parent.path, repoName).serialize()
         } else {
             return .rootContainer
         }
@@ -212,34 +198,6 @@ class TrashContainerItem: NSObject, NSFileProviderItem {
 
     public override var debugDescription: String {
         return "TrashContainerItem()"
-    }
-}
-
-func itemFromIdentifier(
-        _ identifier: NSFileProviderItemIdentifier,
-        _ session: OuisyncSession) async throws -> NSFileProviderItem {
-    return try await itemFromIdentifier(ItemIdentifier(identifier), session)
-}
-
-func itemFromIdentifier(
-        _ identifier: ItemIdentifier,
-        _ session: OuisyncSession) async throws -> NSFileProviderItem {
-    switch identifier {
-    case .rootContainer: return RootContainerItem()
-    case .trashContainer: return TrashContainerItem()
-    case .workingSet: return WorkingSetItem()
-    case .directory(let repoName, let path):
-        let dir = try await DirectoryItem.fromIdentifier(path, repoName, session)
-        if try await dir.exists() == false {
-            throw ExtError.noSuchItem
-        }
-        return dir
-    case .file(let repoName, let path):
-        let file = try await FileItem.fromIdentifier(path, repoName, session)
-        if try await file.exists() == false {
-            throw ExtError.noSuchItem
-        }
-        return file
     }
 }
 

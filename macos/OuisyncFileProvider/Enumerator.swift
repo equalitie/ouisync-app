@@ -51,9 +51,9 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
                 observer.didEnumerate(reposToItems(reposByName))
                 observer.finishEnumerating(upTo: nil)
             }
-        case .directory(let repoName, let path):
+        case .directory(let identifier):
             Task {
-                let dir = try await DirectoryItem.fromIdentifier(path, repoName, session)
+                let dir = try await identifier.loadItem(session)
                 let entries = try await dir.directory.listEntries()
                 let items = entries.map({ e in itemFromEntry(e, dir.repoName) })
                 log("enumerateItems \(itemId) -> \(items)")

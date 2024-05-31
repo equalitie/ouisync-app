@@ -48,12 +48,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         Task {
             do {
-                let item = try await itemFromIdentifier(identifier, session)
+                let item = try await ItemIdentifier(identifier).loadItem(session)
                 completionHandler(item, nil)
             } catch ExtError.noSuchItem {
                 completionHandler(nil, ExtError.noSuchItem.toNSError())
             } catch {
-                fatalError("Unrecognized exception \(error)")
+                fatalError("Unrecognized exception error:\(error) itemIdentifier:\(identifier)")
             }
         }
 
@@ -61,6 +61,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
+        Self.log("fetchContents(\(itemIdentifier))")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
         completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
@@ -69,21 +70,24 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: a new item was created on disk, process the item's creation
-        
+        Self.log("createItem(\(itemTemplate))")
+
         completionHandler(itemTemplate, [], false, nil)
         return Progress()
     }
     
     func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: an item was modified on disk, process the item's modification
-        
+        Self.log("createItem(\(item))")
+
         completionHandler(nil, [], false, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
         return Progress()
     }
     
     func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
         // TODO: an item was deleted on disk, process the item's deletion
-        
+        Self.log("deleteItem(\(item))")
+
         completionHandler(NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
         return Progress()
     }
@@ -101,7 +105,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
 
     static func log(_ str: String) {
-        NSLog(">>>> FileProviderExtension: \(str)")
+        NSLog("🧩 FileProviderExtension: \(str)")
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location
@@ -110,4 +114,3 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return temporaryDirectoryURL.appendingPathComponent("\(purpose)-\(UUID().uuidString)")
     }
 }
-

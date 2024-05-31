@@ -16,9 +16,8 @@ enum ItemIdentifier: CustomDebugStringConvertible {
     case rootContainer
     case trashContainer
     case workingSet
-    // The file path here is relative to the repository
-    case directory(RepoName, FilePath)
-    case file(RepoName, FilePath)
+    case directory(DirectoryIdentifier)
+    case file(FileIdentifier)
 
     init(_ serialized: NSFileProviderItemIdentifier) {
         switch serialized {
@@ -33,10 +32,10 @@ enum ItemIdentifier: CustomDebugStringConvertible {
             let arr = str.split(separator: "-", maxSplits: 1)
             if (arr[0] == "directory") {
                 let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                self = .directory(repoName, path)
+                self = .directory(DirectoryIdentifier(path, repoName))
             } else if (arr[0] == "file") {
                 let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                self = .file(repoName, path)
+                self = .file(FileIdentifier(path, repoName))
             } else {
                 fatalError("Failed to parse NSFileProviderItemIdentifier: \(serialized)")
             }
@@ -48,8 +47,8 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .rootContainer: return .rootContainer
         case .trashContainer: return .trashContainer
         case .workingSet: return .workingSet
-        case .directory(let repoName, let path): return NSFileProviderItemIdentifier("directory-\(FilePath.mergeRepoNameAndPath(repoName, path))")
-        case .file(let repoName, let path): return NSFileProviderItemIdentifier("file-\(FilePath.mergeRepoNameAndPath(repoName, path))")
+        case .directory(let id): return id.serialize()
+        case .file(let id): return id.serialize()
         }
     }
 
@@ -58,9 +57,79 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .rootContainer: return "ItemIdentifier(.rootContainer)"
         case .trashContainer: return "ItemIdentifier(.trashContainer)"
         case .workingSet: return "ItemIdentifier(.workingSet)"
-        case .directory(let repoName, let path): return "ItemIdentifier(directory-\(FilePath.mergeRepoNameAndPath(repoName, path)))"
-        case .file(let repoName, let path): return "ItemIdentifier(file-\(FilePath.mergeRepoNameAndPath(repoName, path)))"
+        case .directory(let id): return "ItemIdentifier(directory-\(FilePath.mergeRepoNameAndPath(id.repoName, id.path)))"
+        case .file(let id): return "ItemIdentifier(file-\(FilePath.mergeRepoNameAndPath(id.repoName, id.path)))"
         }
+    }
+
+    func loadItem(_ session: OuisyncSession) async throws -> NSFileProviderItem {
+        switch self {
+        case .rootContainer: return RootContainerItem()
+        case .trashContainer: return TrashContainerItem()
+        case .workingSet: return WorkingSetItem()
+        case .directory(let identifier):
+            return try await identifier.loadItem(session)
+        case .file(let identifier):
+            return try await identifier.loadItem(session)
+        }
+    }
+}
+
+class FileIdentifier {
+    // The file path is relative to the repository
+    let path: FilePath
+    let repoName: RepoName
+
+    init(_ path: FilePath, _ repoName: RepoName) {
+        self.path = path
+        self.repoName = repoName
+    }
+
+    func loadItem(_ session: OuisyncSession) async throws -> FileItem {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+
+        let entry = OuisyncFileEntry(path, repo)
+
+        if try await entry.exists() == false {
+            throw ExtError.noSuchItem
+        }
+
+        return FileItem(OuisyncFileEntry(path, repo), repoName)
+    }
+
+    func serialize() -> NSFileProviderItemIdentifier {
+        NSFileProviderItemIdentifier("file-\(FilePath.mergeRepoNameAndPath(repoName, path))")
+    }
+}
+
+class DirectoryIdentifier {
+    // The file path is relative to the repository
+    let path: FilePath
+    let repoName: RepoName
+
+    init(_ path: FilePath, _ repoName: RepoName) {
+        self.path = path
+        self.repoName = repoName
+    }
+
+    func loadItem(_ session: OuisyncSession) async throws -> DirectoryItem {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+
+        let entry = OuisyncDirectoryEntry(path, repo)
+
+        if try await entry.exists() == false {
+            throw ExtError.noSuchItem
+        }
+
+        return DirectoryItem(OuisyncDirectoryEntry(path, repo), repoName)
+    }
+
+    public func serialize() -> NSFileProviderItemIdentifier {
+        NSFileProviderItemIdentifier("directory-\(FilePath.mergeRepoNameAndPath(repoName, path))")
     }
 }
 
