@@ -71,9 +71,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
         next: _buildButton(S.current.actionNext),
         done: _buildButton(S.current.actionDone),
         curve: Curves.fastLinearToSlowEaseIn,
-        dotsDecorator: const DotsDecorator(
+        dotsDecorator: DotsDecorator(
           size: Size(10.0, 10.0),
-          color: Color(0xFFBDBDBD),
+          color: Theme.of(context).colorScheme.surfaceDim,
           activeSize: Size(22.0, 10.0),
           activeShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -94,6 +94,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         width: _imageWidth * 0.6,
       );
 
-  Widget _buildButton(String text) =>
-      Text(text.toUpperCase(), style: buttonStyle);
+  Widget _buildButton(String text) => Fields.inPageButton(
+        text: text,
+        size: Dimensions.sizeInPageButtonMicro,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        foregroundColor: Theme.of(context).colorScheme.surfaceTint,
+        onPressed: null,
+      );
 }

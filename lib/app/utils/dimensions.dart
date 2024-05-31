@@ -6,6 +6,7 @@ import 'platform/platform_values.dart';
 class Dimensions {
   Dimensions._();
 
+  static const Size sizeInPageButtonMicro = Size(80.0, 50.0);
   static const Size sizeInPageButtonSmall = Size(120.0, 50.0);
   static const Size sizeInPageButtonRegular = Size(150.0, 50.0);
   static const Size sizeInPageButtonLong = Size(240.0, 50.0);

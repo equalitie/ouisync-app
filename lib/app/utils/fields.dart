@@ -79,14 +79,17 @@ class Fields {
         padding,
       );
 
-  static Widget inPageButton(
-          {required void Function()? onPressed,
-          Icon? leadingIcon,
-          required String text,
-          Alignment alignment = Alignment.center,
-          Size size = Dimensions.sizeInPageButtonRegular,
-          bool autofocus = false,
-          FocusNode? focusNode}) =>
+  static Widget inPageButton({
+    required void Function()? onPressed,
+    Icon? leadingIcon,
+    required String text,
+    Alignment alignment = Alignment.center,
+    Size size = Dimensions.sizeInPageButtonRegular,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) =>
       ElevatedButton(
           onPressed: onPressed,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -96,7 +99,13 @@ class Fields {
           ]),
           style: ButtonStyle(
               alignment: alignment,
-              minimumSize: MaterialStateProperty.all<Size?>(size)),
+              minimumSize: WidgetStateProperty.all<Size?>(size),
+              backgroundColor: backgroundColor != null
+                  ? WidgetStateProperty.all<Color>(backgroundColor)
+                  : null,
+              foregroundColor: foregroundColor != null
+                  ? WidgetStateProperty.all<Color>(foregroundColor)
+                  : null),
           autofocus: autofocus,
           focusNode: focusNode);
 
