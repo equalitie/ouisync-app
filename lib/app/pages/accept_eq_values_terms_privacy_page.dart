@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -22,16 +21,15 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: PlatformValues.isMobileDevice
-            ? AppBar(title: Text(S.current.titleAppTitle))
-            : null,
-        body: ContentWithStickyFooterState(
-          content: _buildContent(context),
-          footer: Fields.dialogActions(
-            context,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            buttons: _buildActions(),
+  Widget build(BuildContext context) => SafeArea(
+        child: Scaffold(
+          body: ContentWithStickyFooterState(
+            content: _buildContent(context),
+            footer: Fields.dialogActions(
+              context,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              buttons: _buildActions(),
+            ),
           ),
         ),
       );
