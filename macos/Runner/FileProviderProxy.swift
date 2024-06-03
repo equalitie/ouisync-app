@@ -12,20 +12,21 @@ import Common
 
 // Facilitate communication between the file provider extension and the rust code.
 class FileProviderProxy {
-    static private let printLogs = false
-
     init() {
         let domain = ouisyncFileProviderDomain
 
-        NSFileProviderManager.add(domain, completionHandler: {error in
-            if let error = error {
-                Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
-            } else {
-                Self.log("😀 NSFileProviderManager added domain successfully");
+        SuccessfulTask {
+            while true {
+                do {
+                    try await NSFileProviderManager.add(domain)
+                    Self.log("😀 NSFileProviderManager added domain successfully")
+                    break
+                } catch {
+                    Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                }
             }
-        })
 
-        Task.detached {
             let ffi = FFI()
 
             let (fromRustRx, fromRustTx) = makeStream();
@@ -97,10 +98,12 @@ class FileProviderProxy {
         }
     }
 
+    func invalidate() async throws {
+        try await NSFileProviderManager.remove(ouisyncFileProviderDomain)
+    }
+
     static func log(_ message: String) {
-        if printLogs {
-            NSLog(message)
-        }
+        NSLog(message)
     }
 }
 

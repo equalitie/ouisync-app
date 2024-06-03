@@ -34,7 +34,6 @@
 		1EBC4D622BB1B6850053E2F3 /* Common.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBC4D522BB1B6840053E2F3 /* Common.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1EBC4D652BB1B6850053E2F3 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
 		1EBC4D662BB1B6850053E2F3 /* Common.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1EBC4D702BB1B6B50053E2F3 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D472BB1A7940053E2F3 /* Errors.swift */; };
 		1EBC4D712BB1B70D0053E2F3 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
 		1EBC4D722BB1B70D0053E2F3 /* Common.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1EC102BE2BAC66050026BD42 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */; };
@@ -44,6 +43,9 @@
 		1EC102CA2BAC66050026BD42 /* OuisyncFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1ECD78522C00DA62005D7636 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78512C00DA62005D7636 /* Anchor.swift */; };
 		1ECD78542C04C732005D7636 /* ChangeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78532C04C732005D7636 /* ChangeResolver.swift */; };
+		1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
+		1ECD785B2C0DC0DF005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
+		1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -150,7 +152,6 @@
 		1E6D33D32BBD7AAB00AFB60E /* FileProviderProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileProviderProxy.h; sourceTree = "<group>"; };
 		1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderServiceProtocol.swift; sourceTree = "<group>"; };
 		1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemIdentifier.swift; sourceTree = "<group>"; };
-		1EBC4D472BB1A7940053E2F3 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		1EBC4D492BB1B5A50053E2F3 /* ExtError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtError.swift; sourceTree = "<group>"; };
 		1EBC4D502BB1B6840053E2F3 /* Common.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EBC4D522BB1B6840053E2F3 /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
@@ -165,6 +166,7 @@
 		1EC102C72BAC66050026BD42 /* OuisyncFileProvider.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OuisyncFileProvider.entitlements; sourceTree = "<group>"; };
 		1ECD78512C00DA62005D7636 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		1ECD78532C04C732005D7636 /* ChangeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeResolver.swift; sourceTree = "<group>"; };
+		1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulTask.swift; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1E11B5D92BC00EFA007248F2 /* OuisyncLib in Frameworks */,
+				1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */,
 				1EC102BE2BAC66050026BD42 /* UniformTypeIdentifiers.framework in Frameworks */,
 				1EBC4D712BB1B70D0053E2F3 /* Common.framework in Frameworks */,
 			);
@@ -242,10 +245,10 @@
 		1EBC4D512BB1B6840053E2F3 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				1EBC4D472BB1A7940053E2F3 /* Errors.swift */,
 				1EBC4D522BB1B6840053E2F3 /* Common.h */,
 				1EBC4D532BB1B6840053E2F3 /* Common.docc */,
 				1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */,
+				1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -712,9 +715,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EBC4D702BB1B6B50053E2F3 /* Errors.swift in Sources */,
 				1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */,
 				1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */,
+				1ECD785B2C0DC0DF005D7636 /* SuccessfulTask.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -738,6 +741,7 @@
 				1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */,
 				1ECD78542C04C732005D7636 /* ChangeResolver.swift in Sources */,
 				1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */,
+				1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */,
 				1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

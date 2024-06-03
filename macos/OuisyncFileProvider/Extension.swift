@@ -69,53 +69,49 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             return Progress()
         }
 
-        Task {
-            do {
-                let fileItem: FileItem
-                let identifier = ItemIdentifier(itemIdentifier)
+        SuccessfulTask {
+            let fileItem: FileItem
+            let identifier = ItemIdentifier(itemIdentifier)
 
-                switch identifier {
-                case .file(let identifier):
-                    fileItem = try await identifier.loadItem(session)
-                default:
-                    completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
-                    return
-                }
-
-                let file = try await fileItem.file.open()
-                let url = makeTemporaryURL("fetchContents")
-
-                var offset: UInt64 = 0
-                var size: UInt64 = 0
-                let chunkSize: UInt64 = 32768 // TODO: Decide on optimal value
-
-                let outFile = FileOnDisk(url)
-
-                while true {
-                    let data = try await file.read(offset, chunkSize)
-
-                    let dataSize = UInt64(exactly: data.count)!
-                    size += dataSize
-
-                    if data.isEmpty {
-                        break
-                    }
-
-                    if offset == 0 {
-                        try outFile.write(data)
-                    } else {
-                        try outFile.append(data)
-                    }
-
-                    offset += UInt64(exactly: data.count)!
-                }
-
-                fileItem.size = offset
-
-                completionHandler(url, fileItem, nil)
-            } catch {
-                fatalError("Uncaught exception: \(error)")
+            switch identifier {
+            case .file(let identifier):
+                fileItem = try await identifier.loadItem(session)
+            default:
+                completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
+                return
             }
+
+            let file = try await fileItem.file.open()
+            let url = self.makeTemporaryURL("fetchContents")
+
+            var offset: UInt64 = 0
+            var size: UInt64 = 0
+            let chunkSize: UInt64 = 32768 // TODO: Decide on optimal value
+
+            let outFile = FileOnDisk(url)
+
+            while true {
+                let data = try await file.read(offset, chunkSize)
+
+                let dataSize = UInt64(exactly: data.count)!
+                size += dataSize
+
+                if data.isEmpty {
+                    break
+                }
+
+                if offset == 0 {
+                    try outFile.write(data)
+                } else {
+                    try outFile.append(data)
+                }
+
+                offset += UInt64(exactly: data.count)!
+            }
+
+            fileItem.size = offset
+
+            completionHandler(url, fileItem, nil)
         }
         return Progress()
     }
