@@ -9,40 +9,36 @@ import Common
 import FileProvider
 import OuisyncLib
 
-enum ExtError : Error {
-    case noSuchItem
-    case backendIsUnreachable
-    case syncAnchorExpired
-    case featureNotSupported
-}
+class ExtError {
+    static var noSuchItem: NSError {
+        NSError(
+            domain: NSFileProviderErrorDomain,
+            code: NSFileProviderError.noSuchItem.rawValue,
+            userInfo: nil
+        )
+    }
 
-extension ExtError {
-    func toNSError() -> NSError {
-        switch self {
-        case .noSuchItem:
-            return NSError(
-                domain: NSFileProviderErrorDomain,
-                code: NSFileProviderError.noSuchItem.rawValue,
-                userInfo: nil
-            )
-        case .backendIsUnreachable:
-            return NSError(
-                domain: NSFileProviderErrorDomain,
-                code: NSFileProviderError.serverUnreachable.rawValue,
-                userInfo: nil
-            )
-        case .syncAnchorExpired:
-            return NSError(
-                domain: NSFileProviderErrorDomain,
-                code: NSFileProviderError.syncAnchorExpired.rawValue,
-                userInfo: nil
-            )
-        case .featureNotSupported:
-            return NSError(
-                domain: NSCocoaErrorDomain,
-                code: NSFeatureUnsupportedError,
-                userInfo:[:]
-            )
-        }
+    static var backendIsUnreachable: NSError {
+        NSError(
+            domain: NSFileProviderErrorDomain,
+            code: NSFileProviderError.serverUnreachable.rawValue,
+            userInfo: nil
+        )
+    }
+
+    static var syncAnchorExpired: NSError {
+        NSError(
+            domain: NSFileProviderErrorDomain,
+            code: NSFileProviderError.syncAnchorExpired.rawValue,
+            userInfo: nil
+        )
+    }
+
+    static var featureNotSupported: NSError {
+        NSError(
+            domain: NSCocoaErrorDomain,
+            code: NSFeatureUnsupportedError,
+            userInfo:[:]
+        )
     }
 }

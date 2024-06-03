@@ -133,9 +133,7 @@ class DirectoryIdentifier {
     }
 
     func loadItem(_ session: OuisyncSession) async throws -> DirectoryItem {
-        guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchItem
-        }
+        let repo = try await loadRepo(session)
 
         let entry = OuisyncDirectoryEntry(path, repo)
 
@@ -144,6 +142,13 @@ class DirectoryIdentifier {
         }
 
         return DirectoryItem(OuisyncDirectoryEntry(path, repo), repoName)
+    }
+
+    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+        return repo
     }
 
     public func serialize() -> NSFileProviderItemIdentifier {

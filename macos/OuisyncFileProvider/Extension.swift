@@ -9,6 +9,9 @@ import FileProvider
 import OuisyncLib
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
+    static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
+    static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
+
     var ouisyncSession: OuisyncSession?
     var currentAnchor: UInt64 = UInt64.random(in: UInt64.min ... UInt64.max)
     let domain: NSFileProviderDomain
@@ -42,7 +45,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // resolve the given identifier to a record in the model
         
         guard let session = ouisyncSession else {
-            completionHandler(nil, ExtError.backendIsUnreachable.toNSError())
+            completionHandler(nil, ExtError.backendIsUnreachable)
             return Progress()
         }
 
@@ -50,8 +53,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             do {
                 let item = try await ItemIdentifier(identifier).loadItem(session)
                 completionHandler(item, nil)
-            } catch ExtError.noSuchItem {
-                completionHandler(nil, ExtError.noSuchItem.toNSError())
+            } catch let e as NSError where e.code == ExtError.noSuchItem.code {
+                completionHandler(nil, e)
             } catch {
                 fatalError("Unrecognized exception error:\(error) itemIdentifier:\(identifier)")
             }
@@ -65,7 +68,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
         guard let session = ouisyncSession else {
-            completionHandler(nil, nil, ExtError.backendIsUnreachable.toNSError())
+            completionHandler(nil, nil, ExtError.backendIsUnreachable)
             return Progress()
         }
 
@@ -77,7 +80,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             case .file(let identifier):
                 fileItem = try await identifier.loadItem(session)
             default:
-                completionHandler(nil, nil, ExtError.featureNotSupported.toNSError())
+                completionHandler(nil, nil, ExtError.featureNotSupported)
                 return
             }
 
@@ -86,12 +89,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
             var offset: UInt64 = 0
             var size: UInt64 = 0
-            let chunkSize: UInt64 = 32768 // TODO: Decide on optimal value
 
             let outFile = FileOnDisk(url)
 
             while true {
-                let data = try await file.read(offset, chunkSize)
+                let data = try await file.read(offset, Self.WRITE_CHUNK_SIZE)
 
                 let dataSize = UInt64(exactly: data.count)!
                 size += dataSize
@@ -118,15 +120,78 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: a new item was created on disk, process the item's creation
-        Self.log("createItem(\(itemTemplate))")
+        Self.log("createItem(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options)")
 
-        completionHandler(itemTemplate, [], false, nil)
+        guard let session = ouisyncSession else {
+            completionHandler(itemTemplate, [], false, ExtError.backendIsUnreachable)
+            return Progress()
+        }
+
+        let dstName = itemTemplate.filename
+        let parentId: DirectoryIdentifier
+
+        switch ItemIdentifier(itemTemplate.parentItemIdentifier) {
+        case .directory(let id): parentId = id
+        default:
+            completionHandler(nil, fields, false, ExtError.featureNotSupported)
+            return Progress()
+        }
+
+        enum Type {
+            case file(URL)
+            case folder
+        }
+
+        let type: Type
+
+        // TODO: I don't know if this logic is correct
+        if let templateType = itemTemplate.contentType, templateType == .folder {
+            type = .folder
+        } else if let u = url {
+            type = .file(u)
+        } else {
+            type = .folder
+        }
+
+        Task {
+            do {
+                let repoName = parentId.repoName
+                let repo = try await parentId.loadRepo(session)
+                let dstPath = parentId.path.appending(dstName)
+
+                switch type {
+                case .file(let srcUrl):
+                    let dstFile = try await repo.createFile(dstPath)
+
+                    let srcFile = try FileHandle(forReadingFrom: srcUrl)
+
+                    var written: UInt64 = 0
+
+                    while let data = try srcFile.read(upToCount: Self.READ_CHUNK_SIZE) {
+                        try await dstFile.write(written, data)
+                        written += UInt64(exactly: data.count)!
+                    }
+
+                    let dstItem = FileItem(OuisyncFileEntry(dstPath, repo), repoName, size: written)
+
+                    completionHandler(dstItem, [], false, nil)
+                case .folder:
+                    try await repo.createDirectory(dstPath)
+                    let dstItem = DirectoryItem(OuisyncDirectoryEntry(dstPath, repo), repoName)
+                    completionHandler(dstItem, [], false, nil)
+                }
+            } catch let error as NSError {
+                completionHandler(nil, [], false, error)
+            } catch {
+                fatalError("Uncaught exception in createItem: \(error)")
+            }
+        }
         return Progress()
     }
     
     func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: an item was modified on disk, process the item's modification
-        Self.log("createItem(\(item))")
+        Self.log("modifyItem(\(item))")
 
         completionHandler(nil, [], false, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
         return Progress()
@@ -146,7 +211,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         Self.log("enumerator(\(identifier))")
 
         guard let session = self.ouisyncSession else {
-            throw ExtError.syncAnchorExpired.toNSError()
+            throw ExtError.syncAnchorExpired
         }
 
         return try Enumerator(identifier, session, currentAnchor)
