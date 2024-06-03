@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -22,31 +21,36 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: PlatformValues.isMobileDevice
-          ? AppBar(title: Text(S.current.titleAppTitle))
-          : null,
-      body: SingleChildScrollView(
-          child: Center(
-              child: Container(
-                  padding: EdgeInsets.all(24.0),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _headerImages(),
-                        const SizedBox(height: 60.0),
-                        _introTextSpan(),
-                        const SizedBox(height: 20.0),
-                        EqValues(),
-                        EqTermsAndPrivacy(),
-                        const SizedBox(height: 20.0),
-                        Fields.dialogActions(context,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            buttons: _actions())
-                      ])))));
+  Widget build(BuildContext context) => SafeArea(
+        child: Scaffold(
+          body: ContentWithStickyFooterState(
+            content: _buildContent(context),
+            footer: Fields.dialogActions(
+              context,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              buttons: _buildActions(),
+            ),
+          ),
+        ),
+      );
+
+  Column _buildContent(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _headerImages(),
+        const SizedBox(height: 60.0),
+        _introTextSpan(),
+        const SizedBox(height: 20.0),
+        EqValues(),
+        EqTermsAndPrivacy(),
+      ],
+    );
+  }
 
   Widget _headerImages() => Column(children: [
+        const SizedBox(height: 18.0),
         Image.asset(Constants.ouisyncLogoFull,
             width: MediaQuery.of(context).size.width * 0.6),
         Padding(
@@ -65,7 +69,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         TextSpan(text: ' ${S.current.messageEqualitieValues}')
       ]));
 
-  List<Widget> _actions() => [
+  List<Widget> _buildActions() => [
         OutlinedButton(
             onPressed: () => exit(0),
             child: Text(S.current.actionIDontAgree.toUpperCase())),
