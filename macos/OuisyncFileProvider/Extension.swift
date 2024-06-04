@@ -250,11 +250,16 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         Task {
             do {
-                if changedFields.contains(.filename) {
+                var fields = changedFields
+                var newItem: NSFileProviderItem = item
+
+                if fields.contains(.filename) {
                     let id = ItemIdentifier(item.itemIdentifier)
 
                     let repo: OuisyncRepository
+                    let repoName: String
                     let srcPath: FilePath
+                    let isFile: Bool
 
                     switch id {
                     case .rootContainer, .trashContainer, .workingSet:
@@ -263,9 +268,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     case .directory(let dir):
                         repo = try await dir.loadRepo(session)
                         srcPath = dir.path
+                        repoName = dir.repoName
+                        isFile = false
                     case .file(let file):
                         repo = try await file.loadRepo(session)
                         srcPath = file.path
+                        repoName = file.repoName
+                        isFile = true
                     }
 
                     var dstPath = srcPath
@@ -273,10 +282,17 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     dstPath.append(item.filename)
 
                     try await repo.moveEntry(srcPath, dstPath)
-                } else {
-                    // TODO
-                    handler(nil, [], false, ExtError.featureNotSupported)
+
+                    fields.remove(.filename)
+
+                    if isFile {
+                        newItem = FileItem(OuisyncFileEntry(dstPath, repo), repoName, size: UInt64(exactly: item.documentSize!!)!)
+                    } else {
+                        newItem = DirectoryItem(OuisyncDirectoryEntry(dstPath, repo), repoName)
+                    }
                 }
+
+                handler(newItem, fields, false, nil)
             } catch let error as NSError {
                 handler(nil, [], false, error)
             } catch {
@@ -284,7 +300,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             }
         }
 
-        handler(nil, [], false, ExtError.featureNotSupported)
         return Progress()
     }
     
@@ -299,13 +314,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        log.trace("enumerator(\(identifier))")
+        let log = self.log.child("enumerator").trace("(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             throw ExtError.syncAnchorExpired
         }
 
-        return try Enumerator(identifier, session, currentAnchor)
+        return try Enumerator(identifier, session, currentAnchor, log)
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location

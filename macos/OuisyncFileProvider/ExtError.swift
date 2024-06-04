@@ -14,7 +14,7 @@ class ExtError {
         NSError(
             domain: NSFileProviderErrorDomain,
             code: NSFileProviderError.noSuchItem.rawValue,
-            userInfo: nil
+            userInfo: [:]
         )
     }
 
@@ -22,7 +22,7 @@ class ExtError {
         NSError(
             domain: NSFileProviderErrorDomain,
             code: NSFileProviderError.serverUnreachable.rawValue,
-            userInfo: nil
+            userInfo: [:]
         )
     }
 
@@ -30,7 +30,7 @@ class ExtError {
         NSError(
             domain: NSFileProviderErrorDomain,
             code: NSFileProviderError.syncAnchorExpired.rawValue,
-            userInfo: nil
+            userInfo: [:]
         )
     }
 
@@ -38,7 +38,7 @@ class ExtError {
         NSError(
             domain: NSCocoaErrorDomain,
             code: NSFeatureUnsupportedError,
-            userInfo:[:]
+            userInfo: [:]
         )
     }
 }

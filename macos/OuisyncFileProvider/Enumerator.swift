@@ -12,25 +12,25 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
     private let session: OuisyncSession
     private let itemId: ItemIdentifier
     private let currentAnchor: Anchor
+    private let log: Log
 
-    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: Anchor) throws {
+    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: Anchor, _ log: Log) throws {
+        let log = log.child("Enumerator").trace("init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
         self.itemId = itemIdentifier
         self.session = session
         self.currentAnchor = currentAnchor
+        self.log = log
 
         super.init()
-
-        let selfId = ObjectIdentifier(self)
-        Self.log(selfId, "init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
     }
 
     func invalidate() {
-        log("invalidate() \(itemId)")
+        log.trace("invalidate() \(itemId)")
         // TODO: perform invalidation of server connection if necessary
     }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        log("enumerateItems(...) \(itemId)")
+        let log = log.child("enumerateItems").trace("invoke(...) \(itemId)")
         /* TODO:
          - inspect the page to determine whether this is an initial or a follow-up request
          
@@ -47,7 +47,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         case .rootContainer, .workingSet:
             Task {
                 let reposByName = try await listRepositories()
-                log("enumerateItems \(itemId) -> \(reposByName) \(reposToItems(reposByName))")
+                log.trace("\(itemId) -> \(reposByName) \(reposToItems(reposByName))")
                 observer.didEnumerate(reposToItems(reposByName))
                 observer.finishEnumerating(upTo: nil)
             }
@@ -64,7 +64,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
                         items.append(try await identifier.loadItem(session))
                     }
                 }
-                log("enumerateItems \(itemId) -> \(items)")
+                log.trace("\(itemId) -> \(items)")
                 observer.didEnumerate(items)
                 observer.finishEnumerating(upTo: nil)
             }
@@ -75,7 +75,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
     }
     
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from oldAnchor: NSFileProviderSyncAnchor) {
-        log("enumerateChanges(oldAnchor: \(oldAnchor)) { item:\(itemId), currentAnchor:\(currentAnchor) }")
+        log.trace("enumerateChanges(oldAnchor: \(oldAnchor)) { item:\(itemId), currentAnchor:\(currentAnchor) }")
         /* TODO:
          - query the server for updates since the passed-in sync anchor
          
@@ -92,6 +92,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
             // We don't know what has changed because we don't track the current state and neither does
             // the Ouisync backend. So we return `synchAnchorExpired` error which will force the system
             // to re-enumerate the items (by calling the `enumerateItems` function.
+            // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#40997540
             observer.finishEnumeratingWithError(ExtError.syncAnchorExpired)
         }
     }
@@ -105,16 +106,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
     }
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
-        log("currentSyncAnchor(item:\(itemId)) -> Anchor(\(currentAnchor))")
+        log.trace("currentSyncAnchor(item:\(itemId)) -> Anchor(\(currentAnchor))")
         completionHandler(NSFileProviderSyncAnchor(currentAnchor))
-    }
-
-    func log(_ str: String) {
-        Self.log(ObjectIdentifier(self), str)
-    }
-
-    static func log(_ obj: ObjectIdentifier, _ str: String) {
-        NSLog("\(obj) >>>> FileProviderEnumerator: \(str)")
     }
 
     func listRepositories() async throws -> Dictionary<RepoName, OuisyncRepository> {

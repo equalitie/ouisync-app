@@ -20,32 +20,39 @@ enum ItemIdentifier: CustomDebugStringConvertible {
     case file(FileIdentifier)
 
     init(_ serialized: NSFileProviderItemIdentifier) {
-        switch serialized {
-        case .rootContainer:
-            self = .rootContainer
-        case .trashContainer:
-            self = .trashContainer
-        case .workingSet:
-            self = .workingSet
-        default:
-            let str = serialized.rawValue
-            let arr = str.split(separator: "-", maxSplits: 1)
-            if (arr[0] == "directory") {
-                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                self = .directory(DirectoryIdentifier(path, repoName))
-            } else if (arr[0] == "file") {
-                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                self = .file(FileIdentifier(path, repoName))
-            } else {
-                fatalError("Failed to parse NSFileProviderItemIdentifier: \(serialized)")
-            }
+        guard let deserialized = Self.tryDeserialize(serialized) else {
+            fatalError("Failed to parse NSFileProviderItemIdentifier: \(serialized)")
         }
+        self = deserialized
     }
 
     init(_ ouisyncEntry: OuisyncEntry, _ repoName: RepoName) {
         switch ouisyncEntry {
         case .directory(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
         case .file(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
+        }
+    }
+
+    static func tryDeserialize(_ serialized: NSFileProviderItemIdentifier) -> Self? {
+        switch serialized {
+        case .rootContainer:
+            return .rootContainer
+        case .trashContainer:
+            return .trashContainer
+        case .workingSet:
+            return .workingSet
+        default:
+            let str = serialized.rawValue
+            let arr = str.split(separator: "-", maxSplits: 1)
+            if (arr[0] == "directory") {
+                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
+                return .directory(DirectoryIdentifier(path, repoName))
+            } else if (arr[0] == "file") {
+                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
+                return .file(FileIdentifier(path, repoName))
+            } else {
+                return nil
+            }
         }
     }
 
@@ -177,11 +184,5 @@ extension FilePath {
         let path = FilePath(pathStr)
         let repoName = path.components.first!.string
         return (repoName, FilePath(root: nil, path.components.dropFirst()))
-    }
-}
-
-extension NSFileProviderItemIdentifier: CustomDebugStringConvertible {
-    public var debugDescription: String {
-        return ItemIdentifier(self).debugDescription
     }
 }

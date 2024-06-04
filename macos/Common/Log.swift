@@ -8,22 +8,29 @@
 import Foundation
 
 class Log {
-    var labels: [String] = []
+    fileprivate static var nextRootId: UInt64 = 0
 
-    init(_ label: String? = nil) {
-        if let label = label {
-            labels.append(label)
-        }
+    fileprivate let parent: Log?
+    var label: String
+    var id: UInt64
+    var nextChildId: UInt64 = 0
+
+    init(_ label: String) {
+        self.parent = nil
+        self.label = label
+        self.id = Self.nextRootId
+        Self.nextRootId += 1
     }
 
-    private init(_ labels: [String]) {
-        self.labels = labels
+    fileprivate init(_ label: String, _ parent: Log) {
+        self.parent = parent
+        self.label = label
+        self.id = parent.nextChildId
+        parent.nextChildId += 1
     }
 
     func child(_ label: String) -> Log {
-        let ch = Log(labels)
-        ch.labels.append(label)
-        return ch
+        Log(label, self)
     }
 
     @discardableResult
@@ -41,10 +48,19 @@ class Log {
     }
 
     func labels_str() -> String {
-        if labels.isEmpty {
-            return ""
-        } else {
-            return labels.joined(separator: "/") + ": "
+        let path = self.path()
+        return path.map({ "\($0.label):\($0.id)" }).joined(separator: "/") + ": "
+    }
+
+    fileprivate func path() -> [Log] {
+        var current: Log? = self
+        var ret: [Log] = []
+
+        while let c = current {
+            ret.append(c)
+            current = c.parent
         }
+
+        return ret.reversed()
     }
 }
