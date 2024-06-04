@@ -15,7 +15,7 @@ class FileProviderProxy {
     init() {
         let domain = ouisyncFileProviderDomain
 
-        SuccessfulTask {
+        SuccessfulTask(name: "FileProviderProxy.init") {
             while true {
                 do {
                     try await NSFileProviderManager.add(domain)
@@ -43,7 +43,18 @@ class FileProviderProxy {
             let session = try await ffi.waitForSession(FFI.toUnretainedPtr(obj: wrapFromRustTx), callback)
 
             let manager = NSFileProviderManager(for: domain)!
-            let service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
+
+            var service: NSFileProviderService? = nil
+
+            while true {
+                do {
+                    service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
+                    break
+                } catch {
+                    Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                }
+            }
 
             guard let service = service else {
                 Self.log("😡 Failed to acquire service from NSFileProviderManager")

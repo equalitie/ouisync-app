@@ -117,6 +117,13 @@ class FileIdentifier {
         return FileItem(OuisyncFileEntry(path, repo), repoName, size: size)
     }
 
+    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+        return repo
+    }
+
     func serialize() -> NSFileProviderItemIdentifier {
         NSFileProviderItemIdentifier("file-\(FilePath.mergeRepoNameAndPath(repoName, path))")
     }

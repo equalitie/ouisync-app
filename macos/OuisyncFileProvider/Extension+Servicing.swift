@@ -90,7 +90,8 @@ extension Extension {
                 // actually works remains to be tested. If it happens that there are acually more than
                 // one Ouisync instance, we might need to move the backend to the extension, but that
                 // would require a lot of boilerplate to make it accessible from Dart.
-                fatalError("😡 Session already exists")
+                NSLog("😡 Session already exists")
+                return false
             }
 
             let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))

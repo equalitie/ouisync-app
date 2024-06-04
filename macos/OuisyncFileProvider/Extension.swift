@@ -7,6 +7,8 @@
 
 import FileProvider
 import OuisyncLib
+import System
+import OSLog
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -16,6 +18,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     var currentAnchor: UInt64 = UInt64.random(in: UInt64.min ... UInt64.max)
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
+    let log: Log
 
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
@@ -24,6 +27,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // `FileProviderExtension.init(domain:)` to instantiate the extension
         // for that domain, and call methods on the instance.
         
+        let log = Log("Extension")
         let manager = NSFileProviderManager(for: domain)!
 
         do {
@@ -33,6 +37,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         }
 
         self.domain = domain
+        self.log = log
         super.init()
     }
 
@@ -41,20 +46,27 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
-        Self.log("item(\(identifier))")
+        let log = self.log.child("item").trace("(\(identifier))")
         // resolve the given identifier to a record in the model
         
+        let handler = { (item: NSFileProviderItem?, error: Error?) in
+            if let error = error {
+                log.error("Error: \(error)")
+            }
+            completionHandler(item, error)
+        }
+
         guard let session = ouisyncSession else {
-            completionHandler(nil, ExtError.backendIsUnreachable)
+            handler(nil, ExtError.backendIsUnreachable)
             return Progress()
         }
 
         Task {
             do {
                 let item = try await ItemIdentifier(identifier).loadItem(session)
-                completionHandler(item, nil)
+                handler(item, nil)
             } catch let e as NSError where e.code == ExtError.noSuchItem.code {
-                completionHandler(nil, e)
+                handler(nil, e)
             } catch {
                 fatalError("Unrecognized exception error:\(error) itemIdentifier:\(identifier)")
             }
@@ -64,66 +76,91 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
-        Self.log("fetchContents(\(itemIdentifier))")
+        let log = self.log.child("fetchContents").trace("(\(itemIdentifier))")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
         guard let session = ouisyncSession else {
+            log.error("Backend is unreachable")
             completionHandler(nil, nil, ExtError.backendIsUnreachable)
             return Progress()
         }
 
-        SuccessfulTask {
-            let fileItem: FileItem
-            let identifier = ItemIdentifier(itemIdentifier)
+        Task {
+            var srcFile: OuisyncFile? = nil
 
-            switch identifier {
-            case .file(let identifier):
-                fileItem = try await identifier.loadItem(session)
-            default:
-                completionHandler(nil, nil, ExtError.featureNotSupported)
-                return
-            }
+            do {
+                let fileItem: FileItem
+                let identifier = ItemIdentifier(itemIdentifier)
 
-            let file = try await fileItem.file.open()
-            let url = self.makeTemporaryURL("fetchContents")
-
-            var offset: UInt64 = 0
-            var size: UInt64 = 0
-
-            let outFile = FileOnDisk(url)
-
-            while true {
-                let data = try await file.read(offset, Self.WRITE_CHUNK_SIZE)
-
-                let dataSize = UInt64(exactly: data.count)!
-                size += dataSize
-
-                if data.isEmpty {
-                    break
+                switch identifier {
+                case .file(let identifier):
+                    fileItem = try await identifier.loadItem(session)
+                default:
+                    completionHandler(nil, nil, ExtError.featureNotSupported)
+                    return
                 }
 
-                if offset == 0 {
-                    try outFile.write(data)
-                } else {
-                    try outFile.append(data)
+                srcFile = try await fileItem.file.open()
+                let url = self.makeTemporaryURL("fetchContents")
+
+                var offset: UInt64 = 0
+                var size: UInt64 = 0
+
+                let dstFile = FileOnDisk(url)
+
+                while true {
+                    let data = try await srcFile!.read(offset, Self.WRITE_CHUNK_SIZE)
+
+                    let dataSize = UInt64(exactly: data.count)!
+                    size += dataSize
+
+                    if data.isEmpty {
+                        break
+                    }
+
+                    if offset == 0 {
+                        try dstFile.write(data)
+                    } else {
+                        try dstFile.append(data)
+                    }
+
+                    offset += UInt64(exactly: data.count)!
                 }
 
-                offset += UInt64(exactly: data.count)!
+                fileItem.size = offset
+
+                completionHandler(url, fileItem, nil)
+            } catch let error as NSError {
+                log.error("Error: \(error)")
+                completionHandler(nil, nil, error)
+            } catch {
+                fatalError("Uncaught exception: \(error)")
             }
 
-            fileItem.size = offset
-
-            completionHandler(url, fileItem, nil)
+            do {
+                if let f = srcFile {
+                    try await f.close()
+                }
+            } catch {
+                log.error("Failed to close OuisyncFile: \(error)")
+            }
         }
         return Progress()
     }
     
     func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: a new item was created on disk, process the item's creation
-        Self.log("createItem(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options)")
+        let log = log.child("createItem").trace("(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options))")
+
+        let handler = { (item: NSFileProviderItem?, fields: NSFileProviderItemFields, fetch: Bool, error: Error?) in
+            if let error = error {
+                log.error("Error: \(error)")
+            }
+            completionHandler(item, fields, fetch, error)
+        }
 
         guard let session = ouisyncSession else {
-            completionHandler(itemTemplate, [], false, ExtError.backendIsUnreachable)
+            handler(itemTemplate, [], false, ExtError.backendIsUnreachable)
             return Progress()
         }
 
@@ -133,7 +170,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         switch ItemIdentifier(itemTemplate.parentItemIdentifier) {
         case .directory(let id): parentId = id
         default:
-            completionHandler(nil, fields, false, ExtError.featureNotSupported)
+            handler(nil, fields, false, ExtError.featureNotSupported)
             return Progress()
         }
 
@@ -159,29 +196,35 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 let repo = try await parentId.loadRepo(session)
                 let dstPath = parentId.path.appending(dstName)
 
+                var dstFile: OuisyncFile? = nil
+
                 switch type {
                 case .file(let srcUrl):
-                    let dstFile = try await repo.createFile(dstPath)
+                    dstFile = try await repo.createFile(dstPath)
 
                     let srcFile = try FileHandle(forReadingFrom: srcUrl)
 
                     var written: UInt64 = 0
 
                     while let data = try srcFile.read(upToCount: Self.READ_CHUNK_SIZE) {
-                        try await dstFile.write(written, data)
+                        try await dstFile!.write(written, data)
                         written += UInt64(exactly: data.count)!
                     }
 
                     let dstItem = FileItem(OuisyncFileEntry(dstPath, repo), repoName, size: written)
 
-                    completionHandler(dstItem, [], false, nil)
+                    handler(dstItem, [], false, nil)
                 case .folder:
                     try await repo.createDirectory(dstPath)
                     let dstItem = DirectoryItem(OuisyncDirectoryEntry(dstPath, repo), repoName)
-                    completionHandler(dstItem, [], false, nil)
+                    handler(dstItem, [], false, nil)
+                }
+
+                if let file = dstFile {
+                    try await file.close()
                 }
             } catch let error as NSError {
-                completionHandler(nil, [], false, error)
+                handler(nil, [], false, error)
             } catch {
                 fatalError("Uncaught exception in createItem: \(error)")
             }
@@ -191,15 +234,63 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: an item was modified on disk, process the item's modification
-        Self.log("modifyItem(\(item))")
+        let log = self.log.child("modifyItem").trace("(\(item), changedFields: \(changedFields))")
 
-        completionHandler(nil, [], false, NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
+        let handler = { (item: NSFileProviderItem?, fields, fetch, error: Error?) in
+            if let error = error {
+                log.error("Error: \(error)")
+            }
+            completionHandler(item, fields, fetch, error)
+        }
+
+        guard let session = ouisyncSession else {
+            handler(nil, [], false, ExtError.backendIsUnreachable)
+            return Progress()
+        }
+
+        Task {
+            do {
+                if changedFields.contains(.filename) {
+                    let id = ItemIdentifier(item.itemIdentifier)
+
+                    let repo: OuisyncRepository
+                    let srcPath: FilePath
+
+                    switch id {
+                    case .rootContainer, .trashContainer, .workingSet:
+                        handler(nil, [], false, ExtError.featureNotSupported)
+                        return
+                    case .directory(let dir):
+                        repo = try await dir.loadRepo(session)
+                        srcPath = dir.path
+                    case .file(let file):
+                        repo = try await file.loadRepo(session)
+                        srcPath = file.path
+                    }
+
+                    var dstPath = srcPath
+                    dstPath.removeLastComponent()
+                    dstPath.append(item.filename)
+
+                    try await repo.moveEntry(srcPath, dstPath)
+                } else {
+                    // TODO
+                    handler(nil, [], false, ExtError.featureNotSupported)
+                }
+            } catch let error as NSError {
+                handler(nil, [], false, error)
+            } catch {
+                fatalError("Uncaught exception in createItem: \(error)")
+            }
+        }
+
+        handler(nil, [], false, ExtError.featureNotSupported)
         return Progress()
     }
     
     func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
         // TODO: an item was deleted on disk, process the item's deletion
-        Self.log("deleteItem(\(item))")
+        log.trace("deleteItem(\(identifier))")
 
         completionHandler(NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
         return Progress()
@@ -208,17 +299,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        Self.log("enumerator(\(identifier))")
+        log.trace("enumerator(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             throw ExtError.syncAnchorExpired
         }
 
         return try Enumerator(identifier, session, currentAnchor)
-    }
-
-    static func log(_ str: String) {
-        NSLog("🧩 FileProviderExtension: \(str)")
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location

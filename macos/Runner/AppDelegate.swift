@@ -17,7 +17,6 @@ class AppDelegate: FlutterAppDelegate {
         if fileProviderProxy == nil {
             fileProviderProxy = FileProviderProxy()
         }
-        super.applicationDidFinishLaunching(notification)
     }
 
     
