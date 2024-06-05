@@ -35,8 +35,8 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        //return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
-        [.allowsReading, .allowsRenaming, .allowsDeleting]
+        // [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+        [.allowsReading, .allowsRenaming, .allowsDeleting, .allowsReparenting]
     }
 
     var itemVersion: NSFileProviderItemVersion {

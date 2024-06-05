@@ -211,12 +211,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         written += UInt64(exactly: data.count)!
                     }
 
-                    let dstItem = FileItem(OuisyncFileEntry(dstPath, repo), repoName, size: written)
+                    let dstItem = FileItem(repo.fileEntry(dstPath), repoName, size: written)
 
                     handler(dstItem, [], false, nil)
                 case .folder:
                     try await repo.createDirectory(dstPath)
-                    let dstItem = DirectoryItem(OuisyncDirectoryEntry(dstPath, repo), repoName)
+                    let dstItem = DirectoryItem(repo.directoryEntry(dstPath), repoName)
                     handler(dstItem, [], false, nil)
                 }
 
@@ -253,42 +253,64 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 var fields = changedFields
                 var newItem: NSFileProviderItem = item
 
-                if fields.contains(.filename) {
+                if fields.contains(.filename) /* rename */ || fields.contains(.parentItemIdentifier) /* move */ {
                     let id = ItemIdentifier(item.itemIdentifier)
+                    let parentId = ItemIdentifier(item.parentItemIdentifier)
 
                     let repo: OuisyncRepository
                     let repoName: String
                     let srcPath: FilePath
-                    let isFile: Bool
+                    let type: OuisyncEntryType
+                    let dstParentPath: FilePath
 
-                    switch id {
-                    case .rootContainer, .trashContainer, .workingSet:
+                    switch (id, parentId) {
+                    case (.rootContainer, _),
+                         (.workingSet, _),
+                         (.trashContainer, _),
+                         (_, .rootContainer),
+                         (_, .workingSet),
+                         (_, .trashContainer):
                         handler(nil, [], false, ExtError.featureNotSupported)
                         return
-                    case .directory(let dir):
+                    case (.directory(let dir), .directory(let dstDir)):
                         repo = try await dir.loadRepo(session)
                         srcPath = dir.path
                         repoName = dir.repoName
-                        isFile = false
-                    case .file(let file):
+                        type = .directory
+                        dstParentPath = dstDir.path
+                    case (.file(let file), .directory(let dstDir)):
                         repo = try await file.loadRepo(session)
                         srcPath = file.path
                         repoName = file.repoName
-                        isFile = true
+                        type = .file
+                        dstParentPath = dstDir.path
+                    case (_, .file(_)):
+                        fatalError("Cannot move an entry to file parent")
                     }
 
-                    var dstPath = srcPath
-                    dstPath.removeLastComponent()
-                    dstPath.append(item.filename)
+                    let dstPath = dstParentPath.appending(item.filename)
 
                     try await repo.moveEntry(srcPath, dstPath)
 
                     fields.remove(.filename)
+                    fields.remove(.parentItemIdentifier)
 
-                    if isFile {
-                        newItem = FileItem(OuisyncFileEntry(dstPath, repo), repoName, size: UInt64(exactly: item.documentSize!!)!)
-                    } else {
-                        newItem = DirectoryItem(OuisyncDirectoryEntry(dstPath, repo), repoName)
+                    switch type {
+                    case .file:
+                        let size: UInt64
+
+                        if let f = item.documentSize, let s = f {
+                            size = UInt64(exactly: s)!
+                        } else {
+                            // TODO: Sometimes item.documentSize is not implemented or returns nil,
+                            // TODO: do we still need to pass it to the handler?
+                            let file = try await repo.fileEntry(dstPath).open()
+                            size = try await file.size()
+                        }
+
+                        newItem = FileItem(repo.fileEntry(dstPath), repoName, size: size)
+                    case .directory:
+                        newItem = DirectoryItem(repo.directoryEntry(dstPath), repoName)
                     }
                 }
 
