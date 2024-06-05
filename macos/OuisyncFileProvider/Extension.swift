@@ -305,9 +305,43 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
         // TODO: an item was deleted on disk, process the item's deletion
-        log.trace("deleteItem(\(identifier))")
+        let log = log.child("deleteItem").trace("invoke(\(identifier))")
 
-        completionHandler(NSError(domain: NSCocoaErrorDomain, code: NSFeatureUnsupportedError, userInfo:[:]))
+        let handler = { (error: Error?) in
+            if let error = error {
+                log.error("\(error)")
+            }
+            completionHandler(error)
+        }
+
+        guard let session = ouisyncSession else {
+            handler(ExtError.backendIsUnreachable)
+            return Progress()
+        }
+
+        Task {
+            do {
+                switch ItemIdentifier(identifier) {
+                case .rootContainer, .trashContainer, .workingSet:
+                    throw ExtError.featureNotSupported
+                case .file(let file):
+                    let path = file.path
+                    let repo = try await file.loadRepo(session)
+                    try await repo.deleteFile(path)
+                case .directory(let dir):
+                    let path = dir.path
+                    let repo = try await dir.loadRepo(session)
+                    try await repo.deleteDirectory(path, recursive: true)
+                }
+
+                handler(nil)
+            } catch let error as NSError {
+                handler(error)
+            } catch {
+                fatalError("Uncaught exception in deleteItem: \(error)")
+            }
+        }
+
         return Progress()
     }
     

@@ -23,7 +23,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     func exists() async throws -> Bool {
-        return try await file.exists()
+        try await file.exists()
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
@@ -36,7 +36,7 @@ class FileItem: NSObject, NSFileProviderItem {
 
     var capabilities: NSFileProviderItemCapabilities {
         //return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
-        return [.allowsReading]
+        [.allowsReading, .allowsRenaming, .allowsDeleting]
     }
 
     var itemVersion: NSFileProviderItemVersion {
@@ -44,19 +44,19 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        return file.name()
+        file.name()
     }
 
     var contentType: UTType {
-        return .item
+        .item
     }
 
     public override var debugDescription: String {
-        return "FileItem(\(repoName), \(file.path))"
+        "FileItem(\(repoName), \(file.path))"
     }
 
     var documentSize: NSNumber? {
-        return size as NSNumber
+        size as NSNumber
     }
 }
 
@@ -92,7 +92,8 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+        // [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
+        return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsDeleting]
     }
 
     var itemVersion: NSFileProviderItemVersion {

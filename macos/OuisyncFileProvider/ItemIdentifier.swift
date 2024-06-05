@@ -66,6 +66,16 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         }
     }
 
+    public func isRepository() -> Bool {
+        switch self {
+        case .rootContainer: return false
+        case .trashContainer: return false
+        case .workingSet: return false
+        case .directory(let id): return id.isRepository()
+        case .file(let id): return false
+        }
+    }
+
     public var debugDescription: String {
         switch self {
         case .rootContainer: return "ItemIdentifier(.rootContainer)"
@@ -144,6 +154,10 @@ class DirectoryIdentifier {
     init(_ path: FilePath, _ repoName: RepoName) {
         self.path = path
         self.repoName = repoName
+    }
+
+    public func isRepository() -> Bool {
+        path.components.isEmpty
     }
 
     func loadItem(_ session: OuisyncSession) async throws -> DirectoryItem {
