@@ -110,11 +110,7 @@ class FileIdentifier {
     }
 
     func loadItem(_ session: OuisyncSession) async throws -> FileItem {
-        guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchItem
-        }
-
-        let entry = OuisyncFileEntry(path, repo)
+        let entry = try await loadEntry(session)
 
         let size: UInt64
 
@@ -131,7 +127,15 @@ class FileIdentifier {
             fatalError("Unhandled exception error:\(error), repo:\(repoName), path:\(path)")
         }
 
-        return FileItem(OuisyncFileEntry(path, repo), repoName, size: size)
+        return FileItem(entry, repoName, size: size)
+    }
+
+    func loadEntry(_ session: OuisyncSession) async throws -> OuisyncFileEntry {
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
+
+        return OuisyncFileEntry(path, repo)
     }
 
     func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {

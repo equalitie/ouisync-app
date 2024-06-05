@@ -196,21 +196,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 let repo = try await parentId.loadRepo(session)
                 let dstPath = parentId.path.appending(dstName)
 
-                var dstFile: OuisyncFile? = nil
-
                 switch type {
                 case .file(let srcUrl):
-                    dstFile = try await repo.createFile(dstPath)
-
-                    let srcFile = try FileHandle(forReadingFrom: srcUrl)
-
-                    var written: UInt64 = 0
-
-                    while let data = try srcFile.read(upToCount: Self.READ_CHUNK_SIZE) {
-                        try await dstFile!.write(written, data)
-                        written += UInt64(exactly: data.count)!
-                    }
-
+                    let dstFile = try await repo.createFile(dstPath)
+                    let written = try await copyContentsAndClose(srcUrl, dstFile)
                     let dstItem = FileItem(repo.fileEntry(dstPath), repoName, size: written)
 
                     handler(dstItem, [], false, nil)
@@ -218,10 +207,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     try await repo.createDirectory(dstPath)
                     let dstItem = DirectoryItem(repo.directoryEntry(dstPath), repoName)
                     handler(dstItem, [], false, nil)
-                }
-
-                if let file = dstFile {
-                    try await file.close()
                 }
             } catch let error as NSError {
                 handler(nil, [], false, error)
@@ -250,11 +235,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         Task {
             do {
+                let id = ItemIdentifier(item.itemIdentifier)
                 var fields = changedFields
                 var newItem: NSFileProviderItem = item
 
                 if fields.contains(.filename) /* rename */ || fields.contains(.parentItemIdentifier) /* move */ {
-                    let id = ItemIdentifier(item.itemIdentifier)
                     let parentId = ItemIdentifier(item.parentItemIdentifier)
 
                     let repo: OuisyncRepository
@@ -314,6 +299,32 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     }
                 }
 
+                if fields.contains(.contents) {
+                    let srcUrl = newContents!
+                    let file: OuisyncFile
+                    let entry: OuisyncFileEntry
+                    let repoName: String
+
+                    switch id {
+                    case .rootContainer, .workingSet, .trashContainer:
+                        handler(nil, [], false, ExtError.featureNotSupported)
+                        return
+                    case .directory:
+                        fatalError("Cannot change contents of a directory")
+                    case .file(let fileId):
+                        repoName = fileId.repoName
+                        entry = try await fileId.loadEntry(session)
+                        file = try await entry.open()
+                    }
+
+                    try await file.truncate(0)
+                    let written = try await copyContentsAndClose(srcUrl, file)
+
+                    fields.remove(.contents)
+
+                    newItem = FileItem(entry, repoName, size: written)
+                }
+
                 handler(newItem, fields, false, nil)
             } catch let error as NSError {
                 handler(nil, [], false, error)
@@ -370,7 +381,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        let log = self.log.child("enumerator").trace("(\(identifier))")
+        let log = self.log.child("enumerator").disable().trace("(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             let error = ExtError.backendIsUnreachable
@@ -419,4 +430,29 @@ class FileOnDisk {
             return handle
         }
     }
+}
+
+// Returns number of bytes written
+func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> UInt64 {
+    let srcFile = try FileHandle(forReadingFrom: src)
+
+    var written: UInt64 = 0
+
+    while true {
+        let readResult = Result { try srcFile.read(upToCount: Extension.READ_CHUNK_SIZE) }
+        switch readResult {
+        case .failure(let error):
+            try? await dst.close()
+            throw error
+        case .success(let data):
+            guard let data = data else {
+                try await dst.close()
+                return written
+            }
+            try await dst.write(written, data)
+            written += UInt64(exactly: data.count)!
+        }
+    }
+
+    return written
 }
