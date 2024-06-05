@@ -76,8 +76,7 @@ class FileProviderProxy {
 
             let server = connection.remoteObjectProxy() as! OuisyncFileProviderServerProtocol;
 
-            @Sendable
-            func fromRustToServer() async {
+            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
                 for await message in fromRustRx {
                     server.messageFromClientToServer(message)
                 }
@@ -103,7 +102,7 @@ class FileProviderProxy {
             // For some reason the communication wont start unless we send this first message
             server.messageFromClientToServer([])
 
-            await fromRustToServer();
+            await fromRustToServer(server, fromRustRx);
 
             await ffi.closeSession(session)
         }
