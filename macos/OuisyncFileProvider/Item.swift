@@ -92,8 +92,16 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        // [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting]
-        return [.allowsReading, .allowsWriting, .allowsRenaming, .allowsReparenting, .allowsDeleting]
+        var caps: NSFileProviderItemCapabilities = [.allowsReading, .allowsWriting]
+
+        // We currently allow these *repository* operations only from the app
+        if !DirectoryIdentifier(directory.path, repoName).isRepository() {
+            caps.insert(.allowsDeleting)
+            caps.insert(.allowsReparenting)
+            caps.insert(.allowsRenaming)
+        }
+
+        return caps
     }
 
     var itemVersion: NSFileProviderItemVersion {
