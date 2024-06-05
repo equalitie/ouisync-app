@@ -42,7 +42,6 @@
 		1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC102C42BAC66050026BD42 /* Enumerator.swift */; };
 		1EC102CA2BAC66050026BD42 /* OuisyncFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1ECD78522C00DA62005D7636 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78512C00DA62005D7636 /* Anchor.swift */; };
-		1ECD78542C04C732005D7636 /* ChangeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78532C04C732005D7636 /* ChangeResolver.swift */; };
 		1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
 		1ECD785B2C0DC0DF005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
 		1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
@@ -168,7 +167,6 @@
 		1EC102C62BAC66050026BD42 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1EC102C72BAC66050026BD42 /* OuisyncFileProvider.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OuisyncFileProvider.entitlements; sourceTree = "<group>"; };
 		1ECD78512C00DA62005D7636 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
-		1ECD78532C04C732005D7636 /* ChangeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeResolver.swift; sourceTree = "<group>"; };
 		1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulTask.swift; sourceTree = "<group>"; };
 		1ECD785D2C0F2806005D7636 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		1ECD78602C0F40A0005D7636 /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
@@ -280,7 +278,6 @@
 				1E60DA1B2BD0FBEE001422A4 /* Path.swift */,
 				1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */,
 				1ECD78512C00DA62005D7636 /* Anchor.swift */,
-				1ECD78532C04C732005D7636 /* ChangeResolver.swift */,
 				1ECD78602C0F40A0005D7636 /* Debug.swift */,
 			);
 			path = OuisyncFileProvider;
@@ -749,7 +746,6 @@
 				1EC102C32BAC66050026BD42 /* Item.swift in Sources */,
 				1EBC4D4A2BB1B5A50053E2F3 /* ExtError.swift in Sources */,
 				1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */,
-				1ECD78542C04C732005D7636 /* ChangeResolver.swift in Sources */,
 				1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */,
 				1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */,
 				1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */,

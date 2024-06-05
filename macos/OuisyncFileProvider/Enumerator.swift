@@ -14,7 +14,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
     private let currentAnchor: Anchor
     private let log: Log
 
-    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: Anchor, _ log: Log) throws {
+    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: Anchor, _ log: Log) {
         let log = log.child("Enumerator").trace("init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
         self.itemId = itemIdentifier
         self.session = session

@@ -11,9 +11,10 @@ class Log {
     fileprivate static var nextRootId: UInt64 = 0
 
     fileprivate let parent: Log?
-    var label: String
-    var id: UInt64
-    var nextChildId: UInt64 = 0
+    fileprivate var label: String
+    fileprivate var id: UInt64
+    fileprivate var nextChildId: UInt64 = 0
+    fileprivate var enabled: Bool = true
 
     init(_ label: String) {
         self.parent = nil
@@ -35,21 +36,35 @@ class Log {
 
     @discardableResult
     func trace(_ msg: String) -> Log {
-        NSLog("🧩 \(labels_str())\(msg)")
+        let (enabled, labels) = collect()
+        if !enabled { return self }
+        NSLog("🧩 \(labels)\(msg)")
         return self
     }
 
     func info(_ msg: String) {
-        NSLog("🧩 \(labels_str())\(msg)")
+        let (enabled, labels) = collect()
+        if !enabled { return }
+        NSLog("🧩 \(labels)\(msg)")
     }
 
     func error(_ msg: String) {
-        NSLog("😡 \(labels_str())\(msg)")
+        let (enabled, labels) = collect()
+        if !enabled { return }
+        NSLog("😡 \(labels)\(msg)")
     }
 
-    func labels_str() -> String {
+    func disable() -> Log {
+        enabled = false
+        return self
+    }
+
+    fileprivate func collect() -> (enabled: Bool, labels: String) {
         let path = self.path()
-        return path.map({ "\($0.label):\($0.id)" }).joined(separator: "/") + ": "
+        return (
+            enabled: path.reduce(true, { $0 && $1.enabled }),
+            labels: path.map({ "\($0.label):\($0.id)" }).joined(separator: "/") + ": "
+        )
     }
 
     fileprivate func path() -> [Log] {

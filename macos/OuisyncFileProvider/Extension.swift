@@ -351,10 +351,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         let log = self.log.child("enumerator").trace("(\(identifier))")
 
         guard let session = self.ouisyncSession else {
-            throw ExtError.syncAnchorExpired
+            let error = ExtError.backendIsUnreachable
+            log.error("\(error)")
+            throw error
         }
 
-        return try Enumerator(identifier, session, currentAnchor, log)
+        return Enumerator(identifier, session, currentAnchor, log)
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location
