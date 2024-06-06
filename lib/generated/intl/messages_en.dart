@@ -140,7 +140,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionHideCapital": MessageLookupByLibrary.simpleMessage("HIDE"),
         "actionIAgree": MessageLookupByLibrary.simpleMessage("I agree"),
         "actionIDontAgree":
-            MessageLookupByLibrary.simpleMessage("I don\'t agree"),
+            MessageLookupByLibrary.simpleMessage("I don’t agree"),
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
@@ -282,7 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Authenticate"),
         "messageAutomaticUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
-                "We couldn\'t unlock the repository"),
+                "We couldn’t unlock the repository"),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("Available on mobile"),
         "messageAwaitingResult":
@@ -315,7 +315,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
             "This policy is effective as of 2022-03-09"),
         "messageChildrensPolicyP1": MessageLookupByLibrary.simpleMessage(
-            "We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens\' Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)"),
+            "We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens’ Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)"),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to delete this file?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
@@ -344,7 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDataCollectionP1": MessageLookupByLibrary.simpleMessage(
             "The Ouisync team values user privacy and thus does not collect any user information"),
         "messageDataCollectionP2": MessageLookupByLibrary.simpleMessage(
-            "The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don\'t know who uses our app and with whom they sync or share their data"),
+            "The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don’t know who uses our app and with whom they sync or share their data"),
         "messageDataSharingP1": MessageLookupByLibrary.simpleMessage(
             "Ouisync (and eQualit.ie) does not share any data with any third parties"),
         "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
@@ -352,7 +352,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
             "The Ouisync team cannot delete individual files from repositories, as it is not possible to identify them because they are encrypted. We are able to delete whole repositories if you send us the link to the repository that needs to be deleted"),
         "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
-            "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
+            "The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers’ repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below"),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Distributed Hash Tables"),
         "messageDokan": MessageLookupByLibrary.simpleMessage("Dokan"),
@@ -436,7 +436,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageErrorFormValidatorNameDefault":
             MessageLookupByLibrary.simpleMessage("Please enter a valid name."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "We couldn’t load this folder\'s contents. Please try again."),
+            "We couldn’t load this folder’s contents. Please try again."),
         "messageErrorNewPasswordSameOldPassword":
             MessageLookupByLibrary.simpleMessage(
                 "The new password is the same as the old password"),
@@ -470,7 +470,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "File is already being uploaded"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("File name"),
         "messageFilePreviewFailed": MessageLookupByLibrary.simpleMessage(
-            "We couldn\'t start the file preview"),
+            "We couldn’t start the file preview"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "File preview is not yet available"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("files"),
@@ -538,7 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogData3": MessageLookupByLibrary.simpleMessage(
             "User’s IP address - for the purposes of providing technical support"),
         "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
-            "The Ouisync app creates logfiles on users\' devices. Their purpose is only to log device\'s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes"),
+            "The Ouisync app creates logfiles on users\' devices. Their purpose is only to log device’s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes"),
         "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
             "If the user does decide to contact us, the personally indetifiable data we may collect is:"),
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
@@ -686,7 +686,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
             "You can learn more about the encryption techniques used in our documentation"),
         "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
-            "The Ouisync app stores users\' data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers"),
+            "The Ouisync app stores users’ data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers"),
         "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
             "If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
