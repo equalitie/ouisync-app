@@ -95,8 +95,6 @@ class Dimensions {
   static const double actionsDialogAvatarRadius = 10.0;
 
   static const double defaultListBottomPadding = 2.0;
-  static const double paddingBottomWithFloatingButtonExtra = 48.0;
-  static const double paddingBottomWithBottomSheetExtra = 130.0;
 
   static const AlignmentGeometry alignmentIconButton = Alignment.center;
 
