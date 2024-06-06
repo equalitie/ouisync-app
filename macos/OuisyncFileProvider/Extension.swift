@@ -46,12 +46,14 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
-        let log = self.log.child("item").trace("(\(identifier))")
+        let log = self.log.child("item").trace("invoked(\(identifier))")
         // resolve the given identifier to a record in the model
         
         let handler = { (item: NSFileProviderItem?, error: Error?) in
             if let error = error {
                 log.error("Error: \(error)")
+            } else {
+                log.trace("Returning \(item as Optional)")
             }
             completionHandler(item, error)
         }
@@ -76,7 +78,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
-        let log = self.log.child("fetchContents").trace("(\(itemIdentifier))")
+        let log = self.log.child("fetchContents").trace("invoked(\(itemIdentifier))")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
         guard let session = ouisyncSession else {
@@ -89,13 +91,9 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             var srcFile: OuisyncFile? = nil
 
             do {
-                let fileItem: FileItem
                 let identifier = ItemIdentifier(itemIdentifier)
 
-                switch identifier {
-                case .file(let identifier):
-                    fileItem = try await identifier.loadItem(session)
-                default:
+                guard let fileItem = try await identifier.asFile()?.loadItem(session) else {
                     completionHandler(nil, nil, ExtError.featureNotSupported)
                     return
                 }
@@ -150,7 +148,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: a new item was created on disk, process the item's creation
-        let log = log.child("createItem").trace("(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options))")
+        let log = log.child("createItem").trace("invoked(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options))")
 
         let handler = { (item: NSFileProviderItem?, fields: NSFileProviderItemFields, fetch: Bool, error: Error?) in
             if let error = error {
@@ -168,7 +166,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         let parentId: DirectoryIdentifier
 
         switch ItemIdentifier(itemTemplate.parentItemIdentifier) {
-        case .directory(let id): parentId = id
+        case .entry(let entry):
+            switch entry {
+            case .directory(let id): parentId = id
+            case .file: fatalError("Parent can't be a file")
+            }
         default:
             handler(nil, fields, false, ExtError.featureNotSupported)
             return Progress()
@@ -219,11 +221,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: an item was modified on disk, process the item's modification
-        let log = self.log.child("modifyItem").trace("(\(item), changedFields: \(changedFields))")
+        let log = self.log.child("modifyItem").trace("invoked(\(item), changedFields: \(changedFields))")
 
-        let handler = { (item: NSFileProviderItem?, fields, fetch, error: Error?) in
+        let handler = { (item: NSFileProviderItem?, fields: NSFileProviderItemFields, fetch, error: Error?) in
             if let error = error {
                 log.error("Error: \(error)")
+            } else {
+                log.trace("Returning: item:\(item as Optional) fields:\(fields)")
             }
             completionHandler(item, fields, fetch, error)
         }
@@ -242,11 +246,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 if fields.contains(.filename) /* rename */ || fields.contains(.parentItemIdentifier) /* move */ {
                     let parentId = ItemIdentifier(item.parentItemIdentifier)
 
-                    let repo: OuisyncRepository
-                    let repoName: String
-                    let srcPath: FilePath
-                    let type: OuisyncEntryType
                     let dstParentPath: FilePath
+                    let src: EntryIdentifier
 
                     switch (id, parentId) {
                     case (.rootContainer, _),
@@ -257,30 +258,23 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                          (_, .trashContainer):
                         handler(nil, [], false, ExtError.featureNotSupported)
                         return
-                    case (.directory(let dir), .directory(let dstDir)):
-                        repo = try await dir.loadRepo(session)
-                        srcPath = dir.path
-                        repoName = dir.repoName
-                        type = .directory
+                    case (.entry(let entry), .entry(.directory(let dstDir))):
+                        src = entry
+                        // TODO: Check that the source and destination repo is the same
                         dstParentPath = dstDir.path
-                    case (.file(let file), .directory(let dstDir)):
-                        repo = try await file.loadRepo(session)
-                        srcPath = file.path
-                        repoName = file.repoName
-                        type = .file
-                        dstParentPath = dstDir.path
-                    case (_, .file(_)):
-                        fatalError("Cannot move an entry to file parent")
+                    case (_, .entry(.file(_))):
+                        fatalError("Cannot move an entry to a file parent")
                     }
 
+                    let repo = try await src.loadRepo(session)
                     let dstPath = dstParentPath.appending(item.filename)
 
-                    try await repo.moveEntry(srcPath, dstPath)
+                    try await repo.moveEntry(src.path(), dstPath)
 
                     fields.remove(.filename)
                     fields.remove(.parentItemIdentifier)
 
-                    switch type {
+                    switch src.type() {
                     case .file:
                         let size: UInt64
 
@@ -293,9 +287,9 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                             size = try await file.size()
                         }
 
-                        newItem = FileItem(repo.fileEntry(dstPath), repoName, size: size)
+                        newItem = FileItem(repo.fileEntry(dstPath), src.repoName(), size: size)
                     case .directory:
-                        newItem = DirectoryItem(repo.directoryEntry(dstPath), repoName)
+                        newItem = DirectoryItem(repo.directoryEntry(dstPath), src.repoName())
                     }
                 }
 
@@ -309,9 +303,9 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     case .rootContainer, .workingSet, .trashContainer:
                         handler(nil, [], false, ExtError.featureNotSupported)
                         return
-                    case .directory:
+                    case .entry(.directory):
                         fatalError("Cannot change contents of a directory")
-                    case .file(let fileId):
+                    case .entry(.file(let fileId)):
                         repoName = fileId.repoName
                         entry = try await fileId.loadEntry(session)
                         file = try await entry.open()
@@ -338,7 +332,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
         // TODO: an item was deleted on disk, process the item's deletion
-        let log = log.child("deleteItem").trace("invoke(\(identifier))")
+        let log = log.child("deleteItem").trace("invoked(\(identifier))")
 
         let handler = { (error: Error?) in
             if let error = error {
@@ -357,11 +351,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 switch ItemIdentifier(identifier) {
                 case .rootContainer, .trashContainer, .workingSet:
                     throw ExtError.featureNotSupported
-                case .file(let file):
+                case .entry(.file(let file)):
                     let path = file.path
                     let repo = try await file.loadRepo(session)
                     try await repo.deleteFile(path)
-                case .directory(let dir):
+                case .entry(.directory(let dir)):
                     let path = dir.path
                     let repo = try await dir.loadRepo(session)
                     try await repo.deleteDirectory(path, recursive: true)
@@ -381,7 +375,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        let log = self.log.child("enumerator").disable().trace("(\(identifier))")
+        let log = self.log.child("enumerator").trace("invoked(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             let error = ExtError.backendIsUnreachable

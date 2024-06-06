@@ -27,11 +27,11 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        FileIdentifier(file.path, repoName).serialize()
+        return FileIdentifier(file.path, repoName).item().serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        return DirectoryIdentifier(file.parent().path, repoName).serialize()
+        return DirectoryIdentifier(file.parent().path, repoName).item().serialize()
     }
 
     var capabilities: NSFileProviderItemCapabilities {
@@ -44,7 +44,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        file.name()
+        return file.name()
     }
 
     var contentType: UTType {
@@ -72,7 +72,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     // For when this directory represents a repository
     init(_ repo: OuisyncRepository, _ repoName: String) {
         self.repoName = repoName
-        self.directory = OuisyncDirectoryEntry(FilePath("/"), repo)
+        self.directory = OuisyncDirectoryEntry(FilePath(""), repo)
     }
     
     func exists() async throws -> Bool {
@@ -80,12 +80,12 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        DirectoryIdentifier(directory.path, repoName).serialize()
+        return DirectoryIdentifier(directory.path, repoName).item().serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
         if let parent = directory.parent() {
-            return DirectoryIdentifier(parent.path, repoName).serialize()
+            return DirectoryIdentifier(parent.path, repoName).item().serialize()
         } else {
             return .rootContainer
         }

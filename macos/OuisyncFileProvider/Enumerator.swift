@@ -47,11 +47,12 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         case .rootContainer, .workingSet:
             Task {
                 let reposByName = try await listRepositories()
-                log.trace("\(itemId) -> \(reposByName) \(reposToItems(reposByName))")
-                observer.didEnumerate(reposToItems(reposByName))
+                let items = reposToItems(reposByName)
+                log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
+                observer.didEnumerate(items)
                 observer.finishEnumerating(upTo: nil)
             }
-        case .directory(let identifier):
+        case .entry(.directory(let identifier)):
             Task {
                 let dir = try await identifier.loadItem(session)
                 let entries = try await dir.directory.listEntries()
@@ -64,7 +65,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
                         items.append(try await identifier.loadItem(session))
                     }
                 }
-                log.trace("\(itemId) -> \(items)")
+                log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
                 observer.didEnumerate(items)
                 observer.finishEnumerating(upTo: nil)
             }

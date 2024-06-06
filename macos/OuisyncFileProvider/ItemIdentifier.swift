@@ -16,8 +16,7 @@ enum ItemIdentifier: CustomDebugStringConvertible {
     case rootContainer
     case trashContainer
     case workingSet
-    case directory(DirectoryIdentifier)
-    case file(FileIdentifier)
+    case entry(EntryIdentifier)
 
     init(_ serialized: NSFileProviderItemIdentifier) {
         guard let deserialized = Self.tryDeserialize(serialized) else {
@@ -28,9 +27,13 @@ enum ItemIdentifier: CustomDebugStringConvertible {
 
     init(_ ouisyncEntry: OuisyncEntry, _ repoName: RepoName) {
         switch ouisyncEntry {
-        case .directory(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
-        case .file(let entry): self = .directory(DirectoryIdentifier(entry.path, repoName))
+        case .directory(let entry): self = .entry(DirectoryIdentifier(entry.path, repoName).entry())
+        case .file(let entry): self = .entry(FileIdentifier(entry.path, repoName).entry())
         }
+    }
+
+    init(_ entryId: EntryIdentifier) {
+        self = .entry(entryId)
     }
 
     static func tryDeserialize(_ serialized: NSFileProviderItemIdentifier) -> Self? {
@@ -42,17 +45,13 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .workingSet:
             return .workingSet
         default:
-            let str = serialized.rawValue
-            let arr = str.split(separator: "-", maxSplits: 1)
-            if (arr[0] == "directory") {
-                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                return .directory(DirectoryIdentifier(path, repoName))
-            } else if (arr[0] == "file") {
-                let (repoName, path) = FilePath.splitRepoNameAndPath(String(arr[1]))
-                return .file(FileIdentifier(path, repoName))
-            } else {
-                return nil
-            }
+            let entry: EntryIdentifier? =
+                try? JSONDecoder()
+                    .decode(EntryIdentifier.self, from: serialized.rawValue.data(using: .utf8)!)
+
+            guard let entry = entry else { return nil }
+
+            return .entry(entry)
         }
     }
 
@@ -61,28 +60,39 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .rootContainer: return .rootContainer
         case .trashContainer: return .trashContainer
         case .workingSet: return .workingSet
-        case .directory(let id): return id.serialize()
-        case .file(let id): return id.serialize()
+        case .entry(let entry):
+            let encoder = JSONEncoder()
+            // Without .sortedKeys the encoder would encode the keys in a random order, but
+            // the system expects consistent strings to identify items. With .sortedKeys
+            // the resulting string is deterministic.
+            encoder.outputFormatting = .sortedKeys
+            // We don't expect this to fail
+            let json = try! encoder.encode(entry)
+            let str = String(data: json, encoding: .utf8)
+            return NSFileProviderItemIdentifier(str!)
+        }
+    }
+
+    public func asFile() -> FileIdentifier? {
+        switch self {
+        case .entry(.file(let file)): return file
+        default: return nil
         }
     }
 
     public func isRepository() -> Bool {
         switch self {
-        case .rootContainer: return false
-        case .trashContainer: return false
-        case .workingSet: return false
-        case .directory(let id): return id.isRepository()
-        case .file(let id): return false
+        case .entry(.directory(let dir)): return dir.isRepository()
+        default: return false
         }
     }
 
     public var debugDescription: String {
         switch self {
-        case .rootContainer: return "ItemIdentifier(.rootContainer)"
-        case .trashContainer: return "ItemIdentifier(.trashContainer)"
-        case .workingSet: return "ItemIdentifier(.workingSet)"
-        case .directory(let id): return "ItemIdentifier(directory-\(FilePath.mergeRepoNameAndPath(id.repoName, id.path)))"
-        case .file(let id): return "ItemIdentifier(file-\(FilePath.mergeRepoNameAndPath(id.repoName, id.path)))"
+        case .rootContainer: return ".rootContainer"
+        case .trashContainer: return ".trashContainer"
+        case .workingSet: return ".workingSet"
+        case .entry(let entry): return entry.debugDescription
         }
     }
 
@@ -91,15 +101,67 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .rootContainer: return RootContainerItem()
         case .trashContainer: return TrashContainerItem()
         case .workingSet: return WorkingSetItem()
-        case .directory(let identifier):
-            return try await identifier.loadItem(session)
-        case .file(let identifier):
-            return try await identifier.loadItem(session)
+        case .entry(let entry): return try await entry.loadItem(session)
         }
     }
 }
 
-class FileIdentifier {
+enum EntryIdentifier: CustomDebugStringConvertible, Codable {
+    case file(FileIdentifier)
+    case directory(DirectoryIdentifier)
+
+    init(_ file: FileIdentifier) {
+        self = .file(file)
+    }
+
+    init(_ dir: DirectoryIdentifier) {
+        self = .directory(dir)
+    }
+
+    func loadItem(_ session: OuisyncSession) async throws -> NSFileProviderItem {
+        switch self {
+        case .file(let id): return try await id.loadItem(session)
+        case .directory(let id): return try await id.loadItem(session)
+        }
+    }
+
+    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+        switch self {
+        case .file(let id): return try await id.loadRepo(session)
+        case .directory(let id): return try await id.loadRepo(session)
+        }
+    }
+
+    func path() -> FilePath {
+        switch self {
+        case .file(let id): return id.path
+        case .directory(let id): return id.path
+        }
+    }
+
+    func repoName() -> String {
+        switch self {
+        case .file(let id): return id.repoName
+        case .directory(let id): return id.repoName
+        }
+    }
+
+    public func type() -> OuisyncEntryType {
+        switch self {
+        case .file: return .file
+        case .directory: return .directory
+        }
+    }
+
+    public var debugDescription: String {
+        switch self {
+        case .file(let file): file.debugDescription
+        case .directory(let dir): dir.debugDescription
+        }
+    }
+}
+
+class FileIdentifier: CustomDebugStringConvertible, Codable {
     // The file path is relative to the repository
     let path: FilePath
     let repoName: RepoName
@@ -145,12 +207,20 @@ class FileIdentifier {
         return repo
     }
 
-    func serialize() -> NSFileProviderItemIdentifier {
-        NSFileProviderItemIdentifier("file-\(FilePath.mergeRepoNameAndPath(repoName, path))")
+    func entry() -> EntryIdentifier {
+        EntryIdentifier(self)
+    }
+
+    func item() -> ItemIdentifier {
+        ItemIdentifier(entry())
+    }
+
+    public var debugDescription: String {
+        ".file(\(repoName)\(path.isEmpty ? "" : "/")\(path))"
     }
 }
 
-class DirectoryIdentifier {
+class DirectoryIdentifier: CustomDebugStringConvertible, Codable {
     // The file path is relative to the repository
     let path: FilePath
     let repoName: RepoName
@@ -183,8 +253,16 @@ class DirectoryIdentifier {
         return repo
     }
 
-    public func serialize() -> NSFileProviderItemIdentifier {
-        NSFileProviderItemIdentifier("directory-\(FilePath.mergeRepoNameAndPath(repoName, path))")
+    func entry() -> EntryIdentifier {
+        EntryIdentifier(self)
+    }
+
+    func item() -> ItemIdentifier {
+        ItemIdentifier(entry())
+    }
+
+    public var debugDescription: String {
+        ".directory(\(repoName)\(path.isEmpty ? "" : "/")\(path))"
     }
 }
 
