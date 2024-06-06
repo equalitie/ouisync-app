@@ -1310,10 +1310,10 @@ class S {
     );
   }
 
-  /// `We couldn’t load this folder's contents. Please try again.`
+  /// `We couldn’t load this folder’s contents. Please try again.`
   String get messageErrorLoadingContents {
     return Intl.message(
-      'We couldn’t load this folder\'s contents. Please try again.',
+      'We couldn’t load this folder’s contents. Please try again.',
       name: 'messageErrorLoadingContents',
       desc: '',
       args: [],
@@ -3300,10 +3300,10 @@ class S {
     );
   }
 
-  /// `The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don't know who uses our app and with whom they sync or share their data`
+  /// `The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don’t know who uses our app and with whom they sync or share their data`
   String get messageDataCollectionP2 {
     return Intl.message(
-      'The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don\'t know who uses our app and with whom they sync or share their data',
+      'The Ouisync app is designed to be able to provide file sharing services without a user ID, name, nickname, user account or any other form of user data. We don’t know who uses our app and with whom they sync or share their data',
       name: 'messageDataCollectionP2',
       desc: '',
       args: [],
@@ -3340,10 +3340,10 @@ class S {
     );
   }
 
-  /// `The Ouisync app stores users' data on an 'Always-On Peer', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers`
+  /// `The Ouisync app stores users’ data on an 'Always-On Peer', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers`
   String get messageSecurityPracticesP3 {
     return Intl.message(
-      'The Ouisync app stores users\' data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers',
+      'The Ouisync app stores users’ data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers',
       name: 'messageSecurityPracticesP3',
       desc: '',
       args: [],
@@ -3360,10 +3360,10 @@ class S {
     );
   }
 
-  /// `The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below`
+  /// `The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers’ repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below`
   String get messageDeletionDataServerP1 {
     return Intl.message(
-      'The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers\' repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below',
+      'The simplest way to delete your data is by deleting files or repositories from your own device. Any file deletion will be propagated to all your peers - ie, if you have Write access to a repository, you can delete any files within it and the same files will be deleted from your peers’ repositories as well as from our Always-On-Peer. If you need to delete only the repositories from our Always-On-Peer (but still keep them in your own repository on your own device), please contact us at the address below',
       name: 'messageDeletionDataServerP1',
       desc: '',
       args: [],
@@ -3380,10 +3380,10 @@ class S {
     );
   }
 
-  /// `The Ouisync app creates logfiles on users' devices. Their purpose is only to log device's activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user's device unless the user decides to send it to us for support purposes`
+  /// `The Ouisync app creates logfiles on users' devices. Their purpose is only to log device’s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user's device unless the user decides to send it to us for support purposes`
   String get messageLogDataP1 {
     return Intl.message(
-      'The Ouisync app creates logfiles on users\' devices. Their purpose is only to log device\'s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes',
+      'The Ouisync app creates logfiles on users\' devices. Their purpose is only to log device’s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes',
       name: 'messageLogDataP1',
       desc: '',
       args: [],
@@ -3460,10 +3460,10 @@ class S {
     );
   }
 
-  /// `We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens' Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)`
+  /// `We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens’ Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)`
   String get messageChildrensPolicyP1 {
     return Intl.message(
-      'We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens\' Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)',
+      'We do not knowingly collect personally identifiable information from children. We encourage all children to never submit any personally identifiable information through the Application and/or Services. We encourage parents and legal guardians to monitor their childrens’ Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to us through the Application and/or Services, please contact us. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf)',
       name: 'messageChildrensPolicyP1',
       desc: '',
       args: [],
@@ -3720,10 +3720,10 @@ class S {
     );
   }
 
-  /// `We couldn't unlock the repository`
+  /// `We couldn’t unlock the repository`
   String get messageAutomaticUnlockRepositoryFailed {
     return Intl.message(
-      'We couldn\'t unlock the repository',
+      'We couldn’t unlock the repository',
       name: 'messageAutomaticUnlockRepositoryFailed',
       desc: '',
       args: [],
@@ -3770,10 +3770,10 @@ class S {
     );
   }
 
-  /// `We couldn't start the file preview`
+  /// `We couldn’t start the file preview`
   String get messageFilePreviewFailed {
     return Intl.message(
-      'We couldn\'t start the file preview',
+      'We couldn’t start the file preview',
       name: 'messageFilePreviewFailed',
       desc: '',
       args: [],
@@ -4760,10 +4760,10 @@ class S {
     );
   }
 
-  /// `I don't agree`
+  /// `I don’t agree`
   String get actionIDontAgree {
     return Intl.message(
-      'I don\'t agree',
+      'I don’t agree',
       name: 'actionIDontAgree',
       desc: '',
       args: [],
