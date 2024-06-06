@@ -545,6 +545,7 @@ class _MainPageState extends State<MainPage>
           ],
         ),
       ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: _cubits.repositories
           .builder((repos) => _buildFAB(context, repos.currentRepo)),
       bottomSheet: _bottomSheet);
@@ -629,6 +630,7 @@ class _MainPageState extends State<MainPage>
     if (_cubits.repositories.showList) {
       if (_cubits.repositories.repos.isNotEmpty) {
         return FloatingActionButton(
+          mini: true,
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
           child: icon,
@@ -641,6 +643,7 @@ class _MainPageState extends State<MainPage>
         builder: (context, state) => Visibility(
           visible: state.canWrite,
           child: FloatingActionButton(
+            mini: true,
             focusNode: _fabFocus,
             heroTag: Constants.heroTagMainPageActions,
             child: icon,
