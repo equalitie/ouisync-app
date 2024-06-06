@@ -4,7 +4,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../pages/pages.dart';
 import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -12,21 +11,14 @@ import '../widgets.dart';
 class FolderDetail extends StatefulWidget {
   const FolderDetail({
     required this.context,
-    required this.repo,
-    required this.navigation,
+    required this.repoCubit,
     required this.entry,
-    required this.onUpdateBottomSheet,
-    required this.onMoveEntry,
     required this.isActionAvailableValidator,
   });
 
   final BuildContext context;
-  final RepoCubit repo;
-
-  final NavigationCubit navigation;
+  final RepoCubit repoCubit;
   final DirectoryEntry entry;
-  final BottomSheetCallback onUpdateBottomSheet;
-  final MoveEntryCallback onMoveEntry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
 
   @override
@@ -43,53 +35,76 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Fields.bottomSheetHandle(context),
-            Fields.bottomSheetTitle(S.current.titleFolderDetails,
-                style: context.theme.appTextStyle.titleMedium),
+            Fields.bottomSheetTitle(
+              S.current.titleFolderDetails,
+              style: context.theme.appTextStyle.titleMedium,
+            ),
             EntryActionItem(
-                iconData: Icons.edit,
-                title: S.current.iconRename,
-                dense: true,
-                onTap: () async => _showRenameDialog(widget.entry),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.repo.state.accessMode, EntryAction.rename),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration),
+              iconData: Icons.edit,
+              title: S.current.iconRename,
+              dense: true,
+              onTap: () async => _showRenameDialog(widget.entry),
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.rename,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
             EntryActionItem(
-                iconData: Icons.drive_file_move_outlined,
-                title: S.current.iconMove,
-                dense: true,
-                onTap: () => _showMoveEntryBottomSheet(
-                      widget.entry.path,
-                      EntryType.directory,
-                      widget.onMoveEntry,
-                      widget.onUpdateBottomSheet,
-                    ),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.repo.state.accessMode, EntryAction.move),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration),
+              iconData: Icons.drive_file_move_outlined,
+              title: S.current.iconMove,
+              dense: true,
+              onTap: () {
+                Navigator.of(context).pop();
+
+                final entryPath = widget.entry.path;
+                final entryType = EntryType.directory;
+
+                widget.repoCubit.showMoveEntryBottomSheet(
+                  sheetType: BottomSheetType.move,
+                  entryPath: entryPath,
+                  entryType: entryType,
+                );
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.move,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
             EntryActionItem(
-                iconData: Icons.delete,
-                title: S.current.iconDelete,
-                isDanger: true,
-                dense: true,
-                onTap: () => _deleteFolderWithValidation(
-                      widget.repo,
-                      widget.entry.path,
-                    ),
-                enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.repo.state.accessMode, EntryAction.delete),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration),
+              iconData: Icons.delete,
+              title: S.current.iconDelete,
+              isDanger: true,
+              dense: true,
+              onTap: () => _deleteFolderWithValidation(
+                widget.repoCubit,
+                widget.entry.path,
+              ),
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.delete,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
             const Divider(
-                height: 10.0, thickness: 2.0, indent: 20.0, endIndent: 20.0),
-            EntryInfoTable(entryInfo: {
-              S.current.labelName: widget.entry.name,
-              S.current.labelLocation: dirname(widget.entry.path),
-            })
+              height: 10.0,
+              thickness: 2.0,
+              indent: 20.0,
+              endIndent: 20.0,
+            ),
+            EntryInfoTable(
+              entryInfo: {
+                S.current.labelName: widget.entry.name,
+                S.current.labelLocation: dirname(widget.entry.path),
+              },
+            ),
           ],
         ),
       );
@@ -108,7 +123,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
 
     final deleteFolder = await Dialogs.deleteFolderAlertDialog(
       widget.context,
-      widget.repo,
+      widget.repoCubit,
       widget.entry.path,
       validationMessage,
     );
@@ -142,52 +157,37 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     return true;
   }
 
-  void _showMoveEntryBottomSheet(
-      String path,
-      EntryType type,
-      MoveEntryCallback moveEntryCallback,
-      BottomSheetCallback bottomSheetControllerCallback) {
-    Navigator.of(context).pop();
-
-    final originPath = dirname(path);
-    final bottomSheetMoveEntry = MoveEntryDialog(
-      repo: widget.repo,
-      navigation: widget.navigation,
-      originPath: originPath,
-      path: path,
-      type: type,
-      onBottomSheetOpen: bottomSheetControllerCallback,
-      onMoveEntry: moveEntryCallback,
-    );
-
-    widget.onUpdateBottomSheet(bottomSheetMoveEntry, 160.0, path);
-  }
-
-  void _showRenameDialog(DirectoryEntry entry) async {
-    await showDialog(
+  void _showRenameDialog(DirectoryEntry entry) async => await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           final oldName = basename(entry.path);
 
           return ActionsDialog(
-              title: S.current.messageRenameFolder,
-              body: RenameEntry(
-                  parentContext: context,
-                  oldName: oldName,
-                  originalExtension: '',
-                  isFile: false,
-                  hint: S.current.messageFolderName));
-        }).then((newName) {
-      if (newName.isNotEmpty) {
-        // The new name provided by the user.
-        final parent = dirname(entry.path);
-        final newEntryPath = join(parent, newName);
+            title: S.current.messageRenameFolder,
+            body: RenameEntry(
+              parentContext: context,
+              oldName: oldName,
+              originalExtension: '',
+              isFile: false,
+              hint: S.current.messageFolderName,
+            ),
+          );
+        },
+      ).then(
+        (newName) {
+          if (newName.isNotEmpty) {
+            // The new name provided by the user.
+            final parent = dirname(entry.path);
+            final newEntryPath = join(parent, newName);
 
-        widget.repo.moveEntry(source: entry.path, destination: newEntryPath);
+            widget.repoCubit.moveEntry(
+              source: entry.path,
+              destination: newEntryPath,
+            );
 
-        Navigator.of(context).pop();
-      }
-    });
-  }
+            Navigator.of(context).pop();
+          }
+        },
+      );
 }

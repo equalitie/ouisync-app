@@ -270,21 +270,34 @@ class Fields {
           EdgeInsets padding = Dimensions.paddingBox,
           Widget space = Dimensions.spacingHorizontal}) =>
       Padding(
-          padding: padding,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              _iconBase(icon, size: iconSize, color: iconColor),
-              space,
-              constrainedText(text,
-                  textAlign: textAlign,
-                  textOverflow: textOverflow,
-                  softWrap: textSoftWrap,
-                  style: style)
-            ],
-          ));
+        padding: padding,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              flex: 0,
+              child: _iconBase(
+                icon,
+                size: iconSize,
+                color: iconColor,
+              ),
+            ),
+            Expanded(flex: 0, child: space),
+            Expanded(
+              child: ellipsedText(
+                text,
+                textAlign: textAlign,
+                textOverflow: textOverflow,
+                softWrap: textSoftWrap,
+                style: style,
+                ellipsisPosition: TextOverflowPosition.middle,
+              ),
+            )
+          ],
+        ),
+      );
 
   static Widget autosizeText(String text,
           {Key? key,
