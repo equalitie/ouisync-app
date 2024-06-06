@@ -1,11 +1,11 @@
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../pages/pages.dart';
+import '../../cubits/cubits.dart';
 import '../../utils/path.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
-import '../../cubits/repos.dart';
 
 typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
@@ -13,159 +13,219 @@ class SaveSharedMedia extends StatefulWidget {
   const SaveSharedMedia(
     this._repos, {
     required this.sharedMediaPaths,
+    required this.canSaveMedia,
     required this.onUpdateBottomSheet,
     required this.onSaveFile,
-    required this.validationFunction,
   });
 
   final ReposCubit _repos;
   final List<String> sharedMediaPaths;
-  final BottomSheetCallback onUpdateBottomSheet;
+  final Future<bool> Function() canSaveMedia;
+  final void Function(
+    BottomSheetType type,
+    double padding,
+    String entry,
+  ) onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
-  final Future<bool> Function() validationFunction;
 
   @override
   State<SaveSharedMedia> createState() => _SaveSharedMediaState();
 }
 
 class _SaveSharedMediaState extends State<SaveSharedMedia> {
-  final Icon _collapsableIconUp = const Icon(Icons.keyboard_arrow_up_rounded);
-  final Icon _collapsableIconDown =
-      const Icon(Icons.keyboard_arrow_down_rounded);
-
-  late Icon _collapsableIcon;
-  bool _minimize = false;
+  final bodyKey = GlobalKey();
+  Size? widgetSize;
 
   @override
   void initState() {
-    _collapsableIcon = _collapsableIconDown;
+    WidgetsBinding.instance.addPostFrameCallback((_) => afterBuild());
 
     super.initState();
   }
 
+  void afterBuild() {
+    final widgetContext = bodyKey.currentContext;
+    if (widgetContext == null) return;
+
+    widgetSize = widgetContext.size;
+
+    widgetContext.size?.let((it) {
+          widget.onUpdateBottomSheet(
+            BottomSheetType.move,
+            it.height,
+            '',
+          );
+        }) ??
+        0.0;
+  }
+
+  double mediaListMaxHeight = 0.0;
+
   @override
   Widget build(BuildContext context) {
-    return widget._repos.builder((_) {
-      final mediaListMaxHeight = MediaQuery.of(context).size.height * 0.2;
+    /// We limit the size of the list of files to just 20% of the viewport, this
+    /// way we prevent issues if the user is adding a lot of files.
+    mediaListMaxHeight = MediaQuery.of(context).size.height * 0.2;
 
-      final sheetTitleStyle = Theme.of(context)
-          .textTheme
-          .bodyLarge
-          ?.copyWith(fontWeight: FontWeight.w400);
-
-      return Container(
-        padding: Dimensions.paddingBottomSheet,
-        decoration: Dimensions.decorationBottomSheetAlternative,
+    return Container(
+      key: bodyKey,
+      padding: Dimensions.paddingBottomSheet,
+      decoration: Dimensions.decorationBottomSheetAlternative,
+      child: IntrinsicHeight(
         child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Fields.bottomSheetTitle(S.current.titleAddFile,
-                      textAlign: TextAlign.start,
-                      padding: EdgeInsets.all(0.0),
-                      style: sheetTitleStyle),
-                  Fields.actionIcon(_collapsableIcon,
-                      onPressed: _collapsableAction,
-                      padding: EdgeInsets.all(0.0),
-                      alignment: Alignment.center,
-                      size: Dimensions.sizeIconBig,
-                      color: Colors.black)
-                ],
-              ),
-              Fields.autosizeText(
-                '(${widget.sharedMediaPaths.length} ${widget.sharedMediaPaths.length == 1 ? S.current.messageFile : S.current.messageFiles})',
-                textAlign: TextAlign.center,
-              ),
-              Dimensions.spacingVertical,
-              Visibility(
-                  visible: !_minimize,
-                  child: ConstrainedBox(
-                      constraints: BoxConstraints.loose(
-                          Size.fromHeight(mediaListMaxHeight)),
-                      child:
-                          _buildMediaList(context, widget.sharedMediaPaths))),
-              Visibility(
-                  visible: !_minimize,
-                  child: Fields.dialogActions(context,
-                      buttons: _actions(context),
-                      padding: const EdgeInsets.only(top: 20.0),
-                      mainAxisAlignment: MainAxisAlignment.end))
-            ]),
-      );
-    });
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetTitle(
+              S.current.titleAddFile,
+              style: context.theme.appTextStyle.titleMedium,
+            ),
+            _buildMediaList(widget.sharedMediaPaths),
+            _buildFilesCount(),
+            _buildActions(),
+          ],
+        ),
+      ),
+    );
   }
 
-  void _collapsableAction() {
-    if (_collapsableIcon == _collapsableIconDown) {
-      setState(() {
-        _collapsableIcon = _collapsableIconUp;
-        _minimize = true;
-      });
-
-      return;
+  Widget _buildMediaList(List<String> mediaPaths) {
+    if (mediaPaths.length == 1) {
+      return _MediaDescription(mediaPath: mediaPaths.first);
     }
 
-    setState(() {
-      _collapsableIcon = _collapsableIconDown;
-      _minimize = false;
-    });
+    return Container(
+      constraints: BoxConstraints.loose(Size.fromHeight(mediaListMaxHeight)),
+      height: mediaListMaxHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        color: Color.fromARGB(150, 255, 255, 255),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        separatorBuilder: (context, index) => const Divider(
+          height: 1,
+          color: Colors.black12,
+        ),
+        itemCount: mediaPaths.length,
+        itemBuilder: (context, index) {
+          final path = mediaPaths[index];
+          return _MediaDescription(mediaPath: path);
+        },
+      ),
+    );
   }
 
-  Widget _buildMediaList(BuildContext context, List<String> mediaPaths) =>
-      ListView.separated(
-          shrinkWrap: true,
-          separatorBuilder: (context, index) =>
-              const Divider(height: 1, color: Colors.black12),
-          itemCount: mediaPaths.length,
-          itemBuilder: (context, index) {
-            final mediaPath = mediaPaths[index];
-            final name = basename(mediaPath);
+  Widget _buildFilesCount() {
+    final totalFiles = widget.sharedMediaPaths.length;
+    final pluralizedMessage =
+        totalFiles == 1 ? S.current.messageFile : S.current.messageFiles;
 
-            return Container(
-                padding: Dimensions.paddingListItem,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                            flex: 1,
-                            child: const Icon(Icons.insert_drive_file_outlined,
-                                size: Dimensions.sizeIconAverage)),
-                        Expanded(flex: 9, child: Fields.autosizeText(name))
-                      ],
-                    ),
-                    Fields.autosizeText(mediaPath)
-                  ],
-                ));
-          });
+    return Padding(
+      padding: EdgeInsets.all(4.0),
+      child: Text(
+        '$totalFiles $pluralizedMessage',
+        textAlign: TextAlign.right,
+      ),
+    );
+  }
 
-  List<Widget> _actions(BuildContext context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () => widget.onUpdateBottomSheet.call(null, 0.0, ''),
-            buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton),
-        PositiveButton(
-            text: S.current.actionSave,
-            onPressed: widget._repos.showList
-                ? null
-                : () async {
-                    final canSaveMedia = await widget.validationFunction();
-                    if (!canSaveMedia) {
-                      return;
-                    }
+  Widget _buildActions() => widget._repos.builder(
+        (reposCubit) => Fields.dialogActions(
+          context,
+          buttons: _actions(reposCubit),
+          padding: const EdgeInsets.only(top: 20.0),
+          mainAxisAlignment: MainAxisAlignment.end,
+        ),
+      );
 
-                    for (final path in widget.sharedMediaPaths) {
-                      await widget.onSaveFile(path);
-                    }
+  List<Widget> _actions(ReposCubit reposCubit) {
+    final repoCubit = reposCubit.currentRepo?.cubit;
+    final isRepoList = reposCubit.showList;
 
-                    widget.onUpdateBottomSheet.call(null, 0.0, '');
-                  },
-            buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton)
-      ];
+    return [
+      NegativeButton(
+        text: S.current.actionCancel,
+        buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
+        onPressed: () {
+          widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+          repoCubit?.hideBottomSheet();
+        },
+      ),
+      widget._repos.builder(
+        (rc) => PositiveButton(
+          text: S.current.actionSave,
+          onPressed: isRepoList
+              ? null
+              : () async {
+                  final canSaveMedia = await widget.canSaveMedia();
+                  if (!canSaveMedia) {
+                    return;
+                  }
+                  for (final path in widget.sharedMediaPaths) {
+                    await widget.onSaveFile(path);
+                  }
+
+                  widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+                  repoCubit?.hideBottomSheet();
+                },
+          buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
+        ),
+      ),
+    ];
+  }
+}
+
+class _MediaDescription extends StatelessWidget {
+  const _MediaDescription({required this.mediaPath});
+
+  final String mediaPath;
+
+  @override
+  Widget build(BuildContext context) {
+    final parent = dirname(mediaPath);
+    final name = basename(mediaPath);
+
+    return Container(
+      padding: Dimensions.paddingListItem,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                flex: 0,
+                child: const Icon(Icons.insert_drive_file_outlined,
+                    size: Dimensions.sizeIconAverage),
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Fields.ellipsedText(
+                    name,
+                    ellipsisPosition: TextOverflowPosition.middle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Fields.ellipsedText(
+                    parent,
+                    ellipsisPosition: TextOverflowPosition.middle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

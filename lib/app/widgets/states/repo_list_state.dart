@@ -8,15 +8,16 @@ import '../widgets.dart';
 
 class RepoListState extends StatelessWidget
     with AppLogger, RepositoryActionsMixin {
-  const RepoListState(
-      {required this.reposCubit,
-      required this.bottomPaddingWithBottomSheet,
-      required this.onShowRepoSettings,
-      required this.onNewRepositoryPressed,
-      required this.onImportRepositoryPressed});
+  const RepoListState({
+    required this.reposCubit,
+    required this.bottomSheetInfo,
+    required this.onShowRepoSettings,
+    required this.onNewRepositoryPressed,
+    required this.onImportRepositoryPressed,
+  });
 
   final ReposCubit reposCubit;
-  final ValueNotifier<double> bottomPaddingWithBottomSheet;
+  final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
 
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
@@ -54,9 +55,13 @@ class RepoListState extends StatelessWidget
     String? currentRepoName,
   ) =>
       ValueListenableBuilder(
-        valueListenable: bottomPaddingWithBottomSheet,
-        builder: (context, value, child) => ListView.separated(
-          padding: EdgeInsets.only(bottom: value),
+        valueListenable: bottomSheetInfo,
+        builder: (context, btInfo, child) => ListView.separated(
+          padding: EdgeInsets.only(
+            bottom: btInfo.neededPadding <= 0.0
+                ? Dimensions.defaultListBottomPadding
+                : btInfo.neededPadding,
+          ),
           separatorBuilder: (context, index) => const Divider(
             height: 1,
             color: Colors.transparent,

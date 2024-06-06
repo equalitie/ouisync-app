@@ -5,8 +5,8 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/native_channels.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
 
@@ -102,6 +102,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Session _session;
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
+  final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
   final _setCacheServersEnabledThrottle = Throttle();
@@ -110,6 +111,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     this._session,
     this._nativeChannels,
     this._navigation,
+    this._bottomSheet,
     this._repo,
     this._pathCipher,
     RepoState state,
@@ -124,6 +126,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required Repository repo,
     required RepoLocation location,
     required NavigationCubit navigation,
+    required EntryBottomSheetCubit bottomSheet,
   }) async {
     final authMode = await repo.getAuthMode();
 
@@ -150,6 +153,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       session,
       nativeChannels,
       navigation,
+      bottomSheet,
       repo,
       pathCipher,
       state,
@@ -174,6 +178,23 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(location, currentFolder, isFolder);
+  }
+
+  void showMoveEntryBottomSheet({
+    required BottomSheetType sheetType,
+    required String entryPath,
+    required EntryType entryType,
+  }) {
+    _bottomSheet.showMoveEntry(
+      repoCubit: this,
+      navigationCubit: _navigation,
+      entryPath: entryPath,
+      entryType: entryType,
+    );
+  }
+
+  void hideBottomSheet() {
+    _bottomSheet.hide();
   }
 
   Future<void> enableSync() async {

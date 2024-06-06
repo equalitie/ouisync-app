@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -12,11 +13,13 @@ import '../widgets.dart';
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions({
     required this.context,
-    required this.cubit,
+    required this.repoCubit,
+    required this.bottomSheetCubit,
   });
 
   final BuildContext context;
-  final RepoCubit cubit;
+  final RepoCubit repoCubit;
+  final EntryBottomSheetCubit bottomSheetCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -26,56 +29,97 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         ?.copyWith(fontWeight: FontWeight.w400);
 
     return Container(
-        padding: Dimensions.paddingBottomSheet,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      padding: Dimensions.paddingBottomSheet,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.bottomSheetHandle(context),
+          Fields.bottomSheetTitle(
+            S.current.titleFolderActions,
+            style: sheetTitleStyle,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Fields.bottomSheetHandle(context),
-              Fields.bottomSheetTitle(
-                S.current.titleFolderActions,
-                style: sheetTitleStyle,
+              _buildAction(
+                name: S.current.actionNewFolder,
+                icon: Icons.create_new_folder_outlined,
+                action: () => createFolderDialog(context, repoCubit),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildAction(
-                    name: S.current.actionNewFolder,
-                    icon: Icons.create_new_folder_outlined,
-                    action: () => createFolderDialog(context, cubit),
-                  ),
-                  _buildAction(
-                    name: S.current.actionNewFile,
-                    icon: Icons.upload_file_outlined,
-                    action: () async =>
-                        await addFile(context, cubit, FileType.any),
-                  ),
-                  if (io.Platform.isIOS)
-                    _buildAction(
-                      name: S.current.actionNewMediaFile,
-                      icon: Icons.photo_library_outlined,
-                      action: () async =>
-                          await addFile(context, cubit, FileType.media),
-                    ),
-                ],
-              ),
-            ]));
+              _buildNewFileAction(),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAction({name, icon, action}) => Padding(
-      padding: Dimensions.paddingBottomSheetActions,
-      child: GestureDetector(
+        padding: Dimensions.paddingBottomSheetActions,
+        child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: action,
-          child: Column(children: [
-            Icon(
-              icon,
-              size: Dimensions.sizeIconBig,
-            ),
-            Dimensions.spacingVertical,
-            Text(name)
-          ])));
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: Dimensions.sizeIconBig,
+              ),
+              Dimensions.spacingVertical,
+              Text(name)
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildNewFileAction() =>
+      BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
+        bloc: bottomSheetCubit,
+        builder: (context, state) {
+          /// If we are not using the modal bottom sheet, this is, we
+          /// are not moving entries or adding media from the device,
+          /// we dissable the add File button.
+          final enable = state is HideSheetState;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildAction(
+                name: S.current.actionNewFile,
+                icon: Icons.upload_file_outlined,
+                action: enable
+                    ? () async => await addFile(
+                          context,
+                          repoCubit,
+                          FileType.any,
+                        )
+                    : () async => await _showNotAvailableAlertDialog(context),
+              ),
+              if (io.Platform.isIOS)
+                _buildAction(
+                  name: S.current.actionNewMediaFile,
+                  icon: Icons.photo_library_outlined,
+                  action: enable
+                      ? () async => await addFile(
+                            context,
+                            repoCubit,
+                            FileType.media,
+                          )
+                      : () async => await _showNotAvailableAlertDialog(context),
+                ),
+            ],
+          );
+        },
+      );
+
+  Future<void> _showNotAvailableAlertDialog(BuildContext context) =>
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: S.current.titleMovingEntry,
+        message: S.current.messageMovingEntry,
+      );
 
   void createFolderDialog(context, RepoCubit cubit) async {
     final parent = cubit.state.currentFolder.path;
@@ -89,7 +133,8 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       if (newFolderPath.isNotEmpty) {
         await cubit.createFolder(newFolderPath);
 
-        /// If a name for the new folder is provided, the new folder path is returned; otherwise, empty string.
+        /// If a name for the new folder is provided, the new folder path is
+        /// returned; otherwise, empty string.
         Navigator.of(this.context).pop();
       }
     });
@@ -160,7 +205,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
     final newFileName = '$name (${versions += 1})$extension';
 
-    if (await cubit.exists(newFileName)) {
+    if (await repoCubit.exists(newFileName)) {
       return await _renameFile(dstPath, versions);
     }
 
