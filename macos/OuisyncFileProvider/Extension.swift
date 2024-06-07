@@ -37,7 +37,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         }
 
         self.domain = domain
-        self.log = log
+        self.log = log.level(.info)
         super.init()
     }
 
@@ -375,7 +375,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        let log = self.log.child("enumerator").trace("invoked(\(identifier))")
+        let log = self.log.child("enumerator").level(.error).trace("invoked(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             let error = ExtError.backendIsUnreachable

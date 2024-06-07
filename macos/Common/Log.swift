@@ -8,13 +8,19 @@
 import Foundation
 
 class Log {
+    enum Level: UInt8 {
+        case trace = 0
+        case info
+        case error
+    }
+
     fileprivate static var nextRootId: UInt64 = 0
 
     fileprivate let parent: Log?
     fileprivate var label: String
     fileprivate var id: UInt64
     fileprivate var nextChildId: UInt64 = 0
-    fileprivate var enabled: Bool = true
+    var selfLevel: Level? = nil
 
     init(_ label: String) {
         self.parent = nil
@@ -23,51 +29,68 @@ class Log {
         Self.nextRootId += 1
     }
 
-    fileprivate init(_ label: String, _ parent: Log) {
+    fileprivate init(_ label: String, _ parent: Log, _ level: Level?) {
         self.parent = parent
         self.label = label
         self.id = parent.nextChildId
+        self.selfLevel = level
         parent.nextChildId += 1
     }
 
     func child(_ label: String) -> Log {
-        Log(label, self)
+        Log(label, self, selfLevel)
     }
 
     @discardableResult
     func trace(_ msg: String) -> Log {
-        let (enabled, labels) = collect()
-        if !enabled { return self }
-        NSLog("🧩 \(labels)\(msg)")
-        return self
+        print(.trace, msg)
     }
 
     func info(_ msg: String) {
-        let (enabled, labels) = collect()
-        if !enabled { return }
-        NSLog("🧩 \(labels)\(msg)")
+        print(.info, msg)
     }
 
     func error(_ msg: String) {
-        let (enabled, labels) = collect()
-        if !enabled { return }
-        NSLog("😡 \(labels)\(msg)")
+        print(.error, msg)
     }
 
-    func disable() -> Log {
-        enabled = false
+    @discardableResult
+    fileprivate func print(_ level: Level, _ msg: String) -> Log {
+        if !shouldPrint(level) { return self }
+        let path = self.path()
+        NSLog("\(levelBadge(level)) \(labels(path)): \(msg)")
         return self
     }
 
-    fileprivate func collect() -> (enabled: Bool, labels: String) {
-        let path = self.path()
-        return (
-            enabled: path.reduce(true, { $0 && $1.enabled }),
-            labels: path.map({ "\($0.label):\($0.id)" }).joined(separator: "/") + ": "
-        )
+    func level(_ l: Level) -> Log {
+        self.selfLevel = l
+        return self
     }
 
-    fileprivate func path() -> [Log] {
+    fileprivate func levelBadge(_ level: Level) -> String {
+        switch level {
+        case .trace: return "🧩"
+        case .info: return "👉"
+        case .error: return "😡"
+        }
+    }
+    fileprivate func labels(_ path: [Log]) -> String {
+        return path.map({ "\($0.label):\($0.id)" }).joined(separator: "/")
+    }
+
+    fileprivate func shouldPrint(_ level: Level) -> Bool {
+        var cur = self
+        while true {
+            if let curSelfLevel = cur.selfLevel {
+                return level.rawValue >= curSelfLevel.rawValue
+            }
+            if let parent = cur.parent { cur = parent } else { break }
+        }
+
+        return true
+    }
+
+    func path() -> [Log] {
         var current: Log? = self
         var ret: [Log] = []
 
@@ -77,5 +100,17 @@ class Log {
         }
 
         return ret.reversed()
+    }
+
+    func pathFromSelf() -> [Log] {
+        var current: Log? = self
+        var ret: [Log] = []
+
+        while let c = current {
+            ret.append(c)
+            current = c.parent
+        }
+
+        return ret
     }
 }
