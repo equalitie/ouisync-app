@@ -172,16 +172,34 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
     }
 
     func loadItem(_ session: OuisyncSession) async throws -> FileItem {
-        let entry = try await loadEntry(session)
+        guard let repo = await getRepoByName(session, repoName) else {
+            throw ExtError.noSuchItem
+        }
 
-        let size: UInt64
+        return try await loadItem(repo)
+    }
 
+    func loadItem(_ repo: OuisyncRepository) async throws -> FileItem {
+        let entry = OuisyncFileEntry(path, repo)
+
+        var file: OuisyncFile? = nil
+        var size: UInt64 = 0
+
+        // When a directory lists a file Ouisync may not yet have it and thus it may not
+        // be able to determine it's size. The FileItem we want to return here doesn't
+        // require a OuisyncFile, so we may still proceed as if the file was there but
+        // with size == 0.
         do {
-            let file = try await entry.open()
-            size = try await file.size()
+            if let f = try? await entry.open() {
+                size = try await f.size()
+                file = f
+            }
         } catch let error as OuisyncError {
             if error.code == .EntryNotFound {
                 throw ExtError.noSuchItem
+            } else if error.code == .Store {
+                // We likely don't yet have the first block which tells us the file size
+                size = 0
             } else {
                 fatalError("Unhandled Ouisync error:\(error), repo:\(repoName), path:\(path)")
             }
@@ -189,7 +207,19 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
             fatalError("Unhandled exception error:\(error), repo:\(repoName), path:\(path)")
         }
 
-        return FileItem(entry, repoName, size: size)
+        var version = Data()
+
+        do {
+            if let file = file {
+                // If the file is open returning it's version vector hash should succeed because
+                // that information is stored in that file's parent directory.
+                version = try await file.versionVectorHash()
+            }
+        } catch {
+            fatalError("Unhandled exception when retrieving file version:\(error)")
+        }
+
+        return FileItem(entry, repoName, size: size, version: version)
     }
 
     func loadEntry(_ session: OuisyncSession) async throws -> OuisyncFileEntry {

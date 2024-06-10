@@ -15,11 +15,13 @@ class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
     let file: OuisyncFileEntry
     var size: UInt64
+    let version: Data
 
-    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64) {
+    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64, version: Data) {
         self.repoName = repoName
         self.file = file
         self.size = size
+        self.version = version
     }
 
     func exists() async throws -> Bool {
@@ -40,7 +42,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+        return NSFileProviderItemVersion(contentVersion: version, metadataVersion: "a metadata version".data(using: .utf8)!)
     }
 
     var filename: String {
@@ -56,7 +58,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var documentSize: NSNumber? {
-        size as NSNumber
+        return size as NSNumber
     }
 }
 

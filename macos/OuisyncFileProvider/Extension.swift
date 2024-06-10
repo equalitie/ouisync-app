@@ -201,8 +201,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 switch type {
                 case .file(let srcUrl):
                     let dstFile = try await repo.createFile(dstPath)
-                    let written = try await copyContentsAndClose(srcUrl, dstFile)
-                    let dstItem = FileItem(repo.fileEntry(dstPath), repoName, size: written)
+                    let (written, version) = try await copyContentsAndClose(srcUrl, dstFile)
+                    let dstItem = FileItem(repo.fileEntry(dstPath), repoName, size: written, version: version)
 
                     handler(dstItem, [], false, nil)
                 case .folder:
@@ -276,18 +276,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
                     switch src.type() {
                     case .file:
-                        let size: UInt64
-
-                        if let f = item.documentSize, let s = f {
-                            size = UInt64(exactly: s)!
-                        } else {
-                            // TODO: Sometimes item.documentSize is not implemented or returns nil,
-                            // TODO: do we still need to pass it to the handler?
-                            let file = try await repo.fileEntry(dstPath).open()
-                            size = try await file.size()
-                        }
-
-                        newItem = FileItem(repo.fileEntry(dstPath), src.repoName(), size: size)
+                        newItem = try await FileIdentifier(dstPath, src.repoName()).loadItem(repo)
                     case .directory:
                         newItem = DirectoryItem(repo.directoryEntry(dstPath), src.repoName())
                     }
@@ -312,11 +301,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     }
 
                     try await file.truncate(0)
-                    let written = try await copyContentsAndClose(srcUrl, file)
+                    let (written, version) = try await copyContentsAndClose(srcUrl, file)
 
                     fields.remove(.contents)
 
-                    newItem = FileItem(entry, repoName, size: written)
+                    newItem = FileItem(entry, repoName, size: written, version: version)
                 }
 
                 handler(newItem, fields, false, nil)
@@ -426,8 +415,8 @@ class FileOnDisk {
     }
 }
 
-// Returns number of bytes written
-func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> UInt64 {
+// Returns number of bytes written and version vector hash
+func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt64, Data) {
     let srcFile = try FileHandle(forReadingFrom: src)
 
     var written: UInt64 = 0
@@ -440,13 +429,12 @@ func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> UInt64
             throw error
         case .success(let data):
             guard let data = data else {
+                let version = try await dst.versionVectorHash()
                 try await dst.close()
-                return written
+                return (written, version)
             }
             try await dst.write(written, data)
             written += UInt64(exactly: data.count)!
         }
     }
-
-    return written
 }
