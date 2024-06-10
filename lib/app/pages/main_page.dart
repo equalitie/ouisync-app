@@ -963,7 +963,11 @@ class _MainPageState extends State<MainPage>
         originRepoCubit: repoCubit,
         entryPath: entryPath,
         onUpdateBottomSheet: updateBottomSheetInfo,
-        onMoveEntry: () async => await moveEntry(repoCubit, entryPath),
+        onMoveEntry: () async => await moveEntry(
+          repoCubit,
+          entryPath,
+          entryType,
+        ),
         onCancel: widget.bottomSheet.hide,
       );
 
@@ -1007,6 +1011,7 @@ class _MainPageState extends State<MainPage>
   Future<bool> moveEntry(
     RepoCubit currentRepo,
     String entryPath,
+    EntryType entryType,
   ) async {
     RepoCubit? destinationRepo = currentRepo.state.infoHash !=
             _cubits.repositories.currentRepo?.cubit?.state.infoHash
@@ -1026,6 +1031,7 @@ class _MainPageState extends State<MainPage>
           )
         : currentRepo.moveEntryToRepo(
             destinationRepoCubit: destinationRepo,
+            type: entryType,
             source: entryPath,
             destination: destination,
           );

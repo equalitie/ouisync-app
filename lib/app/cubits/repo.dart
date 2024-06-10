@@ -674,29 +674,76 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<bool> moveEntryToRepo({
     required RepoCubit destinationRepoCubit,
+    required EntryType type,
     required String source,
     required String destination,
   }) async {
     emit(state.copyWith(isLoading: true));
-
     try {
-      final originFile = await openFile(source);
-      final originFileLength = await originFile.length;
+      final result = type == EntryType.file
+          ? await _moveFileToRepo(
+              destinationRepoCubit,
+              source,
+              destination,
+            )
+          : await _moveFolderToRepo(
+              destinationRepoCubit,
+              source,
+              destination,
+            );
 
-      await destinationRepoCubit.saveFile(
-        filePath: destination,
-        length: originFileLength,
-        fileByteStream: originFile.read(0, originFileLength).asStream(),
-      );
-
-      await File.remove(_repo, source);
-      return true;
+      return result;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await destinationRepoCubit.refresh();
+      await refresh();
     }
+  }
+
+  Future<bool> _moveFileToRepo(
+    RepoCubit destinationRepoCubit,
+    String source,
+    String destination,
+  ) async {
+    final originFile = await openFile(source);
+    final originFileLength = await originFile.length;
+
+    await destinationRepoCubit.saveFile(
+      filePath: destination,
+      length: originFileLength,
+      fileByteStream: originFile.read(0, originFileLength).asStream(),
+    );
+
+    await File.remove(_repo, source);
+    return true;
+  }
+
+  Future<bool> _moveFolderToRepo(
+    RepoCubit destinationRepoCubit,
+    String source,
+    String destination,
+  ) async {
+    final createFolderOk = await destinationRepoCubit.createFolder(destination);
+    if (!createFolderOk) return false;
+
+    await openDirectory(source).then(
+      (contents) async {
+        for (var entry in contents) {
+          final from = join(source, entry.name);
+          final to = join(destination, entry.name);
+          final moveOk = entry.entryType == EntryType.file
+              ? await _moveFileToRepo(destinationRepoCubit, from, to)
+              : await _moveFolderToRepo(destinationRepoCubit, from, to);
+
+          if (!moveOk) return false;
+        }
+      },
+    );
+
+    await Directory.remove(_repo, source);
+    return true;
   }
 
   Future<bool> deleteFile(String filePath) async {
