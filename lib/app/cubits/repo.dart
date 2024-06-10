@@ -373,7 +373,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       }
 
       loggy.debug('File saved: $filePath (${formatSize(offset)})');
-    } catch (e) {
+    } catch (e, st) {
+      loggy.debug('Save file to $filePath failed: ${e.toString()}', e, st);
       showSnackBar(S.current.messageWritingFileError(filePath));
       return;
     } finally {
@@ -668,6 +669,33 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return false;
     } finally {
       await refresh();
+    }
+  }
+
+  Future<bool> moveEntryToRepo({
+    required RepoCubit destinationRepoCubit,
+    required String source,
+    required String destination,
+  }) async {
+    emit(state.copyWith(isLoading: true));
+
+    try {
+      final originFile = await openFile(source);
+      final originFileLength = await originFile.length;
+
+      await destinationRepoCubit.saveFile(
+        filePath: destination,
+        length: originFileLength,
+        fileByteStream: originFile.read(0, originFileLength).asStream(),
+      );
+
+      await File.remove(_repo, source);
+      return true;
+    } catch (e, st) {
+      loggy.app('Move entry from $source to $destination failed', e, st);
+      return false;
+    } finally {
+      await destinationRepoCubit.refresh();
     }
   }
 

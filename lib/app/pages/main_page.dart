@@ -959,10 +959,9 @@ class _MainPageState extends State<MainPage>
     required EntryType entryType,
   }) =>
       MoveEntryDialog(
-        repo: repoCubit,
-        navigation: navigationCubit,
+        _cubits,
+        originRepoCubit: repoCubit,
         entryPath: entryPath,
-        entryType: entryType,
         onUpdateBottomSheet: updateBottomSheetInfo,
         onMoveEntry: () async => await moveEntry(repoCubit, entryPath),
         onCancel: widget.bottomSheet.hide,
@@ -1007,18 +1006,29 @@ class _MainPageState extends State<MainPage>
 
   Future<bool> moveEntry(
     RepoCubit currentRepo,
-    String path,
+    String entryPath,
   ) async {
-    final basename = repo_path.basename(path);
-    final destination = repo_path.join(
-      currentRepo.state.currentFolder.path,
-      basename,
-    );
+    RepoCubit? destinationRepo = currentRepo.state.infoHash !=
+            _cubits.repositories.currentRepo?.cubit?.state.infoHash
+        ? _cubits.repositories.currentRepo?.cubit
+        : null;
 
-    return currentRepo.moveEntry(
-      source: path,
-      destination: destination,
-    );
+    final basename = repo_path.basename(entryPath);
+    final currentFolder = destinationRepo == null
+        ? currentRepo.state.currentFolder.path
+        : destinationRepo.state.currentFolder.path;
+    final destination = repo_path.join(currentFolder, basename);
+
+    return destinationRepo == null
+        ? currentRepo.moveEntry(
+            source: entryPath,
+            destination: destination,
+          )
+        : currentRepo.moveEntryToRepo(
+            destinationRepoCubit: destinationRepo,
+            source: entryPath,
+            destination: destination,
+          );
   }
 
   Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
