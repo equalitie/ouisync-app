@@ -1009,28 +1009,30 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool> moveEntry(
-    RepoCubit currentRepo,
+    RepoCubit originRepo,
     String entryPath,
     EntryType entryType,
   ) async {
-    RepoCubit? destinationRepo = currentRepo.state.infoHash !=
-            _cubits.repositories.currentRepo?.cubit?.state.infoHash
-        ? _cubits.repositories.currentRepo?.cubit
-        : null;
+    if (_currentRepo == null) return false;
 
+    final otherRepoCubit =
+        originRepo.location.compareTo(_currentRepo!.location) == 0
+            ? null
+            : _currentRepo!.cubit;
+
+    final currentFolder = otherRepoCubit == null
+        ? originRepo.state.currentFolder.path
+        : otherRepoCubit.state.currentFolder.path;
     final basename = repo_path.basename(entryPath);
-    final currentFolder = destinationRepo == null
-        ? currentRepo.state.currentFolder.path
-        : destinationRepo.state.currentFolder.path;
     final destination = repo_path.join(currentFolder, basename);
 
-    return destinationRepo == null
-        ? currentRepo.moveEntry(
+    return otherRepoCubit == null
+        ? await originRepo.moveEntry(
             source: entryPath,
             destination: destination,
           )
-        : currentRepo.moveEntryToRepo(
-            destinationRepoCubit: destinationRepo,
+        : await originRepo.moveEntryToRepo(
+            destinationRepoCubit: otherRepoCubit,
             type: entryType,
             source: entryPath,
             destination: destination,
