@@ -186,9 +186,14 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     required bool isRepoList,
   }) {
     if (isRepoList) return false;
+    if (destinationRepoLocation == null) return false;
 
-    if (originRepoLocation == destinationRepoLocation &&
-        originPath == destinationPath) return false;
+    bool isSameRepo = originRepoLocation.compareTo(destinationRepoLocation) == 0
+        ? true
+        : false;
+    final isSamePath =
+        originPath.compareTo(destinationPath) == 0 ? true : false;
+    if (isSameRepo && isSamePath) return false;
 
     return true;
   }
