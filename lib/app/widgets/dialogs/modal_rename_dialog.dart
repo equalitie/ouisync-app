@@ -128,8 +128,7 @@ class RenameEntry extends HookWidget with AppLogger {
       if (!extensionValidationOK) return false;
     }
 
-    final newPath = join(parent, newName);
-    final newPathExistOk = await _validateNewNameExists(newPath);
+    final newPathExistOk = await _validateNewNameExists(parent, newName);
     if (!newPathExistOk) return false;
 
     formKey.currentState!.save();
@@ -176,18 +175,20 @@ class RenameEntry extends HookWidget with AppLogger {
     return continueAnyway ?? false;
   }
 
-  Future<bool> _validateNewNameExists(String newPath) async {
+  Future<bool> _validateNewNameExists(String parent, String newName) async {
+    final newPath = join(parent, newName);
     final exist = await repoCubit.exists(newPath);
     if (!exist) return true;
 
     final title =
         isFile ? S.current.messageRenameFile : S.current.messageRenameFolder;
-    final entryTypeName =
-        (isFile ? S.current.typeFile : S.current.typeFolder).toLowerCase();
-    final message = 'There is already a $entryTypeName with that name';
+    final message = S.current.messageEntryAlreadyExist(newName);
 
     await Dialogs.simpleAlertDialog(
-        context: parentContext, title: title, message: message);
+      context: parentContext,
+      title: title,
+      message: message,
+    );
 
     return false;
   }
