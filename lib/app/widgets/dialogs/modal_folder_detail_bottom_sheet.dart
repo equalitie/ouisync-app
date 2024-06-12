@@ -161,12 +161,15 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
+          final parent = dirname(entry.path);
           final oldName = basename(entry.path);
 
           return ActionsDialog(
             title: S.current.messageRenameFolder,
             body: RenameEntry(
               parentContext: context,
+              repoCubit: widget.repoCubit,
+              parent: parent,
               oldName: oldName,
               originalExtension: '',
               isFile: false,
@@ -175,13 +178,13 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           );
         },
       ).then(
-        (newName) {
+        (newName) async {
           if (newName.isNotEmpty) {
             // The new name provided by the user.
             final parent = dirname(entry.path);
             final newEntryPath = join(parent, newName);
 
-            widget.repoCubit.moveEntry(
+            await widget.repoCubit.moveEntry(
               source: entry.path,
               destination: newEntryPath,
             );

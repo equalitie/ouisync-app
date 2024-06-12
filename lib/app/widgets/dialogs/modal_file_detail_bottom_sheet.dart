@@ -214,6 +214,7 @@ class _FileDetailState extends State<FileDetail> {
           return ScaffoldMessenger(
             child: Builder(
               builder: (context) {
+                final parent = dirname(entry.path);
                 final oldName = basename(entry.path);
                 final originalExtension = extension(entry.path);
 
@@ -223,6 +224,8 @@ class _FileDetailState extends State<FileDetail> {
                     title: S.current.messageRenameFile,
                     body: RenameEntry(
                       parentContext: context,
+                      repoCubit: widget.repoCubit,
+                      parent: parent,
                       oldName: oldName,
                       originalExtension: originalExtension,
                       isFile: true,
@@ -235,13 +238,13 @@ class _FileDetailState extends State<FileDetail> {
           );
         },
       ).then(
-        (newName) {
+        (newName) async {
           if (newName.isNotEmpty) {
             // The new name provided by the user.
             final parent = dirname(entry.path);
             final newEntryPath = join(parent, newName);
 
-            widget.repoCubit.moveEntry(
+            await widget.repoCubit.moveEntry(
               source: entry.path,
               destination: newEntryPath,
             );

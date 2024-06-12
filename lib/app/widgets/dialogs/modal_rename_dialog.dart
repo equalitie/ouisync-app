@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/platform/platform.dart';
+import '../../cubits/repo.dart';
 import '../../utils/path.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RenameEntry extends HookWidget with AppLogger {
-  RenameEntry(
-      {required this.parentContext,
-      required this.oldName,
-      required this.originalExtension,
-      required this.isFile,
-      required this.hint});
+  RenameEntry({
+    required this.parentContext,
+    required this.repoCubit,
+    required this.parent,
+    required this.oldName,
+    required this.originalExtension,
+    required this.isFile,
+    required this.hint,
+  });
 
   final BuildContext parentContext;
+  final RepoCubit repoCubit;
+  final String parent;
   final String oldName;
   final String originalExtension;
   final bool isFile;
@@ -71,7 +77,7 @@ class RenameEntry extends HookWidget with AppLogger {
                 labelText: S.current.labelName,
                 hintText: hint,
                 onFieldSubmitted: (newName) async {
-                  final submitted = await _submitField(context, newName);
+                  final submitted = await _submitField(parent, newName);
                   if (submitted && PlatformValues.isDesktopDevice) {
                     Navigator.of(context).pop(newName);
                   }
@@ -85,7 +91,7 @@ class RenameEntry extends HookWidget with AppLogger {
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  Future<bool> _submitField(BuildContext context, String? newName) async {
+  Future<bool> _submitField(String parent, String? newName) async {
     if (newName == null) return false;
 
     if (newName == oldName) {
@@ -96,7 +102,7 @@ class RenameEntry extends HookWidget with AppLogger {
       return false;
     }
 
-    final validationOk = await _validateNewName(newName);
+    final validationOk = await _validateNewName(parent, newName);
 
     if (!validationOk) {
       final newExtension = extension(newName);
@@ -114,13 +120,17 @@ class RenameEntry extends HookWidget with AppLogger {
     return true;
   }
 
-  Future<bool> _validateNewName(String newName) async {
+  Future<bool> _validateNewName(String parent, String newName) async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     if (isFile) {
       final extensionValidationOK = await _validateExtension(newName);
       if (!extensionValidationOK) return false;
     }
+
+    final newPath = join(parent, newName);
+    final newPathExistOk = await _validateNewNameExists(newPath);
+    if (!newPathExistOk) return false;
 
     formKey.currentState!.save();
     return true;
@@ -129,7 +139,8 @@ class RenameEntry extends HookWidget with AppLogger {
   Future<bool> _validateExtension(String name) async {
     final fileExtension = extension(name);
 
-    /// If there was not extension originally, then no need to have or validate a new one
+    /// If there was not extension originally, then no need to have or validate
+    /// a new one
     if (originalExtension.isEmpty) return true;
 
     String title = '';
@@ -165,6 +176,22 @@ class RenameEntry extends HookWidget with AppLogger {
     return continueAnyway ?? false;
   }
 
+  Future<bool> _validateNewNameExists(String newPath) async {
+    final exist = await repoCubit.exists(newPath);
+    if (!exist) return true;
+
+    final title =
+        isFile ? S.current.messageRenameFile : S.current.messageRenameFolder;
+    final entryTypeName =
+        (isFile ? S.current.typeFile : S.current.typeFolder).toLowerCase();
+    final message = 'There is already a $entryTypeName with that name';
+
+    await Dialogs.simpleAlertDialog(
+        context: parentContext, title: title, message: message);
+
+    return false;
+  }
+
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
@@ -173,13 +200,17 @@ class RenameEntry extends HookWidget with AppLogger {
         PositiveButton(
             text: S.current.actionRename,
             onPressed: () async =>
-                await _onSaved(context, _newNameController.text),
+                await _onSaved(context, parent, _newNameController.text),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
 
-  Future<void> _onSaved(BuildContext context, String? newName) async {
-    final submitted = await _submitField(context, newName);
+  Future<void> _onSaved(
+    BuildContext context,
+    String parent,
+    String? newName,
+  ) async {
+    final submitted = await _submitField(parent, newName);
     if (submitted) {
       Navigator.of(context).pop(newName);
     }
