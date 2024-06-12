@@ -959,12 +959,15 @@ class _MainPageState extends State<MainPage>
     required EntryType entryType,
   }) =>
       MoveEntryDialog(
-        repo: repoCubit,
-        navigation: navigationCubit,
+        _cubits,
+        originRepoCubit: repoCubit,
         entryPath: entryPath,
-        entryType: entryType,
         onUpdateBottomSheet: updateBottomSheetInfo,
-        onMoveEntry: () async => await moveEntry(repoCubit, entryPath),
+        onMoveEntry: () async => await moveEntry(
+          repoCubit,
+          entryPath,
+          entryType,
+        ),
         onCancel: widget.bottomSheet.hide,
       );
 
@@ -1006,19 +1009,34 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool> moveEntry(
-    RepoCubit currentRepo,
-    String path,
+    RepoCubit originRepo,
+    String entryPath,
+    EntryType entryType,
   ) async {
-    final basename = repo_path.basename(path);
-    final destination = repo_path.join(
-      currentRepo.state.currentFolder.path,
-      basename,
-    );
+    if (_currentRepo == null) return false;
 
-    return currentRepo.moveEntry(
-      source: path,
-      destination: destination,
-    );
+    final otherRepoCubit =
+        originRepo.location.compareTo(_currentRepo!.location) == 0
+            ? null
+            : _currentRepo!.cubit;
+
+    final currentFolder = otherRepoCubit == null
+        ? originRepo.state.currentFolder.path
+        : otherRepoCubit.state.currentFolder.path;
+    final basename = repo_path.basename(entryPath);
+    final destination = repo_path.join(currentFolder, basename);
+
+    return otherRepoCubit == null
+        ? await originRepo.moveEntry(
+            source: entryPath,
+            destination: destination,
+          )
+        : await originRepo.moveEntryToRepo(
+            destinationRepoCubit: otherRepoCubit,
+            type: entryType,
+            source: entryPath,
+            destination: destination,
+          );
   }
 
   Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
