@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -13,20 +12,18 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class MoveEntryDialog extends StatefulWidget {
-  const MoveEntryDialog({
-    required this.repo,
-    required this.navigation,
+  const MoveEntryDialog(
+    this._cubits, {
+    required this.originRepoCubit,
     required this.entryPath,
-    required this.entryType,
     required this.onUpdateBottomSheet,
     required this.onMoveEntry,
     required this.onCancel,
   });
 
-  final RepoCubit repo;
-  final NavigationCubit navigation;
+  final Cubits _cubits;
+  final RepoCubit originRepoCubit;
   final String entryPath;
-  final EntryType entryType;
   final void Function(
     BottomSheetType type,
     double padding,
@@ -42,6 +39,12 @@ class MoveEntryDialog extends StatefulWidget {
 class _MoveEntryDialogState extends State<MoveEntryDialog> {
   final bodyKey = GlobalKey();
   Size? widgetSize;
+  double aspectRatio = 1;
+
+  NavigationCubit get navigationCubit => widget._cubits.navigation;
+  RepoCubit get originRepoCubit => widget.originRepoCubit;
+
+  String get entryPath => widget.entryPath;
 
   @override
   void initState() {
@@ -55,13 +58,17 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
     widgetSize = widgetContext.size;
 
-    widgetContext.size?.let((it) {
-          widget.onUpdateBottomSheet(
-            BottomSheetType.move,
-            it.height,
-            widget.entryPath,
-          );
-        }) ??
+    aspectRatio = widgetContext.size?.let(
+          (it) {
+            widget.onUpdateBottomSheet(
+              BottomSheetType.move,
+              it.height,
+              widget.entryPath,
+            );
+
+            return _getButtonAspectRatio(widgetSize);
+          },
+        ) ??
         0.0;
   }
 
@@ -75,44 +82,51 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     final parent = dirname(widget.entryPath);
     final name = basename(widget.entryPath);
 
-    return Container(
-      key: bodyKey,
-      padding: Dimensions.paddingBottomSheet,
-      decoration: Dimensions.decorationBottomSheetAlternative,
-      child: IntrinsicHeight(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Dimensions.spacingVertical,
-            Fields.iconLabel(
-              icon: Icons.drive_file_move_outlined,
-              text: name,
-            ),
-            Fields.ellipsedText(
-              S.current.messageMoveEntryOrigin(parent),
-              ellipsisPosition: TextOverflowPosition.middle,
-              style: bodyStyle,
-            ),
-            _selectActions(context),
-          ],
+    return widget._cubits.repositories.builder(
+      (cubit) => Container(
+        key: bodyKey,
+        padding: Dimensions.paddingBottomSheet,
+        decoration: Dimensions.decorationBottomSheetAlternative,
+        child: IntrinsicHeight(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Dimensions.spacingVertical,
+              Fields.iconLabel(
+                icon: Icons.drive_file_move_outlined,
+                text: name,
+              ),
+              Fields.ellipsedText(
+                S.current.messageMoveEntryOrigin(parent),
+                ellipsisPosition: TextOverflowPosition.middle,
+                style: bodyStyle,
+              ),
+              _selectActions(context, cubit.showList),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  _selectActions(context) {
-    final aspectRatio = _getButtonAspectRatio(widgetSize);
-    return Fields.dialogActions(
-      context,
-      buttons: _actions(context, aspectRatio),
-      padding: const EdgeInsets.only(top: 20.0),
-      mainAxisAlignment: MainAxisAlignment.end,
-    );
-  }
+  _selectActions(context, bool isRepoList) =>
+      BlocBuilder<NavigationCubit, NavigationState>(
+        bloc: navigationCubit,
+        builder: (context, state) => Fields.dialogActions(
+          context,
+          buttons: _actions(context, isRepoList),
+          padding: const EdgeInsets.only(top: 20.0),
+          mainAxisAlignment: MainAxisAlignment.end,
+        ),
+      );
 
-  List<Widget> _actions(BuildContext context, double aspectRatio) => [
+  List<Widget> _actions(
+    BuildContext context,
+    bool isRepoList,
+  ) =>
+      [
         NegativeButton(
           buttonsAspectRatio: aspectRatio,
           buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
@@ -123,15 +137,15 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
           },
         ),
         BlocBuilder<NavigationCubit, NavigationState>(
-          bloc: widget.navigation,
+          bloc: navigationCubit,
           builder: (context, state) {
-            final originPath = dirname(state.path);
             final canMove = state.isFolder
                 ? _canMove(
-                    state.repoLocation,
-                    state.path,
-                    widget.repo.location,
-                    originPath,
+                    originRepoLocation: originRepoCubit.location,
+                    originPath: dirname(entryPath),
+                    destinationRepoLocation: state.repoLocation,
+                    destinationPath: state.path,
+                    isRepoList: isRepoList,
                   )
                 : false;
             return PositiveButton(
@@ -164,14 +178,25 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         /// Then null is used instead of the function, which disable the button.
       ];
 
-  bool _canMove(
-    RepoLocation? originRepoLocation,
-    String originPath,
-    RepoLocation destinationRepoLocation,
-    String destinationPath,
-  ) =>
-      originRepoLocation == destinationRepoLocation &&
-      originPath != destinationPath;
+  bool _canMove({
+    required RepoLocation originRepoLocation,
+    required String originPath,
+    required RepoLocation? destinationRepoLocation,
+    required String destinationPath,
+    required bool isRepoList,
+  }) {
+    if (isRepoList) return false;
+    if (destinationRepoLocation == null) return false;
+
+    bool isSameRepo = originRepoLocation.compareTo(destinationRepoLocation) == 0
+        ? true
+        : false;
+    final isSamePath =
+        originPath.compareTo(destinationPath) == 0 ? true : false;
+    if (isSameRepo && isSamePath) return false;
+
+    return true;
+  }
 
   double _getButtonAspectRatio(Size? size) {
     if (Platform.isWindows || Platform.isLinux) {
