@@ -39,7 +39,6 @@ class MoveEntryDialog extends StatefulWidget {
 class _MoveEntryDialogState extends State<MoveEntryDialog> {
   final bodyKey = GlobalKey();
   Size? widgetSize;
-  double aspectRatio = 1;
 
   NavigationCubit get navigationCubit => widget._cubits.navigation;
   RepoCubit get originRepoCubit => widget.originRepoCubit;
@@ -58,18 +57,11 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
     widgetSize = widgetContext.size;
 
-    aspectRatio = widgetContext.size?.let(
-          (it) {
-            widget.onUpdateBottomSheet(
-              BottomSheetType.move,
-              it.height,
-              widget.entryPath,
-            );
-
-            return _getButtonAspectRatio(widgetSize);
-          },
-        ) ??
-        0.0;
+    widget.onUpdateBottomSheet(
+      BottomSheetType.move,
+      widgetSize?.height ?? 0.0,
+      widget.entryPath,
+    );
   }
 
   @override
@@ -114,17 +106,21 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
   _selectActions(context, bool isRepoList) =>
       BlocBuilder<NavigationCubit, NavigationState>(
         bloc: navigationCubit,
-        builder: (context, state) => Fields.dialogActions(
-          context,
-          buttons: _actions(context, isRepoList),
-          padding: const EdgeInsets.only(top: 20.0),
-          mainAxisAlignment: MainAxisAlignment.end,
-        ),
+        builder: (context, state) {
+          final aspectRatio = _getButtonAspectRatio(widgetSize);
+          return Fields.dialogActions(
+            context,
+            buttons: _actions(context, isRepoList, aspectRatio),
+            padding: const EdgeInsets.only(top: 20.0),
+            mainAxisAlignment: MainAxisAlignment.end,
+          );
+        },
       );
 
   List<Widget> _actions(
     BuildContext context,
     bool isRepoList,
+    double aspectRatio,
   ) =>
       [
         NegativeButton(
