@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,8 +25,6 @@ void main() {
 
   late NativeChannels nativeChannels;
   late Settings settings;
-  late RepoLocation originLocation;
-  late RepoLocation otherLocation;
   late NavigationCubit navigationCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
@@ -60,8 +59,6 @@ void main() {
     final sharedPreferences = await SharedPreferences.getInstance();
     final key = await MasterKey.init();
     settings = await Settings.init(sharedPreferences, key, session);
-    originLocation = RepoLocation.fromDbPath(locationOrigin.path);
-    otherLocation = RepoLocation.fromDbPath(locationOther.path);
     navigationCubit = NavigationCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
@@ -70,7 +67,7 @@ void main() {
       nativeChannels: nativeChannels,
       settings: settings,
       repo: originRepo,
-      location: originLocation,
+      location: locationOrigin,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
     );
@@ -80,7 +77,7 @@ void main() {
       nativeChannels: nativeChannels,
       settings: settings,
       repo: otherRepo,
-      location: otherLocation,
+      location: locationOther,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
     );
@@ -93,22 +90,17 @@ void main() {
   });
 
   test('Move file to other repo', () async {
+    final expectedFile1 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];
+
     // Create file to move
     {
-      await File.create(originRepo, 'file1.txt');
+      final file = await File.create(originRepo, 'file1.txt');
+      await file.write(0, utf8.encode("123"));
+      await file.close();
 
       final originContents = await Directory.open(originRepo, '/');
       expect(originContents, hasLength(1));
-      expect(
-        originContents,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('file1.txt', EntryType.file)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(originContents, dirEntryComparator(expectedFile1));
     }
 
     // Move file to other repo
@@ -125,38 +117,24 @@ void main() {
       final originContentsPost = await Directory.open(originRepo, '/');
       final otherContents = await Directory.open(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
-      expect(otherContents, hasLength(1));
 
-      expect(
-        otherContents.entries,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('file1.txt', EntryType.file)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(otherContents, hasLength(1));
+      expect(otherContents.entries, dirEntryComparator(expectedFile1));
     }
   });
 
   test('Move empty folder to other repo', () async {
+    final expectedFolder1 = <DirEntry>[
+      DirEntry('folder1', EntryType.directory)
+    ];
+
     // Create empty folder to move
     {
       await Directory.create(originRepo, '/folder1');
 
       final originContents = await Directory.open(originRepo, '/');
       expect(originContents, hasLength(1));
-      expect(
-        originContents,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('folder1', EntryType.directory)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(originContents, dirEntryComparator(expectedFolder1));
     }
 
     // Move empty folder to other repo
@@ -173,42 +151,28 @@ void main() {
       final originContentsPost = await Directory.open(originRepo, '/');
       final otherContents = await Directory.open(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
-      expect(otherContents, hasLength(1));
 
-      expect(
-        otherContents.entries,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('folder1', EntryType.directory)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(otherContents, hasLength(1));
+      expect(otherContents.entries, dirEntryComparator(expectedFolder1));
     }
   });
 
   test('Move folder with one file to other repo', () async {
+    final expectedFile1 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];
     // Create folder with one file to move
     {
       await Directory.create(originRepo, '/folder1');
-      await File.create(originRepo, '/folder1/file1.txt');
+
+      final file = await File.create(originRepo, '/folder1/file1.txt');
+      await file.write(0, utf8.encode("123"));
+      await file.close();
 
       final originContents = await Directory.open(originRepo, '/');
       expect(originContents, hasLength(1));
 
       final folder1Contents = await Directory.open(originRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
-      expect(
-        folder1Contents,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('file1.txt', EntryType.file)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(folder1Contents, dirEntryComparator(expectedFile1));
     }
 
     // Move folder woth one file to other repo
@@ -225,30 +189,16 @@ void main() {
       final originContentsPost = await Directory.open(originRepo, '/');
       final otherContents = await Directory.open(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
+
+      final expectedFolder1 = <DirEntry>[
+        DirEntry('folder1', EntryType.directory)
+      ];
       expect(otherContents, hasLength(1));
-      expect(
-        otherContents.entries,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('folder1', EntryType.directory)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(otherContents.entries, dirEntryComparator(expectedFolder1));
 
       final otherFolder1Contents = await Directory.open(otherRepo, '/folder1');
       expect(otherFolder1Contents, hasLength(1));
-      expect(
-        otherFolder1Contents,
-        pairwiseCompare(
-          <DirEntry>[DirEntry('file1.txt', EntryType.file)],
-          (DirEntry e0, DirEntry? e1) {
-            return e0.entryType == e1?.entryType && e0.name == e1?.name;
-          },
-          'Check for same DirEntry',
-        ),
-      );
+      expect(otherFolder1Contents, dirEntryComparator(expectedFile1));
     }
   });
 
@@ -285,6 +235,13 @@ void main() {
   //   }
   // });
 }
+
+Matcher dirEntryComparator(Iterable<DirEntry> expected) => pairwiseCompare(
+      expected,
+      (DirEntry e0, DirEntry? e1) =>
+          e0.entryType == e1?.entryType && e0.name == e1?.name,
+      'Check for same DirEntry',
+    );
 
 class FakeNativeChannels extends NativeChannels {
   FakeNativeChannels(super.session);
