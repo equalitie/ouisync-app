@@ -60,7 +60,7 @@ class ReplaceFile extends StatelessWidget {
         PositiveButton(
             text: S.current.actionAccept,
             onPressed: () => Navigator.of(context).pop(_fileAction.value),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
       ];
 
   void _onFileActionChanged(FileAction? value) =>

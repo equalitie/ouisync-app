@@ -1165,16 +1165,16 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<dynamic> _showDirectoryActions(
-    BuildContext context,
+    BuildContext parentContext,
     OpenRepoEntry repo,
   ) =>
       showModalBottomSheet(
         isScrollControlled: true,
-        context: context,
+        context: parentContext,
         shape: Dimensions.borderBottomSheetTop,
         builder: (context) {
           return DirectoryActions(
-            context: context,
+            parentContext: parentContext,
             repoCubit: repo.cubit,
             bottomSheetCubit: widget.bottomSheet,
           );

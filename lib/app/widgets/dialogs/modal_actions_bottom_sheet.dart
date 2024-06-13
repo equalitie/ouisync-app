@@ -12,12 +12,12 @@ import '../widgets.dart';
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions({
-    required this.context,
+    required this.parentContext,
     required this.repoCubit,
     required this.bottomSheetCubit,
   });
 
-  final BuildContext context;
+  final BuildContext parentContext;
   final RepoCubit repoCubit;
   final EntryBottomSheetCubit bottomSheetCubit;
 
@@ -48,7 +48,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 icon: Icons.create_new_folder_outlined,
                 action: () => createFolderDialog(context, repoCubit),
               ),
-              _buildNewFileAction(),
+              _buildNewFileAction(parentContext),
             ],
           ),
         ],
@@ -74,7 +74,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         ),
       );
 
-  Widget _buildNewFileAction() =>
+  Widget _buildNewFileAction(BuildContext parentContext) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: bottomSheetCubit,
         builder: (context, state) {
@@ -91,7 +91,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 icon: Icons.upload_file_outlined,
                 action: enable
                     ? () async => await addFile(
-                          context,
+                          parentContext,
                           repoCubit,
                           FileType.any,
                         )
@@ -103,7 +103,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   icon: Icons.photo_library_outlined,
                   action: enable
                       ? () async => await addFile(
-                            context,
+                            parentContext,
                             repoCubit,
                             FileType.media,
                           )
@@ -135,13 +135,17 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
         /// If a name for the new folder is provided, the new folder path is
         /// returned; otherwise, empty string.
-        Navigator.of(this.context).pop();
+        Navigator.of(parentContext).pop();
       }
     });
   }
 
-  Future<void> addFile(context, RepoCubit repo, FileType type) async {
-    final dstDir = repo.state.currentFolder.path;
+  Future<void> addFile(
+    parentContext,
+    RepoCubit repoCubit,
+    FileType type,
+  ) async {
+    final dstDir = repoCubit.state.currentFolder.path;
 
     final result = await FilePicker.platform.pickFiles(
       type: type,
@@ -155,60 +159,74 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         return 'Adding files $fileNames';
       });
 
-      Navigator.of(context).pop();
+      Navigator.of(parentContext).pop();
 
       for (final srcFile in result.files) {
         String fileName = srcFile.name;
         String dstPath = p.join(dstDir, fileName);
 
-        if (await repo.exists(dstPath)) {
-          final action = await showDialog<FileAction>(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                  title: Flex(direction: Axis.horizontal, children: [
-                    Fields.constrainedText(S.current.titleAddFile,
-                        style: context.theme.appTextStyle.titleMedium,
-                        maxLines: 2)
-                  ]),
-                  content: ReplaceFile(context: context, fileName: fileName)));
+        if (await repoCubit.exists(dstPath)) {
+          await showDialog<FileAction>(
+            context: parentContext,
+            builder: (BuildContext context) => AlertDialog(
+              title: Flex(
+                direction: Axis.horizontal,
+                children: [
+                  Fields.constrainedText(
+                    S.current.titleAddFile,
+                    style: context.theme.appTextStyle.titleMedium,
+                    maxLines: 2,
+                  )
+                ],
+              ),
+              content: ReplaceFile(context: context, fileName: fileName),
+            ),
+          ).then(
+            (fileAction) async {
+              if (fileAction == null) {
+                return;
+              }
 
-          if (action == null) {
-            return;
-          }
+              if (fileAction == FileAction.replace) {
+                await repoCubit.replaceFile(
+                  filePath: dstPath,
+                  length: srcFile.size,
+                  fileByteStream: srcFile.readStream!,
+                );
+              }
 
-          if (action == FileAction.replace) {
-            await repo.replaceFile(
-              filePath: dstPath,
-              length: srcFile.size,
-              fileByteStream: srcFile.readStream!,
-            );
-
-            return;
-          }
-
-          fileName = await _renameFile(dstPath, 0);
-          dstPath = p.join(dstDir, fileName);
+              if (fileAction == FileAction.keep) {
+                final newPath = await _renameFile(dstPath, 0);
+                await repoCubit.saveFile(
+                  filePath: newPath,
+                  length: srcFile.size,
+                  fileByteStream: srcFile.readStream!,
+                );
+              }
+            },
+          );
+        } else {
+          await repoCubit.saveFile(
+            filePath: dstPath,
+            length: srcFile.size,
+            fileByteStream: srcFile.readStream!,
+          );
         }
-
-        await repo.saveFile(
-          filePath: dstPath,
-          length: srcFile.size,
-          fileByteStream: srcFile.readStream!,
-        );
       }
     }
   }
 
   Future<String> _renameFile(String dstPath, int versions) async {
+    final parent = p.dirname(dstPath);
     final name = p.basenameWithoutExtension(dstPath);
     final extension = p.extension(dstPath);
 
     final newFileName = '$name (${versions += 1})$extension';
+    final newPath = p.join(parent, newFileName);
 
-    if (await repoCubit.exists(newFileName)) {
+    if (await repoCubit.exists(newPath)) {
       return await _renameFile(dstPath, versions);
     }
-
-    return newFileName;
+    return newPath;
   }
 }
