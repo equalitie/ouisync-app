@@ -50,7 +50,9 @@ android {
     }
 
     compileSdkVersion 34
-    ndkVersion '25.2.9519653'
+
+    // At time of writing, this is the LTS version
+    ndkVersion '26.3.11579264'
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
