@@ -15,9 +15,9 @@ class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
     let file: OuisyncFileEntry
     var size: UInt64
-    let version: Data
+    let version: Hash
 
-    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64, version: Data) {
+    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64, version: Hash) {
         self.repoName = repoName
         self.file = file
         self.size = size
@@ -42,7 +42,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        return NSFileProviderItemVersion(contentVersion: version, metadataVersion: "a metadata version".data(using: .utf8)!)
+        return NSFileProviderItemVersion(contentVersion: version.data, metadataVersion: "a metadata version".data(using: .utf8)!)
     }
 
     var filename: String {

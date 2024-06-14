@@ -416,7 +416,7 @@ class FileOnDisk {
 }
 
 // Returns number of bytes written and version vector hash
-func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt64, Data) {
+func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt64, Hash) {
     let srcFile = try FileHandle(forReadingFrom: src)
 
     var written: UInt64 = 0
@@ -431,7 +431,7 @@ func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt6
             guard let data = data else {
                 let version = try await dst.versionVectorHash()
                 try await dst.close()
-                return (written, version)
+                return (written, Hash(version))
             }
             try await dst.write(written, data)
             written += UInt64(exactly: data.count)!
