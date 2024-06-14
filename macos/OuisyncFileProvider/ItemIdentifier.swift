@@ -190,10 +190,8 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
         // require a OuisyncFile, so we may still proceed as if the file was there but
         // with size == 0.
         do {
-            if let f = try? await entry.open() {
-                size = try await f.size()
-                file = f
-            }
+            file = try await entry.open()
+            size = try await file!.size()
         } catch let error as OuisyncError {
             if error.code == .EntryNotFound {
                 throw ExtError.noSuchItem
@@ -215,6 +213,9 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
                 // that information is stored in that file's parent directory.
                 version = try await file.versionVectorHash()
             }
+        } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store {
+            NSLog("WARNING: Block to file not found")
+            version = Data()
         } catch {
             fatalError("Unhandled exception when retrieving file version:\(error)")
         }
