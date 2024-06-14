@@ -25,6 +25,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   StreamSubscription<void>? _subscription;
   final Settings _settings;
   final NavigationCubit _navigation;
+  final EntryBottomSheetCubit _bottomSheet;
   final PasswordHasher passwordHasher;
 
   ReposCubit({
@@ -32,10 +33,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     required nativeChannels,
     required settings,
     required navigation,
+    required bottomSheet,
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
         _navigation = navigation,
+        _bottomSheet = bottomSheet,
         passwordHasher = PasswordHasher(session);
 
   Settings get settings => _settings;
@@ -299,6 +302,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       nativeChannels: _nativeChannels,
       settings: _settings,
       navigation: _navigation,
+      bottomSheet: _bottomSheet,
       repo: repo,
       location: location,
     );
@@ -484,6 +488,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         nativeChannels: _nativeChannels,
         settings: _settings,
         navigation: _navigation,
+        bottomSheet: _bottomSheet,
         repo: repo,
         location: location,
       );
@@ -567,6 +572,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         nativeChannels: _nativeChannels,
         settings: _settings,
         navigation: _navigation,
+        bottomSheet: _bottomSheet,
         repo: repo,
         location: location,
       );

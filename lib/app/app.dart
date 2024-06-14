@@ -114,6 +114,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   @override
   Widget build(BuildContext context) {
     final navigation = NavigationCubit();
+    final bottomSheet = EntryBottomSheetCubit();
 
     return Scaffold(
       body: DropTarget(
@@ -138,6 +139,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
         child: MainPage(
           mediaReceiver: _mediaReceiver,
           navigation: navigation,
+          bottomSheet: bottomSheet,
           packageInfo: widget.packageInfo,
           session: widget.session,
           nativeChannels: widget.nativeChannels,

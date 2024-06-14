@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
+import 'entry_bottom_sheet.dart';
 import 'mount.dart';
 import 'navigation.dart';
 import 'power_control.dart';
@@ -11,10 +12,12 @@ import 'state_monitor.dart';
 import 'upgrade_exists.dart';
 
 export 'connectivity_info.dart';
+export 'entry_bottom_sheet.dart';
 export 'file_progress.dart';
 export 'job.dart';
 export 'mount.dart';
 export 'nat_detection.dart';
+export 'navigation.dart';
 export 'peer_set.dart';
 export 'power_control.dart';
 export 'repo.dart';
@@ -24,7 +27,6 @@ export 'state_monitor.dart';
 export 'upgrade_exists.dart';
 export 'value.dart';
 export 'watch.dart';
-export 'navigation.dart';
 
 class Cubits {
   final ReposCubit repositories;
@@ -34,6 +36,7 @@ class Cubits {
   final PlatformWindowManager windowManager;
   final MountCubit mount;
   final NavigationCubit navigation;
+  final EntryBottomSheetCubit bottomSheet;
 
   Cubits({
     required this.repositories,
@@ -43,6 +46,7 @@ class Cubits {
     required this.windowManager,
     required this.mount,
     required this.navigation,
+    required this.bottomSheet,
   });
 
   Color? mainNotificationBadgeColor() {

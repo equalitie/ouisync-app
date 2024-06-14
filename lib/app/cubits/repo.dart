@@ -5,8 +5,8 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/native_channels.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
 
@@ -102,6 +102,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final Session _session;
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
+  final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
   final _setCacheServersEnabledThrottle = Throttle();
@@ -110,6 +111,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     this._session,
     this._nativeChannels,
     this._navigation,
+    this._bottomSheet,
     this._repo,
     this._pathCipher,
     RepoState state,
@@ -124,6 +126,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required Repository repo,
     required RepoLocation location,
     required NavigationCubit navigation,
+    required EntryBottomSheetCubit bottomSheet,
   }) async {
     final authMode = await repo.getAuthMode();
 
@@ -150,6 +153,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       session,
       nativeChannels,
       navigation,
+      bottomSheet,
       repo,
       pathCipher,
       state,
@@ -174,6 +178,23 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(location, currentFolder, isFolder);
+  }
+
+  void showMoveEntryBottomSheet({
+    required BottomSheetType sheetType,
+    required String entryPath,
+    required EntryType entryType,
+  }) {
+    _bottomSheet.showMoveEntry(
+      repoCubit: this,
+      navigationCubit: _navigation,
+      entryPath: entryPath,
+      entryType: entryType,
+    );
+  }
+
+  void hideBottomSheet() {
+    _bottomSheet.hide();
   }
 
   Future<void> enableSync() async {
@@ -352,7 +373,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       }
 
       loggy.debug('File saved: $filePath (${formatSize(offset)})');
-    } catch (e) {
+    } catch (e, st) {
+      loggy.debug('Save file to $filePath failed: ${e.toString()}', e, st);
       showSnackBar(S.current.messageWritingFileError(filePath));
       return;
     } finally {
@@ -648,6 +670,80 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     } finally {
       await refresh();
     }
+  }
+
+  Future<bool> moveEntryToRepo({
+    required RepoCubit destinationRepoCubit,
+    required EntryType type,
+    required String source,
+    required String destination,
+  }) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final result = type == EntryType.file
+          ? await _moveFileToRepo(
+              destinationRepoCubit,
+              source,
+              destination,
+            )
+          : await _moveFolderToRepo(
+              destinationRepoCubit,
+              source,
+              destination,
+            );
+
+      return result;
+    } catch (e, st) {
+      loggy.app('Move entry from $source to $destination failed', e, st);
+      return false;
+    } finally {
+      await destinationRepoCubit.refresh();
+      await refresh();
+    }
+  }
+
+  Future<bool> _moveFileToRepo(
+    RepoCubit destinationRepoCubit,
+    String source,
+    String destination,
+  ) async {
+    final originFile = await openFile(source);
+    final originFileLength = await originFile.length;
+
+    await destinationRepoCubit.saveFile(
+      filePath: destination,
+      length: originFileLength,
+      fileByteStream: originFile.read(0, originFileLength).asStream(),
+    );
+
+    await File.remove(_repo, source);
+    return true;
+  }
+
+  Future<bool> _moveFolderToRepo(
+    RepoCubit destinationRepoCubit,
+    String source,
+    String destination,
+  ) async {
+    final createFolderOk = await destinationRepoCubit.createFolder(destination);
+    if (!createFolderOk) return false;
+
+    await openDirectory(source).then(
+      (contents) async {
+        for (var entry in contents) {
+          final from = join(source, entry.name);
+          final to = join(destination, entry.name);
+          final moveOk = entry.entryType == EntryType.file
+              ? await _moveFileToRepo(destinationRepoCubit, from, to)
+              : await _moveFolderToRepo(destinationRepoCubit, from, to);
+
+          if (!moveOk) return false;
+        }
+      },
+    );
+
+    await Directory.remove(_repo, source);
+    return true;
   }
 
   Future<bool> deleteFile(String filePath) async {

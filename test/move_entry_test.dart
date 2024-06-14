@@ -1,17 +1,15 @@
-// import 'dart:convert';
+import 'dart:convert';
 import 'dart:io' as io;
-// import 'dart:js_util';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/models.dart';
-// import 'package:ouisync_app/app/cubits/repo.dart';
-// import 'package:ouisync_app/app/utils/settings.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late Session session;
-  // late RepoCubit repository;
   late Repository pluginRepo;
 
   setUp(() async {
@@ -25,147 +23,139 @@ void main() {
       readSecret: null,
       writeSecret: null,
     );
-
-    // final settings = await Settings.init();
-    // final settingsRepoEntry =
-    //     SettingsRepoEntry(await pluginRepo.hexDatabaseId(), location);
-
-    // repository = await RepoCubit.create(
-    //     settingsRepoEntry: settingsRepoEntry,
-    //     handle: pluginRepo,
-    //     settings: settings);
   });
 
   tearDown(() async {
-    // await repository.close();
     await pluginRepo.close();
     await session.close();
   });
 
-  test('Placeholder test', () async {
-    final accessMode = await pluginRepo.accessMode;
-    expect(accessMode, equals(AccessMode.write));
+  test('Move file (file1.txt) from root (/) to folder1 (/folder1)', () async {
+    // Create on folder and one file in the root
+    {
+      await Directory.create(pluginRepo, '/folder1');
+
+      final file = await File.create(pluginRepo, '/file1.txt');
+      await file.write(0, utf8.encode("123"));
+      await file.close();
+
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(2));
+
+      final expectedRoot = <DirEntry>[
+        DirEntry('file1.txt', EntryType.file),
+        DirEntry('folder1', EntryType.directory),
+      ];
+      expect(rootContents, dirEntryComparator(expectedRoot));
+    }
+
+    // Move file (/file1.txt) to folder (/folder2/file1.txt)
+    {
+      await pluginRepo.move('/file1.txt', '/folder1/file1.txt');
+
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(1));
+
+      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      expect(folder1Contents, hasLength(1));
+
+      final expectedFolder1Contents = <DirEntry>[
+        DirEntry('file1.txt', EntryType.file)
+      ];
+      expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
+    }
   });
 
-  // test('Move folder ok when folder to move is empty', () async {
-  //   const folder1Path = '/folder1';
-  //   const folder2Path = '/folder1/folder2';
-  //   const folder2RootPath = '/folder2';
-  //   final folder1ExpectedContents = [
-  //     FolderItem(
-  //       name: 'folder2',
-  //       path: folder2Path,
-  //     )
-  //   ];
-  //   final rootExpectedContentsWithFolder1AndFolder2 = [
-  //     FolderItem(
-  //       name: 'folder1',
-  //       path: folder1Path,
-  //     ),
-  //     FolderItem(
-  //       name: 'folder2',
-  //       path: folder2RootPath,
-  //     )
-  //   ];
+  test('Move folder ok when folder to move is empty', () async {
+    // Create two empty folders
+    {
+      await Directory.create(pluginRepo, '/folder1');
+      await Directory.create(pluginRepo, '/folder2');
 
-  //   // Create folder1 (/folder1)
-  //   {
-  //     final result = await repository.createFolder(folder1Path);
-  //     expect(result, equals(true));
-  //   }
-  //   // Create folder2 inside folder2 (/folder1/folder2)
-  //   {
-  //     final result = await repository.createFolder(folder2Path);
-  //     expect(result, equals(true));
-  //   }
-  //   // Get contents of folder1 (/folder1) and confirm it contains folder2 (/folder1/folder2)
-  //   {
-  //     final folder1Contents = await repository.getFolderContents(folder1Path);
-  //     expect(folder1Contents, equals(folder1ExpectedContents));
-  //   }
-  //   // Move folder2 (/folder1/folder2) to root (/folder2)
-  //   {
-  //     final result = await repository.moveEntry(
-  //         source: folder2Path, destination: folder2RootPath);
-  //     expect(result, equals(true));
-  //   }
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(2));
 
-  //   {
-  //     final rootContentsAfterMovingFolder2 =
-  //         await repository.getFolderContents('/');
-  //     expect(rootContentsAfterMovingFolder2,
-  //         equals(rootExpectedContentsWithFolder1AndFolder2));
-  //   }
-  // });
+      final expectedRoot = <DirEntry>[
+        DirEntry('folder1', EntryType.directory),
+        DirEntry('folder2', EntryType.directory),
+      ];
+      expect(rootContents, dirEntryComparator(expectedRoot));
+    }
 
-  // test('Move folder ok when folder to move is not empty', () async {
-  //   const folder1Path = '/folder1';
-  //   const folder2Path = '/folder1/folder2';
-  //   const folder2RootPath = '/folder2';
-  //   const file1InFolder2Path = '/folder1/folder2/file1.txt';
-  //   const filePathContent = 'hello world';
-  //   final folder1ExpectedContents = [
-  //     FolderItem(
-  //       name: 'folder2',
-  //       path: folder2Path,
-  //     )
-  //   ];
-  //   final folder2WithFile1ExpectedContents = [
-  //     FileItem(
-  //       name: 'file1.txt',
-  //       path: file1InFolder2Path,
-  //       size: filePathContent.length,
-  //     )
-  //   ];
-  //   final rootExpectedContentsWithFolder1AndFolder2 = [
-  //     FolderItem(
-  //       name: 'folder1',
-  //       path: folder1Path,
-  //     ),
-  //     FolderItem(
-  //       name: 'folder2',
-  //       path: folder2RootPath,
-  //     )
-  //   ];
+    // Move empty folder to other repo
+    {
+      await pluginRepo.move('/folder2', '/folder1/folder2');
 
-  //   // Create folder1 (/folder1)
-  //   {
-  //     final result = await repository.createFolder(folder1Path);
-  //     expect(result, equals(true));
-  //   }
-  //   // Create folder2 inside folder2 (/folder1/folder2)
-  //   {
-  //     final result = await repository.createFolder(folder2Path);
-  //     expect(result, equals(true));
-  //   }
-  //   // Create file1 inside folder2 (/folder1/folder2)
-  //   {
-  //     final file = await File.create(repository.handle, file1InFolder2Path);
-  //     await file.write(0, utf8.encode(filePathContent));
-  //     await file.close();
-  //   }
-  //   // Get contents of folder1 (/folder1) and confirm it contains folder2 (/folder1/folder2)
-  //   {
-  //     final folder1Contents = await repository.getFolderContents(folder1Path);
-  //     expect(folder1Contents, equals(folder1ExpectedContents));
-  //   }
-  //   // Get contents of folder2 (/folder1/folder2) and confirm it contains file1.txt (/folder1/folder2/file1.txt)
-  //   {
-  //     final folder2Contents = await repository.getFolderContents(folder2Path);
-  //     expect(folder2Contents, equals(folder2WithFile1ExpectedContents));
-  //   }
-  //   // Move folder2 (/folder1/folder2) to root (/folder2) containing file1.txt (/folder1/folder2/file1.txt)
-  //   {
-  //     final result = await repository.moveEntry(
-  //         source: folder2Path, destination: folder2RootPath);
-  //     expect(result, equals(true));
-  //   }
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(1));
 
-  //   {
-  //     final rootContentsAfterMovingFolder2 =
-  //         await repository.getFolderContents('/');
-  //     expect(rootContentsAfterMovingFolder2,
-  //         equals(rootExpectedContentsWithFolder1AndFolder2));
-  //   }
-  // });
+      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      expect(folder1Contents, hasLength(1));
+
+      final expectedFolder1Contents = <DirEntry>[
+        DirEntry('folder2', EntryType.directory)
+      ];
+      expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
+    }
+  });
+
+  test('Move folder ok when folder to move is not empty', () async {
+    // Create two folders, with one file inside folder2
+    {
+      await Directory.create(pluginRepo, '/folder1');
+      await Directory.create(pluginRepo, '/folder2');
+
+      final file = await File.create(pluginRepo, '/folder2/file1.txt');
+      await file.write(0, utf8.encode("123"));
+      await file.close();
+
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(2));
+
+      final folder2Contents = await Directory.open(pluginRepo, '/folder2');
+      expect(folder2Contents, hasLength(1));
+
+      final expectedRoot = <DirEntry>[
+        DirEntry('folder1', EntryType.directory),
+        DirEntry('folder2', EntryType.directory),
+      ];
+      expect(rootContents, dirEntryComparator(expectedRoot));
+
+      final expectedFolder2 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];
+      expect(folder2Contents, dirEntryComparator(expectedFolder2));
+    }
+
+    // Move folder2 (/folder2) to folder1 (/folder1/folder2) containing
+    // file1.txt (/folder2/file1.txt)
+    {
+      await pluginRepo.move('/folder2', '/folder1/folder2');
+
+      final rootContents = await Directory.open(pluginRepo, '/');
+      expect(rootContents, hasLength(1));
+
+      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      expect(folder1Contents, hasLength(1));
+
+      final expectedFolder1Contents = <DirEntry>[
+        DirEntry('folder2', EntryType.directory)
+      ];
+      expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
+
+      final folder2Contents = await Directory.open(
+        pluginRepo,
+        '/folder1/folder2',
+      );
+      expect(folder2Contents, hasLength(1));
+
+      final expectedFolder2 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];
+      expect(folder2Contents, dirEntryComparator(expectedFolder2));
+    }
+  });
 }
+
+Matcher dirEntryComparator(Iterable<DirEntry> expected) => pairwiseCompare(
+      expected,
+      (DirEntry e0, DirEntry? e1) =>
+          e0.entryType == e1?.entryType && e0.name == e1?.name,
+      'Check for same DirEntry',
+    );
