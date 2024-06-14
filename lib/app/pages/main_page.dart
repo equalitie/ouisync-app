@@ -1008,12 +1008,12 @@ class _MainPageState extends State<MainPage>
     return !readDisabledActions.contains(action);
   }
 
-  Future<bool> moveEntry(
+  Future<void> moveEntry(
     RepoCubit originRepo,
     String entryPath,
     EntryType entryType,
   ) async {
-    if (_currentRepo == null) return false;
+    if (_currentRepo == null) return;
 
     final otherRepoCubit =
         originRepo.location.compareTo(_currentRepo!.location) == 0
@@ -1026,17 +1026,140 @@ class _MainPageState extends State<MainPage>
     final basename = repo_path.basename(entryPath);
     final destination = repo_path.join(currentFolder, basename);
 
-    return otherRepoCubit == null
-        ? await originRepo.moveEntry(
-            source: entryPath,
-            destination: destination,
-          )
-        : await originRepo.moveEntryToRepo(
-            destinationRepoCubit: otherRepoCubit,
-            type: entryType,
-            source: entryPath,
-            destination: destination,
-          );
+    if (await (otherRepoCubit ?? originRepo).exists(destination)) {
+      await showDialog<FileAction>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Flex(
+            direction: Axis.horizontal,
+            children: [
+              Fields.constrainedText(
+                S.current.titleMovingEntry,
+                style: context.theme.appTextStyle.titleMedium,
+                maxLines: 2,
+              )
+            ],
+          ),
+          content: ReplaceEntry(name: basename, type: entryType),
+        ),
+      ).then(
+        (fileAction) async {
+          if (fileAction == FileAction.replace) {
+            await _moveAndReplaceEntry(
+              originRepo,
+              otherRepoCubit,
+              entryPath,
+              entryType,
+              destination,
+            );
+          }
+
+          if (fileAction == FileAction.keep) {
+            await _renameAndMoveEntry(
+              originRepo,
+              otherRepoCubit,
+              entryPath,
+              entryType,
+              destination,
+            );
+          }
+        },
+      );
+    } else {
+      await _pickModeAndMoveEntry(
+        originRepo,
+        otherRepoCubit,
+        entryPath,
+        entryType,
+        destination,
+      );
+    }
+  }
+
+  Future<void> _moveAndReplaceEntry(
+    RepoCubit originRepo,
+    RepoCubit? otherRepoCubit,
+    String entryPath,
+    EntryType entryType,
+    String destination,
+  ) async {
+    try {
+      final file = await originRepo.openFile(entryPath);
+      final fileLength = await file.length;
+
+      await (otherRepoCubit ?? originRepo).replaceFile(
+        filePath: destination,
+        length: fileLength,
+        fileByteStream: file.read(0, fileLength).asStream(),
+      );
+
+      await originRepo.deleteFile(entryPath);
+    } catch (e, st) {
+      loggy.debug(e, st);
+    }
+  }
+
+  Future<void> _renameAndMoveEntry(
+    RepoCubit originRepo,
+    RepoCubit? otherRepoCubit,
+    String entryPath,
+    EntryType entryType,
+    String destination,
+  ) async {
+    final newPath = await _renameEntry(
+      (otherRepoCubit ?? originRepo),
+      destination,
+    );
+
+    await _pickModeAndMoveEntry(
+      originRepo,
+      otherRepoCubit,
+      entryPath,
+      entryType,
+      newPath,
+    );
+  }
+
+  Future<String> _renameEntry(
+    RepoCubit repoCubit,
+    String path, {
+    int versions = 0,
+  }) async {
+    final parent = system_path.dirname(path);
+    final name = system_path.basenameWithoutExtension(path);
+    final extension = system_path.extension(path);
+
+    final newFileName = '$name (${versions += 1})$extension';
+    final newPath = system_path.join(parent, newFileName);
+
+    if (await repoCubit.exists(newPath)) {
+      return await _renameEntry(repoCubit, path, versions: versions);
+    }
+    return newPath;
+  }
+
+  Future<void> _pickModeAndMoveEntry(
+    RepoCubit originRepo,
+    RepoCubit? otherRepoCubit,
+    String entryPath,
+    EntryType entryType,
+    String destination,
+  ) async {
+    if (otherRepoCubit == null) {
+      await originRepo.moveEntry(
+        source: entryPath,
+        destination: destination,
+      );
+
+      return;
+    }
+
+    await originRepo.moveEntryToRepo(
+      destinationRepoCubit: otherRepoCubit,
+      type: entryType,
+      source: entryPath,
+      destination: destination,
+    );
   }
 
   Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {

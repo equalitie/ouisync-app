@@ -516,6 +516,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "International Bill of Human Rights"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Keep both files"),
+        "messageKeepBothFolders":
+            MessageLookupByLibrary.simpleMessage("Keep both folders"),
         "messageLaunchAtStartup":
             MessageLookupByLibrary.simpleMessage("Launch at startup"),
         "messageLibraryPanic":
@@ -590,6 +592,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Repositories can be shared as read-write, read-only, or blind (you store files for others, but cannot access them)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "All files and folders added to Ouisync are securely encrypted by default, both in transit and at rest."),
+        "messageOnlyAvailableFiles":
+            MessageLookupByLibrary.simpleMessage("Only available for files"),
         "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("Or"),
         "messageOuiSyncDesktopTitle":
@@ -640,6 +644,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Rename repository"),
         "messageReplaceExistingFile":
             MessageLookupByLibrary.simpleMessage("Replace existing file"),
+        "messageReplaceExistingFolder":
+            MessageLookupByLibrary.simpleMessage("Replace existing folder"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Repository authentication failed"),
         "messageRepoDeletionErrorDescription": m18,
