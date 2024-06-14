@@ -1264,27 +1264,105 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    await saveFile(currentRepo.cubit, path);
+    final newFileName = repo_path.basename(path);
+    final newFilePath = repo_path.join(
+      currentRepo.cubit.state.currentFolder.path,
+      newFileName,
+    );
+
+    if (!await currentRepo.cubit.exists(newFilePath)) {
+      await saveFile(
+        currentRepo.cubit,
+        path,
+        newFilePath,
+        newFileName,
+      );
+
+      return;
+    }
+
+    await showDialog<FileAction>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Flex(
+          direction: Axis.horizontal,
+          children: [
+            Fields.constrainedText(
+              S.current.titleMovingEntry,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2,
+            )
+          ],
+        ),
+        content: ReplaceEntry(name: newFileName, type: EntryType.file),
+      ),
+    ).then(
+      (fileAction) async {
+        if (fileAction == FileAction.replace) {
+          await _replaceFile(currentRepo.cubit, path, newFilePath);
+        }
+
+        if (fileAction == FileAction.keep) {
+          await _renameAndSaveFile(
+            currentRepo.cubit,
+            path,
+            newFilePath,
+            newFileName,
+          );
+        }
+      },
+    );
   }
 
   Future<void> saveFile(
     RepoCubit currentRepo,
     String path,
+    String newFilePath,
+    String newFileName,
   ) async {
     final file = io.File(path);
-    final fileName = repo_path.basename(path);
     final length = (await file.stat()).size;
-    final filePath = repo_path.join(
-      currentRepo.state.currentFolder.path,
-      fileName,
-    );
     final fileByteStream = file.openRead();
 
     await currentRepo.saveFile(
-      filePath: filePath,
+      filePath: newFilePath,
       length: length,
       fileByteStream: fileByteStream,
     );
+  }
+
+  Future<void> _replaceFile(
+    RepoCubit repoCubit,
+    String path,
+    String newFilePath,
+  ) async {
+    try {
+      final file = io.File(path);
+      final fileLength = (await file.stat()).size;
+      final fileByteStream = file.openRead();
+
+      await repoCubit.replaceFile(
+        filePath: newFilePath,
+        length: fileLength,
+        fileByteStream: fileByteStream,
+      );
+    } catch (e, st) {
+      loggy.debug(e, st);
+    }
+  }
+
+  Future<void> _renameAndSaveFile(
+    RepoCubit repoCubit,
+    String path,
+    String newFilePath,
+    String newFileName,
+  ) async {
+    final newPath = await _renameEntry(
+      repoCubit,
+      newFilePath,
+    );
+
+    await saveFile(repoCubit, path, newPath, newFileName);
   }
 
   Future<dynamic> _showDirectoryActions(
