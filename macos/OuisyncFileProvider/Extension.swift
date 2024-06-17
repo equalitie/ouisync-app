@@ -200,8 +200,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
                 switch type {
                 case .file(let srcUrl):
-                    let dstFile = try await repo.createFile(dstPath)
-                    let (written, version) = try await copyContentsAndClose(srcUrl, dstFile)
+                    let (written, version) = try await copyContentsAndClose(srcUrl, repo.fileEntry(dstPath), true)
                     let dstItem = FileItem(repo.fileEntry(dstPath), repoName, size: written, version: version)
 
                     handler(dstItem, [], false, nil)
@@ -284,7 +283,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
                 if fields.contains(.contents) {
                     let srcUrl = newContents!
-                    let file: OuisyncFile
                     let entry: OuisyncFileEntry
                     let repoName: String
 
@@ -297,11 +295,9 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     case .entry(.file(let fileId)):
                         repoName = fileId.repoName
                         entry = try await fileId.loadEntry(session)
-                        file = try await entry.open()
                     }
 
-                    try await file.truncate(0)
-                    let (written, version) = try await copyContentsAndClose(srcUrl, file)
+                    let (written, version) = try await copyContentsAndClose(srcUrl, entry, false)
 
                     fields.remove(.contents)
 
@@ -416,10 +412,19 @@ class FileOnDisk {
 }
 
 // Returns number of bytes written and version vector hash
-func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt64, Hash) {
+func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst: Bool) async throws -> (UInt64, Hash) {
     let srcFile = try FileHandle(forReadingFrom: src)
 
     var written: UInt64 = 0
+
+    var dst: OuisyncFile
+
+    if createDst {
+        dst = try await dstEntry.create()
+    } else {
+        dst = try await dstEntry.open()
+        try await dst.truncate(0)
+    }
 
     while true {
         let readResult = Result { try srcFile.read(upToCount: Extension.READ_CHUNK_SIZE) }
@@ -429,7 +434,11 @@ func copyContentsAndClose(_ src: URL, _ dst: OuisyncFile) async throws -> (UInt6
             throw error
         case .success(let data):
             guard let data = data else {
-                let version = try await dst.versionVectorHash()
+                // TODO: We are getting a version of the file after we've written to it,
+                // that may lead to race conditions where after our writing someone else
+                // writes to it and we get the version hash after the second write. If that
+                // happens File Provider won't notice that other change.
+                let version = try await dstEntry.getVersionHash()
                 try await dst.close()
                 return (written, Hash(version))
             }

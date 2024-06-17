@@ -155,8 +155,8 @@ enum EntryIdentifier: CustomDebugStringConvertible, Codable {
 
     public var debugDescription: String {
         switch self {
-        case .file(let file): file.debugDescription
-        case .directory(let dir): dir.debugDescription
+        case .file(let file): return file.debugDescription
+        case .directory(let dir): return dir.debugDescription
         }
     }
 }
@@ -208,11 +208,9 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
         var version = Hash.invalid()
 
         do {
-            if let file = file {
-                // If the file is open returning it's version vector hash should succeed because
-                // that information is stored in that file's parent directory.
-                version = Hash(try await file.versionVectorHash())
-            }
+            // If the file is open returning it's version vector hash should succeed because
+            // that information is stored in that file's parent directory.
+            version = Hash(try await entry.getVersionHash())
         } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store {
             NSLog("WARNING: Block to file not found")
         } catch {
