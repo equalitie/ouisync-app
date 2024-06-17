@@ -1,5 +1,4 @@
 {
-  "originHash" : "257491d5e6bf68d45423b9f18fd2bad1874ddd6eb700e9f7f33df468184c9f45",
   "pins" : [
     {
       "identity" : "messagepack.swift",
@@ -11,5 +10,5 @@
       }
     }
   ],
-  "version" : 3
+  "version" : 2
 }
