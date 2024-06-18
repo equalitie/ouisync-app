@@ -412,7 +412,7 @@ class FileOnDisk {
 }
 
 // Returns number of bytes written and version vector hash
-func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst: Bool) async throws -> (UInt64, Hash) {
+func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst: Bool) async throws -> (UInt64, Version) {
     let srcFile = try FileHandle(forReadingFrom: src)
 
     var written: UInt64 = 0
@@ -440,7 +440,7 @@ func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst:
                 // happens File Provider won't notice that other change.
                 let version = try await dstEntry.getVersionHash()
                 try await dst.close()
-                return (written, Hash(version))
+                return (written, Version(Hash(version), written))
             }
             try await dst.write(written, data)
             written += UInt64(exactly: data.count)!

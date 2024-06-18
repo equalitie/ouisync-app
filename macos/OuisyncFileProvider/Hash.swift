@@ -7,15 +7,11 @@
 
 import Foundation
 
-struct Hash: Equatable, CustomDebugStringConvertible {
+struct Hash: Codable, Equatable, CustomDebugStringConvertible {
     let data: Data
 
     init(_ data: Data) {
         self.data = data
-    }
-
-    static func invalid() -> Self {
-        Self(Data())
     }
 
     static func == (lhs: Hash, rhs: Hash) -> Bool {

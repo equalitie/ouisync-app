@@ -205,12 +205,12 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
             fatalError("Unhandled exception error:\(error), repo:\(repoName), path:\(path)")
         }
 
-        var version = Hash.invalid()
+        var version = Version.invalid()
 
         do {
             // If the file is open returning it's version vector hash should succeed because
             // that information is stored in that file's parent directory.
-            version = Hash(try await entry.getVersionHash())
+            version = Version(Hash(try await entry.getVersionHash()), size)
         } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store {
             NSLog("WARNING: Block to file not found")
         } catch {
