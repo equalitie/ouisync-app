@@ -15,7 +15,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
 
     var ouisyncSession: OuisyncSession?
-    var currentAnchor: UInt64 = UInt64.random(in: UInt64.min ... UInt64.max)
+    var currentAnchor: NSFileProviderSyncAnchor = NSFileProviderSyncAnchor.random()
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
     let log: Log

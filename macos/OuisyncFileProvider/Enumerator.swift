@@ -11,10 +11,10 @@ import OuisyncLib
 class Enumerator: NSObject, NSFileProviderEnumerator {
     private let session: OuisyncSession
     private let itemId: ItemIdentifier
-    private let currentAnchor: Anchor
+    private let currentAnchor: NSFileProviderSyncAnchor
     private let log: Log
 
-    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: Anchor, _ log: Log) {
+    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: NSFileProviderSyncAnchor, _ log: Log) {
         let log = log.child("Enumerator").trace("init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
         self.itemId = itemIdentifier
         self.session = session
@@ -95,8 +95,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          - inform the observer when you have finished enumerating up to a subsequent sync anchor
          */
         
-        if oldAnchor.asInteger() == currentAnchor {
-            observer.finishEnumeratingChanges(upTo: NSFileProviderSyncAnchor(currentAnchor), moreComing: false)
+        if oldAnchor == currentAnchor {
+            observer.finishEnumeratingChanges(upTo: currentAnchor, moreComing: false)
         } else {
             // We don't know what has changed because we don't track the current state and neither does
             // the Ouisync backend. So we return `synchAnchorExpired` error which will force the system
@@ -106,17 +106,18 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    func reposToItems(_ repos: Dictionary<RepoName, OuisyncRepository>)  -> [NSFileProviderItem] {
+    func reposToItems(_ repos: Dictionary<RepoName, OuisyncRepository>) async throws -> [NSFileProviderItem] {
         var items: [NSFileProviderItem] = []
         for (repoName, repo) in repos {
-            items.append(itemFromRepo(repo, repoName))
+            let dirItem = try await DirectoryItem.load(repo, repoName)
+            items.append(dirItem)
         }
         return items
     }
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
         log.trace("currentSyncAnchor(item:\(itemId)) -> Anchor(\(currentAnchor))")
-        completionHandler(NSFileProviderSyncAnchor(currentAnchor))
+        completionHandler(currentAnchor)
     }
 
     func listRepositories() async throws -> Dictionary<RepoName, OuisyncRepository> {
@@ -130,9 +131,9 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 }
 
 class NoConnectionEnumerator: NSObject, NSFileProviderEnumerator {
-    let currentAnchor: Anchor
+    let currentAnchor: NSFileProviderSyncAnchor
 
-    init(_ currentAnchor: Anchor) {
+    init(_ currentAnchor: NSFileProviderSyncAnchor) {
         self.currentAnchor = currentAnchor
     }
 
@@ -150,7 +151,7 @@ class NoConnectionEnumerator: NSObject, NSFileProviderEnumerator {
 
     func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
         NSLog("NoConnectionEnumerator.currentSyncAnchor(...) -> Anchor(\(currentAnchor))")
-        let anchor = NSFileProviderSyncAnchor(currentAnchor)
+        let anchor = currentAnchor
         completionHandler(anchor)
     }
 }

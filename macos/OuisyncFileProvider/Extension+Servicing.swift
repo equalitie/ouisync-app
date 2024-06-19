@@ -204,7 +204,7 @@ extension Extension {
     // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
     static func refreshFileProvider(_ ext: Extension) async {
         let oldAnchor = ext.currentAnchor
-        ext.currentAnchor = UInt64.random(in: UInt64.min ... UInt64.max)
+        ext.currentAnchor = NSFileProviderSyncAnchor.random()
         NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(ext.currentAnchor)")
 
         let domain = ouisyncFileProviderDomain

@@ -8,25 +8,17 @@
 import Foundation
 import FileProvider
 
-typealias Anchor = UInt64
-
 extension NSFileProviderSyncAnchor {
-    init(_ n: Anchor) {
-        self.init(rawValue: String(n).data(using: .ascii)!)
-    }
-
-    func asInteger() -> Anchor? {
-        guard let str = String(bytes: rawValue, encoding: .ascii) else {
-            return nil
-        }
-        return UInt64(str)
+    static func random() -> NSFileProviderSyncAnchor {
+        let value = UInt64.random(in: UInt64.min ... UInt64.max)
+        return NSFileProviderSyncAnchor(rawValue: String(value).data(using: .ascii)!)
     }
 }
 
 extension NSFileProviderSyncAnchor: CustomDebugStringConvertible {
     public var debugDescription: String {
         guard let str = String(bytes: rawValue, encoding: .ascii) else {
-            fatalError("Invalid anchor")
+            return "InvalidAnchor"
         }
         return "Anchor(\(str))"
     }
