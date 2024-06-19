@@ -192,6 +192,7 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
         do {
             file = try await entry.open()
             size = try await file!.size()
+            try await file!.close()
         } catch let error as OuisyncError {
             if error.code == .EntryNotFound {
                 throw ExtError.noSuchItem
