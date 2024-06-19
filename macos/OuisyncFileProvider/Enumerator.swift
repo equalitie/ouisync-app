@@ -46,28 +46,36 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         switch itemId {
         case .rootContainer, .workingSet:
             Task {
-                let reposByName = try await listRepositories()
-                let items = reposToItems(reposByName)
-                log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
-                observer.didEnumerate(items)
-                observer.finishEnumerating(upTo: nil)
+                do {
+                    let reposByName = try await listRepositories()
+                    let items = reposToItems(reposByName)
+                    log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
+                    observer.didEnumerate(items)
+                    observer.finishEnumerating(upTo: nil)
+                } catch {
+                    fatalError("Unhandled exception \(error)")
+                }
             }
         case .entry(.directory(let identifier)):
             Task {
-                let dir = try await identifier.loadItem(session)
-                let entries = try await dir.directory.listEntries()
-                var items: [NSFileProviderItem] = []
-                for entry in entries {
-                    switch entry {
-                    case .directory(let dirEntry): items.append(DirectoryItem(dirEntry, dir.repoName))
-                    case .file(let fileEntry):
-                        let identifier = FileIdentifier(fileEntry.path, dir.repoName)
-                        items.append(try await identifier.loadItem(session))
+                do {
+                    let dir = try await identifier.loadItem(session)
+                    let entries = try await dir.directory.listEntries()
+                    var items: [NSFileProviderItem] = []
+                    for entry in entries {
+                        switch entry {
+                        case .directory(let dirEntry): items.append(DirectoryItem(dirEntry, dir.repoName))
+                        case .file(let fileEntry):
+                            let identifier = FileIdentifier(fileEntry.path, dir.repoName)
+                            items.append(try await identifier.loadItem(session))
+                        }
                     }
+                    log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
+                    observer.didEnumerate(items)
+                    observer.finishEnumerating(upTo: nil)
+                } catch {
+                    fatalError("Unhandled exception for \(identifier): \(error)")
                 }
-                log.trace("\(itemId) -> \(items.map({ $0.itemIdentifier }))")
-                observer.didEnumerate(items)
-                observer.finishEnumerating(upTo: nil)
             }
         case .trashContainer:
             observer.finishEnumerating(upTo: nil)
