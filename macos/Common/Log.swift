@@ -46,11 +46,13 @@ class Log {
         print(.trace, msg)
     }
 
-    func info(_ msg: String) {
+    @discardableResult
+    func info(_ msg: String) -> Log {
         print(.info, msg)
     }
 
-    func error(_ msg: String) {
+    @discardableResult
+    func error(_ msg: String) -> Log {
         print(.error, msg)
     }
 
