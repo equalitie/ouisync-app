@@ -42,3 +42,25 @@ class ExtError {
         )
     }
 }
+
+extension NSError {
+    func from(_ str: String) -> NSError {
+        var userInfo = self.userInfo
+        
+        if var value = userInfo["from"] {
+            if var array = value as? [String] {
+                array.append(str)
+            } else {
+                userInfo["from"] = [str]
+            }
+        } else {
+            userInfo["from"] = [str]
+        }
+
+        return NSError(
+            domain: self.domain,
+            code: self.code,
+            userInfo: userInfo
+        )
+    }
+}
