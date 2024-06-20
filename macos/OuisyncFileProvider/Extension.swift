@@ -78,59 +78,81 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     }
     
     func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
-        let log = self.log.child("fetchContents").trace("invoked(\(itemIdentifier))")
+        let log = self.log.child("fetchContents").info("invoked(\(itemIdentifier), \(requestedVersion.flatMap{Version($0)} as Optional)")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
+        let handler = { (url: URL?, item: NSFileProviderItem?, error: Error?) in
+
+            if let error = error {
+                log.error("\(error)")
+            }
+            completionHandler(url, item, error)
+        }
+
         guard let session = ouisyncSession else {
-            log.error("Backend is unreachable")
-            completionHandler(nil, nil, ExtError.backendIsUnreachable)
+            handler(nil, nil, ExtError.backendIsUnreachable)
             return Progress()
         }
 
+        let progress = Progress()
+
         Task {
             var srcFile: OuisyncFile? = nil
+
+            var retError: NSFileProviderError? = nil
+            var retUrl: URL? = nil
+            var retFileItem: FileItem? = nil
+
+            var offset: UInt64 = 0
 
             do {
                 let identifier = ItemIdentifier(itemIdentifier)
 
                 guard let fileItem = try await identifier.asFile()?.loadItem(session) else {
-                    completionHandler(nil, nil, ExtError.featureNotSupported)
+                    handler(nil, nil, ExtError.featureNotSupported)
                     return
                 }
+                retFileItem = fileItem
 
-                srcFile = try await fileItem.file.open()
+                progress.totalUnitCount = Int64(fileItem.size)
+
                 let url = self.makeTemporaryURL("fetchContents")
-
-                var offset: UInt64 = 0
-                var size: UInt64 = 0
+                retUrl = url
 
                 let dstFile = FileOnDisk(url)
 
+                try dstFile.write(Data())
+
+                do {
+                    srcFile = try await fileItem.file.open()
+                } catch let error as OuisyncError where error.code == .Store {
+                    fileItem.size = 0
+                    handler(url, fileItem, nil)
+                    return
+                }
+
                 while true {
                     let data = try await srcFile!.read(offset, Self.WRITE_CHUNK_SIZE)
-
-                    let dataSize = UInt64(exactly: data.count)!
-                    size += dataSize
 
                     if data.isEmpty {
                         break
                     }
 
-                    if offset == 0 {
-                        try dstFile.write(data)
-                    } else {
-                        try dstFile.append(data)
-                    }
+                    try dstFile.append(data)
+
 
                     offset += UInt64(exactly: data.count)!
+                    progress.completedUnitCount = Int64(offset)
+
+                    if progress.isCancelled {
+                        break
+                    }
                 }
 
-                fileItem.size = offset
-
-                completionHandler(url, fileItem, nil)
-            } catch let error as NSError {
-                log.error("Error: \(error)")
-                completionHandler(nil, nil, error)
+            } catch let error as NSFileProviderError {
+                retError = error
+            } catch let error as OuisyncError where error.code != OuisyncErrorCode.Store && retFileItem != nil {
+                // Ignore, we'll return whatever we wrote to the temporary file (if anything)
             } catch {
                 fatalError("Uncaught exception: \(error)")
             }
@@ -142,8 +164,16 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             } catch {
                 log.error("Failed to close OuisyncFile: \(error)")
             }
+
+            if let error = retError {
+                handler(nil, nil, error)
+            } else {
+                retFileItem!.size = offset
+                handler(retUrl!, retFileItem!, nil)
+            }
         }
-        return Progress()
+
+        return progress
     }
     
     func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
