@@ -169,7 +169,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
             } catch let error as NSFileProviderError {
                 retError = error
-            } catch let error as OuisyncError where error.code != OuisyncErrorCode.Store && retFileItem != nil {
+            } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store && retFileItem != nil {
                 // Ignore, we'll return whatever we wrote to the temporary file (if anything)
             } catch {
                 fatalError("Uncaught exception: \(error)")
@@ -257,7 +257,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     let dstItem = try await DirectoryItem.load(repo.directoryEntry(dstPath), repoName)
                     handler(dstItem, [], false, nil)
                 }
-            } catch let error as NSError {
+            } catch let error as NSFileProviderError {
                 handler(nil, [], false, error)
             } catch {
                 fatalError("Uncaught exception in createItem: \(error)")
@@ -355,7 +355,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 }
 
                 handler(newItem, fields, false, nil)
-            } catch let error as NSError {
+            } catch let error as NSFileProviderError {
                 handler(nil, [], false, error)
             } catch {
                 fatalError("Uncaught exception in createItem: \(error)")
@@ -397,7 +397,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 }
 
                 handler(nil)
-            } catch let error as NSError {
+            } catch let error as NSFileProviderError {
                 handler(error)
             } catch {
                 fatalError("Uncaught exception in deleteItem: \(error)")
