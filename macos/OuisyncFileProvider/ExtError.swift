@@ -18,12 +18,8 @@ class ExtError {
         )
     }
 
-    static var backendIsUnreachable: NSError {
-        NSError(
-            domain: NSFileProviderErrorDomain,
-            code: NSFileProviderError.serverUnreachable.rawValue,
-            userInfo: [:]
-        )
+    static var backendIsUnreachable: NSFileProviderError {
+        NSFileProviderError(.serverUnreachable)
     }
 
     static var syncAnchorExpired: NSError {

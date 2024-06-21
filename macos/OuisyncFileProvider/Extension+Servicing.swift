@@ -95,7 +95,7 @@ extension Extension {
             }
 
             let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
-            ext.ouisyncSession = ouisyncSession
+            ext.assignSession(ouisyncSession)
 
             startListeningToRepoChanges()
 

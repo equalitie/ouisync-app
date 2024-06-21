@@ -46,6 +46,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         super.init()
     }
 
+    func assignSession(_ ouisyncSession: OuisyncSession) {
+        self.ouisyncSession = ouisyncSession
+        Task {
+            try! await manager.signalErrorResolved(ExtError.backendIsUnreachable)
+        }
+    }
+
     func invalidate() {
         // TODO: cleanup any resources
     }
