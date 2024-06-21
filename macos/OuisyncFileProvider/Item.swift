@@ -11,6 +11,32 @@ import MessagePack
 import OuisyncLib
 import System
 
+enum EntryItem: Hashable, Equatable, CustomDebugStringConvertible {
+    case file(FileItem)
+    case directory(DirectoryItem)
+
+    func providerItem() -> NSFileProviderItem {
+        switch self {
+        case .file(let file): return file
+        case .directory(let dir): return dir
+        }
+    }
+
+    func id() -> EntryIdentifier {
+        switch self {
+        case .file(let file): return file.fileIdentifer().entry()
+        case .directory(let dir): return dir.directoryIdentifier().entry()
+        }
+    }
+
+    public var debugDescription: String {
+        switch self {
+        case .file(let file): return file.debugDescription
+        case .directory(let dir): return dir.debugDescription
+        }
+    }
+}
+
 class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
     let file: OuisyncFileEntry
@@ -28,6 +54,10 @@ class FileItem: NSObject, NSFileProviderItem {
         try await file.exists()
     }
 
+    func fileIdentifer() -> FileIdentifier {
+        FileIdentifier(file.path, repoName)
+    }
+
     var itemIdentifier: NSFileProviderItemIdentifier {
         return FileIdentifier(file.path, repoName).item().serialize()
     }
@@ -42,7 +72,8 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        return NSFileProviderItemVersion(contentVersion: version.serialize(), metadataVersion: "a metadata version".data(using: .utf8)!)
+        let data = version.serialize()
+        return NSFileProviderItemVersion(contentVersion: data, metadataVersion: data)
     }
 
     var filename: String {
@@ -54,7 +85,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        "FileItem(\(repoName), \(file.path))"
+        "FileItem(\(repoName), \(file.path), \(version))"
     }
 
     var documentSize: NSNumber? {
@@ -65,18 +96,29 @@ class FileItem: NSObject, NSFileProviderItem {
 class DirectoryItem: NSObject, NSFileProviderItem {
     let repoName: String
     let directory: OuisyncDirectoryEntry
+    let version: Version
 
-    init(_ directory: OuisyncDirectoryEntry, _ repoName: String) {
+    fileprivate init(_ directory: OuisyncDirectoryEntry, _ repoName: String, _ version: Version) {
         self.repoName = repoName
         self.directory = directory
+        self.version = version
+    }
+
+    static func load(_ directory: OuisyncDirectoryEntry, _ repoName: String) async throws -> DirectoryItem {
+        let version = Version(Hash(try await directory.repository.getEntryVersionHash("/")), 0)
+        return DirectoryItem(directory, repoName, version)
     }
 
     // For when this directory represents a repository
-    init(_ repo: OuisyncRepository, _ repoName: String) {
-        self.repoName = repoName
-        self.directory = OuisyncDirectoryEntry(FilePath(""), repo)
+    static func load(_ repo: OuisyncRepository, _ repoName: String) async throws -> DirectoryItem {
+        let directory = OuisyncDirectoryEntry(FilePath(""), repo)
+        return try await load(directory, repoName)
     }
     
+    func directoryIdentifier() -> DirectoryIdentifier {
+        DirectoryIdentifier(directory.path, repoName)
+    }
+
     func exists() async throws -> Bool {
         try await directory.exists()
     }
@@ -107,7 +149,8 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+        let data = version.serialize()
+        return NSFileProviderItemVersion(contentVersion: data, metadataVersion: data)
     }
 
     var filename: String {
@@ -119,12 +162,16 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "DirectoryItem(\(repoName), \(directory.path))"
+        return "DirectoryItem(\(repoName), \(directory.path), \(version), \(parentItemIdentifier))"
     }
 }
 
 class RootContainerItem: NSObject, NSFileProviderItem {
-    override init() { }
+    let version: NSFileProviderSyncAnchor
+
+    init(_ version: NSFileProviderSyncAnchor) {
+        self.version = version
+    }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
         return .rootContainer
@@ -139,7 +186,7 @@ class RootContainerItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+        NSFileProviderItemVersion(contentVersion: version.rawValue, metadataVersion: "a metadata version".data(using: .utf8)!)
     }
 
     var filename: String {
@@ -151,12 +198,16 @@ class RootContainerItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "RootContainerItem()"
+        return "RootContainerItem(\(version))"
     }
 }
 
 class WorkingSetItem: NSObject, NSFileProviderItem {
-    override init() { }
+    let version: NSFileProviderSyncAnchor
+
+    init(_ version: NSFileProviderSyncAnchor) {
+        self.version = version
+    }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
         return .workingSet
@@ -171,7 +222,7 @@ class WorkingSetItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: "a content version".data(using: .utf8)!, metadataVersion: "a metadata version".data(using: .utf8)!)
+        NSFileProviderItemVersion(contentVersion: version.rawValue, metadataVersion: "a metadata version".data(using: .utf8)!)
     }
 
     var filename: String {
@@ -183,7 +234,7 @@ class WorkingSetItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "WorkingSetItem()"
+        return "WorkingSetItem(\(version))"
     }
 }
 
@@ -232,8 +283,4 @@ func getRepoByName(_ session: OuisyncSession, _ repoName: String) async -> Ouisy
     }
 
     return nil
-}
-
-func itemFromRepo(_ repo: OuisyncRepository, _ repoName: RepoName) -> NSFileProviderItem {
-    return DirectoryItem(repo, repoName)
 }

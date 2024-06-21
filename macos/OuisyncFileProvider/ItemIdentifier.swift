@@ -12,7 +12,7 @@ import System // for FilePath
 
 typealias RepoName = String
 
-enum ItemIdentifier: CustomDebugStringConvertible {
+enum ItemIdentifier: CustomDebugStringConvertible, Hashable, Equatable {
     case rootContainer
     case trashContainer
     case workingSet
@@ -95,18 +95,9 @@ enum ItemIdentifier: CustomDebugStringConvertible {
         case .entry(let entry): return entry.debugDescription
         }
     }
-
-    func loadItem(_ session: OuisyncSession) async throws -> NSFileProviderItem {
-        switch self {
-        case .rootContainer: return RootContainerItem()
-        case .trashContainer: return TrashContainerItem()
-        case .workingSet: return WorkingSetItem()
-        case .entry(let entry): return try await entry.loadItem(session)
-        }
-    }
 }
 
-enum EntryIdentifier: CustomDebugStringConvertible, Codable {
+enum EntryIdentifier: CustomDebugStringConvertible, Codable, Equatable, Hashable {
     case file(FileIdentifier)
     case directory(DirectoryIdentifier)
 
@@ -159,9 +150,13 @@ enum EntryIdentifier: CustomDebugStringConvertible, Codable {
         case .directory(let dir): return dir.debugDescription
         }
     }
+
+    func item() -> ItemIdentifier {
+        ItemIdentifier(self)
+    }
 }
 
-class FileIdentifier: CustomDebugStringConvertible, Codable {
+struct FileIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equatable {
     // The file path is relative to the repository
     let path: FilePath
     let repoName: RepoName
@@ -214,6 +209,8 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
             version = Version(Hash(try await entry.getVersionHash()), size)
         } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store {
             NSLog("WARNING: Block to file not found")
+        } catch let error as OuisyncError where error.code == OuisyncErrorCode.EntryNotFound {
+            throw ExtError.noSuchItem.from("\(self):L\(#line)")
         } catch {
             fatalError("Unhandled exception when retrieving file version:\(error)")
         }
@@ -249,7 +246,7 @@ class FileIdentifier: CustomDebugStringConvertible, Codable {
     }
 }
 
-class DirectoryIdentifier: CustomDebugStringConvertible, Codable {
+struct DirectoryIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equatable {
     // The file path is relative to the repository
     let path: FilePath
     let repoName: RepoName
@@ -272,7 +269,7 @@ class DirectoryIdentifier: CustomDebugStringConvertible, Codable {
             throw ExtError.noSuchItem
         }
 
-        return DirectoryItem(OuisyncDirectoryEntry(path, repo), repoName)
+        return try await DirectoryItem.load(OuisyncDirectoryEntry(path, repo), repoName)
     }
 
     func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
@@ -280,6 +277,17 @@ class DirectoryIdentifier: CustomDebugStringConvertible, Codable {
             throw ExtError.noSuchItem
         }
         return repo
+    }
+
+    func listEntries(_ session: OuisyncSession) async throws -> [EntryIdentifier] {
+        let repo = try await loadRepo(session)
+        let entry = OuisyncDirectoryEntry(path, repo)
+        return try await entry.listEntries().map { e in
+            switch e {
+            case .directory(let dirEntry): return EntryIdentifier(DirectoryIdentifier(dirEntry.path, repoName))
+            case .file(let fileEntry): return EntryIdentifier(FileIdentifier(fileEntry.path, repoName))
+            }
+        }
     }
 
     func entry() -> EntryIdentifier {

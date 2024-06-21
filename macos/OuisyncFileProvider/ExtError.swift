@@ -46,8 +46,8 @@ class ExtError {
 extension NSError {
     func from(_ str: String) -> NSError {
         var userInfo = self.userInfo
-        
-        if var value = userInfo["from"] {
+
+        if let value = userInfo["from"] {
             if var array = value as? [String] {
                 array.append(str)
             } else {

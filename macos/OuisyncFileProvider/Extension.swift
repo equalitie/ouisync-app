@@ -19,6 +19,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
     let log: Log
+    let pastEnumerations: PastEnumerations? = nil
+    let manager: NSFileProviderManager
 
     required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
@@ -28,7 +30,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // for that domain, and call methods on the instance.
         
         let log = Log("Extension")
-        let manager = NSFileProviderManager(for: domain)!
+        self.manager = NSFileProviderManager(for: domain)!
 
         do {
             temporaryDirectoryURL = try manager.temporaryDirectoryURL()
@@ -36,8 +38,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             fatalError("Failed to get temporary directory: \(error)")
         }
 
+        // TODO: This doesn't work yet
+        //pastEnumerations = PastEnumerations()
+
         self.domain = domain
-        self.log = log.level(.info)
+        self.log = log.level(.trace)
         super.init()
     }
 
@@ -65,7 +70,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         Task {
             do {
-                let item = try await ItemIdentifier(identifier).loadItem(session)
+                let item: NSFileProviderItem
+                switch ItemIdentifier(identifier) {
+                case .rootContainer: item = RootContainerItem(currentAnchor)
+                case .trashContainer: item = TrashContainerItem()
+                case .workingSet: item = WorkingSetItem(currentAnchor)
+                case .entry(let entry): item = try await entry.loadItem(session)
+                }
                 handler(item, nil)
             } catch let e as NSError where e.code == ExtError.noSuchItem.code {
                 handler(nil, e)
@@ -236,7 +247,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     handler(dstItem, [], false, nil)
                 case .folder:
                     try await repo.createDirectory(dstPath)
-                    let dstItem = DirectoryItem(repo.directoryEntry(dstPath), repoName)
+                    let dstItem = try await DirectoryItem.load(repo.directoryEntry(dstPath), repoName)
                     handler(dstItem, [], false, nil)
                 }
             } catch let error as NSError {
@@ -273,6 +284,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 var newItem: NSFileProviderItem = item
 
                 if fields.contains(.filename) /* rename */ || fields.contains(.parentItemIdentifier) /* move */ {
+                    log.info("Requested rename or move \(id)")
                     let parentId = ItemIdentifier(item.parentItemIdentifier)
 
                     let dstParentPath: FilePath
@@ -307,11 +319,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     case .file:
                         newItem = try await FileIdentifier(dstPath, src.repoName()).loadItem(repo)
                     case .directory:
-                        newItem = DirectoryItem(repo.directoryEntry(dstPath), src.repoName())
+                        newItem = try await DirectoryItem.load(repo.directoryEntry(dstPath), src.repoName())
                     }
                 }
 
                 if fields.contains(.contents) {
+                    log.info("Requested content change \(id)")
                     let srcUrl = newContents!
                     let entry: OuisyncFileEntry
                     let repoName: String
@@ -390,7 +403,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
-        let log = self.log.child("enumerator").level(.error).trace("invoked(\(identifier))")
+        let log = self.log.child("enumerator").level(.trace).trace("invoked(\(identifier))")
 
         guard let session = self.ouisyncSession else {
             let error = ExtError.backendIsUnreachable
@@ -398,7 +411,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             throw error
         }
 
-        return Enumerator(identifier, session, currentAnchor, log)
+        return Enumerator(identifier, session, currentAnchor, log, pastEnumerations)
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location
@@ -476,4 +489,8 @@ func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst:
             written += UInt64(exactly: data.count)!
         }
     }
+}
+
+class PastEnumerations {
+    var enumerations: [ItemIdentifier: [EntryIdentifier: EntryItem]] = [:]
 }

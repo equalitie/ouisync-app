@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FileProvider
 
 enum Version: Codable, CustomDebugStringConvertible {
     case valid(ValidVersion)
@@ -18,6 +19,7 @@ enum Version: Codable, CustomDebugStringConvertible {
     init(_ hash: Hash, _ size: UInt64) { self = .valid(ValidVersion(hash, size)) }
     init(_ v: ValidVersion) { self = .valid(v) }
     init(_ v: InvalidVersion) { self = .invalid(v) }
+    init(_ v: NSFileProviderItemVersion) { self = Self.tryDeserialize(v.contentVersion)! }
 
     static func invalid() -> Self { .invalid(InvalidVersion()) }
 
@@ -39,6 +41,13 @@ enum Version: Codable, CustomDebugStringConvertible {
         switch self {
         case .valid(let v): return v.debugDescription
         case .invalid(let v): return v.debugDescription
+        }
+    }
+
+    func knownSize() -> UInt64? {
+        switch self {
+        case .valid(let v): return v.size
+        case .invalid: return nil
         }
     }
 }
