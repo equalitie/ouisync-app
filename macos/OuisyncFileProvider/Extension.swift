@@ -288,7 +288,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             do {
                 let id = ItemIdentifier(item.itemIdentifier)
                 var fields = changedFields
-                var newItem: NSFileProviderItem = item
+                var newItem: NSFileProviderItem? = nil
 
                 if fields.contains(.filename) /* rename */ || fields.contains(.parentItemIdentifier) /* move */ {
                     log.info("Requested rename or move \(id)")
@@ -326,7 +326,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     case .file:
                         newItem = try await FileIdentifier(dstPath, src.repoName()).loadItem(repo)
                     case .directory:
-                        newItem = try await DirectoryItem.load(repo.directoryEntry(dstPath), src.repoName())
+                        newItem = try await DirectoryIdentifier(dstPath, src.repoName()).loadItem(repo)
                     }
                 }
 
@@ -352,6 +352,25 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     fields.remove(.contents)
 
                     newItem = FileItem(entry, repoName, size: written, version: version)
+                }
+
+                if newItem == nil {
+                    // We can't return the item that was passed to us because the system expects the version
+                    // (and possibly other things as well) to have been changed.
+                    // https://stackoverflow.com/questions/74490453/why-is-fetchcontents-called-when-opening-an-already-materialized-file
+
+                    let entryId: EntryIdentifier
+
+                    switch id {
+                    case .rootContainer, .workingSet, .trashContainer:
+                        fatalError("TODO?")
+                    case .entry(.directory(let dirId)):
+                        entryId = EntryIdentifier(dirId)
+                    case .entry(.file(let fileId)):
+                        entryId = EntryIdentifier(fileId)
+                    }
+
+                    newItem = try await entryId.loadItem(session)
                 }
 
                 handler(newItem, fields, false, nil)

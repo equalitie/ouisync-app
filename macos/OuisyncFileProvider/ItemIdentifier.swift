@@ -116,6 +116,13 @@ enum EntryIdentifier: CustomDebugStringConvertible, Codable, Equatable, Hashable
         }
     }
 
+    func loadItem(_ repo: OuisyncRepository) async throws -> NSFileProviderItem {
+        switch self {
+        case .file(let id): return try await id.loadItem(repo)
+        case .directory(let id): return try await id.loadItem(repo)
+        }
+    }
+
     func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
         switch self {
         case .file(let id): return try await id.loadRepo(session)
@@ -262,7 +269,10 @@ struct DirectoryIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equ
 
     func loadItem(_ session: OuisyncSession) async throws -> DirectoryItem {
         let repo = try await loadRepo(session)
+        return try await loadItem(repo)
+    }
 
+    func loadItem(_ repo: OuisyncRepository) async throws -> DirectoryItem {
         let entry = OuisyncDirectoryEntry(path, repo)
 
         if try await entry.exists() == false {
