@@ -239,18 +239,21 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<void> close() async {
-    // Make sure this function is idempotent, i.e. that calling it more than once
-    // one after another won't change it's meaning nor it will crash.
+    // Make sure this function is idempotent, i.e. that calling it more than once won't change it's
+    // meaning nor it will crash.
     _currentRepo = null;
 
-    await _subscription?.cancel();
+    final subscription = _subscription;
     _subscription = null;
 
-    for (var repo in _repos.values) {
+    final repos = _repos.values.toList();
+    _repos.clear();
+
+    await subscription?.cancel();
+
+    for (final repo in repos) {
       await repo.close();
     }
-
-    _repos.clear();
 
     changed();
   }

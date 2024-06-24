@@ -178,8 +178,8 @@ class _MainPageState extends State<MainPage>
   }
 
   @override
-  void dispose() async {
-    await _cubits.repositories.close();
+  void dispose() {
+    unawaited(_cubits.repositories.close());
 
     _bottomSheetInfo.dispose();
     _appSettingsIconFocus.dispose();

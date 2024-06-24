@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart';
@@ -19,8 +17,6 @@ import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
-  _setupErrorReporting();
-
   final packageInfo = await PackageInfo.fromPlatform();
   final windowManager = await PlatformWindowManager.create(
     args,
@@ -178,28 +174,3 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
               labelMedium: AppTypography.labelMedium,
               labelSmall: AppTypography.labelSmall)
         ]);
-
-void _setupErrorReporting() {
-  // Errors from flutter
-  FlutterError.onError = (details) {
-    // Invoke the default handler
-    FlutterError.presentError(details);
-
-    _onError(details);
-  };
-
-  // Errors from outside of flutter
-  PlatformDispatcher.instance.onError = (exception, stack) {
-    _onError(FlutterErrorDetails(exception: exception, stack: stack));
-
-    // Invoke the default handler
-    return false;
-  };
-}
-
-void _onError(FlutterErrorDetails details) {
-  logError("Unhandled Exception:", details.exception, details.stack);
-
-  unawaited(
-      Sentry.captureException(details.exception, stackTrace: details.stack));
-}
