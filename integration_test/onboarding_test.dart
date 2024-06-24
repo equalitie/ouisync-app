@@ -1,11 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 
-import 'test_env.dart';
+import '../test/test_env.dart';
 
 void main() {
-  integrationTests(() async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testEnv(() async {
     testWidgets('onboarding', (tester) async {
       await tester.pumpWidget(await initOuiSyncApp([]));
       await tester.pumpAndSettle();
