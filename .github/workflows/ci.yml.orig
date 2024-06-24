@@ -132,4 +132,8 @@ jobs:
         if: matrix.name == 'linux'
 
       - name: Build Ouisync app
+<<<<<<< HEAD
+        run: flutter build ${{ matrix.build-args }} --verbose
+=======
         run: flutter --verbose build ${{ matrix.build-args }}
+>>>>>>> 928524e2 (Run integration tests on the CI)
