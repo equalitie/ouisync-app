@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_entry.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/repository_creation_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
@@ -14,6 +17,8 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+
+import 'utils.dart';
 
 void main() {
   late Session session;
@@ -51,12 +56,17 @@ void main() {
   });
 
   testWidgets('create repository', (tester) async {
-    final navigatorObserver = TestNavigatorObserver();
+    // NOTE: We need to construct the completer inside `runAsync` otherwise its future would never
+    // complete.
+    final onSuccess =
+        (await tester.runAsync(() => Future.value(Completer<RepoLocation>())))!;
 
     await tester.pumpWidget(MaterialApp(
-      home: RepositoryCreation(reposCubit: reposCubit),
+      home: RepositoryCreation(
+        reposCubit: reposCubit,
+        onSuccess: onSuccess.complete,
+      ),
       localizationsDelegates: const [S.delegate],
-      navigatorObservers: [navigatorObserver],
     ));
     await tester.pumpAndSettle();
 
@@ -73,18 +83,9 @@ void main() {
     // Verify that use cache servers is off:
     expect(tester.widget<Switch>(useCacheServersField).value, isFalse);
 
-    // Verify we are not in the root route.
-    expect(navigatorObserver.cubit.state, equals(1));
-
-    // NOTE: It seems we need to use `runAsync` because tapping the "create" button invokes an async
-    // callback. Not sure this is the correct way to do it though...
     await tester.runAsync(() async {
       await tester.tap(find.text('CREATE'));
-      // Wait until we return to the root route.
-      await navigatorObserver.cubit.stream
-          .where((stack) => stack == 0)
-          .timeout(Duration(seconds: 10))
-          .first;
+      await onSuccess.future.timeout(const Duration(seconds: 10));
     });
 
     final repoEntry =
@@ -105,31 +106,42 @@ void main() {
           ),
     );
   });
-}
 
-/// Observes the current navigation route stack depth.
-class TestNavigatorObserver extends NavigatorObserver {
-  final cubit = TestNavigatorCubit();
+  testWidgets('attempt to create repository with existing name',
+      (tester) async {
+    final name = 'le repo';
 
-  @override
-  void didPop(Route route, Route? previousRoute) {
-    cubit.pop();
-  }
+    await tester.runAsync(() async => await reposCubit.createRepository(
+          location: RepoLocation.fromParts(
+            dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+            name: name,
+          ),
+          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          localSecretMode: LocalSecretMode.randomStored,
+        ));
 
-  @override
-  void didPush(Route route, Route? previousRoute) {
-    cubit.push();
-  }
-}
+    final onFailure = (await tester.runAsync(() => Future.value(Completer())))!;
 
-class TestNavigatorCubit extends Cubit<int> {
-  TestNavigatorCubit() : super(0);
+    await tester.pumpWidget(MaterialApp(
+      home: RepositoryCreation(
+        reposCubit: reposCubit,
+        onFailure: onFailure.complete,
+      ),
+      localizationsDelegates: const [S.delegate],
+    ));
+    await tester.pumpAndSettle();
 
-  void push() {
-    emit(state + 1);
-  }
+    final nameField = find.byKey(ValueKey('name'));
+    await tester.enterText(nameField, name);
 
-  void pop() {
-    emit(state - 1);
-  }
+    await tester.runAsync(() async {
+      await tester.tap(find.text('CREATE'));
+      await onFailure.future.timeout(const Duration(seconds: 10));
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('There is already a repository with this name'), findsOne);
+    expect(reposCubit.repos.length, equals(1));
+  });
 }

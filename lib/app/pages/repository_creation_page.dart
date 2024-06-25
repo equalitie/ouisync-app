@@ -14,11 +14,15 @@ class RepositoryCreation extends StatefulWidget {
   RepositoryCreation({
     required this.reposCubit,
     this.initialTokenValue,
+    this.onSuccess,
+    this.onFailure,
   });
 
   final ReposCubit reposCubit;
   final String? initialTokenValue;
   final LocalSecretMode initialLocalSecretMode = LocalSecretMode.randomStored;
+  final void Function(RepoLocation)? onSuccess;
+  final void Function()? onFailure;
 
   @override
   State<RepositoryCreation> createState() => _RepositoryCreationState();
@@ -267,6 +271,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   Future<void> _onSubmit(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
+      _onFailure();
       return;
     }
 
@@ -274,7 +279,6 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     // perform it we need to first construct the `RepoLocation` object which we also need here. If
     // we did it in the validator there would be no way to pass that object to here and we would
     // have to construct it again which would be sad.
-
     final location = RepoLocation.fromParts(
       dir: await widget.reposCubit.settings.getDefaultRepositoriesDir(),
       name: name,
@@ -290,6 +294,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     });
 
     if (exists) {
+      _onFailure();
       return;
     }
 
@@ -299,6 +304,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         : localPassword;
 
     if (setLocalSecret == null) {
+      _onFailure();
       return;
     }
 
@@ -316,7 +322,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
     switch (repoEntry) {
       case OpenRepoEntry():
-        Navigator.of(context).pop(location);
+        _onSuccess(context, location);
       case ErrorRepoEntry():
         await Dialogs.simpleAlertDialog(
           context: context,
@@ -324,10 +330,24 @@ class _RepositoryCreationState extends State<RepositoryCreation>
           message: repoEntry.error,
         );
 
-        return;
+        _onFailure();
       case LoadingRepoEntry():
       case MissingRepoEntry():
         throw 'unreachable code';
+    }
+  }
+
+  void _onFailure() {
+    final callback = widget.onFailure;
+    if (callback != null) callback();
+  }
+
+  void _onSuccess(BuildContext context, RepoLocation location) {
+    final callback = widget.onSuccess;
+    if (callback != null) {
+      callback(location);
+    } else {
+      Navigator.of(context).pop(location);
     }
   }
 
