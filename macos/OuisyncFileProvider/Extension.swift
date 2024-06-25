@@ -19,7 +19,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
     let log: Log
-    let pastEnumerations: PastEnumerations? = nil
+    let pastEnumerations: PastEnumerations?
     let manager: NSFileProviderManager
 
     required init(domain: NSFileProviderDomain) {
@@ -40,6 +40,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()
+        pastEnumerations = nil
 
         self.domain = domain
         self.log = log.level(.trace)
@@ -519,4 +520,8 @@ func copyContentsAndClose(_ src: URL, _ dstEntry: OuisyncFileEntry, _ createDst:
 
 class PastEnumerations {
     var enumerations: [ItemIdentifier: [EntryIdentifier: EntryItem]] = [:]
+
+    func setFor(_ itemId: ItemIdentifier, _ enums: [EntryIdentifier: EntryItem]) {
+        self.enumerations[itemId] = enums
+    }
 }

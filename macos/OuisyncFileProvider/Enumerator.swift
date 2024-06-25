@@ -51,9 +51,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
                 if !items.isEmpty {
                     observer.didEnumerate(items.map{ $0.providerItem() })
                 }
-                log.info("\(itemId) -> \(items)")
-                if var pastEnumerations = self.pastEnumerations?.enumerations {
-                    pastEnumerations[itemId] = Dictionary(uniqueKeysWithValues: items.map { ($0.id(), $0) })
+                if let pastEnumerations = self.pastEnumerations {
+                    pastEnumerations.setFor(itemId, Dictionary(uniqueKeysWithValues: items.map { ($0.id(), $0) }))
                 }
                 observer.finishEnumerating(upTo: nil)
             } catch {
@@ -63,7 +62,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
     }
     
     func enumerateChanges(for observer: NSFileProviderChangeObserver, from oldAnchor: NSFileProviderSyncAnchor) {
-        log.trace("enumerateChanges(oldAnchor: \(oldAnchor)) { item:\(itemId), currentAnchor:\(currentAnchor) }")
+        let log = log.trace("enumerateChanges(oldAnchor: \(oldAnchor)) { item:\(itemId), currentAnchor:\(currentAnchor) }")
         /* TODO:
          - query the server for updates since the passed-in sync anchor
          
@@ -74,20 +73,31 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          - inform the observer when you have finished enumerating up to a subsequent sync anchor
          */
         
+        let finishEnumeratingWithError = { (error: NSError, line: Int) in
+            if self.pastEnumerations == nil {
+                if error.code != ExtError.syncAnchorExpired.code {
+                    log.trace("\(error) L\(line)")
+                }
+            } else {
+                log.trace("\(error) L\(line)")
+            }
+            observer.finishEnumeratingWithError(error)
+        }
+
         if oldAnchor == currentAnchor {
             observer.finishEnumeratingChanges(upTo: currentAnchor, moreComing: false)
         } else {
             guard let pastEnumerations = pastEnumerations?.enumerations else {
-                observer.finishEnumeratingWithError(ExtError.syncAnchorExpired)
-                return
-            }
-
-            guard let previousItems = pastEnumerations[itemId] else {
                 // We don't know what has changed because we don't track the current state and neither does
                 // the Ouisync backend. So we return `synchAnchorExpired` error which will force the system
                 // to re-enumerate the items (by calling the `enumerateItems` function.
                 // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#40997540
-                observer.finishEnumeratingWithError(ExtError.syncAnchorExpired)
+                finishEnumeratingWithError(ExtError.syncAnchorExpired, #line)
+                return
+            }
+
+            guard let previousItems = pastEnumerations[itemId] else {
+                finishEnumeratingWithError(ExtError.syncAnchorExpired, #line)
                 return
             }
 
@@ -131,7 +141,10 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 
     private func enumerateBackend() async throws -> [EntryItem] {
         switch itemId {
-        case .rootContainer, .workingSet:
+        case .workingSet:
+            // TODO
+            return []
+        case .rootContainer:
             do {
                 let reposByName = try await listRepositories()
                 let items = try await reposToItems(reposByName)
