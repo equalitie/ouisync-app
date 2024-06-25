@@ -136,7 +136,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        var caps: NSFileProviderItemCapabilities = [.allowsReading, .allowsWriting]
+        var caps: NSFileProviderItemCapabilities = [.allowsReading, .allowsWriting, .allowsAddingSubItems, .allowsContentEnumerating]
 
         // We currently allow these *repository* operations only from the app
         if !DirectoryIdentifier(directory.path, repoName).isRepository() {
@@ -182,11 +182,12 @@ class RootContainerItem: NSObject, NSFileProviderItem {
     }
 
     var capabilities: NSFileProviderItemCapabilities {
-        return [.allowsReading]
+        return [.allowsReading, .allowsContentEnumerating]
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: version.rawValue, metadataVersion: "a metadata version".data(using: .utf8)!)
+        let v = version.rawValue
+        return NSFileProviderItemVersion(contentVersion: v, metadataVersion: v)
     }
 
     var filename: String {
@@ -222,7 +223,8 @@ class WorkingSetItem: NSObject, NSFileProviderItem {
     }
 
     var itemVersion: NSFileProviderItemVersion {
-        NSFileProviderItemVersion(contentVersion: version.rawValue, metadataVersion: "a metadata version".data(using: .utf8)!)
+        let v = version.rawValue
+        return NSFileProviderItemVersion(contentVersion: v, metadataVersion: v)
     }
 
     var filename: String {
