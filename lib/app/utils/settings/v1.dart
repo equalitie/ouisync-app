@@ -131,18 +131,19 @@ class Settings with AppLogger {
   }
 
   static Future<Settings> init(
-    SharedPreferences prefs,
     MasterKey masterKey,
-    Session session,
   ) async {
+    final prefs = await SharedPreferences.getInstance();
+
     final json = prefs.getString(settingsKey);
     final root = SettingsRoot.fromJson(json);
 
-    final settings = Settings._(root, prefs, masterKey);
-    await settings._migrateValues(session);
-    await settings._migrateRepositoryPaths();
+    return Settings._(root, prefs, masterKey);
+  }
 
-    return settings;
+  Future<void> migrate(Session session) async {
+    await _migrateValues(session);
+    await _migrateRepositoryPaths();
   }
 
   Future<void> _migrateValues(Session session) async {

@@ -199,6 +199,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
         Padding(
           padding: Dimensions.paddingVertical10,
           child: Fields.formTextField(
+            key: ValueKey('name'),
             context: context,
             controller: nameController,
             labelText: S.current.labelName,
@@ -232,6 +233,7 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   Widget _buildUseCacheServersSwitch(BuildContext context) =>
       CustomAdaptiveSwitch(
+        key: ValueKey('use-cache-servers'),
         value: useCacheServers,
         title: S.current.messageUseCacheServers,
         contentPadding: EdgeInsets.zero,

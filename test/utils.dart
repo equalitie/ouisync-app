@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +7,7 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Setup the test environment and run `callback` inside it.
-Future<void> testEnv(Future<void> Function() callback) async {
+Future<void> testEnv(FutureOr<void> Function() callback) async {
   Directory? tempDir;
 
   setUp(() async {

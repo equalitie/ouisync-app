@@ -4,6 +4,7 @@ import '../../utils/extensions.dart';
 
 class CustomAdaptiveSwitch extends StatelessWidget {
   const CustomAdaptiveSwitch({
+    super.key,
     required this.value,
     required this.title,
     required this.contentPadding,

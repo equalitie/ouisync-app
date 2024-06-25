@@ -56,9 +56,8 @@ void main() {
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
-    final sharedPreferences = await SharedPreferences.getInstance();
-    final key = await MasterKey.init();
-    settings = await Settings.init(sharedPreferences, key, session);
+    final key = MasterKey.random();
+    settings = await Settings.init(key);
     navigationCubit = NavigationCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
