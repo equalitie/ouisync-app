@@ -27,6 +27,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final NavigationCubit _navigation;
   final EntryBottomSheetCubit _bottomSheet;
   final PasswordHasher passwordHasher;
+  final CacheServers cacheServers;
 
   ReposCubit({
     required session,
@@ -34,6 +35,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     required settings,
     required navigation,
     required bottomSheet,
+    required this.cacheServers,
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
@@ -308,6 +310,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       bottomSheet: _bottomSheet,
       repo: repo,
       location: location,
+      cacheServers: cacheServers,
     );
 
     final entry = OpenRepoEntry(cubit);
@@ -494,6 +497,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         bottomSheet: _bottomSheet,
         repo: repo,
         location: location,
+        cacheServers: cacheServers,
       );
 
       return OpenRepoEntry(cubit);
@@ -565,7 +569,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       // Optionally enable cache server mirror.
       if (useCacheServers) {
-        await repo.setCacheServersEnabled(true);
+        await cacheServers.setEnabled(repo, true);
       }
 
       final databaseId = DatabaseId(await repo.hexDatabaseId());
@@ -578,6 +582,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         bottomSheet: _bottomSheet,
         repo: repo,
         location: location,
+        cacheServers: cacheServers,
       );
 
       final authMode = switch (localSecretMode) {

@@ -84,8 +84,10 @@ class _RepositoryCreationState extends State<RepositoryCreation>
     isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
     // When importing existing repository check if the cache servers have been already enabled.
-    useCacheServers =
-        (shareToken != null) ? await shareToken.isCacheServersEnabled() : true;
+    useCacheServers = (shareToken != null)
+        ? await widget.reposCubit.cacheServers
+            .isEnabledForShareToken(shareToken)
+        : true;
   }
 
   Future<ShareToken?> _validateToken(String initialToken) async {

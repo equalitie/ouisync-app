@@ -112,6 +112,7 @@ class _MainPageState extends State<MainPage>
       settings: settings,
       navigation: navigation,
       bottomSheet: bottomSheet,
+      cacheServers: CacheServers(Constants.cacheServers),
     );
     final powerControl = PowerControl(session, settings);
     final panicCounter = StateMonitorIntCubit(

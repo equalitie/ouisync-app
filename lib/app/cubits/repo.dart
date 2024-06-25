@@ -105,7 +105,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
-  final _setCacheServersEnabledThrottle = Throttle();
+  final CacheServers _cacheServers;
 
   RepoCubit._(
     this._session,
@@ -114,8 +114,9 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     this._bottomSheet,
     this._repo,
     this._pathCipher,
-    RepoState state,
-  ) : super(state) {
+    this._cacheServers,
+    super.state,
+  ) {
     _currentFolder.repo = this;
   }
 
@@ -127,6 +128,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required RepoLocation location,
     required NavigationCubit navigation,
     required EntryBottomSheetCubit bottomSheet,
+    required CacheServers cacheServers,
   }) async {
     final authMode = await repo.getAuthMode();
 
@@ -156,6 +158,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       bottomSheet,
       repo,
       pathCipher,
+      cacheServers,
       state,
     );
 
@@ -230,19 +233,14 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<void> setCacheServersEnabled(bool value) async {
     // Update the state to the desired value for immediate feedback...
     emit(state.copyWith(isCacheServersEnabled: value));
-
-    await _setCacheServersEnabledThrottle.invoke(() async {
-      await _repo.setCacheServersEnabled(value);
-
-      // ...then fetch the actual value and update the state again. This is needed because some of
-      // the cache server requests might fail.
-      await _updateCacheServersState();
-    });
+    await _cacheServers.setEnabled(_repo, value);
+    // ...then fetch the actual value and update the state again. This is needed because some of
+    // the cache server requests might fail.
+    await _updateCacheServersState();
   }
 
   Future<void> _updateCacheServersState() async {
-    final value = await _repo.isCacheServersEnabled();
-
+    final value = await _cacheServers.isEnabledForRepo(_repo);
     emit(state.copyWith(isCacheServersEnabled: value));
   }
 
@@ -823,37 +821,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
         return await _repo.getReadPasswordSalt();
       case AccessMode.write:
         return await _repo.getWritePasswordSalt();
-    }
-  }
-}
-
-// Ensures an async operation is being executed at most once at a time. If the operation is invoked
-// while already executing, it's delayed until the current execution completes. If it's invoked
-// more than once, only the last invocation is executed.
-//
-// TODO: come up with more accurate name.
-class Throttle {
-  Future<void> Function()? curr;
-  Future<void> Function()? next;
-
-  Future<void> invoke(Future<void> Function() f) async {
-    if (curr != null) {
-      next = f;
-      return;
-    } else {
-      curr = f;
-    }
-
-    while (curr != null) {
-      try {
-        await curr!();
-        curr = next;
-      } catch (e) {
-        curr = null;
-        rethrow;
-      } finally {
-        next = null;
-      }
     }
   }
 }

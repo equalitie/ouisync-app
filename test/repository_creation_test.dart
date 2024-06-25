@@ -6,6 +6,7 @@ import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/pages/repository_creation_page.dart';
+import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
@@ -38,6 +39,7 @@ void main() {
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
+      cacheServers: CacheServers.disabled,
     );
 
     await reposCubit.init();
@@ -69,7 +71,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify that use cache servers is off:
-    // TODO: Disable cache servers in tests
     expect(tester.widget<Switch>(useCacheServersField).value, isFalse);
 
     // Verify we are not in the root route.
@@ -91,11 +92,17 @@ void main() {
 
     expect(
       repoEntry,
-      isA<OpenRepoEntry>().having(
-        (e) => e.cubit.state.accessMode,
-        'accessMode',
-        equals(AccessMode.write),
-      ),
+      isA<OpenRepoEntry>()
+          .having(
+            (e) => e.cubit.state.accessMode,
+            'cubit.state.accessMode',
+            equals(AccessMode.write),
+          )
+          .having(
+            (e) => e.cubit.state.isCacheServersEnabled,
+            'cubit.state.isCacheServersEnabled',
+            isFalse,
+          ),
     );
   });
 }

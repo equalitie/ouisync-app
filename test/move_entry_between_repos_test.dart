@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
+import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_plugin/native_channels.dart';
@@ -69,6 +70,7 @@ void main() {
       location: locationOrigin,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
+      cacheServers: CacheServers.disabled,
     );
 
     otherRepoCubit = await RepoCubit.create(
@@ -79,6 +81,7 @@ void main() {
       location: locationOther,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
+      cacheServers: CacheServers.disabled,
     );
   });
 
