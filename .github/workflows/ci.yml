@@ -126,4 +126,4 @@ jobs:
           flutter test
 
       - name: Build Ouisync app
-        run: flutter build ${{ matrix.build-args }}
+        run: flutter build ${{ matrix.build-args }} --verbose
