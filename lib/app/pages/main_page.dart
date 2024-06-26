@@ -19,7 +19,6 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/path.dart' as repo_path;
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -926,6 +925,21 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
+  bool _isEntryActionAvailable(
+    AccessMode accessMode,
+    EntryAction action,
+  ) {
+    if (accessMode == AccessMode.write) return true;
+
+    final readDisabledActions = [
+      EntryAction.delete,
+      EntryAction.move,
+      EntryAction.rename,
+    ];
+
+    return !readDisabledActions.contains(action);
+  }
+
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: widget.bottomSheet,
@@ -971,6 +985,26 @@ class _MainPageState extends State<MainPage>
         onCancel: widget.bottomSheet.hide,
       );
 
+  Future<void> moveEntry(
+    RepoCubit originRepoCubit,
+    String entryPath,
+    EntryType entryType,
+  ) async {
+    if (_currentRepo == null) return;
+
+    final toRepoCubit =
+        originRepoCubit.location.compareTo(_currentRepo!.location) != 0
+            ? _currentRepo!.cubit
+            : null;
+
+    await MoveEntry(
+      context,
+      repoCubit: originRepoCubit,
+      path: entryPath,
+      type: entryType,
+    ).move(toRepoCubit: toRepoCubit);
+  }
+
   Widget _uploadFileState({
     required ReposCubit reposCubit,
     required List<String> paths,
@@ -993,173 +1027,65 @@ class _MainPageState extends State<MainPage>
     _bottomSheetInfo.value = newInfo;
   }
 
-  bool _isEntryActionAvailable(
-    AccessMode accessMode,
-    EntryAction action,
-  ) {
-    if (accessMode == AccessMode.write) return true;
-
-    final readDisabledActions = [
-      EntryAction.delete,
-      EntryAction.move,
-      EntryAction.rename,
-    ];
-
-    return !readDisabledActions.contains(action);
-  }
-
-  Future<void> moveEntry(
-    RepoCubit originRepo,
-    String entryPath,
-    EntryType entryType,
-  ) async {
-    if (_currentRepo == null) return;
-
-    final otherRepoCubit =
-        originRepo.location.compareTo(_currentRepo!.location) == 0
-            ? null
-            : _currentRepo!.cubit;
-
-    final currentFolder = otherRepoCubit == null
-        ? originRepo.state.currentFolder.path
-        : otherRepoCubit.state.currentFolder.path;
-    final basename = repo_path.basename(entryPath);
-    final destination = repo_path.join(currentFolder, basename);
-
-    if (await (otherRepoCubit ?? originRepo).exists(destination)) {
-      await showDialog<FileAction>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: Flex(
-            direction: Axis.horizontal,
-            children: [
-              Fields.constrainedText(
-                S.current.titleMovingEntry,
-                style: context.theme.appTextStyle.titleMedium,
-                maxLines: 2,
-              )
-            ],
-          ),
-          content: ReplaceEntry(name: basename, type: entryType),
-        ),
-      ).then(
-        (fileAction) async {
-          if (fileAction == FileAction.replace) {
-            await _moveAndReplaceEntry(
-              originRepo,
-              otherRepoCubit,
-              entryPath,
-              entryType,
-              destination,
-            );
-          }
-
-          if (fileAction == FileAction.keep) {
-            await _renameAndMoveEntry(
-              originRepo,
-              otherRepoCubit,
-              entryPath,
-              entryType,
-              destination,
-            );
-          }
-        },
-      );
-    } else {
-      await _pickModeAndMoveEntry(
-        originRepo,
-        otherRepoCubit,
-        entryPath,
-        entryType,
-        destination,
-      );
-    }
-  }
-
-  Future<void> _moveAndReplaceEntry(
-    RepoCubit originRepo,
-    RepoCubit? otherRepoCubit,
-    String entryPath,
-    EntryType entryType,
-    String destination,
-  ) async {
-    try {
-      final file = await originRepo.openFile(entryPath);
-      final fileLength = await file.length;
-
-      await (otherRepoCubit ?? originRepo).replaceFile(
-        filePath: destination,
-        length: fileLength,
-        fileByteStream: file.read(0, fileLength).asStream(),
-      );
-
-      await originRepo.deleteFile(entryPath);
-    } catch (e, st) {
-      loggy.debug(e, st);
-    }
-  }
-
-  Future<void> _renameAndMoveEntry(
-    RepoCubit originRepo,
-    RepoCubit? otherRepoCubit,
-    String entryPath,
-    EntryType entryType,
-    String destination,
-  ) async {
-    final newPath = await _renameEntry(
-      (otherRepoCubit ?? originRepo),
-      destination,
-    );
-
-    await _pickModeAndMoveEntry(
-      originRepo,
-      otherRepoCubit,
-      entryPath,
-      entryType,
-      newPath,
-    );
-  }
-
-  Future<String> _renameEntry(
-    RepoCubit repoCubit,
-    String path, {
-    int versions = 0,
-  }) async {
-    final parent = system_path.dirname(path);
-    final name = system_path.basenameWithoutExtension(path);
-    final extension = system_path.extension(path);
-
-    final newFileName = '$name (${versions += 1})$extension';
-    final newPath = system_path.join(parent, newFileName);
-
-    if (await repoCubit.exists(newPath)) {
-      return await _renameEntry(repoCubit, path, versions: versions);
-    }
-    return newPath;
-  }
-
-  Future<void> _pickModeAndMoveEntry(
-    RepoCubit originRepo,
-    RepoCubit? otherRepoCubit,
-    String entryPath,
-    EntryType entryType,
-    String destination,
-  ) async {
-    if (otherRepoCubit == null) {
-      await originRepo.moveEntry(
-        source: entryPath,
-        destination: destination,
-      );
-
+  Future<void> trySaveFile(String sourcePath) async {
+    if (_currentRepo is! OpenRepoEntry) {
       return;
     }
 
-    await originRepo.moveEntryToRepo(
-      destinationRepoCubit: otherRepoCubit,
-      type: entryType,
-      source: entryPath,
-      destination: destination,
-    );
+    if (_currentRepo?.cubit == null) return;
+
+    await SaveMedia(
+      context,
+      repoCubit: _currentRepo!.cubit!,
+      sourcePath: sourcePath,
+      type: EntryType.file,
+    ).save();
+  }
+
+  Future<bool> canSaveFiles() async {
+    final currentRepo = _currentRepo;
+    if (currentRepo is! OpenRepoEntry) {
+      await Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.titleAddFile,
+          message: S.current.messageNoRepo);
+
+      return false;
+    }
+
+    final accessModeMessage = currentRepo.cubit.state.canWrite
+        ? null
+        : currentRepo.cubit.state.canRead
+            ? S.current.messageAddingFileToReadRepository
+            : S.current.messageAddingFileToLockedRepository;
+
+    if (accessModeMessage != null) {
+      await showDialog<bool>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (context) {
+            return AlertDialog(
+                title: Flex(direction: Axis.horizontal, children: [
+                  Fields.constrainedText(S.current.titleAddFile,
+                      style: context.theme.appTextStyle.titleMedium,
+                      maxLines: 2)
+                ]),
+                content: SingleChildScrollView(
+                    child: ListBody(children: [
+                  Text(accessModeMessage,
+                      style: context.theme.appTextStyle.bodyMedium)
+                ])),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(S.current.actionCloseCapital))
+                ]);
+          });
+
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
@@ -1209,160 +1135,6 @@ class _MainPageState extends State<MainPage>
       reposCubit: _cubits.repositories,
       paths: paths,
     );
-  }
-
-  Future<bool> canSaveFiles() async {
-    final currentRepo = _currentRepo;
-    if (currentRepo is! OpenRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
-
-      return false;
-    }
-
-    final accessModeMessage = currentRepo.cubit.state.canWrite
-        ? null
-        : currentRepo.cubit.state.canRead
-            ? S.current.messageAddingFileToReadRepository
-            : S.current.messageAddingFileToLockedRepository;
-
-    if (accessModeMessage != null) {
-      await showDialog<bool>(
-          context: context,
-          barrierDismissible: false, // user must tap button!
-          builder: (context) {
-            return AlertDialog(
-                title: Flex(direction: Axis.horizontal, children: [
-                  Fields.constrainedText(S.current.titleAddFile,
-                      style: context.theme.appTextStyle.titleMedium,
-                      maxLines: 2)
-                ]),
-                content: SingleChildScrollView(
-                    child: ListBody(children: [
-                  Text(accessModeMessage,
-                      style: context.theme.appTextStyle.bodyMedium)
-                ])),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(S.current.actionCloseCapital))
-                ]);
-          });
-
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> trySaveFile(String path) async {
-    final currentRepo = _currentRepo;
-
-    if (currentRepo is! OpenRepoEntry) {
-      return;
-    }
-
-    final newFileName = repo_path.basename(path);
-    final newFilePath = repo_path.join(
-      currentRepo.cubit.state.currentFolder.path,
-      newFileName,
-    );
-
-    if (!await currentRepo.cubit.exists(newFilePath)) {
-      await saveFile(
-        currentRepo.cubit,
-        path,
-        newFilePath,
-        newFileName,
-      );
-
-      return;
-    }
-
-    await showDialog<FileAction>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Flex(
-          direction: Axis.horizontal,
-          children: [
-            Fields.constrainedText(
-              S.current.titleMovingEntry,
-              style: context.theme.appTextStyle.titleMedium,
-              maxLines: 2,
-            )
-          ],
-        ),
-        content: ReplaceEntry(name: newFileName, type: EntryType.file),
-      ),
-    ).then(
-      (fileAction) async {
-        if (fileAction == FileAction.replace) {
-          await _replaceFile(currentRepo.cubit, path, newFilePath);
-        }
-
-        if (fileAction == FileAction.keep) {
-          await _renameAndSaveFile(
-            currentRepo.cubit,
-            path,
-            newFilePath,
-            newFileName,
-          );
-        }
-      },
-    );
-  }
-
-  Future<void> saveFile(
-    RepoCubit currentRepo,
-    String path,
-    String newFilePath,
-    String newFileName,
-  ) async {
-    final file = io.File(path);
-    final length = (await file.stat()).size;
-    final fileByteStream = file.openRead();
-
-    await currentRepo.saveFile(
-      filePath: newFilePath,
-      length: length,
-      fileByteStream: fileByteStream,
-    );
-  }
-
-  Future<void> _replaceFile(
-    RepoCubit repoCubit,
-    String path,
-    String newFilePath,
-  ) async {
-    try {
-      final file = io.File(path);
-      final fileLength = (await file.stat()).size;
-      final fileByteStream = file.openRead();
-
-      await repoCubit.replaceFile(
-        filePath: newFilePath,
-        length: fileLength,
-        fileByteStream: fileByteStream,
-      );
-    } catch (e, st) {
-      loggy.debug(e, st);
-    }
-  }
-
-  Future<void> _renameAndSaveFile(
-    RepoCubit repoCubit,
-    String path,
-    String newFilePath,
-    String newFileName,
-  ) async {
-    final newPath = await _renameEntry(
-      repoCubit,
-      newFilePath,
-    );
-
-    await saveFile(repoCubit, path, newPath, newFileName);
   }
 
   Future<dynamic> _showDirectoryActions(
