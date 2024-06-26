@@ -180,7 +180,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   )
                 ],
               ),
-              content: ReplaceEntry(name: fileName, type: EntryType.file),
+              content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
             ),
           ).then(
             (fileAction) async {

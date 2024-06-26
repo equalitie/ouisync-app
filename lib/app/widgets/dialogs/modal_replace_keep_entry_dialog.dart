@@ -5,8 +5,8 @@ import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
-class ReplaceEntry extends StatelessWidget {
-  ReplaceEntry({required this.name, required this.type});
+class ReplaceKeepEntry extends StatelessWidget {
+  ReplaceKeepEntry({required this.name, required this.type});
 
   final String name;
   final EntryType type;
