@@ -1220,7 +1220,7 @@ class _MainPageState extends State<MainPage>
       Navigator.push<RepoLocation?>(
         context,
         MaterialPageRoute(
-          builder: (context) => RepositoryCreationPage(
+          builder: (context) => RepoCreationPage(
             reposCubit: _cubits.repositories,
           ),
         ),
@@ -1274,7 +1274,7 @@ class _MainPageState extends State<MainPage>
     return Navigator.push<RepoLocation>(
       context,
       MaterialPageRoute(
-        builder: (context) => RepositoryCreationPage(
+        builder: (context) => RepoCreationPage(
           reposCubit: _cubits.repositories,
           initialTokenValue: initialTokenValue,
         ),

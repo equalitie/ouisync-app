@@ -59,6 +59,9 @@ class RepoLocation implements Comparable<RepoLocation> {
 
     return _dir.compareTo(other._dir);
   }
+
+  @override
+  String toString() => path;
 }
 
 String _trimLeadingDot(String s) => s.startsWith('.') ? s.substring(1) : s;
