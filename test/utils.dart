@@ -9,6 +9,8 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Setup the test environment and run `callback` inside it.
+///
+/// This can be applied automatically using `flutter_test_config.dart`.
 Future<void> testEnv(FutureOr<void> Function() callback) async {
   Directory? tempDir;
 
@@ -47,7 +49,12 @@ class _TestPathProviderPlatform extends PathProviderPlatform {
       join(root.path, 'application-documents');
 }
 
-// https://github.com/flutter/flutter/issues/129623
+/// Take a screenshot of the widget under test. Useful to debug tests. Note that by default all text
+/// is rendered using a font that shows all letters as rectangles. See the "Including Fonts"
+/// section in https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html for more
+/// details.
+///
+/// This Code is taken from https://github.com/flutter/flutter/issues/129623.
 extension WidgetTesterExtension on WidgetTester {
   Future<void> takeScreenshot([String name = 'screenshot']) =>
       runAsync(() async {
@@ -59,7 +66,10 @@ extension WidgetTesterExtension on WidgetTester {
 
         final path = join(
             (goldenFileComparator as LocalFileComparator).basedir.path,
+            'screenshots',
             '$name.png');
+
+        await Directory(dirname(path)).create(recursive: true);
 
         debugPrint('screenshot saved to $path');
 

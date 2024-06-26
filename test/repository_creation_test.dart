@@ -13,12 +13,11 @@ import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart'
+    show AccessMode, LocalSecretKeyAndSalt, Session, SessionKind;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-
-import 'utils.dart';
 
 void main() {
   late Session session;
@@ -62,7 +61,7 @@ void main() {
         (await tester.runAsync(() => Future.value(Completer<RepoLocation>())))!;
 
     await tester.pumpWidget(MaterialApp(
-      home: RepositoryCreation(
+      home: RepositoryCreationPage(
         reposCubit: reposCubit,
         onSuccess: onSuccess.complete,
       ),
@@ -123,7 +122,7 @@ void main() {
     final onFailure = (await tester.runAsync(() => Future.value(Completer())))!;
 
     await tester.pumpWidget(MaterialApp(
-      home: RepositoryCreation(
+      home: RepositoryCreationPage(
         reposCubit: reposCubit,
         onFailure: onFailure.complete,
       ),
@@ -145,3 +144,32 @@ void main() {
     expect(reposCubit.repos.length, equals(1));
   });
 }
+
+//Future<ShareToken> _createShareToken({
+//  required String name,
+//  required AccessMode accessMode,
+//}) async {
+//  final dir = await Directory.systemTemp.createTemp();
+//  final session = Session.create(
+//    kind: SessionKind.unique,
+//    configPath: join(dir.path, 'config'),
+//  );
+
+//  try {
+//    final repo = await Repository.create(
+//      session,
+//      store: join(dir.path, 'store', 'repo.ouisyncdb'),
+//      readSecret: null,
+//      writeSecret: null,
+//    );
+
+//    try {
+//      return await repo.createShareToken(accessMode: accessMode);
+//    } finally {
+//      await repo.close();
+//    }
+//  } finally {
+//    await session.close();
+//    await dir.delete(recursive: true);
+//  }
+//}

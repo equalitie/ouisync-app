@@ -10,8 +10,8 @@ import '../models/models.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
-class RepositoryCreation extends StatefulWidget {
-  RepositoryCreation({
+class RepositoryCreationPage extends StatefulWidget {
+  RepositoryCreationPage({
     required this.reposCubit,
     this.initialTokenValue,
     this.onSuccess,
@@ -21,14 +21,20 @@ class RepositoryCreation extends StatefulWidget {
   final ReposCubit reposCubit;
   final String? initialTokenValue;
   final LocalSecretMode initialLocalSecretMode = LocalSecretMode.randomStored;
+
+  /// Callback invoked on submit when all the fields are filled in correctly. Gets the location of
+  /// the newly created repo passed in. If not specified, defaults to popping the navigator.
   final void Function(RepoLocation)? onSuccess;
+
+  /// Callback invoked on submit when there are some validation errors. Default is to do nothing.
+  /// Useful mostly for testing.
   final void Function()? onFailure;
 
   @override
-  State<RepositoryCreation> createState() => _RepositoryCreationState();
+  State<RepositoryCreationPage> createState() => _RepositoryCreationPageState();
 }
 
-class _RepositoryCreationState extends State<RepositoryCreation>
+class _RepositoryCreationPageState extends State<RepositoryCreationPage>
     with AppLogger {
   late Future<void> init = _init();
 
@@ -96,10 +102,11 @@ class _RepositoryCreationState extends State<RepositoryCreation>
 
   Future<ShareToken?> _validateToken(String initialToken) async {
     try {
-      return await ShareToken.fromString(
+      final token = await ShareToken.fromString(
         widget.reposCubit.session,
         initialToken,
       );
+      return token;
     } catch (e, st) {
       loggy.error('Extract repository token exception:', e, st);
       showSnackBar(S.current.messageErrorTokenInvalid);
