@@ -65,8 +65,3 @@ secrets/
 # For Windows app publishing (MSIX)
 /installers/
 /certificates/
-
-# For environment variables
-
-.env
-/lib/env/env.g.dart

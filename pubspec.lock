@@ -369,22 +369,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  envied:
-    dependency: "direct main"
-    description:
-      name: envied
-      sha256: dab29e21452c3d57ec10889d96b06b4a006b01375d4df10b33c9704800c208c4
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.3"
-  envied_generator:
-    dependency: "direct dev"
-    description:
-      name: envied_generator
-      sha256: b8655d5cb39b4d1d449a79ff6f1367b252c23955ff17ec7c03aacdff938598bd
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.3"
   equatable:
     dependency: "direct main"
     description:
@@ -1231,14 +1215,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  recase:
-    dependency: transitive
-    description:
-      name: recase
-      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
@@ -1275,18 +1251,18 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: a7946f4a90b0feb47214981d881b98149e05f6c576da9f2a2f33945bf561de25
+      sha256: "7342ef4c18932881730ac941a07a6e4cf76fe99cd1ea3bef06e53a6a1402dec0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.16.0"
+    version: "8.3.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: "6db7fa1b076faf2f5dd77d8cc9ef206171f32a290cc638842d78e5d62b441a27"
+      sha256: "475cf49682e4d1eb48caa2577502721bcfdcbb63f215de57b3b246d52f4f7914"
       url: "https://pub.dev"
     source: hosted
-    version: "7.16.0"
+    version: "8.3.0"
   settings_ui:
     dependency: "direct main"
     description:
@@ -1404,14 +1380,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  source_gen:
-    dependency: transitive
-    description:
-      name: source_gen
-      sha256: "14658ba5f669685cd3d63701d01b31ea748310f7ab854e471962670abcf57832"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.0"
   source_map_stack_trace:
     dependency: transitive
     description:
