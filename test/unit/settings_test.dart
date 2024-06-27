@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -8,32 +6,13 @@ import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart'
     show Repository, Session, SessionKind;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  late Directory tempDir;
-
-  setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp();
-    PathProviderPlatform.instance = FakePathProviderPlatform(tempDir);
-  });
-
-  tearDown(() async {
-    try {
-      await tempDir.delete(recursive: true);
-    } on PathAccessException catch (_) {
-      // This sometimes happen on the CI on windows. It seems to be caused by another process
-      // accessing the temp directory for some reason. It probably doesn't indicate a problem in
-      // the code under test so it should be safe to ignore it.
-    }
-  });
-
   test('settings migration', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
@@ -41,8 +20,10 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getKeys().isEmpty, true);
 
-    final fooPath = join(tempDir.path, 'foo.db');
-    final barPath = join(tempDir.path, 'bar.db');
+    final baseDir = await getApplicationSupportDirectory();
+
+    final fooPath = join(baseDir.path, 'foo.db');
+    final barPath = join(baseDir.path, 'bar.db');
 
     final s0 = await v0.Settings.init(prefs);
 
@@ -59,7 +40,7 @@ void main() {
     await s0.setDefaultRepo('foo');
 
     final session = Session.create(
-      configPath: join(tempDir.path, 'config'),
+      configPath: join(baseDir.path, 'config'),
       kind: SessionKind.unique,
     );
 
@@ -137,18 +118,4 @@ void main() {
 
     expect(await key.decrypt(encrypted), teststring);
   });
-}
-
-class FakePathProviderPlatform extends PathProviderPlatform {
-  final Directory root;
-
-  FakePathProviderPlatform(this.root);
-
-  @override
-  Future<String?> getApplicationSupportPath() async =>
-      join(root.path, 'application-support');
-
-  @override
-  Future<String?> getApplicationDocumentsPath() async =>
-      join(root.path, 'application-documents');
 }

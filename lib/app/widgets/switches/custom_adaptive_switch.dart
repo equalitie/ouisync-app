@@ -4,6 +4,7 @@ import '../../utils/extensions.dart';
 
 class CustomAdaptiveSwitch extends StatelessWidget {
   const CustomAdaptiveSwitch({
+    super.key,
     required this.value,
     required this.title,
     required this.contentPadding,
@@ -20,6 +21,7 @@ class CustomAdaptiveSwitch extends StatelessWidget {
     return Container(
       padding: contentPadding,
       child: InkWell(
+        onTap: onChanged?.let((onChanged) => () => onChanged(!value)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'v1.dart' as v1;
 import '../files.dart';
@@ -16,10 +15,12 @@ typedef Settings = v1.Settings;
 Future<Settings> loadAndMigrateSettings(Session session) async {
   await _migratePaths();
 
-  final prefs = await SharedPreferences.getInstance();
   final masterKey = await MasterKey.init();
 
-  return await v1.Settings.init(prefs, masterKey, session);
+  final settings = await v1.Settings.init(masterKey);
+  await settings.migrate(session);
+
+  return settings;
 }
 
 Future<void> _migratePaths() async {

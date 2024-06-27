@@ -9,8 +9,8 @@ import '../utils/utils.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 
-class RepositorySecurityPage extends StatefulWidget {
-  const RepositorySecurityPage({
+class RepoSecurityPage extends StatefulWidget {
+  const RepoSecurityPage({
     required this.settings,
     required this.repo,
     required this.currentLocalSecret,
@@ -23,10 +23,10 @@ class RepositorySecurityPage extends StatefulWidget {
   final PasswordHasher passwordHasher;
 
   @override
-  State<RepositorySecurityPage> createState() => _RepositorySecurityState();
+  State<RepoSecurityPage> createState() => _RepoSecurityPageState();
 }
 
-class _RepositorySecurityState extends State<RepositorySecurityPage>
+class _RepoSecurityPageState extends State<RepoSecurityPage>
     with AppLogger, RepositoryActionsMixin {
   var isBiometricsAvailable = false;
 

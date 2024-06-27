@@ -118,6 +118,8 @@ dev_dependencies:
   hex: ^0.2.0
   icons_launcher: ^2.0.3
   image: ^4.1.3
+  integration_test:
+    sdk: flutter
   # Use this command to generate internationalization files if you're not using
   # the vscode plugin:
   # # dart run intl_utils:generate

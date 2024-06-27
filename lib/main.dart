@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
@@ -15,6 +18,7 @@ const _syncInBackgroundPeriod = Duration(minutes: 5);
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  _setupErrorReporting();
 
   if (Platform.isAndroid) {
     await AndroidAlarmManager.initialize();
@@ -55,4 +59,29 @@ Future<void> setupSentry(
         ..beforeSend = beforeSendCallback;
     }
   }, appRunner: ouisyncAppRunner);
+}
+
+void _setupErrorReporting() {
+  // Errors from flutter
+  FlutterError.onError = (details) {
+    // Invoke the default handler
+    FlutterError.presentError(details);
+
+    _onError(details);
+  };
+
+  // Errors from outside of flutter
+  PlatformDispatcher.instance.onError = (exception, stack) {
+    _onError(FlutterErrorDetails(exception: exception, stack: stack));
+
+    // Invoke the default handler
+    return false;
+  };
+}
+
+void _onError(FlutterErrorDetails details) {
+  logError("Unhandled Exception:", details.exception, details.stack);
+
+  unawaited(
+      Sentry.captureException(details.exception, stackTrace: details.stack));
 }

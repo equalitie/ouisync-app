@@ -47,7 +47,7 @@ class Cipher {
 
     try {
       return await _algorithm.decryptString(secretBox, secretKey: secretKey);
-    } on SecretBoxAuthenticationError catch (e) {
+    } on SecretBoxAuthenticationError {
       return null;
     }
   }
@@ -58,7 +58,7 @@ class Cipher {
     try {
       return Uint8List.fromList(
           await _algorithm.decrypt(secretBox, secretKey: secretKey));
-    } on SecretBoxAuthenticationError catch (e) {
+    } on SecretBoxAuthenticationError {
       return null;
     }
   }

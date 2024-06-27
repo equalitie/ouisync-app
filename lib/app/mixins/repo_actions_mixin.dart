@@ -97,7 +97,7 @@ mixin RepositoryActionsMixin on LoggyType {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RepositorySecurityPage(
+        builder: (context) => RepoSecurityPage(
           settings: settings,
           repo: repoCubit,
           currentLocalSecret: secret,
