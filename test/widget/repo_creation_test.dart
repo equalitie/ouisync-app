@@ -20,7 +20,7 @@ import 'package:ouisync_plugin/native_channels.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 
-import 'utils.dart';
+import '../utils.dart';
 
 void main() {
   late Session session;
