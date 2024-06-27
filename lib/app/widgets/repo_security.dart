@@ -93,6 +93,7 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
       };
 
   Widget _buildOriginSwitch() => _buildSwitch(
+        key: ValueKey('use-local-password'),
         value: origin == SecretKeyOrigin.manual,
         title: S.current.messageUseLocalPassword,
         onChanged: _onOriginChanged,
@@ -138,11 +139,13 @@ class _RepoSecurityState extends State<RepoSecurity> with AppLogger {
       );
 
   Widget _buildSwitch({
+    Key? key,
     required bool value,
     required String title,
     required void Function(bool)? onChanged,
   }) =>
       CustomAdaptiveSwitch(
+        key: key,
         value: value,
         title: title,
         contentPadding: EdgeInsets.zero,

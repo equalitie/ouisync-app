@@ -39,6 +39,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               Expanded(
                 child: Fields.formTextField(
                   context: context,
+                  key: ValueKey('password'),
                   obscureText: _obscurePassword,
                   labelText: S.current.labelPassword,
                   hintText: S.current.messageRepositoryPassword,
@@ -59,6 +60,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               Expanded(
                 child: Fields.formTextField(
                   context: context,
+                  key: ValueKey('retype-password'),
                   obscureText: _obscureRetypePassword,
                   labelText: S.current.labelRetypePassword,
                   hintText: S.current.messageRepositoryPassword,

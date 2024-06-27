@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
+import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_plugin/native_channels.dart';
@@ -56,9 +57,8 @@ void main() {
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
-    final sharedPreferences = await SharedPreferences.getInstance();
-    final key = await MasterKey.init();
-    settings = await Settings.init(sharedPreferences, key, session);
+    final key = MasterKey.random();
+    settings = await Settings.init(key);
     navigationCubit = NavigationCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
@@ -70,6 +70,7 @@ void main() {
       location: locationOrigin,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
+      cacheServers: CacheServers.disabled,
     );
 
     otherRepoCubit = await RepoCubit.create(
@@ -80,6 +81,7 @@ void main() {
       location: locationOther,
       navigation: navigationCubit,
       bottomSheet: bottomSheetCubit,
+      cacheServers: CacheServers.disabled,
     );
   });
 

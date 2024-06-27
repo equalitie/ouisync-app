@@ -12,6 +12,7 @@ class MasterKey {
 
   MasterKey._(cipher.SecretKey masterKey) : _cipher = cipher.Cipher(masterKey);
 
+  /// Load the master key from the secure storage. Generate a new one if not stored yet.
   static Future<MasterKey> init() async {
     final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
@@ -35,6 +36,13 @@ class MasterKey {
     } finally {
       mutex.release();
     }
+  }
+
+  /// Generate a throwaway master key. Useful for testing.
+  static MasterKey random() {
+    final algo = cipher.Cipher.newAlgorithm();
+    final key = cipher.Cipher.randomSecretKey(algo);
+    return MasterKey._(key);
   }
 
   Future<String> encrypt(String plainText) async {

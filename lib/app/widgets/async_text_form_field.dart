@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 /// Same as TextFormField but the validator function can be async.
 class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
+  final String? initialValue;
   final bool? enabled;
   final Function(String?)? onSaved;
   final Function(String)? onChanged;
@@ -19,22 +20,24 @@ class AsyncTextFormField extends StatefulWidget {
   final InputDecoration? decoration;
   final TextStyle? style;
 
-  const AsyncTextFormField(
-      {Key? key,
-      this.controller,
-      this.enabled,
-      this.onSaved,
-      this.onChanged,
-      this.onFieldSubmitted,
-      required this.validator,
-      this.autovalidateMode,
-      this.autofocus = false,
-      this.focusNode,
-      this.obscureText = false,
-      this.textInputAction,
-      this.keyboardType,
-      this.decoration,
-      this.style});
+  const AsyncTextFormField({
+    Key? key,
+    this.controller,
+    this.initialValue,
+    this.enabled,
+    this.onSaved,
+    this.onChanged,
+    this.onFieldSubmitted,
+    required this.validator,
+    this.autovalidateMode,
+    this.autofocus = false,
+    this.focusNode,
+    this.obscureText = false,
+    this.textInputAction,
+    this.keyboardType,
+    this.decoration,
+    this.style,
+  });
 
   @override
   State<AsyncTextFormField> createState() => _State();
@@ -49,6 +52,7 @@ class _State extends State<AsyncTextFormField> {
   Widget build(BuildContext context) => TextFormField(
       key: widget.key,
       controller: widget.controller,
+      initialValue: widget.initialValue,
       enabled: widget.enabled,
       onSaved: widget.onSaved,
       onFieldSubmitted: widget.onFieldSubmitted,

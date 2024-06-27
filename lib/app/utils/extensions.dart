@@ -120,27 +120,6 @@ extension TextEditingControllerExtension on TextEditingController {
 }
 
 extension RepositoryExtension on Repository {
-  /// Check if the repository is mirrored on at least one of the cache servers in
-  /// `Constants.cacheServers`
-  Future<bool> isCacheServersEnabled() => _isCacheServersEnabled(mirrorExists);
-
-  /// Create/delete repository mirror on all the cache servers in `Constants.cacheServers`.
-  Future<void> setCacheServersEnabled(bool enabled) async {
-    Future<void> update(String host, bool enabled) async {
-      try {
-        if (enabled) {
-          await createMirror(host);
-        } else {
-          await deleteMirror(host);
-        }
-      } catch (_) {}
-    }
-
-    await Future.wait(
-      Constants.cacheServers.map((host) => update(host, enabled)),
-    );
-  }
-
   static const _authModeKey = 'authMode';
 
   Future<AuthMode> getAuthMode() =>
@@ -170,27 +149,6 @@ extension RepositoryExtension on Repository {
       }
     }
   }
-}
-
-extension ShareTokenExtension on ShareToken {
-  /// Check if the repository of this token is mirrored on at least one of the cache servers in
-  /// `Constants.cacheServers`
-  Future<bool> isCacheServersEnabled() => _isCacheServersEnabled(mirrorExists);
-}
-
-Future<bool> _isCacheServersEnabled(
-  Future<bool> Function(String) mirrorExists,
-) async {
-  Future<bool> check(String host) async {
-    try {
-      return await mirrorExists(host);
-    } catch (_) {
-      return false;
-    }
-  }
-
-  return await Future.wait(Constants.cacheServers.map(check))
-      .then((results) => results.contains(true));
 }
 
 extension ProgressExtension on Progress {
