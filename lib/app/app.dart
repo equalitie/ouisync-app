@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
+import 'package:ouisync_app/app/widgets/media_receiver.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -72,7 +72,7 @@ class OuiSyncApp extends StatefulWidget {
 }
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
-  final _mediaReceiver = MediaReceiver();
+  final receivedMediaController = StreamController<List<SharedMediaFile>>();
 
   @override
   void initState() {
@@ -82,53 +82,25 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   void dispose() {
-    _mediaReceiver.dispose();
+    unawaited(receivedMediaController.close());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DropTarget(
-        onDragDone: (detail) {
-          loggy.debug(
-              'Drop done: ${detail.files.map((file) => file.path).join(', ')}');
-
-          final media = detail.files
-              .map((file) => SharedMediaFile(
-                  path: file.path,
-                  type: SharedMediaType.file,
-                  mimeType: file.mimeType))
-              .toList();
-          _mediaReceiver.controller.add(media);
-        },
-        onDragEntered: (detail) {
-          loggy.debug('Drop entered: ${detail.localPosition}');
-        },
-        onDragExited: (detail) {
-          loggy.debug('Drop exited: ${detail.localPosition}');
-        },
-        child: _buildContent(context),
-      ),
-    );
-  }
-
-  Future<void> _init() async {
-    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
-    await widget.windowManager.initSystemTray();
-  }
-
-  Widget _buildContent(BuildContext context) {
     /// We show the onboarding the first time the app starts.
     /// Then, we show the page for accepting eQ values, until the user taps YES.
     /// After this, just show the regular home page.
-    final home = MainPage(
-      mediaReceiver: _mediaReceiver,
-      packageInfo: widget.packageInfo,
-      session: widget.session,
-      nativeChannels: widget.nativeChannels,
-      settings: widget.settings,
-      windowManager: widget.windowManager,
+    final home = MediaReceiver(
+      controller: receivedMediaController,
+      child: MainPage(
+        packageInfo: widget.packageInfo,
+        session: widget.session,
+        nativeChannels: widget.nativeChannels,
+        settings: widget.settings,
+        windowManager: widget.windowManager,
+        receivedMedia: receivedMediaController.stream,
+      ),
     );
 
     final afterOnboarding = widget.settings.getEqualitieValues()
@@ -144,6 +116,11 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
             ouisyncAppHome: afterOnboarding,
           )
         : afterOnboarding;
+  }
+
+  Future<void> _init() async {
+    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
+    await widget.windowManager.initSystemTray();
   }
 }
 

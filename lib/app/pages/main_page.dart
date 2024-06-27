@@ -48,16 +48,16 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.nativeChannels,
     required this.settings,
-    required this.mediaReceiver,
     required this.packageInfo,
+    required this.receivedMedia,
   });
 
   final PlatformWindowManager windowManager;
   final Session session;
   final NativeChannels nativeChannels;
   final Settings settings;
-  final MediaReceiver mediaReceiver;
   final PackageInfo packageInfo;
+  final Stream<List<SharedMediaFile>> receivedMedia;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
@@ -84,6 +84,8 @@ class _MainPageState extends State<MainPage>
       FocusNode(debugLabel: 'app_settings_icon_focus');
 
   final _fabFocus = FocusNode(debugLabel: 'fab_focus');
+
+  StreamSubscription? _receivedMediaSubscription;
 
   _MainPageState._(this._cubits);
 
@@ -160,10 +162,8 @@ class _MainPageState extends State<MainPage>
     unawaited(_cubits.repositories.init());
     unawaited(_cubits.powerControl.init());
 
-    /// The MediaReceiver uses the MediaReceiverMobile (_mediaIntentSubscription,
-    /// _textIntentSubscription), or the MediaReceiverWindows (DropTarget),
-    /// depending on the platform.
-    widget.mediaReceiver.controller.stream.listen(handleReceivedMedia);
+    _receivedMediaSubscription =
+        widget.receivedMedia.listen(handleReceivedMedia);
 
     if (io.Platform.isWindows) {
       checkForDokan();
@@ -172,11 +172,12 @@ class _MainPageState extends State<MainPage>
 
   @override
   void dispose() {
-    unawaited(_cubits.repositories.close());
-
     _bottomSheetInfo.dispose();
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
+    _receivedMediaSubscription?.cancel();
+
+    unawaited(_cubits.repositories.close());
 
     super.dispose();
   }
