@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/platform/platform.dart';
+import '../../cubits/repo.dart';
 import '../../utils/path.dart';
+import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RenameEntry extends HookWidget with AppLogger {
-  RenameEntry(
-      {required this.parentContext,
-      required this.oldName,
-      required this.originalExtension,
-      required this.isFile,
-      required this.hint});
+  RenameEntry({
+    required this.parentContext,
+    required this.repoCubit,
+    required this.parent,
+    required this.oldName,
+    required this.originalExtension,
+    required this.isFile,
+    required this.hint,
+  });
 
   final BuildContext parentContext;
+  final RepoCubit repoCubit;
+  final String parent;
   final String oldName;
   final String originalExtension;
   final bool isFile;
@@ -27,6 +33,8 @@ class RenameEntry extends HookWidget with AppLogger {
 
   late final FocusNode _nameTextFieldFocus;
   late final FocusNode _positiveButtonFocus;
+
+  late final ValueNotifier<String> _errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +51,17 @@ class RenameEntry extends HookWidget with AppLogger {
     _newNameController =
         useTextEditingController.fromValue(TextEditingValue.empty);
 
+    _newNameController.addListener(() {
+      if (_newNameController.text.isEmpty ||
+          _newNameController.text == oldName) {
+        _errorMessage.value = '';
+      }
+    });
+
     _nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
     _positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
+
+    _errorMessage = useValueNotifier('');
   }
 
   void selectEntryName(String value, String extension, bool isFile) {
@@ -59,45 +76,54 @@ class RenameEntry extends HookWidget with AppLogger {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Fields.constrainedText('"$oldName"',
-                flex: 0,
-                style: context.theme.appTextStyle.bodyMedium
-                    .copyWith(fontWeight: FontWeight.w400)),
+            Fields.constrainedText(
+              '"$oldName"',
+              flex: 0,
+              style: context.theme.appTextStyle.bodyMedium
+                  .copyWith(fontWeight: FontWeight.w400),
+            ),
             Dimensions.spacingVerticalDouble,
-            Fields.formTextField(
-                context: context,
-                controller: _newNameController,
-                textInputAction: TextInputAction.done,
-                labelText: S.current.labelName,
-                hintText: hint,
-                onFieldSubmitted: (newName) async {
-                  final submitted = await _submitField(context, newName);
-                  if (submitted && PlatformValues.isDesktopDevice) {
-                    Navigator.of(context).pop(newName);
-                  }
-                },
-                validator: validateNoEmptyMaybeRegExpr(
-                    emptyError: S.current.messageErrorFormValidatorNameDefault,
-                    regExp: Strings.entityNameRegExp,
-                    regExpError: S.current.messageErrorCharactersNotAllowed),
-                focusNode: _nameTextFieldFocus,
-                autofocus: true),
+            ValueListenableBuilder(
+              valueListenable: _errorMessage,
+              builder: (context, errorMessage, child) {
+                return Fields.formTextField(
+                  context: context,
+                  controller: _newNameController,
+                  textInputAction: TextInputAction.done,
+                  labelText: S.current.labelName,
+                  hintText: hint,
+                  errorText:
+                      _newNameController.text.isEmpty ? '' : errorMessage,
+                  onFieldSubmitted: (newName) async {
+                    final submitted = await _submitField(parent, newName);
+                    if (submitted && PlatformValues.isDesktopDevice) {
+                      Navigator.of(context).pop(newName);
+                    }
+                  },
+                  validator: validateNoEmptyMaybeRegExpr(
+                      emptyError:
+                          S.current.messageErrorFormValidatorNameDefault,
+                      regExp: Strings.entityNameRegExp,
+                      regExpError: S.current.messageErrorCharactersNotAllowed),
+                  focusNode: _nameTextFieldFocus,
+                  autofocus: true,
+                );
+              },
+            ),
             Fields.dialogActions(context, buttons: _actions(context)),
           ]);
 
-  Future<bool> _submitField(BuildContext context, String? newName) async {
+  Future<bool> _submitField(String parent, String? newName) async {
     if (newName == null) return false;
 
     if (newName == oldName) {
-      showSnackBar(S.current.messageEnterDifferentName);
-
+      _errorMessage.value = S.current.messageEnterDifferentName;
       _nameTextFieldFocus.requestFocus();
 
       return false;
     }
 
-    final validationOk = await _validateNewName(newName);
-
+    final validationOk = await _validateNewName(parent, newName);
     if (!validationOk) {
       final newExtension = extension(newName);
       selectEntryName(newName, newExtension, isFile);
@@ -114,13 +140,16 @@ class RenameEntry extends HookWidget with AppLogger {
     return true;
   }
 
-  Future<bool> _validateNewName(String newName) async {
+  Future<bool> _validateNewName(String parent, String newName) async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     if (isFile) {
       final extensionValidationOK = await _validateExtension(newName);
       if (!extensionValidationOK) return false;
     }
+
+    final newPathExistOk = await _validateNewNameDoNotExists(parent, newName);
+    if (!newPathExistOk) return false;
 
     formKey.currentState!.save();
     return true;
@@ -129,7 +158,8 @@ class RenameEntry extends HookWidget with AppLogger {
   Future<bool> _validateExtension(String name) async {
     final fileExtension = extension(name);
 
-    /// If there was not extension originally, then no need to have or validate a new one
+    /// If there was not extension originally, then no need to have or validate
+    /// a new one
     if (originalExtension.isEmpty) return true;
 
     String title = '';
@@ -165,6 +195,21 @@ class RenameEntry extends HookWidget with AppLogger {
     return continueAnyway ?? false;
   }
 
+  Future<bool> _validateNewNameDoNotExists(
+    String parent,
+    String newName,
+  ) async {
+    final newPath = join(parent, newName);
+    final exist = await repoCubit.exists(newPath);
+    if (exist) {
+      _errorMessage.value = S.current.messageEntryAlreadyExist(newName);
+      return false;
+    }
+
+    _errorMessage.value = '';
+    return true;
+  }
+
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
@@ -173,13 +218,17 @@ class RenameEntry extends HookWidget with AppLogger {
         PositiveButton(
             text: S.current.actionRename,
             onPressed: () async =>
-                await _onSaved(context, _newNameController.text),
+                await _onSaved(context, parent, _newNameController.text),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
 
-  Future<void> _onSaved(BuildContext context, String? newName) async {
-    final submitted = await _submitField(context, newName);
+  Future<void> _onSaved(
+    BuildContext context,
+    String parent,
+    String? newName,
+  ) async {
+    final submitted = await _submitField(parent, newName);
     if (submitted) {
       Navigator.of(context).pop(newName);
     }

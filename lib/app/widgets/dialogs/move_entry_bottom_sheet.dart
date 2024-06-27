@@ -29,7 +29,7 @@ class MoveEntryDialog extends StatefulWidget {
     double padding,
     String entry,
   ) onUpdateBottomSheet;
-  final Future<bool> Function() onMoveEntry;
+  final Future<void> Function() onMoveEntry;
   final void Function() onCancel;
 
   @override
@@ -150,20 +150,19 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
               text: S.current.actionMove,
               onPressed: canMove
                   ? () async {
-                      final moved =
-                          await Dialogs.executeFutureWithLoadingDialog(
+                      await Dialogs.executeFutureWithLoadingDialog(
                         context,
                         widget.onMoveEntry(),
+                      ).then(
+                        (_) {
+                          widget.onUpdateBottomSheet(
+                            BottomSheetType.gone,
+                            0.0,
+                            '',
+                          );
+                          widget.onCancel();
+                        },
                       );
-
-                      if (moved) {
-                        widget.onUpdateBottomSheet(
-                          BottomSheetType.gone,
-                          0.0,
-                          '',
-                        );
-                        widget.onCancel();
-                      }
                     }
                   : null,
             );
