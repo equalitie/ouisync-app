@@ -88,7 +88,7 @@ dependencies:
   qr_flutter: ^4.0.0
   receive_sharing_intent: ^1.6.7
   result_type: ^0.2.0
-  sentry_flutter: ^7.13.2
+  sentry_flutter: ^8.3.0
   settings_ui: ^2.0.2
   share_plus: ^7.1.0
   shared_preferences: ^2.0.13
