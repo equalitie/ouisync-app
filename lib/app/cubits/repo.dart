@@ -392,27 +392,16 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
-    File? file;
-
     try {
-      file = await openFile(filePath);
+      await deleteFile(filePath);
     } catch (e, st) {
-      loggy.error('Failed to open file $filePath:', e, st);
-      file = null;
+      loggy.error('Failed deleting file $filePath:', e, st);
     }
-
-    if (file == null) {
-      showSnackBar(S.current.messageOpenFileError(filePath));
-      return;
-    }
-
-    await file.truncate(length);
 
     await saveFile(
       filePath: filePath,
       length: length,
       fileByteStream: fileByteStream,
-      currentFile: file,
     );
   }
 

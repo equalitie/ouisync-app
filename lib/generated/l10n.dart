@@ -2920,11 +2920,41 @@ class S {
     );
   }
 
+  /// `Replace existing folder`
+  String get messageReplaceExistingFolder {
+    return Intl.message(
+      'Replace existing folder',
+      name: 'messageReplaceExistingFolder',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Keep both files`
   String get messageKeepBothFiles {
     return Intl.message(
       'Keep both files',
       name: 'messageKeepBothFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep both folders`
+  String get messageKeepBothFolders {
+    return Intl.message(
+      'Keep both folders',
+      name: 'messageKeepBothFolders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only available for files`
+  String get messageOnlyAvailableFiles {
+    return Intl.message(
+      'Only available for files',
+      name: 'messageOnlyAvailableFiles',
       desc: '',
       args: [],
     );

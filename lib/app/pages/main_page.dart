@@ -19,7 +19,6 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
-import '../utils/path.dart' as repo_path;
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
@@ -920,6 +919,21 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
+  bool _isEntryActionAvailable(
+    AccessMode accessMode,
+    EntryAction action,
+  ) {
+    if (accessMode == AccessMode.write) return true;
+
+    final readDisabledActions = [
+      EntryAction.delete,
+      EntryAction.move,
+      EntryAction.rename,
+    ];
+
+    return !readDisabledActions.contains(action);
+  }
+
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: _cubits.bottomSheet,
@@ -965,6 +979,26 @@ class _MainPageState extends State<MainPage>
         onCancel: _cubits.bottomSheet.hide,
       );
 
+  Future<void> moveEntry(
+    RepoCubit originRepoCubit,
+    String entryPath,
+    EntryType entryType,
+  ) async {
+    if (_currentRepo == null) return;
+
+    final toRepoCubit =
+        originRepoCubit.location.compareTo(_currentRepo!.location) != 0
+            ? _currentRepo!.cubit
+            : null;
+
+    await MoveEntry(
+      context,
+      repoCubit: originRepoCubit,
+      path: entryPath,
+      type: entryType,
+    ).move(toRepoCubit: toRepoCubit);
+  }
+
   Widget _uploadFileState({
     required ReposCubit reposCubit,
     required List<String> paths,
@@ -987,50 +1021,65 @@ class _MainPageState extends State<MainPage>
     _bottomSheetInfo.value = newInfo;
   }
 
-  bool _isEntryActionAvailable(
-    AccessMode accessMode,
-    EntryAction action,
-  ) {
-    if (accessMode == AccessMode.write) return true;
+  Future<void> trySaveFile(String sourcePath) async {
+    if (_currentRepo is! OpenRepoEntry) {
+      return;
+    }
 
-    final readDisabledActions = [
-      EntryAction.delete,
-      EntryAction.move,
-      EntryAction.rename,
-    ];
+    if (_currentRepo?.cubit == null) return;
 
-    return !readDisabledActions.contains(action);
+    await SaveMedia(
+      context,
+      repoCubit: _currentRepo!.cubit!,
+      sourcePath: sourcePath,
+      type: EntryType.file,
+    ).save();
   }
 
-  Future<bool> moveEntry(
-    RepoCubit originRepo,
-    String entryPath,
-    EntryType entryType,
-  ) async {
-    if (_currentRepo == null) return false;
+  Future<bool> canSaveFiles() async {
+    final currentRepo = _currentRepo;
+    if (currentRepo is! OpenRepoEntry) {
+      await Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.titleAddFile,
+          message: S.current.messageNoRepo);
 
-    final otherRepoCubit =
-        originRepo.location.compareTo(_currentRepo!.location) == 0
-            ? null
-            : _currentRepo!.cubit;
+      return false;
+    }
 
-    final currentFolder = otherRepoCubit == null
-        ? originRepo.state.currentFolder.path
-        : otherRepoCubit.state.currentFolder.path;
-    final basename = repo_path.basename(entryPath);
-    final destination = repo_path.join(currentFolder, basename);
+    final accessModeMessage = currentRepo.cubit.state.canWrite
+        ? null
+        : currentRepo.cubit.state.canRead
+            ? S.current.messageAddingFileToReadRepository
+            : S.current.messageAddingFileToLockedRepository;
 
-    return otherRepoCubit == null
-        ? await originRepo.moveEntry(
-            source: entryPath,
-            destination: destination,
-          )
-        : await originRepo.moveEntryToRepo(
-            destinationRepoCubit: otherRepoCubit,
-            type: entryType,
-            source: entryPath,
-            destination: destination,
-          );
+    if (accessModeMessage != null) {
+      await showDialog<bool>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (context) {
+            return AlertDialog(
+                title: Flex(direction: Axis.horizontal, children: [
+                  Fields.constrainedText(S.current.titleAddFile,
+                      style: context.theme.appTextStyle.titleMedium,
+                      maxLines: 2)
+                ]),
+                content: SingleChildScrollView(
+                    child: ListBody(children: [
+                  Text(accessModeMessage,
+                      style: context.theme.appTextStyle.bodyMedium)
+                ])),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(S.current.actionCloseCapital))
+                ]);
+          });
+
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> handleReceivedMedia(List<SharedMediaFile> media) async {
@@ -1082,93 +1131,17 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<bool> canSaveFiles() async {
-    final currentRepo = _currentRepo;
-    if (currentRepo is! OpenRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
-
-      return false;
-    }
-
-    final accessModeMessage = currentRepo.cubit.state.canWrite
-        ? null
-        : currentRepo.cubit.state.canRead
-            ? S.current.messageAddingFileToReadRepository
-            : S.current.messageAddingFileToLockedRepository;
-
-    if (accessModeMessage != null) {
-      await showDialog<bool>(
-          context: context,
-          barrierDismissible: false, // user must tap button!
-          builder: (context) {
-            return AlertDialog(
-                title: Flex(direction: Axis.horizontal, children: [
-                  Fields.constrainedText(S.current.titleAddFile,
-                      style: context.theme.appTextStyle.titleMedium,
-                      maxLines: 2)
-                ]),
-                content: SingleChildScrollView(
-                    child: ListBody(children: [
-                  Text(accessModeMessage,
-                      style: context.theme.appTextStyle.bodyMedium)
-                ])),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(S.current.actionCloseCapital))
-                ]);
-          });
-
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> trySaveFile(String path) async {
-    final currentRepo = _currentRepo;
-
-    if (currentRepo is! OpenRepoEntry) {
-      return;
-    }
-
-    await saveFile(currentRepo.cubit, path);
-  }
-
-  Future<void> saveFile(
-    RepoCubit currentRepo,
-    String path,
-  ) async {
-    final file = io.File(path);
-    final fileName = repo_path.basename(path);
-    final length = (await file.stat()).size;
-    final filePath = repo_path.join(
-      currentRepo.state.currentFolder.path,
-      fileName,
-    );
-    final fileByteStream = file.openRead();
-
-    await currentRepo.saveFile(
-      filePath: filePath,
-      length: length,
-      fileByteStream: fileByteStream,
-    );
-  }
-
   Future<dynamic> _showDirectoryActions(
-    BuildContext context,
+    BuildContext parentContext,
     OpenRepoEntry repo,
   ) =>
       showModalBottomSheet(
         isScrollControlled: true,
-        context: context,
+        context: parentContext,
         shape: Dimensions.borderBottomSheetTop,
         builder: (context) {
           return DirectoryActions(
-            context: context,
+            parentContext: parentContext,
             repoCubit: repo.cubit,
             bottomSheetCubit: _cubits.bottomSheet,
           );
