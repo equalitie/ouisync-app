@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +50,12 @@ class _TestPathProviderPlatform extends PathProviderPlatform {
   Future<String?> getApplicationDocumentsPath() async =>
       join(root.path, 'application-documents');
 }
+
+/// Build `MaterialApp` to host the widget under test.
+Widget testApp(Widget child) => MaterialApp(
+      home: Scaffold(body: child),
+      localizationsDelegates: const [S.delegate],
+    );
 
 extension WidgetTesterExtension on WidgetTester {
   /// Take a screenshot of the widget under test. Useful to debug tests. Note that by default all

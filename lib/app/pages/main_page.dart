@@ -50,9 +50,6 @@ class MainPage extends StatefulWidget {
     required this.nativeChannels,
     required this.settings,
     required this.mediaReceiver,
-    required this.upgradeExists,
-    required this.navigation,
-    required this.bottomSheet,
     required this.packageInfo,
   });
 
@@ -61,9 +58,6 @@ class MainPage extends StatefulWidget {
   final NativeChannels nativeChannels;
   final Settings settings;
   final MediaReceiver mediaReceiver;
-  final UpgradeExistsCubit upgradeExists;
-  final NavigationCubit navigation;
-  final EntryBottomSheetCubit bottomSheet;
   final PackageInfo packageInfo;
 
   @override
@@ -72,9 +66,6 @@ class MainPage extends StatefulWidget {
         session: session,
         nativeChannels: nativeChannels,
         settings: settings,
-        upgradeExists: upgradeExists,
-        navigation: navigation,
-        bottomSheet: bottomSheet,
       );
 }
 
@@ -102,10 +93,9 @@ class _MainPageState extends State<MainPage>
     required Session session,
     required NativeChannels nativeChannels,
     required Settings settings,
-    required UpgradeExistsCubit upgradeExists,
-    required NavigationCubit navigation,
-    required EntryBottomSheetCubit bottomSheet,
   }) {
+    final bottomSheet = EntryBottomSheetCubit();
+    final navigation = NavigationCubit();
     final repositories = ReposCubit(
       session: session,
       nativeChannels: nativeChannels,
@@ -126,6 +116,9 @@ class _MainPageState extends State<MainPage>
     if (mountPoint != null) {
       unawaited(mount.mount(mountPoint));
     }
+
+    final upgradeExists =
+        UpgradeExistsCubit(session.currentProtocolVersion, settings);
 
     return _MainPageState._(Cubits(
       repositories: repositories,
@@ -929,7 +922,7 @@ class _MainPageState extends State<MainPage>
 
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
-        bloc: widget.bottomSheet,
+        bloc: _cubits.bottomSheet,
         builder: (context, state) {
           Widget? sheet;
 
@@ -969,7 +962,7 @@ class _MainPageState extends State<MainPage>
           entryPath,
           entryType,
         ),
-        onCancel: widget.bottomSheet.hide,
+        onCancel: _cubits.bottomSheet.hide,
       );
 
   Widget _uploadFileState({
@@ -1083,7 +1076,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    widget.bottomSheet.showSaveMedia(
+    _cubits.bottomSheet.showSaveMedia(
       reposCubit: _cubits.repositories,
       paths: paths,
     );
@@ -1177,7 +1170,7 @@ class _MainPageState extends State<MainPage>
           return DirectoryActions(
             context: context,
             repoCubit: repo.cubit,
-            bottomSheetCubit: widget.bottomSheet,
+            bottomSheetCubit: _cubits.bottomSheet,
           );
         },
       );

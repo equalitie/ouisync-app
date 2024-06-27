@@ -121,15 +121,9 @@ jobs:
         working-directory: ouisync
         run: cargo build --package ouisync-ffi --lib
 
-      - name: Run unit tests
+      - name: Run tests
         run:
           flutter test
-
-      # Run integration tests on linux only for now
-      - name: Run integration tests
-        run:
-          flutter test integration_test
-        if: matrix.name == 'linux'
 
       - name: Build Ouisync app
         run: flutter --verbose build ${{ matrix.build-args }}

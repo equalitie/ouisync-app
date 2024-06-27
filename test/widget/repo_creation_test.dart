@@ -13,7 +13,6 @@ import 'package:ouisync_app/app/widgets/repo_creation.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
-import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart'
     show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
 import 'package:ouisync_plugin/native_channels.dart';
@@ -65,7 +64,7 @@ void main() {
     'create repository without password',
     (tester) => tester.runAsync(
       () async {
-        await tester.pumpWidget(_app(RepoCreation(repoCreationCubit)));
+        await tester.pumpWidget(testApp(RepoCreation(repoCreationCubit)));
         await tester.pumpAndSettle();
 
         // Filling in the repo name triggers an async operation and so we must explicitly wait until
@@ -107,7 +106,7 @@ void main() {
         final name = 'my repo';
         final password = 'supersecret';
 
-        await tester.pumpWidget(_app(RepoCreation(repoCreationCubit)));
+        await tester.pumpWidget(testApp(RepoCreation(repoCreationCubit)));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(ValueKey('name')), name);
@@ -157,7 +156,7 @@ void main() {
           localSecretMode: LocalSecretMode.randomStored,
         );
 
-        await tester.pumpWidget(_app(RepoCreation(repoCreationCubit)));
+        await tester.pumpWidget(testApp(RepoCreation(repoCreationCubit)));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(ValueKey('name')), name);
@@ -187,7 +186,7 @@ void main() {
             await _createShareToken(name: name, accessMode: AccessMode.read);
         await repoCreationCubit.setInitialTokenValue(token.toString());
 
-        await tester.pumpWidget(_app(RepoCreation(repoCreationCubit)));
+        await tester.pumpWidget(testApp(RepoCreation(repoCreationCubit)));
         await tester.pumpAndSettle();
 
         // The repo token is shown.
@@ -270,8 +269,3 @@ Future<String> _createShareToken({
     await dir.delete(recursive: true);
   }
 }
-
-Widget _app(Widget child) => MaterialApp(
-      home: Scaffold(body: child),
-      localizationsDelegates: const [S.delegate],
-    );
