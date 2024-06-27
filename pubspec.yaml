@@ -39,7 +39,7 @@ dependencies:
   desktop_drop: ^0.4.1
   device_info_plus: ^9.0.3
   dns_client: ^0.2.1
-  envied: ^0.5.3
+  envied: ^0.5.4
   equatable: ^2.0.3
   extended_text: ^13.0.0
   ffi: ^2.0.1
