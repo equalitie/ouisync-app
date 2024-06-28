@@ -70,13 +70,22 @@ Future<void> main(List<String> args) async {
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
-  if (options.deb) {
-    final asset = await buildDeb(
+  if (options.deb_gui) {
+    final asset = await buildDebGUI(
         name: name,
         outputDir: outputDir,
         buildDesc: buildDesc,
         description: pubspec.description ?? '',
         sentryDSN: sentryDSN);
+    assets.add(asset);
+  }
+
+  if (options.deb_cli) {
+    final asset = await buildDebCLI(
+        name: name,
+        outputDir: outputDir,
+        buildDesc: buildDesc,
+        description: pubspec.description ?? '');
     assets.add(asset);
   }
 
@@ -135,7 +144,8 @@ class Options {
   final bool aab;
   final bool exe;
   final bool msix;
-  final bool deb;
+  final bool deb_gui;
+  final bool deb_cli;
 
   final String? token;
   final RepositorySlug slug;
@@ -151,7 +161,8 @@ class Options {
     this.aab = false,
     this.exe = false,
     this.msix = false,
-    this.deb = false,
+    this.deb_gui = false,
+    this.deb_cli = false,
     this.token,
     required this.slug,
     this.action,
@@ -171,8 +182,10 @@ class Options {
         help: 'Build Windows installer', defaultsTo: Platform.isWindows);
     parser.addFlag('msix',
         help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
-    parser.addFlag('deb',
-        help: 'Build Linux deb package', defaultsTo: Platform.isLinux);
+    parser.addFlag('deb-gui',
+        help: 'Build Linux deb GUI package', defaultsTo: Platform.isLinux);
+    parser.addFlag('deb-cli',
+        help: 'Build Linux deb CLI package', defaultsTo: Platform.isLinux);
 
     parser.addOption(
       'token-file',
@@ -278,7 +291,8 @@ class Options {
       aab: results['aab'],
       exe: results['exe'],
       msix: results['msix'],
-      deb: results['deb'],
+      deb_gui: results['deb-gui'],
+      deb_cli: results['deb-cli'],
       token: token?.trim(),
       slug: slug,
       action: action,
@@ -481,10 +495,10 @@ Future<void> prepareDokanBundle() async {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// deb
+// deb GUI
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildDeb({
+Future<File> buildDebGUI({
   required String name,
   required Directory outputDir,
   required BuildDesc buildDesc,
@@ -511,7 +525,7 @@ Future<File> buildDeb({
   ]);
 
   final arch = 'amd64';
-  final packageName = '${name}_${buildDesc}_$arch';
+  final packageName = '${name}-gui_${buildDesc}_$arch';
 
   final packageDir = Directory('${outputDir.path}/$packageName');
 
@@ -572,10 +586,69 @@ Future<File> buildDeb({
   final debDir = Directory('${packageDir.path}/DEBIAN');
   await debDir.create();
 
-  final controlContent = 'Package: $name\n'
+  final controlContent = 'Package: $name-gui\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
       'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1, libappindicator3-1\n'
+      'Maintainer: Ouisync developers <support@ouisync.net>\n'
+      'Description: $description\n';
+  await File('${debDir.path}/control').writeAsString(controlContent);
+
+  final package = File('${outputDir.path}/$packageName.deb');
+
+  await run('dpkg-deb', [
+    '--root-owner-group',
+    '-b',
+    packageDir.path,
+    package.path,
+  ]);
+
+  return package;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// deb CLI
+//
+////////////////////////////////////////////////////////////////////////////////
+Future<File> buildDebCLI(
+    {required String name,
+    required Directory outputDir,
+    required BuildDesc buildDesc,
+    String description = ''}) async {
+  final buildName = buildDesc.toString();
+
+  await run(
+      'cargo', ['build', '--release', '--package', 'ouisync-cli'], './ouisync');
+
+  final arch = 'amd64';
+  final packageName = '${name}-cli_${buildDesc}_$arch';
+
+  final packageDir = Directory('${outputDir.path}/$packageName');
+
+  // Delete any previous dir
+  try {
+    await packageDir.delete(recursive: true);
+  } on PathNotFoundException {
+    // ignore if it doesn't exist yet
+  }
+
+  await packageDir.create();
+
+  // Copy the binary
+
+  final binDir = Directory('${packageDir.path}/usr/bin');
+  await binDir.create(recursive: true);
+  await File('./ouisync/target/release/ouisync').copy('${binDir.path}/ouisync');
+
+  // Create debian control file
+  final debDir = Directory('${packageDir.path}/DEBIAN');
+  await debDir.create();
+
+  final controlContent = 'Package: $name-cli\n'
+      'Version: $buildName\n'
+      'Architecture: $arch\n'
+      'Depends: libfuse2\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
