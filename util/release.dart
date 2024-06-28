@@ -176,16 +176,15 @@ class Options {
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
 
-    parser.addFlag('apk', help: 'Build Android APK', defaultsTo: true);
-    parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: true);
-    parser.addFlag('exe',
-        help: 'Build Windows installer', defaultsTo: Platform.isWindows);
+    parser.addFlag('apk', help: 'Build Android APK', defaultsTo: false);
+    parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: false);
+    parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: false);
     parser.addFlag('msix',
-        help: 'Build Windows MSIX package', defaultsTo: Platform.isWindows);
+        help: 'Build Windows MSIX package', defaultsTo: false);
     parser.addFlag('deb-gui',
-        help: 'Build Linux deb GUI package', defaultsTo: Platform.isLinux);
+        help: 'Build Linux deb GUI package', defaultsTo: false);
     parser.addFlag('deb-cli',
-        help: 'Build Linux deb CLI package', defaultsTo: Platform.isLinux);
+        help: 'Build Linux deb CLI package', defaultsTo: false);
 
     parser.addOption(
       'token-file',
@@ -286,13 +285,26 @@ class Options {
       }
     }
 
+    final apk = results['apk'];
+    final aab = results['aab'];
+    final exe = results['exe'];
+    final msix = results['msix'];
+    final deb_gui = results['deb-gui'];
+    final deb_cli = results['deb-cli'];
+
+    if (!apk && !aab && !exe && !msix && !deb_gui && !deb_cli) {
+      print(
+          "No package to build. Use one or more flags from {--apk, --aab, --exe, --msix, --deb-gui, --deb-cli}");
+      exit(1);
+    }
+
     return Options._(
-      apk: results['apk'],
-      aab: results['aab'],
-      exe: results['exe'],
-      msix: results['msix'],
-      deb_gui: results['deb-gui'],
-      deb_cli: results['deb-cli'],
+      apk: apk,
+      aab: aab,
+      exe: exe,
+      msix: msix,
+      deb_gui: deb_gui,
+      deb_cli: deb_cli,
       token: token?.trim(),
       slug: slug,
       action: action,
