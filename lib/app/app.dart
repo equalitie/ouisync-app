@@ -45,7 +45,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: S.delegate.supportedLocales,
-    home: OuiSyncApp(
+    home: OuisyncApp(
       session: session,
       windowManager: windowManager,
       settings: settings,
@@ -54,8 +54,8 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   );
 }
 
-class OuiSyncApp extends StatefulWidget {
-  OuiSyncApp({
+class OuisyncApp extends StatefulWidget {
+  OuisyncApp({
     required this.windowManager,
     required this.session,
     required this.settings,
@@ -70,10 +70,10 @@ class OuiSyncApp extends StatefulWidget {
   final PackageInfo packageInfo;
 
   @override
-  State<OuiSyncApp> createState() => _OuiSyncAppState();
+  State<OuisyncApp> createState() => _OuisyncAppState();
 }
 
-class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
+class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final powerControl = PowerControl(widget.session, widget.settings);
   late final reposCubit = ReposCubit(

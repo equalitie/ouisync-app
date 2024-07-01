@@ -32,7 +32,7 @@ void main() {
   });
 
   testWidgets('onboarding', (tester) async {
-    await tester.pumpWidget(testApp(OuiSyncApp(
+    await tester.pumpWidget(testApp(OuisyncApp(
       packageInfo: fakePackageInfo,
       session: session,
       settings: settings,
