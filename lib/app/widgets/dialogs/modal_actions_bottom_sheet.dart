@@ -57,19 +57,29 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
   }
 
-  Widget _buildAction({name, icon, action}) => Padding(
+  Widget _buildAction({
+    required String name,
+    required IconData icon,
+    required Function()? action,
+    bool enabled = true,
+  }) =>
+      Padding(
         padding: Dimensions.paddingBottomSheetActions,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: action,
+          onTap: enabled ? action : null,
           child: Column(
             children: [
               Icon(
                 icon,
                 size: Dimensions.sizeIconBig,
+                color: !enabled ? Colors.grey : null,
               ),
               Dimensions.spacingVertical,
-              Text(name)
+              Text(
+                name,
+                style: TextStyle(color: !enabled ? Colors.grey : null),
+              )
             ],
           ),
         ),
@@ -90,13 +100,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
               _buildAction(
                 name: S.current.actionNewFile,
                 icon: Icons.upload_file_outlined,
-                action: enable
-                    ? () async => await addFile(
-                          parentContext,
-                          repoCubit,
-                          FileType.any,
-                        )
-                    : () async => await _showNotAvailableAlertDialog(context),
+                action: () async => await addFile(
+                  parentContext,
+                  repoCubit,
+                  FileType.any,
+                ),
+                enabled: enable,
               ),
               if (io.Platform.isIOS)
                 _buildAction(
