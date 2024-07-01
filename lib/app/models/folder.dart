@@ -16,7 +16,7 @@ class FolderState extends Equatable {
     this.path = Strings.root,
     this.content = const [],
     this.sortBy = SortBy.name,
-    this.sortDirection = SortDirection.desc,
+    this.sortDirection = SortDirection.asc,
   });
 
   bool get isRoot => path == Strings.root;
@@ -128,7 +128,7 @@ class _Refresher {
               content.sort(_sortByType(sortDirection ?? SortDirection.asc));
               break;
             default:
-              content.sort(_sortByType(sortDirection ?? SortDirection.asc));
+              content.sort(_sortByName(sortDirection ?? SortDirection.asc));
           }
 
           if (path == folder.state.path) {
@@ -162,8 +162,15 @@ class _Refresher {
         : (b, a) => _nameComparator(a, b);
   }
 
-  int _nameComparator(FileSystemEntry a, FileSystemEntry b) =>
-      a.name.compareTo(b.name);
+  int _nameComparator(FileSystemEntry a, FileSystemEntry b) {
+    final nameResult = a.name.compareTo(b.name);
+    if (nameResult != 0) {
+      if (a is FileEntry && b is DirectoryEntry) return 1;
+      if (a is DirectoryEntry && b is FileEntry) return -1;
+    }
+
+    return nameResult;
+  }
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortBySize(
       SortDirection direction) {
@@ -173,12 +180,16 @@ class _Refresher {
   }
 
   int _sizeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
-        (FileEntry(size: final a), FileEntry(size: final b)) =>
-          (a ?? 0).compareTo(b ?? 0),
+        (FileEntry(size: final sa), FileEntry(size: final sb)) =>
+          _sizeNameComparator((sa ?? 0).compareTo(sb ?? 0), a, b),
         (FileEntry(), DirectoryEntry()) => 1,
         (DirectoryEntry(), FileEntry()) => -1,
-        (DirectoryEntry(), DirectoryEntry()) => 0,
+        (DirectoryEntry(), DirectoryEntry()) => a.name.compareTo(b.name),
       };
+
+  int _sizeNameComparator(
+          int sizeResult, FileSystemEntry a, FileSystemEntry b) =>
+      sizeResult == 0 ? a.name.compareTo(b.name) : sizeResult;
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
       SortDirection direction) {
@@ -188,8 +199,10 @@ class _Refresher {
   }
 
   int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
-        (FileEntry(), FileEntry()) || (DirectoryEntry(), DirectoryEntry()) => 0,
-        (DirectoryEntry(), FileEntry()) => 1,
-        (FileEntry(), DirectoryEntry()) => -1,
+        (FileEntry(), FileEntry()) ||
+        (DirectoryEntry(), DirectoryEntry()) =>
+          a.name.compareTo(b.name),
+        (DirectoryEntry(), FileEntry()) => -1,
+        (FileEntry(), DirectoryEntry()) => 1,
       };
 }

@@ -86,7 +86,7 @@ class _SortByList extends StatelessWidget with AppLogger {
   final ReposCubit _reposCubit;
 
   final ValueNotifier<SortDirection> _sortDirection =
-      ValueNotifier<SortDirection>(SortDirection.desc);
+      ValueNotifier<SortDirection>(SortDirection.asc);
 
   @override
   Widget build(BuildContext context) {
