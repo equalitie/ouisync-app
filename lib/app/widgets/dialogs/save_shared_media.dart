@@ -11,14 +11,14 @@ typedef SaveFileCallback = Future<void> Function(String sourceFilePath);
 
 class SaveSharedMedia extends StatefulWidget {
   const SaveSharedMedia(
-    this._repos, {
+    this.reposCubit, {
     required this.sharedMediaPaths,
     required this.canSaveMedia,
     required this.onUpdateBottomSheet,
     required this.onSaveFile,
   });
 
-  final ReposCubit _repos;
+  final ReposCubit reposCubit;
   final List<String> sharedMediaPaths;
   final Future<bool> Function() canSaveMedia;
   final void Function(
@@ -131,7 +131,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
     );
   }
 
-  Widget _buildActions() => widget._repos.builder(
+  Widget _buildActions() => widget.reposCubit.builder(
         (reposCubit) => Fields.dialogActions(
           context,
           buttons: _actions(reposCubit),
@@ -141,7 +141,6 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       );
 
   List<Widget> _actions(ReposCubit reposCubit) {
-    final repoCubit = reposCubit.currentRepo?.cubit;
     final isRepoList = reposCubit.showList;
 
     return [
@@ -150,10 +149,10 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
         buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
         onPressed: () {
           widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-          repoCubit?.hideBottomSheet();
+          widget.reposCubit.hideBottomSheet();
         },
       ),
-      widget._repos.builder(
+      widget.reposCubit.builder(
         (rc) => PositiveButton(
           text: S.current.actionSave,
           onPressed: isRepoList
@@ -168,7 +167,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                   }
 
                   widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-                  repoCubit?.hideBottomSheet();
+                  widget.reposCubit.hideBottomSheet();
                 },
           buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
         ),

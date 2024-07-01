@@ -468,6 +468,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
+  void hideBottomSheet() {
+    _bottomSheet.hide();
+  }
+
   Future<RepoEntry> _open(
     RepoLocation location, [
     LocalSecret? secret,

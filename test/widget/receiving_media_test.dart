@@ -91,13 +91,12 @@ void main() {
         expect(saveButton, findsOne);
         expect(tester.widget<PositiveButton>(saveButton).onPressed, isNull);
 
+        // Cancel adding the file
         final cancelButton = find.widgetWithText(NegativeButton, 'CANCEL');
         expect(cancelButton, findsOne);
         await tester.tap(cancelButton);
         await tester.pumpAndSettle();
-
-        // FIXME: this fails
-        //expect(find.text('Add file to Ouisync'), findsNothing);
+        expect(find.text('Add file to Ouisync'), findsNothing);
       },
     ),
   );
