@@ -242,4 +242,38 @@ void main() {
       },
     ),
   );
+
+  testWidgets(
+    'receive repo',
+    (tester) => tester.runAsync(
+      () async {
+        final repoName = 'new repo';
+        final repoPath =
+            join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
+        final repo = await Repository.create(
+          session,
+          store: repoPath,
+          readSecret: null,
+          writeSecret: null,
+        );
+        await repo.close();
+
+        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpAndSettle();
+
+        expect(find.text(repoName), findsNothing);
+
+        mediaReceiverController.add([
+          SharedMediaFile(
+            path: repoPath,
+            type: SharedMediaType.file,
+          ),
+        ]);
+        await reposCubit.waitUntil((_) => reposCubit.repos.isNotEmpty);
+        await tester.pumpAndSettle();
+
+        expect(find.text(repoName), findsOne);
+      },
+    ),
+  );
 }
