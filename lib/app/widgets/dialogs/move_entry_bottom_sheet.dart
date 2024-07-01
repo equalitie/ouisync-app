@@ -40,7 +40,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
   final bodyKey = GlobalKey();
   Size? widgetSize;
 
-  NavigationCubit get navigationCubit => widget._cubits.navigation;
+  NavigationCubit get navigationCubit => widget._cubits.repositories.navigation;
   RepoCubit get originRepoCubit => widget.originRepoCubit;
 
   String get entryPath => widget.entryPath;

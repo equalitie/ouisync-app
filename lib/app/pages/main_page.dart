@@ -44,11 +44,11 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
-    required this.cacheServers,
     required this.nativeChannels,
     required this.packageInfo,
     required this.powerControl,
     required this.receivedMedia,
+    required this.reposCubit,
     required this.session,
     required this.settings,
     required this.windowManager,
@@ -61,13 +61,13 @@ class MainPage extends StatefulWidget {
   final PackageInfo packageInfo;
   final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
-  final CacheServers cacheServers;
+  final ReposCubit reposCubit;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
-        cacheServers: cacheServers,
         nativeChannels: nativeChannels,
         powerControl: powerControl,
+        reposCubit: reposCubit,
         session: session,
         settings: settings,
         windowManager: windowManager,
@@ -96,26 +96,15 @@ class _MainPageState extends State<MainPage>
   _MainPageState._(this._cubits);
 
   factory _MainPageState({
-    required CacheServers cacheServers,
     required NativeChannels nativeChannels,
+    required ReposCubit reposCubit,
     required Session session,
     required Settings settings,
     required PlatformWindowManager windowManager,
     required PowerControl powerControl,
   }) {
-    final bottomSheet = EntryBottomSheetCubit();
-    final navigation = NavigationCubit();
-    final repositories = ReposCubit(
-      session: session,
-      nativeChannels: nativeChannels,
-      settings: settings,
-      navigation: navigation,
-      bottomSheet: bottomSheet,
-      cacheServers: cacheServers,
-    );
     final panicCounter = StateMonitorIntCubit(
-      repositories.rootStateMonitor
-          .child(oui.MonitorId.expectUnique("Session")),
+      reposCubit.rootStateMonitor.child(oui.MonitorId.expectUnique("Session")),
       "panic_counter",
     );
 
@@ -129,14 +118,12 @@ class _MainPageState extends State<MainPage>
         UpgradeExistsCubit(session.currentProtocolVersion, settings);
 
     return _MainPageState._(Cubits(
-      repositories: repositories,
+      repositories: reposCubit,
       powerControl: powerControl,
       panicCounter: panicCounter,
       upgradeExists: upgradeExists,
       windowManager: windowManager,
       mount: mount,
-      navigation: navigation,
-      bottomSheet: bottomSheet,
     ));
   }
 
@@ -182,8 +169,6 @@ class _MainPageState extends State<MainPage>
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
-
-    unawaited(_cubits.repositories.close());
 
     super.dispose();
   }
@@ -943,7 +928,7 @@ class _MainPageState extends State<MainPage>
 
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
-        bloc: _cubits.bottomSheet,
+        bloc: _cubits.repositories.bottomSheet,
         builder: (context, state) {
           Widget? sheet;
 
@@ -983,7 +968,7 @@ class _MainPageState extends State<MainPage>
           entryPath,
           entryType,
         ),
-        onCancel: _cubits.bottomSheet.hide,
+        onCancel: _cubits.repositories.bottomSheet.hide,
       );
 
   Future<void> moveEntry(
@@ -1132,7 +1117,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    _cubits.bottomSheet.showSaveMedia(
+    _cubits.repositories.bottomSheet.showSaveMedia(
       reposCubit: _cubits.repositories,
       paths: paths,
     );
@@ -1150,7 +1135,7 @@ class _MainPageState extends State<MainPage>
           return DirectoryActions(
             parentContext: parentContext,
             repoCubit: repo.cubit,
-            bottomSheetCubit: _cubits.bottomSheet,
+            bottomSheetCubit: _cubits.repositories.bottomSheet,
           );
         },
       );

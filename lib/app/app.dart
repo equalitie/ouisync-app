@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
+import 'cubits/repos.dart';
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/platform/platform.dart';
@@ -75,6 +76,12 @@ class OuiSyncApp extends StatefulWidget {
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final powerControl = PowerControl(widget.session, widget.settings);
+  late final reposCubit = ReposCubit(
+    session: widget.session,
+    nativeChannels: widget.nativeChannels,
+    settings: widget.settings,
+    cacheServers: CacheServers(Constants.cacheServers),
+  );
 
   @override
   void initState() {
@@ -84,6 +91,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   void dispose() {
+    unawaited(reposCubit.close());
     unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
     super.dispose();
@@ -97,9 +105,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     final home = MediaReceiver(
       controller: receivedMediaController,
       child: MainPage(
-        cacheServers: CacheServers(Constants.cacheServers),
         packageInfo: widget.packageInfo,
         powerControl: powerControl,
+        reposCubit: reposCubit,
         session: widget.session,
         nativeChannels: widget.nativeChannels,
         settings: widget.settings,

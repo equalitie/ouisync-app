@@ -149,7 +149,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
         buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
         onPressed: () {
           widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-          widget.reposCubit.hideBottomSheet();
+          widget.reposCubit.bottomSheet.hide();
         },
       ),
       widget.reposCubit.builder(
@@ -167,7 +167,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                   }
 
                   widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-                  widget.reposCubit.hideBottomSheet();
+                  widget.reposCubit.bottomSheet.hide();
                 },
           buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
         ),

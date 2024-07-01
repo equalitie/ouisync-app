@@ -24,23 +24,24 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final NativeChannels _nativeChannels;
   StreamSubscription<void>? _subscription;
   final Settings _settings;
-  final NavigationCubit _navigation;
-  final EntryBottomSheetCubit _bottomSheet;
-  final PasswordHasher passwordHasher;
+
+  final EntryBottomSheetCubit bottomSheet;
   final CacheServers cacheServers;
+  final NavigationCubit navigation;
+  final PasswordHasher passwordHasher;
 
   ReposCubit({
     required session,
     required nativeChannels,
     required settings,
-    required navigation,
-    required bottomSheet,
     required this.cacheServers,
+    EntryBottomSheetCubit? bottomSheet,
+    NavigationCubit? navigation,
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
-        _navigation = navigation,
-        _bottomSheet = bottomSheet,
+        bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
+        navigation = navigation ?? NavigationCubit(),
         passwordHasher = PasswordHasher(session);
 
   Settings get settings => _settings;
@@ -240,6 +241,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     return infoHash;
   }
 
+  @override
   Future<void> close() async {
     // Make sure this function is idempotent, i.e. that calling it more than once won't change it's
     // meaning nor it will crash.
@@ -258,6 +260,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     changed();
+
+    await super.close();
   }
 
   Future<void> importRepoFromLocation(RepoLocation location) async {
@@ -306,8 +310,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       session: _session,
       nativeChannels: _nativeChannels,
       settings: _settings,
-      navigation: _navigation,
-      bottomSheet: _bottomSheet,
+      navigation: navigation,
+      bottomSheet: bottomSheet,
       repo: repo,
       location: location,
       cacheServers: cacheServers,
@@ -468,10 +472,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     changed();
   }
 
-  void hideBottomSheet() {
-    _bottomSheet.hide();
-  }
-
   Future<RepoEntry> _open(
     RepoLocation location, [
     LocalSecret? secret,
@@ -497,8 +497,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         session: _session,
         nativeChannels: _nativeChannels,
         settings: _settings,
-        navigation: _navigation,
-        bottomSheet: _bottomSheet,
+        navigation: navigation,
+        bottomSheet: bottomSheet,
         repo: repo,
         location: location,
         cacheServers: cacheServers,
@@ -582,8 +582,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         session: _session,
         nativeChannels: _nativeChannels,
         settings: _settings,
-        navigation: _navigation,
-        bottomSheet: _bottomSheet,
+        navigation: navigation,
+        bottomSheet: bottomSheet,
         repo: repo,
         location: location,
         cacheServers: cacheServers,
