@@ -76,12 +76,19 @@ class PowerControlState {
 class PowerControl extends Cubit<PowerControlState> with AppLogger {
   final oui.Session _session;
   final Settings _settings;
-  final Connectivity _connectivity = Connectivity();
+  final Connectivity _connectivity;
   _Transition _networkModeTransition = _Transition.none;
 
-  PowerControl(this._session, this._settings) : super(PowerControlState());
+  PowerControl(
+    this._session,
+    this._settings, {
+    Connectivity? connectivity,
+  })  : _connectivity = connectivity ?? Connectivity(),
+        super(PowerControlState()) {
+    unawaited(_init());
+  }
 
-  Future<void> init() async {
+  Future<void> _init() async {
     final syncOnMobile = _settings.getSyncOnMobileEnabled();
     await setSyncOnMobileEnabled(syncOnMobile);
 
@@ -91,8 +98,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     ));
 
     await _refresh();
-
-    unawaited(_listen());
+    await _listen();
   }
 
   Future<void> setSyncOnMobileEnabled(bool value) async {

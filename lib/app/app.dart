@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
+import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/widgets/media_receiver.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
 import 'package:ouisync_plugin/native_channels.dart';
@@ -73,6 +74,7 @@ class OuiSyncApp extends StatefulWidget {
 
 class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
+  late final powerControl = PowerControl(widget.session, widget.settings);
 
   @override
   void initState() {
@@ -82,6 +84,7 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   void dispose() {
+    unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
     super.dispose();
   }
@@ -94,7 +97,9 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     final home = MediaReceiver(
       controller: receivedMediaController,
       child: MainPage(
+        cacheServers: CacheServers(Constants.cacheServers),
         packageInfo: widget.packageInfo,
+        powerControl: powerControl,
         session: widget.session,
         nativeChannels: widget.nativeChannels,
         settings: widget.settings,

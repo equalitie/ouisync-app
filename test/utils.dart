@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/generated/l10n.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +21,7 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   setUp(() async {
     final dir = await Directory.systemTemp.createTemp();
-    PathProviderPlatform.instance = _TestPathProviderPlatform(dir);
+    PathProviderPlatform.instance = _FakePathProviderPlatform(dir);
     SharedPreferences.setMockInitialValues({});
 
     tempDir = dir;
@@ -37,18 +40,22 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   await callback();
 }
 
-class _TestPathProviderPlatform extends PathProviderPlatform {
+class _FakePathProviderPlatform extends PathProviderPlatform {
   final Directory root;
 
-  _TestPathProviderPlatform(this.root);
+  _FakePathProviderPlatform(this.root);
 
   @override
-  Future<String?> getApplicationSupportPath() async =>
-      join(root.path, 'application-support');
+  Future<String?> getApplicationSupportPath() =>
+      Future.value(join(root.path, 'application-support'));
 
   @override
-  Future<String?> getApplicationDocumentsPath() async =>
-      join(root.path, 'application-documents');
+  Future<String?> getApplicationDocumentsPath() =>
+      Future.value(join(root.path, 'application-documents'));
+
+  @override
+  Future<String?> getTemporaryPath() =>
+      Future.value(join(root.path, 'temporary'));
 }
 
 /// Build `MaterialApp` to host the widget under test.
@@ -56,6 +63,37 @@ Widget testApp(Widget child) => MaterialApp(
       home: Scaffold(body: child),
       localizationsDelegates: const [S.delegate],
     );
+
+/// Fake window manager
+class FakeWindowManager extends PlatformWindowManager {
+  @override
+  void onClose(CloseHandler handler) {}
+
+  @override
+  Future<void> setTitle(String title) => Future.value();
+
+  @override
+  Future<void> initSystemTray() => Future.value();
+}
+
+/// Fake Connectivity
+class FakeConnectivity implements Connectivity {
+  @override
+  final Stream<ConnectivityResult> onConnectivityChanged = Stream.empty();
+
+  @override
+  Future<ConnectivityResult> checkConnectivity() =>
+      Future.value(ConnectivityResult.none);
+}
+
+/// Fake PackageInfo
+PackageInfo fakePackageInfo = PackageInfo(
+  appName: 'ouisync.test',
+  packageName: 'org.equalitie.ouisync.test',
+  version: '1.0.0',
+  buildNumber: '42',
+  buildSignature: '',
+);
 
 extension WidgetTesterExtension on WidgetTester {
   /// Take a screenshot of the widget under test. Useful to debug tests. Note that by default all

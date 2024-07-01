@@ -44,12 +44,14 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
-    required this.windowManager,
-    required this.session,
+    required this.cacheServers,
     required this.nativeChannels,
-    required this.settings,
     required this.packageInfo,
+    required this.powerControl,
     required this.receivedMedia,
+    required this.session,
+    required this.settings,
+    required this.windowManager,
   });
 
   final PlatformWindowManager windowManager;
@@ -57,14 +59,18 @@ class MainPage extends StatefulWidget {
   final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
+  final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
+  final CacheServers cacheServers;
 
   @override
   State<StatefulWidget> createState() => _MainPageState(
-        windowManager: windowManager,
-        session: session,
+        cacheServers: cacheServers,
         nativeChannels: nativeChannels,
+        powerControl: powerControl,
+        session: session,
         settings: settings,
+        windowManager: windowManager,
       );
 }
 
@@ -90,10 +96,12 @@ class _MainPageState extends State<MainPage>
   _MainPageState._(this._cubits);
 
   factory _MainPageState({
-    required PlatformWindowManager windowManager,
-    required Session session,
+    required CacheServers cacheServers,
     required NativeChannels nativeChannels,
+    required Session session,
     required Settings settings,
+    required PlatformWindowManager windowManager,
+    required PowerControl powerControl,
   }) {
     final bottomSheet = EntryBottomSheetCubit();
     final navigation = NavigationCubit();
@@ -103,9 +111,8 @@ class _MainPageState extends State<MainPage>
       settings: settings,
       navigation: navigation,
       bottomSheet: bottomSheet,
-      cacheServers: CacheServers(Constants.cacheServers),
+      cacheServers: cacheServers,
     );
-    final powerControl = PowerControl(session, settings);
     final panicCounter = StateMonitorIntCubit(
       repositories.rootStateMonitor
           .child(oui.MonitorId.expectUnique("Session")),
@@ -160,7 +167,6 @@ class _MainPageState extends State<MainPage>
     });
 
     unawaited(_cubits.repositories.init());
-    unawaited(_cubits.powerControl.init());
 
     _receivedMediaSubscription =
         widget.receivedMedia.listen(handleReceivedMedia);
