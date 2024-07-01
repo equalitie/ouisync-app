@@ -61,29 +61,31 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     required String name,
     required IconData icon,
     required Function()? action,
-    bool enabled = true,
-  }) =>
-      Padding(
-        padding: Dimensions.paddingBottomSheetActions,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: enabled ? action : null,
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: Dimensions.sizeIconBig,
-                color: !enabled ? Colors.grey : null,
-              ),
-              Dimensions.spacingVertical,
-              Text(
-                name,
-                style: TextStyle(color: !enabled ? Colors.grey : null),
-              )
-            ],
-          ),
+  }) {
+    Color? dissabledColor = action == null ? Colors.grey : null;
+
+    return Padding(
+      padding: Dimensions.paddingBottomSheetActions,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: action,
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: Dimensions.sizeIconBig,
+              color: dissabledColor,
+            ),
+            Dimensions.spacingVertical,
+            Text(
+              name,
+              style: TextStyle(color: dissabledColor),
+            )
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildNewFileAction(BuildContext parentContext) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
@@ -100,12 +102,13 @@ class DirectoryActions extends StatelessWidget with AppLogger {
               _buildAction(
                 name: S.current.actionNewFile,
                 icon: Icons.upload_file_outlined,
-                action: () async => await addFile(
-                  parentContext,
-                  repoCubit,
-                  FileType.any,
-                ),
-                enabled: enable,
+                action: enable
+                    ? () async => await addFile(
+                          parentContext,
+                          repoCubit,
+                          FileType.any,
+                        )
+                    : null,
               ),
               if (io.Platform.isIOS)
                 _buildAction(
