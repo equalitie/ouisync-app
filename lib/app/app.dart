@@ -83,6 +83,10 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
     cacheServers: CacheServers(Constants.cacheServers),
   );
 
+  bool get _onboarded =>
+      !widget.settings.getShowOnboarding() &&
+      widget.settings.getEqualitieValues();
+
   @override
   void initState() {
     super.initState();
@@ -98,42 +102,53 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
   }
 
   @override
-  Widget build(BuildContext context) {
-    /// We show the onboarding the first time the app starts.
-    /// Then, we show the page for accepting eQ values, until the user taps YES.
-    /// After this, just show the regular home page.
-    final home = MediaReceiver(
-      controller: receivedMediaController,
-      child: MainPage(
-        packageInfo: widget.packageInfo,
-        powerControl: powerControl,
-        reposCubit: reposCubit,
-        session: widget.session,
-        nativeChannels: widget.nativeChannels,
-        settings: widget.settings,
-        windowManager: widget.windowManager,
-        receivedMedia: receivedMediaController.stream,
-      ),
-    );
-
-    final afterOnboarding = widget.settings.getEqualitieValues()
-        ? home
-        : AcceptEqualitieValuesTermsPrivacyPage(
+  Widget build(BuildContext context) => Visibility(
+        child: MediaReceiver(
+          controller: receivedMediaController,
+          child: MainPage(
+            packageInfo: widget.packageInfo,
+            powerControl: powerControl,
+            reposCubit: reposCubit,
+            session: widget.session,
+            nativeChannels: widget.nativeChannels,
             settings: widget.settings,
-            ouisyncAppHome: home,
-          );
-
-    return widget.settings.getShowOnboarding()
-        ? OnboardingPage(
-            settings: widget.settings,
-            ouisyncAppHome: afterOnboarding,
-          )
-        : afterOnboarding;
-  }
+            windowManager: widget.windowManager,
+            receivedMedia: receivedMediaController.stream,
+          ),
+        ),
+        visible: _onboarded,
+      );
 
   Future<void> _init() async {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
     await widget.windowManager.initSystemTray();
+
+    // We show the onboarding the first time the app starts.
+    // Then, we show the page for accepting eQ values, until the user taps YES.
+    // After this, just show the regular home page.
+
+    if (!_onboarded) {
+      if (widget.settings.getShowOnboarding()) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => OnboardingPage(
+            settings: widget.settings,
+          ),
+        ));
+      }
+
+      if (!widget.settings.getEqualitieValues()) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => AcceptEqualitieValuesTermsPrivacyPage(
+            settings: widget.settings,
+          ),
+        ));
+      }
+
+      if (_onboarded) {
+        // Force rebuild to show the main page.
+        setState(() {});
+      }
+    }
   }
 }
 

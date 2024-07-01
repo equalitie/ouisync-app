@@ -9,7 +9,6 @@ import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
