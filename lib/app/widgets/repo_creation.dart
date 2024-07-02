@@ -30,44 +30,21 @@ class RepoCreation extends StatelessWidget {
             listenWhen: (previous, current) =>
                 current.tokenError.isNotEmpty &&
                 current.tokenError != previous.tokenError,
-            listener: (context, state) => showSnackBar(state.tokenError),
+            listener: _handleTokenError,
           ),
           // Handle substate changes
           BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: cubit,
             listenWhen: (previous, current) =>
                 current.substate != previous.substate,
-            listener: (context, state) {
-              switch (state.substate) {
-                case RepoCreationPending():
-                case RepoCreationValid():
-                  break;
-                case RepoCreationSuccess(location: final location):
-                  Navigator.of(context).pop(location);
-                case RepoCreationFailure(
-                    location: final location,
-                    error: final error
-                  ):
-                  unawaited(Dialogs.simpleAlertDialog(
-                    context: context,
-                    title:
-                        S.current.messsageFailedCreateRepository(location.path),
-                    message: error,
-                  ));
-              }
-            },
+            listener: _handleSubstateChange,
           ),
           // Show loading indicator
           BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: cubit,
             listenWhen: (previous, current) =>
                 current.loading && !previous.loading,
-            listener: (context, state) {
-              unawaited(Dialogs.executeFutureWithLoadingDialog(
-                context,
-                cubit.stream.where((state) => !state.loading).first,
-              ));
-            },
+            listener: _handleLoading,
           ),
         ],
         child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
@@ -214,4 +191,42 @@ class RepoCreation extends StatelessWidget {
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
+
+  void _handleTokenError(BuildContext context, RepoCreationState state) =>
+      showSnackBar(state.tokenError);
+
+  Future<void> _handleSubstateChange(
+    BuildContext context,
+    RepoCreationState state,
+  ) async {
+    switch (state.substate) {
+      case RepoCreationPending():
+      case RepoCreationValid():
+        break;
+      case RepoCreationSuccess(location: final location):
+        Navigator.of(context).pop(location);
+      case RepoCreationFailure(location: final location, error: final error):
+        await Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.messsageFailedCreateRepository(location.path),
+          message: error,
+        );
+    }
+  }
+
+  Future<void> _handleLoading(
+    BuildContext context,
+    RepoCreationState state,
+  ) async {
+    Future<void> done() async {
+      // Make sure to check the initial state as well, to avoid race conditions.
+      if (!cubit.state.loading) {
+        return;
+      }
+
+      await cubit.stream.where((state) => !state.loading).first;
+    }
+
+    await Dialogs.executeFutureWithLoadingDialog(context, done());
+  }
 }
