@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
-class WatchSelf<Self> {
-  final _Cubit _cubit = _Cubit();
+class WatchSelf<Self> extends Cubit<Changed> {
+  WatchSelf() : super(Changed(0));
 
   void changed() {
-    _cubit.change();
+    emit(state.next);
   }
 
   void update(void Function(Self) f) {
@@ -15,8 +15,8 @@ class WatchSelf<Self> {
   }
 
   Widget builder(Widget Function(Self) builderFunc) {
-    return BlocBuilder<_Cubit, Changed>(
-      bloc: _cubit,
+    return BlocBuilder<WatchSelf<Self>, Changed>(
+      bloc: this,
       builder: (BuildContext ctx, Changed _) {
         return builderFunc(this as Self);
       },
@@ -24,9 +24,11 @@ class WatchSelf<Self> {
   }
 
   Widget consumer(
-      Widget Function(Self) builderFunc, void Function(Self) listenerFunc) {
-    return BlocConsumer<_Cubit, Changed>(
-      bloc: _cubit,
+    Widget Function(Self) builderFunc,
+    void Function(Self) listenerFunc,
+  ) {
+    return BlocConsumer<WatchSelf<Self>, Changed>(
+      bloc: this,
       builder: (BuildContext ctx, Changed _) {
         return builderFunc(this as Self);
       },
@@ -35,25 +37,15 @@ class WatchSelf<Self> {
       },
     );
   }
-
-  Stream<Changed> get stream => _cubit.stream;
 }
 
 class Changed extends Equatable {
-  static int _nextChangeVersion = 0;
-  final int _version;
+  final int version;
 
-  Changed() : _version = _nextChangeVersion {
-    _nextChangeVersion += 1;
-  }
+  Changed(this.version);
+
+  Changed get next => Changed(version + 1);
 
   @override
-  List<Object?> get props => [_version];
-}
-
-// We can't use Cubit as it's marked as `abstract` so this is a generic one.
-class _Cubit extends Cubit<Changed> {
-  _Cubit() : super(Changed());
-
-  void change() => emit(Changed());
+  List<Object?> get props => [version];
 }

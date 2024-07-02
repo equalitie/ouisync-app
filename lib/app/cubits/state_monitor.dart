@@ -22,7 +22,9 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> {
   }
 
   Future<void> _load() async {
-    emit(await _monitor.load());
+    final node = await _monitor.load();
+    if (isClosed) return;
+    emit(node);
   }
 
   @override

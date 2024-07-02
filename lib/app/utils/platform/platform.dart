@@ -1,6 +1,3 @@
-export 'media_receiver.dart';
-export 'media_receiver_mobile.dart';
-
 export 'platform_values.dart';
 export 'platform_widget.dart';
 

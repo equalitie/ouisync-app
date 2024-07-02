@@ -5,10 +5,11 @@ import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({required this.settings, required this.ouisyncAppHome});
+  const OnboardingPage({
+    required this.settings,
+  });
 
   final Settings settings;
-  final Widget ouisyncAppHome;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -83,10 +84,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _onIntroEnd(context) async {
     await widget.settings.setShowOnboarding(false);
-
-    await Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => widget.ouisyncAppHome),
-    );
+    Navigator.of(context).pop(null);
   }
 
   Widget _buildImage(String assetName) => Image.asset(

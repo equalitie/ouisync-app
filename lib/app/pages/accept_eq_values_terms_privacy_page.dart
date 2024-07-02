@@ -7,11 +7,11 @@ import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
-  const AcceptEqualitieValuesTermsPrivacyPage(
-      {required this.settings, required this.ouisyncAppHome});
+  const AcceptEqualitieValuesTermsPrivacyPage({
+    required this.settings,
+  });
 
   final Settings settings;
-  final Widget ouisyncAppHome;
 
   @override
   State<AcceptEqualitieValuesTermsPrivacyPage> createState() =>
@@ -28,7 +28,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
             footer: Fields.dialogActions(
               context,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              buttons: _buildActions(),
+              buttons: _buildActions(context),
             ),
           ),
         ),
@@ -69,18 +69,14 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         TextSpan(text: ' ${S.current.messageEqualitieValues}')
       ]));
 
-  List<Widget> _buildActions() => [
+  List<Widget> _buildActions(BuildContext context) => [
         OutlinedButton(
             onPressed: () => exit(0),
             child: Text(S.current.actionIDontAgree.toUpperCase())),
         ElevatedButton(
             onPressed: () async {
               await widget.settings.setEqualitieValues(true);
-
-              await Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => widget.ouisyncAppHome));
+              Navigator.of(context).pop(null);
             },
             autofocus: true,
             child: Text(S.current.actionIAgree.toUpperCase()))

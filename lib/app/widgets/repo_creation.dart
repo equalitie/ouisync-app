@@ -30,44 +30,21 @@ class RepoCreation extends StatelessWidget {
             listenWhen: (previous, current) =>
                 current.tokenError.isNotEmpty &&
                 current.tokenError != previous.tokenError,
-            listener: (context, state) => showSnackBar(state.tokenError),
+            listener: _handleTokenError,
           ),
           // Handle substate changes
           BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: cubit,
             listenWhen: (previous, current) =>
                 current.substate != previous.substate,
-            listener: (context, state) {
-              switch (state.substate) {
-                case RepoCreationPending():
-                case RepoCreationValid():
-                  break;
-                case RepoCreationSuccess(location: final location):
-                  Navigator.of(context).pop(location);
-                case RepoCreationFailure(
-                    location: final location,
-                    error: final error
-                  ):
-                  unawaited(Dialogs.simpleAlertDialog(
-                    context: context,
-                    title:
-                        S.current.messsageFailedCreateRepository(location.path),
-                    message: error,
-                  ));
-              }
-            },
+            listener: _handleSubstateChange,
           ),
           // Show loading indicator
           BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: cubit,
             listenWhen: (previous, current) =>
                 current.loading && !previous.loading,
-            listener: (context, state) {
-              unawaited(Dialogs.executeFutureWithLoadingDialog(
-                context,
-                cubit.stream.where((state) => !state.loading).first,
-              ));
-            },
+            listener: _handleLoading,
           ),
         ],
         child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
@@ -85,6 +62,7 @@ class RepoCreation extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, RepoCreationState state) => Column(
         mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (state.token != null) ..._buildTokenLabel(context, state),
           ..._buildNameField(context, state),
@@ -116,88 +94,73 @@ class RepoCreation extends StatelessWidget {
   List<Widget> _buildTokenLabel(
           BuildContext context, RepoCreationState state) =>
       [
-        Padding(
-          padding: Dimensions.paddingVertical10,
-          child: Container(
-            padding: Dimensions.paddingShareLinkBox,
-            decoration: const BoxDecoration(
-              borderRadius:
-                  BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-              color: Constants.inputBackgroundColor,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Fields.constrainedText(
-                  S.current.labelRepositoryLink,
-                  flex: 0,
-                  style: context.theme.appTextStyle.labelMedium
-                      .copyWith(color: Constants.inputLabelForeColor),
-                ),
-                Dimensions.spacingVerticalHalf,
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        state.token?.toString() ?? '',
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: context.theme.appTextStyle.bodySmall
-                            .copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        Container(
+          padding: Dimensions.paddingShareLinkBox,
+          decoration: const BoxDecoration(
+            borderRadius:
+                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            color: Constants.inputBackgroundColor,
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 6.0),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Fields.constrainedText(
-                S.current.messageRepositoryAccessMode(state.accessMode.name),
-                style: _smallMessageStyle(context),
+                S.current.labelRepositoryLink,
+                flex: 0,
+                style: context.theme.appTextStyle.labelMedium
+                    .copyWith(color: Constants.inputLabelForeColor),
+              ),
+              Dimensions.spacingVerticalHalf,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.token?.toString() ?? '',
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: context.theme.appTextStyle.bodySmall
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        Dimensions.spacingVerticalHalf,
+        Text(
+          S.current.messageRepositoryAccessMode(state.accessMode.name),
+          style: _smallMessageStyle(context),
+        ),
+        Dimensions.spacingVertical,
       ];
 
   List<Widget> _buildNameField(BuildContext context, RepoCreationState state) =>
       [
-        Padding(
-          padding: Dimensions.paddingVertical10,
-          child: Fields.formTextField(
-            key: ValueKey('name'),
-            context: context,
-            controller: cubit.nameController,
-            labelText: S.current.labelName,
-            hintText: S.current.messageRepositoryName,
-            errorText: state.nameError,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            autofocus: true,
-            textInputAction: TextInputAction.next,
-          ),
+        Fields.formTextField(
+          key: ValueKey('name'),
+          context: context,
+          controller: cubit.nameController,
+          labelText: S.current.labelName,
+          hintText: S.current.messageRepositoryName,
+          errorText: state.nameError,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
         ),
         Visibility(
           visible: state.suggestedName.isNotEmpty,
           child: GestureDetector(
             onTap: () => cubit.acceptSuggestedName(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Fields.constrainedText(
-                  S.current.messageRepositorySuggestedName(state.suggestedName),
-                  style: _smallMessageStyle(context),
-                )
-              ],
+            child: Text(
+              S.current.messageRepositorySuggestedName(state.suggestedName),
+              style: _smallMessageStyle(context),
             ),
           ),
         ),
+        Dimensions.spacingVertical,
       ];
 
   Widget _buildUseCacheServersSwitch(
@@ -214,4 +177,42 @@ class RepoCreation extends StatelessWidget {
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
+
+  void _handleTokenError(BuildContext context, RepoCreationState state) =>
+      showSnackBar(state.tokenError);
+
+  Future<void> _handleSubstateChange(
+    BuildContext context,
+    RepoCreationState state,
+  ) async {
+    switch (state.substate) {
+      case RepoCreationPending():
+      case RepoCreationValid():
+        break;
+      case RepoCreationSuccess(location: final location):
+        Navigator.of(context).pop(location);
+      case RepoCreationFailure(location: final location, error: final error):
+        await Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.messsageFailedCreateRepository(location.path),
+          message: error,
+        );
+    }
+  }
+
+  Future<void> _handleLoading(
+    BuildContext context,
+    RepoCreationState state,
+  ) async {
+    Future<void> done() async {
+      // Make sure to check the initial state as well, to avoid race conditions.
+      if (!cubit.state.loading) {
+        return;
+      }
+
+      await cubit.stream.where((state) => !state.loading).first;
+    }
+
+    await Dialogs.executeFutureWithLoadingDialog(context, done());
+  }
 }
