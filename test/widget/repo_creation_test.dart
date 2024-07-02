@@ -164,7 +164,7 @@ void main() {
             !state.loading &&
             switch (state.substate) {
               RepoCreationPending(nameError: final nameError)
-                  when nameError.isNotEmpty =>
+                  when nameError != null && nameError.isNotEmpty =>
                 true,
               _ => false,
             });

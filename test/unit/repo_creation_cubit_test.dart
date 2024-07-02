@@ -69,7 +69,7 @@ void main() {
           .having((s) => s.location, 'location', isNull)
           .having((s) => s.setLocalSecret, 'setLocalSecret',
               isA<LocalSecretKeyAndSalt>())
-          .having((s) => s.nameError, 'nameError', isEmpty),
+          .having((s) => s.nameError, 'nameError', isNull),
     );
 
     repoCreationCubit.nameController.text = name;
