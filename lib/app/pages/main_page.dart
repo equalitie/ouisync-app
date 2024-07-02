@@ -739,8 +739,8 @@ class _MainPageState extends State<MainPage>
     } else if (io.Platform.isWindows ||
         io.Platform.isLinux ||
         io.Platform.isMacOS) {
-      final mountedDirectory = repo.mountedDirectory();
-      if (mountedDirectory == null) {
+      final mountPoint = repo.mountPoint;
+      if (mountPoint == null) {
         showSnackBar(S.current.messageRepositoryNotMounted);
         return;
       }
@@ -748,7 +748,7 @@ class _MainPageState extends State<MainPage>
       bool previewOk = false;
       try {
         if (!io.Platform.isWindows) {
-          final url = Uri.parse('file:$mountedDirectory${entry.path}');
+          final url = Uri.parse('file:$mountPoint${entry.path}');
           previewOk = await launchUrl(url);
         } else {
           // Special non ASCII characters are encoded using Escape Encoding
@@ -756,7 +756,7 @@ class _MainPageState extends State<MainPage>
           // which are not decoded back by the url_launcher plugin on Windows
           // before passing to the system for execution. Thus on Windows
           // we use the `launchUrlString` function instead of `launchUrl`.
-          final path = '$mountedDirectory${entry.path}';
+          final path = '$mountPoint${entry.path}';
           previewOk = await launchUrlString(path);
         }
       } on PlatformException catch (e, st) {

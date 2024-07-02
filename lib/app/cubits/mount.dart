@@ -4,18 +4,27 @@ import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
 
 import '../utils/log.dart';
 
-class MountState {}
+sealed class MountState {
+  const MountState();
+}
 
-class MountStateDisabled extends MountState {}
+class MountStateDisabled extends MountState {
+  const MountStateDisabled();
+}
 
-class MountStateMounting extends MountState {}
+class MountStateMounting extends MountState {
+  const MountStateMounting();
+}
 
-class MountStateSuccess extends MountState {}
+class MountStateSuccess extends MountState {
+  const MountStateSuccess();
+}
 
 class MountStateError extends MountState {
-  oui.ErrorCode code;
-  String message;
-  MountStateError(this.code, this.message);
+  final oui.ErrorCode code;
+  final String message;
+
+  const MountStateError(this.code, this.message);
 }
 
 class MountCubit extends Cubit<MountState> with AppLogger {
