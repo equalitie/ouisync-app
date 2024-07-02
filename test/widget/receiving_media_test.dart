@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
+import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
@@ -276,4 +278,70 @@ void main() {
       },
     ),
   );
+
+  for (final type in [SharedMediaType.text, SharedMediaType.url]) {
+    testWidgets(
+      'receive token as ${type.value}',
+      (tester) => tester.runAsync(
+        () async {
+          final repoName = 'new repo';
+          final repoPath =
+              join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
+          final repo = await Repository.create(
+            session,
+            store: repoPath,
+            readSecret: null,
+            writeSecret: null,
+          );
+          final token = await repo.createShareToken(
+            accessMode: AccessMode.read,
+            name: repoName,
+          );
+          await repo.close();
+
+          final navigationObserver = NavigationObserver();
+          final stateObserver = StateObserver<RepoCreationState>();
+          Bloc.observer = stateObserver;
+
+          await tester.pumpWidget(testApp(
+            makeMainPage(),
+            navigatorObservers: [navigationObserver],
+          ));
+          await tester.pumpAndSettle();
+
+          mediaReceiverController.add([
+            SharedMediaFile(
+              path: token.toString(),
+              type: type,
+            ),
+          ]);
+
+          // Wait for navigating to the repo creation page.
+          await navigationObserver.waitForDepth(2);
+          await tester.pumpAndSettle();
+
+          // We should now be on the repo creation page. Wait until it loads.
+          await stateObserver
+              .waitUntil((state) => !state.loading && state.token != null);
+          await tester.pumpAndSettle();
+
+          // Apply the suggested name.
+          await tester.tap(find.textContaining('Suggested: $repoName'));
+          await stateObserver
+              .waitUntil((state) => state.substate is RepoCreationValid);
+          await tester.pumpAndSettle();
+
+          // Create the repo
+          await tester.tap(find.text('IMPORT'));
+          await stateObserver
+              .waitUntil((state) => state.substate is RepoCreationSuccess);
+
+          expect(
+            reposCubit.repos.where((entry) => entry.name == repoName),
+            isNotEmpty,
+          );
+        },
+      ),
+    );
+  }
 }

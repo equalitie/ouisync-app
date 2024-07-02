@@ -17,9 +17,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// This can be applied automatically using `flutter_test_config.dart`.
 Future<void> testEnv(FutureOr<void> Function() callback) async {
-  Directory? tempDir;
+  late Directory tempDir;
+  late BlocObserver origBlocObserver;
 
   setUp(() async {
+    origBlocObserver = Bloc.observer;
+
     final dir = await Directory.systemTemp.createTemp();
     PathProviderPlatform.instance = _FakePathProviderPlatform(dir);
     SharedPreferences.setMockInitialValues({});
@@ -28,8 +31,10 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   tearDown(() async {
+    Bloc.observer = origBlocObserver;
+
     try {
-      await tempDir?.delete(recursive: true);
+      await tempDir.delete(recursive: true);
     } on PathAccessException catch (_) {
       // This sometimes happen on the CI on windows. It seems to be caused by another process
       // accessing the temp directory for some reason. It probably doesn't indicate a problem in
@@ -59,9 +64,14 @@ class _FakePathProviderPlatform extends PathProviderPlatform {
 }
 
 /// Build `MaterialApp` to host the widget under test.
-Widget testApp(Widget child) => MaterialApp(
+Widget testApp(
+  Widget child, {
+  List<NavigatorObserver> navigatorObservers = const [],
+}) =>
+    MaterialApp(
       home: Scaffold(body: child),
       localizationsDelegates: const [S.delegate],
+      navigatorObservers: navigatorObservers,
     );
 
 /// Fake window manager
@@ -95,6 +105,60 @@ PackageInfo fakePackageInfo = PackageInfo(
   buildSignature: '',
 );
 
+/// Observer for bloc/cubit state. Useful when we don't have direct access to the bloc/cubit we
+/// want to observe. If we do have access, prefer to use `BlocBaseExtension.waitUntil`.
+class StateObserver<State> extends BlocObserver {
+  final _completer = Completer<BlocBase<State>>();
+
+  /// Waits until the observed bloc transitions to a state for which the given predicate returns
+  /// true. If it's already in such state, returns immediately.
+  Future<void> waitUntil(
+    bool Function(State) f, {
+    Duration timeout = _timeout,
+  }) =>
+      _completer.future.then((bloc) => bloc.waitUntil(f, timeout: timeout));
+
+  @override
+  void onCreate(BlocBase bloc) {
+    super.onCreate(bloc);
+
+    if (bloc is BlocBase<State>) {
+      _completer.complete(bloc);
+    }
+  }
+}
+
+class NavigationObserver extends NavigatorObserver {
+  final _controller = StreamController<int>.broadcast();
+  int _depth = 0;
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    _depth += 1;
+    _controller.add(_depth);
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    _depth -= 1;
+    _controller.add(_depth);
+  }
+
+  Future<void> waitForDepth(
+    int expected, {
+    Duration timeout = _timeout,
+  }) async {
+    if (_depth == expected) {
+      return;
+    }
+
+    await _controller.stream
+        .where((depth) => depth == expected)
+        .timeout(_timeout)
+        .first;
+  }
+}
+
 extension WidgetTesterExtension on WidgetTester {
   /// Take a screenshot of the widget under test. Useful to debug tests. Note that by default all
   /// text is rendered using a font that shows all letters as rectangles. See the "Including Fonts"
@@ -119,12 +183,12 @@ extension WidgetTesterExtension on WidgetTester {
   }
 }
 
-extension CubitExtension<State> on Cubit<State> {
+extension BlocBaseExtension<State> on BlocBase<State> {
   /// Waits until this cubit transitions to a state for which the given predicate returns true. If
   /// it's already in such state, returns immediately.
   Future<void> waitUntil(
     bool Function(State) f, {
-    Duration timeout = const Duration(seconds: 10),
+    Duration timeout = _timeout,
   }) async {
     if (f(state)) {
       return;
@@ -136,3 +200,5 @@ extension CubitExtension<State> on Cubit<State> {
 
 String get _testDirPath =>
     (goldenFileComparator as LocalFileComparator).basedir.path;
+
+const _timeout = Duration(seconds: 10);
