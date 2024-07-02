@@ -3,9 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
-import 'entry_bottom_sheet.dart';
 import 'mount.dart';
-import 'navigation.dart';
 import 'power_control.dart';
 import 'repos.dart';
 import 'state_monitor.dart';
@@ -35,8 +33,6 @@ class Cubits {
   final UpgradeExistsCubit upgradeExists;
   final PlatformWindowManager windowManager;
   final MountCubit mount;
-  final NavigationCubit navigation;
-  final EntryBottomSheetCubit bottomSheet;
 
   Cubits({
     required this.repositories,
@@ -45,8 +41,6 @@ class Cubits {
     required this.upgradeExists,
     required this.windowManager,
     required this.mount,
-    required this.navigation,
-    required this.bottomSheet,
   });
 
   Color? mainNotificationBadgeColor() {

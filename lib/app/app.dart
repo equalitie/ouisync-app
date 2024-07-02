@@ -1,15 +1,17 @@
 import 'dart:async';
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
+import 'package:ouisync_app/app/cubits/power_control.dart';
+import 'package:ouisync_app/app/widgets/media_receiver.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
+import 'cubits/repos.dart';
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/platform/platform.dart';
@@ -43,7 +45,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: S.delegate.supportedLocales,
-    home: OuiSyncApp(
+    home: OuisyncApp(
       session: session,
       windowManager: windowManager,
       settings: settings,
@@ -52,8 +54,8 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   );
 }
 
-class OuiSyncApp extends StatefulWidget {
-  OuiSyncApp({
+class OuisyncApp extends StatefulWidget {
+  OuisyncApp({
     required this.windowManager,
     required this.session,
     required this.settings,
@@ -68,11 +70,22 @@ class OuiSyncApp extends StatefulWidget {
   final PackageInfo packageInfo;
 
   @override
-  State<OuiSyncApp> createState() => _OuiSyncAppState();
+  State<OuisyncApp> createState() => _OuisyncAppState();
 }
 
-class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
-  final _mediaReceiver = MediaReceiver();
+class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
+  final receivedMediaController = StreamController<List<SharedMediaFile>>();
+  late final powerControl = PowerControl(widget.session, widget.settings);
+  late final reposCubit = ReposCubit(
+    session: widget.session,
+    nativeChannels: widget.nativeChannels,
+    settings: widget.settings,
+    cacheServers: CacheServers(Constants.cacheServers),
+  );
+
+  bool get _onboarded =>
+      !widget.settings.getShowOnboarding() &&
+      widget.settings.getEqualitieValues();
 
   @override
   void initState() {
@@ -82,68 +95,60 @@ class _OuiSyncAppState extends State<OuiSyncApp> with AppLogger {
 
   @override
   void dispose() {
-    _mediaReceiver.dispose();
+    unawaited(reposCubit.close());
+    unawaited(powerControl.close());
+    unawaited(receivedMediaController.close());
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: DropTarget(
-        onDragDone: (detail) {
-          loggy.debug(
-              'Drop done: ${detail.files.map((file) => file.path).join(', ')}');
-
-          final media = detail.files
-              .map((file) => SharedMediaFile(
-                  path: file.path,
-                  type: SharedMediaType.file,
-                  mimeType: file.mimeType))
-              .toList();
-          _mediaReceiver.controller.add(media);
-        },
-        onDragEntered: (detail) {
-          loggy.debug('Drop entered: ${detail.localPosition}');
-        },
-        onDragExited: (detail) {
-          loggy.debug('Drop exited: ${detail.localPosition}');
-        },
-        child: _buildContent(context),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Visibility(
+        child: MediaReceiver(
+          controller: receivedMediaController,
+          child: MainPage(
+            packageInfo: widget.packageInfo,
+            powerControl: powerControl,
+            reposCubit: reposCubit,
+            session: widget.session,
+            nativeChannels: widget.nativeChannels,
+            settings: widget.settings,
+            windowManager: widget.windowManager,
+            receivedMedia: receivedMediaController.stream,
+          ),
+        ),
+        visible: _onboarded,
+      );
 
   Future<void> _init() async {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
     await widget.windowManager.initSystemTray();
-  }
 
-  Widget _buildContent(BuildContext context) {
-    /// We show the onboarding the first time the app starts.
-    /// Then, we show the page for accepting eQ values, until the user taps YES.
-    /// After this, just show the regular home page.
-    final home = MainPage(
-      mediaReceiver: _mediaReceiver,
-      packageInfo: widget.packageInfo,
-      session: widget.session,
-      nativeChannels: widget.nativeChannels,
-      settings: widget.settings,
-      windowManager: widget.windowManager,
-    );
+    // We show the onboarding the first time the app starts.
+    // Then, we show the page for accepting eQ values, until the user taps YES.
+    // After this, just show the regular home page.
 
-    final afterOnboarding = widget.settings.getEqualitieValues()
-        ? home
-        : AcceptEqualitieValuesTermsPrivacyPage(
+    if (!_onboarded) {
+      if (widget.settings.getShowOnboarding()) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => OnboardingPage(
             settings: widget.settings,
-            ouisyncAppHome: home,
-          );
+          ),
+        ));
+      }
 
-    return widget.settings.getShowOnboarding()
-        ? OnboardingPage(
+      if (!widget.settings.getEqualitieValues()) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => AcceptEqualitieValuesTermsPrivacyPage(
             settings: widget.settings,
-            ouisyncAppHome: afterOnboarding,
-          )
-        : afterOnboarding;
+          ),
+        ));
+      }
+
+      if (_onboarded) {
+        // Force rebuild to show the main page.
+        setState(() {});
+      }
+    }
   }
 }
 

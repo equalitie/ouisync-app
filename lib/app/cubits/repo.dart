@@ -196,10 +196,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     );
   }
 
-  void hideBottomSheet() {
-    _bottomSheet.hide();
-  }
-
   Future<void> enableSync() async {
     await _repo.setSyncEnabled(true);
 

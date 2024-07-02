@@ -92,10 +92,10 @@ class RepoCreationPending extends RepoCreationSubstate {
   const RepoCreationPending({
     this.location,
     this.setLocalSecret,
-    this.nameError = '',
+    this.nameError,
   });
 
-  final String nameError;
+  final String? nameError;
   final RepoLocation? location;
   final SetLocalSecret? setLocalSecret;
 
@@ -287,7 +287,10 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
 
   Future<void> _onNameChanged(String name) async {
     if (name.isEmpty) {
-      _setInvalidName(S.current.messageErrorFormValidatorNameDefault);
+      if (state.location != null) {
+        _setInvalidName(S.current.messageErrorFormValidatorNameDefault);
+      }
+
       return;
     }
 
