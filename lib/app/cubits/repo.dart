@@ -30,6 +30,7 @@ class RepoState extends Equatable {
   final AccessMode accessMode;
   final String infoHash;
   final FolderState currentFolder;
+  final MountState mountState;
 
   RepoState({
     this.isLoading = false,
@@ -44,6 +45,7 @@ class RepoState extends Equatable {
     this.infoHash = "",
     this.accessMode = AccessMode.blind,
     this.currentFolder = const FolderState(),
+    this.mountState = const MountStateDisabled(),
   });
 
   RepoState copyWith({
@@ -60,6 +62,7 @@ class RepoState extends Equatable {
     AccessMode? accessMode,
     String? infoHash,
     FolderState? currentFolder,
+    MountState? mountState,
   }) =>
       RepoState(
         isLoading: isLoading ?? this.isLoading,
@@ -75,6 +78,7 @@ class RepoState extends Equatable {
         accessMode: accessMode ?? this.accessMode,
         infoHash: infoHash ?? this.infoHash,
         currentFolder: currentFolder ?? this.currentFolder,
+        mountState: mountState ?? this.mountState,
       );
 
   @override
@@ -91,6 +95,7 @@ class RepoState extends Equatable {
         accessMode,
         infoHash,
         currentFolder,
+        mountState,
       ];
 
   bool get canRead => accessMode != AccessMode.blind;
@@ -161,6 +166,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       cacheServers,
       state,
     );
+
+    await cubit.mount();
 
     // Fetching the cache server state involves network request which might take a long time. Using
     // `unawaited` to avoid blocking this function on it.
@@ -271,11 +278,34 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     emit(state.copyWith(accessMode: accessMode));
   }
 
-  String? mountedDirectory() {
+  Future<void> mount() async {
+    try {
+      await _repo.mount();
+      emit(state.copyWith(mountState: const MountStateSuccess()));
+    } on Error catch (error) {
+      emit(state.copyWith(
+        mountState: MountStateError(error.code, error.message),
+      ));
+    }
+  }
+
+  Future<void> unmount() async {
+    try {
+      await _repo.unmount();
+      emit(state.copyWith(mountState: const MountStateDisabled()));
+    } catch (_) {}
+  }
+
+  String? get mountPoint {
+    if (state.mountState is! MountStateSuccess) {
+      return null;
+    }
+
     final mountPoint = _session.mountPoint;
     if (mountPoint == null) {
       return null;
     }
+
     return "$mountPoint/$name";
   }
 

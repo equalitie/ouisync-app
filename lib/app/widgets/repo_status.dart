@@ -6,10 +6,10 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../cubits/mount.dart';
 import '../cubits/repo.dart';
 import '../cubits/state_monitor.dart';
-import '../utils/extensions.dart';
-import '../utils/log.dart';
+import '../utils/utils.dart';
 
 const _iconSize = 20.0;
 const _iconPadding = 2.0;
@@ -25,6 +25,7 @@ class RepoStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
         children: [
+          _Status(repoCubit),
           _Activity(repoCubit),
           _Progress(repoCubit),
         ],
@@ -141,13 +142,45 @@ class _ActivityState extends State<_Activity> with AppLogger {
   }
 }
 
+class _Status extends StatelessWidget {
+  _Status(this.repoCubit);
+
+  final RepoCubit repoCubit;
+
+  @override
+  Widget build(BuildContext context) => switch (repoCubit.state.mountState) {
+        MountStateDisabled() ||
+        MountStateMounting() ||
+        MountStateSuccess() =>
+          SizedBox.shrink(),
+        MountStateError(code: final code, message: final message) =>
+          GestureDetector(
+            onTap: () => _showErrorDialog(
+              context,
+              code,
+              message,
+            ),
+            child: Icon(
+              Icons.warning,
+              color: Constants.warningColor,
+              size: _iconSize + 2 * _iconPadding,
+            ),
+          ),
+      };
+
+  Future<void> _showErrorDialog(
+    BuildContext context,
+    ErrorCode code,
+    String message,
+  ) =>
+      Dialogs.simpleAlertDialog(
+        context: context,
+        title: 'Failed to mount the repository',
+        message: 'Error: $message',
+      );
+}
+
 extension _RepoCubitExtension on RepoCubit {
   Stream<Progress> get syncProgressStream =>
       events.startWith(null).asyncMapSample((_) => syncProgress);
-}
-
-// TODO: Add this to the plugin
-extension _StateMonitorNodeExtension on StateMonitorNode {
-  double? parseDoubleValue(String name) =>
-      values[name]?.let((s) => double.tryParse(s));
 }
