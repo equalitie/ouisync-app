@@ -21,6 +21,8 @@ class FolderCreation extends HookWidget {
   late final FocusNode nameTextFieldFocus;
   late final FocusNode positiveButtonFocus;
 
+  late final ValueNotifier<String> errorMessage;
+
   @override
   Widget build(BuildContext context) {
     initHooks();
@@ -34,26 +36,35 @@ class FolderCreation extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Dimensions.spacingVerticalDouble,
-              Fields.formTextField(
-                  context: context,
-                  controller: nameController,
-                  textInputAction: TextInputAction.done,
-                  labelText: S.current.labelName,
-                  hintText: S.current.messageFolderName,
-                  onFieldSubmitted: (newFolderName) async {
-                    final submitted = await submitField(parent, newFolderName);
-                    if (submitted && PlatformValues.isDesktopDevice) {
-                      final newFolderPath = join(parent, newFolderName!);
-                      Navigator.of(context).pop(newFolderPath);
-                    }
-                  },
-                  validator: validateNoEmptyMaybeRegExpr(
-                      emptyError:
-                          S.current.messageErrorFormValidatorNameDefault,
-                      regExp: Strings.entityNameRegExp,
-                      regExpError: S.current.messageErrorCharactersNotAllowed),
-                  autofocus: true,
-                  focusNode: nameTextFieldFocus),
+              ValueListenableBuilder(
+                valueListenable: errorMessage,
+                builder: (context, errorMessage, child) {
+                  return Fields.formTextField(
+                      context: context,
+                      controller: nameController,
+                      textInputAction: TextInputAction.done,
+                      labelText: S.current.labelName,
+                      hintText: S.current.messageFolderName,
+                      errorText:
+                          nameController.text.isEmpty ? '' : errorMessage,
+                      onFieldSubmitted: (newFolderName) async {
+                        final submitted =
+                            await submitField(parent, newFolderName);
+                        if (submitted && PlatformValues.isDesktopDevice) {
+                          final newFolderPath = join(parent, newFolderName!);
+                          Navigator.of(context).pop(newFolderPath);
+                        }
+                      },
+                      validator: validateNoEmptyMaybeRegExpr(
+                          emptyError:
+                              S.current.messageErrorFormValidatorNameDefault,
+                          regExp: Strings.entityNameRegExp,
+                          regExpError:
+                              S.current.messageErrorCharactersNotAllowed),
+                      autofocus: true,
+                      focusNode: nameTextFieldFocus);
+                },
+              ),
               Fields.dialogActions(context, buttons: _actions(context, parent)),
             ]));
   }
@@ -61,8 +72,16 @@ class FolderCreation extends HookWidget {
   void initHooks() {
     nameController = useTextEditingController.fromValue(TextEditingValue.empty);
 
+    nameController.addListener(() {
+      if (nameController.text.isEmpty) {
+        errorMessage.value = '';
+      }
+    });
+
     nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
     positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
+
+    errorMessage = useValueNotifier('');
   }
 
   void selectEntryName(String value) {
@@ -93,7 +112,12 @@ class FolderCreation extends HookWidget {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     final newFolderPath = join(parent, newName);
-    if (await cubit.exists(newFolderPath)) return false;
+    if (await cubit.exists(newFolderPath)) {
+      errorMessage.value = S.current.messageEntryAlreadyExist(newName);
+      return false;
+    } else {
+      errorMessage.value = '';
+    }
 
     formKey.currentState!.save();
     return true;
