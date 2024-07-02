@@ -62,6 +62,7 @@ class RepoCreation extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, RepoCreationState state) => Column(
         mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (state.token != null) ..._buildTokenLabel(context, state),
           ..._buildNameField(context, state),
@@ -93,88 +94,73 @@ class RepoCreation extends StatelessWidget {
   List<Widget> _buildTokenLabel(
           BuildContext context, RepoCreationState state) =>
       [
-        Padding(
-          padding: Dimensions.paddingVertical10,
-          child: Container(
-            padding: Dimensions.paddingShareLinkBox,
-            decoration: const BoxDecoration(
-              borderRadius:
-                  BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-              color: Constants.inputBackgroundColor,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Fields.constrainedText(
-                  S.current.labelRepositoryLink,
-                  flex: 0,
-                  style: context.theme.appTextStyle.labelMedium
-                      .copyWith(color: Constants.inputLabelForeColor),
-                ),
-                Dimensions.spacingVerticalHalf,
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        state.token?.toString() ?? '',
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: context.theme.appTextStyle.bodySmall
-                            .copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        Container(
+          padding: Dimensions.paddingShareLinkBox,
+          decoration: const BoxDecoration(
+            borderRadius:
+                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            color: Constants.inputBackgroundColor,
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 6.0),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Fields.constrainedText(
-                S.current.messageRepositoryAccessMode(state.accessMode.name),
-                style: _smallMessageStyle(context),
+                S.current.labelRepositoryLink,
+                flex: 0,
+                style: context.theme.appTextStyle.labelMedium
+                    .copyWith(color: Constants.inputLabelForeColor),
+              ),
+              Dimensions.spacingVerticalHalf,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.token?.toString() ?? '',
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: context.theme.appTextStyle.bodySmall
+                          .copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        Dimensions.spacingVerticalHalf,
+        Text(
+          S.current.messageRepositoryAccessMode(state.accessMode.name),
+          style: _smallMessageStyle(context),
+        ),
+        Dimensions.spacingVertical,
       ];
 
   List<Widget> _buildNameField(BuildContext context, RepoCreationState state) =>
       [
-        Padding(
-          padding: Dimensions.paddingVertical10,
-          child: Fields.formTextField(
-            key: ValueKey('name'),
-            context: context,
-            controller: cubit.nameController,
-            labelText: S.current.labelName,
-            hintText: S.current.messageRepositoryName,
-            errorText: state.nameError,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            autofocus: true,
-            textInputAction: TextInputAction.next,
-          ),
+        Fields.formTextField(
+          key: ValueKey('name'),
+          context: context,
+          controller: cubit.nameController,
+          labelText: S.current.labelName,
+          hintText: S.current.messageRepositoryName,
+          errorText: state.nameError,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
         ),
         Visibility(
           visible: state.suggestedName.isNotEmpty,
           child: GestureDetector(
             onTap: () => cubit.acceptSuggestedName(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Fields.constrainedText(
-                  S.current.messageRepositorySuggestedName(state.suggestedName),
-                  style: _smallMessageStyle(context),
-                )
-              ],
+            child: Text(
+              S.current.messageRepositorySuggestedName(state.suggestedName),
+              style: _smallMessageStyle(context),
             ),
           ),
         ),
+        Dimensions.spacingVertical,
       ];
 
   Widget _buildUseCacheServersSwitch(
