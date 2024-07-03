@@ -53,14 +53,14 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       ),
                       _SwitchItem(
                         title: S.current.labelBitTorrentDHT,
-                        icon: Icons.hub,
+                        icon: Icons.hub_outlined,
                         value: state.isDhtEnabled,
                         onChanged: (value) =>
                             widget.repoCubit.setDhtEnabled(value),
                       ),
                       _SwitchItem(
                         title: S.current.messagePeerExchange,
-                        icon: Icons.group_add,
+                        icon: Icons.group_add_outlined,
                         value: state.isPexEnabled,
                         onChanged: (value) =>
                             widget.repoCubit.setPexEnabled(value),
@@ -74,7 +74,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                               widget.repoCubit.setCacheServersEnabled(value),
                         ),
                       EntryActionItem(
-                        iconData: Icons.edit,
+                        iconData: Icons.edit_outlined,
                         title: S.current.actionRename,
                         dense: true,
                         onTap: () async => await renameRepository(
@@ -85,7 +85,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         ),
                       ),
                       EntryActionItem(
-                          iconData: Icons.share,
+                          iconData: Icons.share_outlined,
                           title: S.current.actionShare,
                           dense: true,
                           onTap: () async {
@@ -94,7 +94,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                                 repository: widget.repoCubit);
                           }),
                       EntryActionItem(
-                          iconData: Icons.password,
+                          iconData: Icons.password_outlined,
                           title: S.current.titleSecurity,
                           dense: true,
                           onTap: () async => await navigateToRepositorySecurity(
@@ -114,7 +114,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       //// is not storing the secret for the user.
                       //if (!widget.cubit.repoSettings.hasLocalSecret())
                       //  EntryActionItem(
-                      //      iconData: Icons.eject,
+                      //      iconData: Icons.eject_outlined,
                       //      title: S.current.actionEject,
                       //      dense: true,
                       //      onTap: () async {
@@ -128,7 +128,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           dense: true,
                           onTap: null),
                       EntryActionItem(
-                          iconData: Icons.delete,
+                          iconData: Icons.delete_outline,
                           title: S.current.actionDelete,
                           dense: true,
                           isDanger: true,

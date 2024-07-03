@@ -40,7 +40,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               style: context.theme.appTextStyle.titleMedium,
             ),
             EntryActionItem(
-              iconData: Icons.edit,
+              iconData: Icons.edit_outlined,
               title: S.current.iconRename,
               dense: true,
               onTap: () async => _showRenameDialog(widget.entry),
@@ -77,7 +77,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                   Constants.notAvailableActionMessageDuration,
             ),
             EntryActionItem(
-              iconData: Icons.delete,
+              iconData: Icons.delete_outlined,
               title: S.current.iconDelete,
               isDanger: true,
               dense: true,
