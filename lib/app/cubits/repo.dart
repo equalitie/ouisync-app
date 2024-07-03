@@ -564,7 +564,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
-  Future<void> unlock(LocalSecret secret) async {
+  Future<void> unlock(LocalSecret? secret) async {
     await _repo.setAccessMode(AccessMode.write, secret: secret);
     final accessMode = await _repo.accessMode;
     emit(state.copyWith(accessMode: accessMode));

@@ -153,8 +153,6 @@ class _MainPageState extends State<MainPage>
       }
     });
 
-    unawaited(_cubits.repositories.init());
-
     _receivedMediaSubscription =
         widget.receivedMedia.listen(handleReceivedMedia);
 

@@ -42,11 +42,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         _settings = settings,
         bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
         navigation = navigation ?? NavigationCubit(),
-        passwordHasher = PasswordHasher(session);
+        passwordHasher = PasswordHasher(session) {
+    unawaited(_init());
+  }
 
   Settings get settings => _settings;
 
-  Future<void> init() async {
+  Future<void> _init() async {
     _update(() {
       _isLoading = true;
     });

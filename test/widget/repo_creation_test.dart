@@ -49,8 +49,6 @@ void main() {
       cacheServers: CacheServers.disabled,
     );
 
-    await reposCubit.init();
-
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
   });
 
