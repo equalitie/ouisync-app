@@ -39,6 +39,28 @@ flutter pub get
 flutter <build|run> -d <windows|android|linux>
 ```
 
+## Running tests
+
+On Linux:
+
+```bash
+# Build Ouisync library
+cargo build -p ouisync-ffi --manifest-path=ouisync/Cargo.toml
+# Run tests
+OUISYNC_LIB=ouisync/target/debug/ouisync_ffi.dll flutter test
+```
+
+On Windows
+
+```bat
+# Build Ouisync library
+cargo build -p ouisync-ffi --manifest-path=ouisync/Cargo.toml
+# Set environment variable to point to ouisync_ffi.dll
+set OUISYNC_LIB=ouisync/target/debug/ouisync_ffi.dll
+# Run tests
+flutter test
+```
+
 ## Docker
 
 We have *Dockerfiles* for
