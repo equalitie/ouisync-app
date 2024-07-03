@@ -167,19 +167,23 @@ extension WidgetTesterExtension on WidgetTester {
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
   Future<void> takeScreenshot([String name = 'screenshot']) async {
-    final finder = find.bySubtype<Widget>().first;
-    final image = await captureImage(finder.evaluate().single);
-    final bytes = (await image.toByteData(format: ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
+    try {
+      final finder = find.bySubtype<Widget>().first;
+      final image = await captureImage(finder.evaluate().single);
+      final bytes = (await image.toByteData(format: ImageByteFormat.png))!
+          .buffer
+          .asUint8List();
 
-    final path = join(_testDirPath, 'screenshots', '$name.png');
+      final path = join(_testDirPath, 'screenshots', '$name.png');
 
-    await Directory(dirname(path)).create(recursive: true);
+      await Directory(dirname(path)).create(recursive: true);
 
-    debugPrint('screenshot saved to $path');
+      debugPrint('screenshot saved to $path');
 
-    await File(path).writeAsBytes(bytes);
+      await File(path).writeAsBytes(bytes);
+    } catch (e) {
+      debugPrint('Failed to save screenshot: $e');
+    }
   }
 }
 
