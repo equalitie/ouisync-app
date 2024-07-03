@@ -47,7 +47,7 @@ On Linux:
 # Build Ouisync library
 cargo build -p ouisync-ffi --manifest-path=ouisync/Cargo.toml
 # Run tests
-OUISYNC_LIB=ouisync/target/debug/ouisync_ffi.dll flutter test
+OUISYNC_LIB=ouisync/target/debug/libouisync_ffi.so flutter test
 ```
 
 On Windows
@@ -60,6 +60,8 @@ set OUISYNC_LIB=ouisync/target/debug/ouisync_ffi.dll
 rem Run tests
 flutter test
 ```
+
+Some info on debugging tests can be found in [test/README.md](./test/README.md).
 
 ## Docker
 
