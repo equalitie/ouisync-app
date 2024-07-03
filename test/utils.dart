@@ -202,7 +202,17 @@ extension BlocBaseExtension<State> on BlocBase<State> {
   }
 }
 
-String get _testDirPath =>
-    (goldenFileComparator as LocalFileComparator).basedir.path;
+String get _testDirPath {
+  var path = (goldenFileComparator as LocalFileComparator).basedir.path;
+
+  if (Platform.isWindows) {
+    // For some reason the `path` on windows looks like `/c:/...`
+    if (path[0] == '/') {
+      path = path.substring(1);
+    }
+  }
+
+  return path;
+}
 
 const _timeout = Duration(seconds: 10);
