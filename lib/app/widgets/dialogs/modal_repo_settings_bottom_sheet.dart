@@ -123,6 +123,11 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       //        Navigator.of(context).pop();
                       //      }),
                       EntryActionItem(
+                          iconData: Icons.snippet_folder_outlined,
+                          title: 'Locate repository',
+                          dense: true,
+                          onTap: null),
+                      EntryActionItem(
                           iconData: Icons.delete,
                           title: S.current.actionDelete,
                           dense: true,
