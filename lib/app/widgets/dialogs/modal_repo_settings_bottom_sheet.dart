@@ -124,7 +124,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       //      }),
                       EntryActionItem(
                           iconData: Icons.snippet_folder_outlined,
-                          title: 'Locate repository',
+                          title: S.current.actionLocateRepo,
                           dense: true,
                           onTap: null),
                       EntryActionItem(
