@@ -943,5 +943,13 @@
   "titleChildrensPrivacy": "Конфиденциальность детей",
   "@titleChildrensPrivacy": {},
   "messageCopiedToClipboard": "Скопировано в буфер обмена.",
-  "@messageCopiedToClipboard": {}
+  "@messageCopiedToClipboard": {},
+  "labelRememberPassword": "Запомнить пароль",
+  "@labelRememberPassword": {},
+  "repositoryIsAlreadyImported": "Хранилище уже импортируется",
+  "@repositoryIsAlreadyImported": {},
+  "titleDokanInstallation": "Установка Dokan",
+  "@titleDokanInstallation": {},
+  "titleDokanInstallationFound": "Установка Dokan найдена",
+  "@titleDokanInstallationFound": {}
 }
