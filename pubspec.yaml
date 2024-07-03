@@ -113,6 +113,7 @@ dev_dependencies:
     sdk: flutter
   git: ^2.2.1
   github: ^9.19.0
+  golden_toolkit: ^0.15.0
   hex: ^0.2.0
   icons_launcher: ^2.0.3
   image: ^4.1.3
