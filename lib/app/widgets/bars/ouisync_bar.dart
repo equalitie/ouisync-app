@@ -44,9 +44,9 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
         final settingsButton = cubit != null
             ? getSettingsAction(
-                cubit,
-                appSettingsButton,
-                repoSettingsButton,
+                cubit: cubit,
+                appSettingsButton: appSettingsButton,
+                repoSettingsButton: repoSettingsButton,
               )
             : appSettingsButton;
 
@@ -77,34 +77,34 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
       BlocBuilder<RepoCubit, RepoState>(
         bloc: cubit,
         builder: (_, state) => _selectWidget(
-          AppBarWidgetType.title,
-          state.currentFolder.isRoot,
-          repoPicker,
-          FolderNavigationBar(cubit),
+          type: AppBarWidgetType.title,
+          isFolderRoot: state.currentFolder.isRoot,
+          repoListWidget: repoPicker,
+          folderContentWidget: FolderNavigationBar(cubit),
         ),
       );
 
-  Widget getSettingsAction(
-    RepoCubit cubit,
-    Widget appSettingsButton,
-    Widget repoSettingsButton,
-  ) =>
+  Widget getSettingsAction({
+    required RepoCubit cubit,
+    required Widget repoSettingsButton,
+    required Widget appSettingsButton,
+  }) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: cubit,
         builder: (_, state) => _selectWidget(
-          AppBarWidgetType.action,
-          state.currentFolder.isRoot,
-          repoSettingsButton,
-          appSettingsButton,
+          type: AppBarWidgetType.action,
+          isFolderRoot: state.currentFolder.isRoot,
+          repoListWidget: repoSettingsButton,
+          folderContentWidget: appSettingsButton,
         ),
       );
 
-  Widget _selectWidget(
-    AppBarWidgetType type,
-    bool isFolderRoot,
-    Widget repoListWidget,
-    Widget folderContentWidget,
-  ) {
+  Widget _selectWidget({
+    required AppBarWidgetType type,
+    required bool isFolderRoot,
+    required Widget repoListWidget,
+    required Widget folderContentWidget,
+  }) {
     if (isFolderRoot) return repoListWidget;
 
     return switch (type) {

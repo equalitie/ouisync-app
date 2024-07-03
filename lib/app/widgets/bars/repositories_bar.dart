@@ -1,3 +1,4 @@
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -26,18 +27,21 @@ class RepositoriesBar extends StatelessWidget
         return Row(
           children: [
             _buildBackButton(),
-            Expanded(flex: 2, child: _buildName(reposCubit.currentRepo)),
+            _buildName(reposCubit.currentRepo),
             _buildStatus(reposCubit.currentRepo),
             _buildLockButton(reposCubit.currentRepo),
           ],
         );
       });
 
-  Widget _buildName(RepoEntry? repo) => Text(
-        repo?.name ?? S.current.messageNoRepos,
-        softWrap: true,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
+  Widget _buildName(RepoEntry? repo) => Expanded(
+        child: Container(
+          padding: Dimensions.paddingItem,
+          child: Fields.ellipsedText(
+            repo?.name ?? S.current.messageNoRepos,
+            ellipsisPosition: TextOverflowPosition.middle,
+          ),
+        ),
       );
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
