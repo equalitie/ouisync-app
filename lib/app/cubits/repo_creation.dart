@@ -270,11 +270,14 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     }
   }
 
-  Future<void> _init() => _loading(() async {
-        emit(state.copyWith(
-          isBiometricsAvailable: await LocalAuth.canAuthenticate(),
-        ));
-      });
+  Future<void> _init() async {
+    await _loading(() async {
+      final canAuthenticate = await LocalAuth.canAuthenticate();
+      emit(state.copyWith(
+        isBiometricsAvailable: canAuthenticate,
+      ));
+    });
+  }
 
   Future<R> _loading<R>(Future<R> Function() f) async {
     try {
