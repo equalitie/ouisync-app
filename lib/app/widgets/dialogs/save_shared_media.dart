@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/path.dart';
+import '../../utils/repo_path.dart' as repoPath;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 

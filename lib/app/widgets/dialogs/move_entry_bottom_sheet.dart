@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/repo_location.dart';
-import '../../utils/path.dart';
+import '../../utils/repo_path.dart' as repoPath;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -71,8 +71,8 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         .bodyMedium
         ?.copyWith(fontWeight: FontWeight.w800);
 
-    final parent = dirname(widget.entryPath);
-    final name = basename(widget.entryPath);
+    final parent = repoPath.dirname(widget.entryPath);
+    final name = repoPath.basename(widget.entryPath);
 
     return widget._cubits.repositories.builder(
       (cubit) => Container(
@@ -138,7 +138,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
             final canMove = state.isFolder
                 ? _canMove(
                     originRepoLocation: originRepoCubit.location,
-                    originPath: dirname(entryPath),
+                    originPath: repoPath.dirname(entryPath),
                     destinationRepoLocation: state.repoLocation,
                     destinationPath: state.path,
                     isRepoList: isRepoList,

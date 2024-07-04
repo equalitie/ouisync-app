@@ -986,7 +986,7 @@ class _MainPageState extends State<MainPage>
     await MoveEntry(
       context,
       repoCubit: originRepoCubit,
-      path: entryPath,
+      srcPath: entryPath,
       type: entryType,
     ).move(toRepoCubit: toRepoCubit);
   }

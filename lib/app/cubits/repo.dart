@@ -13,7 +13,7 @@ import 'package:shelf/shelf_io.dart';
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/master_key.dart';
-import '../utils/path.dart';
+import '../utils/repo_path.dart' as repoPath;
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -441,7 +441,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     try {
       for (final dirEntry in directory) {
-        final entryPath = join(path, dirEntry.name);
+        final entryPath = repoPath.join(path, dirEntry.name);
 
         final entry = switch (dirEntry.entryType) {
           EntryType.file => FileEntry(
@@ -744,8 +744,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     await openDirectory(source).then(
       (contents) async {
         for (var entry in contents) {
-          final from = join(source, entry.name);
-          final to = join(destination, entry.name);
+          final from = repoPath.join(source, entry.name);
+          final to = repoPath.join(destination, entry.name);
           final moveOk = entry.entryType == EntryType.file
               ? await _moveFileToRepo(destinationRepoCubit, from, to)
               : await _moveFolderToRepo(destinationRepoCubit, from, to);
