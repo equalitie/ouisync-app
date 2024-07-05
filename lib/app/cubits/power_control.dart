@@ -92,9 +92,12 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     final syncOnMobile = _settings.getSyncOnMobileEnabled();
     await setSyncOnMobileEnabled(syncOnMobile);
 
+    final portForwardingEnabled = await _session.isPortForwardingEnabled;
+    final localDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+
     emit(state.copyWith(
-      portForwardingEnabled: await _session.isPortForwardingEnabled,
-      localDiscoveryEnabled: await _session.isLocalDiscoveryEnabled,
+      portForwardingEnabled: portForwardingEnabled,
+      localDiscoveryEnabled: localDiscoveryEnabled,
     ));
 
     await _refresh();

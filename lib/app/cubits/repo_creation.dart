@@ -167,12 +167,16 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
           tokenValue,
         );
 
+        final accessMode = await token.mode;
+        final suggestedName = await token.suggestedName;
+        final useCacheServers =
+            await reposCubit.cacheServers.isEnabledForShareToken(token);
+
         emit(state.copyWith(
-          accessMode: await token.mode,
-          suggestedName: await token.suggestedName,
+          accessMode: accessMode,
+          suggestedName: suggestedName,
           token: token,
-          useCacheServers:
-              await reposCubit.cacheServers.isEnabledForShareToken(token),
+          useCacheServers: useCacheServers,
         ));
       } catch (e, st) {
         loggy.error('Extract repository token exception:', e, st);

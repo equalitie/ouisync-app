@@ -142,15 +142,21 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       authMode: authMode,
     );
 
+    final infoHash = await repo.infoHash;
+    final accessMode = await repo.accessMode;
+
     state = state.copyWith(
-      infoHash: await repo.infoHash,
-      accessMode: await repo.accessMode,
+      infoHash: infoHash,
+      accessMode: accessMode,
     );
 
     if (await repo.isSyncEnabled) {
+      final isDhtEnabled = await repo.isDhtEnabled;
+      final isPexEnabled = await repo.isPexEnabled;
+
       state = state.copyWith(
-        isDhtEnabled: await repo.isDhtEnabled,
-        isPexEnabled: await repo.isPexEnabled,
+        isDhtEnabled: isDhtEnabled,
+        isPexEnabled: isPexEnabled,
       );
     }
 
@@ -207,9 +213,12 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     await _repo.setSyncEnabled(true);
 
     // DHT and PEX states can only be queried when sync is enabled, so let's do it here.
+    final isDhtEnabled = await _repo.isDhtEnabled;
+    final isPexEnabled = await _repo.isPexEnabled;
+
     emit(state.copyWith(
-      isDhtEnabled: await _repo.isDhtEnabled,
-      isPexEnabled: await _repo.isPexEnabled,
+      isDhtEnabled: isDhtEnabled,
+      isPexEnabled: isPexEnabled,
     ));
   }
 
@@ -557,7 +566,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   /// what access mode the secret unlock (read or write).
   Future<void> unlock(LocalSecret secret) async {
     await _repo.setAccessMode(AccessMode.write, secret: secret);
-    emit(state.copyWith(accessMode: await _repo.accessMode));
+    final accessMode = await _repo.accessMode;
+    emit(state.copyWith(accessMode: accessMode));
 
     if (state.accessMode != AccessMode.blind) {
       await refresh();
@@ -567,7 +577,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   /// Locks the repository (switches it to blind mode)
   Future<void> lock() async {
     await _repo.setAccessMode(AccessMode.blind);
-    emit(state.copyWith(accessMode: await _repo.accessMode));
+    final accessMode = await _repo.accessMode;
+    emit(state.copyWith(accessMode: accessMode));
   }
 
   Future<int?> _getFileSize(String path) async {
