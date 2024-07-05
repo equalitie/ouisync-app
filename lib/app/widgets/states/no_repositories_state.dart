@@ -3,15 +3,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
-import '../../models/models.dart';
 
 class NoRepositoriesState extends HookWidget {
-  const NoRepositoriesState(
-      {required this.onNewRepositoryPressed,
-      required this.onImportRepositoryPressed});
+  const NoRepositoriesState({
+    required this.onCreateRepoPressed,
+    required this.onImportRepoPressed,
+  });
 
-  final Future<RepoLocation?> Function() onNewRepositoryPressed;
-  final Future<RepoLocation?> Function() onImportRepositoryPressed;
+  final Future<void> Function() onCreateRepoPressed;
+  final Future<void> Function() onImportRepoPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class NoRepositoriesState extends HookWidget {
           Dimensions.spacingVerticalDouble,
           Dimensions.spacingVerticalDouble,
           Fields.inPageButton(
-            onPressed: () async => await onNewRepositoryPressed.call(),
+            onPressed: onCreateRepoPressed,
             text: S.current.actionCreateRepository,
             size: Dimensions.sizeInPageButtonRegular,
             focusNode: newRepoButtonFocus,
@@ -64,7 +64,7 @@ class NoRepositoriesState extends HookWidget {
           ),
           Dimensions.spacingVertical,
           Fields.inPageButton(
-            onPressed: () async => await onImportRepositoryPressed.call(),
+            onPressed: onImportRepoPressed,
             text: S.current.actionAddRepositoryWithToken,
             size: Dimensions.sizeInPageButtonRegular,
             focusNode: importRepoButtonFocus,

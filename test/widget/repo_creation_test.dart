@@ -176,7 +176,7 @@ void main() {
   );
 
   testWidgets(
-    'import repository',
+    'import repository with token',
     (tester) => tester.runAsync(
       () async {
         final name = 'le repo';

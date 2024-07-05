@@ -1,7 +1,11 @@
+import 'dart:io' as io;
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
@@ -21,6 +25,7 @@ void main() {
   late NativeChannels nativeChannels;
   late PowerControl powerControl;
   late ReposCubit reposCubit;
+  FilePicker? origFilePicker;
 
   setUp(() async {
     final configPath = join(
@@ -50,27 +55,132 @@ void main() {
   });
 
   tearDown(() async {
+    if (origFilePicker != null) {
+      FilePicker.platform = origFilePicker!;
+    }
+
     await reposCubit.close();
     await powerControl.close();
     await session.close();
   });
 
+  Widget buildMainPage() => MainPage(
+        nativeChannels: nativeChannels,
+        packageInfo: fakePackageInfo,
+        powerControl: powerControl,
+        receivedMedia: Stream.empty(),
+        reposCubit: reposCubit,
+        session: session,
+        settings: settings,
+        windowManager: FakeWindowManager(),
+      );
+
+  Future<RepoLocation> createExportedRepo([
+    String name = 'exported-repo',
+  ]) async {
+    final location = RepoLocation.fromParts(
+      dir: await getTemporaryDirectory(),
+      name: name,
+    );
+    final repo = await Repository.create(
+      session,
+      store: location.path,
+      readSecret: null,
+      writeSecret: null,
+    );
+    await repo.setAccess(write: DisableAccess());
+    await repo.close();
+
+    return location;
+  }
+
+  testWidgets(
+    'import repo when no repos exists',
+    (tester) => tester.runAsync(
+      () async {
+        final location = await createExportedRepo();
+
+        await tester.pumpWidget(testApp(buildMainPage()));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('IMPORT REPOSITORY'));
+        await tester.pumpAndSettle();
+
+        // Mock file picker
+        origFilePicker = FilePicker.platform;
+        FilePicker.platform = _FakeFilePicker(location.path);
+
+        final locateButton = find.text('LOCATE');
+        await tester.ensureVisible(locateButton);
+        await tester.tap(locateButton);
+        await reposCubit.waitUntil((_) => reposCubit.repos.isNotEmpty);
+        await reposCubit
+            .waitUntil((_) => reposCubit.currentRepo?.location == location);
+
+        // TODO: Test that the bottom sheet is closed and the repo list now contains the imported
+        // repo. Problem is that calling `pumpAndSettle` here throws timeout exception and calling
+        // just `pump` doesn't refresh the page for some reason, which makes it difficult to test
+        // this. Figure it out.
+
+        //expect(find.widgetWithText(InkWell, location.name), findsOne);
+      },
+    ),
+  );
+
+  testWidgets(
+    'import repo when some repos exists',
+    (tester) => tester.runAsync(
+      () async {
+        // Create existing repo
+        final existingLocation = RepoLocation.fromParts(
+            dir: await settings.getDefaultRepositoriesDir(), name: 'some repo');
+        await reposCubit.createRepository(
+          location: existingLocation,
+          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          localSecretMode: LocalSecretMode.randomStored,
+        );
+
+        // Create repo to be imported
+        final exportedLocation = await createExportedRepo();
+
+        expect(reposCubit.repos, hasLength(1));
+
+        await tester.pumpWidget(testApp(buildMainPage()));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.add_rounded));
+        await tester.pumpAndSettle();
+
+        final importButton =
+            find.widgetWithText(GestureDetector, 'Import repository');
+        await tester.tap(importButton);
+        await tester.pumpAndSettle();
+
+        // Mock file picker
+        origFilePicker = FilePicker.platform;
+        FilePicker.platform = _FakeFilePicker(exportedLocation.path);
+
+        final locateButton = find.text('LOCATE');
+        await tester.ensureVisible(locateButton);
+        await tester.tap(locateButton);
+
+        await reposCubit.waitUntil((_) => reposCubit.repos.length == 2);
+        await reposCubit.waitUntil(
+            (_) => reposCubit.currentRepo?.location == exportedLocation);
+
+        // TODO: Test that the bottom sheet is closed and the repo list now contains both repos.
+        // Problem is that calling `pumpAndSettle` here throws timeout exception and calling just
+        // `pump` doesn't refresh the page for some reason, which makes it difficult to test this.
+        // Figure it out.
+      },
+    ),
+  );
+
   testWidgets(
     'lock and unlock imported repo without password',
     (tester) => tester.runAsync(
       () async {
-        final location = RepoLocation.fromParts(
-          dir: await getTemporaryDirectory(),
-          name: 'external-repo',
-        );
-        final repo = await Repository.create(
-          session,
-          store: location.path,
-          readSecret: null,
-          writeSecret: null,
-        );
-        await repo.setAccess(write: DisableAccess());
-        await repo.close();
+        final location = await createExportedRepo();
 
         await reposCubit.waitUntil((_) => !reposCubit.isLoading);
         await reposCubit.importRepoFromLocation(location);
@@ -78,16 +188,7 @@ void main() {
         final repoEntry = reposCubit.get(location);
         final repoCubit = repoEntry!.cubit!;
 
-        await tester.pumpWidget(testApp(MainPage(
-          nativeChannels: nativeChannels,
-          packageInfo: fakePackageInfo,
-          powerControl: powerControl,
-          receivedMedia: Stream.empty(),
-          reposCubit: reposCubit,
-          session: session,
-          settings: settings,
-          windowManager: FakeWindowManager(),
-        )));
+        await tester.pumpWidget(testApp(buildMainPage()));
         await tester.pumpAndSettle();
         await reposCubit.waitUntil((_) => !reposCubit.isLoading);
 
@@ -138,4 +239,38 @@ void main() {
       },
     ),
   );
+}
+
+/// Fake FilePicker instance that simulates picking the given file.
+class _FakeFilePicker extends FilePicker {
+  _FakeFilePicker(this.pickedFile);
+
+  final String pickedFile;
+
+  @override
+  Future<FilePickerResult?> pickFiles({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    dynamic Function(FilePickerStatus)? onFileLoading,
+    bool allowCompression = true,
+    int compressionQuality = 30,
+    bool allowMultiple = false,
+    bool withData = false,
+    bool withReadStream = false,
+    bool lockParentWindow = false,
+    bool readSequential = false,
+  }) async {
+    final name = basename(pickedFile);
+    final size = await io.File(pickedFile).length();
+
+    return FilePickerResult([
+      PlatformFile(
+        path: pickedFile,
+        name: name,
+        size: size,
+      )
+    ]);
+  }
 }

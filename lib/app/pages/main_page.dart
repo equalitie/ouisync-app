@@ -451,8 +451,6 @@ class _MainPageState extends State<MainPage>
           reposCubit: repos,
           bottomSheetInfo: _bottomSheetInfo,
           onShowRepoSettings: _showRepoSettings,
-          onNewRepositoryPressed: _addRepository,
-          onImportRepositoryPressed: _importRepository,
         );
       }
 
@@ -493,8 +491,9 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
-                onNewRepositoryPressed: _addRepository,
-                onImportRepositoryPressed: _importRepository);
+                onCreateRepoPressed: _createRepo,
+                onImportRepoPressed: _importRepo,
+              );
       }
 
       return Center(child: Text(S.current.messageErrorUnhandledState));
@@ -648,8 +647,9 @@ class _MainPageState extends State<MainPage>
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
-          onNewRepositoryPressed: _addRepository,
-          onImportRepositoryPressed: _importRepository);
+        onCreateRepoPressed: _createRepo,
+        onImportRepoPressed: _importRepo,
+      );
     }
 
     if (current is OpenRepoEntry) {
@@ -1103,7 +1103,7 @@ class _MainPageState extends State<MainPage>
 
     // Handle share tokens
     for (final token in tokens) {
-      await addRepoWithTokenDialog(context, initialTokenValue: token);
+      await importRepoDialog(context, initialTokenValue: token);
     }
 
     // Handle received files
@@ -1147,29 +1147,36 @@ class _MainPageState extends State<MainPage>
           return RepoListActions(
             context: context,
             reposCubit: _cubits.repositories,
-            onNewRepositoryPressed: _addRepository,
-            onImportRepositoryPressed: _importRepository,
+            onCreateRepoPressed: _createRepo,
+            onImportRepoPressed: _importRepo,
           );
         },
       );
 
-  Future<RepoLocation?> _addRepository() async =>
-      _addRepoAndNavigate(await createRepoDialog(context));
+  Future<RepoLocation?> _createRepo() async {
+    final location = await createRepoDialog(context);
 
-  Future<RepoLocation?> _importRepository() async =>
-      _addRepoAndNavigate(await addRepoWithTokenDialog(context));
-
-  Future<RepoLocation?> _addRepoAndNavigate(
-    RepoLocation? newRepoLocation,
-  ) async {
-    if (newRepoLocation == null || newRepoLocation.name.isEmpty) {
-      return null;
+    if (location != null) {
+      await setCurrent(location);
     }
 
-    final repo = _cubits.repositories.get(newRepoLocation);
-    await _cubits.repositories.setCurrent(repo);
+    return location;
+  }
 
-    return newRepoLocation;
+  Future<List<RepoLocation>> _importRepo() async {
+    final locations = await importRepoDialog(context);
+    final location = locations.singleOrNull;
+
+    if (location != null) {
+      await setCurrent(location);
+    }
+
+    return locations;
+  }
+
+  Future<void> setCurrent(RepoLocation location) async {
+    final repo = _cubits.repositories.get(location);
+    await _cubits.repositories.setCurrent(repo);
   }
 
   Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
@@ -1182,60 +1189,73 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<RepoLocation?> addRepoWithTokenDialog(BuildContext parentContext,
-      {String? initialTokenValue}) async {
-    initialTokenValue ??= await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            AddRepositoryPage(reposCubit: _cubits.repositories),
-      ),
-    );
-
-    if (initialTokenValue == null) return null;
-
-    final tokenValidationError =
-        await _cubits.repositories.validateTokenLink(initialTokenValue);
-    if (tokenValidationError != null) {
-      await showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Flex(
-              direction: Axis.horizontal,
-              children: [
-                Fields.constrainedText(
-                  S.current.titleAddRepository,
-                  style: context.theme.appTextStyle.titleMedium,
-                  maxLines: 2,
-                )
-              ],
+  Future<List<RepoLocation>> importRepoDialog(
+    BuildContext parentContext, {
+    String? initialTokenValue,
+  }) async {
+    final result = (initialTokenValue != null)
+        ? RepoImportFromToken(initialTokenValue)
+        : await Navigator.push<RepoImportResult>(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  AddRepositoryPage(reposCubit: _cubits.repositories),
             ),
-            content: Text(tokenValidationError,
-                style: context.theme.appTextStyle.bodyMedium),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(S.current.actionOK),
-              )
-            ],
           );
-        },
-      );
 
-      return null;
+    switch (result) {
+      case RepoImportFromToken():
+        final error =
+            await _cubits.repositories.validateTokenLink(result.token);
+        if (error == null) {
+          final location = await Navigator.push<RepoLocation>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RepoCreationPage(
+                reposCubit: _cubits.repositories,
+                initialTokenValue: initialTokenValue,
+              ),
+            ),
+          );
+
+          return location != null ? [location] : [];
+        } else {
+          await showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Flex(
+                  direction: Axis.horizontal,
+                  children: [
+                    Fields.constrainedText(
+                      S.current.titleAddRepository,
+                      style: context.theme.appTextStyle.titleMedium,
+                      maxLines: 2,
+                    )
+                  ],
+                ),
+                content:
+                    Text(error, style: context.theme.appTextStyle.bodyMedium),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(S.current.actionOK),
+                  )
+                ],
+              );
+            },
+          );
+
+          return [];
+        }
+
+      case RepoImportFromFiles():
+        return result.locations;
+
+      case null:
+        return [];
     }
-
-    return Navigator.push<RepoLocation>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RepoCreationPage(
-          reposCubit: _cubits.repositories,
-          initialTokenValue: initialTokenValue,
-        ),
-      ),
-    );
   }
 
   Future<void> _showAppSettings() => Navigator.push(

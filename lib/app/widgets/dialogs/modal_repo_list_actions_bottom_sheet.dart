@@ -6,17 +6,18 @@ import '../../utils/utils.dart';
 import '../../models/models.dart';
 
 class RepoListActions extends StatelessWidget with AppLogger {
-  RepoListActions(
-      {required this.context,
-      required this.reposCubit,
-      required this.onNewRepositoryPressed,
-      required this.onImportRepositoryPressed});
+  RepoListActions({
+    required this.context,
+    required this.reposCubit,
+    required this.onCreateRepoPressed,
+    required this.onImportRepoPressed,
+  });
 
   final BuildContext context;
   final ReposCubit reposCubit;
 
-  final Future<RepoLocation?> Function() onNewRepositoryPressed;
-  final Future<RepoLocation?> Function() onImportRepositoryPressed;
+  final Future<RepoLocation?> Function() onCreateRepoPressed;
+  final Future<List<RepoLocation>> Function() onImportRepoPressed;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -30,9 +31,9 @@ class RepoListActions extends StatelessWidget with AppLogger {
                   name: S.current.actionNewRepo,
                   icon: Icons.archive_outlined,
                   action: () async {
-                    final newRepoLocation = await onNewRepositoryPressed.call();
+                    final location = await onCreateRepoPressed();
 
-                    if (newRepoLocation == null) {
+                    if (location == null) {
                       return;
                     }
 
@@ -42,10 +43,9 @@ class RepoListActions extends StatelessWidget with AppLogger {
                   name: S.current.actionImportRepo,
                   icon: Icons.unarchive_outlined,
                   action: () async {
-                    final importedRepoLocation =
-                        await onImportRepositoryPressed.call();
+                    final locations = await onImportRepoPressed();
 
-                    if (importedRepoLocation == null) {
+                    if (locations.isEmpty) {
                       return;
                     }
 
