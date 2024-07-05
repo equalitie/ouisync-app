@@ -9,7 +9,7 @@ import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/path.dart';
+import 'package:ouisync_app/app/utils/repo_path.dart' as repoPath;
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync_plugin/native_channels.dart';
@@ -27,7 +27,7 @@ void main() {
   late RepoCreationCubit repoCreationCubit;
 
   setUp(() async {
-    final configPath = join(
+    final configPath = repoPath.join(
       (await getApplicationSupportDirectory()).path,
       'config',
     );

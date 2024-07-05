@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
-import '../../utils/path.dart';
+import '../../utils/repo_path.dart' as repoPath;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -102,7 +102,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
             EntryInfoTable(
               entryInfo: {
                 S.current.labelName: widget.entry.name,
-                S.current.labelLocation: dirname(widget.entry.path),
+                S.current.labelLocation: repoPath.dirname(widget.entry.path),
               },
             ),
           ],
@@ -161,8 +161,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          final parent = dirname(entry.path);
-          final oldName = basename(entry.path);
+          final parent = repoPath.dirname(entry.path);
+          final oldName = repoPath.basename(entry.path);
 
           return ActionsDialog(
             title: S.current.messageRenameFolder,
@@ -181,8 +181,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         (newName) async {
           if (newName.isNotEmpty) {
             // The new name provided by the user.
-            final parent = dirname(entry.path);
-            final newEntryPath = join(parent, newName);
+            final parent = repoPath.dirname(entry.path);
+            final newEntryPath = repoPath.join(parent, newName);
 
             await widget.repoCubit.moveEntry(
               source: entry.path,

@@ -1,9 +1,10 @@
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/path.dart';
+import '../../utils/repo_path.dart' as repoPath;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -183,8 +184,8 @@ class _MediaDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parent = dirname(mediaPath);
-    final name = basename(mediaPath);
+    final parent = p.dirname(mediaPath);
+    final name = p.basename(mediaPath);
 
     return Container(
       padding: Dimensions.paddingListItem,
