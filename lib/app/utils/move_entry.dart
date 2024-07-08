@@ -4,7 +4,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import '../cubits/cubits.dart';
 import '../widgets/widgets.dart';
 import 'utils.dart';
-import 'repo_path.dart' as repoPath;
+import 'repo_path.dart' as repo_path;
 
 class MoveEntry with EntryOps, AppLogger {
   MoveEntry(
@@ -23,8 +23,8 @@ class MoveEntry with EntryOps, AppLogger {
   Future<void> move({required RepoCubit? toRepoCubit}) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolder = dstRepo.state.currentFolder.path;
-    final basename = repoPath.basename(srcPath);
-    final dstPath = repoPath.join(dstFolder, basename);
+    final basename = repo_path.basename(srcPath);
+    final dstPath = repo_path.join(dstFolder, basename);
 
     final exist = await dstRepo.exists(dstPath);
     if (!exist) {
