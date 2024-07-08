@@ -186,6 +186,15 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (authMode) {
       case (AuthModeBlindOrManual()):
+        // First try to unlock it without a password.
+        await repoCubit.unlock(null);
+        final accessMode = repoCubit.accessMode;
+        if (accessMode != AccessMode.blind) {
+          showSnackBar(S.current.messageUnlockRepoOk(accessMode.name));
+          return;
+        }
+
+        // If it didn't work, try to unlock using a password from the user.
         final unlockResult = await unlockRepositoryManually(
           context,
           repoCubit,

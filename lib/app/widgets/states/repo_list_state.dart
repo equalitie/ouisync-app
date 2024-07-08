@@ -12,8 +12,6 @@ class RepoListState extends StatelessWidget
     required this.reposCubit,
     required this.bottomSheetInfo,
     required this.onShowRepoSettings,
-    required this.onNewRepositoryPressed,
-    required this.onImportRepositoryPressed,
   });
 
   final ReposCubit reposCubit;
@@ -21,8 +19,6 @@ class RepoListState extends StatelessWidget
 
   final Future<void> Function(BuildContext context,
       {required RepoCubit repoCubit}) onShowRepoSettings;
-  final Future<RepoLocation?> Function() onNewRepositoryPressed;
-  final Future<RepoLocation?> Function() onImportRepositoryPressed;
 
   @override
   Widget build(BuildContext context) {

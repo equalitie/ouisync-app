@@ -7,7 +7,7 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/repo_path.dart' as repoPath;
+import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -176,7 +176,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
       for (final srcFile in result.files) {
         String fileName = srcFile.name;
-        String dstPath = repoPath.join(dstDir, fileName);
+        String dstPath = repo_path.join(dstDir, fileName);
 
         if (await repoCubit.exists(dstPath)) {
           await showDialog<FileAction>(
@@ -230,12 +230,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Future<String> _renameFile(String dstPath, int versions) async {
-    final parent = repoPath.dirname(dstPath);
-    final name = repoPath.basenameWithoutExtension(dstPath);
-    final extension = repoPath.extension(dstPath);
+    final parent = repo_path.dirname(dstPath);
+    final name = repo_path.basenameWithoutExtension(dstPath);
+    final extension = repo_path.extension(dstPath);
 
     final newFileName = '$name (${versions += 1})$extension';
-    final newPath = repoPath.join(parent, newFileName);
+    final newPath = repo_path.join(parent, newFileName);
 
     if (await repoCubit.exists(newPath)) {
       return await _renameFile(dstPath, versions);

@@ -13,7 +13,7 @@ import 'package:shelf/shelf_io.dart';
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/master_key.dart';
-import '../utils/repo_path.dart' as repoPath;
+import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -450,7 +450,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
     try {
       for (final dirEntry in directory) {
-        final entryPath = repoPath.join(path, dirEntry.name);
+        final entryPath = repo_path.join(path, dirEntry.name);
 
         final entry = switch (dirEntry.entryType) {
           EntryType.file => FileEntry(
@@ -564,7 +564,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
-  Future<void> unlock(LocalSecret secret) async {
+  Future<void> unlock(LocalSecret? secret) async {
     await _repo.setAccessMode(AccessMode.write, secret: secret);
     final accessMode = await _repo.accessMode;
     emit(state.copyWith(accessMode: accessMode));
@@ -755,8 +755,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     await openDirectory(source).then(
       (contents) async {
         for (var entry in contents) {
-          final from = repoPath.join(source, entry.name);
-          final to = repoPath.join(destination, entry.name);
+          final from = repo_path.join(source, entry.name);
+          final to = repo_path.join(destination, entry.name);
           final moveOk = entry.entryType == EntryType.file
               ? await _moveFileToRepo(destinationRepoCubit, from, to)
               : await _moveFolderToRepo(destinationRepoCubit, from, to);

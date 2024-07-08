@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
 import '../../utils/fields.dart';
-import '../../utils/repo_path.dart' as repoPath;
+import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/strings.dart';
 
 class FolderNavigationBar extends StatelessWidget {
@@ -33,7 +33,7 @@ class FolderNavigationBar extends StatelessWidget {
   }
 
   Widget _currentLocationBar(String path) {
-    final current = repoPath.basename(path);
+    final current = repo_path.basename(path);
     String separator = Strings.root;
 
     return Row(
@@ -54,7 +54,7 @@ class FolderNavigationBar extends StatelessWidget {
   }
 
   GestureDetector _navigation(String path) {
-    final target = repoPath.dirname(path);
+    final target = repo_path.dirname(path);
 
     return GestureDetector(
         onTap: () {

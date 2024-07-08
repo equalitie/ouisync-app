@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 
 import '../cubits/cubits.dart';
-import '../utils/repo_path.dart' as repoPath;
+import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 
 class FolderState extends Equatable {
@@ -20,7 +20,7 @@ class FolderState extends Equatable {
   });
 
   bool get isRoot => path == Strings.root;
-  String get parent => repoPath.dirname(path);
+  String get parent => repo_path.dirname(path);
 
   @override
   List<Object?> get props => [path, content, sortBy, sortDirection];
@@ -31,7 +31,7 @@ sealed class FileSystemEntry {
 
   final String path;
 
-  String get name => repoPath.basename(path);
+  String get name => repo_path.basename(path);
 }
 
 class FileEntry extends FileSystemEntry {

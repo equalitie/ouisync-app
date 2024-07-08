@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../utils/repo_path.dart' as repoPath;
+import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -52,7 +52,7 @@ class FolderCreation extends HookWidget {
                             await submitField(parent, newFolderName);
                         if (submitted && PlatformValues.isDesktopDevice) {
                           final newFolderPath =
-                              repoPath.join(parent, newFolderName!);
+                              repo_path.join(parent, newFolderName!);
                           Navigator.of(context).pop(newFolderPath);
                         }
                       },
@@ -112,7 +112,7 @@ class FolderCreation extends HookWidget {
 
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
-    final newFolderPath = repoPath.join(parent, newName);
+    final newFolderPath = repo_path.join(parent, newName);
     if (await cubit.exists(newFolderPath)) {
       errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
@@ -140,7 +140,7 @@ class FolderCreation extends HookWidget {
       BuildContext context, String parent, String newFolderName) async {
     final submitted = await submitField(parent, newFolderName);
     if (submitted) {
-      final newFolderPath = repoPath.join(parent, newFolderName);
+      final newFolderPath = repo_path.join(parent, newFolderName);
       Navigator.of(context).pop(newFolderPath);
     }
   }

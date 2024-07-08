@@ -49,8 +49,6 @@ void main() {
       cacheServers: CacheServers.disabled,
     );
 
-    await reposCubit.init();
-
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
   });
 
@@ -178,7 +176,7 @@ void main() {
   );
 
   testWidgets(
-    'import repository',
+    'import repository with token',
     (tester) => tester.runAsync(
       () async {
         final name = 'le repo';

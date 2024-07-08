@@ -113,7 +113,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
                 return;
               }
 
-              Navigator.of(context).pop(data);
+              Navigator.of(context).pop(RepoImportFromToken(data));
             },
       leadingIcon: const Icon(Icons.qr_code_2_outlined),
       text: S.current.actionScanQR.toUpperCase());
@@ -192,12 +192,16 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
                 RepoLocation.legacyExtension
               ]);
           if (result == null) return;
-          for (final path in result.paths) {
-            if (path == null) continue;
-            await widget.reposCubit
-                .importRepoFromLocation(RepoLocation.fromDbPath(path));
-          }
-          Navigator.of(context).pop();
+
+          final locations = result.paths
+              .whereType<String>()
+              .map((path) => RepoLocation.fromDbPath(path))
+              .toList();
+
+          await Future.wait(
+              locations.map(widget.reposCubit.importRepoFromLocation));
+
+          Navigator.of(context).pop(RepoImportFromFiles(locations));
         }),
       ],
     );
@@ -234,12 +238,28 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           padding: Dimensions.paddingVertical20,
           child: Fields.inPageButton(onPressed: () => onPressed(), text: text));
 
-  void _onAddRepo(String shareLink) async {
+  void _onAddRepo(String token) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
 
     formKey.currentState!.save();
-    Navigator.of(context).pop(shareLink);
+    Navigator.of(context).pop(RepoImportFromToken(token));
   }
+}
+
+sealed class RepoImportResult {
+  const RepoImportResult();
+}
+
+class RepoImportFromToken extends RepoImportResult {
+  const RepoImportFromToken(this.token);
+
+  final String token;
+}
+
+class RepoImportFromFiles extends RepoImportResult {
+  const RepoImportFromFiles(this.locations);
+
+  final List<RepoLocation> locations;
 }

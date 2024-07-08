@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
-import '../../utils/repo_path.dart' as repoPath;
+import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -125,7 +125,7 @@ class RenameEntry extends HookWidget with AppLogger {
 
     final validationOk = await _validateNewName(parent, newName);
     if (!validationOk) {
-      final newExtension = repoPath.extension(newName);
+      final newExtension = repo_path.extension(newName);
       selectEntryName(newName, newExtension, isFile);
 
       _nameTextFieldFocus.requestFocus();
@@ -156,7 +156,7 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Future<bool> _validateExtension(String name) async {
-    final fileExtension = repoPath.extension(name);
+    final fileExtension = repo_path.extension(name);
 
     /// If there was not extension originally, then no need to have or validate
     /// a new one
@@ -199,7 +199,7 @@ class RenameEntry extends HookWidget with AppLogger {
     String parent,
     String newName,
   ) async {
-    final newPath = repoPath.join(parent, newName);
+    final newPath = repo_path.join(parent, newName);
     final exist = await repoCubit.exists(newPath);
     if (exist) {
       _errorMessage.value = S.current.messageEntryAlreadyExist(newName);

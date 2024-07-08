@@ -23,7 +23,6 @@ import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:path/path.dart' as p;
 
 import '../utils.dart';
 
