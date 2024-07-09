@@ -1211,7 +1211,7 @@ class _MainPageState extends State<MainPage>
         context,
         MaterialPageRoute(
           builder: (context) =>
-              AddRepositoryPage(reposCubit: _cubits.repositories),
+              RepoImportPage(reposCubit: _cubits.repositories),
         ),
       );
     }

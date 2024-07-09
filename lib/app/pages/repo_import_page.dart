@@ -15,16 +15,16 @@ import '../utils/utils.dart';
 import '../models/models.dart';
 import 'pages.dart';
 
-class AddRepositoryPage extends StatefulWidget {
-  const AddRepositoryPage({required this.reposCubit});
+class RepoImportPage extends StatefulWidget {
+  const RepoImportPage({required this.reposCubit});
 
   final ReposCubit reposCubit;
 
   @override
-  State<AddRepositoryPage> createState() => _AddRepositoryPageState();
+  State<RepoImportPage> createState() => _RepoImportPageState();
 }
 
-class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
+class _RepoImportPageState extends State<RepoImportPage> with AppLogger {
   final _isDesktop = PlatformValues.isDesktopDevice;
   late final _repoImportCubit = RepoImportCubit(reposCubit: widget.reposCubit);
 
