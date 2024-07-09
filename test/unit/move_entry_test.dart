@@ -3,7 +3,7 @@ import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/models.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 
 void main() {

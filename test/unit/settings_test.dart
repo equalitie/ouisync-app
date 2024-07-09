@@ -4,8 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart'
-    show Repository, Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Repository, Session, SessionKind;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';

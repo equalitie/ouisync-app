@@ -12,8 +12,8 @@ import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/repo_path.dart' as repoPath;
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync_plugin/native_channels.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';

@@ -13,9 +13,9 @@ import 'package:ouisync_app/app/widgets/repo_creation.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart'
+import 'package:ouisync/ouisync.dart'
     show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
-import 'package:ouisync_plugin/native_channels.dart';
+import 'package:ouisync/native_channels.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 
