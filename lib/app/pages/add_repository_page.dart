@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync_app/app/cubits/repo_import.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/platform/platform.dart';
+import '../utils/share_token.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
 import 'pages.dart';
@@ -20,14 +25,32 @@ class AddRepositoryPage extends StatefulWidget {
 }
 
 class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
-  final formKey = GlobalKey<FormState>();
-
-  final _tokenController = TextEditingController(text: '');
-
   final _isDesktop = PlatformValues.isDesktopDevice;
+  late final _repoImportCubit = RepoImportCubit(reposCubit: widget.reposCubit);
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    unawaited(_repoImportCubit.close());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+          title: Text(S.current.titleAddRepoToken),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.black87,
+          titleTextStyle: context.theme.appTextStyle.titleMedium),
+      body: Center(
+          child: SingleChildScrollView(
+              padding: Dimensions.paddingAll20,
+              child: BlocBuilder<RepoImportCubit, ShareTokenResult?>(
+                  bloc: _repoImportCubit,
+                  builder: (context, state) =>
+                      _buildContent(context, state)))));
+
+  Widget _buildContent(BuildContext context, ShareTokenResult? state) {
     final noReposImageHeight = MediaQuery.of(context).size.height * 0.2;
 
     final children = [
@@ -36,7 +59,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           assetHeight: noReposImageHeight),
       _buildScanQrCode(context),
       _buildOrSeparator(),
-      _buildUseToken(context),
+      _buildUseToken(context, state),
     ];
 
     if (PlatformValues.isDesktopDevice) {
@@ -45,21 +68,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
         ..add(_buildImportOuisyncDb(context));
     }
 
-    return Scaffold(
-        appBar: AppBar(
-            title: Text(S.current.titleAddRepoToken),
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.black87,
-            titleTextStyle: context.theme.appTextStyle.titleMedium),
-        body: Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.disabled,
-            child: Center(
-                child: SingleChildScrollView(
-              padding: Dimensions.paddingAll20,
-              child: Column(children: children),
-            ))));
+    return Column(children: children);
   }
 
   Widget _buildScanQrCode(BuildContext context) => Column(
@@ -93,27 +102,24 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
           : () async {
               final permissionGranted =
                   await _checkPermission(Permission.camera);
-
               if (!permissionGranted) return;
 
-              final data = await Navigator.push(context,
-                  MaterialPageRoute(builder: (context) {
-                return QRScanner(widget.reposCubit.session);
-              }));
+              final data = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => QRScanner(widget.reposCubit.session)),
+              );
 
               if (!mounted) return;
               if (data == null) return;
 
-              final tokenValidationError =
-                  await widget.reposCubit.validateTokenLink(data);
-
-              if (tokenValidationError != null) {
-                showSnackBar(tokenValidationError);
-
-                return;
+              final result = await parseShareToken(widget.reposCubit, data);
+              switch (result) {
+                case ShareTokenValid(value: final token):
+                  Navigator.of(context).pop(RepoImportFromToken(token));
+                case ShareTokenInvalid(error: final error):
+                  showSnackBar(error.toString());
               }
-
-              Navigator.of(context).pop(RepoImportFromToken(data));
             },
       leadingIcon: const Icon(Icons.qr_code_2_outlined),
       text: S.current.actionScanQR.toUpperCase());
@@ -143,35 +149,49 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
         ));
   }
 
-  Widget _buildUseToken(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Fields.constrainedText(S.current.messageAddRepoLink,
-                textAlign: TextAlign.center),
-          ],
-        ),
-        Dimensions.spacingVerticalDouble,
-        Container(
-          decoration: const BoxDecoration(
-            borderRadius:
-                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
-            color: Constants.inputBackgroundColor,
+  Widget _buildUseToken(BuildContext context, ShareTokenResult? state) =>
+      Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Fields.constrainedText(S.current.messageAddRepoLink,
+                  textAlign: TextAlign.center),
+            ],
           ),
-          child: Fields.formTextField(
+          Dimensions.spacingVerticalDouble,
+          Container(
+            decoration: const BoxDecoration(
+              borderRadius:
+                  BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+              color: Constants.inputBackgroundColor,
+            ),
+            child: Fields.formTextField(
               context: context,
-              controller: _tokenController,
+              key: ValueKey('token'),
+              controller: _repoImportCubit.tokenController,
               labelText: S.current.labelRepositoryLink,
               hintText: S.current.messageRepositoryToken,
+              errorText: state?.error?.toString(),
               suffixIcon: const Icon(Icons.key_rounded),
-              validator: _repositoryTokenValidator),
-        ),
-        _builAddRepositoryButton(),
-      ],
-    );
-  }
+            ),
+          ),
+          _builAddRepositoryButton(context, state),
+        ],
+      );
+
+  Widget _builAddRepositoryButton(
+    BuildContext context,
+    ShareTokenResult? state,
+  ) =>
+      _buildButton(
+        S.current.actionAddRepository.toUpperCase(),
+        switch (state) {
+          ShareTokenValid(value: final token) => () =>
+              Navigator.of(context).pop(RepoImportFromToken(token)),
+          ShareTokenInvalid() || null => null,
+        },
+      );
 
   Widget _buildImportOuisyncDb(BuildContext context) {
     return Column(
@@ -207,45 +227,10 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with AppLogger {
     );
   }
 
-  Future<String?> _repositoryTokenValidator(String? value) async {
-    if (value == null || value.isEmpty) {
-      return S.current.messageErrorTokenEmpty;
-    }
-
-    try {
-      final shareToken =
-          await ShareToken.fromString(widget.reposCubit.session, value);
-
-      final existingRepo =
-          widget.reposCubit.findByInfoHash(await shareToken.infoHash);
-
-      if (existingRepo != null) {
-        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
-      }
-    } catch (e) {
-      return S.current.messageErrorTokenValidator;
-    }
-
-    return null;
-  }
-
-  Widget _builAddRepositoryButton() => _buildButton(
-      S.current.actionAddRepository.toUpperCase(),
-      () async => _onAddRepo(_tokenController.text));
-
-  Widget _buildButton(String text, Future<void> Function() onPressed) =>
-      Padding(
-          padding: Dimensions.paddingVertical20,
-          child: Fields.inPageButton(onPressed: () => onPressed(), text: text));
-
-  void _onAddRepo(String token) async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    formKey.currentState!.save();
-    Navigator.of(context).pop(RepoImportFromToken(token));
-  }
+  Widget _buildButton(String text, void Function()? onPressed) => Padding(
+        padding: Dimensions.paddingVertical20,
+        child: Fields.inPageButton(onPressed: onPressed, text: text),
+      );
 }
 
 sealed class RepoImportResult {
@@ -255,11 +240,17 @@ sealed class RepoImportResult {
 class RepoImportFromToken extends RepoImportResult {
   const RepoImportFromToken(this.token);
 
-  final String token;
+  final ShareToken token;
+
+  @override
+  String toString() => '$runtimeType($token)';
 }
 
 class RepoImportFromFiles extends RepoImportResult {
   const RepoImportFromFiles(this.locations);
 
   final List<RepoLocation> locations;
+
+  @override
+  String toString() => '$runtimeType($locations)';
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:ouisync_plugin/state_monitor.dart' as oui;
@@ -1193,62 +1194,41 @@ class _MainPageState extends State<MainPage>
     BuildContext parentContext, {
     String? initialTokenValue,
   }) async {
-    final result = (initialTokenValue != null)
-        ? RepoImportFromToken(initialTokenValue)
-        : await Navigator.push<RepoImportResult>(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AddRepositoryPage(reposCubit: _cubits.repositories),
-            ),
-          );
+    RepoImportResult? result;
+
+    if (initialTokenValue != null) {
+      final tokenResult =
+          await parseShareToken(_cubits.repositories, initialTokenValue);
+      switch (tokenResult) {
+        case ShareTokenValid():
+          result = RepoImportFromToken(tokenResult.value);
+        case ShareTokenInvalid():
+          showSnackBar(tokenResult.error.toString());
+          return [];
+      }
+    } else {
+      result = await Navigator.push<RepoImportResult>(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              AddRepositoryPage(reposCubit: _cubits.repositories),
+        ),
+      );
+    }
 
     switch (result) {
-      case RepoImportFromToken():
-        final error =
-            await _cubits.repositories.validateTokenLink(result.token);
-        if (error == null) {
-          final location = await Navigator.push<RepoLocation>(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RepoCreationPage(
-                reposCubit: _cubits.repositories,
-                initialTokenValue: initialTokenValue,
-              ),
+      case RepoImportFromToken(token: final token):
+        final location = await Navigator.push<RepoLocation>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RepoCreationPage(
+              reposCubit: _cubits.repositories,
+              token: token,
             ),
-          );
+          ),
+        );
 
-          return location != null ? [location] : [];
-        } else {
-          await showDialog(
-            context: context,
-            barrierDismissible: true,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Flex(
-                  direction: Axis.horizontal,
-                  children: [
-                    Fields.constrainedText(
-                      S.current.titleAddRepository,
-                      style: context.theme.appTextStyle.titleMedium,
-                      maxLines: 2,
-                    )
-                  ],
-                ),
-                content:
-                    Text(error, style: context.theme.appTextStyle.bodyMedium),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(S.current.actionOK),
-                  )
-                ],
-              );
-            },
-          );
-
-          return [];
-        }
+        return location != null ? [location] : [];
 
       case RepoImportFromFiles():
         return result.locations;

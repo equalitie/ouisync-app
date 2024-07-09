@@ -25,7 +25,6 @@ class RepoCreationState {
   final RepoCreationSubstate substate;
   final String suggestedName;
   final ShareToken? token;
-  final String tokenError;
   final bool useCacheServers;
 
   RepoCreationState({
@@ -36,7 +35,6 @@ class RepoCreationState {
     this.substate = const RepoCreationPending(),
     this.suggestedName = '',
     this.token,
-    this.tokenError = '',
     this.useCacheServers = true,
   });
 
@@ -48,7 +46,6 @@ class RepoCreationState {
     RepoCreationSubstate? substate,
     String? suggestedName,
     ShareToken? token,
-    String? tokenError,
     bool? useCacheServers,
   }) =>
       RepoCreationState(
@@ -60,7 +57,6 @@ class RepoCreationState {
         substate: substate ?? this.substate,
         suggestedName: suggestedName ?? this.suggestedName,
         token: token ?? this.token,
-        tokenError: tokenError ?? this.tokenError,
         useCacheServers: useCacheServers ?? this.useCacheServers,
       );
 
@@ -155,33 +151,23 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     await super.close();
   }
 
-  Future<void> setInitialTokenValue(String? tokenValue) async {
-    if (tokenValue == null) {
+  Future<void> setToken(ShareToken? token) async {
+    if (token == null) {
       return;
     }
 
     await _loading(() async {
-      try {
-        final token = await ShareToken.fromString(
-          reposCubit.session,
-          tokenValue,
-        );
+      final accessMode = await token.mode;
+      final suggestedName = await token.suggestedName;
+      final useCacheServers =
+          await reposCubit.cacheServers.isEnabledForShareToken(token);
 
-        final accessMode = await token.mode;
-        final suggestedName = await token.suggestedName;
-        final useCacheServers =
-            await reposCubit.cacheServers.isEnabledForShareToken(token);
-
-        emit(state.copyWith(
-          accessMode: accessMode,
-          suggestedName: suggestedName,
-          token: token,
-          useCacheServers: useCacheServers,
-        ));
-      } catch (e, st) {
-        loggy.error('Extract repository token exception:', e, st);
-        emit(state.copyWith(tokenError: S.current.messageErrorTokenInvalid));
-      }
+      emit(state.copyWith(
+        accessMode: accessMode,
+        suggestedName: suggestedName,
+        token: token,
+        useCacheServers: useCacheServers,
+      ));
     });
   }
 

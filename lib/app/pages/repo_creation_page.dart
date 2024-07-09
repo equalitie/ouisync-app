@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/widgets/repo_creation.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -11,11 +12,11 @@ import '../utils/utils.dart';
 class RepoCreationPage extends StatefulWidget {
   RepoCreationPage({
     required this.reposCubit,
-    this.initialTokenValue,
+    this.token,
   });
 
   final ReposCubit reposCubit;
-  final String? initialTokenValue;
+  final ShareToken? token;
 
   @override
   State<RepoCreationPage> createState() => _RepoCreationPageState();
@@ -27,8 +28,8 @@ class _RepoCreationPageState extends State<RepoCreationPage> with AppLogger {
   @override
   void initState() {
     super.initState();
-    repoCreationCubit = RepoCreationCubit(reposCubit: widget.reposCubit);
-    repoCreationCubit.setInitialTokenValue(widget.initialTokenValue);
+    repoCreationCubit = RepoCreationCubit(reposCubit: widget.reposCubit)
+      ..setToken(widget.token);
   }
 
   @override

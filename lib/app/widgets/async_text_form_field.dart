@@ -21,7 +21,7 @@ class AsyncTextFormField extends StatefulWidget {
   final TextStyle? style;
 
   const AsyncTextFormField({
-    Key? key,
+    super.key,
     this.controller,
     this.initialValue,
     this.enabled,
@@ -50,7 +50,6 @@ class _State extends State<AsyncTextFormField> {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-      key: widget.key,
       controller: widget.controller,
       initialValue: widget.initialValue,
       enabled: widget.enabled,
