@@ -108,6 +108,9 @@ PackageInfo fakePackageInfo = PackageInfo(
 /// Observer for bloc/cubit state. Useful when we don't have direct access to the bloc/cubit we
 /// want to observe. If we do have access, prefer to use `BlocBaseExtension.waitUntil`.
 class StateObserver<State> extends BlocObserver {
+  StateObserver._(this._prev);
+
+  final BlocObserver? _prev;
   final _completer = Completer<BlocBase<State>>();
 
   /// Waits until the observed bloc transitions to a state for which the given predicate returns
@@ -116,7 +119,9 @@ class StateObserver<State> extends BlocObserver {
     bool Function(State) f, {
     Duration timeout = _timeout,
   }) =>
-      _completer.future.then((bloc) => bloc.waitUntil(f, timeout: timeout));
+      _completer.future
+          .timeout(timeout)
+          .then((bloc) => bloc.waitUntil(f, timeout: timeout));
 
   @override
   void onCreate(BlocBase bloc) {
@@ -125,6 +130,15 @@ class StateObserver<State> extends BlocObserver {
     if (bloc is BlocBase<State>) {
       _completer.complete(bloc);
     }
+
+    _prev?.onCreate(bloc);
+  }
+
+  static StateObserver<State> install<State>() {
+    final prev = Bloc.observer;
+    final next = StateObserver<State>._(prev);
+    Bloc.observer = next;
+    return next;
   }
 }
 
