@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
@@ -300,8 +299,7 @@ void main() {
           await repo.close();
 
           final navigationObserver = NavigationObserver();
-          final stateObserver = StateObserver<RepoCreationState>();
-          Bloc.observer = stateObserver;
+          final stateObserver = StateObserver.install<RepoCreationState>();
 
           await tester.pumpWidget(testApp(
             makeMainPage(),

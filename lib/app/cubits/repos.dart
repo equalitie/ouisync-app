@@ -88,30 +88,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   Future<oui.ShareToken> createToken(String tokenString) =>
       oui.ShareToken.fromString(session, tokenString);
 
-  Future<String?> validateTokenLink(String tokenLink) async {
-    if (tokenLink.isEmpty) {
-      return S.current.messageErrorTokenEmpty;
-    }
-
-    final tokenUri = Uri.tryParse(tokenLink);
-    if (tokenUri == null || !(tokenUri.isValidOuiSyncUri())) {
-      return S.current.messageErrorTokenInvalid;
-    }
-
-    try {
-      final shareToken = await oui.ShareToken.fromString(session, tokenLink);
-      final existingRepo = findByInfoHash(await shareToken.infoHash);
-
-      if (existingRepo != null) {
-        return S.current.messageRepositoryAlreadyExist(existingRepo.name);
-      }
-    } catch (e) {
-      return S.current.messageErrorTokenValidator;
-    }
-
-    return null;
-  }
-
   RepoEntry? findByInfoHash(String infoHash) {
     try {
       return repos.firstWhere((repo) => repo.infoHash == infoHash);

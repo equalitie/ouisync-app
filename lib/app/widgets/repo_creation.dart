@@ -6,7 +6,6 @@ import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/actions.dart';
 import '../utils/constants.dart';
 import '../utils/dialogs.dart';
 import '../utils/dimensions.dart';
@@ -24,14 +23,6 @@ class RepoCreation extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiBlocListener(
         listeners: [
-          // Show snackbar when initial token valid is invalid
-          BlocListener<RepoCreationCubit, RepoCreationState>(
-            bloc: cubit,
-            listenWhen: (previous, current) =>
-                current.tokenError.isNotEmpty &&
-                current.tokenError != previous.tokenError,
-            listener: _handleTokenError,
-          ),
           // Handle substate changes
           BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: cubit,
@@ -177,9 +168,6 @@ class RepoCreation extends StatelessWidget {
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
-
-  void _handleTokenError(BuildContext context, RepoCreationState state) =>
-      showSnackBar(state.tokenError);
 
   Future<void> _handleSubstateChange(
     BuildContext context,
