@@ -1,4 +1,4 @@
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 
 // This class exists mainly to avoid passing the ouisync Session througout the
 // code where only it's password hashing functionality is needed.

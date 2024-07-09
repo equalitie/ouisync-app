@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
 
-import 'package:ouisync_plugin/native_channels.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
-import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/ouisync.dart' as oui;
+import 'package:ouisync/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';

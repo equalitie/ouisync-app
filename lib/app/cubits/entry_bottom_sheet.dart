@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/bindings.dart';
+import 'package:ouisync/bindings.dart';
 
 import '../utils/log.dart';
 import 'cubits.dart';

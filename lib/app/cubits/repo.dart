@@ -5,9 +5,9 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync_plugin/native_channels.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
-import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
 
 import '../../generated/l10n.dart';

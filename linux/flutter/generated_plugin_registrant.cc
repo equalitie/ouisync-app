@@ -9,7 +9,7 @@
 #include <biometric_storage/biometric_storage_plugin.h>
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h>
-#include <ouisync_plugin/ouisync_plugin.h>
+#include <ouisync/ouisync_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
 #include <system_tray/system_tray_plugin.h>
@@ -26,9 +26,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) flutter_secure_storage_linux_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "FlutterSecureStorageLinuxPlugin");
   flutter_secure_storage_linux_plugin_register_with_registrar(flutter_secure_storage_linux_registrar);
-  g_autoptr(FlPluginRegistrar) ouisync_plugin_registrar =
+  g_autoptr(FlPluginRegistrar) ouisync_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "OuisyncPlugin");
-  ouisync_plugin_register_with_registrar(ouisync_plugin_registrar);
+  ouisync_plugin_register_with_registrar(ouisync_registrar);
   g_autoptr(FlPluginRegistrar) screen_retriever_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverPlugin");
   screen_retriever_plugin_register_with_registrar(screen_retriever_registrar);

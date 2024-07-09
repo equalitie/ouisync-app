@@ -1,8 +1,8 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/native_channels.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 

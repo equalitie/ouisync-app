@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as plugin;
+import 'package:ouisync/ouisync.dart' as plugin;
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';

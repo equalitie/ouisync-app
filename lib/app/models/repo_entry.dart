@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync/ouisync.dart' as oui;
 
 import '../cubits/cubits.dart';
 import '../models/models.dart';

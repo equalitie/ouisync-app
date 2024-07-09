@@ -6,7 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   biometric_storage
   desktop_drop
   flutter_secure_storage_linux
-  ouisync_plugin
+  ouisync
   screen_retriever
   sentry_flutter
   system_tray

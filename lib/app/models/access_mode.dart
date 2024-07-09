@@ -1,1 +1,1 @@
-export 'package:ouisync_plugin/ouisync_plugin.dart' show AccessMode;
+export 'package:ouisync/ouisync.dart' show AccessMode;
