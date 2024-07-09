@@ -2,79 +2,27 @@ import 'dart:io' show Directory;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
-import 'package:ouisync_app/app/cubits/navigation.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
-import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart'
     show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
-import 'package:ouisync_plugin/native_channels.dart';
 import 'package:path/path.dart' show join;
-import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';
 
 void main() {
-  late Session session;
-  late Settings settings;
-  late NativeChannels nativeChannels;
-  late PowerControl powerControl;
-  late ReposCubit reposCubit;
+  late TestDependencies deps;
 
   setUp(() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
-
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
-
-    settings = await Settings.init(MasterKey.random());
-    nativeChannels = NativeChannels(session);
-    powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
-
-    reposCubit = ReposCubit(
-      session: session,
-      nativeChannels: nativeChannels,
-      settings: settings,
-      navigation: NavigationCubit(),
-      bottomSheet: EntryBottomSheetCubit(),
-      cacheServers: CacheServers.disabled,
-    );
+    deps = await TestDependencies.create();
   });
 
   tearDown(() async {
-    await reposCubit.close();
-    await powerControl.close();
-    await session.close();
+    await deps.dispose();
   });
-
-  MainPage makeMainPage() => MainPage(
-        nativeChannels: nativeChannels,
-        packageInfo: fakePackageInfo,
-        powerControl: powerControl,
-        receivedMedia: Stream.empty(),
-        reposCubit: reposCubit,
-        session: session,
-        settings: settings,
-        windowManager: FakeWindowManager(),
-      );
 
   testWidgets(
     'create repository without password',
@@ -82,7 +30,7 @@ void main() {
       () async {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('CREATE REPOSITORY'));
@@ -109,7 +57,7 @@ void main() {
         await repoCreationObserver
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-        final repoCubit = reposCubit.repos
+        final repoCubit = deps.reposCubit.repos
             .where((entry) => entry.name == 'my repo')
             .first
             .cubit!;
@@ -129,7 +77,7 @@ void main() {
 
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('CREATE REPOSITORY'));
@@ -154,8 +102,10 @@ void main() {
         await repoCreationObserver
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-        final repoCubit =
-            reposCubit.repos.where((entry) => entry.name == name).first.cubit!;
+        final repoCubit = deps.reposCubit.repos
+            .where((entry) => entry.name == name)
+            .first
+            .cubit!;
         expect(repoCubit.state.accessMode, equals(AccessMode.write));
 
         await repoCubit.lock();
@@ -175,16 +125,16 @@ void main() {
 
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
-        await reposCubit.createRepository(
+        await deps.reposCubit.createRepository(
           location: RepoLocation.fromParts(
-            dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
             name: name,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
           localSecretMode: LocalSecretMode.randomStored,
         );
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(Icons.add_rounded));
@@ -221,9 +171,9 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
         final repoImportObserver = StateObserver.install<ShareTokenResult?>();
 
-        expect(reposCubit.repos, isEmpty);
+        expect(deps.reposCubit.repos, isEmpty);
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('IMPORT REPOSITORY'));
@@ -275,7 +225,7 @@ void main() {
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
         // The repo got created correctly.
-        final repoCubit = reposCubit.repos.first.cubit!;
+        final repoCubit = deps.reposCubit.repos.first.cubit!;
         final actualMode = repoCubit.state.accessMode;
         final actualToken = await repoCubit.createShareToken(AccessMode.read);
 
