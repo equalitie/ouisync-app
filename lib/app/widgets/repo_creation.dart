@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
+import 'package:ouisync_app/app/cubits/repo_security.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 
 import '../../generated/l10n.dart';
@@ -11,79 +12,102 @@ import '../utils/dialogs.dart';
 import '../utils/dimensions.dart';
 import '../utils/extensions.dart';
 import '../utils/fields.dart';
+import 'holder.dart';
 import 'repo_security.dart';
 import 'states/content_with_sticky_footer_state.dart';
 import 'switches/custom_adaptive_switch.dart';
 
 class RepoCreation extends StatelessWidget {
-  RepoCreation(this.cubit, {super.key});
+  RepoCreation(this.creationCubit, {super.key});
 
-  final RepoCreationCubit cubit;
+  final RepoCreationCubit creationCubit;
 
   @override
-  Widget build(BuildContext context) => MultiBlocListener(
-        listeners: [
-          // Handle substate changes
-          BlocListener<RepoCreationCubit, RepoCreationState>(
-            bloc: cubit,
-            listenWhen: (previous, current) =>
-                current.substate != previous.substate,
-            listener: _handleSubstateChange,
-          ),
-          // Show loading indicator
-          BlocListener<RepoCreationCubit, RepoCreationState>(
-            bloc: cubit,
-            listenWhen: (previous, current) =>
-                current.loading && !previous.loading,
-            listener: _handleLoading,
-          ),
-        ],
-        child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
-          bloc: cubit,
-          builder: (context, state) => ContentWithStickyFooterState(
-            content: _buildContent(context, state),
-            footer: Fields.dialogActions(
-              context,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              buttons: _buildActions(context, state),
+  Widget build(BuildContext context) => BlocHolder(
+        create: () => RepoSecurityCubit(
+          oldLocalSecretMode: RepoCreationState.initialLocalSecretMode,
+        ),
+        builder: (context, securityCubit) => MultiBlocListener(
+          listeners: [
+            // Handle substate changes
+            BlocListener<RepoCreationCubit, RepoCreationState>(
+              bloc: creationCubit,
+              listenWhen: (previous, current) =>
+                  current.substate != previous.substate,
+              listener: _handleSubstateChange,
+            ),
+            // Show loading indicator
+            BlocListener<RepoCreationCubit, RepoCreationState>(
+              bloc: creationCubit,
+              listenWhen: (previous, current) =>
+                  current.loading && !previous.loading,
+              listener: _handleLoading,
+            ),
+            BlocListener<RepoSecurityCubit, RepoSecurityState>(
+              bloc: securityCubit,
+              listener: _handleLocalSecretChanged,
+            ),
+          ],
+          child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
+            bloc: creationCubit,
+            builder: (context, state) => ContentWithStickyFooterState(
+              content: _buildContent(context, securityCubit, state),
+              footer: Fields.dialogActions(
+                context,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                buttons: _buildActions(context, securityCubit, state),
+              ),
             ),
           ),
         ),
       );
 
-  Widget _buildContent(BuildContext context, RepoCreationState state) => Column(
+  Widget _buildContent(
+    BuildContext context,
+    RepoSecurityCubit securityCubit,
+    RepoCreationState creationState,
+  ) =>
+      Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (state.token != null) ..._buildTokenLabel(context, state),
-          ..._buildNameField(context, state),
-          if (state.accessMode == AccessMode.write)
-            _buildUseCacheServersSwitch(context, state),
-          RepoSecurity(
-            initialLocalSecretMode: RepoCreationState.initialLocalSecretMode,
-            isBiometricsAvailable: state.isBiometricsAvailable,
-            onChanged: (localSecretMode, localPassword) =>
-                cubit.setLocalSecret(localSecretMode, localPassword),
-          ),
+          if (creationState.token != null)
+            ..._buildTokenLabel(context, creationState),
+          ..._buildNameField(context, creationState),
+          if (creationState.accessMode == AccessMode.write)
+            _buildUseCacheServersSwitch(context, creationState),
+          RepoSecurity(securityCubit),
         ],
       );
 
-  List<Widget> _buildActions(BuildContext context, RepoCreationState state) => [
+  List<Widget> _buildActions(
+    BuildContext context,
+    RepoSecurityCubit securityCubit,
+    RepoCreationState creationState,
+  ) =>
+      [
         Fields.inPageButton(
           text: S.current.actionCancel,
           onPressed: () => Navigator.of(context).pop(null),
         ),
-        Fields.inPageButton(
-          text: state.token == null
-              ? S.current.actionCreate
-              : S.current.actionImport,
-          onPressed:
-              state.substate is RepoCreationValid ? () => cubit.save() : null,
+        BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
+          bloc: securityCubit,
+          builder: (context, securityState) => Fields.inPageButton(
+            text: creationState.token == null
+                ? S.current.actionCreate
+                : S.current.actionImport,
+            onPressed: creationState.substate is RepoCreationValid &&
+                    securityState.isValid
+                ? () => creationCubit.save()
+                : null,
+          ),
         ),
       ];
 
   List<Widget> _buildTokenLabel(
-          BuildContext context, RepoCreationState state) =>
+    BuildContext context,
+    RepoCreationState state,
+  ) =>
       [
         Container(
           padding: Dimensions.paddingShareLinkBox,
@@ -133,7 +157,7 @@ class RepoCreation extends StatelessWidget {
         Fields.formTextField(
           key: ValueKey('name'),
           context: context,
-          controller: cubit.nameController,
+          controller: creationCubit.nameController,
           labelText: S.current.labelName,
           hintText: S.current.messageRepositoryName,
           errorText: state.nameError,
@@ -144,7 +168,7 @@ class RepoCreation extends StatelessWidget {
         Visibility(
           visible: state.suggestedName.isNotEmpty,
           child: GestureDetector(
-            onTap: () => cubit.acceptSuggestedName(),
+            onTap: () => creationCubit.acceptSuggestedName(),
             child: Text(
               S.current.messageRepositorySuggestedName(state.suggestedName),
               style: _smallMessageStyle(context),
@@ -163,7 +187,7 @@ class RepoCreation extends StatelessWidget {
         value: state.useCacheServers,
         title: S.current.messageUseCacheServers,
         contentPadding: EdgeInsets.zero,
-        onChanged: (value) => cubit.setUseCacheServers(value),
+        onChanged: (value) => creationCubit.setUseCacheServers(value),
       );
 
   TextStyle _smallMessageStyle(BuildContext context) =>
@@ -194,13 +218,25 @@ class RepoCreation extends StatelessWidget {
   ) async {
     Future<void> done() async {
       // Make sure to check the initial state as well, to avoid race conditions.
-      if (!cubit.state.loading) {
+      if (!creationCubit.state.loading) {
         return;
       }
 
-      await cubit.stream.where((state) => !state.loading).first;
+      await creationCubit.stream.where((state) => !state.loading).first;
     }
 
     await Dialogs.executeFutureWithLoadingDialog(context, done());
+  }
+
+  void _handleLocalSecretChanged(
+    BuildContext context,
+    RepoSecurityState state,
+  ) {
+    final localSecretInput = state.newLocalSecretInput;
+    if (localSecretInput == null) {
+      return;
+    }
+
+    creationCubit.setLocalSecret(localSecretInput);
   }
 }

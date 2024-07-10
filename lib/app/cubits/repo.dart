@@ -491,14 +491,17 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<void> setAuthMode(AuthMode authMode) async {
+    emit(state.copyWith(isLoading: true));
     await _repo.setAuthMode(authMode);
-    emit(state.copyWith(authMode: authMode));
+    emit(state.copyWith(authMode: authMode, isLoading: false));
   }
 
   Future<bool> setLocalSecret({
     required LocalSecret oldSecret,
     required SetLocalSecret newSecret,
   }) async {
+    emit(state.copyWith(isLoading: true));
+
     // Grab the current credentials so we can restore the access mode when we are done.
     final credentials = await _repo.credentials;
 
@@ -534,6 +537,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return false;
     } finally {
       await _repo.setCredentials(credentials);
+      emit(state.copyWith(isLoading: false));
     }
   }
 

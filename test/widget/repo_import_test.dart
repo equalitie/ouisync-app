@@ -3,15 +3,8 @@ import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
-import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
-import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,38 +13,11 @@ import 'package:styled_text/styled_text.dart';
 import '../utils.dart';
 
 void main() {
-  late Session session;
-  late Settings settings;
-  late NativeChannels nativeChannels;
-  late PowerControl powerControl;
-  late ReposCubit reposCubit;
+  late TestDependencies deps;
   FilePicker? origFilePicker;
 
   setUp(() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
-
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
-
-    settings = await Settings.init(MasterKey.random());
-    nativeChannels = NativeChannels(session);
-    powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
-
-    reposCubit = ReposCubit(
-      cacheServers: CacheServers.disabled,
-      nativeChannels: nativeChannels,
-      session: session,
-      settings: settings,
-    );
+    deps = await TestDependencies.create();
   });
 
   tearDown(() async {
@@ -59,21 +25,8 @@ void main() {
       FilePicker.platform = origFilePicker!;
     }
 
-    await reposCubit.close();
-    await powerControl.close();
-    await session.close();
+    await deps.dispose();
   });
-
-  Widget buildMainPage() => MainPage(
-        nativeChannels: nativeChannels,
-        packageInfo: fakePackageInfo,
-        powerControl: powerControl,
-        receivedMedia: Stream.empty(),
-        reposCubit: reposCubit,
-        session: session,
-        settings: settings,
-        windowManager: FakeWindowManager(),
-      );
 
   Future<RepoLocation> createExportedRepo([
     String name = 'exported-repo',
@@ -83,7 +36,7 @@ void main() {
       name: name,
     );
     final repo = await Repository.create(
-      session,
+      deps.session,
       store: location.path,
       readSecret: null,
       writeSecret: null,
@@ -100,7 +53,7 @@ void main() {
       () async {
         final location = await createExportedRepo();
 
-        await tester.pumpWidget(testApp(buildMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('IMPORT REPOSITORY'));
@@ -113,9 +66,10 @@ void main() {
         final locateButton = find.text('LOCATE');
         await tester.ensureVisible(locateButton);
         await tester.tap(locateButton);
-        await reposCubit.waitUntil((_) => reposCubit.repos.isNotEmpty);
-        await reposCubit
-            .waitUntil((_) => reposCubit.currentRepo?.location == location);
+        await deps.reposCubit
+            .waitUntil((_) => deps.reposCubit.repos.isNotEmpty);
+        await deps.reposCubit.waitUntil(
+            (_) => deps.reposCubit.currentRepo?.location == location);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains the imported
         // repo. Problem is that calling `pumpAndSettle` here throws timeout exception and calling
@@ -133,8 +87,9 @@ void main() {
       () async {
         // Create existing repo
         final existingLocation = RepoLocation.fromParts(
-            dir: await settings.getDefaultRepositoriesDir(), name: 'some repo');
-        await reposCubit.createRepository(
+            dir: await deps.settings.getDefaultRepositoriesDir(),
+            name: 'some repo');
+        await deps.reposCubit.createRepository(
           location: existingLocation,
           setLocalSecret: LocalSecretKeyAndSalt.random(),
           localSecretMode: LocalSecretMode.randomStored,
@@ -143,9 +98,9 @@ void main() {
         // Create repo to be imported
         final exportedLocation = await createExportedRepo();
 
-        expect(reposCubit.repos, hasLength(1));
+        expect(deps.reposCubit.repos, hasLength(1));
 
-        await tester.pumpWidget(testApp(buildMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(Icons.add_rounded));
@@ -164,9 +119,10 @@ void main() {
         await tester.ensureVisible(locateButton);
         await tester.tap(locateButton);
 
-        await reposCubit.waitUntil((_) => reposCubit.repos.length == 2);
-        await reposCubit.waitUntil(
-            (_) => reposCubit.currentRepo?.location == exportedLocation);
+        await deps.reposCubit
+            .waitUntil((_) => deps.reposCubit.repos.length == 2);
+        await deps.reposCubit.waitUntil(
+            (_) => deps.reposCubit.currentRepo?.location == exportedLocation);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains both repos.
         // Problem is that calling `pumpAndSettle` here throws timeout exception and calling just
@@ -182,15 +138,15 @@ void main() {
       () async {
         final location = await createExportedRepo();
 
-        await reposCubit.waitUntil((_) => !reposCubit.isLoading);
-        await reposCubit.importRepoFromLocation(location);
+        await deps.reposCubit.waitUntil((_) => !deps.reposCubit.isLoading);
+        await deps.reposCubit.importRepoFromLocation(location);
 
-        final repoEntry = reposCubit.get(location);
+        final repoEntry = deps.reposCubit.get(location);
         final repoCubit = repoEntry!.cubit!;
 
-        await tester.pumpWidget(testApp(buildMainPage()));
+        await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
-        await reposCubit.waitUntil((_) => !reposCubit.isLoading);
+        await deps.reposCubit.waitUntil((_) => !deps.reposCubit.isLoading);
 
         final repoItem = find.widgetWithText(InkWell, location.name);
         final readIcon = find.descendant(
@@ -215,7 +171,8 @@ void main() {
 
         // Tap the repo to go to the unlock page.
         await tester.tap(repoItem);
-        await reposCubit.waitUntil((_) => reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit
+            .waitUntil((_) => deps.reposCubit.currentRepo == repoEntry);
         await repoCubit.waitUntil((state) => !state.isLoading);
         await tester.pumpAndSettle();
 

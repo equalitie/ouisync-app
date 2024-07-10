@@ -6,11 +6,21 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/cubits/power_control.dart';
+import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/cache_servers.dart';
+import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
+import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
+import 'package:ouisync_plugin/native_channels.dart';
+import 'package:ouisync_plugin/ouisync_plugin.dart' show Session, SessionKind;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Setup the test environment and run `callback` inside it.
@@ -43,6 +53,77 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   await callback();
+}
+
+/// Helper to setup and teardown common widget test dependencies
+class TestDependencies {
+  TestDependencies._(
+    this.session,
+    this.settings,
+    this.nativeChannels,
+    this.powerControl,
+    this.reposCubit,
+  );
+
+  static Future<TestDependencies> create() async {
+    final configPath = join(
+      (await getApplicationSupportDirectory()).path,
+      'config',
+    );
+
+    final session = Session.create(
+      kind: SessionKind.unique,
+      configPath: configPath,
+    );
+
+    final settings = await Settings.init(MasterKey.random());
+    final nativeChannels = NativeChannels(session);
+    final powerControl = PowerControl(
+      session,
+      settings,
+      connectivity: FakeConnectivity(),
+    );
+    final reposCubit = ReposCubit(
+      cacheServers: CacheServers.disabled,
+      nativeChannels: nativeChannels,
+      session: session,
+      settings: settings,
+    );
+
+    return TestDependencies._(
+      session,
+      settings,
+      nativeChannels,
+      powerControl,
+      reposCubit,
+    );
+  }
+
+  Future<void> dispose() async {
+    await reposCubit.close();
+    await powerControl.close();
+    await session.close();
+  }
+
+  MainPage createMainPage({
+    Stream<List<SharedMediaFile>>? receivedMedia,
+  }) =>
+      MainPage(
+        nativeChannels: nativeChannels,
+        packageInfo: fakePackageInfo,
+        powerControl: powerControl,
+        receivedMedia: receivedMedia ?? Stream.empty(),
+        reposCubit: reposCubit,
+        session: session,
+        settings: settings,
+        windowManager: FakeWindowManager(),
+      );
+
+  final Session session;
+  final Settings settings;
+  final NativeChannels nativeChannels;
+  final PowerControl powerControl;
+  final ReposCubit reposCubit;
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
