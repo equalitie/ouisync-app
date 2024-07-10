@@ -215,6 +215,23 @@ enum SecretKeyOrigin {
   }
 }
 
+enum SecretKeyStore {
+  notStored,
+  stored,
+  securedWithBiometrics,
+  ;
+
+  bool get isStored => switch (this) {
+        notStored => false,
+        stored || securedWithBiometrics => true,
+      };
+
+  bool get isSecuredWithBiometrics => switch (this) {
+        securedWithBiometrics => true,
+        notStored || stored => false,
+      };
+}
+
 /// How is the local secret key obtained and stored
 enum LocalSecretMode {
   /// Derived from a user provided password, not stored in the secure storage
@@ -242,19 +259,44 @@ enum LocalSecretMode {
         randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
       };
 
-  bool get isStored => switch (this) {
-        manual => false,
-        manualStored ||
-        manualSecuredWithBiometrics ||
-        randomStored ||
-        randomSecuredWithBiometrics =>
-          true,
+  SecretKeyStore get store => switch (this) {
+        manual => SecretKeyStore.notStored,
+        manualStored || randomStored => SecretKeyStore.stored,
+        LocalSecretMode.manualSecuredWithBiometrics ||
+        LocalSecretMode.randomSecuredWithBiometrics =>
+          SecretKeyStore.securedWithBiometrics,
       };
+}
 
-  bool get isSecuredWithBiometrics => switch (this) {
-        manualSecuredWithBiometrics || randomSecuredWithBiometrics => true,
-        manual || manualStored || randomStored => false,
+/// Parameters to compute local secret and auth mode.
+sealed class LocalSecretInput {
+  LocalSecretMode get mode;
+}
+
+class LocalSecretManual extends LocalSecretInput {
+  LocalSecretManual({required this.password, required this.store});
+
+  final LocalPassword password;
+  final SecretKeyStore store;
+
+  @override
+  LocalSecretMode get mode => switch (store) {
+        SecretKeyStore.notStored => LocalSecretMode.manual,
+        SecretKeyStore.stored => LocalSecretMode.manualStored,
+        SecretKeyStore.securedWithBiometrics =>
+          LocalSecretMode.manualSecuredWithBiometrics,
       };
+}
+
+class LocalSecretRandom extends LocalSecretInput {
+  LocalSecretRandom({this.secureWithBiometrics = false});
+
+  final bool secureWithBiometrics;
+
+  @override
+  LocalSecretMode get mode => secureWithBiometrics
+      ? LocalSecretMode.randomSecuredWithBiometrics
+      : LocalSecretMode.randomStored;
 }
 
 sealed class AuthModeException implements Exception {}

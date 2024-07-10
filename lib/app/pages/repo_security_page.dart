@@ -1,15 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
-import '../mixins/repo_actions_mixin.dart';
+import '../cubits/repo_security.dart';
 import '../utils/utils.dart';
 import '../models/models.dart';
+import '../widgets/holder.dart';
 import '../widgets/widgets.dart';
 
-class RepoSecurityPage extends StatefulWidget {
+class RepoSecurityPage extends StatelessWidget {
   const RepoSecurityPage({
     required this.settings,
     required this.repo,
@@ -23,88 +25,50 @@ class RepoSecurityPage extends StatefulWidget {
   final PasswordHasher passwordHasher;
 
   @override
-  State<RepoSecurityPage> createState() => _RepoSecurityPageState();
-}
-
-class _RepoSecurityPageState extends State<RepoSecurityPage>
-    with AppLogger, RepositoryActionsMixin {
-  var isBiometricsAvailable = false;
-
-  late LocalSecretMode oldLocalSecretMode =
-      widget.repo.state.authMode.localSecretMode;
-  late LocalSecretMode newLocalSecretMode = oldLocalSecretMode;
-
-  late LocalSecret oldLocalSecret = widget.currentLocalSecret;
-  LocalPassword? newLocalPassword;
-
-  final formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-
-    unawaited(LocalAuth.canAuthenticate().then(
-      (value) => setState(() {
-        isBiometricsAvailable = value;
-      }),
-    ));
-  }
-
-  @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
-        body: _buildContent(context),
-      );
-
-  ContentWithStickyFooterState _buildContent(BuildContext context) =>
-      ContentWithStickyFooterState(
-        content: Form(
-          key: formKey,
-          canPop: false,
-          onPopInvoked: (didPop) => _onPopInvoked(context, didPop),
-          child: _buildForm(),
-        ),
-        footer: Fields.inPageButton(
-          text: S.current.actionUpdate,
-          onPressed: _isSubmitEnabled ? () => _onSubmit(context) : null,
-        ),
-      );
-
-  Column _buildForm() => Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          RepoSecurity(
-            initialLocalSecretMode: oldLocalSecretMode,
-            isBiometricsAvailable: isBiometricsAvailable,
-            onChanged: _onLocalSecretChanged,
+        body: BlocHolder(
+          create: () => RepoSecurityCubit(
+            oldLocalSecretMode: repo.state.authMode.localSecretMode,
+            oldLocalSecret: currentLocalSecret,
           ),
-        ],
+          builder: _buildContent,
+        ),
       );
 
-  void _onLocalSecretChanged(
-    LocalSecretMode localSecretMode,
-    LocalPassword? localPassword,
+  ContentWithStickyFooterState _buildContent(
+    BuildContext context,
+    RepoSecurityCubit cubit,
+  ) =>
+      ContentWithStickyFooterState(
+        content: PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) => _onPopInvoked(context, didPop, cubit.state),
+          child: RepoSecurity(
+            cubit,
+          ),
+        ),
+        footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
+          bloc: cubit,
+          builder: (context, state) => Fields.inPageButton(
+            text: S.current.actionUpdate,
+            onPressed: state.hasPendingChanges && state.isValid
+                ? () => _onSubmit(context, cubit)
+                : null,
+          ),
+        ),
+      );
+
+  void _onPopInvoked(
+    BuildContext context,
+    bool didPop,
+    RepoSecurityState state,
   ) {
-    setState(() {
-      newLocalSecretMode = localSecretMode;
-      newLocalPassword = localPassword;
-    });
-  }
-
-  // If origin is manual, only allow submit if something actually changed.
-  // If it's random, always allow it to allow regenerating the random secret key.
-  bool get _isSubmitEnabled =>
-      _hasPendingChanges || newLocalSecretMode.origin == SecretKeyOrigin.random;
-
-  bool get _hasPendingChanges =>
-      newLocalSecretMode != oldLocalSecretMode || newLocalPassword != null;
-
-  void _onPopInvoked(BuildContext context, bool didPop) {
     if (didPop) {
       return;
     }
 
-    if (!_hasPendingChanges) {
+    if (!state.hasPendingChanges) {
       Navigator.pop(context);
       return;
     }
@@ -128,80 +92,21 @@ class _RepoSecurityPageState extends State<RepoSecurityPage>
     });
   }
 
-  Future<void> _onSubmit(BuildContext context) async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
+  Future<void> _onSubmit(BuildContext context, RepoSecurityCubit cubit) async {
     final confirm = await _confirmSaveChanges(context);
     if (!confirm) {
       return;
     }
 
-    final newLocalSecret = await _computeLocalSecret();
-    final newAuthMode = await _computeAuthMode(newLocalSecret?.key);
-
-    // Keep the old auth mode in case we need to revert to it on error.
-    final oldAuthMode = widget.repo.state.authMode;
-
-    // Save the new auth mode
-    if (newAuthMode != null) {
-      try {
-        await widget.repo.setAuthMode(newAuthMode);
-
-        setState(() {
-          oldLocalSecretMode = newAuthMode.localSecretMode;
-        });
-
-        loggy.debug('Repo auth mode updated: $newAuthMode');
-      } catch (e, st) {
-        loggy.error(
-          'Failed to update repo auth mode:',
-          e,
-          st,
-        );
-
-        showSnackBar(S.current.messageUpdateLocalSecretFailed);
-
-        return;
-      }
+    if (await cubit.apply(
+      repo,
+      passwordHasher: passwordHasher,
+      masterKey: settings.masterKey,
+    )) {
+      showSnackBar(S.current.messageUpdateLocalSecretOk);
+    } else {
+      showSnackBar(S.current.messageUpdateLocalSecretFailed);
     }
-
-    // Save the new local secret, if it changed
-    //
-    // NOTE: If `newAuthMode` is null then `newLocalSecret` is also null so we can never get the
-    // situation where we would save a new local secret but not update the auth mode
-    // accordingly.
-    if (newLocalSecret != null) {
-      try {
-        await widget.repo.setLocalSecret(
-          oldSecret: oldLocalSecret,
-          newSecret: newLocalSecret,
-        );
-
-        setState(() {
-          oldLocalSecret = newLocalSecret.key;
-          newLocalPassword = null;
-        });
-
-        loggy.debug('Repo local secret updated');
-      } catch (e, st) {
-        loggy.error(
-          'Failed to update repo local secret:',
-          e,
-          st,
-        );
-
-        showSnackBar(S.current.messageUpdateLocalSecretFailed);
-
-        // Revert to the old auth mode
-        await widget.repo.setAuthMode(oldAuthMode);
-
-        return;
-      }
-    }
-
-    showSnackBar(S.current.messageUpdateLocalSecretOk);
   }
 
   Future<bool> _confirmSaveChanges(BuildContext context) async {
@@ -222,46 +127,5 @@ class _RepoSecurityPageState extends State<RepoSecurityPage>
     );
 
     return saveChanges ?? false;
-  }
-
-  Future<LocalSecretKeyAndSalt?> _computeLocalSecret() async {
-    switch (newLocalSecretMode.origin) {
-      case SecretKeyOrigin.manual:
-        final localPassword = newLocalPassword;
-        if (localPassword == null) {
-          return null;
-        }
-
-        return await widget.passwordHasher.hashPassword(localPassword);
-      case SecretKeyOrigin.random:
-        return LocalSecretKeyAndSalt.random();
-    }
-  }
-
-  Future<AuthMode?> _computeAuthMode(LocalSecretKey? localSecretKey) async {
-    if (newLocalSecretMode.isStored) {
-      if (localSecretKey != null) {
-        return await AuthModeKeyStoredOnDevice.encrypt(
-          widget.settings.masterKey,
-          localSecretKey,
-          keyOrigin: newLocalSecretMode.origin,
-          secureWithBiometrics: newLocalSecretMode.isSecuredWithBiometrics,
-        );
-      } else {
-        final oldAuthMode = widget.repo.state.authMode;
-        switch (oldAuthMode) {
-          case AuthModeKeyStoredOnDevice():
-            return oldAuthMode.copyWith(
-              keyOrigin: newLocalSecretMode.origin,
-              secureWithBiometrics: newLocalSecretMode.isSecuredWithBiometrics,
-            );
-          case AuthModeBlindOrManual():
-          case AuthModePasswordStoredOnDevice():
-            return null;
-        }
-      }
-    } else {
-      return AuthModeBlindOrManual();
-    }
   }
 }
