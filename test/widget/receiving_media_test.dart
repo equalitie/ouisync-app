@@ -12,7 +12,7 @@ import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/widgets/buttons/dialog_negative_button.dart';
 import 'package:ouisync_app/app/widgets/buttons/dialog_positive_button.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';

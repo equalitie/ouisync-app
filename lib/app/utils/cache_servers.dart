@@ -1,4 +1,4 @@
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 
 /// Utility to set and query the cache servers state.
 class CacheServers {

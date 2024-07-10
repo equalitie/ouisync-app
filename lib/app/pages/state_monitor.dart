@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
-import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:ouisync/ouisync.dart' as oui;
+import 'package:ouisync/state_monitor.dart';
 
 import '../cubits/cubits.dart';
 import '../../generated/l10n.dart';

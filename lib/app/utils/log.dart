@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as o;
+import 'package:ouisync/ouisync.dart' as o;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:watcher/watcher.dart';

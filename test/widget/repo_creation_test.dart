@@ -7,7 +7,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart'
+import 'package:ouisync/ouisync.dart'
     show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
 import 'package:path/path.dart' show join;
 

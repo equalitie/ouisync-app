@@ -77,7 +77,7 @@ dependencies:
   move_to_background: ^1.0.2
   mutex: ^3.1.0
   network_info_plus: ^5.0.3
-  ouisync_plugin:
+  ouisync:
     path: ouisync/bindings/dart
   package_info_plus: ^5.0.1
   path: ^1.8.2

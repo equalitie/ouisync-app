@@ -31,7 +31,7 @@
     android:roundIcon="@mipmap/ic_launcher_round">
     <provider
       tools:replace="android:authorities"
-      android:name="ie.equalit.ouisync_plugin.PipeProvider"
+      android:name="org.equalitie.ouisync.PipeProvider"
       android:authorities="${applicationId}.pipe"
       android:exported="true"/>
     <!--

@@ -13,7 +13,7 @@ import device_info_plus
 import flutter_secure_storage_macos
 import mobile_scanner
 import network_info_plus
-import ouisync_plugin
+import ouisync
 import package_info_plus
 import path_provider_foundation
 import screen_retriever
