@@ -5,19 +5,13 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
-import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/app/widgets/buttons/dialog_negative_button.dart';
 import 'package:ouisync_app/app/widgets/buttons/dialog_positive_button.dart';
-import 'package:ouisync_plugin/native_channels.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -26,58 +20,21 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../utils.dart';
 
 void main() {
-  late Session session;
-  late Settings settings;
-  late NativeChannels nativeChannels;
-  late PowerControl powerControl;
-  late ReposCubit reposCubit;
+  late TestDependencies deps;
   late StreamController<List<SharedMediaFile>> mediaReceiverController;
 
   setUp(() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
-
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
-
-    settings = await Settings.init(MasterKey.random());
-    nativeChannels = NativeChannels(session);
-    powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
-    reposCubit = ReposCubit(
-      cacheServers: CacheServers.disabled,
-      nativeChannels: nativeChannels,
-      session: session,
-      settings: settings,
-    );
-
+    deps = await TestDependencies.create();
     mediaReceiverController = StreamController();
   });
 
   tearDown(() async {
     await mediaReceiverController.close();
-    await reposCubit.close();
-    await powerControl.close();
-    await session.close();
+    await deps.dispose();
   });
 
-  MainPage makeMainPage() => MainPage(
-        nativeChannels: nativeChannels,
-        packageInfo: fakePackageInfo,
-        powerControl: powerControl,
-        receivedMedia: mediaReceiverController.stream,
-        reposCubit: reposCubit,
-        session: session,
-        settings: settings,
-        windowManager: FakeWindowManager(),
-      );
+  MainPage createMainPage() =>
+      deps.createMainPage(receivedMedia: mediaReceiverController.stream);
 
   Future<io.File> createFile({
     required String name,
@@ -109,7 +66,7 @@ void main() {
       () async {
         final file = await createFile(name: 'file.txt');
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(createMainPage()));
         await tester.pumpAndSettle();
 
         mediaReceiverController.add([
@@ -147,9 +104,9 @@ void main() {
         final file = await createFile(name: fileName, content: fileContent);
 
         final repoName = 'my repo';
-        final repoEntry = await reposCubit.createRepository(
+        final repoEntry = await deps.reposCubit.createRepository(
           location: RepoLocation.fromParts(
-            dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -157,7 +114,7 @@ void main() {
         );
         final repoCubit = repoEntry.cubit!;
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(createMainPage()));
         await tester.pumpAndSettle();
 
         mediaReceiverController.add([
@@ -169,8 +126,9 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.text(repoName));
-        await reposCubit.waitUntil((_) =>
-            !reposCubit.isLoading && reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit.waitUntil((_) =>
+            !deps.reposCubit.isLoading &&
+            deps.reposCubit.currentRepo == repoEntry);
         await tester.pump();
 
         expect(find.widgetWithText(AppBar, repoName), findsOne);
@@ -200,9 +158,9 @@ void main() {
         final file = await createFile(name: fileName, content: fileContent);
 
         final repoName = 'my repo';
-        final repoEntry = await reposCubit.createRepository(
+        final repoEntry = await deps.reposCubit.createRepository(
           location: RepoLocation.fromParts(
-            dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -212,9 +170,10 @@ void main() {
         );
         final repoCubit = repoEntry.cubit!;
 
-        await tester.pumpWidget(testApp(makeMainPage()));
-        await reposCubit.waitUntil((_) =>
-            !reposCubit.isLoading && reposCubit.currentRepo == repoEntry);
+        await tester.pumpWidget(testApp(createMainPage()));
+        await deps.reposCubit.waitUntil((_) =>
+            !deps.reposCubit.isLoading &&
+            deps.reposCubit.currentRepo == repoEntry);
         await tester.pump();
 
         // Verify we are in the single repo screen
@@ -226,7 +185,7 @@ void main() {
             type: SharedMediaType.file,
           ),
         ]);
-        await reposCubit.bottomSheet
+        await deps.reposCubit.bottomSheet
             .waitUntil((state) => state is SaveMediaSheetState);
         await tester.pump();
 
@@ -252,14 +211,14 @@ void main() {
         final repoPath =
             join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
         final repo = await Repository.create(
-          session,
+          deps.session,
           store: repoPath,
           readSecret: null,
           writeSecret: null,
         );
         await repo.close();
 
-        await tester.pumpWidget(testApp(makeMainPage()));
+        await tester.pumpWidget(testApp(createMainPage()));
         await tester.pumpAndSettle();
 
         expect(find.text(repoName), findsNothing);
@@ -270,7 +229,8 @@ void main() {
             type: SharedMediaType.file,
           ),
         ]);
-        await reposCubit.waitUntil((_) => reposCubit.repos.isNotEmpty);
+        await deps.reposCubit
+            .waitUntil((_) => deps.reposCubit.repos.isNotEmpty);
         await tester.pumpAndSettle();
 
         expect(find.text(repoName), findsOne);
@@ -287,7 +247,7 @@ void main() {
           final repoPath =
               join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
           final repo = await Repository.create(
-            session,
+            deps.session,
             store: repoPath,
             readSecret: null,
             writeSecret: null,
@@ -302,7 +262,7 @@ void main() {
           final stateObserver = StateObserver.install<RepoCreationState>();
 
           await tester.pumpWidget(testApp(
-            makeMainPage(),
+            createMainPage(),
             navigatorObservers: [navigationObserver],
           ));
           await tester.pumpAndSettle();
@@ -335,7 +295,7 @@ void main() {
               .waitUntil((state) => state.substate is RepoCreationSuccess);
 
           expect(
-            reposCubit.repos.where((entry) => entry.name == repoName),
+            deps.reposCubit.repos.where((entry) => entry.name == repoName),
             isNotEmpty,
           );
         },

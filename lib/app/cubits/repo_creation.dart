@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/utils/local_auth.dart';
 import 'package:ouisync_app/app/utils/log.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart' show AccessMode, ShareToken;
 
@@ -19,7 +18,6 @@ class RepoCreationState {
   static const initialLocalSecretMode = LocalSecretMode.randomStored;
 
   final AccessMode accessMode;
-  final bool isBiometricsAvailable;
   final LocalSecretMode localSecretMode;
   final bool loading;
   final RepoCreationSubstate substate;
@@ -29,7 +27,6 @@ class RepoCreationState {
 
   RepoCreationState({
     this.accessMode = AccessMode.write,
-    this.isBiometricsAvailable = false,
     this.loading = false,
     this.localSecretMode = initialLocalSecretMode,
     this.substate = const RepoCreationPending(),
@@ -50,8 +47,6 @@ class RepoCreationState {
   }) =>
       RepoCreationState(
         accessMode: accessMode ?? this.accessMode,
-        isBiometricsAvailable:
-            isBiometricsAvailable ?? this.isBiometricsAvailable,
         localSecretMode: localSecretMode ?? this.localSecretMode,
         loading: loading ?? this.loading,
         substate: substate ?? this.substate,
@@ -138,8 +133,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
       () => unawaited(_onNameChanged(nameController.text)),
     );
 
-    setLocalSecret(RepoCreationState.initialLocalSecretMode, null);
-    unawaited(_init());
+    setLocalSecret(LocalSecretRandom());
   }
 
   final ReposCubit reposCubit;
@@ -177,54 +171,42 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     emit(state.copyWith(useCacheServers: value));
   }
 
-  void setLocalSecret(LocalSecretMode mode, LocalPassword? password) {
-    final setLocalSecret = (state.accessMode == AccessMode.blind ||
-            mode.origin == SecretKeyOrigin.random)
-        ? LocalSecretKeyAndSalt.random()
-        : password;
+  void setLocalSecret(LocalSecretInput input) {
+    final setLocalSecret = switch ((state.accessMode, input)) {
+      (AccessMode.blind, _) ||
+      (_, LocalSecretRandom()) =>
+        LocalSecretKeyAndSalt.random(),
+      (_, LocalSecretManual(password: final password)) => password,
+    };
 
     RepoCreationSubstate substate;
 
-    if (setLocalSecret == null) {
-      substate = switch (state.substate) {
+    substate = switch (state.substate) {
+      RepoCreationPending(location: final location) when location != null =>
+        RepoCreationValid(
+          location: location,
+          setLocalSecret: setLocalSecret,
+        ),
+      RepoCreationPending(
+        location: final location,
+        nameError: final nameError
+      ) =>
         RepoCreationPending(
-          location: final location,
-          nameError: final nameError
-        ) =>
-          RepoCreationPending(location: location, nameError: nameError),
-        RepoCreationValid(location: final location) ||
-        RepoCreationSuccess(location: final location) ||
-        RepoCreationFailure(location: final location) =>
-          RepoCreationPending(location: location),
-      };
-    } else {
-      substate = switch (state.substate) {
-        RepoCreationPending(location: final location) when location != null =>
-          RepoCreationValid(
-            location: location,
-            setLocalSecret: setLocalSecret,
-          ),
-        RepoCreationPending(
-          location: final location,
-          nameError: final nameError
-        ) =>
-          RepoCreationPending(
-            location: location,
-            nameError: nameError,
-            setLocalSecret: setLocalSecret,
-          ),
-        RepoCreationValid(location: final location) =>
-          RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
-        RepoCreationSuccess(location: final location) ||
-        RepoCreationFailure(location: final location) =>
-          RepoCreationValid(
-            location: location,
-            setLocalSecret: setLocalSecret,
-          ),
-      };
-    }
+          location: location,
+          nameError: nameError,
+          setLocalSecret: setLocalSecret,
+        ),
+      RepoCreationValid(location: final location) =>
+        RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
+      RepoCreationSuccess(location: final location) ||
+      RepoCreationFailure(location: final location) =>
+        RepoCreationValid(
+          location: location,
+          setLocalSecret: setLocalSecret,
+        ),
+    };
 
-    emit(state.copyWith(substate: substate, localSecretMode: mode));
+    emit(state.copyWith(substate: substate, localSecretMode: input.mode));
   }
 
   Future<void> save() async {
@@ -258,15 +240,6 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
       case MissingRepoEntry():
         throw 'unreachable code';
     }
-  }
-
-  Future<void> _init() async {
-    await _loading(() async {
-      final canAuthenticate = await LocalAuth.canAuthenticate();
-      emit(state.copyWith(
-        isBiometricsAvailable: canAuthenticate,
-      ));
-    });
   }
 
   Future<R> _loading<R>(Future<R> Function() f) async {
