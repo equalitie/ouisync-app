@@ -1,6 +1,6 @@
 import 'dart:io' as io;
 
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 

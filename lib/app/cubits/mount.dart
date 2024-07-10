@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' as oui;
+import 'package:ouisync/ouisync.dart' as oui;
 
 import '../utils/log.dart';
 

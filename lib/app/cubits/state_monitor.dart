@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ouisync_plugin/state_monitor.dart';
+import 'package:ouisync/state_monitor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class StateMonitorCubit extends Cubit<StateMonitorNode?> {

@@ -1,5 +1,5 @@
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' show Repository, Session;
+import 'package:ouisync/ouisync.dart' show Repository, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'session.dart';

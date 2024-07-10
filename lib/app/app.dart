@@ -5,8 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/widgets/media_receiver.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
-import 'package:ouisync_plugin/native_channels.dart';
+import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/native_channels.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 

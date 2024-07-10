@@ -5,7 +5,7 @@ import 'package:badges/badges.dart' as b;
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../pages/pages.dart';

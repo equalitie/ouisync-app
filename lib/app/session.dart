@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' show Session;
+import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

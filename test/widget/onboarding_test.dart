@@ -3,7 +3,7 @@ import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 

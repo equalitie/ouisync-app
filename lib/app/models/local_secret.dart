@@ -1,4 +1,4 @@
-export 'package:ouisync_plugin/ouisync_plugin.dart'
+export 'package:ouisync/ouisync.dart'
     show
         LocalPassword,
         LocalSecret,

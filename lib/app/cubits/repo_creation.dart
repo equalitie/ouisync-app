@@ -7,7 +7,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/log.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart' show AccessMode, ShareToken;
+import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
 
 import '../../generated/l10n.dart';
 import '../models/repo_entry.dart';

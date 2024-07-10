@@ -1,7 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 
 import '../cubits/cubits.dart';

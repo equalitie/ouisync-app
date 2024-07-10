@@ -7,7 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   flutter_secure_storage_windows
   local_auth_windows
-  ouisync_plugin
+  ouisync
   permission_handler_windows
   screen_retriever
   sentry_flutter
