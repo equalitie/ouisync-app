@@ -1,5 +1,5 @@
 // TODO: replace this with `Result` from `result_type` once we bump it to v1.0.
-import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repos.dart';
