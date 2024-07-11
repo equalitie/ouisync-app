@@ -1,4 +1,4 @@
-package org.equalitie.ouisync
+package org.equalitie.ouisync_app
 
 import android.content.Context
 import android.content.Intent
