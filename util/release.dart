@@ -70,7 +70,7 @@ Future<void> main(List<String> args) async {
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
-  if (options.deb_gui) {
+  if (options.debGui) {
     final asset = await buildDebGUI(
         name: name,
         outputDir: outputDir,
@@ -80,7 +80,7 @@ Future<void> main(List<String> args) async {
     assets.add(asset);
   }
 
-  if (options.deb_cli) {
+  if (options.debCli) {
     final asset = await buildDebCLI(
         name: name,
         outputDir: outputDir,
@@ -144,8 +144,8 @@ class Options {
   final bool aab;
   final bool exe;
   final bool msix;
-  final bool deb_gui;
-  final bool deb_cli;
+  final bool debGui;
+  final bool debCli;
 
   final String? token;
   final RepositorySlug slug;
@@ -161,8 +161,8 @@ class Options {
     this.aab = false,
     this.exe = false,
     this.msix = false,
-    this.deb_gui = false,
-    this.deb_cli = false,
+    this.debGui = false,
+    this.debCli = false,
     this.token,
     required this.slug,
     this.action,
@@ -289,10 +289,10 @@ class Options {
     final aab = results['aab'];
     final exe = results['exe'];
     final msix = results['msix'];
-    final deb_gui = results['deb-gui'];
-    final deb_cli = results['deb-cli'];
+    final debGui = results['deb-gui'];
+    final debCli = results['deb-cli'];
 
-    if (!apk && !aab && !exe && !msix && !deb_gui && !deb_cli) {
+    if (!apk && !aab && !exe && !msix && !debGui && !debCli) {
       print(
           "No package to build. Use one or more flags from {--apk, --aab, --exe, --msix, --deb-gui, --deb-cli}");
       exit(1);
@@ -303,8 +303,8 @@ class Options {
       aab: aab,
       exe: exe,
       msix: msix,
-      deb_gui: deb_gui,
-      deb_cli: deb_cli,
+      debGui: debGui,
+      debCli: debCli,
       token: token?.trim(),
       slug: slug,
       action: action,
@@ -537,7 +537,7 @@ Future<File> buildDebGUI({
   ]);
 
   final arch = 'amd64';
-  final packageName = '${name}-gui_${buildDesc}_$arch';
+  final packageName = '$name-gui_${buildDesc}_$arch';
 
   final packageDir = Directory('${outputDir.path}/$packageName');
 
@@ -634,7 +634,7 @@ Future<File> buildDebCLI(
       'cargo', ['build', '--release', '--package', 'ouisync-cli'], './ouisync');
 
   final arch = 'amd64';
-  final packageName = '${name}-cli_${buildDesc}_$arch';
+  final packageName = '$name-cli_${buildDesc}_$arch';
 
   final packageDir = Directory('${outputDir.path}/$packageName');
 
