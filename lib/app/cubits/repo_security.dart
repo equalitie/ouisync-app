@@ -123,9 +123,11 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
 
   Future<void> _init() async {
     final canAuthenticate = await LocalAuth.canAuthenticate();
-    emit(state.copyWith(
-      isBiometricsAvailable: canAuthenticate,
-    ));
+    if (!isClosed) {
+      emit(state.copyWith(
+        isBiometricsAvailable: canAuthenticate,
+      ));
+    }
   }
 
   void setOrigin(SecretKeyOrigin value) {
