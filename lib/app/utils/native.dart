@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 /// implemented natively, and viceversa.
 class Native {
   static const MethodChannel _channel =
-      MethodChannel('org.equalitie.ouisync/native');
+      MethodChannel('org.equalitie.ouisync_app/native');
 
   /// Sets the method handler for the calls to and from native implementations.
   static void init() {
