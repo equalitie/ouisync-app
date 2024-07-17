@@ -20,7 +20,11 @@ class RepoCreationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text(S.current.titleCreateRepository),
+          title: Text(
+            token == null
+                ? S.current.titleCreateRepository
+                : S.current.titleAddRepository,
+          ),
           elevation: 0.0,
         ),
         body: BlocHolder(
