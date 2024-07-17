@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
+import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
 import '../utils/master_key.dart';
+import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -118,6 +122,57 @@ mixin RepositoryActionsMixin on LoggyType {
           body: UnlockDialog(repoCubit),
         ),
       );
+
+  Future<void> locateRepository(
+    BuildContext context, {
+    required RepoLocation repoLocation,
+    required bool windows,
+  }) async {
+    final uri = Uri.directory(repoLocation.dir.path, windows: windows);
+    if (PlatformValues.isDesktopDevice) {
+      await launcher.launchUrl(uri);
+      return;
+    }
+
+    await _showRepoLocationDialog(context, repoLocation);
+  }
+
+  Future<void> _showRepoLocationDialog(
+    BuildContext context,
+    RepoLocation repoLocation,
+  ) async {
+    final dbFile = p.basename(repoLocation.path);
+    final segments = p.split(repoLocation.dir.path);
+
+    final breadcrumbs = BreadCrumb.builder(
+      itemCount: segments.length,
+      divider: const Icon(Icons.chevron_right_rounded),
+      builder: (index) {
+        final crumb = Text(segments[index]);
+        return BreadCrumbItem(content: crumb);
+      },
+    );
+
+    await Dialogs.alertDialogWithActions(
+      context: context,
+      title: S.current.actionLocateRepo,
+      body: [
+        Fields.ellipsedText(
+          dbFile,
+          style: context.theme.appTextStyle.bodyMedium
+              .copyWith(fontWeight: FontWeight.w400),
+        ),
+        Dimensions.spacingVerticalDouble,
+        breadcrumbs,
+      ],
+      actions: [
+        TextButton(
+          child: Text(S.current.actionCloseCapital),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+      ],
+    );
+  }
 
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(

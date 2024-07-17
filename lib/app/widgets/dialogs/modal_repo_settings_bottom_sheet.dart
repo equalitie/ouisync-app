@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_plugin/ouisync_plugin.dart';
@@ -123,10 +125,15 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       //        Navigator.of(context).pop();
                       //      }),
                       EntryActionItem(
-                          iconData: Icons.snippet_folder_outlined,
-                          title: S.current.actionLocateRepo,
-                          dense: true,
-                          onTap: null),
+                        iconData: Icons.snippet_folder_outlined,
+                        title: S.current.actionLocateRepo,
+                        dense: true,
+                        onTap: () async => await locateRepository(
+                          context,
+                          repoLocation: widget.repoCubit.location,
+                          windows: Platform.isWindows,
+                        ),
+                      ),
                       EntryActionItem(
                           iconData: Icons.delete_outline,
                           title: S.current.actionDelete,
