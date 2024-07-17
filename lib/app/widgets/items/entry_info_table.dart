@@ -25,7 +25,7 @@ class EntryInfoTable extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.iconLabel(
-              icon: Icons.info_rounded,
+              icon: Icons.info_outline_rounded,
               text: S.current.iconInformation,
               style: context.theme.appTextStyle.titleMedium),
           _getInfoTable(entryInfo),

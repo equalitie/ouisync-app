@@ -324,7 +324,7 @@ class Fields {
           {Key? key,
           TextAlign textAlign = TextAlign.start,
           TextOverflow textOverflow = TextOverflow.ellipsis,
-          TextOverflowPosition ellipsisPosition = TextOverflowPosition.end,
+          TextOverflowPosition ellipsisPosition = TextOverflowPosition.middle,
           bool softWrap = true,
           TextStyle? style,
           int maxLines = 1}) =>
@@ -337,13 +337,11 @@ class Fields {
         maxLines: maxLines,
         style: style,
         overflowWidget: TextOverflowWidget(
-          position: TextOverflowPosition.middle,
-          child: Text(
-            '...',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          position: ellipsisPosition,
+          child: Text('...'),
         ),
       );
+
   static Widget constrainedText(String text,
           {Key? key,
           int flex = 1,

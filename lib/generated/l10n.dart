@@ -4850,6 +4850,16 @@ class S {
     );
   }
 
+  /// `Locate repository`
+  String get actionLocateRepo {
+    return Intl.message(
+      'Locate repository',
+      name: 'actionLocateRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Accessing repositories via File Explorer is not available: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(

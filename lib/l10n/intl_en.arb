@@ -690,6 +690,7 @@
   "actionNewMediaFile":"Media",
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
+  "actionLocateRepo":"Locate repository",
   "messageFailedToMount": "Accessing repositories via File Explorer is not available: {reason}",
   "@messageFailedToMount": {
     "placeholders": {

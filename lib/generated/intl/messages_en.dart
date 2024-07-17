@@ -146,6 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Import repository"),
         "actionInstallDokan":
             MessageLookupByLibrary.simpleMessage("Install Dokan"),
+        "actionLocateRepo":
+            MessageLookupByLibrary.simpleMessage("Locate repository"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),

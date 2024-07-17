@@ -224,6 +224,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Слушаю на QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6":
             MessageLookupByLibrary.simpleMessage("Слушаю на QUIC/UDP IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("Запомнить пароль"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ввести новое имя: "),
         "labelRepositoryCurrentPassword":
@@ -738,6 +740,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementNumber": m35,
         "replacementPath": m36,
         "replacementStatus": m37,
+        "repositoryIsAlreadyImported":
+            MessageLookupByLibrary.simpleMessage("Хранилище уже импортируется"),
         "statusSync": MessageLookupByLibrary.simpleMessage("СИНХРОНИЗИРОВАНО"),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage("Не указано"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("О приложении"),
@@ -778,6 +782,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "3.4 Удаление ваших данных с нашего Always-On-Peer сервера"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("Цифровая Безопасность"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("Установка Dokan"),
+        "titleDokanInstallationFound":
+            MessageLookupByLibrary.simpleMessage("Установка Dokan найдена"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Путь загрузок"),
         "titleDownloadToDevice":

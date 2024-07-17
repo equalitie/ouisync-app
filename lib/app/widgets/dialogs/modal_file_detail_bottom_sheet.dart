@@ -51,7 +51,7 @@ class _FileDetailState extends State<FileDetail> {
                 style: context.theme.appTextStyle.titleMedium,
               ),
               EntryActionItem(
-                iconData: Icons.download,
+                iconData: Icons.download_outlined,
                 title: S.current.iconDownload,
                 dense: true,
                 onTap: () async {
@@ -85,7 +85,7 @@ class _FileDetailState extends State<FileDetail> {
                     Constants.notAvailableActionMessageDuration,
               ),
               EntryActionItem(
-                iconData: Icons.preview_rounded,
+                iconData: Icons.preview_outlined,
                 title: S.current.iconPreview,
                 dense: true,
                 onTap: () async {
@@ -107,7 +107,7 @@ class _FileDetailState extends State<FileDetail> {
               ),
               if (io.Platform.isAndroid)
                 EntryActionItem(
-                  iconData: Icons.share_rounded,
+                  iconData: Icons.share_outlined,
                   title: S.current.iconShare,
                   dense: true,
                   onTap: () async =>
@@ -125,7 +125,7 @@ class _FileDetailState extends State<FileDetail> {
                       Constants.notAvailableActionMessageDuration,
                 ),
               EntryActionItem(
-                iconData: Icons.edit,
+                iconData: Icons.edit_outlined,
                 title: S.current.iconRename,
                 dense: true,
                 onTap: () async => _showRenameDialog(widget.entry),
@@ -162,7 +162,7 @@ class _FileDetailState extends State<FileDetail> {
                     Constants.notAvailableActionMessageDuration,
               ),
               EntryActionItem(
-                iconData: Icons.delete,
+                iconData: Icons.delete_outlined,
                 title: S.current.iconDelete,
                 isDanger: true,
                 dense: true,

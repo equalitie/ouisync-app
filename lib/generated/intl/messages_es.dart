@@ -23,6 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "El permiso no puede ser más alto que el modo de acceso actual del repositorio: ${access}";
 
+  static String m1(path) => "Archivo descargado en ${path}";
+
   static String m2(name) => "${name} - descarga cancelada";
 
   static String m3(name) => "${name} - fallo durante descarga";
@@ -33,15 +35,17 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m5(path) =>
       "Este directorio no existe más, navegando al ancestro: ${path}";
 
-  static String m7(dokanUrl) =>
-      "Falta la instalación de Dokan. Por favor, instálelo desde ${dokanUrl}";
+  static String m6(error) => "Error: ${error}";
+
+  static String m7(dokanUrl) => "Dokan ha desaparecido.${dokanUrl}";
 
   static String m8(name) =>
       "La inicialización del repositorio \"${name}\" falló";
 
   static String m9(path) => "${path} no está vacío";
 
-  static String m10(reason) => "Fallo al montar: ${reason}";
+  static String m10(reason) =>
+      "El acceso a los repositorios a través del Explorador de archivos no está disponible: ${reason}";
 
   static String m11(name) =>
       "${name} ya existe en esta ubicación.\n\n¿Qué deseas hacer?";
@@ -72,9 +76,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m22(name) =>
       "Sugerido: ${name}\n(clic aquí para usar este nombre)";
 
+  static String m23(name) => "Ordenar por: ${name}";
+
   static String m24(access) => "Abierto en modo ${access}";
 
-  static String m25(name) => "Ingrese la clave para abrir el repositorio";
+  static String m25(name) =>
+      "Introduzca la contraseña para desbloquear \"${name}\"";
 
   static String m26(name) => "${name} escritura cancelada";
 
@@ -89,6 +96,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m31(changes) => "${changes}";
 
   static String m32(entry) => "${entry}";
+
+  static String m33(error) => "${error}";
 
   static String m34(name) => "${name}";
 
@@ -141,6 +150,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionImport": MessageLookupByLibrary.simpleMessage("Importar"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Importar un repositorio"),
+        "actionInstallDokan":
+            MessageLookupByLibrary.simpleMessage("Instalar Dokan"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("BLOQUEAR"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Mover"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("Archivo"),
@@ -178,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUndo": MessageLookupByLibrary.simpleMessage("Deshacer"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Abrir"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Actualizar"),
+        "actionUpdateDokan":
+            MessageLookupByLibrary.simpleMessage("Actualizar Dokan"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Sí"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Localizar"),
@@ -226,6 +239,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Escuchar sobre QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6": MessageLookupByLibrary.simpleMessage(
             "Escuchando sobre QUIC/UPD IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("Recordar clave"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Ingrese el nuevo nombre: "),
         "labelRepositoryCurrentPassword":
@@ -267,7 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Esta opción no está disponible en repositorios de solo lectura"),
         "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
-            "Importar repositorio desde sistema de archivos"),
+            "Importar repositorio desde el sistema de archivos"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Importar un repositorio usando un enlace de token"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -277,11 +292,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "Este repositorio es sólo-lectura."),
+        "messageAuthenticate":
+            MessageLookupByLibrary.simpleMessage("Autenticar"),
         "messageAutomaticUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
                 "No pudimos desbloquear el repositorio"),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("Disponible para móviles"),
+        "messageAwaitingResult":
+            MessageLookupByLibrary.simpleMessage("Esperando el resultado..."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "En poco Android te predirá autorización para correr esta app en el trasfondo.\n\nEsto es requerido para poder continuar sincronizando mientras la app no está siendo usada activamente"),
         "messageBackgroundNotificationAndroid":
@@ -311,7 +330,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
             "Esta política entrará en vigor el 9 de Marzo de 2022"),
         "messageChildrensPolicyP1": MessageLookupByLibrary.simpleMessage(
-            "No recopilamos conscientemente información personal de niños. Animamos a todos los niños a que nunca envíen información personal a través de la Aplicación y/o los Servicios. Animamos a los padres y tutores legales a que supervisen el uso que sus hijos hacen de Internet y a que ayuden a hacer cumplir esta Política indicando a sus hijos que nunca proporcionen información personal a través de la Aplicación y/o los Servicios sin su permiso. Si tiene motivos para creer que un menor nos ha proporcionado información personal a través de la Aplicación y/o los Servicios, póngase en contacto con nosotros. También debe tener al menos 16 años de edad para consentir el procesamiento de su información personal en su país (en algunos países podemos permitir que su padre o tutor lo haga en su nombre)"),
+            "No recopilamos a sabiendas información de identificación personal de niños. Animamos a todos los niños a que nunca envíen información de identificación personal a través de la Aplicación y/o los Servicios. Animamos a los padres y tutores legales a monitorear el uso de Internet de sus hijos y a ayudar a hacer cumplir esta Política instruyendo a sus hijos a que nunca proporcionen información de identificación personal a través de la Aplicación y/o los Servicios sin su permiso. Si tiene motivos para creer que un niño nos ha proporcionado información de identificación personal a través de la Aplicación y/o los Servicios, póngase en contacto con nosotros. También debe tener al menos 16 años de edad para dar su consentimiento al procesamiento de su información de identificación personal en su país (en algunos países podemos permitir que su padre o tutor lo haga en su nombre)"),
         "messageConfirmFileDeletion":
             MessageLookupByLibrary.simpleMessage("¿Borrar este archivo?"),
         "messageConfirmFolderDeletion":
@@ -339,7 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDataCollectionP1": MessageLookupByLibrary.simpleMessage(
             "El equipo de Ouisync valora la privacidad de los usuarios y en consecuencia no recolecta ninguna información del usuario"),
         "messageDataCollectionP2": MessageLookupByLibrary.simpleMessage(
-            "La aplicación Ouisync está diseñada para poder proporcionar servicios de intercambio de archivos sin una identificación de usuario, nombre, apodo, cuenta de usuario o cualquier otra forma de información del usuario. Nosotros no sabemos quién usa nuestra aplicación ni con quién sincroniza o comparte su información"),
+            "La aplicación Ouisync está diseñada para proporcionar servicios para compartir archivos sin identificador de usuario, nombre, apodo, cuenta de usuario ni ningún dato del usuario. No sabemos quién utiliza nuestra aplicación ni con quién sincroniza o comparte los datos"),
         "messageDataSharingP1": MessageLookupByLibrary.simpleMessage(
             "Ouisync (y eQualit.ie) no comparte ningún dato con terceros"),
         "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
@@ -347,11 +366,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
             "El equipo de Ouisync no puede eliminar archivos individuales de los repositorios, ya que no es posible identificarlos porque están encriptados. Podemos eliminar repositorios enteros si nos envías el enlace al repositorio que necesitas eliminar"),
         "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
-            "La forma más sencilla de eliminar sus datos es borrando los archivos o los repositorios desde su propio dispositivo. Cualquier eliminación se propagará a todos sus compañeros - es decir, si tiene acceso de escritura a un repositorio, puede eliminar cualquier archivo dentro de él y los mismos archivos se eliminarán de los repositorios de sus compañeros, así como de nuestro Always-On-Peer. Si necesita borrar sólo los repositorios de nuestro Always-On-Peer (pero mantenerlos en su propio repositorio o en su dispositivo), por favor contacta con nosotros en la siguiente dirección"),
+            "La forma más sencilla de eliminar tus datos es eliminar archivos o repositorios de tu propio dispositivo. Cualquier eliminación de archivos se propagará a todos sus pares - es decir, si tiene acceso de escritura a un repositorio, puede eliminar cualquier archivo dentro de él y los mismos archivos se eliminarán de los repositorios de sus pares, así como de nuestro Always-On-Peer. Si necesita eliminar sólo los repositorios de nuestro Always-On-Peer (pero aún así mantenerlos en su propio repositorio en su propio dispositivo), por favor contáctenos en la dirección abajo"),
         "messageDistributedHashTables": MessageLookupByLibrary.simpleMessage(
             "Tablas de control distribuidas"),
+        "messageDokan": MessageLookupByLibrary.simpleMessage("Dokan"),
+        "messageDokanDifferentMayorP1":
+            MessageLookupByLibrary.simpleMessage("La versión installada de"),
+        "messageDokanDifferentMayorP2": MessageLookupByLibrary.simpleMessage(
+            "está desactualizada. Por favor actualízala a la versión más reciente."),
+        "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
+            "La instalación de Dokan falló."),
+        "messageDokanOlderVersionP2": MessageLookupByLibrary.simpleMessage(
+            "está desactualizada.\n\nPor favor desinstale la versión existente de Dokan, reinicie el sistema y ejecute Ouisync nuevamente."),
         "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
             "Descarga de archivos cancelada"),
+        "messageDownloadFileLocation": m1,
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -415,6 +444,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Algo falló. Por favor intente de nuevo."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("Falló."),
+        "messageErrorDetail": m6,
         "messageErrorDokanNotInstalled": m7,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("entrada no encontrada"),
@@ -422,7 +452,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Por favor ingrese un nombre válido."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "No pudimos cargar los contenidos de este directorio. Por favor intente de nuevo."),
+            "No pudimos cargar el contenido de esta carpeta. Inténtalo de nuevo."),
         "messageErrorNewPasswordSameOldPassword":
             MessageLookupByLibrary.simpleMessage(
                 "La nueva contraseña es la misma que la vieja"),
@@ -495,6 +525,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inicializando…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Toque el botón <bold>Abrir</bold> e ingrese la clave para acceder los contenidos."),
+        "messageInstallDokanForOuisyncP1":
+            MessageLookupByLibrary.simpleMessage("Ouisync utiliza"),
+        "messageInstallDokanForOuisyncP2": MessageLookupByLibrary.simpleMessage(
+            "para acceder a los repositorios a través del Explorador de Archivos.\nor favor instala Dokan para mejorar tu experiencia con Ouisync."),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage(
                 "Declaración Internacional de Derechos Humanos"),
@@ -522,7 +556,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogData3": MessageLookupByLibrary.simpleMessage(
             "Dirección IP del usuario - para proporcionar asistencia técnica"),
         "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
-            "La aplicación Ouisync crea archivos de registro en los dispositivos de los usuarios. Su única finalidad es registrar la actividad del dispositivo para facilitar el proceso de depuración en caso de que el usuario tenga dificultades para conectarse con sus compañeros o para utilizar la aplicación Ouisync. El archivo de registro permanece en el dispositivo del usuario a menos que éste decida enviárnoslo con fines de asistencia o soporte"),
+            "La aplicación Ouisync crea archivos de registro en los dispositivos de los usuarios. Su único propósito es registrar la actividad del dispositivo para facilitar el proceso de depuración en caso de que el usuario experimente dificultades para conectarse con sus compañeros o utilizar la aplicación Ouisync. El archivo de registro permanece en el dispositivo del usuario a menos que el usuario decida enviarlo a nosotros con fines de soporte"),
         "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
             "Si el usuario decide ponerse en contacto con nosotros, los datos personales que podemos recopilar son:"),
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
@@ -559,7 +593,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("Existe una nueva versión."),
         "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
-            "No todas las aplicaciones pueden realizar esta acción"),
+            "No se han encontrado aplicaciones que pueden realizar esta acción"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Antes de agregar archivos, tienes que crear un repositorio"),
         "messageNoRepoIsSelected": MessageLookupByLibrary.simpleMessage(
@@ -587,13 +621,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "messagePasswordStrength":
             MessageLookupByLibrary.simpleMessage("Fuerza de contraseña"),
         "messagePeerAdded":
-            MessageLookupByLibrary.simpleMessage("Compañero agregado"),
+            MessageLookupByLibrary.simpleMessage("Par agregado"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Intercambio entre pares"),
         "messagePeerExchangeWikipedia": MessageLookupByLibrary.simpleMessage(
             "Intercambio entre pares en Wikipedia"),
         "messagePeerRemoved":
-            MessageLookupByLibrary.simpleMessage("Compañero eliminado"),
+            MessageLookupByLibrary.simpleMessage("Par eliminado"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Este permiso es requerido"),
         "messagePreviewingFileFailed": m17,
@@ -655,6 +689,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m22,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Pegue el link aquí"),
+        "messageResetLocalSecret":
+            MessageLookupByLibrary.simpleMessage("Restablecer secreto local"),
         "messageRousseau":
             MessageLookupByLibrary.simpleMessage("Jean-Jacques Rousseau"),
         "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
@@ -672,7 +708,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
             "Usted puede aprender más sobre las técnicas de cifrado por medio de nuestra documentación"),
         "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
-            "La aplicación Ouisync almacena los datos de los usuarios en un \"par siempre activo\", que es un servidor ubicado en Canadá. Todos los datos se almacenan en trozos cifrados y ni el servidor ni sus operadores pueden leerlos. El propósito de este servidor es simplemente salvar las distancias entre pares que no están conectados al mismo tiempo. Todos los datos se eliminan periódicamente de este servidor: su objetivo no es proporcionar un almacenamiento permanente de datos, sino simplemente facilitar la sincronización de datos entre pares"),
+            "La aplicación Ouisync almacena los datos de los usuarios en un \"par siempre activo\", que es un servidor ubicado en Canadá. Todos los datos se almacenan en trozos cifrados y ni el servidor ni sus operadores pueden leerlos. El propósito de este servidor es simplemente salvar las distancias entre pares que no están conectados al mismo tiempo. Todos los datos se eliminan periódicamente de este servidor: su objetivo no es proporcionar un almacenamiento permanente de los datos, sino simplemente facilitar la sincronización de datos entre los pares"),
         "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
             "Si tiene motivos para creer que sus datos personales han sido obtenidos y compartidos ilegalmente por otros usuarios de Ouisync, póngase en contacto con nosotros en la siguiente dirección"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
@@ -685,6 +721,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Necesitas seleccionar un permiso primero para crear un link de repository"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("Comparte con Código QR"),
+        "messageSortBy": m23,
         "messageStorage":
             MessageLookupByLibrary.simpleMessage("Almacenamiento"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
@@ -719,8 +756,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "La aplicación Ouisync está construida alineada con los valores de eQualie. Al utilizar este software, usted acepta que no utilizará Ouisync para publicar, compartir o almacenar materiales que sean contrarios a los valores subyacentes ni a la letra de las leyes de Quebec o Canadá o la Carta Internacional de Derechos Humanos, incluido el contenido que:"),
         "messageTokenCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Token de repositorio copiado al portapapeles."),
-        "messageUnknownFileExtension":
-            MessageLookupByLibrary.simpleMessage("Extensión desconocida"),
+        "messageUnknownFileExtension": MessageLookupByLibrary.simpleMessage(
+            "Extensión de archivo desconocida"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
             "La contraseña no desbloqueó el repositorio"),
         "messageUnlockRepoOk": m24,
@@ -731,9 +768,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tienes cambios sin guardar.\n\n¿Desea descartarlos?"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
-                "¿Actualizar este repositorio localpassword?"),
+                "¿Actualizar la contraseña local de este repositorio?"),
+        "messageUpdateLocalSecretFailed": MessageLookupByLibrary.simpleMessage(
+            "Error al actualizar las propiedades de seguridad del repositorio."),
+        "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
+            "Las propiedades de seguridad del repositorio han sido actualizadas."),
         "messageUseCacheServers": MessageLookupByLibrary.simpleMessage(
-            "Usar la caché de los servidores"),
+            "Usar los servidores de almacenamiento temporal"),
+        "messageUseLocalPassword":
+            MessageLookupByLibrary.simpleMessage("Usar clave local"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
         "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Validar la contraseña localmente"),
@@ -755,12 +798,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementAccess": m30,
         "replacementChanges": m31,
         "replacementEntry": m32,
+        "replacementError": m33,
         "replacementName": m34,
         "replacementNumber": m35,
         "replacementPath": m36,
         "replacementStatus": m37,
-        "repositoryIsAlreadyImported":
-            MessageLookupByLibrary.simpleMessage("El repositorio ya importado"),
+        "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
+            "El repositorio ya ha sido importado"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),
@@ -802,6 +846,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "3.4 Eliminación de sus datos de nuestro servidor Always-On-Peer"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("Seguridad Digital"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("Instalación de Dokan"),
+        "titleDokanInstallationFound": MessageLookupByLibrary.simpleMessage(
+            "Instalación de Dokan encontrada"),
+        "titleDokanMissing":
+            MessageLookupByLibrary.simpleMessage("Falta Dokan"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Ubicación de descarga"),
         "titleDownloadToDevice":
