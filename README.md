@@ -91,7 +91,7 @@ dart run intl_utils:generate
 
 ## Testing
 
-This project is tested with BrowserStack.
+This project is tested with [BrowserStack](https://www.browserstack.com/).
 
 ## Sentry (optional)
 
