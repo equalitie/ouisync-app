@@ -89,6 +89,10 @@ file](lib/l10n/intl_en.arb), and run the following to generate the dart code.
 dart run intl_utils:generate
 ```
 
+## Testing
+
+This project is tested with BrowserStack.
+
 ## Sentry (optional)
 
 Ouisync integrates Sentry, via the `sentry_flutter` plugin.
